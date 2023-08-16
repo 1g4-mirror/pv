@@ -40,7 +40,7 @@ the terms of the Artistic License 2.0.  For more details of this license,
 see the file "[doc/COPYING](./doc/COPYING)".
 
 Report bugs in **pv** using the contact form linked from the home page, or
-though the [project issue tracker](https://github.com/a-j-wood/pv/issues).
+though the [project issue tracker](https://codeberg.org/a-j-wood/pv/issues).
 
 The **pv** home page is at:
 
