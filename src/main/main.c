@@ -21,6 +21,7 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 
 int pv_remote_set(opts_t);
@@ -89,21 +90,80 @@ int main(int argc, char **argv)
 	 * Write a PID file if -P was specified.
 	 */
 	if (opts->pidfile != NULL) {
-		FILE *pidfptr;
-		/* TODO: safe open to temp file, rename to pidfile */
-		pidfptr = fopen(opts->pidfile, "w");
-		if (NULL == pidfptr) {
-			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
+		char *pidfile_tmp_name;
+		size_t pidfile_tmp_bufsize;
+		int pidfile_tmp_fd;
+		FILE *pidfile_tmp_fptr;
+		mode_t prev_umask;
+
+		pidfile_tmp_bufsize = 16 + strlen(opts->pidfile);	/* flawfinder: ignore */
+		/*
+		 * flawfinder rationale: pidfile was supplied as an argument
+		 * so we have to assume it is \0 terminated.
+		 */
+		pidfile_tmp_name = malloc(pidfile_tmp_bufsize);
+		if (NULL == pidfile_tmp_name) {
+			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 			pv_state_free(state);
 			opts_free(opts);
 			return 1;
-			/*@+mustfreefresh@ */
 		}
-		fprintf(pidfptr, "%d\n", getpid());
-		if (0 != fclose(pidfptr)) {
+		memset(pidfile_tmp_name, 0, pidfile_tmp_bufsize);
+		(void) pv_snprintf(pidfile_tmp_name, pidfile_tmp_bufsize, "%s.XXXXXX", opts->pidfile);
+
+		/*@-type@ *//* splint doesn't like mode_t */
+		prev_umask = umask(0000);   /* flawfinder: ignore */
+		(void) umask(prev_umask | 0133);	/* flawfinder: ignore */
+
+		/*@-unrecog@ *//* splint doesn't know mkstemp() */
+		pidfile_tmp_fd = mkstemp(pidfile_tmp_name);	/* flawfinder: ignore */
+		/*@+unrecog@ */
+		if (pidfile_tmp_fd < 0) {
+			fprintf(stderr, "%s: %s: %s\n", opts->program_name, pidfile_tmp_name, strerror(errno));
+			(void) umask(prev_umask);	/* flawfinder: ignore */
+			free(pidfile_tmp_name);
+			pv_state_free(state);
+			opts_free(opts);
+			return 1;
+		}
+
+		(void) umask(prev_umask);   /* flawfinder: ignore */
+
+		/*
+		 * flawfinder rationale (umask, mkstemp) - flawfinder
+		 * recommends setting the most restrictive umask possible
+		 * when calling mkstemp(), so this is what we have done.
+		 *
+		 * We get the original umask and OR it with 0133 to make
+		 * sure new files will be at least chmod 644.  Then we put
+		 * the umask back to what it was, after creating the
+		 * temporary file.
+		 */
+
+		/*@+type@ */
+
+		pidfile_tmp_fptr = fdopen(pidfile_tmp_fd, "w");
+		if (NULL == pidfile_tmp_fptr) {
+			fprintf(stderr, "%s: %s: %s\n", opts->program_name, pidfile_tmp_name, strerror(errno));
+			(void) close(pidfile_tmp_fd);
+			(void) remove(pidfile_tmp_name);
+			free(pidfile_tmp_name);
+			pv_state_free(state);
+			opts_free(opts);
+			return 1;
+		}
+
+		fprintf(pidfile_tmp_fptr, "%d\n", getpid());
+		if (0 != fclose(pidfile_tmp_fptr)) {
 			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
 		}
+
+		if (rename(pidfile_tmp_name, opts->pidfile) < 0) {
+			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
+			(void) remove(pidfile_tmp_name);
+		}
+
+		free(pidfile_tmp_name);
 	}
 
 	/*

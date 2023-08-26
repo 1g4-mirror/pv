@@ -465,7 +465,7 @@ Save the process ID of
 .B @PACKAGE@
 in
 .BR FILE .
-The file will be truncated if it already exists, and will be removed when
+The file will be replaced if it already exists, and will be removed when
 .B @PACKAGE@
 exits.  While
 .B @PACKAGE@
