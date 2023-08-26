@@ -280,13 +280,11 @@ void pv_remote_check(pvstate_t state)
 	msgbuf.name[sizeof(msgbuf.name) - 1] = '\0';
 	msgbuf.format[sizeof(msgbuf.format) - 1] = '\0';
 
-	/* TODO: replace strdup(msgbuf.name) with just msgbuf.name once pv_state_* do their own strdup of name */
-
 	pv_state_set_format(state, msgbuf.progress, msgbuf.timer,
 			    msgbuf.eta, msgbuf.fineta, msgbuf.rate,
 			    msgbuf.average_rate,
 			    msgbuf.bytes, msgbuf.bufpercent,
-			    msgbuf.lastwritten, '\0' == msgbuf.name[0] ? NULL : strdup(msgbuf.name));
+			    msgbuf.lastwritten, '\0' == msgbuf.name[0] ? NULL : msgbuf.name);
 
 	if (msgbuf.rate_limit > 0)
 		pv_state_rate_limit_set(state, msgbuf.rate_limit);
@@ -302,7 +300,7 @@ void pv_remote_check(pvstate_t state)
 	if (msgbuf.height > 0)
 		pv_state_height_set(state, msgbuf.height);
 	if (msgbuf.format[0] != '\0')
-		pv_state_format_string_set(state, strdup(msgbuf.format));
+		pv_state_format_string_set(state, msgbuf.format);
 }
 
 

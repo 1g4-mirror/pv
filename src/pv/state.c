@@ -92,8 +92,15 @@ void pv_state_free(pvstate_t state)
 		free(state->display_buffer);
 	state->display_buffer = NULL;
 
-	/* TODO: after changing ->name to a strdup(), free() it here */
-	/* TODO: after changing ->format_string to a strdup(), free() it here */
+	if (NULL != state->name) {
+		free(state->name);
+		state->name = NULL;
+	}
+
+	if (NULL != state->format_string) {
+		free(state->format_string);
+		state->format_string = NULL;
+	}
 
 	if (NULL != state->transfer_buffer)
 		free(state->transfer_buffer);
@@ -138,8 +145,14 @@ void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, b
 		PV_ADDFORMAT(lastwritten > 0, buf);
 	}
 
-	/* TODO: free state->name, store strdup(name) */
-	state->name = name;
+	if (NULL != state->name) {
+		free(state->name);
+		state->name = NULL;
+	}
+
+	if (NULL != name)
+		state->name = strdup(name);
+
 	state->reparse_display = 1;
 }
 
@@ -247,14 +260,22 @@ void pv_state_height_set(pvstate_t state, unsigned int val)
 
 void pv_state_name_set(pvstate_t state, /*@null@ */ const char *val)
 {
-	/* TODO: free state->name, store strdup(val) */
-	state->name = val;
+	if (NULL != state->name) {
+		free(state->name);
+		state->name = NULL;
+	}
+	if (NULL != val)
+		state->name = strdup(val);
 };
 
 void pv_state_format_string_set(pvstate_t state, /*@null@ */ const char *val)
 {
-	/* TODO: free state->format_string, store strdup(val) */
-	state->format_string = val;
+	if (NULL != state->format_string) {
+		free(state->format_string);
+		state->format_string = NULL;
+	}
+	if (NULL != val)
+		state->format_string = strdup(val);
 };
 
 void pv_state_watch_pid_set(pvstate_t state, unsigned int val)

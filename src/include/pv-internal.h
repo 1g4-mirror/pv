@@ -106,9 +106,9 @@ struct pvstate_s {
 	int watch_fd;			 /* fd to watch */
 	unsigned int width;              /* screen width */
 	unsigned int height;             /* screen height */
-	/*@null@*/ const char *name;	 /* display name */
+	/*@null@*/ char *name;		 /* display name */
 	char default_format[PV_SIZEOF_DEFAULT_FORMAT];	 /* default format string */
-	const char *format_string;	 /* output format string */
+	char *format_string;		 /* output format string */
 
 	/******************
 	 * Program status *
