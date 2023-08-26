@@ -6,6 +6,7 @@
   * cleanup: replaced *AC_HEADER_TIOCGWINSZ* with *AC_CHECK_HEADERS(sys/ioctl.h)* for better MacOS compatibility ([#74](https://codeberg.org/a-j-wood/pv/issues/74))
   * cleanup: with "`--sync`", call `fsync()` instead of `fdatasync()` on incapable systems ([#73](https://codeberg.org/a-j-wood/pv/issues/73))
   * cleanup: keep self-contained copies of name and format string in PV internal state for memory safety
+  * cleanup: with "`--pidfile`", write to a temporary file and rename it into place, to improve security
   * misc: moved from GitHub to Codeberg; updated issue tracking links in documentation
 
 1.7.24 - 30 July 2023
