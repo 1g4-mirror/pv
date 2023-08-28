@@ -199,7 +199,7 @@ static unsigned long long pv_calc_total_lines(pvstate_t state)
 				break;
 			}
 			for (buf_idx = 0; buf_idx < numread; buf_idx++) {
-				if (state->null) {
+				if (state->null_terminated_lines) {
 					if ('\0' == scanbuf[buf_idx])
 						total++;
 				} else {

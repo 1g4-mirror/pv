@@ -529,7 +529,7 @@ static int pv__transfer_write(pvstate_t state, int *eof_in, int *eof_out, long *
 			state->transfer_buffer[state->write_position + nwritten] = 0;
 			ptr = (char *) (state->transfer_buffer + state->write_position - 1);
 
-			if (state->null) {
+			if (state->null_terminated_lines) {
 				for (ptr++;
 				     ptr -
 				     (char *) state->transfer_buffer -
@@ -861,7 +861,7 @@ long pv_transfer(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned lo
 	 * In line mode, only write up to and including the last newline,
 	 * so that we're writing output line-by-line.
 	 */
-	if ((state->to_write > 0) && (state->linemode) && !(state->null)) {
+	if ((state->to_write > 0) && (state->linemode) && !(state->null_terminated_lines)) {
 		/*
 		 * Guillaume Marcais: use strrchr to find last \n
 		 */

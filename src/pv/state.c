@@ -192,9 +192,9 @@ void pv_state_bits_set(pvstate_t state, bool bits)
 	state->bits = bits;
 };
 
-void pv_state_null_set(pvstate_t state, bool val)
+void pv_state_null_terminated_lines_set(pvstate_t state, bool val)
 {
-	state->null = val;
+	state->null_terminated_lines = val;
 };
 
 void pv_state_no_display_set(pvstate_t state, bool val)

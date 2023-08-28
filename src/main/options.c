@@ -422,7 +422,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->linemode = true;
 			break;
 		case '0':
-			opts->null = true;
+			opts->null_terminated_lines = true;
 			opts->linemode = true;
 			break;
 		case 'i':
@@ -529,7 +529,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		return NULL;
 
 	if (0 != opts->watch_pid) {
-		if (opts->linemode || opts->null || opts->stop_at_size
+		if (opts->linemode || opts->null_terminated_lines || opts->stop_at_size
 		    || (opts->skip_errors > 0) || (opts->buffer_size > 0)
 		    || (opts->rate_limit > 0)) {
 			/*@-mustfreefresh@ *//* see above */
