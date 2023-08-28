@@ -16,6 +16,12 @@ AC_USE_SYSTEM_EXTENSIONS
 AC_C_CONST
 AC_HEADER_STDBOOL
 AC_SYS_LARGEFILE
+AM_GNU_GETTEXT_VERSION([0.21])
+AM_GNU_GETTEXT([external])
+if test "$USE_NLS" = "yes"; then
+  CPPFLAGS="$CPPFLAGS -DLOCALEDIR=\\\"\$(localedir)\\\""
+  LDFLAGS="$LDFLAGS $LIBINTL"
+fi
 AC_CHECK_FUNCS([getopt_long])
 AC_CHECK_HEADERS([getopt.h])
 AC_CHECK_FUNCS([memcpy basename vsnprintf strlcat])
@@ -28,10 +34,6 @@ AC_CHECK_HEADERS([libgen.h])
 AC_CHECK_HEADERS([sys/ioctl.h])
 AC_CHECK_HEADERS([libintl.h locale.h])
 AH_BOTTOM([#include "config-aux.h"])
-
-AM_GNU_GETTEXT_VERSION([0.21])
-AM_GNU_GETTEXT([external])
-CPPFLAGS="$CPPFLAGS -DLOCALEDIR=\\\"\$(localedir)\\\""
 
 AC_ARG_ENABLE([debugging],
   [  --enable-debugging      compile with debugging support],
