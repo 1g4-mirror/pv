@@ -211,8 +211,8 @@ int main(int argc, char **argv)
 	if ((0 == isatty(STDERR_FILENO))
 	    && (false == opts->force)
 	    && (false == opts->numeric)) {
-		opts->no_op = true;
-		debug("%s", "nothing to display - setting no_op");
+		opts->no_display = true;
+		debug("%s", "nothing to display - setting no_display");
 	}
 
 	/*
@@ -259,7 +259,7 @@ int main(int argc, char **argv)
 	pv_state_interval_set(state, opts->interval);
 	pv_state_width_set(state, opts->width);
 	pv_state_height_set(state, opts->height);
-	pv_state_no_op_set(state, opts->no_op);
+	pv_state_no_display_set(state, opts->no_display);
 	pv_state_force_set(state, opts->force);
 	pv_state_cursor_set(state, opts->cursor);
 	pv_state_numeric_set(state, opts->numeric);

@@ -380,7 +380,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			numopts++;
 			break;
 		case 'q':
-			opts->no_op = true;
+			opts->no_display = true;
 			numopts++;
 			break;
 		case 'c':

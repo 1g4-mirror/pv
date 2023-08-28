@@ -237,7 +237,7 @@ int pv_main_loop(pvstate_t state)
 				next_update.tv_sec = cur_time.tv_sec - 1;
 		}
 
-		if (state->no_op)
+		if (state->no_display)
 			continue;
 
 		/*
@@ -322,7 +322,7 @@ int pv_main_loop(pvstate_t state)
 	if (state->cursor) {
 		pv_crs_fini(state);
 	} else {
-		if ((!state->numeric) && (!state->no_op)
+		if ((!state->numeric) && (!state->no_display)
 		    && (state->display_visible))
 			pv_write_retry(STDERR_FILENO, "\n", 1);
 	}

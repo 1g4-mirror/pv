@@ -197,9 +197,9 @@ void pv_state_null_set(pvstate_t state, bool val)
 	state->null = val;
 };
 
-void pv_state_no_op_set(pvstate_t state, bool val)
+void pv_state_no_display_set(pvstate_t state, bool val)
 {
-	state->no_op = val;
+	state->no_display = val;
 };
 
 void pv_state_skip_errors_set(pvstate_t state, unsigned int val)

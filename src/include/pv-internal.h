@@ -90,7 +90,7 @@ struct pvstate_s {
 	bool linemode;                   /* count lines instead of bytes */
 	bool bits;			 /* report bits instead of bytes */
 	bool null;                       /* lines are null-terminated */
-	bool no_op;                      /* do nothing other than pipe data */
+	bool no_display;                 /* do nothing other than pipe data */
 	unsigned int skip_errors;        /* skip read errors counter */
 	bool stop_at_size;               /* set if we stop at "size" bytes */
 	bool sync_after_write;           /* set if we sync after every write */

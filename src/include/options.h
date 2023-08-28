@@ -35,7 +35,7 @@ struct opts_s {           /* structure describing run-time options */
 	bool wait;                     /* wait for transfer before display */
 	bool linemode;                 /* count lines instead of bytes */
 	bool null;                     /* lines are null-terminated */
-	bool no_op;                    /* do nothing other than pipe data */
+	bool no_display;               /* do nothing other than pipe data */
 	unsigned long long rate_limit; /* rate limit, in bytes per second */
 	unsigned long long buffer_size;/* buffer size, in bytes (0=default) */
 	unsigned int remote;           /* PID of pv to update settings of */
