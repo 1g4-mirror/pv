@@ -12,7 +12,7 @@ Documentation
 -------------
 
 A manual page is included in this distribution ("`man pv`").  Before
-installation, it is in "[doc/pv.1.md](./doc/pv.1)".
+installation, it is in "[doc/pv.1](./doc/pv.1.md)".
 
 Changes are listed in "[doc/NEWS.md](./doc/NEWS.md)".  The to-do list is "[doc/TODO.md](./doc/TODO.md)".
 
