@@ -35,10 +35,12 @@
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
+#endif				/* HAVE_IPC */
+
+/* for basename() */
 #ifdef HAVE_LIBGEN_H
 #include <libgen.h>
 #endif
-#endif				/* HAVE_IPC */
 
 
 /*

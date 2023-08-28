@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-AUTOMAKE_OPTIONS = subdir-objects no-dependencies
+AUTOMAKE_OPTIONS = subdir-objects
 
 SUBDIRS = po
 

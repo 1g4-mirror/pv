@@ -24,6 +24,7 @@ AC_CHECK_FUNCS([fpathconf sysconf posix_memalign posix_fadvise])
 AC_CHECK_HEADERS([limits.h])
 AC_CHECK_HEADERS([wctype.h])
 AC_CHECK_HEADERS([termios.h])
+AC_CHECK_HEADERS([libgen.h])
 AC_CHECK_HEADERS([sys/ioctl.h])
 AC_CHECK_HEADERS([libintl.h locale.h])
 AH_BOTTOM([#include "config-aux.h"])
@@ -78,7 +79,16 @@ yes
 ], [LIBS="$LIBS -lc128"])
 
 if test "$IPC_SUPPORT" = "yes"; then
-  AC_CHECK_HEADERS([sys/ipc.h sys/param.h libgen.h])
+  AC_CHECK_HEADERS([sys/ipc.h], [], [IPC_SUPPORT=no])
+  AC_CHECK_HEADERS([sys/msg.h], [], [IPC_SUPPORT=no])
+  AC_CHECK_HEADERS([sys/param.h])
+  if test "$IPC_SUPPORT" = "yes"; then
+    AC_CHECK_FUNCS([msgget], [], [IPC_SUPPORT=no])
+  fi
+fi
+
+if test "$IPC_SUPPORT" = "yes"; then
+  AC_DEFINE([HAVE_IPC], [1], [IPC support enabled])
 fi
 
 if test "$SPLICE_SUPPORT" = "yes"; then

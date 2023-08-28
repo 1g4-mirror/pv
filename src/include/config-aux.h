@@ -22,11 +22,6 @@
 # define N_(String) (String)
 #endif
 
-#undef HAVE_IPC
-#ifdef HAVE_SYS_IPC_H
-#define HAVE_IPC 1
-#endif
-
 #undef CURSOR_ANSWERBACK_BYTE_BY_BYTE
 #ifndef _AIX
 #define CURSOR_ANSWERBACK_BYTE_BY_BYTE 1
