@@ -100,3 +100,6 @@ analyse: $(pv_SOURCES:.c=.e) FORCE
 	grep -E -e '^Finished checking --' -e 'Hits = ' $+ 2>/dev/null || true
 
 FORCE:
+
+clean-local:
+	rm -f $(pv_SOURCES:.c=.e)
