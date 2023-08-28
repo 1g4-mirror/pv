@@ -103,3 +103,6 @@ FORCE:
 
 clean-local:
 	rm -f src/*/*.e
+
+# Convenience alias for "make check": "make test"
+test: check
