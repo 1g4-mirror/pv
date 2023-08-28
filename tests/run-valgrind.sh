@@ -29,6 +29,11 @@ if ! command -v valgrind >/dev/null 2>&1; then
 	exit 77
 fi
 
+valgrindHelp="$(valgrind --help 2>&1)"
+for valgrindOption in "verbose" "show-error-list" "error-exitcode" "track-fds" "leak-check"; do
+	echo "${valgrindHelp}" | grep -Fq "${valgrindOption}" || { echo "test requires \`valgrind --${valgrindOption}'"; exit 77; }
+done
+
 runWithValgrind () {
 
 	valgrind --tool=memcheck \
