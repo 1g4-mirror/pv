@@ -493,19 +493,23 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
  *
  * On error, sets *eof_out to 1, sets state->written to -1, and updates
  * state->exit_status.
+ *
+ * If state->discard_input is true, does not actually write anything.
  */
 static int pv__transfer_write(pvstate_t state, int *eof_in, int *eof_out, long *lineswritten)
 {
 	ssize_t nwritten;
 
-	signal(SIGALRM, SIG_IGN);
-	alarm(1);
-
-	nwritten = pv__transfer_write_repeated(STDOUT_FILENO,
-					       state->transfer_buffer +
-					       state->write_position, state->to_write, state->sync_after_write);
-
-	alarm(0);
+	if (state->discard_input) {
+		nwritten = state->to_write;
+	} else {
+		signal(SIGALRM, SIG_IGN);
+		alarm(1);
+		nwritten = pv__transfer_write_repeated(STDOUT_FILENO,
+						       state->transfer_buffer +
+						       state->write_position, state->to_write, state->sync_after_write);
+		alarm(0);
+	}
 
 	if (0 == nwritten) {
 		/*

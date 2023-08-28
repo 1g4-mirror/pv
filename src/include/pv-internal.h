@@ -97,6 +97,7 @@ struct pvstate_s {
 	bool direct_io;                  /* set if O_DIRECT is to be used */
 	bool direct_io_changed;          /* set when direct_io is changed */
 	bool no_splice;                  /* never use splice() */
+	bool discard_input;              /* write nothing to stdout */
 	unsigned long long rate_limit;   /* rate limit, in bytes per second */
 	unsigned long long target_buffer_size;  /* buffer size (0=default) */
 	unsigned long long size;         /* total size of data */

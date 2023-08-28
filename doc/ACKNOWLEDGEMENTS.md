@@ -51,7 +51,7 @@ is acknowledged and greatly appreciated:
  * Kim Krecht - suggested buffer fill status and last bytes output display options
  * Cristian Ciupitu <http://ciupicri.github.io>, Josh Stone - pointed out file descriptor leak with helpful suggestions (Josh Stone initially noticed the missing close)
  * Jan Seda - found issue with `splice()` and *SPLICE_F_NONBLOCK* causing slowdown
- * André Stapf - pointed out formatting problem e.g. 13GB -> 13.1GB which should be shown 13.0GB -> 13.1GB; highlighted on-startup row swapping in "`-c`"
+ * André Stapf - pointed out formatting problem e.g. 13GB -> 13.1GB which should be shown 13.0GB -> 13.1GB; highlighted on-startup row swapping in "`-c`", and suggested "`--discard`"
  * Damon Harper <http://www.usrbin.ca/> - suggested "`-D`" / "`--delay-start`" option
  * Ganaël Laplanche <http://www.martymac.org> - provided patch for `lstat64()` on systems that do not support it
  * Peter Korsgaard <http://www.buildroot.net/> - provided similar patch for `lstat64()`, specifically for uClibc support; provided AIX cross-compilation patch to fix bug in "`-lc128`" check

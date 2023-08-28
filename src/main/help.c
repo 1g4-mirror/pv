@@ -377,6 +377,9 @@ void display_help(void)
 		{ "-K", "--direct-io", NULL,
 		 N_("use direct I/O to bypass cache"),
 		 { 0, 0, 0, 0} },
+		{ "-X", "--discard", NULL,
+		 N_("discard input instead of writing to output"),
+		 { 0, 0, 0, 0} },
 #ifdef HAVE_IPC
 		{ "-R", "--remote", N_("PID"),
 		 N_("update settings of process PID"),

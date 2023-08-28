@@ -29,7 +29,6 @@ Feature requests
  * ([#38](https://codeberg.org/a-j-wood/pv/issues/38)) Reset ETA on *SIGUSR1* (Jacek Wielemborek - Jan 2019)
  * ([#40](https://codeberg.org/a-j-wood/pv/issues/40)) Permit "`-c`" with "`-d PID:FD`", reject "`-N`" with "`-d PID`" (Norman Rasmussen - Nov 2020)
  * ([#41](https://codeberg.org/a-j-wood/pv/issues/41)) Improve how backwards-moving reads are shown in "`--watchfd`" (Ryan Cooley - Dec 2017)
- * ([#42](https://codeberg.org/a-j-wood/pv/issues/42)) Option to discard stdin so nothing is written to stdout (André Stapf - Apr 2017)
  * ([#43](https://codeberg.org/a-j-wood/pv/issues/43)) Differentiate between "`--eta`" and "`--fineta`" in display (André Stapf - Apr 2017)
  * ([#45](https://codeberg.org/a-j-wood/pv/issues/45)) Option "`--sparse`" (with block size option) to write sparse output (Andriy Galetski - Apr 2019)
  * ([#46](https://codeberg.org/a-j-wood/pv/issues/46)) Option to show speed gauge (% max speed) if progress not known (Ryan Cooley - Jun 2019)

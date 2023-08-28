@@ -172,6 +172,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "stop-at-size", 0, NULL, (int) 'S' },
 		{ "sync", 0, NULL, (int) 'Y' },
 		{ "direct-io", 0, NULL, (int) 'K' },
+		{ "discard", 0, NULL, (int) 'X' },
 		{ "remote", 1, NULL, (int) 'R' },
 		{ "pidfile", 1, NULL, (int) 'P' },
 		{ "watchfd", 1, NULL, (int) 'd' },
@@ -184,7 +185,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8TA:fnqcWD:s:l0i:w:H:N:F:L:B:CESYKR:P:d:m:"
+	char *short_options = "hVpteIrab8TA:fnqcWD:s:l0i:w:H:N:F:L:B:CESYKXR:P:d:m:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -463,6 +464,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'K':
 			opts->direct_io = true;
+			break;
+		case 'X':
+			opts->discard_input = true;
+			opts->no_splice = true;
 			break;
 		case 'R':
 			opts->remote = pv_getnum_ui(optarg);

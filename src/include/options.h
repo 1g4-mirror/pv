@@ -45,6 +45,7 @@ struct opts_s {           /* structure describing run-time options */
 	bool stop_at_size;             /* set if we stop at "size" bytes */
 	bool sync_after_write;         /* set if we sync after every write */
 	bool direct_io;                /* set if O_DIRECT is to be used */
+	bool discard_input;            /* set to write nothing to stdout */
 	double interval;               /* interval between updates */
 	double delay_start;            /* delay before first display */
 	unsigned int watch_pid;	       /* process to watch fds of */

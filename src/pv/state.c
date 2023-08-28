@@ -223,6 +223,11 @@ void pv_state_direct_io_set(pvstate_t state, bool val)
 	state->direct_io_changed = true;
 };
 
+void pv_state_discard_input_set(pvstate_t state, bool val)
+{
+	state->discard_input = val;
+};
+
 void pv_state_rate_limit_set(pvstate_t state, unsigned long long val)
 {
 	state->rate_limit = val;

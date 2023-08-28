@@ -366,11 +366,14 @@ but means that the transfer buffer may not be used.  This prevents
 .B \-A
 and
 .B \-T
-from working, and makes
+from working, cannot work with
+.BR \-X ,
+and makes
 .B \-B
 redundant, so using
 .BR \-A ,
 .BR \-T ,
+.BR \-X ,
 or
 .B \-B
 automatically switches on
@@ -419,6 +422,15 @@ requirements, it also may cause read or write failures with an error of
 of filesystems in a single
 .B pv
 call.  Use this option with caution.
+.TP
+.B \-X, \-\-discard
+Instead of transferring input data to standard output, discard it.  This is
+equivalent to redirecting standard output to
+.IR /dev/null ,
+except that
+.BR write (2)
+is never called.  Implies
+.BR \-C .
 .TP
 .B \-d PID[:FD], \-\-watchfd PID[:FD]
 Instead of transferring data, watch file descriptor

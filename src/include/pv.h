@@ -116,6 +116,7 @@ extern void pv_state_direct_io_set(pvstate_t, bool);
 extern void pv_state_rate_limit_set(pvstate_t, unsigned long long);
 extern void pv_state_target_buffer_size_set(pvstate_t, unsigned long long);
 extern void pv_state_no_splice_set(pvstate_t, bool);
+extern void pv_state_discard_input_set(pvstate_t, bool);
 extern void pv_state_size_set(pvstate_t, unsigned long long);
 extern void pv_state_interval_set(pvstate_t, double);
 extern void pv_state_width_set(pvstate_t, unsigned int);

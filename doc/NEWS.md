@@ -2,6 +2,7 @@
 
   * feature: new "`--enable-static`" option to "`configure`" for static builds ([#75](https://codeberg.org/a-j-wood/pv/pull/75))
   * feature: now uses `posix_fadvise()` like `cat`(1) does, to improve efficiency ([#39](https://codeberg.org/a-j-wood/pv/issues/39))
+  * feature: new "`--discard`" option to discard input as if writing to */dev/null* ([#42](https://codeberg.org/a-j-wood/pv/issues/42))
   * security: with "`--pidfile`", write to a temporary file and rename it into place, to improve security
   * security: keep self-contained copies of name and format string in PV internal state for memory safety
   * fix: auto-calculate total line count with "`--line-mode`" when all inputs are regular files
