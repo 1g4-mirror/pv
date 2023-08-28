@@ -258,8 +258,8 @@ int main(int argc, char **argv)
 	 * Copy parameters from options into main state.
 	 */
 	pv_state_interval_set(state, opts->interval);
-	pv_state_width_set(state, opts->width);
-	pv_state_height_set(state, opts->height);
+	pv_state_width_set(state, opts->width, opts->width_set_manually);
+	pv_state_height_set(state, opts->height, opts->height_set_manually);
 	pv_state_no_display_set(state, opts->no_display);
 	pv_state_force_set(state, opts->force);
 	pv_state_cursor_set(state, opts->cursor);

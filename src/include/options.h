@@ -53,6 +53,8 @@ struct opts_s {           /* structure describing run-time options */
 	unsigned int average_rate_window; /* time window in seconds for average rate calculations */
 	unsigned int width;            /* screen width */
 	unsigned int height;           /* screen height */
+	bool width_set_manually;       /* width was set manually, not detected */
+	bool height_set_manually;      /* height was set manually, not detected */
 	/*@keep@*/ /*@null@*/ char *name;    /* display name, if any */
 	/*@keep@*/ /*@null@*/ char *format;  /* output format, if any */
 	/*@keep@*/ /*@null@*/ char *pidfile; /* PID file, if any */

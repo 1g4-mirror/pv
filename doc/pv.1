@@ -302,13 +302,16 @@ seconds window for average rate and ETA calculations (default 30s).
 Assume the terminal is
 .B WIDTH
 characters wide, instead of trying to work it out (or assuming 80 if it
-cannot be guessed).
+cannot be guessed).  If this option is used, the output width will not be
+adjusted if the width of the terminal changes while the transfer is running.
 .TP
 .B \-H HEIGHT, \-\-height HEIGHT
 Assume the terminal is
 .B HEIGHT
 rows high, instead of trying to work it out (or assuming 25 if it
-cannot be guessed).
+cannot be guessed).  If this option is used, the output height will not be
+adjusted if the height of the terminal changes while the transfer is
+running.
 .TP
 .B \-N NAME, \-\-name NAME
 Prefix the output information with

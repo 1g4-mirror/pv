@@ -238,6 +238,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	opts->watch_fd = -1;
 	opts->average_rate_window = 30;
 
+	opts->width_set_manually = false;
+	opts->height_set_manually = false;
+
 	do {
 #ifdef HAVE_GETOPT_LONG
 		c = getopt_long((int) argc, argv, short_options, long_options, &option_index);	/* flawfinder: ignore */
@@ -431,9 +434,11 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'w':
 			opts->width = pv_getnum_ui(optarg);
+			opts->width_set_manually = opts->width == 0 ? false : true;
 			break;
 		case 'H':
 			opts->height = pv_getnum_ui(optarg);
+			opts->height_set_manually = opts->height == 0 ? false : true;
 			break;
 		case 'N':
 			opts->name = xstrdup(optarg);

@@ -42,6 +42,8 @@ struct remote_msg {
 	double interval;		 /* interval between updates */
 	unsigned int width;		 /* screen width */
 	unsigned int height;		 /* screen height */
+	bool width_set_manually;	 /* width was set manually, not detected */
+	bool height_set_manually;	 /* height was set manually, not detected */
 	char name[256];			 /* flawfinder: ignore */
 	char format[256];		 /* flawfinder: ignore */
 };
@@ -151,6 +153,8 @@ int pv_remote_set(opts_t opts)
 	msgbuf.interval = opts->interval;
 	msgbuf.width = opts->width;
 	msgbuf.height = opts->height;
+	msgbuf.width_set_manually = opts->width_set_manually;
+	msgbuf.height_set_manually = opts->height_set_manually;
 
 	if (opts->name != NULL) {
 		strncpy(msgbuf.name, opts->name, sizeof(msgbuf.name) - 1);	/* flawfinder: ignore */
@@ -295,10 +299,10 @@ void pv_remote_check(pvstate_t state)
 		pv_state_size_set(state, msgbuf.size);
 	if (msgbuf.interval > 0)
 		pv_state_interval_set(state, msgbuf.interval);
-	if (msgbuf.width > 0)
-		pv_state_width_set(state, msgbuf.width);
-	if (msgbuf.height > 0)
-		pv_state_height_set(state, msgbuf.height);
+	if (msgbuf.width > 0 && msgbuf.width_set_manually)
+		pv_state_width_set(state, msgbuf.width, msgbuf.width_set_manually);
+	if (msgbuf.height > 0 && msgbuf.height_set_manually)
+		pv_state_height_set(state, msgbuf.height, msgbuf.height_set_manually);
 	if (msgbuf.format[0] != '\0')
 		pv_state_format_string_set(state, msgbuf.format);
 }

@@ -253,14 +253,16 @@ void pv_state_interval_set(pvstate_t state, double val)
 	state->interval = val;
 };
 
-void pv_state_width_set(pvstate_t state, unsigned int val)
+void pv_state_width_set(pvstate_t state, unsigned int val, bool was_set_manually)
 {
 	state->width = val;
+	state->width_set_manually = was_set_manually;
 };
 
-void pv_state_height_set(pvstate_t state, unsigned int val)
+void pv_state_height_set(pvstate_t state, unsigned int val, bool was_set_manually)
 {
 	state->height = val;
+	state->height_set_manually = was_set_manually;
 };
 
 void pv_state_name_set(pvstate_t state, /*@null@ */ const char *val)

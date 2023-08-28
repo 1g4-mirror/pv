@@ -321,8 +321,18 @@ int pv_main_loop(pvstate_t state)
 			since_last = -1;
 
 		if (state->pv_sig_newsize) {
+			unsigned int new_width, new_height;
+
 			state->pv_sig_newsize = 0;
-			pv_screensize(&(state->width), &(state->height));
+
+			new_width = state->width;
+			new_height = state->height;
+			pv_screensize(&new_width, &new_height);
+
+			if (!state->width_set_manually)
+				state->width = new_width;
+			if (!state->height_set_manually)
+				state->height = new_height;
 		}
 
 		pv_display(state, elapsed, since_last, total_written);
@@ -475,8 +485,18 @@ int pv_watchfd_loop(pvstate_t state)
 			since_last = -1;
 
 		if (state->pv_sig_newsize) {
+			unsigned int new_width, new_height;
+
 			state->pv_sig_newsize = 0;
-			pv_screensize(&(state->width), &(state->height));
+
+			new_width = state->width;
+			new_height = state->height;
+			pv_screensize(&new_width, &new_height);
+
+			if (!state->width_set_manually)
+				state->width = new_width;
+			if (!state->height_set_manually)
+				state->height = new_height;
 		}
 
 		pv_display(state, elapsed, since_last, total_written);
