@@ -6,12 +6,9 @@ translators:
 
  * `--enable-debugging` - build in debugging support
  * `--enable-profiling` - build in support for profiling
- * `--enable-static-nls` - compile translations directly into the program
 
 These "`make`" targets are available:
 
- * `make help` - describe all of the "`.PHONY`" targets
- * `make index` - generate a source code index
  * `make analyse` - run _splint_ and _flawfinder_ on all C source files
 
 
@@ -33,24 +30,8 @@ This does mean that if you call "`debug()`", make sure it has no side
 effects, as they won't be present in builds without debugging support.
 
 Builds produced after "`./configure --enable-profiling`" will write profile
-data when run, to be used with _gprof_.  See "`man gprof`" for details.
-
-
-Source code indexing
---------------------
-
-Running "`make index`" calls a script which uses _cproto_ and _ctags_ to
-generate a single file, "`index.html`", which lists all C source files, all
-functions within them, and all TODOs marked in the code.
-
-It relies on each function having a comment block directly before it,
-describing what it does.
-
-The indexing script pre-dates the author's knowledge of documentation
-generation tools like Doxygen, and is over 20 years old.  If it contains
-bugs, then rather than fixing them, it may be worth looking at how to alter
-the C sources to better suit widely available documentation generation
-tools.  Please open issues or start discussions about this if it comes up.
+data when run, to be used with _gprof_.  See "`man gprof`" for details. 
+Please note that the memory safety checks will fail with profiling enabled.
 
 
 Source code analysis
@@ -60,9 +41,9 @@ Running "`make analyse`" runs _splint_ and _flawfinder_ on all C sources,
 writing the output of both programs to files named "`*.e`" for each "`*.c`".
 
 There are no dependency rules set up for these "`.e`" files, so if a header
-file is altered, either run "`make analysisclean`", manually remove the
-relevant "`.e`" files, or update the timestamp of the relevant "`.c`" files
-before running "`make analyse`" again.
+file is altered, manually remove the relevant "`.e`" files, or update the
+timestamp of the relevant "`.c`" files, before running "`make analyse`"
+again.
 
 The eventual goal is for all C source files to generate zero warnings from
 either tool.
@@ -72,7 +53,7 @@ Translation notes
 -----------------
 
 The message catalogues used to translate program messages into other
-languages are in the "`src/nls/`" directory, named "`xx.po`", where "`xx`"
+languages are in the "`po/`" directory, named "`xx.po`", where "`xx`"
 is the ISO 639-1 2-letter language code, such as "`fr`" for French.
 
 Each of these files contains lines like this:
@@ -89,37 +70,33 @@ It is the "`msgstr`" lines which need to be updated by translators.
 
 Message catalogue files should all be encoded as UTF-8.
 
-To quickly test translations, use "`./configure --enable-static-nls`".  This
-is not recommended for production use, because it replaces the system
-internationalisation libraries with some very simplistic alternatives, but
-it has the benefit of compiling the message catalogues directly into the
-program.
+_FIXME: The test below doesn't work on Debian with only en_GB installed, and
+also it looks like the compiled-in LOCALEDIR is overriding LOCPATH._
 
-This means that after making a change to a "`.po`" file, do this:
+After making a change to a "`.po`" file, test it by compiling it and installing
+to a temporary location, like this:
 
-    make
-    LANG=de LC_ALL=en_GB.UTF-8 ./pv --help
+    make install DESTDIR=/tmp/yourtest
+    localedef -f UTF-8 -i de_DE /tmp/yourtest/usr/local/share/locale/de_DE.UTF-8
+    LOCPATH=/tmp/yourtest/usr/local/share/locale \
+    LC_ALL=de_DE.UTF-8 ./pv --help
 
 Replace "`--help`" with whatever is appropriate for your test.  In this
 example, the language being tested is "`de`" (German), on a system which is
-otherwise running in English with UTF-8 support.
+running with UTF-8 support.
 
-To add a new language, edit "`autoconf/configure.in`".  Look for this line:
+To add a new language, create the new message catalogue file under "`po/`"
+by copying "`po/pv.pot`" to "`po/xx.po`", where "`xx`" is the language code,
+and adjusting it.  The "`.pot`" file is generated automatically by "`make`".
 
-    for lang in de fr pl pt; do
+Next, add the language code to "`po/LINGUAS`" - this is a list of the
+2-letter codes of the supported languages.
 
-Add the new language code before the "`; do`".
+Finally, run "`./config.status`" and "`make -C po update-po`".
 
-Create the new message catalogue file under "`src/nls/`" by copying
-"`src/nls/pv.pot`" to "`src/nls/xx.po`", where "`xx`" is the language code,
-and adjusting it.
-
-Then run "`./generate.sh`" to generate a new "`configure`" script; you will
-need to run "`./configure --enable-static-nls`" and "`make`" afterwards.
-
-When the source code is updated, running "`make`" will update the "`pv.pot`"
-file so that it lists where all the messages are in the source, and running
-"`make update-po`" will use _msgmerge_ to update all of the "`.po`" files
+When the source code is updated, running "`make -C po update-po`" will
+update the "`pv.pot`" file so that it lists where all the messages are in
+the source.  It will also use _msgmerge_ to update all of the "`.po`" files
 from the updated "`pv.pot`" file.  After doing this, look for missing
 translations (empty "`msgstr`" lines) or translations marked as "fuzzy", as
 these will need to be corrected by translators.

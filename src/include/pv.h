@@ -9,7 +9,12 @@
 #ifndef _PV_H
 #define _PV_H 1
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdlib.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {

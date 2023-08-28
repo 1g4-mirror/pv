@@ -8,9 +8,7 @@
 
 #include "config.h"
 #include "options.h"
-#include "library/getopt.h"
 #include "pv.h"
-#include "pv-internal.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,6 +16,9 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 
 void display_help(void);

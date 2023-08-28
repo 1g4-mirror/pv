@@ -1,0 +1,16 @@
+src/main/debug.c
+src/main/help.c
+src/main/main.c
+src/main/options.c
+src/main/remote.c
+src/main/version.c
+src/pv/cursor.c
+src/pv/display.c
+src/pv/file.c
+src/pv/loop.c
+src/pv/number.c
+src/pv/signal.c
+src/pv/state.c
+src/pv/string.c
+src/pv/transfer.c
+src/pv/watchpid.c

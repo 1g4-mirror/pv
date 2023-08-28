@@ -11,8 +11,8 @@ completion it is, and an estimate of how long it will be until completion.
 Documentation
 -------------
 
-A manual page is included in this distribution.  See "`man ./doc/quickref.1`",
-or "`man pv`" after installation.
+A manual page is included in this distribution ("`man pv`").  Before
+installation, it is in "[doc/pv.1.md](./doc/pv.1)".
 
 Changes are listed in "[doc/NEWS.md](./doc/NEWS.md)".  The to-do list is "[doc/TODO.md](./doc/TODO.md)".
 
@@ -22,14 +22,16 @@ Developers and translators, please see "[doc/DEVELOPERS.md](./doc/DEVELOPERS.md)
 Compilation
 -----------
 
-If this is not a packaged release, first run "`./generate.sh`".
-
 To compile the package, type "`sh ./configure`", which should generate a
-Makefile for your system.  You may then type "`make`" to build everything.
-Note that GNU _make_ is required; this may be installed as _gmake_ on some
-systems, so if typing "`make`" gives an error, try "`gmake`" instead.
+Makefile for your system.  You may then type "`make`" to build everything,
+and "`make install`" to install it.
 
 See the file "[doc/INSTALL](./doc/INSTALL)" for more about the _configure_ script.
+
+If this is not a packaged release, you will need the GNU build system tools
+(`autoconf`, `aclocal`, `autopoint`, `automake`) and the `gettext`
+development tools.  You can then run "`autoreconf -is`" to generate the
+"`configure`" script.
 
 
 Author and acknowledgements
@@ -44,7 +46,7 @@ though the [project issue tracker](https://codeberg.org/a-j-wood/pv/issues).
 
 The **pv** home page is at:
 
-&nbsp;&nbsp;[http://www.ivarch.com/programs/pv.shtml](http://www.ivarch.com/programs/pv.shtml)
+[http://www.ivarch.com/programs/pv.shtml](http://www.ivarch.com/programs/pv.shtml)
 
 The latest version can always be found here.
 

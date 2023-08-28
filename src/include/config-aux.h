@@ -8,8 +8,15 @@
  * Distributed under the Artistic License v2.0; see `doc/COPYING'.
  */
  
-#ifdef ENABLE_NLS
-# include "library/gettext.h"
+#if ENABLE_NLS
+# ifdef HAVE_LIBINTL_H
+#  include <libintl.h>
+# endif
+# ifdef HAVE_LOCALE_H
+#  include <locale.h>
+# endif
+# define _(String)	gettext (String)
+# define N_(String)	(String)
 #else
 # define _(String) (String)
 # define N_(String) (String)

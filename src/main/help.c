@@ -424,7 +424,7 @@ void display_help(void)
 	 * be hard to exploit - the message catalogue would have to be
 	 * replaced or forced to load from another location.
 	 */
-	printf(_("Usage: %s [OPTION] [FILE]..."), PROGRAM_NAME);
+	printf(_("Usage: %s [OPTION] [FILE]..."), PACKAGE_NAME);
 	/*@+formatconst@ */
 
 	printf("\n");
@@ -579,7 +579,7 @@ void display_help(void)
 		 * splint note: see earlier "formatconst" note.
 		 * flawfinder: same reason.
 		 */
-		printf(bug_report_note, BUG_REPORTS_TO);	/* flawfinder: ignore */
+		printf(bug_report_note, PACKAGE_BUGREPORT);	/* flawfinder: ignore */
 		/*@+formatconst@ */
 	}
 

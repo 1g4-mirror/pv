@@ -41,10 +41,6 @@ Feature requests
  * ([#54](https://codeberg.org/a-j-wood/pv/issues/54)) Run command every n percent ([haarp](https://github.com/haarp))
  * ([#56](https://codeberg.org/a-j-wood/pv/issues/56)) Support for backgrounding pv, and allowing it to be monitored separately ([jimbobmcgee](https://github.com/jimbobmcgee))
  * ([#67](https://codeberg.org/a-j-wood/pv/issues/67)) Wrap another process to monitor its stdin & stdout ([Alex Mason](https://github.com/axman6))
- * Make the manual a static file instead of building it with "configure"
- * Drop support for the LSM as the LSM project appears to be dead
- * Drop SourceForge from the release checklist as it has been problematic for OSS for decades
- * Switch build system to GNU Automake
  * Switch license to GPLv3+
 
 Any assistance would be appreciated.
