@@ -5,6 +5,7 @@
   * security: with "`--pidfile`", write to a temporary file and rename it into place, to improve security
   * security: keep self-contained copies of name and format string in PV internal state for memory safety
   * fix: auto-calculate total line count with "`--line-mode`" when all inputs are regular files
+  * fix: only report errors about missing files when starting to transfer from them, not while calculating size, and behave more like `cat`(1) by skipping them and moving on
   * cleanup: switched the build system to GNU Automake
   * cleanup: added a test for terminal width detection to "`make check`"
   * cleanup: added a test to "`make check`" to ensure that "`make install`" installs everything expected

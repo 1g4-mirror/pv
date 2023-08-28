@@ -60,7 +60,7 @@ int pv_main_loop(pvstate_t state)
 	struct timeval init_time, next_remotecheck;
 	long double elapsed;
 	struct stat sb;
-	int fd, n;
+	int fd, file_idx;
 
 	/*
 	 * "written" is ALWAYS bytes written by the last transfer.
@@ -106,9 +106,21 @@ int pv_main_loop(pvstate_t state)
 
 	target = 0;
 	final_update = 0;
-	n = 0;
+	file_idx = 0;
 
-	fd = pv_next_file(state, n, -1);
+	/*
+	 * Open the first readable input file.
+	 */
+	fd = -1;
+	while (fd < 0 && file_idx < state->input_file_count) {
+		fd = pv_next_file(state, file_idx, -1);
+		if (fd < 0)
+			file_idx++;
+	}
+
+	/*
+	 * Exit early if there was no readable input file.
+	 */
 	if (fd < 0) {
 		if (state->cursor)
 			pv_crs_fini(state);
@@ -215,16 +227,16 @@ int pv_main_loop(pvstate_t state)
 				target -= written;
 		}
 
-		if (eof_in && eof_out && n < (state->input_file_count - 1)) {
-			n++;
-			fd = pv_next_file(state, n, fd);
-			if (fd < 0) {
-				if (state->cursor)
-					pv_crs_fini(state);
-				return state->exit_status;
+		/*
+		 * EOF, and files remain - advance to the next file.
+		 */
+		while (eof_in && eof_out && file_idx < (state->input_file_count - 1)) {
+			file_idx++;
+			fd = pv_next_file(state, file_idx, fd);
+			if (fd >= 0) {
+				eof_in = 0;
+				eof_out = 0;
 			}
-			eof_in = 0;
-			eof_out = 0;
 		}
 
 		gettimeofday(&cur_time, NULL);

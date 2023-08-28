@@ -114,8 +114,8 @@ Otherwise, only those display types that are explicitly switched on will be
 shown.
 .TP
 .B \-p, \-\-progress
-Turn the progress bar on.  If standard input is not a file and no
-size was given (with the
+Turn the progress bar on.  If any inputs are not files, or are
+unreadable, and no size was explicitly given (with the
 .B \-s
 modifier), the progress bar cannot indicate how close to completion the
 transfer is, so it will just move left and right to indicate that data is
@@ -143,7 +143,8 @@ transfer.
 .TP
 .B \-a, \-\-average\-rate
 Turn the average rate counter on.  This will display the current average
-rate of data transfer (default: last 30s, see --average-rate-window).
+rate of data transfer (default: last 30s, see
+.BR \-m ).
 .TP
 .B \-b, \-\-bytes
 Turn the total byte counter on.  This will display the total amount of
@@ -279,10 +280,12 @@ If this option is used without
 .BR \-s ,
 the "total size" (in this case, total line count) is calculated by reading
 through all input files once before transfer starts.  If any inputs are
-pipes or non-regular files, the total size will not be calculated.
+pipes or non-regular files, or are unreadable, the total size will not be
+calculated.
 .TP
 .B \-0, \-\-null
-Count lines as null terminated.  This option implies \-\-line\-mode.
+Count lines as terminated with a zero byte instead of with a newline.
+This option implies \-\-line\-mode.
 .TP
 .B \-i SEC, \-\-interval SEC
 Wait

@@ -26,7 +26,7 @@
  * size (such as if they are a pipe), the total size is set to zero.
  *
  * Any files that cannot be stat()ed or that access() says we can't read
- * will cause a warning to be output and will be removed from the list.
+ * will be skipped, and the total size will be set to zero.
  *
  * Returns the total size, or 0 if it is unknown.
  */
@@ -34,10 +34,9 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 {
 	unsigned long long total;
 	struct stat sb;
-	int rc, file_idx, move_idx, fd;
+	int file_idx;
 
 	total = 0;
-	rc = 0;
 	memset(&sb, 0, sizeof(sb));
 
 	/*
@@ -50,6 +49,8 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 	}
 
 	for (file_idx = 0; file_idx < state->input_file_count; file_idx++) {
+		int rc;
+
 		if (0 == strcmp(state->input_files[file_idx], "-")) {
 			rc = fstat(STDIN_FILENO, &sb);
 			if (rc != 0) {
@@ -63,17 +64,14 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 		}
 
 		if (rc != 0) {
-			pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
-			for (move_idx = file_idx; move_idx < state->input_file_count - 1; move_idx++) {
-				state->input_files[move_idx] = state->input_files[move_idx + 1];
-			}
-			state->input_file_count--;
-			file_idx--;
-			state->exit_status |= 2;
-			continue;
+			debug("%s: %s", state->input_files[file_idx], strerror(errno));
+			total = 0;
+			return total;
 		}
 
 		if (S_ISBLK(sb.st_mode)) {
+			int fd;
+
 			/*
 			 * Get the size of block devices by opening
 			 * them and seeking to the end.
@@ -87,8 +85,8 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 				total += lseek(fd, 0, SEEK_END);
 				close(fd);
 			} else {
-				pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
-				state->exit_status |= 2;
+				total = 0;
+				return total;
 			}
 		} else if (S_ISREG(sb.st_mode)) {
 			total += sb.st_size;
@@ -106,7 +104,10 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 	 * and that we can seek back to the start after getting the size.
 	 */
 	if (total <= 0) {
+		int rc;
+
 		rc = fstat(STDOUT_FILENO, &sb);
+
 		if ((0 == rc) && S_ISBLK(sb.st_mode)
 		    && (0 == (fcntl(STDOUT_FILENO, F_GETFL) & O_APPEND))) {
 			total = lseek(STDOUT_FILENO, 0, SEEK_END);
@@ -122,7 +123,7 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 			 * device.
 			 */
 			if (total > 0) {
-				state->stop_at_size = 1;
+				state->stop_at_size = true;
 			}
 		}
 	}
@@ -137,7 +138,7 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
  * are a pipe or a block device), the total size is set to zero.
  *
  * Any files that cannot be stat()ed or that access() says we can't read
- * will cause a warning to be output and will be removed from the list.
+ * will be skipped, and the total size will be set to zero.
  *
  * Returns the total size, or 0 if it is unknown.
  */
@@ -145,15 +146,13 @@ static unsigned long long pv_calc_total_lines(pvstate_t state)
 {
 	unsigned long long total;
 	struct stat sb;
-	int rc, file_idx, move_idx, fd;
+	int file_idx;
 
-	/*
-	 * In line mode, we count input lines to work out the total size.
-	 */
 	total = 0;
 
 	for (file_idx = 0; file_idx < state->input_file_count; file_idx++) {
-		fd = -1;
+		int fd = -1;
+		int rc = 0;
 
 		if (0 == strcmp(state->input_files[file_idx], "-")) {
 			rc = fstat(STDIN_FILENO, &sb);
@@ -172,14 +171,9 @@ static unsigned long long pv_calc_total_lines(pvstate_t state)
 		}
 
 		if (fd < 0) {
-			pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
-			for (move_idx = file_idx; move_idx < state->input_file_count - 1; move_idx++) {
-				state->input_files[move_idx] = state->input_files[move_idx + 1];
-			}
-			state->input_file_count--;
-			file_idx--;
-			state->exit_status |= 2;
-			continue;
+			debug("%s: %s", state->input_files[file_idx], strerror(errno));
+			total = 0;
+			return total;
 		}
 #if HAVE_POSIX_FADVISE
 		/* Advise the OS that we will only be reading sequentially. */
@@ -252,8 +246,8 @@ int pv_next_file(pvstate_t state, int filenum, int oldfd)
 	struct stat osb;
 	int fd, input_file_is_stdout;
 
-	if (oldfd > 0) {
-		if (close(oldfd)) {
+	if (oldfd >= 0) {
+		if (0 != close(oldfd)) {
 			pv_error(state, "%s: %s", _("failed to close file"), strerror(errno));
 			state->exit_status |= 8;
 			return -1;
@@ -261,11 +255,13 @@ int pv_next_file(pvstate_t state, int filenum, int oldfd)
 	}
 
 	if (filenum >= state->input_file_count) {
+		debug("%s: %d >= %d", "filenum too large", filenum, state->input_file_count);
 		state->exit_status |= 8;
 		return -1;
 	}
 
 	if (filenum < 0) {
+		debug("%s: %d < 0", "filenum too small", filenum);
 		state->exit_status |= 8;
 		return -1;
 	}
@@ -332,6 +328,8 @@ int pv_next_file(pvstate_t state, int filenum, int oldfd)
 	 * that could cause the input and output settings to differ.
 	 */
 #endif				/* O_DIRECT */
+
+	debug("%s: %d: %s: fd=%d", "next file opened", filenum, state->current_file, fd);
 
 	return fd;
 }
