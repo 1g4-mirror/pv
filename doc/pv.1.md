@@ -77,10 +77,11 @@ that are explicitly switched on will be shown.
 
 **-p, \--progress**
 
-:   Turn the progress bar on. If standard input is not a file and no
-    size was given (with the **-s** modifier), the progress bar cannot
-    indicate how close to completion the transfer is, so it will just
-    move left and right to indicate that data is moving.
+:   Turn the progress bar on. If any inputs are not files, or are
+    unreadable, and no size was explicitly given (with the **-s**
+    modifier), the progress bar cannot indicate how close to completion
+    the transfer is, so it will just move left and right to indicate
+    that data is moving.
 
 **-t, \--timer**
 
@@ -108,8 +109,7 @@ that are explicitly switched on will be shown.
 **-a, \--average-rate**
 
 :   Turn the average rate counter on. This will display the current
-    average rate of data transfer (default: last 30s, see
-    \--average-rate-window).
+    average rate of data transfer (default: last 30s, see **-m**).
 
 **-b, \--bytes**
 
@@ -194,12 +194,16 @@ that are explicitly switched on will be shown.
 :   Instead of counting bytes, count lines (newline characters). The
     progress bar will only move when a new line is found, and the value
     passed to the **-s** option will be interpreted as a line count.
-    Note that file sizes are not automatically calculated when this
-    option is used, to avoid having to read all files twice.
+
+If this option is used without **-s**, the \"total size\" (in this case,
+total line count) is calculated by reading through all input files once
+before transfer starts. If any inputs are pipes or non-regular files, or
+are unreadable, the total size will not be calculated.
 
 **-0, \--null**
 
-:   Count lines as null terminated. This option implies \--line-mode.
+:   Count lines as terminated with a zero byte instead of with a
+    newline. This option implies \--line-mode.
 
 **-i SEC, \--interval SEC**
 

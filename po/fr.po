@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/a-j-wood/pv/issues\n"
-"POT-Creation-Date: 2023-08-28 09:37+0100\n"
+"POT-Creation-Date: 2023-08-28 18:16+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -241,49 +241,49 @@ msgstr "SVP rapporter touts bogues à %s."
 msgid "state allocation failed"
 msgstr "échec de l'allocation de mémoire de condition"
 
-#: src/main/main.c:320
+#: src/main/main.c:321
 msgid "failed to read terminal attributes"
 msgstr ""
 
-#: src/main/options.c:205
+#: src/main/options.c:206
 msgid "option structure allocation failed"
 msgstr "l'allocation pour la structure d'une option a echoué"
 
-#: src/main/options.c:224
+#: src/main/options.c:225
 msgid "option structure argv allocation failed"
 msgstr "l'allocation pour la structure de l'option argv a echoué"
 
-#: src/main/options.c:281
+#: src/main/options.c:282
 msgid "integer argument expected"
 msgstr "Valeur entière attendue"
 
-#: src/main/options.c:292
+#: src/main/options.c:293
 msgid "numeric argument expected"
 msgstr "Valeur numérique attendue"
 
-#: src/main/options.c:303
+#: src/main/options.c:304
 msgid "process ID or pid:fd pair expected"
 msgstr "ID de processus ou paire pid:fd attendue"
 
-#: src/main/options.c:310
+#: src/main/options.c:311
 msgid "invalid process ID"
 msgstr "ID de processus non valide"
 
-#: src/main/options.c:411 src/pv/file.c:239
+#: src/main/options.c:412 src/pv/file.c:282
 msgid "failed to stat file"
 msgstr "échec à statuer sur le fichier"
 
-#: src/main/options.c:503
+#: src/main/options.c:504
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Essayez `%s --help' pour plus d'information."
 
-#: src/main/options.c:505
+#: src/main/options.c:506
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Essayez `%s -h' pour plus d'information."
 
-#: src/main/options.c:536
+#: src/main/options.c:537
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -291,25 +291,25 @@ msgstr ""
 "impossible d'utiliser le mode ligne ou les options de modificateur de "
 "transfert lors de la visualisation des descripteurs de fichiers"
 
-#: src/main/options.c:545
+#: src/main/options.c:546
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "impossible d'utiliser le positionnement du curseur lors de la visualisation "
 "des descripteurs de fichier"
 
-#: src/main/options.c:554
+#: src/main/options.c:555
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "impossible d'utiliser la télécommande lors de la visualisation des "
 "descripteurs de fichiers"
 
-#: src/main/options.c:563
+#: src/main/options.c:564
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "impossible de transférer des fichiers lorsque vous regardez des descripteurs "
 "de fichiers"
 
-#: src/main/options.c:578
+#: src/main/options.c:579
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "non disponible sur les systèmes sans /proc/self/fdinfo"
 
@@ -337,19 +337,19 @@ msgstr ""
 msgid "Project web site"
 msgstr ""
 
-#: src/pv/cursor.c:85
+#: src/pv/cursor.c:87
 msgid "failed to get terminal name"
 msgstr "échec de lecture du nom du terminal"
 
-#: src/pv/cursor.c:117
+#: src/pv/cursor.c:119
 msgid "failed to open lock file"
 msgstr "échec de l'ouverture du fichier de verrouillage"
 
-#: src/pv/cursor.c:150
+#: src/pv/cursor.c:152
 msgid "lock attempt failed"
 msgstr "tentative de verrouillage échoué"
 
-#: src/pv/cursor.c:391
+#: src/pv/cursor.c:393
 msgid "failed to open terminal"
 msgstr "l'ouverture du terminal a échoué"
 
@@ -389,27 +389,27 @@ msgstr "O/s"
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/file.c:119
+#: src/pv/file.c:116
 msgid "failed to seek to start of output"
 msgstr "ne peut pas passer au début de la sortie"
 
-#: src/pv/file.c:210
+#: src/pv/file.c:251
 msgid "failed to close file"
 msgstr "la fermeture du fichier a échoué"
 
-#: src/pv/file.c:232
+#: src/pv/file.c:275
 msgid "failed to read file"
 msgstr "la lecture du fichier a échoué"
 
-#: src/pv/file.c:246
+#: src/pv/file.c:289
 msgid "failed to stat output file"
 msgstr "échec à statuer sur le fichier de sortie"
 
-#: src/pv/file.c:268
+#: src/pv/file.c:311
 msgid "input file is output file"
 msgstr "fichiers d'entré et de sortie sont les mêmes"
 
-#: src/pv/loop.c:506 src/pv/loop.c:558 src/pv/loop.c:602 src/pv/watchpid.c:73
+#: src/pv/loop.c:523 src/pv/loop.c:575 src/pv/loop.c:619 src/pv/watchpid.c:73
 #: src/pv/watchpid.c:83 src/pv/watchpid.c:94 src/pv/watchpid.c:102
 #: src/pv/watchpid.c:139 src/pv/watchpid.c:150 src/pv/watchpid.c:158
 #: src/pv/watchpid.c:169 src/pv/watchpid.c:253 src/pv/watchpid.c:261
