@@ -1,6 +1,7 @@
 0.0.20230828-UNRELEASED
 
   * feature: new "`--enable-static`" option to "`configure`" for static builds ([#75](https://codeberg.org/a-j-wood/pv/pull/75))
+  * feature: now uses `posix_fadvise()` like `cat`(1) does, to improve efficiency ([#39](https://codeberg.org/a-j-wood/pv/issues/39))
   * security: with "`--pidfile`", write to a temporary file and rename it into place, to improve security
   * security: keep self-contained copies of name and format string in PV internal state for memory safety
   * cleanup: switched the build system to GNU Automake

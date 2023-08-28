@@ -165,6 +165,11 @@ unsigned long long pv_calc_total_size(pvstate_t state)
 			return total;
 		}
 
+#if HAVE_POSIX_FADVISE
+		/* Advise the OS that we will only be reading sequentially. */
+		(void) posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+#endif
+
 		while (1) {
 			unsigned char scanbuf[1024];
 			int numread, j;
@@ -275,6 +280,7 @@ int pv_next_file(pvstate_t state, int filenum, int oldfd)
 	if (0 == strcmp(state->input_files[filenum], "-")) {
 		state->current_file = "(stdin)";
 	}
+
 #ifdef O_DIRECT
 	/*
 	 * Set or clear O_DIRECT on the file descriptor.

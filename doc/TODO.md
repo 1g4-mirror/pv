@@ -27,7 +27,6 @@ Feature requests
  * ([#36](https://codeberg.org/a-j-wood/pv/issues/36)) Ignore *SIGWINCH* (window size change) if "`-w`" / "`-H`" provided
  * ([#37](https://codeberg.org/a-j-wood/pv/issues/37)) Allow "`-E`" to take a block size argument so errors cause a skip to the next block (Anthony DeRobertis - Oct 2016)
  * ([#38](https://codeberg.org/a-j-wood/pv/issues/38)) Reset ETA on *SIGUSR1* (Jacek Wielemborek - Jan 2019)
- * ([#39](https://codeberg.org/a-j-wood/pv/issues/39)) Use `posix_fadvise()` like `cat`(1) does (Jacek Wielemborek - Oct 2015)
  * ([#40](https://codeberg.org/a-j-wood/pv/issues/40)) Permit "`-c`" with "`-d PID:FD`", reject "`-N`" with "`-d PID`" (Norman Rasmussen - Nov 2020)
  * ([#41](https://codeberg.org/a-j-wood/pv/issues/41)) Improve how backwards-moving reads are shown in "`--watchfd`" (Ryan Cooley - Dec 2017)
  * ([#42](https://codeberg.org/a-j-wood/pv/issues/42)) Option to discard stdin so nothing is written to stdout (André Stapf - Apr 2017)

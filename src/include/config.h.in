@@ -61,6 +61,9 @@
 /* Define to 1 if you have the <minix/config.h> header file. */
 #undef HAVE_MINIX_CONFIG_H
 
+/* Define to 1 if you have the `posix_fadvise' function. */
+#undef HAVE_POSIX_FADVISE
+
 /* Define to 1 if you have the `posix_memalign' function. */
 #undef HAVE_POSIX_MEMALIGN
 

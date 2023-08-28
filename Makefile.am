@@ -102,4 +102,4 @@ analyse: $(pv_SOURCES:.c=.e) FORCE
 FORCE:
 
 clean-local:
-	rm -f $(pv_SOURCES:.c=.e)
+	rm -f src/*/*.e
