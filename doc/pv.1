@@ -273,9 +273,13 @@ to watch all file descriptors of a process, but will work with
 Instead of counting bytes, count lines (newline characters). The progress
 bar will only move when a new line is found, and the value passed to the
 .B \-s
-option will be interpreted as a line count.  Note that file sizes are not
-automatically calculated when this option is used, to avoid having to read
-all files twice.
+option will be interpreted as a line count.
+
+If this option is used without
+.BR \-s ,
+the "total size" (in this case, total line count) is calculated by reading
+through all input files once before transfer starts.  If any inputs are
+pipes or non-regular files, the total size will not be calculated.
 .TP
 .B \-0, \-\-null
 Count lines as null terminated.  This option implies \-\-line\-mode.

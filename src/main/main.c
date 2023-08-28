@@ -187,10 +187,11 @@ int main(int argc, char **argv)
 
 	if (0 == opts->watch_pid) {
 		/*
-		 * If no size was given, and we're not in line mode, try to
-		 * calculate the total size.
+		 * If no size was given, try to calculate the total size.
 		 */
-		if ((0 == opts->size) && (false == opts->linemode)) {
+		if (0 == opts->size) {
+			pv_state_linemode_set(state, opts->linemode);
+			pv_state_null_set(state, opts->null);
 			opts->size = pv_calc_total_size(state);
 			debug("%s: %llu", "no size given - calculated", opts->size);
 		}

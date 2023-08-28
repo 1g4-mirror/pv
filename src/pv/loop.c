@@ -114,7 +114,6 @@ int pv_main_loop(pvstate_t state)
 			pv_crs_fini(state);
 		return state->exit_status;
 	}
-
 #if HAVE_POSIX_FADVISE
 	/* Advise the OS that we will only be reading sequentially. */
 	(void) posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);

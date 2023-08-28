@@ -21,24 +21,20 @@
 
 
 /*
- * Try to work out the total size of all data by adding up the sizes of all
- * input files. If any of the input files are of indeterminate size (i.e.
- * they are a pipe), the total size is set to zero.
+ * Calculate the total number of bytes to be transferred by adding up the
+ * sizes of all input files.  If any of the input files are of indeterminate
+ * size (such as if they are a pipe), the total size is set to zero.
  *
  * Any files that cannot be stat()ed or that access() says we can't read
  * will cause a warning to be output and will be removed from the list.
  *
- * In line mode, any files that pass the above checks will then be read to
- * determine how many lines they contain, and the total size will be set to
- * the total line count. Only regular files will be read.
- *
  * Returns the total size, or 0 if it is unknown.
  */
-unsigned long long pv_calc_total_size(pvstate_t state)
+static unsigned long long pv_calc_total_bytes(pvstate_t state)
 {
 	unsigned long long total;
 	struct stat sb;
-	int rc, i, j, fd;
+	int rc, file_idx, move_idx, fd;
 
 	total = 0;
 	rc = 0;
@@ -53,26 +49,26 @@ unsigned long long pv_calc_total_size(pvstate_t state)
 		return total;
 	}
 
-	for (i = 0; i < state->input_file_count; i++) {
-		if (0 == strcmp(state->input_files[i], "-")) {
+	for (file_idx = 0; file_idx < state->input_file_count; file_idx++) {
+		if (0 == strcmp(state->input_files[file_idx], "-")) {
 			rc = fstat(STDIN_FILENO, &sb);
 			if (rc != 0) {
 				total = 0;
 				return total;
 			}
 		} else {
-			rc = stat(state->input_files[i], &sb);
+			rc = stat(state->input_files[file_idx], &sb);
 			if (0 == rc)
-				rc = access(state->input_files[i], R_OK);
+				rc = access(state->input_files[file_idx], R_OK);
 		}
 
 		if (rc != 0) {
-			pv_error(state, "%s: %s", state->input_files[i], strerror(errno));
-			for (j = i; j < state->input_file_count - 1; j++) {
-				state->input_files[j] = state->input_files[j + 1];
+			pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
+			for (move_idx = file_idx; move_idx < state->input_file_count - 1; move_idx++) {
+				state->input_files[move_idx] = state->input_files[move_idx + 1];
 			}
 			state->input_file_count--;
-			i--;
+			file_idx--;
 			state->exit_status |= 2;
 			continue;
 		}
@@ -82,16 +78,16 @@ unsigned long long pv_calc_total_size(pvstate_t state)
 			 * Get the size of block devices by opening
 			 * them and seeking to the end.
 			 */
-			if (0 == strcmp(state->input_files[i], "-")) {
+			if (0 == strcmp(state->input_files[file_idx], "-")) {
 				fd = open("/dev/stdin", O_RDONLY);
 			} else {
-				fd = open(state->input_files[i], O_RDONLY);
+				fd = open(state->input_files[file_idx], O_RDONLY);
 			}
 			if (fd >= 0) {
 				total += lseek(fd, 0, SEEK_END);
 				close(fd);
 			} else {
-				pv_error(state, "%s: %s", state->input_files[i], strerror(errno));
+				pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
 				state->exit_status |= 2;
 			}
 		} else if (S_ISREG(sb.st_mode)) {
@@ -131,18 +127,35 @@ unsigned long long pv_calc_total_size(pvstate_t state)
 		}
 	}
 
-	if (!state->linemode)
-		return total;
+	return total;
+}
+
+
+/*
+ * Count the total number of lines to be transferred by reading through all
+ * input files.  If any of the inputs are not regular files (such as if they
+ * are a pipe or a block device), the total size is set to zero.
+ *
+ * Any files that cannot be stat()ed or that access() says we can't read
+ * will cause a warning to be output and will be removed from the list.
+ *
+ * Returns the total size, or 0 if it is unknown.
+ */
+static unsigned long long pv_calc_total_lines(pvstate_t state)
+{
+	unsigned long long total;
+	struct stat sb;
+	int rc, file_idx, move_idx, fd;
 
 	/*
 	 * In line mode, we count input lines to work out the total size.
 	 */
 	total = 0;
 
-	for (i = 0; i < state->input_file_count; i++) {
+	for (file_idx = 0; file_idx < state->input_file_count; file_idx++) {
 		fd = -1;
 
-		if (0 == strcmp(state->input_files[i], "-")) {
+		if (0 == strcmp(state->input_files[file_idx], "-")) {
 			rc = fstat(STDIN_FILENO, &sb);
 			if ((rc != 0) || (!S_ISREG(sb.st_mode))) {
 				total = 0;
@@ -150,21 +163,24 @@ unsigned long long pv_calc_total_size(pvstate_t state)
 			}
 			fd = dup(STDIN_FILENO);
 		} else {
-			rc = stat(state->input_files[i], &sb);
+			rc = stat(state->input_files[file_idx], &sb);
 			if ((rc != 0) || (!S_ISREG(sb.st_mode))) {
 				total = 0;
 				return total;
 			}
-			fd = open(state->input_files[i], O_RDONLY);
+			fd = open(state->input_files[file_idx], O_RDONLY);
 		}
 
 		if (fd < 0) {
-			pv_error(state, "%s: %s", state->input_files[i], strerror(errno));
-			total = 0;
+			pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
+			for (move_idx = file_idx; move_idx < state->input_file_count - 1; move_idx++) {
+				state->input_files[move_idx] = state->input_files[move_idx + 1];
+			}
+			state->input_file_count--;
+			file_idx--;
 			state->exit_status |= 2;
-			return total;
+			continue;
 		}
-
 #if HAVE_POSIX_FADVISE
 		/* Advise the OS that we will only be reading sequentially. */
 		(void) posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
@@ -172,27 +188,53 @@ unsigned long long pv_calc_total_size(pvstate_t state)
 
 		while (1) {
 			unsigned char scanbuf[1024];
-			int numread, j;
+			int numread, buf_idx;
 
 			numread = read(fd, scanbuf, sizeof(scanbuf));
 			if (numread < 0) {
-				pv_error(state, "%s: %s", state->input_files[i], strerror(errno));
+				pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
 				state->exit_status |= 2;
 				break;
 			} else if (0 == numread) {
 				break;
 			}
-			for (j = 0; j < numread; j++) {
-				if ('\n' == scanbuf[j])
-					total++;
+			for (buf_idx = 0; buf_idx < numread; buf_idx++) {
+				if (state->null) {
+					if ('\0' == scanbuf[buf_idx])
+						total++;
+				} else {
+					if ('\n' == scanbuf[buf_idx])
+						total++;
+				}
 			}
 		}
 
-		lseek(fd, 0, SEEK_SET);
-		close(fd);
+		if (0 != lseek(fd, 0, SEEK_SET)) {
+			pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
+			state->exit_status |= 2;
+		}
+
+		(void) close(fd);
 	}
 
 	return total;
+}
+
+
+/*
+ * Work out the total size of all data by adding up the sizes of all input
+ * files, using either pv_calc_total_bytes() or pv_calc_total_lines()
+ * depending on whether state->linemode is true.
+ *
+ * Returns the total size, or 0 if it is unknown.
+ */
+unsigned long long pv_calc_total_size(pvstate_t state)
+{
+	if (state->linemode) {
+		return pv_calc_total_lines(state);
+	} else {
+		return pv_calc_total_bytes(state);
+	}
 }
 
 
@@ -280,7 +322,6 @@ int pv_next_file(pvstate_t state, int filenum, int oldfd)
 	if (0 == strcmp(state->input_files[filenum], "-")) {
 		state->current_file = "(stdin)";
 	}
-
 #ifdef O_DIRECT
 	/*
 	 * Set or clear O_DIRECT on the file descriptor.
