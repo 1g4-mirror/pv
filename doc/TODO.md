@@ -6,7 +6,7 @@ Bugs
  * ([#5](https://codeberg.org/a-j-wood/pv/issues/5)) Transfer IPC leadership on exit of leader
  * ([#13](https://codeberg.org/a-j-wood/pv/issues/13)) Use `clock_gettime()` in ETA calculation to cope with machine suspend/resume (Mateju Miroslav)
  * ([#20](https://codeberg.org/a-j-wood/pv/issues/20)) Terminal state is not restored correctly in all cases (VA)
- * ([#24](https://codeberg.org/a-j-wood/pv/issues/24)) Race condition with multiple "`pv -c`" leaves terminal state inconsistent (Lars Ellenberg, Viktor Ashirov)
+ * ([#24](https://codeberg.org/a-j-wood/pv/issues/24)) Debian #890901 - Race condition with multiple "`pv -c`" leaves terminal state inconsistent (Lars Ellenberg, Viktor Ashirov)
  * ([#34](https://codeberg.org/a-j-wood/pv/issues/34)) Continue timer even if input or output is blocking (Martin Probst - Jun 2017)
 
 Feature requests
@@ -24,7 +24,7 @@ Feature requests
  * ([#22](https://codeberg.org/a-j-wood/pv/issues/22)) Options to skip input and seek on output (Jason A. Pfeil, Feb 2022)
  * ([#25](https://codeberg.org/a-j-wood/pv/issues/25)) Normalise progress to 100% on overrun (Andrej Gantvorg)
  * ([#35](https://codeberg.org/a-j-wood/pv/issues/35)) Allow decimal values for "`-s`", "`-L`", "`-B`" (Thomas Watson - Aug 2020)
- * ([#37](https://codeberg.org/a-j-wood/pv/issues/37)) Allow "`-E`" to take a block size argument so errors cause a skip to the next block (Anthony DeRobertis - Oct 2016)
+ * ([#37](https://codeberg.org/a-j-wood/pv/issues/37)) Debian #839796 - Allow "`-E`" to take a block size argument so errors cause a skip to the next block (Anthony DeRobertis - Oct 2016)
  * ([#38](https://codeberg.org/a-j-wood/pv/issues/38)) Reset ETA on *SIGUSR1* (Jacek Wielemborek - Jan 2019)
  * ([#40](https://codeberg.org/a-j-wood/pv/issues/40)) Permit "`-c`" with "`-d PID:FD`", reject "`-N`" with "`-d PID`" (Norman Rasmussen - Nov 2020)
  * ([#41](https://codeberg.org/a-j-wood/pv/issues/41)) Improve how backwards-moving reads are shown in "`--watchfd`" (Ryan Cooley - Dec 2017)
