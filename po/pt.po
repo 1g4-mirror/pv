@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/a-j-wood/pv/issues\n"
-"POT-Creation-Date: 2023-08-28 18:16+0100\n"
+"POT-Creation-Date: 2023-08-30 22:28+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -180,54 +180,58 @@ msgid "use direct I/O to bypass cache"
 msgstr ""
 
 #: src/main/help.c:381
+msgid "discard input instead of writing to output"
+msgstr ""
+
+#: src/main/help.c:384
 msgid "PID"
 msgstr ""
 
-#: src/main/help.c:382
+#: src/main/help.c:385
 msgid "update settings of process PID"
 msgstr "atualizar as configurações do processo PID"
 
-#: src/main/help.c:386 src/main/help.c:401
+#: src/main/help.c:389 src/main/help.c:404
 msgid "FILE"
 msgstr ""
 
-#: src/main/help.c:387
+#: src/main/help.c:390
 msgid "save process ID in FILE"
 msgstr "salvar ID do processo em FILE"
 
-#: src/main/help.c:390
+#: src/main/help.c:393
 msgid "PID[:FD]"
 msgstr ""
 
-#: src/main/help.c:391
+#: src/main/help.c:394
 msgid "watch file FD opened by process PID"
 msgstr "assistir arquivo FD aberto pelo processo PID"
 
-#: src/main/help.c:395
+#: src/main/help.c:398
 msgid "show this help and exit"
 msgstr "exibe esta tela de ajuda e termina"
 
-#: src/main/help.c:398
+#: src/main/help.c:401
 msgid "show version information and exit"
 msgstr "exibe a versão e termina"
 
-#: src/main/help.c:402
+#: src/main/help.c:405
 msgid "write debug logs to FILE"
 msgstr ""
 
-#: src/main/help.c:427
+#: src/main/help.c:430
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Uso: %s [OPÇÕES] [ARQUIVOS]..."
 
-#: src/main/help.c:438
+#: src/main/help.c:441
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Concatena ARQUIVO(s) ou a entrada padrão e grava na saída padrão, com "
 "monitoramento."
 
-#: src/main/help.c:575
+#: src/main/help.c:578
 #, c-format
 msgid "Please report any bugs to %s."
 msgstr "Por favor, reporte quaisquer defeitos para %s."
@@ -236,49 +240,49 @@ msgstr "Por favor, reporte quaisquer defeitos para %s."
 msgid "state allocation failed"
 msgstr "alocação de memória de status falhou"
 
-#: src/main/main.c:321
+#: src/main/main.c:322
 msgid "failed to read terminal attributes"
 msgstr ""
 
-#: src/main/options.c:206
+#: src/main/options.c:207
 msgid "option structure allocation failed"
 msgstr "erro na alocação da estrutura de opções"
 
-#: src/main/options.c:225
+#: src/main/options.c:226
 msgid "option structure argv allocation failed"
 msgstr "erro na alocação da estrutura de opções argv"
 
-#: src/main/options.c:282
+#: src/main/options.c:286
 msgid "integer argument expected"
 msgstr "argumento inteiro esperado"
 
-#: src/main/options.c:293
+#: src/main/options.c:297
 msgid "numeric argument expected"
 msgstr "argumento numérico esperado"
 
-#: src/main/options.c:304
+#: src/main/options.c:308
 msgid "process ID or pid:fd pair expected"
 msgstr "ID do processo ou par pid:fd esperado"
 
-#: src/main/options.c:311
+#: src/main/options.c:315
 msgid "invalid process ID"
 msgstr "ID de processo inválido"
 
-#: src/main/options.c:412 src/pv/file.c:282
+#: src/main/options.c:416 src/pv/file.c:282
 msgid "failed to stat file"
 msgstr "erro obtendo informações do arquivo"
 
-#: src/main/options.c:504
+#: src/main/options.c:514
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Tente `%s --help' para maiores informações."
 
-#: src/main/options.c:506
+#: src/main/options.c:516
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Tente `%s -h' para maiores informações."
 
-#: src/main/options.c:537
+#: src/main/options.c:547
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -286,29 +290,29 @@ msgstr ""
 "não pode usar o modo de linha ou opções de modificador de transferência ao "
 "assistir os descritores de arquivo"
 
-#: src/main/options.c:546
+#: src/main/options.c:556
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "não pode usar o posicionamento do cursor ao observar os descritores de "
 "arquivo"
 
-#: src/main/options.c:555
+#: src/main/options.c:565
 msgid "cannot use remote control when watching file descriptors"
 msgstr "não pode usar o controle remoto ao assistir os descritores de arquivo"
 
-#: src/main/options.c:564
+#: src/main/options.c:574
 msgid "cannot transfer files when watching file descriptors"
 msgstr "não pode transferir arquivos ao assistir descritores de arquivo"
 
-#: src/main/options.c:579
+#: src/main/options.c:589
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "não disponível em sistemas sem /proc/self/fdinfo"
 
-#: src/main/remote.c:238
+#: src/main/remote.c:242
 msgid "message not received"
 msgstr "mensagem não recebida"
 
-#: src/main/remote.c:347
+#: src/main/remote.c:351
 msgid "IPC not supported on this system"
 msgstr "IPC não suportado neste sistema"
 
@@ -352,7 +356,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:600 src/pv/transfer.c:743
+#: src/pv/display.c:600 src/pv/transfer.c:751
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
@@ -360,7 +364,7 @@ msgstr "erro alocando o buffer"
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:666 src/pv/transfer.c:468
+#: src/pv/display.c:666 src/pv/transfer.c:472
 msgid "B"
 msgstr ""
 
@@ -400,7 +404,7 @@ msgstr "erro obtendo informações do arquivo de saída"
 msgid "input file is output file"
 msgstr "os arquivos de entrada e saída são o mesmo"
 
-#: src/pv/loop.c:523 src/pv/loop.c:575 src/pv/loop.c:619 src/pv/watchpid.c:73
+#: src/pv/loop.c:522 src/pv/loop.c:572 src/pv/loop.c:617 src/pv/watchpid.c:73
 #: src/pv/watchpid.c:83 src/pv/watchpid.c:94 src/pv/watchpid.c:102
 #: src/pv/watchpid.c:139 src/pv/watchpid.c:150 src/pv/watchpid.c:158
 #: src/pv/watchpid.c:169 src/pv/watchpid.c:253 src/pv/watchpid.c:261
@@ -416,31 +420,31 @@ msgstr ""
 msgid "none"
 msgstr ""
 
-#: src/pv/transfer.c:366
+#: src/pv/transfer.c:370
 msgid "read failed"
 msgstr "erro de leitura"
 
-#: src/pv/transfer.c:381
+#: src/pv/transfer.c:385
 msgid "warning: read errors detected"
 msgstr "aviso: erros de leitura detectados"
 
-#: src/pv/transfer.c:393
+#: src/pv/transfer.c:397
 msgid "file is not seekable"
 msgstr "não pode mover dentro do arquivo"
 
-#: src/pv/transfer.c:452
+#: src/pv/transfer.c:456
 msgid "failed to seek past error"
 msgstr "não pode ir além do erro"
 
-#: src/pv/transfer.c:468
+#: src/pv/transfer.c:472
 msgid "skipped past read error"
 msgstr "ignorado erro de leitura"
 
-#: src/pv/transfer.c:624
+#: src/pv/transfer.c:632
 msgid "write failed"
 msgstr "erro de gravação"
 
-#: src/pv/transfer.c:840
+#: src/pv/transfer.c:848
 msgid "select call failed"
 msgstr "erro na chamada da função select"
 
