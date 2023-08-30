@@ -152,7 +152,8 @@ int pv_main_loop(pvstate_t state)
 			pv_elapsedtime_read(&cur_time);
 			if (pv_elapsedtime_compare(&cur_time, &next_ratecheck) > 0) {
 				target +=
-				    ((long double) (state->rate_limit)) / (long double) (1000000000.0 / RATE_GRANULARITY);
+				    ((long double) (state->rate_limit)) / (long double) (1000000000.0 /
+											 RATE_GRANULARITY);
 				long double burst_max = ((long double) (state->rate_limit * RATE_BURST_WINDOW));
 				if (target > burst_max) {
 					target = burst_max;
@@ -223,7 +224,7 @@ int pv_main_loop(pvstate_t state)
 			final_update = 1;
 			if ((state->display_visible)
 			    || (0 == state->delay_start)) {
-			    	pv_elapsedtime_copy(&next_update, &cur_time);
+				pv_elapsedtime_copy(&next_update, &cur_time);
 			}
 		}
 
@@ -423,7 +424,7 @@ int pv_watchfd_loop(pvstate_t state)
 		/* Ended - force a display update. */
 		if (ended) {
 			ended = 1;
-		    	pv_elapsedtime_copy(&next_update, &cur_time);
+			pv_elapsedtime_copy(&next_update, &cur_time);
 		}
 
 		/*
@@ -688,7 +689,8 @@ int pv_watchpid_loop(pvstate_t state)
 				pv_write_retry(STDERR_FILENO, "\n", 1);
 			}
 
-			debug("%s %d [%d]: %Lf / %Ld / %Ld", "fd", fd, idx, elapsed_seconds, transferred_since_last, position_now);
+			debug("%s %d [%d]: %Lf / %Ld / %Ld", "fd", fd, idx, elapsed_seconds, transferred_since_last,
+			      position_now);
 
 			pv_display(&(state_array[idx]), elapsed_seconds, transferred_since_last, position_now);
 			displayed_lines++;
