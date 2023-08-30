@@ -27,24 +27,6 @@
 
 
 /*
- * Add the given number of microseconds (which may be negative) to the given
- * timeval.
- */
-static void pv_timeval_add_usec(struct timeval *val, long usec)
-{
-	val->tv_usec += usec;
-	while (val->tv_usec < 0) {
-		val->tv_sec--;
-		val->tv_usec += 1000000;
-	}
-	while (val->tv_usec >= 1000000) {
-		val->tv_sec++;
-		val->tv_usec -= 1000000;
-	}
-}
-
-
-/*
  * Pipe data from a list of files to standard output, giving information
  * about the transfer on standard error according to the given options.
  *
@@ -53,12 +35,12 @@ static void pv_timeval_add_usec(struct timeval *val, long usec)
 int pv_main_loop(pvstate_t state)
 {
 	long written, lineswritten;
-	long long total_written, since_last, cansend;
+	long long total_written, transferred_since_last, cansend;
 	long double target;
 	int eof_in, eof_out, final_update;
-	struct timeval start_time, next_update, next_ratecheck, cur_time;
-	struct timeval init_time, next_remotecheck;
-	long double elapsed;
+	struct timespec start_time, next_update, next_ratecheck, cur_time;
+	struct timespec init_time, next_remotecheck, transfer_elapsed;
+	long double elapsed_seconds;
 	struct stat sb;
 	int fd, file_idx;
 
@@ -71,8 +53,9 @@ int pv_main_loop(pvstate_t state)
 	 * "total_written" is the total bytes written since the start,
 	 * or in line mode, the total lines written since the start.
 	 *
-	 * "since_last" is the bytes written since the last display,
-	 * or in line mode, the lines written since the last display.
+	 * "transferred_since_last" is the bytes written since the last
+	 * display, or in line mode, the lines written since the last
+	 * display.
 	 *
 	 * The remaining variables are all unchanged by linemode.
 	 */
@@ -84,25 +67,21 @@ int pv_main_loop(pvstate_t state)
 	eof_in = 0;
 	eof_out = 0;
 	total_written = 0;
-	since_last = 0;
+	transferred_since_last = 0;
 	state->initial_offset = 0;
 
-	gettimeofday(&start_time, NULL);
-	gettimeofday(&cur_time, NULL);
+	pv_elapsedtime_read(&cur_time);
+	pv_elapsedtime_copy(&start_time, &cur_time);
 
-	next_update.tv_sec = start_time.tv_sec;
-	next_update.tv_usec = start_time.tv_usec;
+	pv_elapsedtime_copy(&next_ratecheck, &cur_time);
+	pv_elapsedtime_copy(&next_remotecheck, &cur_time);
+	pv_elapsedtime_copy(&next_update, &cur_time);
 	if ((state->delay_start > 0)
 	    && (state->delay_start > state->interval)) {
-		pv_timeval_add_usec(&next_update, (long) (1000000.0 * state->delay_start));
+		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->delay_start));
 	} else {
-		pv_timeval_add_usec(&next_update, (long) (1000000.0 * state->interval));
+		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->interval));
 	}
-
-	next_ratecheck.tv_sec = start_time.tv_sec;
-	next_ratecheck.tv_usec = start_time.tv_usec;
-	next_remotecheck.tv_sec = start_time.tv_sec;
-	next_remotecheck.tv_usec = start_time.tv_usec;
 
 	target = 0;
 	final_update = 0;
@@ -159,29 +138,26 @@ int pv_main_loop(pvstate_t state)
 		cansend = 0;
 
 		/*
-		 * Check for remote messages from -R every short while
+		 * Check for remote messages from -R every short while.
 		 */
-		if ((cur_time.tv_sec > next_remotecheck.tv_sec)
-		    || (cur_time.tv_sec == next_remotecheck.tv_sec && cur_time.tv_usec >= next_remotecheck.tv_usec)) {
+		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
 			pv_remote_check(state);
-			pv_timeval_add_usec(&next_remotecheck, REMOTE_INTERVAL);
+			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
 		if (state->pv_sig_abort)
 			break;
 
 		if (state->rate_limit > 0) {
-			gettimeofday(&cur_time, NULL);
-			if ((cur_time.tv_sec > next_ratecheck.tv_sec)
-			    || (cur_time.tv_sec == next_ratecheck.tv_sec && cur_time.tv_usec >= next_ratecheck.tv_usec)) {
-
+			pv_elapsedtime_read(&cur_time);
+			if (pv_elapsedtime_compare(&cur_time, &next_ratecheck) > 0) {
 				target +=
-				    ((long double) (state->rate_limit)) / (long double) (1000000 / RATE_GRANULARITY);
-				long double burstMax = ((long double) (state->rate_limit * RATE_BURST_WINDOW));
-				if (target > burstMax) {
-					target = burstMax;
+				    ((long double) (state->rate_limit)) / (long double) (1000000000.0 / RATE_GRANULARITY);
+				long double burst_max = ((long double) (state->rate_limit * RATE_BURST_WINDOW));
+				if (target > burst_max) {
+					target = burst_max;
 				}
-				pv_timeval_add_usec(&next_ratecheck, RATE_GRANULARITY);
+				pv_elapsedtime_add_nsec(&next_ratecheck, RATE_GRANULARITY);
 			}
 			cansend = target;
 		}
@@ -216,12 +192,12 @@ int pv_main_loop(pvstate_t state)
 		}
 
 		if (state->linemode) {
-			since_last += lineswritten;
+			transferred_since_last += lineswritten;
 			total_written += lineswritten;
 			if (state->rate_limit > 0)
 				target -= lineswritten;
 		} else {
-			since_last += written;
+			transferred_since_last += written;
 			total_written += written;
 			if (state->rate_limit > 0)
 				target -= written;
@@ -239,15 +215,19 @@ int pv_main_loop(pvstate_t state)
 			}
 		}
 
-		gettimeofday(&cur_time, NULL);
+		/* Now check the current time. */
+		pv_elapsedtime_read(&cur_time);
 
+		/* If full EOF, final update, and force a display updaate. */
 		if (eof_in && eof_out) {
 			final_update = 1;
 			if ((state->display_visible)
-			    || (0 == state->delay_start))
-				next_update.tv_sec = cur_time.tv_sec - 1;
+			    || (0 == state->delay_start)) {
+			    	pv_elapsedtime_copy(&next_update, &cur_time);
+			}
 		}
 
+		/* Just go round the loop again if there's no display. */
 		if (state->no_display)
 			continue;
 
@@ -258,6 +238,7 @@ int pv_main_loop(pvstate_t state)
 		 * was received.
 		 */
 		if (state->wait) {
+			/* Restart the loop if nothing written yet. */
 			if (state->linemode) {
 				if (lineswritten < 1)
 					continue;
@@ -279,47 +260,47 @@ int pv_main_loop(pvstate_t state)
 			 * SIGTSTOP so things don't mess up.
 			 */
 			pv_sig_nopause();
-			gettimeofday(&start_time, NULL);
-			state->pv_sig_toffset.tv_sec = 0;
-			state->pv_sig_toffset.tv_usec = 0;
+			pv_elapsedtime_read(&start_time);
+			pv_elapsedtime_zero(&(state->pv_sig_toffset));
 			pv_sig_allowpause();
 
-			next_update.tv_sec = start_time.tv_sec;
-			next_update.tv_usec = start_time.tv_usec;
-			pv_timeval_add_usec(&next_update, (long) (1000000.0 * state->interval));
+			/*
+			 * Start the display, but only at the next interval,
+			 * not immediately.
+			 */
+			pv_elapsedtime_copy(&next_update, &start_time);
+			pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->interval));
 		}
 
-		if ((cur_time.tv_sec < next_update.tv_sec)
-		    || (cur_time.tv_sec == next_update.tv_sec && cur_time.tv_usec < next_update.tv_usec)) {
+		/* Restart the loop if it's not time to update the display. */
+		if (pv_elapsedtime_compare(&cur_time, &next_update) < 0) {
 			continue;
 		}
 
-		pv_timeval_add_usec(&next_update, (long) (1000000.0 * state->interval));
+		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->interval));
 
-		if (next_update.tv_sec < cur_time.tv_sec) {
-			next_update.tv_sec = cur_time.tv_sec;
-			next_update.tv_usec = cur_time.tv_usec;
-		} else if (next_update.tv_sec == cur_time.tv_sec && next_update.tv_usec < cur_time.tv_usec) {
-			next_update.tv_usec = cur_time.tv_usec;
-		}
+		/* Set the "next update" time to now, if it's in the past. */
+		if (pv_elapsedtime_compare(&next_update, &cur_time) < 0)
+			pv_elapsedtime_copy(&next_update, &cur_time);
 
-		init_time.tv_sec = start_time.tv_sec + state->pv_sig_toffset.tv_sec;
-		init_time.tv_usec = start_time.tv_usec + state->pv_sig_toffset.tv_usec;
-		if (init_time.tv_usec >= 1000000) {
-			init_time.tv_sec++;
-			init_time.tv_usec -= 1000000;
-		}
-		if (init_time.tv_usec < 0) {
-			init_time.tv_sec--;
-			init_time.tv_usec += 1000000;
-		}
+		/*
+		 * Calculate the effective start time: the time we actually
+		 * started, plus the total time we spent stopped.
+		 */
+		pv_elapsedtime_add(&init_time, &start_time, &(state->pv_sig_toffset));
 
-		elapsed = cur_time.tv_sec - init_time.tv_sec;
-		elapsed += (cur_time.tv_usec - init_time.tv_usec) / 1000000.0;
+		/*
+		 * Now get the effective elapsed transfer time - current
+		 * time minus effective start time.
+		 */
+		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
+
+		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 		if (final_update)
-			since_last = -1;
+			transferred_since_last = -1;
 
+		/* Resize the display, if a resize signal was received. */
 		if (state->pv_sig_newsize) {
 			unsigned int new_width, new_height;
 
@@ -335,9 +316,9 @@ int pv_main_loop(pvstate_t state)
 				state->height = new_height;
 		}
 
-		pv_display(state, elapsed, since_last, total_written);
+		pv_display(state, elapsed_seconds, transferred_since_last, total_written);
 
-		since_last = 0;
+		transferred_since_last = 0;
 	}
 
 	if (state->cursor) {
@@ -368,10 +349,10 @@ int pv_main_loop(pvstate_t state)
 int pv_watchfd_loop(pvstate_t state)
 {
 	struct pvwatchfd_s info;
-	long long position_now, total_written, since_last;
-	struct timeval next_update, cur_time;
-	struct timeval init_time, next_remotecheck;
-	long double elapsed;
+	long long position_now, total_written, transferred_since_last;
+	struct timespec next_update, cur_time;
+	struct timespec init_time, next_remotecheck, transfer_elapsed;
+	long double elapsed_seconds;
 	int ended;
 	int first_check;
 	int rc;
@@ -401,29 +382,24 @@ int pv_watchfd_loop(pvstate_t state)
 		}
 	}
 
-	gettimeofday(&(info.start_time), NULL);
-	gettimeofday(&cur_time, NULL);
-
-	next_update.tv_sec = info.start_time.tv_sec;
-	next_update.tv_usec = info.start_time.tv_usec;
-	pv_timeval_add_usec(&next_update, (long) (1000000.0 * state->interval));
-
-	next_remotecheck.tv_sec = info.start_time.tv_sec;
-	next_remotecheck.tv_usec = info.start_time.tv_usec;
+	pv_elapsedtime_read(&cur_time);
+	pv_elapsedtime_copy(&(info.start_time), &cur_time);
+	pv_elapsedtime_copy(&next_remotecheck, &cur_time);
+	pv_elapsedtime_copy(&next_update, &cur_time);
+	pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->interval));
 
 	ended = 0;
 	total_written = 0;
-	since_last = 0;
+	transferred_since_last = 0;
 	first_check = 1;
 
 	while (!ended) {
 		/*
-		 * Check for remote messages from -R every short while
+		 * Check for remote messages from -R every short while.
 		 */
-		if ((cur_time.tv_sec > next_remotecheck.tv_sec)
-		    || (cur_time.tv_sec == next_remotecheck.tv_sec && cur_time.tv_usec >= next_remotecheck.tv_usec)) {
+		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
 			pv_remote_check(state);
-			pv_timeval_add_usec(&next_remotecheck, REMOTE_INTERVAL);
+			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
 		if (state->pv_sig_abort)
@@ -434,7 +410,7 @@ int pv_watchfd_loop(pvstate_t state)
 		if (position_now < 0) {
 			ended = 1;
 		} else {
-			since_last += position_now - total_written;
+			transferred_since_last += position_now - total_written;
 			total_written = position_now;
 			if (first_check) {
 				state->initial_offset = position_now;
@@ -442,15 +418,19 @@ int pv_watchfd_loop(pvstate_t state)
 			}
 		}
 
-		gettimeofday(&cur_time, NULL);
+		pv_elapsedtime_read(&cur_time);
 
+		/* Ended - force a display update. */
 		if (ended) {
 			ended = 1;
-			next_update.tv_sec = cur_time.tv_sec - 1;
+		    	pv_elapsedtime_copy(&next_update, &cur_time);
 		}
 
-		if ((cur_time.tv_sec < next_update.tv_sec)
-		    || (cur_time.tv_sec == next_update.tv_sec && cur_time.tv_usec < next_update.tv_usec)) {
+		/*
+		 * Restart the loop after a brief delay, if it's not time to
+		 * update the display.
+		 */
+		if (pv_elapsedtime_compare(&cur_time, &next_update) < 0) {
 			struct timeval tv;
 			tv.tv_sec = 0;
 			tv.tv_usec = 50000;
@@ -458,32 +438,30 @@ int pv_watchfd_loop(pvstate_t state)
 			continue;
 		}
 
-		pv_timeval_add_usec(&next_update, (long) (1000000.0 * state->interval));
+		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->interval));
 
-		if (next_update.tv_sec < cur_time.tv_sec) {
-			next_update.tv_sec = cur_time.tv_sec;
-			next_update.tv_usec = cur_time.tv_usec;
-		} else if (next_update.tv_sec == cur_time.tv_sec && next_update.tv_usec < cur_time.tv_usec) {
-			next_update.tv_usec = cur_time.tv_usec;
-		}
+		/* Set the "next update" time to now, if it's in the past. */
+		if (pv_elapsedtime_compare(&next_update, &cur_time) < 0)
+			pv_elapsedtime_copy(&next_update, &cur_time);
 
-		init_time.tv_sec = info.start_time.tv_sec + state->pv_sig_toffset.tv_sec;
-		init_time.tv_usec = info.start_time.tv_usec + state->pv_sig_toffset.tv_usec;
-		if (init_time.tv_usec >= 1000000) {
-			init_time.tv_sec++;
-			init_time.tv_usec -= 1000000;
-		}
-		if (init_time.tv_usec < 0) {
-			init_time.tv_sec--;
-			init_time.tv_usec += 1000000;
-		}
+		/*
+		 * Calculate the effective start time: the time we actually
+		 * started, plus the total time we spent stopped.
+		 */
+		pv_elapsedtime_add(&init_time, &(info.start_time), &(state->pv_sig_toffset));
 
-		elapsed = cur_time.tv_sec - init_time.tv_sec;
-		elapsed += (cur_time.tv_usec - init_time.tv_usec) / 1000000.0;
+		/*
+		 * Now get the effective elapsed transfer time - current
+		 * time minus effective start time.
+		 */
+		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
+
+		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 		if (ended)
-			since_last = -1;
+			transferred_since_last = -1;
 
+		/* Resize the display, if a resize signal was received. */
 		if (state->pv_sig_newsize) {
 			unsigned int new_width, new_height;
 
@@ -499,9 +477,9 @@ int pv_watchfd_loop(pvstate_t state)
 				state->height = new_height;
 		}
 
-		pv_display(state, elapsed, since_last, total_written);
+		pv_display(state, elapsed_seconds, transferred_since_last, total_written);
 
-		since_last = 0;
+		transferred_since_last = 0;
 	}
 
 	if (!state->numeric)
@@ -530,7 +508,7 @@ int pv_watchpid_loop(pvstate_t state)
 	struct pvstate_s *state_array = NULL;
 	int array_length = 0;
 	int fd_to_idx[FD_SETSIZE] = { 0, };
-	struct timeval next_update, cur_time;
+	struct timespec next_update, cur_time;
 	int idx;
 	int prev_displayed_lines, blank_lines;
 	int first_pass = 1;
@@ -570,11 +548,9 @@ int pv_watchpid_loop(pvstate_t state)
 	 * Get things ready for the main loop.
 	 */
 
-	gettimeofday(&cur_time, NULL);
-
-	next_update.tv_sec = cur_time.tv_sec;
-	next_update.tv_usec = cur_time.tv_usec;
-	pv_timeval_add_usec(&next_update, (long) (1000000.0 * state->interval));
+	pv_elapsedtime_read(&cur_time);
+	pv_elapsedtime_copy(&next_update, &cur_time);
+	pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->interval));
 
 	for (idx = 0; idx < FD_SETSIZE; idx++) {
 		fd_to_idx[idx] = -1;
@@ -588,7 +564,7 @@ int pv_watchpid_loop(pvstate_t state)
 		if (state->pv_sig_abort)
 			break;
 
-		gettimeofday(&cur_time, NULL);
+		pv_elapsedtime_read(&cur_time);
 
 		if (kill(state->watch_pid, 0) != 0) {
 			if (first_pass) {
@@ -603,8 +579,11 @@ int pv_watchpid_loop(pvstate_t state)
 			break;
 		}
 
-		if ((cur_time.tv_sec < next_update.tv_sec)
-		    || (cur_time.tv_sec == next_update.tv_sec && cur_time.tv_usec < next_update.tv_usec)) {
+		/*
+		 * Restart the loop after a brief delay, if it's not time to
+		 * update the display.
+		 */
+		if (pv_elapsedtime_compare(&cur_time, &next_update) < 0) {
 			struct timeval tv;
 			tv.tv_sec = 0;
 			tv.tv_usec = 50000;
@@ -612,15 +591,13 @@ int pv_watchpid_loop(pvstate_t state)
 			continue;
 		}
 
-		pv_timeval_add_usec(&next_update, (long) (1000000.0 * state->interval));
+		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->interval));
 
-		if (next_update.tv_sec < cur_time.tv_sec) {
-			next_update.tv_sec = cur_time.tv_sec;
-			next_update.tv_usec = cur_time.tv_usec;
-		} else if (next_update.tv_sec == cur_time.tv_sec && next_update.tv_usec < cur_time.tv_usec) {
-			next_update.tv_usec = cur_time.tv_usec;
-		}
+		/* Set the "next update" time to now, if it's in the past. */
+		if (pv_elapsedtime_compare(&next_update, &cur_time) < 0)
+			pv_elapsedtime_copy(&next_update, &cur_time);
 
+		/* Resize the display, if a resize signal was received. */
 		if (state->pv_sig_newsize) {
 			state->pv_sig_newsize = 0;
 			pv_screensize(&(state->width), &(state->height));
@@ -651,9 +628,9 @@ int pv_watchpid_loop(pvstate_t state)
 		displayed_lines = 0;
 
 		for (fd = 0; fd < FD_SETSIZE; fd++) {
-			long long position_now, since_last;
-			struct timeval init_time;
-			long double elapsed;
+			long long position_now, transferred_since_last;
+			struct timespec init_time, transfer_elapsed;
+			long double elapsed_seconds;
 
 			if (displayed_lines >= (int) (state->height))
 				break;
@@ -689,31 +666,31 @@ int pv_watchpid_loop(pvstate_t state)
 				continue;
 			}
 
-			since_last = position_now - info_array[idx].position;
+			transferred_since_last = position_now - info_array[idx].position;
 			info_array[idx].position = position_now;
 
-			init_time.tv_sec = info_array[idx].start_time.tv_sec + state->pv_sig_toffset.tv_sec;
-			init_time.tv_usec = info_array[idx].start_time.tv_usec + state->pv_sig_toffset.tv_usec;
-			if (init_time.tv_usec >= 1000000) {
-				init_time.tv_sec++;
-				init_time.tv_usec -= 1000000;
-			}
-			if (init_time.tv_usec < 0) {
-				init_time.tv_sec--;
-				init_time.tv_usec += 1000000;
-			}
+			/*
+			 * Calculate the effective start time: the time we actually
+			 * started, plus the total time we spent stopped.
+			 */
+			pv_elapsedtime_add(&init_time, &(info_array[idx].start_time), &(state->pv_sig_toffset));
 
-			elapsed = cur_time.tv_sec - init_time.tv_sec;
-			elapsed += (cur_time.tv_usec - init_time.tv_usec) / 1000000.0;
+			/*
+			 * Now get the effective elapsed transfer time - current
+			 * time minus effective start time.
+			 */
+			pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
+
+			elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 			if (displayed_lines > 0) {
 				debug("%s", "adding newline");
 				pv_write_retry(STDERR_FILENO, "\n", 1);
 			}
 
-			debug("%s %d [%d]: %Lf / %Ld / %Ld", "fd", fd, idx, elapsed, since_last, position_now);
+			debug("%s %d [%d]: %Lf / %Ld / %Ld", "fd", fd, idx, elapsed_seconds, transferred_since_last, position_now);
 
-			pv_display(&(state_array[idx]), elapsed, since_last, position_now);
+			pv_display(&(state_array[idx]), elapsed_seconds, transferred_since_last, position_now);
 			displayed_lines++;
 		}
 

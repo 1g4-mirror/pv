@@ -32,21 +32,21 @@
  * buffer as full as we can.
  *
  * We stop retrying if the time elapsed since this function was entered
- * reaches TRANSFER_READ_TIMEOUT microseconds.
+ * reaches TRANSFER_READ_TIMEOUT seconds.
  */
 static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
 {
-	struct timeval start_time;
+	struct timespec start_time;
 	ssize_t total_read;
 
-	gettimeofday(&start_time, NULL);
+	pv_elapsedtime_read(&start_time);
 
 	total_read = 0;
 
 	while (count > 0) {
 		ssize_t nread;
-		struct timeval now;
-		long elapsed_usec;
+		struct timespec cur_time, transfer_elapsed;
+		long double elapsed_seconds;
 
 		nread = read(fd, buf, count > MAX_READ_AT_ONCE ? MAX_READ_AT_ONCE : count);
 		if (nread < 0)
@@ -59,11 +59,13 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
 		if (0 == nread)
 			return total_read;
 
-		gettimeofday(&now, NULL);
-		elapsed_usec = 1000000 * (now.tv_sec - start_time.tv_sec) + (now.tv_usec - start_time.tv_usec);
-		if (elapsed_usec > TRANSFER_READ_TIMEOUT) {
-			debug("%s %d: %s (%ld %s)", "fd", fd,
-			      "stopping read - timer expired", elapsed_usec, "usec elapsed");
+		pv_elapsedtime_read(&cur_time);
+		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &start_time);
+		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+
+		if (elapsed_seconds > TRANSFER_READ_TIMEOUT) {
+			debug("%s %d: %s (%lf %s)", "fd", fd,
+			      "stopping read - timer expired", elapsed_seconds, "sec elapsed");
 			return total_read;
 		}
 
@@ -100,21 +102,21 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
  * fsync() if _POSIX_SYNCHRONIZED_IO is not > 0).
  *
  * We stop retrying if the time elapsed since this function was entered
- * reaches TRANSFER_WRITE_TIMEOUT microseconds.
+ * reaches TRANSFER_WRITE_TIMEOUT seconds.
  */
 static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool sync_after_write)
 {
-	struct timeval start_time;
+	struct timespec start_time;
 	ssize_t total_written;
 
-	gettimeofday(&start_time, NULL);
+	pv_elapsedtime_read(&start_time);
 
 	total_written = 0;
 
 	while (count > 0) {
 		ssize_t nwritten;
-		struct timeval now;
-		long elapsed_usec;
+		struct timespec cur_time, transfer_elapsed;
+		long double elapsed_seconds;
 		size_t asked_to_write;
 
 		asked_to_write = count > MAX_WRITE_AT_ONCE ? MAX_WRITE_AT_ONCE : count;
@@ -163,11 +165,13 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
 		if (0 == nwritten)
 			return total_written;
 
-		gettimeofday(&now, NULL);
-		elapsed_usec = 1000000 * (now.tv_sec - start_time.tv_sec) + (now.tv_usec - start_time.tv_usec);
-		if (elapsed_usec > TRANSFER_WRITE_TIMEOUT) {
-			debug("%s %d: %s (%ld %s)", "fd", fd,
-			      "stopping write - timer expired", elapsed_usec, "usec elapsed");
+		pv_elapsedtime_read(&cur_time);
+		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &start_time);
+		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+
+		if (elapsed_seconds > TRANSFER_WRITE_TIMEOUT) {
+			debug("%s %d: %s (%lf %s)", "fd", fd,
+			      "stopping write - timer expired", elapsed_seconds, "sec elapsed");
 			return total_written;
 		}
 
@@ -175,7 +179,7 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
 		 * Running the select() here seems to make PV eat a lot of
 		 * CPU in some cases, so instead we just go round the loop
 		 * again and rely on our alarm() to interrupt us if we run
-		 * out of time - also on our gettimeofday() check.
+		 * out of time - also on our elapsed time check.
 		 */
 		if (count > 0) {
 #if 0					    /* disabled after 1.6.0 - see comment above */

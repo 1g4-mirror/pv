@@ -12,7 +12,6 @@
 
 #include <signal.h>
 #include <termios.h>
-#include <time.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -55,7 +54,7 @@ static void pv_sig_ttou( __attribute__((unused))
 static void pv_sig_tstp( __attribute__((unused))
 			int s)
 {
-	gettimeofday(&(pv_sig_state->pv_sig_tstp_time), NULL);
+	pv_elapsedtime_read(&(pv_sig_state->pv_sig_tstp_time));
 	raise(SIGSTOP);
 }
 
@@ -68,11 +67,13 @@ static void pv_sig_tstp( __attribute__((unused))
 static void pv_sig_cont( __attribute__((unused))
 			int s)
 {
-	struct timeval tv;
+	struct timespec current_time;
+	struct timespec time_spent_stopped;
 	struct termios t;
 
 	pv_sig_state->pv_sig_newsize = 1;
 
+	/* if this SIGCONT didn't follow a SIGTSTP so we have no stop time */
 	if (0 == pv_sig_state->pv_sig_tstp_time.tv_sec) {
 		tcgetattr(STDERR_FILENO, &t);
 		t.c_lflag |= TOSTOP;
@@ -83,21 +84,16 @@ static void pv_sig_cont( __attribute__((unused))
 		return;
 	}
 
-	gettimeofday(&tv, NULL);
+	pv_elapsedtime_read(&current_time);
 
-	pv_sig_state->pv_sig_toffset.tv_sec += (tv.tv_sec - pv_sig_state->pv_sig_tstp_time.tv_sec);
-	pv_sig_state->pv_sig_toffset.tv_usec += (tv.tv_usec - pv_sig_state->pv_sig_tstp_time.tv_usec);
-	if (pv_sig_state->pv_sig_toffset.tv_usec >= 1000000) {
-		pv_sig_state->pv_sig_toffset.tv_sec++;
-		pv_sig_state->pv_sig_toffset.tv_usec -= 1000000;
-	}
-	if (pv_sig_state->pv_sig_toffset.tv_usec < 0) {
-		pv_sig_state->pv_sig_toffset.tv_sec--;
-		pv_sig_state->pv_sig_toffset.tv_usec += 1000000;
-	}
+	/* time spent stopped = current time - time SIGTSTP received */
+	pv_elapsedtime_subtract(&time_spent_stopped, &current_time, &(pv_sig_state->pv_sig_tstp_time));
 
-	pv_sig_state->pv_sig_tstp_time.tv_sec = 0;
-	pv_sig_state->pv_sig_tstp_time.tv_usec = 0;
+	/* add time spent stopped the total stopped-time count */
+	pv_elapsedtime_add(&(pv_sig_state->pv_sig_toffset), &(pv_sig_state->pv_sig_toffset), &time_spent_stopped);
+
+	/* reset the SIGTSTP receipt time */
+	pv_elapsedtime_zero(&(pv_sig_state->pv_sig_tstp_time));
 
 	if (pv_sig_state->pv_sig_old_stderr != -1) {
 		dup2(pv_sig_state->pv_sig_old_stderr, STDERR_FILENO);
@@ -145,10 +141,8 @@ void pv_sig_init(pvstate_t state)
 	pv_sig_state = state;
 
 	pv_sig_state->pv_sig_old_stderr = -1;
-	pv_sig_state->pv_sig_tstp_time.tv_sec = 0;
-	pv_sig_state->pv_sig_tstp_time.tv_usec = 0;
-	pv_sig_state->pv_sig_toffset.tv_sec = 0;
-	pv_sig_state->pv_sig_toffset.tv_usec = 0;
+	pv_elapsedtime_zero(&(pv_sig_state->pv_sig_tstp_time));
+	pv_elapsedtime_zero(&(pv_sig_state->pv_sig_toffset));
 
 	/*
 	 * Ignore SIGPIPE, so we don't die if stdout is a pipe and the other

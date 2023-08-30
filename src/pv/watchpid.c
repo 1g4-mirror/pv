@@ -440,7 +440,7 @@ int pv_watchpid_scanfds(pvstate_t state, pvstate_t pristine,
 
 		state_array[use_idx].reparse_display = 1;
 
-		gettimeofday(&(info_array[use_idx].start_time), NULL);
+		pv_elapsedtime_read(&(info_array[use_idx].start_time));
 
 		state_array[use_idx].initial_offset = 0;
 		info_array[use_idx].position = 0;

@@ -7,6 +7,7 @@
   * security: keep self-contained copies of name and format string in PV internal state for memory safety
   * fix: only report errors about missing files when starting to transfer from them, not while calculating size, and behave more like `cat`(1) by skipping them and moving on
   * fix: auto-calculate total line count with "`--line-mode`" when all inputs are regular files
+  * fix: use `clock_gettime()` in ETA calculation to cope with machine suspend/resume ([#13](https://codeberg.org/a-j-wood/pv/issues/13))
   * fix: if "`--width`" or "`--height`" were provided, do not change them when the window size changes ([#36](https://codeberg.org/a-j-wood/pv/issues/36))
   * cleanup: switched the build system to GNU Automake
   * cleanup: added a test for terminal width detection to "`make check`"

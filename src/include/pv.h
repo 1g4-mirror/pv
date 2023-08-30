@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,6 +77,43 @@ extern int pv_snprintf(char *, size_t, const char *, ...);
  * termination with '\0'.
  */
 extern size_t pv_strlcat(char *, const char *, size_t);
+
+/*
+ * Functions relating to elapsed time.
+ */
+
+/*
+ * Read the current elapsed time, relative to an unspecified point in the
+ * past, and store it in the given timespec buffer.  The time is guaranteed
+ * to not go backwards and does not count time when the system was
+ * suspended.  See clock_gettime(2) with CLOCK_MONOTONIC.
+ */
+void pv_elapsedtime_read(struct timespec *);
+
+/* Set the time in the given timespec to zero. */
+void pv_elapsedtime_zero(struct timespec *);
+
+/* Copy the second timespec into the first.  Analogous to strcpy(3). */
+void pv_elapsedtime_copy(struct timespec *, const struct timespec *);
+
+/*
+ * Return -1, 0, or 1 depending on whether the first time is earlier than,
+ * equal to, or later than the second time.  Analogous to strcmp(3).
+ */
+int pv_elapsedtime_compare(const struct timespec *, const struct timespec *);
+
+/* Add the latter two timespecs and store them in the first timespec. */
+void pv_elapsedtime_add(struct timespec *, const struct timespec *, const struct timespec *);
+
+/* Add a number of nanoseconds to the given timespec. */
+void pv_elapsedtime_add_nsec(struct timespec *, long long);
+
+/* Set the first timespec to the second minus the third. */
+void pv_elapsedtime_subtract(struct timespec *, const struct timespec *, const struct timespec *);
+
+/* Convert a timespec to seconds. */
+long double pv_elapsedtime_seconds(const struct timespec *);
+
           
 /*
  * Main PV functions.

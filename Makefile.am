@@ -19,6 +19,7 @@ src/main/remote.c \
 src/main/version.c \
 src/pv/cursor.c \
 src/pv/display.c \
+src/pv/elapsedtime.c \
 src/pv/file.c \
 src/pv/loop.c \
 src/pv/number.c \

@@ -84,6 +84,7 @@ is acknowledged and greatly appreciated:
  * [Nick Black](https://nick-black.com) - added "`--bits`" option
  * [Andrew Schulman](https://github.com/andrew-schulman) - provided reproducible example of terminal size detection issue in 1.7.17/1.7.18
  * [fuschia74](https://github.com/fuchsia74) - provided "`--enable-static`"  patch for "`configure`"
- * [Wilhelm von Thiele](https://github.com/TurtleWilly) - assisted with OS X cleanups ([Issue#73](https://codeberg.org/a-j-wood/pv/issues/73), [Issue#74](https://codeberg.org/a-j-wood/pv/issues/74))
+ * [Wilhelm von Thiele](https://github.com/TurtleWilly) - assisted with OS X cleanups ([#73](https://codeberg.org/a-j-wood/pv/issues/73), [#74](https://codeberg.org/a-j-wood/pv/issues/74))
+ * Matějů Miroslav, Ing. - suggested fix for ETA and elapsed time faults when suspending and resuming a machine ([#13](https://codeberg.org/a-j-wood/pv/issues/13))
 
 ---

@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <signal.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -30,15 +31,15 @@ extern "C" {
 #define PV_DISPLAY_OUTPUTBUF	256
 #define PV_DISPLAY_FINETA	512
 
-#define RATE_GRANULARITY	100000	 /* usec between -L rate chunks */
-#define RATE_BURST_WINDOW	5	 /* rate burst window (multiples of rate) */
-#define REMOTE_INTERVAL		100000	 /* usec between checks for -R */
-#define BUFFER_SIZE		409600	 /* default transfer buffer size */
-#define BUFFER_SIZE_MAX		524288	 /* max auto transfer buffer size */
-#define MAX_READ_AT_ONCE	524288	 /* max to read() in one go */
-#define MAX_WRITE_AT_ONCE	524288	 /* max to write() in one go */
-#define TRANSFER_READ_TIMEOUT	90000	 /* usec to time reads out at */
-#define TRANSFER_WRITE_TIMEOUT	900000	 /* usec to time writes out at */
+#define RATE_GRANULARITY	100000000.0L	 /* nsec between -L rate chunks */
+#define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
+#define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R */
+#define BUFFER_SIZE		409600		 /* default transfer buffer size */
+#define BUFFER_SIZE_MAX		524288		 /* max auto transfer buffer size */
+#define MAX_READ_AT_ONCE	524288		 /* max to read() in one go */
+#define MAX_WRITE_AT_ONCE	524288		 /* max to write() in one go */
+#define TRANSFER_READ_TIMEOUT	0.09L		 /* seconds to time reads out at */
+#define TRANSFER_WRITE_TIMEOUT	0.9L		 /* seconds to time writes out at */
 
 #define MAXIMISE_BUFFER_FILL	1
 
@@ -125,8 +126,8 @@ struct pvstate_s {
 	 * Signal handling *
 	 *******************/
 	int pv_sig_old_stderr;		 /* see pv_sig_ttou() */
-	struct timeval pv_sig_tstp_time; /* see pv_sig_tstp() / __cont() */
-	struct timeval pv_sig_toffset;		 /* total time spent stopped */
+	struct timespec pv_sig_tstp_time; /* see pv_sig_tstp() / __cont() */
+	struct timespec pv_sig_toffset;		 /* total time spent stopped */
 	volatile sig_atomic_t pv_sig_newsize;	 /* whether we need to get term size again */
 	volatile sig_atomic_t pv_sig_abort;	 /* whether we need to abort right now */
 	volatile sig_atomic_t reparse_display;	 /* whether to re-check format string */
@@ -265,7 +266,7 @@ struct pvwatchfd_s {
 	struct stat sb_fd_link;		 /* lstat of fd symlink */
 	unsigned long long size;	 /* size of whole file, 0 if unknown */
 	long long position;		 /* position last seen at */
-	struct timeval start_time;	 /* time we started watching the fd */
+	struct timespec start_time;	 /* time we started watching the fd */
 };
 typedef struct pvwatchfd_s *pvwatchfd_t;
 
