@@ -1,5 +1,5 @@
 /*
- * Functions for converting strings to numbers.
+ * Functions for portably managing strings.
  *
  * Copyright 2023 Andrew Wood
  *

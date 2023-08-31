@@ -11,6 +11,7 @@
 #include "options.h"
 #include "pv.h"
 
+/* We do not set this because it breaks "dd" - see below. */
 /* #undef MAKE_STDOUT_NONBLOCKING */
 
 #include <stdio.h>

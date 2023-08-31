@@ -1,5 +1,5 @@
 /*
- * Functions used across the program.  Include "config.h" first.
+ * Functions used across the program.
  *
  * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
  *

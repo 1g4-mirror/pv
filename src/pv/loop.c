@@ -1,6 +1,5 @@
 /*
- * Main program entry point - read the command line options, then perform
- * the appropriate actions.
+ * Functions providing the main transfer or file descriptor watching loop.
  *
  * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
  *
