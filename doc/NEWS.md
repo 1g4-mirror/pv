@@ -9,6 +9,7 @@
   * fix: auto-calculate total line count with "`--line-mode`" when all inputs are regular files
   * fix: use `clock_gettime()` in ETA calculation to cope with machine suspend/resume ([#13](https://codeberg.org/a-j-wood/pv/issues/13))
   * fix: if "`--width`" or "`--height`" were provided, do not change them when the window size changes ([#36](https://codeberg.org/a-j-wood/pv/issues/36))
+  * fix: when a file descriptor position in "`--watchfd`" moves backwards, show the rate using the correct prefix ([#41](https://codeberg.org/a-j-wood/pv/issues/41))
   * cleanup: switched the build system to GNU Automake
   * cleanup: added a test for terminal width detection to "`make check`"
   * cleanup: added a test to "`make check`" to ensure that "`make install`" installs everything expected

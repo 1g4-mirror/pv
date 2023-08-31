@@ -145,10 +145,6 @@ static long pv__calc_eta(const long long so_far, const long long total, const lo
  * If "is_bytes" is 1, then the second byte of "prefix" is set to "i" to
  * denote MiB etc (IEEE1541).  Thus "prefix" should be at least 3 bytes long
  * (to include the terminating null).
- *
- * Submitted by Henry Gebhardt <hsggebhardt@googlemail.com> and then
- * modified.  Further changed after input from Thomas Rachel; changed still
- * further after Debian bug #706175.
  */
 static void pv__si_prefix(long double *value, char *prefix, const long double ratio, int is_bytes)
 {
@@ -161,11 +157,25 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 	char const *i;
 	long double cutoff;
 
+	/*
+	 * The prefix list strings have a space (no prefix) in the middle;
+	 * moving right from the space gives the prefix letter for each
+	 * increasing multiple of 1000 or 1024 - such as kilo, mega, giga -
+	 * and moving left from the space gives the prefix letter for each
+	 * decreasing multiple - such as milli, micro, nano.
+	 */
+
+	/*
+	 * Prefix list for multiples of 1000.
+	 */
 	if (NULL == pfx_000) {
 		pfx_000 = _("yzafpnum kMGTPEZY");
 		pfx_middle_000 = strchr(pfx_000, ' ');
 	}
 
+	/*
+	 * Prefix list for multiples of 1024.
+	 */
 	if (NULL == pfx_024) {
 		pfx_024 = _("yzafpnum KMGTPEZY");
 		pfx_middle_024 = strchr(pfx_024, ' ');
@@ -186,8 +196,8 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 	/*
 	 * Force an empty prefix if the value is zero to avoid "0yB".
 	 *
-	 * See below's "is_bytes" check for the reason we add another space
-	 * in bytes mode.
+	 * See the "is_bytes" check below for the reason we add another
+	 * space in bytes mode.
 	 */
 	if (0.0 == *value) {
 		if (is_bytes) {
@@ -199,20 +209,55 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 
 	cutoff = ratio * 0.97;
 
-	while ((*value > cutoff) && (*(i += 1) != '\0')) {
-		*value /= ratio;
-		prefix[0] = *i;
-	}
+	/*
+	 * Divide by the ratio until the value is a little below the ratio,
+	 * moving along the prefix list with each division to get the
+	 * associated prefix letter, so that for example 20000 becomes 20
+	 * with a "k" (kilo) prefix.
+	 */
 
-	while ((*value < 1.0) && ((i -= 1) != (pfx - 1))) {
-		*value *= ratio;
-		prefix[0] = *i;
+	if (*value > 0) {
+		/* Positive values */
+
+		while ((*value > cutoff) && (*(i += 1) != '\0')) {
+			*value /= ratio;
+			prefix[0] = *i;
+		}
+	} else {
+		/* Negative values */
+
+		cutoff = 0 - cutoff;
+		while ((*value < cutoff) && (*(i += 1) != '\0')) {
+			*value /= ratio;
+			prefix[0] = *i;
+		}
 	}
 
 	/*
-	 * Byte prefixes are of the form "KiB" rather than "KB", so that's
-	 * two characters, not one - meaning that for just "B", the prefix
-	 * is two spaces, not one.
+	 * Multiply by the ratio until the value is at least 1, moving in
+	 * the other direction along the prefix list to get the associated
+	 * prefix letter - so for example a value of 0.5 becomes 500 with a
+	 * "m" (milli) prefix.
+	 */
+
+	if (*value > 0) {
+		/* Positive values */
+		while ((*value < 1.0) && ((i -= 1) != (pfx - 1))) {
+			*value *= ratio;
+			prefix[0] = *i;
+		}
+	} else {
+		/* Negative values */
+		while ((*value > -1.0) && ((i -= 1) != (pfx - 1))) {
+			*value *= ratio;
+			prefix[0] = *i;
+		}
+	}
+
+	/*
+	 * Byte prefixes (kibi, mebi, etc) are of the form "KiB" rather than
+	 * "KB", so that's two characters, not one - meaning that for just
+	 * "B", the prefix is two spaces, not one.
 	 */
 	if (is_bytes) {
 		prefix[1] = (prefix[0] == ' ' ? ' ' : 'i');
@@ -258,9 +303,11 @@ static void pv__sizestr(char *buffer, int bufsize, char *format,
 	/* Make sure we don't overrun our buffer. */
 	if (display_amount > 100000)
 		display_amount = 100000;
+	if (display_amount < -100000)
+		display_amount = -100000;
 
 	/* Fix for display of "1.01e+03" instead of "1010" */
-	if (display_amount > 99.9) {
+	if ((display_amount > 99.9) || (display_amount < -99.9)) {
 		(void) pv_snprintf(sizestr_buffer, sizeof(sizestr_buffer),
 				   "%4ld%.2s%.16s", (long) display_amount, si_prefix, suffix);
 	} else {
