@@ -17,9 +17,9 @@ To use it, insert it in a pipeline between two processes, with the
 appropriate options. Its standard input will be passed through to its
 standard output and progress will be shown on standard error.
 
-**pv** will copy each supplied **FILE** in turn to standard output
-(**-** means standard input), or if no **FILE**s are specified just
-standard input is copied. This is the same behaviour as **cat**(1).
+**pv** will copy each supplied *FILE* in turn to standard output (**-**
+means standard input), or if no *FILE*s are specified just standard
+input is copied. This is the same behaviour as **cat**(1).
 
 A simple example to watch how quickly a file is transferred using
 **nc**(1):
@@ -127,15 +127,15 @@ that are explicitly switched on will be shown.
     percentage of the transfer buffer in use - but see the caveat under
     **%T** in the **FORMATTING** section below. Implies **-C**.
 
-**-A, \--last-written NUM**
+**-A ***NUM***, **\--last-written *****NUM*
 
-:   Show the last **NUM** bytes written - but see the caveat under
-    **%nA** in the **FORMATTING** section below. Implies **-C**.
+:   Show the last *NUM* bytes written - but see the caveat under **%nA**
+    in the **FORMATTING** section below. Implies **-C**.
 
-**-F, \--format FORMAT**
+**-F ***FORMAT***, **\--format *****FORMAT*
 
 :   Ignore the options **-p**, **-t**, **-e**, **-r**, **-a**, **-b**,
-    **-T**, and **-A**, and instead use the format string **FORMAT** to
+    **-T**, and **-A**, and instead use the format string *FORMAT* to
     determine the output format. See the **FORMATTING** section below.
 
 **-n, \--numeric**
@@ -170,24 +170,25 @@ that are explicitly switched on will be shown.
     starts, eg piping data into **gpg**(1) or **mcrypt**(1) which
     require a passphrase before data can be processed.
 
-**-D, \--delay-start SEC**
+**-D ***SEC***, **\--delay-start *****SEC*
 
-:   Wait until **SEC** seconds have passed before showing any progress
+:   Wait until *SEC* seconds have passed before showing any progress
     information, for example in a script where you only want to show a
     progress bar if it starts taking a long time. Note that this can be
     a decimal such as 0.5.
 
-**-s SIZE, \--size SIZE**
+**-s ***SIZE***, **\--size *****SIZE*
 
-:   Assume the total amount of data to be transferred is **SIZE** bytes
+:   Assume the total amount of data to be transferred is *SIZE* bytes
     when calculating percentages and ETAs. The same suffixes of \"k\",
     \"m\" etc can be used as with **-L**.
 
-:   If **SIZE** starts with **@**, the size of file whose name follows
-    the **@** will be used.
+:   If *SIZE* starts with **@**, the size of file whose name follows the
+    **@** will be used.
 
-:   Note that **\--size** has no effect if used with **-d PID** to watch
-    all file descriptors of a process, but will work with **-d PID:FD**.
+:   Note that **\--size** has no effect if used with **-d ***PID* to
+    watch all file descriptors of a process, but will work with **-d
+    PID:FD**.
 
 **-l, \--line-mode**
 
@@ -205,29 +206,33 @@ are unreadable, the total size will not be calculated.
 :   Count lines as terminated with a zero byte instead of with a
     newline. This option implies \--line-mode.
 
-**-i SEC, \--interval SEC**
+**-i ***SEC***, **\--interval *****SEC*
 
-:   Wait **SEC** seconds between updates. The default is to update every
+:   Wait *SEC* seconds between updates. The default is to update every
     second. Note that this can be a decimal such as 0.1.
 
-**-m SEC, \--average-rate-window SEC**
+**-m ***SEC***, **\--average-rate-window *****SEC*
 
-:   Compute current average rate over a **SEC** seconds window for
-    average rate and ETA calculations (default 30s).
+:   Compute current average rate over a *SEC* seconds window for average
+    rate and ETA calculations (default 30 seconds).
 
-**-w WIDTH, \--width WIDTH**
+**-w ***WIDTH***, **\--width *****WIDTH*
 
-:   Assume the terminal is **WIDTH** characters wide, instead of trying
-    to work it out (or assuming 80 if it cannot be guessed).
+:   Assume the terminal is *WIDTH* characters wide, instead of trying to
+    work it out (or assuming 80 if it cannot be guessed). If this option
+    is used, the output width will not be adjusted if the width of the
+    terminal changes while the transfer is running.
 
-**-H HEIGHT, \--height HEIGHT**
+**-H ***HEIGHT***, **\--height *****HEIGHT*
 
-:   Assume the terminal is **HEIGHT** rows high, instead of trying to
-    work it out (or assuming 25 if it cannot be guessed).
+:   Assume the terminal is *HEIGHT* rows high, instead of trying to work
+    it out (or assuming 25 if it cannot be guessed). If this option is
+    used, the output height will not be adjusted if the height of the
+    terminal changes while the transfer is running.
 
-**-N NAME, \--name NAME**
+**-N ***NAME***, **\--name *****NAME*
 
-:   Prefix the output information with **NAME**. Useful in conjunction
+:   Prefix the output information with *NAME*. Useful in conjunction
     with **-c** if you have a complicated pipeline and you want to be
     able to tell different parts of it apart.
 
@@ -245,15 +250,15 @@ are unreadable, the total size will not be calculated.
 
 # DATA TRANSFER MODIFIERS
 
-**-L RATE, \--rate-limit RATE**
+**-L ***RATE***, **\--rate-limit *****RATE*
 
-:   Limit the transfer to a maximum of **RATE** bytes per second. A
-    suffix of \"K\", \"M\", \"G\", or \"T\" can be added to denote
-    kibibytes (\*1024), mebibytes, and so on.
+:   Limit the transfer to a maximum of *RATE* bytes per second. A suffix
+    of \"K\", \"M\", \"G\", or \"T\" can be added to denote kibibytes
+    (\*1024), mebibytes, and so on.
 
-**-B BYTES, \--buffer-size BYTES**
+**-B ***BYTES***, **\--buffer-size *****BYTES*
 
-:   Use a transfer buffer size of **BYTES** bytes. A suffix of \"K\",
+:   Use a transfer buffer size of *BYTES* bytes. A suffix of \"K\",
     \"M\", \"G\", or \"T\" can be added to denote kibibytes (\*1024),
     mebibytes, and so on. The default buffer size is the block size of
     the input file\'s filesystem multiplied by 32 (512KiB max), or
@@ -267,11 +272,11 @@ are unreadable, the total size will not be calculated.
     **splice**(2) system call is a more efficient way of transferring
     data from or to a pipe than regular **read**(2) and **write**(2),
     but means that the transfer buffer may not be used. This prevents
-    **-A** and **-T** from working, and makes **-B** redundant, so using
-    **-A**, **-T**, or **-B** automatically switches on **-C**.
-    Switching on **-C** results in a small loss of transfer efficiency.
-    (This option has no effect on systems where **splice**(2) is
-    unavailable).
+    **-A** and **-T** from working, cannot work with **-X**, and makes
+    **-B** redundant, so using **-A**, **-T**, **-X**, or **-B**
+    automatically switches on **-C**. Switching on **-C** results in a
+    small loss of transfer efficiency. (This option has no effect on
+    systems where **splice**(2) is unavailable).
 
 **-E, \--skip-errors**
 
@@ -300,30 +305,35 @@ are unreadable, the total size will not be calculated.
 
 **-K, \--direct-io**
 
-:   Set the *O_DIRECT* flag on all inputs and outputs, if it is
+:   Set the **O_DIRECT** flag on all inputs and outputs, if it is
     available. This will minimise the effect of caches, at the cost of
     performance. Due to memory alignment requirements, it also may cause
     read or write failures with an error of \"Invalid argument\",
     especially if reading and writing files across a variety of
     filesystems in a single **pv** call. Use this option with caution.
 
-**-d PID\[:FD\], \--watchfd PID\[:FD\]**
+**-X, \--discard**
 
-:   Instead of transferring data, watch file descriptor **FD** of
-    process **PID**, and show its progress. The **pv** process will exit
-    when **FD** either changes to a different file, changes read/write
-    mode, or is closed; other data transfer modifiers - and remote
-    control - may not be used with this option.
+:   Instead of transferring input data to standard output, discard it.
+    This is equivalent to redirecting standard output to */dev/null*,
+    except that **write**(2) is never called. Implies **-C**.
 
-:   If only a **PID** is specified, then that process will be watched,
-    and all regular files and block devices it opens will be shown with
-    a progress bar. The **pv** process will exit when process **PID**
-    exits.
+**-d ***PID\[**:***FD*\], *****\--watchfd *****PID\[**:***FD*\]*
 
-**-R PID, \--remote PID**
+:   Instead of transferring data, watch file descriptor *FD* of process
+    *PID*, and show its progress. The **pv** process will exit when *FD*
+    either changes to a different file, changes read/write mode, or is
+    closed; other data transfer modifiers - and remote control - may not
+    be used with this option.
 
-:   If **PID** is an instance of **pv** that is already running, **-R
-    PID** will cause that instance to act as though it had been given
+:   If only a *PID* is specified, then that process will be watched, and
+    all regular files and block devices it opens will be shown with a
+    progress bar. The **pv** process will exit when process *PID* exits.
+
+**-R ***PID***, **\--remote *****PID*
+
+:   If *PID* is an instance of **pv** that is already running, **-R
+    ***PID* will cause that instance to act as though it had been given
     this instance\'s command line instead. For example, if **pv -L
     123K** is running with process ID 9876, then running **pv -R 9876 -L
     321K** will cause it to start using a rate limit of 321KiB instead
@@ -332,9 +342,9 @@ are unreadable, the total size will not be calculated.
 
 # GENERAL OPTIONS
 
-**-P FILE, \--pidfile FILE**
+**-P ***FILE***, **\--pidfile *****FILE*
 
-:   Save the process ID of **pv** in **FILE**. The file will be replaced
+:   Save the process ID of **pv** in *FILE*. The file will be replaced
     if it already exists, and will be removed when **pv** exits. While
     **pv** is running, it will contain a single number - the process ID
     of **pv** - followed by a newline.
@@ -520,7 +530,7 @@ from the **pv** home page: \<http://www.ivarch.com/programs/pv.shtml\>
 
 # SEE ALSO
 
-**cat**(1), **dialog**(1), **splice**(2), **open**(2) (for *O_DIRECT*)
+**cat**(1), **dialog**(1), **splice**(2), **open**(2) (for **O_DIRECT**)
 
 # LICENSE
 
