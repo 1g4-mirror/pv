@@ -3,7 +3,7 @@
  *
  * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
  *
- * Distributed under the Artistic License v2.0; see `doc/COPYING'.
+ * Distributed under the Artistic License v2.0; see `docs/COPYING'.
  */
 
 #ifndef _PV_INTERNAL_H

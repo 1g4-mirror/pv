@@ -5,10 +5,10 @@ AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = po
 
 bin_PROGRAMS = pv
-dist_doc_DATA = README.md doc/INSTALL doc/COPYING doc/NEWS.md doc/ACKNOWLEDGEMENTS.md doc/DEVELOPERS.md doc/TODO.md doc/benchmark.sh
-dist_man1_MANS = doc/pv.1
+dist_doc_DATA = README.md docs/INSTALL docs/COPYING docs/NEWS.md docs/ACKNOWLEDGEMENTS.md docs/DEVELOPERS.md docs/TODO.md docs/benchmark.sh
+dist_man1_MANS = docs/pv.1
 
-EXTRA_DIST = doc/pv.1.md
+EXTRA_DIST = docs/pv.1.md
 
 pv_SOURCES = \
 src/main/debug.c \
@@ -84,8 +84,8 @@ tests/Transfer_-_--stop-at-size.test
 
 EXTRA_DIST += $(TESTS) tests/run-valgrind.sh tests/test-env.sh
 
-doc/pv.1.md: $(srcdir)/doc/pv.1
-	test -d doc || mkdir doc
+docs/pv.1.md: $(srcdir)/docs/pv.1
+	test -d docs || mkdir docs
 	pandoc --from man --to markdown < $< | sed '/\*\*\*\*/{s/\*//g;s/^/**/;s/$$/**/}' | sed '/^```/,/^```/d' > $@
 
 SUFFIXES = .c .o .e

@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 dnl
 dnl Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
 dnl
-dnl Distributed under the Artistic License v2.0; see `doc/COPYING'.
+dnl Distributed under the Artistic License v2.0; see `docs/COPYING'.
 
 AC_INIT([pv], [0.0.20230902-UNRELEASED], [https://codeberg.org/a-j-wood/pv/issues], [pv], [https://www.ivarch.com/programs/pv.shtml])
 AC_CONFIG_SRCDIR([src/include/config.h.in])
