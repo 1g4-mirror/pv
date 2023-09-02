@@ -20,7 +20,7 @@ AM_GNU_GETTEXT_VERSION([0.21])
 AM_GNU_GETTEXT([external])
 if test "$USE_NLS" = "yes"; then
   CPPFLAGS="$CPPFLAGS -DLOCALEDIR=\\\"\$(localedir)\\\""
-  LDFLAGS="$LDFLAGS $LIBINTL"
+  LIBS="$LIBS $LIBINTL"
 fi
 AC_CHECK_FUNCS([getopt_long])
 AC_CHECK_HEADERS([getopt.h])
