@@ -1,5 +1,4 @@
-Notes for developers and translators
-====================================
+# Notes for developers and translators
 
 The following "`configure`" options will be of interest to developers and
 translators:
@@ -12,8 +11,7 @@ These "`make`" targets are available:
  * `make analyse` - run _splint_ and _flawfinder_ on all C source files
 
 
-Debugging and profiling support
--------------------------------
+## Debugging and profiling support
 
 When "`./configure --enable-debugging`" is used, the "`pv`" produced by
 "`make`" will support an extra option, "`--debug FILE`", which will cause
@@ -34,8 +32,7 @@ data when run, to be used with _gprof_.  See "`man gprof`" for details.
 Please note that the memory safety checks will fail with profiling enabled.
 
 
-Source code analysis
---------------------
+## Source code analysis
 
 Running "`make analyse`" runs _splint_ and _flawfinder_ on all C sources,
 writing the output of both programs to files named "`*.e`" for each "`*.c`".
@@ -49,8 +46,7 @@ The eventual goal is for all C source files to generate zero warnings from
 either tool.
 
 
-Translation notes
------------------
+## Translation notes
 
 The message catalogues used to translate program messages into other
 languages are in the "`po/`" directory, named "`xx.po`", where "`xx`"
@@ -100,3 +96,32 @@ the source.  It will also use _msgmerge_ to update all of the "`.po`" files
 from the updated "`pv.pot`" file.  After doing this, look for missing
 translations (empty "`msgstr`" lines) or translations marked as "fuzzy", as
 these will need to be corrected by translators.
+
+
+## Release checklist
+
+The package maintainer should run through these steps for a new release:
+
+ * Check for patches and bug reports at https://tracker.debian.org/pkg/pv
+ * Run "`make indent; make indent indentclean update-po check`"
+ * Version bump and documentation checks:
+  * Update the version in `configure.ac` and `doc/NEWS.md`
+  * Check that `doc/NEWS.md` is up to date
+  * Check that `doc/TODO.md` is up to date
+  * Check that the manual `doc/pv.1` is up to date
+  * Run "`make doc/pv.1.md`" and, if using VPATH, copy the result to the source directory
+ * Ensure everything has been committed to the repository
+ * Run "`autoreconf`" in the source directory
+ * Consistency and build checks:
+  * Wipe the build directory, and run "`configure`" there
+  * Run "`make distcheck`"
+  * Run "`./configure && make check`" on all test systems including Cygwin, using the `tar.gz` that was just created
+ * Run "`make release MAINTAINER=<signing-user>`"
+ * Update the project web site:
+  * Copy the release `.tar.gz`, `.txt`, and `.asc` files to the web site
+  * Use "`pandoc --from markdown --to html`" to convert the TODO, news, and manual to HTML
+  * Update the TODO, news, and manual on the web site
+  * Update the version numbers on the web site
+  * Update the package index on the web site
+ * Create a new release in the repository, and apply the associated tag
+
