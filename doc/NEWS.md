@@ -1,4 +1,4 @@
-0.0.20230828-UNRELEASED
+0.0.20230902-UNRELEASED
 
   * feature: new "`--discard`" option to discard input as if writing to */dev/null* ([#42](https://codeberg.org/a-j-wood/pv/issues/42))
   * feature: use `posix_fadvise()` like `cat`(1) does, to improve efficiency ([#39](https://codeberg.org/a-j-wood/pv/issues/39))
