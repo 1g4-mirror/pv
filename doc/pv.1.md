@@ -127,12 +127,12 @@ that are explicitly switched on will be shown.
     percentage of the transfer buffer in use - but see the caveat under
     **%T** in the **FORMATTING** section below. Implies **-C**.
 
-**-A ***NUM***, **\--last-written *****NUM*
+**-A NUM, \--last-written NUM**
 
 :   Show the last *NUM* bytes written - but see the caveat under **%nA**
     in the **FORMATTING** section below. Implies **-C**.
 
-**-F ***FORMAT***, **\--format *****FORMAT*
+**-F FORMAT, \--format FORMAT**
 
 :   Ignore the options **-p**, **-t**, **-e**, **-r**, **-a**, **-b**,
     **-T**, and **-A**, and instead use the format string *FORMAT* to
@@ -170,14 +170,14 @@ that are explicitly switched on will be shown.
     starts, eg piping data into **gpg**(1) or **mcrypt**(1) which
     require a passphrase before data can be processed.
 
-**-D ***SEC***, **\--delay-start *****SEC*
+**-D SEC, \--delay-start SEC**
 
 :   Wait until *SEC* seconds have passed before showing any progress
     information, for example in a script where you only want to show a
     progress bar if it starts taking a long time. Note that this can be
     a decimal such as 0.5.
 
-**-s ***SIZE***, **\--size *****SIZE*
+**-s SIZE, \--size SIZE**
 
 :   Assume the total amount of data to be transferred is *SIZE* bytes
     when calculating percentages and ETAs. The same suffixes of \"k\",
@@ -206,31 +206,31 @@ are unreadable, the total size will not be calculated.
 :   Count lines as terminated with a zero byte instead of with a
     newline. This option implies \--line-mode.
 
-**-i ***SEC***, **\--interval *****SEC*
+**-i SEC, --interval SEC**
 
 :   Wait *SEC* seconds between updates. The default is to update every
     second. Note that this can be a decimal such as 0.1.
 
-**-m ***SEC***, **\--average-rate-window *****SEC*
+**-m SEC, \--average-rate-window SEC**
 
 :   Compute current average rate over a *SEC* seconds window for average
     rate and ETA calculations (default 30 seconds).
 
-**-w ***WIDTH***, **\--width *****WIDTH*
+**-w WIDTH, \--width WIDTH**
 
 :   Assume the terminal is *WIDTH* characters wide, instead of trying to
     work it out (or assuming 80 if it cannot be guessed). If this option
     is used, the output width will not be adjusted if the width of the
     terminal changes while the transfer is running.
 
-**-H ***HEIGHT***, **\--height *****HEIGHT*
+**-H HEIGHT, \--height HEIGHT**
 
 :   Assume the terminal is *HEIGHT* rows high, instead of trying to work
     it out (or assuming 25 if it cannot be guessed). If this option is
     used, the output height will not be adjusted if the height of the
     terminal changes while the transfer is running.
 
-**-N ***NAME***, **\--name *****NAME*
+**-N NAME, \--name NAME**
 
 :   Prefix the output information with *NAME*. Useful in conjunction
     with **-c** if you have a complicated pipeline and you want to be
@@ -250,13 +250,13 @@ are unreadable, the total size will not be calculated.
 
 # DATA TRANSFER MODIFIERS
 
-**-L ***RATE***, **\--rate-limit *****RATE*
+**-L RATE, \--rate-limit RATE**
 
 :   Limit the transfer to a maximum of *RATE* bytes per second. A suffix
     of \"K\", \"M\", \"G\", or \"T\" can be added to denote kibibytes
     (\*1024), mebibytes, and so on.
 
-**-B ***BYTES***, **\--buffer-size *****BYTES*
+**-B BYTES, \--buffer-size BYTES**
 
 :   Use a transfer buffer size of *BYTES* bytes. A suffix of \"K\",
     \"M\", \"G\", or \"T\" can be added to denote kibibytes (\*1024),
@@ -290,7 +290,7 @@ are unreadable, the total size will not be calculated.
 :   Specify **-E** twice to only report a read error once per file,
     instead of reporting each byte range skipped.
 
-**-Z ***BYTES***, **\--error-skip-block *****BYTES*
+**-Z BYTES, \--error-skip-block BYTES**
 
 :   When ignoring read errors with **-E**, instead of trying to
     adaptively skip by reading small amounts and skipping progressively
@@ -332,7 +332,7 @@ are unreadable, the total size will not be calculated.
     This is equivalent to redirecting standard output to */dev/null*,
     except that **write**(2) is never called. Implies **-C**.
 
-**-d ***PID\[**:***FD*\], *****\--watchfd *****PID\[**:***FD*\]*
+**-d PID\[:FD\], \--watchfd PID\[:FD\]**
 
 :   Instead of transferring data, watch file descriptor *FD* of process
     *PID*, and show its progress. The **pv** process will exit when *FD*
@@ -344,7 +344,7 @@ are unreadable, the total size will not be calculated.
     all regular files and block devices it opens will be shown with a
     progress bar. The **pv** process will exit when process *PID* exits.
 
-**-R ***PID***, **\--remote *****PID*
+**-R PID, \--remote PID**
 
 :   If *PID* is an instance of **pv** that is already running, **-R
     ***PID* will cause that instance to act as though it had been given
@@ -356,7 +356,7 @@ are unreadable, the total size will not be calculated.
 
 # GENERAL OPTIONS
 
-**-P ***FILE***, **\--pidfile *****FILE*
+**-P FILE, \--pidfile FILE**
 
 :   Save the process ID of **pv** in *FILE*. The file will be replaced
     if it already exists, and will be removed when **pv** exits. While
@@ -539,8 +539,10 @@ If you find any other problems, please report them.
 
 # REPORTING BUGS
 
-Report bugs in **pv** to pv@ivarch.com or use the contact form linked
-from the **pv** home page: \<http://www.ivarch.com/programs/pv.shtml\>
+Please report any bugs to: \<https://codeberg.org/a-j-wood/pv/issues\>
+
+Alternatively, use the contact form linked from the **pv** home page:
+\<http://www.ivarch.com/programs/pv.shtml\>
 
 # SEE ALSO
 

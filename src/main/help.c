@@ -578,7 +578,7 @@ void display_help(void)
 
 	printf("\n");
 
-	bug_report_note = _("Please report any bugs to %s.");
+	bug_report_note = _("Please report any bugs to: %s");
 	if (NULL != bug_report_note) {
 		/*@-formatconst@ */
 		/*

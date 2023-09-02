@@ -239,8 +239,8 @@ msgstr ""
 
 #: src/main/help.c:578
 #, c-format
-msgid "Please report any bugs to %s."
-msgstr "Bitte senden Sie Fehlerberichte an %s."
+msgid "Please report any bugs to: %s"
+msgstr "Bitte senden Sie Fehlerberichte an %s"
 
 #: src/main/main.c:82
 msgid "state allocation failed"
