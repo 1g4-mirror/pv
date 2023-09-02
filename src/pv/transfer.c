@@ -409,7 +409,7 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 	 */
 	if (state->error_skip_block > 0) {
 		amount_to_skip = state->error_skip_block;
-		} else {
+	} else {
 		if (state->read_errors_in_a_row < 10) {
 			amount_to_skip = state->read_errors_in_a_row < 5 ? 1 : 2;
 		} else if (state->read_errors_in_a_row < 20) {

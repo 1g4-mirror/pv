@@ -10,6 +10,8 @@
 #include "pv.h"
 #include "pv-internal.h"
 
+#include <string.h>
+#include <errno.h>
 #include <signal.h>
 #include <termios.h>
 #include <unistd.h>
@@ -22,6 +24,40 @@ void pv_crs_needreinit(pvstate_t);
 
 static pvstate_t pv_sig_state = NULL;
 
+
+/*
+ * Ensure that terminal attribute TOSTOP is set.  If we have to set it,
+ * record that fact by setting the state boolean "pv_tty_tostop_added" to
+ * true, so that in pv_sig_fini() we can turn it back off again.
+ */
+static void pv_sig_ensure_tty_tostop()
+{
+	struct termios terminal_attributes;
+
+	if (0 != tcgetattr(STDERR_FILENO, &terminal_attributes)) {
+		debug("%s: %s", "failed to read terminal attributes", strerror(errno));
+		return;
+	}
+
+	if (0 == (terminal_attributes.c_lflag & TOSTOP)) {
+		terminal_attributes.c_lflag |= TOSTOP;
+		if (0 == tcsetattr(STDERR_FILENO, TCSANOW, &terminal_attributes)) {
+			pv_sig_state->pv_tty_tostop_added = true;
+			debug("%s", "set terminal TOSTOP attribute");
+		} else {
+			debug("%s: %s", "failed to set terminal TOSTOP attribute", strerror(errno));
+		}
+#if HAVE_IPC
+		/*
+		 * In "-c" mode with IPC, make all "pv -c" instances aware
+		 * that we set TOSTOP, so the last one can clear it on exit.
+		 */
+		if (pv_sig_state->cursor && (NULL != pv_sig_state->crs_shared) && (!pv_sig_state->crs_noipc)) {
+			pv_sig_state->crs_shared->tty_tostop_added = true;
+		}
+#endif
+	}
+}
 
 /*
  * Handle SIGTTOU (tty output for background process) by redirecting stderr
@@ -69,41 +105,38 @@ static void pv_sig_cont( __attribute__((unused))
 {
 	struct timespec current_time;
 	struct timespec time_spent_stopped;
-	struct termios t;
 
 	pv_sig_state->pv_sig_newsize = 1;
 
-	/* if this SIGCONT didn't follow a SIGTSTP so we have no stop time */
-	if (0 == pv_sig_state->pv_sig_tstp_time.tv_sec) {
-		tcgetattr(STDERR_FILENO, &t);
-		t.c_lflag |= TOSTOP;
-		tcsetattr(STDERR_FILENO, TCSANOW, &t);
-#ifdef HAVE_IPC
-		pv_crs_needreinit(pv_sig_state);
-#endif
-		return;
+	/*
+	 * We can only make the time adjustments if this SIGCONT followed a
+	 * SIGTSTP such that we have a stop time.
+	 */
+	if (0 != pv_sig_state->pv_sig_tstp_time.tv_sec) {
+
+		pv_elapsedtime_read(&current_time);
+
+		/* time spent stopped = current time - time SIGTSTP received */
+		pv_elapsedtime_subtract(&time_spent_stopped, &current_time, &(pv_sig_state->pv_sig_tstp_time));
+
+		/* add time spent stopped the total stopped-time count */
+		pv_elapsedtime_add(&(pv_sig_state->pv_sig_toffset), &(pv_sig_state->pv_sig_toffset),
+				   &time_spent_stopped);
+
+		/* reset the SIGTSTP receipt time */
+		pv_elapsedtime_zero(&(pv_sig_state->pv_sig_tstp_time));
 	}
 
-	pv_elapsedtime_read(&current_time);
-
-	/* time spent stopped = current time - time SIGTSTP received */
-	pv_elapsedtime_subtract(&time_spent_stopped, &current_time, &(pv_sig_state->pv_sig_tstp_time));
-
-	/* add time spent stopped the total stopped-time count */
-	pv_elapsedtime_add(&(pv_sig_state->pv_sig_toffset), &(pv_sig_state->pv_sig_toffset), &time_spent_stopped);
-
-	/* reset the SIGTSTP receipt time */
-	pv_elapsedtime_zero(&(pv_sig_state->pv_sig_tstp_time));
-
+	/*
+	 * Restore the old stderr, if we had replaced it.
+	 */
 	if (pv_sig_state->pv_sig_old_stderr != -1) {
 		dup2(pv_sig_state->pv_sig_old_stderr, STDERR_FILENO);
 		close(pv_sig_state->pv_sig_old_stderr);
 		pv_sig_state->pv_sig_old_stderr = -1;
 	}
 
-	tcgetattr(STDERR_FILENO, &t);
-	t.c_lflag |= TOSTOP;
-	tcsetattr(STDERR_FILENO, TCSANOW, &t);
+	pv_sig_ensure_tty_tostop();
 
 #ifdef HAVE_IPC
 	pv_crs_needreinit(pv_sig_state);
@@ -208,14 +241,26 @@ void pv_sig_init(pvstate_t state)
 	sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
 	sigaction(SIGTERM, &sa, &(pv_sig_state->pv_sig_old_sigterm));
+
+	/*
+	 * Ensure that the TOSTOP terminal attribute is set, so that a
+	 * SIGTTOU signal will be raised if we try to write to the terminal
+	 * while backgrounded (see the SIGTTOU handler above).
+	 */
+	pv_sig_ensure_tty_tostop();
 }
 
 
 /*
- * Shut down signal handling.
+ * Shut down signal handling.  If we had set the TOSTOP terminal attribute,
+ * and we're in the foreground, also turn that off (though if we're in
+ * cursor "-c" mode, only do that if we're the last PV instance, otherwise
+ * leave the terminal alone).
  */
 void pv_sig_fini( __attribute__((unused)) pvstate_t state)
 {
+	bool need_to_clear_tostop = false;
+
 	sigaction(SIGPIPE, &(pv_sig_state->pv_sig_old_sigpipe), NULL);
 	sigaction(SIGTTOU, &(pv_sig_state->pv_sig_old_sigttou), NULL);
 	sigaction(SIGTSTP, &(pv_sig_state->pv_sig_old_sigtstp), NULL);
@@ -224,6 +269,49 @@ void pv_sig_fini( __attribute__((unused)) pvstate_t state)
 	sigaction(SIGINT, &(pv_sig_state->pv_sig_old_sigint), NULL);
 	sigaction(SIGHUP, &(pv_sig_state->pv_sig_old_sighup), NULL);
 	sigaction(SIGTERM, &(pv_sig_state->pv_sig_old_sigterm), NULL);
+
+	need_to_clear_tostop = pv_sig_state->pv_tty_tostop_added;
+
+	if (pv_sig_state->cursor) {
+#ifdef HAVE_IPC
+		/*
+		 * We won't clear TOSTOP if other "pv -c" instances
+		 * were still running when pv_crs_fini() ran.
+		 *
+		 * TODO: we need a better way to determine if we're the last
+		 * "pv" left.
+		 */
+		if (pv_sig_state->cursor && pv_sig_state->crs_pvcount > 1) {
+			need_to_clear_tostop = false;
+		}
+#else				/* !HAVE_IPC */
+		/*
+		 * Without IPC we can't tell whether the other "pv -c"
+		 * instances in the pipeline have finished so we will just
+		 * have to clear TOSTOP anyway.
+		 */
+#endif				/* !HAVE_IPC */
+	}
+
+	debug("%s=%s", "need_to_clear_tostop", need_to_clear_tostop ? "true" : "false");
+
+	if (need_to_clear_tostop && pv_in_foreground()) {
+		struct termios terminal_attributes;
+
+		debug("%s", "about to to clear TOSTOP terminal attribute if it is set");
+
+		tcgetattr(STDERR_FILENO, &terminal_attributes);
+		if (0 != (terminal_attributes.c_lflag & TOSTOP)) {
+			terminal_attributes.c_lflag -= TOSTOP;
+			if (0 == tcsetattr(STDERR_FILENO, TCSANOW, &terminal_attributes)) {
+				debug("%s", "cleared TOSTOP terminal attribute");
+			} else {
+				debug("%s: %s", "failed to clear TOSTOP terminal attribute", strerror(errno));
+			}
+		}
+
+		pv_sig_state->pv_tty_tostop_added = false;
+	}
 }
 
 
@@ -274,7 +362,6 @@ void pv_sig_allowpause(void)
 void pv_sig_checkbg(void)
 {
 	static time_t next_check = 0;
-	struct termios t;
 
 	if (time(NULL) < next_check)
 		return;
@@ -288,10 +375,7 @@ void pv_sig_checkbg(void)
 	close(pv_sig_state->pv_sig_old_stderr);
 	pv_sig_state->pv_sig_old_stderr = -1;
 
-	tcgetattr(STDERR_FILENO, &t);
-	t.c_lflag |= TOSTOP;
-	tcsetattr(STDERR_FILENO, TCSANOW, &t);
-
+	pv_sig_ensure_tty_tostop();
 #ifdef HAVE_IPC
 	pv_crs_needreinit(pv_sig_state);
 #endif

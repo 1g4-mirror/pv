@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <termios.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -36,24 +35,25 @@ void pv_remote_fini(void);
  */
 int main(int argc, char **argv)
 {
-	struct termios t, t_save;
 	/*@only@ */ opts_t opts = NULL;
 	/*@only@ */ pvstate_t state = NULL;
-	bool t_saved, t_needs_reset;
 	int retcode = 0;
 
 #ifdef ENABLE_NLS
+	/* Initialise language translation. */
 	(void) setlocale(LC_ALL, "");
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 	(void) textdomain(PACKAGE);
 #endif
 
+	/* Parse the command line arguments. */
 	opts = opts_parse(argc >= 0 ? (unsigned int) argc : 0, argv);
 	if (NULL == opts) {
 		debug("%s: %d", "exiting with status", 64);
 		return 64;
 	}
 
+	/* Early exit if necessary, such as with "-h". */
 	if (opts->do_nothing) {
 		debug("%s", "nothing to do - exiting with status 0");
 		opts_free(opts);
@@ -180,12 +180,13 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Put our list of files into the PV internal state.
+	 * Put our list of input files into the PV internal state.
 	 */
 	if (NULL != opts->argv) {
 		pv_state_inputfiles(state, opts->argc, (const char **) (opts->argv));
 	}
 
+	/* Total size calculation, in normal transfer mode. */
 	if (0 == opts->watch_pid) {
 		/*
 		 * If no size was given, try to calculate the total size.
@@ -300,85 +301,37 @@ int main(int argc, char **argv)
 	fcntl(STDOUT_FILENO, F_SETFL, O_NONBLOCK | fcntl(STDOUT_FILENO, F_GETFL));
 #endif				/* MAKE_STDOUT_NONBLOCKING */
 
-	/*
-	 * Keep track of whether we've saved the terminal attributes and
-	 * whether we need to reset them at the end.
-	 */
-	t_saved = false;
-	t_needs_reset = false;
+	/* Initialise the signal handling. */
+	pv_sig_init(state);
 
-	/*
-	 * Set terminal option TOSTOP so we get signal SIGTTOU if we try to
-	 * write to the terminal while backgrounded.
-	 *
-	 * Also, save the current terminal attributes for later restoration.
-	 */
-	memset(&t, 0, sizeof(t));
-	if (0 != isatty(STDERR_FILENO)) {
-		if (0 == tcgetattr(STDERR_FILENO, &t)) {
-			debug("%s", "saved terminal attributes");
-			t_saved = true;
-		} else {
-			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name,
-				_("failed to read terminal attributes"), strerror(errno));
-			/*@+mustfreefresh@ */
-		}
-	}
-	t_save = t;
-	if (t_saved && pv_in_foreground()) {
-		t.c_lflag |= TOSTOP;
-		(void) tcsetattr(STDERR_FILENO, TCSANOW, &t);
-		t_needs_reset = true;
-		debug("%s", "set terminal TOSTOP attribute");
-	}
-
-	if (0 != opts->watch_pid) {
-		if (0 <= opts->watch_fd) {
-			pv_sig_init(state);
-			retcode = pv_watchfd_loop(state);
-			if (t_needs_reset && pv_in_foreground()) {
-				(void) tcsetattr(STDERR_FILENO, TCSANOW, &t_save);
-			}
-			if (opts->pidfile != NULL) {
-				if (0 != remove(opts->pidfile)) {
-					fprintf(stderr, "%s: %s: %s\n",
-						opts->program_name, opts->pidfile, strerror(errno));
-				}
-			}
-			pv_sig_fini(state);
-		} else {
-			pv_sig_init(state);
-			retcode = pv_watchpid_loop(state);
-			if (t_needs_reset && pv_in_foreground()) {
-				(void) tcsetattr(STDERR_FILENO, TCSANOW, &t_save);
-			}
-			if (opts->pidfile != NULL) {
-				if (0 != remove(opts->pidfile)) {
-					fprintf(stderr, "%s: %s: %s\n",
-						opts->program_name, opts->pidfile, strerror(errno));
-				}
-			}
-			pv_sig_fini(state);
-		}
-	} else {
-		pv_sig_init(state);
+	/* Run the appropriate main loop. */
+	if (0 == opts->watch_pid) {
+		/* Normal "transfer data" mode. */
 		pv_remote_init();
 		retcode = pv_main_loop(state);
 		pv_remote_fini();
-		if (t_needs_reset && pv_in_foreground()) {
-			(void) tcsetattr(STDERR_FILENO, TCSANOW, &t_save);
-		}
-		if (opts->pidfile != NULL) {
-			if (0 != remove(opts->pidfile)) {
-				fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
-			}
-		}
-		pv_sig_fini(state);
+	} else if (0 != opts->watch_pid && 0 == opts->watch_fd) {
+		/* "Watch all file descriptors of another process" mode. */
+		retcode = pv_watchpid_loop(state);
+	} else if (0 != opts->watch_pid && 0 != opts->watch_fd) {
+		/* "Watch a specific file descriptor of another process" mode. */
+		retcode = pv_watchfd_loop(state);
 	}
 
+	/* Clear up the PID file, if one was written. */
+	if (opts->pidfile != NULL) {
+		if (0 != remove(opts->pidfile)) {
+			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
+		}
+	}
+
+	/* Close down the signal handling. */
+	pv_sig_fini(state);
+
+	/* Free the internal PV state. */
 	pv_state_free(state);
 
+	/* Free the data from parsing the command-line arguments. */
 	opts_free(opts);
 
 	debug("%s: %d", "exiting with status", retcode);

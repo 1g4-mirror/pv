@@ -72,6 +72,15 @@ typedef struct pvhistory {
 
 
 /*
+ * Structure for data shared between multiple "pv -c" instances.
+ */
+struct pvcursorstate_s {
+	int y_topmost;		/* terminal row of topmost "pv" instance */
+	bool tty_tostop_added;	/* whether any instance had to set TOSTOP on the terminal */
+};
+
+
+/*
  * Structure for holding PV internal state. Opaque outside the PV library.
  */
 struct pvstate_s {
@@ -127,6 +136,7 @@ struct pvstate_s {
 	 * Signal handling *
 	 *******************/
 	int pv_sig_old_stderr;		 /* see pv_sig_ttou() */
+	bool pv_tty_tostop_added;	 /* whether we had to set TOSTOP on the terminal */
 	struct timespec pv_sig_tstp_time; /* see pv_sig_tstp() / __cont() */
 	struct timespec pv_sig_toffset;		 /* total time spent stopped */
 	volatile sig_atomic_t pv_sig_newsize;	 /* whether we need to get term size again */
@@ -188,7 +198,7 @@ struct pvstate_s {
 	int crs_shmid;			 /* ID of our shared memory segment */
 	int crs_pvcount;		 /* number of `pv' processes in total */
 	int crs_pvmax;			 /* highest number of `pv's seen */
-	int *crs_y_top;			 /* pointer to Y coord of topmost `pv' */
+	struct pvcursorstate_s *crs_shared;	/* data shared between instances */
 	int crs_y_lastread;		 /* last value of _y_top seen */
 	int crs_y_offset;		 /* our Y offset from this top position */
 	int crs_needreinit;		 /* counter if we need to reinit cursor pos */

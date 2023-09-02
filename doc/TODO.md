@@ -3,9 +3,6 @@ Things still to do.  (#n) indicates the issue tracker number.
 Bugs
 ----
 
- * ([#5](https://codeberg.org/a-j-wood/pv/issues/5)) Transfer IPC leadership on exit of leader
- * ([#20](https://codeberg.org/a-j-wood/pv/issues/20)) Terminal state is not restored correctly in all cases (VA)
- * ([#24](https://codeberg.org/a-j-wood/pv/issues/24)) Debian #890901 - Race condition with multiple "`pv -c`" leaves terminal state inconsistent (Lars Ellenberg, Viktor Ashirov)
  * ([#34](https://codeberg.org/a-j-wood/pv/issues/34)) Continue timer even if input or output is blocking (Martin Probst - Jun 2017)
 
 Feature requests

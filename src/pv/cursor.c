@@ -321,25 +321,27 @@ static int pv_crs_ipcinit(pvstate_t state, char *ttyfile, int terminalfd)
 		return 1;
 	}
 
-	state->crs_shmid = shmget(key, sizeof(int), 0600 | IPC_CREAT);
+	state->crs_shmid = shmget(key, sizeof(struct pvcursorstate_s), 0600 | IPC_CREAT);
 	if (state->crs_shmid < 0) {
 		debug("%s: %s", "shmget failed", strerror(errno));
 		pv_crs_unlock(state, terminalfd);
 		return 1;
 	}
 
-	state->crs_y_top = shmat(state->crs_shmid, NULL, 0);
+	state->crs_shared = shmat(state->crs_shmid, NULL, 0);
 
 	pv_crs_ipccount(state);
 
 	/*
 	 * If nobody else is attached to the shared memory segment, we're
 	 * the first, so we need to initialise the shared memory with our
-	 * current Y cursor co-ordinate.
+	 * current Y cursor co-ordinate and with an initial false value for
+	 * the TOSTOP-added flag.
 	 */
 	if (state->crs_pvcount < 2) {
 		state->crs_y_start = pv_crs_get_ypos(terminalfd);
-		*(state->crs_y_top) = state->crs_y_start;
+		state->crs_shared->y_topmost = state->crs_y_start;
+		state->crs_shared->tty_tostop_added = false;
 		state->crs_y_lastread = state->crs_y_start;
 		debug("%s", "we are the first to attach");
 	}
@@ -353,7 +355,7 @@ static int pv_crs_ipcinit(pvstate_t state, char *ttyfile, int terminalfd)
 	 * to read the top Y co-ordinate from it.
 	 */
 	if (state->crs_pvcount > 1) {
-		state->crs_y_start = *(state->crs_y_top);
+		state->crs_y_start = state->crs_shared->y_topmost;
 		state->crs_y_lastread = state->crs_y_start;
 		debug("%s: %d", "not the first to attach - got top y", state->crs_y_start);
 	}
@@ -384,7 +386,7 @@ void pv_crs_init(pvstate_t state)
 	ttyfile = ttyname(STDERR_FILENO);
 	if (!ttyfile) {
 		debug("%s: %s", "disabling cursor positioning because ttyname failed", strerror(errno));
-		state->cursor = 0;
+		state->cursor = false;
 		return;
 	}
 
@@ -398,6 +400,15 @@ void pv_crs_init(pvstate_t state)
 	if (pv_crs_ipcinit(state, ttyfile, fd) != 0) {
 		debug("%s", "ipcinit failed, setting noipc flag");
 		state->crs_noipc = true;
+	}
+
+	/*
+	 * If we have already set the terminal TOSTOP attribute, set the
+	 * flag in shared memory to let the other instances know.
+	 */
+	if ((!state->crs_noipc) && state->pv_tty_tostop_added && (NULL != state->crs_shared)) {
+		debug("%s", "propagating local pv_tty_tostop_added true value to shared flag");
+		state->crs_shared->tty_tostop_added = true;
 	}
 
 	/*
@@ -469,7 +480,7 @@ void pv_crs_reinit(pvstate_t state)
 	state->crs_y_start = pv_crs_get_ypos(STDERR_FILENO);
 
 	if (state->crs_y_offset < 1)
-		*(state->crs_y_top) = state->crs_y_start;
+		state->crs_shared->y_topmost = state->crs_y_start;
 	state->crs_y_lastread = state->crs_y_start;
 
 	pv_crs_unlock(state, STDERR_FILENO);
@@ -492,8 +503,8 @@ void pv_crs_update(pvstate_t state, const char *str)
 			pv_crs_reinit(state);
 
 		pv_crs_ipccount(state);
-		if (state->crs_y_lastread != *(state->crs_y_top)) {
-			state->crs_y_start = *(state->crs_y_top);
+		if (state->crs_y_lastread != state->crs_shared->y_topmost) {
+			state->crs_y_start = state->crs_shared->y_topmost;
 			state->crs_y_lastread = state->crs_y_start;
 		}
 
@@ -599,9 +610,23 @@ void pv_crs_fini(pvstate_t state)
 
 	pv_write_retry(STDERR_FILENO, pos, strlen(pos));
 
+	/*
+	 * If any other "pv -c" instances have set the terminal TOSTOP
+	 * attribute, set our local flag so pv_sig_fini() will know about
+	 * it.
+	 */
+	if ((!state->crs_noipc) && (NULL != state->crs_shared) && state->crs_shared->tty_tostop_added) {
+		if (!state->pv_tty_tostop_added) {
+			debug("%s", "propagating shared tty_tostop_added true value to local flag");
+			state->pv_tty_tostop_added = true;
+		}
+	}
+
+
 #ifdef HAVE_IPC
 	pv_crs_ipccount(state);
-	(void) shmdt((void *) state->crs_y_top);
+	(void) shmdt(state->crs_shared);
+	state->crs_shared = NULL;
 
 	/*
 	 * If we are the last instance detaching from the shared memory,
