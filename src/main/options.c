@@ -169,6 +169,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "buffer-size", 1, NULL, (int) 'B' },
 		{ "no-splice", 0, NULL, (int) 'C' },
 		{ "skip-errors", 0, NULL, (int) 'E' },
+		{ "error-skip-block", 1, NULL, (int) 'Z' },
 		{ "stop-at-size", 0, NULL, (int) 'S' },
 		{ "sync", 0, NULL, (int) 'Y' },
 		{ "direct-io", 0, NULL, (int) 'K' },
@@ -185,7 +186,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8TA:fnqcWD:s:l0i:w:H:N:F:L:B:CESYKXR:P:d:m:"
+	char *short_options = "hVpteIrab8TA:fnqcWD:s:l0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -281,6 +282,8 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'R':
 			/*@fallthrough@ */
 		case 'm':
+			/*@fallthrough@ */
+		case 'Z':
 			if (pv_getnum_check(optarg, PV_NUMTYPE_INTEGER) != 0) {
 				/*@-mustfreefresh@ *//* see above */
 				fprintf(stderr, "%s: -%c: %s\n", opts->program_name, c, _("integer argument expected"));
@@ -461,6 +464,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'E':
 			opts->skip_errors++;
 			break;
+		case 'Z':
+			opts->error_skip_block = pv_getnum_ull(optarg);
+			break;
 		case 'S':
 			opts->stop_at_size = true;
 			break;
@@ -604,6 +610,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		opts->rate = true;
 		opts->bytes = true;
 	}
+
+	/* If -Z was given but not -E, pretend one -E was given too. */
+	if (opts->error_skip_block > 0 && 0 == opts->skip_errors)
+		opts->skip_errors = 1;
 
 	/*
 	 * Store remaining command-line arguments.

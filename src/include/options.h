@@ -42,6 +42,7 @@ struct opts_s {           /* structure describing run-time options */
 	unsigned long long size;       /* total size of data */
 	bool no_splice;                /* flag set if never to use splice */
 	unsigned int skip_errors;      /* skip read errors counter */
+	unsigned long long error_skip_block; /* skip block size, 0 for adaptive */
 	bool stop_at_size;             /* set if we stop at "size" bytes */
 	bool sync_after_write;         /* set if we sync after every write */
 	bool direct_io;                /* set if O_DIRECT is to be used */

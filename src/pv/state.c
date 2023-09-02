@@ -207,6 +207,11 @@ void pv_state_skip_errors_set(pvstate_t state, unsigned int val)
 	state->skip_errors = val;
 };
 
+void pv_state_error_skip_block_set(pvstate_t state, unsigned long long val)
+{
+	state->error_skip_block = val;
+}
+
 void pv_state_stop_at_size_set(pvstate_t state, bool val)
 {
 	state->stop_at_size = val;

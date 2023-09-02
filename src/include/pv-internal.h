@@ -93,6 +93,7 @@ struct pvstate_s {
 	bool null_terminated_lines;      /* lines are null-terminated */
 	bool no_display;                 /* do nothing other than pipe data */
 	unsigned int skip_errors;        /* skip read errors counter */
+	unsigned long long error_skip_block; /* skip block size, 0 for adaptive */
 	bool stop_at_size;               /* set if we stop at "size" bytes */
 	bool sync_after_write;           /* set if we sync after every write */
 	bool direct_io;                  /* set if O_DIRECT is to be used */

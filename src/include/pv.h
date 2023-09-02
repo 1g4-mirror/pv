@@ -148,6 +148,7 @@ extern void pv_state_bits_set(pvstate_t, bool);
 extern void pv_state_null_terminated_lines_set(pvstate_t, bool);
 extern void pv_state_no_display_set(pvstate_t, bool);
 extern void pv_state_skip_errors_set(pvstate_t, unsigned int);
+extern void pv_state_error_skip_block_set(pvstate_t, unsigned long long);
 extern void pv_state_stop_at_size_set(pvstate_t, bool);
 extern void pv_state_sync_after_write_set(pvstate_t, bool);
 extern void pv_state_direct_io_set(pvstate_t, bool);

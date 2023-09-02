@@ -290,6 +290,20 @@ are unreadable, the total size will not be calculated.
 :   Specify **-E** twice to only report a read error once per file,
     instead of reporting each byte range skipped.
 
+**-Z ***BYTES***, **\--error-skip-block *****BYTES*
+
+:   When ignoring read errors with **-E**, instead of trying to
+    adaptively skip by reading small amounts and skipping progressively
+    larger sections until a read succeeds, move to the next file block
+    of *BYTES* bytes as soon as an error occurs. There may still be some
+    shorter skips where the block being skipped coincides with the end
+    of the transfer buffer.
+
+:   This option can only be used with **-E** and is intended for use
+    when reading from a block device, such as **-E -Z 4K** to skip in 4
+    kibibyte blocks. This will speed up reads from faulty media, at the
+    expense of potentially losing more data.
+
 **-S, \--stop-at-size**
 
 :   If a size was specified with **-s**, stop transferring data once

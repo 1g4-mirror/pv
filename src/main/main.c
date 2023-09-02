@@ -271,6 +271,7 @@ int main(int argc, char **argv)
 	pv_state_bits_set(state, opts->bits);
 	pv_state_null_terminated_lines_set(state, opts->null_terminated_lines);
 	pv_state_skip_errors_set(state, opts->skip_errors);
+	pv_state_error_skip_block_set(state, opts->error_skip_block);
 	pv_state_stop_at_size_set(state, opts->stop_at_size);
 	pv_state_sync_after_write_set(state, opts->sync_after_write);
 	pv_state_direct_io_set(state, opts->direct_io);

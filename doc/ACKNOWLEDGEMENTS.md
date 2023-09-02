@@ -86,5 +86,6 @@ is acknowledged and greatly appreciated:
  * [fuschia74](https://github.com/fuchsia74) - provided "`--enable-static`"  patch for "`configure`"
  * [Wilhelm von Thiele](https://github.com/TurtleWilly) - assisted with OS X cleanups ([#73](https://codeberg.org/a-j-wood/pv/issues/73), [#74](https://codeberg.org/a-j-wood/pv/issues/74))
  * Matějů Miroslav, Ing. - suggested fix for ETA and elapsed time faults when suspending and resuming a machine ([#13](https://codeberg.org/a-j-wood/pv/issues/13))
+ * Anthony DeRobertis - suggested the "`--error-skip-block`" option ([#37](https://codeberg.org/a-j-wood/pv/issues/37))
 
 ---

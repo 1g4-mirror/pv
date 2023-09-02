@@ -23,7 +23,6 @@ Feature requests
  * ([#22](https://codeberg.org/a-j-wood/pv/issues/22)) Options to skip input and seek on output (Jason A. Pfeil, Feb 2022)
  * ([#25](https://codeberg.org/a-j-wood/pv/issues/25)) Normalise progress to 100% on overrun (Andrej Gantvorg)
  * ([#35](https://codeberg.org/a-j-wood/pv/issues/35)) Allow decimal values for "`-s`", "`-L`", "`-B`" (Thomas Watson - Aug 2020)
- * ([#37](https://codeberg.org/a-j-wood/pv/issues/37)) Debian #839796 - Allow "`-E`" to take a block size argument so errors cause a skip to the next block (Anthony DeRobertis - Oct 2016)
  * ([#38](https://codeberg.org/a-j-wood/pv/issues/38)) Reset ETA on *SIGUSR1* (Jacek Wielemborek - Jan 2019)
  * ([#40](https://codeberg.org/a-j-wood/pv/issues/40)) Permit "`-c`" with "`-d PID:FD`", reject "`-N`" with "`-d PID`" (Norman Rasmussen - Nov 2020)
  * ([#43](https://codeberg.org/a-j-wood/pv/issues/43)) Differentiate between "`--eta`" and "`--fineta`" in display (André Stapf - Apr 2017)

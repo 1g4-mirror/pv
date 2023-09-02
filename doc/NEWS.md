@@ -3,6 +3,7 @@
   * feature: new "`--discard`" option to discard input as if writing to */dev/null* ([#42](https://codeberg.org/a-j-wood/pv/issues/42))
   * feature: use `posix_fadvise()` like `cat`(1) does, to improve efficiency ([#39](https://codeberg.org/a-j-wood/pv/issues/39))
   * feature: new "`--enable-static`" option to "`configure`" for static builds ([#75](https://codeberg.org/a-j-wood/pv/pull/75))
+  * feature: new "`--error-skip-block`" option to make "`--skip-errors`" skip whole blocks ([#37](https://codeberg.org/a-j-wood/pv/issues/37))
   * security: with "`--pidfile`", write to a temporary file and rename it into place, to improve security
   * security: keep self-contained copies of name and format string in PV internal state for memory safety
   * fix: only report errors about missing files when starting to transfer from them, not while calculating size, and behave more like `cat`(1) by skipping them and moving on
