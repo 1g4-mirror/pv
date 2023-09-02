@@ -105,23 +105,23 @@ The package maintainer should run through these steps for a new release:
  * Check for patches and bug reports at https://tracker.debian.org/pkg/pv
  * Run "`make indent; make indent indentclean update-po check`"
  * Version bump and documentation checks:
-  * Update the version in `configure.ac` and `docs/NEWS.md`
-  * Check that `docs/NEWS.md` is up to date
-  * Check that `docs/TODO.md` is up to date
-  * Check that the manual `docs/pv.1` is up to date
-  * Run "`make docs/pv.1.md`" and, if using VPATH, copy the result to the source directory
+   * Update the version in `configure.ac` and `docs/NEWS.md`
+   * Check that `docs/NEWS.md` is up to date
+   * Check that `docs/TODO.md` is up to date
+   * Check that the manual `docs/pv.1` is up to date
+   * Run "`make docs/pv.1.md`" and, if using VPATH, copy the result to the source directory
  * Ensure everything has been committed to the repository
  * Run "`autoreconf`" in the source directory
  * Consistency and build checks:
-  * Wipe the build directory, and run "`configure`" there
-  * Run "`make distcheck`"
-  * Run "`./configure && make check`" on all test systems including Cygwin, using the `tar.gz` that was just created
+   * Wipe the build directory, and run "`configure`" there
+   * Run "`make distcheck`"
+   * Run "`./configure && make check`" on all test systems including Cygwin, using the `tar.gz` that was just created
  * Run "`make release MAINTAINER=<signing-user>`"
  * Update the project web site:
-  * Copy the release `.tar.gz`, `.txt`, and `.asc` files to the web site
-  * Use "`pandoc --from markdown --to html`" to convert the TODO, news, and manual to HTML
-  * Update the TODO, news, and manual on the web site
-  * Update the version numbers on the web site
-  * Update the package index on the web site
+   * Copy the release `.tar.gz`, `.txt`, and `.asc` files to the web site
+   * Use "`pandoc --from markdown --to html`" to convert the TODO, news, and manual to HTML
+   * Update the TODO, news, and manual on the web site
+   * Update the version numbers on the web site
+   * Update the package index on the web site
  * Create a new release in the repository, and apply the associated tag
 
