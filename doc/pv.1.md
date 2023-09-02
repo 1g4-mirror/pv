@@ -196,17 +196,18 @@ that are explicitly switched on will be shown.
     progress bar will only move when a new line is found, and the value
     passed to the **-s** option will be interpreted as a line count.
 
-If this option is used without **-s**, the \"total size\" (in this case,
-total line count) is calculated by reading through all input files once
-before transfer starts. If any inputs are pipes or non-regular files, or
-are unreadable, the total size will not be calculated.
+:   If this option is used without **-s**, the \"total size\" (in this
+    case, total line count) is calculated by reading through all input
+    files once before transfer starts. If any inputs are pipes or
+    non-regular files, or are unreadable, the total size will not be
+    calculated.
 
 **-0, \--null**
 
 :   Count lines as terminated with a zero byte instead of with a
     newline. This option implies \--line-mode.
 
-**-i SEC, --interval SEC**
+**-i SEC, \--interval SEC**
 
 :   Wait *SEC* seconds between updates. The default is to update every
     second. Note that this can be a decimal such as 0.1.
@@ -513,9 +514,6 @@ The following problems are known to exist in **pv**:
     in a separate process group from the one that owns the terminal. In
     these cases, use **\--force**.
 
-```{=html}
-<!-- -->
-```
 
 **\***
 
@@ -524,9 +522,6 @@ The following problems are known to exist in **pv**:
     is needed to handle the terminal scrolling). To fix this, start
     **cygserver** before using **pv -c**.
 
-```{=html}
-<!-- -->
-```
 
 **\***
 
