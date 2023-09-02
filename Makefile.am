@@ -107,3 +107,10 @@ clean-local:
 
 # Convenience alias for "make check": "make test"
 test: check
+
+# "release" target - requires MAINTAINER variable to select GPG key.
+release: distcheck
+	gpg --list-secret-keys 2>&1 | grep -F 'uid' | grep -Fq "$(MAINTAINER)"
+	gpg -u "$(MAINTAINER)" -ab $(distdir).tar.gz
+	cp -f $(distdir).tar.gz.asc $(distdir).tar.gz.txt
+	chmod 644 $(distdir).tar.gz $(distdir).tar.gz.asc $(distdir).tar.gz.txt
