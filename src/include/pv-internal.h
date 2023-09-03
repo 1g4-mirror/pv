@@ -198,7 +198,7 @@ struct pvstate_s {
 	int crs_shmid;			 /* ID of our shared memory segment */
 	int crs_pvcount;		 /* number of `pv' processes in total */
 	int crs_pvmax;			 /* highest number of `pv's seen */
-	struct pvcursorstate_s *crs_shared;	/* data shared between instances */
+	/*@keep@*/ /*@null@*/ struct pvcursorstate_s *crs_shared; /* data shared between instances */
 	int crs_y_lastread;		 /* last value of _y_top seen */
 	int crs_y_offset;		 /* our Y offset from this top position */
 	int crs_needreinit;		 /* counter if we need to reinit cursor pos */

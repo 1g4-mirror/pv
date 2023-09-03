@@ -328,7 +328,9 @@ static int pv_crs_ipcinit(pvstate_t state, char *ttyfile, int terminalfd)
 		return 1;
 	}
 
+	/*@-nullpass@*//* splint doesn't know shmaddr can be NULL */
 	state->crs_shared = shmat(state->crs_shmid, NULL, 0);
+	/*@+nullpass@*/
 
 	pv_crs_ipccount(state);
 
@@ -460,7 +462,7 @@ void pv_crs_needreinit(pvstate_t state)
  * Reinitialise the cursor positioning code (called if we are backgrounded
  * then foregrounded again).
  */
-void pv_crs_reinit(pvstate_t state)
+static void pv_crs_reinit(pvstate_t state)
 {
 	debug("%s", "reinit");
 
@@ -479,8 +481,9 @@ void pv_crs_reinit(pvstate_t state)
 
 	state->crs_y_start = pv_crs_get_ypos(STDERR_FILENO);
 
-	if (state->crs_y_offset < 1)
+	if ((state->crs_y_offset < 1) && (NULL != state->crs_shared)) {
 		state->crs_shared->y_topmost = state->crs_y_start;
+	}
 	state->crs_y_lastread = state->crs_y_start;
 
 	pv_crs_unlock(state, STDERR_FILENO);
@@ -503,9 +506,11 @@ void pv_crs_update(pvstate_t state, const char *str)
 			pv_crs_reinit(state);
 
 		pv_crs_ipccount(state);
-		if (state->crs_y_lastread != state->crs_shared->y_topmost) {
-			state->crs_y_start = state->crs_shared->y_topmost;
-			state->crs_y_lastread = state->crs_y_start;
+		if (NULL != state->crs_shared) {
+			if (state->crs_y_lastread != state->crs_shared->y_topmost) {
+				state->crs_y_start = state->crs_shared->y_topmost;
+				state->crs_y_lastread = state->crs_y_start;
+			}
 		}
 
 		if (state->crs_needreinit > 0)
@@ -584,6 +589,9 @@ void pv_crs_fini(pvstate_t state)
 {
 	char pos[32];
 	unsigned int y;
+	struct shmid_ds shm_buf;
+
+	memset(&shm_buf, 0, sizeof(shm_buf));
 
 	debug("%s", "fini");
 
@@ -625,7 +633,9 @@ void pv_crs_fini(pvstate_t state)
 
 #ifdef HAVE_IPC
 	pv_crs_ipccount(state);
-	(void) shmdt(state->crs_shared);
+	if (NULL != state->crs_shared) {
+		(void) shmdt(state->crs_shared);
+	}
 	state->crs_shared = NULL;
 
 	/*
@@ -633,7 +643,7 @@ void pv_crs_fini(pvstate_t state)
 	 * delete it so it's not left lying around.
 	 */
 	if (state->crs_pvcount < 2)
-		(void) shmctl(state->crs_shmid, IPC_RMID, NULL);
+		(void) shmctl(state->crs_shmid, IPC_RMID, &shm_buf);
 
 #endif				/* HAVE_IPC */
 
