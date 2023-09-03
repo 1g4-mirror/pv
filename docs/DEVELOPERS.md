@@ -42,8 +42,15 @@ file is altered, manually remove the relevant "`.e`" files, or update the
 timestamp of the relevant "`.c`" files, before running "`make analyse`"
 again.
 
-The eventual goal is for all C source files to generate zero warnings from
-either tool.
+The goal is for all C source files to generate zero warnings from either
+tool.
+
+Wherever warnings are disabled by annotations to the source, there should be
+associated commentary nearby explaining the rationale behind it, and any
+assumptions made.  This is so that there can be some assurance that the
+issue highlighted by the analyser has been considered properly, as well as
+documenting anything that might need further work if the surrounding code is
+altered in future.
 
 
 ## Translation notes
@@ -104,6 +111,7 @@ The package maintainer should run through these steps for a new release:
 
  * Check for patches and bug reports at https://tracker.debian.org/pkg/pv
  * Run "`make indent; make indent indentclean update-po check`"
+ * Run "`make analyse`" and see whether remaining warnings can be addressed
  * Version bump and documentation checks:
    * Update the version in `configure.ac` and `docs/NEWS.md`
    * Check that `docs/NEWS.md` is up to date
