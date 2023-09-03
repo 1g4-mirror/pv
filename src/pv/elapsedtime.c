@@ -25,10 +25,14 @@
  */
 void pv_elapsedtime_read(struct timespec *return_time)
 {
+	/*@-unrecog@*/ /* splint doesn't know clock_gettime */
 	if (0 != clock_gettime(CLOCK_MONOTONIC, return_time)) {
 		fprintf(stderr, "%s: %s: %s\n", PACKAGE_NAME, "clock_gettime", strerror(errno));
+		/*@-exitarg@*/ /* we explicitly want a special exit status */
 		exit(16);
+		/*@+exitarg@*/
 	}
+	/*@+unrecog@*/
 }
 
 
@@ -71,6 +75,12 @@ int pv_elapsedtime_compare(const struct timespec *first_time, const struct times
 		return -1;
 	if ((NULL != first_time) && (NULL == second_time))
 		return 1;
+
+	/* These should never happen, but check just in case. */
+	if (NULL == first_time)
+		return 0;
+	if (NULL == second_time)
+		return 0;
 
 	/* Check the seconds part, first */
 	if (first_time->tv_sec < second_time->tv_sec)
@@ -116,8 +126,17 @@ void pv_elapsedtime_add(struct timespec *return_time, const struct timespec *fir
 	seconds += nanoseconds / 1000000000;
 	nanoseconds = nanoseconds % 1000000000;
 
+	/*@-type@*/
 	return_time->tv_sec = seconds;
 	return_time->tv_nsec = nanoseconds;
+	/*@+type@*/
+
+	/*
+	 * splint rationale: we know the types are different but should be
+	 * large enough and are relying on the compiler to do the casting
+	 * correctly, since the manual for timespec(3) states the types are
+	 * implementation-defined.
+	 */
 }
 
 
@@ -137,8 +156,10 @@ void pv_elapsedtime_add_nsec(struct timespec *return_time, long long add_nanosec
 	seconds += nanoseconds / 1000000000;
 	nanoseconds = nanoseconds % 1000000000;
 
+	/*@-type@*/ /* see above */
 	return_time->tv_sec = seconds;
 	return_time->tv_nsec = nanoseconds;
+	/*@+type@*/
 }
 
 
@@ -174,8 +195,10 @@ void pv_elapsedtime_subtract(struct timespec *return_time, const struct timespec
 		nanoseconds = 1000000000 + nanoseconds;
 	}
 
+	/*@-type@*/ /* see above */
 	return_time->tv_sec = seconds;
 	return_time->tv_nsec = nanoseconds;
+	/*@+type@*/
 }
 
 
