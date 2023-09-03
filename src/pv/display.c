@@ -66,8 +66,10 @@ bool pv_in_foreground(void)
 		return true;
 	}
 
+	/*@-type@*/ /* __pid_t vs pid_t, not significant */
 	our_process_group = getpgrp();
 	tty_process_group = tcgetpgrp(STDERR_FILENO);
+	/*@+type@*/
 
 	if (tty_process_group == -1 && errno == ENOTTY) {
 		debug("%s: true: %s", "pv_in_foreground", "tty_process_group is -1, errno is ENOTTY");
@@ -94,6 +96,8 @@ void pv_screensize(unsigned int *width, unsigned int *height)
 {
 #ifdef TIOCGWINSZ
 	struct winsize wsz;
+
+	memset(&wsz, 0, sizeof(wsz));
 
 	if (0 != isatty(STDERR_FILENO)) {
 		if (0 == ioctl(STDERR_FILENO, TIOCGWINSZ, &wsz)) {
@@ -138,15 +142,23 @@ static long pv__calc_eta(const long long so_far, const long long total, const lo
 }
 
 /*
+ * Types of transfer count - bytes or lines.
+ */
+typedef enum {
+  PV_TRANSFERCOUNT_BYTES,
+  PV_TRANSFERCOUNT_LINES
+} pv__transfercount_t;
+
+/*
  * Given a long double value, it is divided or multiplied by the ratio until
  * a value in the range 1.0 to 999.999... is found.  The string "prefix" to
  * is updated to the corresponding SI prefix.
  *
- * If "is_bytes" is 1, then the second byte of "prefix" is set to "i" to
- * denote MiB etc (IEEE1541).  Thus "prefix" should be at least 3 bytes long
- * (to include the terminating null).
+ * If the count type is PV_TRANSFERCOUNT_BYTES, then the second byte of
+ * "prefix" is set to "i" to denote MiB etc (IEEE1541).  Thus "prefix"
+ * should be at least 3 bytes long (to include the terminating null).
  */
-static void pv__si_prefix(long double *value, char *prefix, const long double ratio, int is_bytes)
+static void pv__si_prefix(long double *value, char *prefix, const long double ratio, pv__transfercount_t count_type)
 {
 	static char *pfx_000 = NULL;	 /* kilo, mega, etc */
 	static char *pfx_024 = NULL;	 /* kibi, mibi, etc */
@@ -154,8 +166,11 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 	static char const *pfx_middle_024 = NULL;
 	char *pfx;
 	char const *pfx_middle;
-	char const *i;
+	char const *pfx_ptr;
 	long double cutoff;
+
+	prefix[0] = ' ';		    /* Make the prefix start blank. */
+	prefix[1] = '\0';
 
 	/*
 	 * The prefix list strings have a space (no prefix) in the middle;
@@ -170,6 +185,10 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 	 */
 	if (NULL == pfx_000) {
 		pfx_000 = _("yzafpnum kMGTPEZY");
+		if (NULL == pfx_000) {
+			debug("%s", "prefix list was NULL");
+			return;
+		}
 		pfx_middle_000 = strchr(pfx_000, ' ');
 	}
 
@@ -178,35 +197,47 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 	 */
 	if (NULL == pfx_024) {
 		pfx_024 = _("yzafpnum KMGTPEZY");
+		if (NULL == pfx_024) {
+			debug("%s", "prefix list was NULL");
+			return;
+		}
 		pfx_middle_024 = strchr(pfx_024, ' ');
 	}
 
 	pfx = pfx_000;
 	pfx_middle = pfx_middle_000;
-	if (is_bytes) {
+	if (count_type == PV_TRANSFERCOUNT_BYTES) {
+		/* bytes - multiples of 1024 */
 		pfx = pfx_024;
 		pfx_middle = pfx_middle_024;
 	}
 
-	i = pfx_middle;
-
-	prefix[0] = ' ';		    /* Make the prefix start blank. */
-	prefix[1] = 0;
+	pfx_ptr = pfx_middle;
+	if (NULL == pfx_ptr) {
+		debug("%s", "prefix middle was NULL");
+		return;
+	}
 
 	/*
-	 * Force an empty prefix if the value is zero to avoid "0yB".
+	 * Force an empty prefix if the value is almost zero, to avoid
+	 * "0yB".  NB we don't compare directly with zero because of
+	 * potential floating-point inaccuracies.
 	 *
-	 * See the "is_bytes" check below for the reason we add another
+	 * See the "count_type" check below for the reason we add another
 	 * space in bytes mode.
 	 */
-	if (0.0 == *value) {
-		if (is_bytes) {
+	if ((*value > -0.00000001) && (*value < 0.00000001)) {
+		if (count_type == PV_TRANSFERCOUNT_BYTES) {
 			prefix[1] = ' ';
-			prefix[2] = 0;
+			prefix[2] = '\0';
 		}
 		return;
 	}
 
+	/*
+	 * Cut-off for moving to the next prefix - a little less than the
+	 * ratio (970 for ratio=1000, 993 for ratio=1024).
+	 */
 	cutoff = ratio * 0.97;
 
 	/*
@@ -219,17 +250,17 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 	if (*value > 0) {
 		/* Positive values */
 
-		while ((*value > cutoff) && (*(i += 1) != '\0')) {
+		while ((*value > cutoff) && (*(pfx_ptr += 1) != '\0')) {
 			*value /= ratio;
-			prefix[0] = *i;
+			prefix[0] = *pfx_ptr;
 		}
 	} else {
 		/* Negative values */
 
 		cutoff = 0 - cutoff;
-		while ((*value < cutoff) && (*(i += 1) != '\0')) {
+		while ((*value < cutoff) && (*(pfx_ptr += 1) != '\0')) {
 			*value /= ratio;
-			prefix[0] = *i;
+			prefix[0] = *pfx_ptr;
 		}
 	}
 
@@ -242,15 +273,15 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 
 	if (*value > 0) {
 		/* Positive values */
-		while ((*value < 1.0) && ((i -= 1) != (pfx - 1))) {
+		while ((*value < 1.0) && ((pfx_ptr -= 1) != (pfx - 1))) {
 			*value *= ratio;
-			prefix[0] = *i;
+			prefix[0] = *pfx_ptr;
 		}
 	} else {
 		/* Negative values */
-		while ((*value > -1.0) && ((i -= 1) != (pfx - 1))) {
+		while ((*value > -1.0) && ((pfx_ptr -= 1) != (pfx - 1))) {
 			*value *= ratio;
-			prefix[0] = *i;
+			prefix[0] = *pfx_ptr;
 		}
 	}
 
@@ -259,9 +290,9 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 	 * "KB", so that's two characters, not one - meaning that for just
 	 * "B", the prefix is two spaces, not one.
 	 */
-	if (is_bytes) {
+	if (count_type == PV_TRANSFERCOUNT_BYTES) {
 		prefix[1] = (prefix[0] == ' ' ? ' ' : 'i');
-		prefix[2] = 0;
+		prefix[2] = '\0';
 	}
 }
 
@@ -270,15 +301,16 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
  * Put a string in "buffer" (max length "bufsize") containing "amount"
  * formatted such that it's 3 or 4 digits followed by an SI suffix and then
  * whichever of "suffix_basic" or "suffix_bytes" is appropriate (whether
- * "is_bytes" is 0 for non-byte amounts or 1 for byte amounts). If
- * "is_bytes" is 1 then the SI units are KiB, MiB etc and the divisor is
- * 1024 instead of 1000.
+ * "count_type" is PV_TRANSFERTYPE_LINES for non-byte amounts or
+ * PV_TRANSFERTYPE_BYTES for byte amounts).  If "count_type" is
+ * PV_TRANSFERTYPE_BYTES then the SI units are KiB, MiB etc and the divisor
+ * is 1024 instead of 1000.
  *
  * The "format" string is in sprintf format and must contain exactly one %
  * parameter (a %s) which will expand to the string described above.
  */
 static void pv__sizestr(char *buffer, int bufsize, char *format,
-			long double amount, char *suffix_basic, char *suffix_bytes, int is_bytes)
+			long double amount, char *suffix_basic, char *suffix_bytes, pv__transfercount_t count_type)
 {
 	char sizestr_buffer[256];
 	char si_prefix[8];
@@ -286,9 +318,12 @@ static void pv__sizestr(char *buffer, int bufsize, char *format,
 	long double display_amount;
 	char *suffix;
 
+	memset(sizestr_buffer, 0, sizeof(sizestr_buffer));
+	memset(si_prefix, 0, sizeof(si_prefix));
+
 	(void) pv_snprintf(si_prefix, sizeof(si_prefix), "%s", "  ");
 
-	if (is_bytes) {
+	if (count_type == PV_TRANSFERCOUNT_BYTES) {
 		suffix = suffix_bytes;
 		divider = 1024.0;
 	} else {
@@ -298,7 +333,7 @@ static void pv__sizestr(char *buffer, int bufsize, char *format,
 
 	display_amount = amount;
 
-	pv__si_prefix(&display_amount, si_prefix, divider, is_bytes);
+	pv__si_prefix(&display_amount, si_prefix, divider, count_type);
 
 	/* Make sure we don't overrun our buffer. */
 	if (display_amount > 100000)
@@ -316,6 +351,7 @@ static void pv__sizestr(char *buffer, int bufsize, char *format,
 		 * write display_amount separately first.
 		 */
 		char str_disp[64];
+		memset(str_disp, 0, sizeof(str_disp));
 		/* # to get 13.0GB instead of 13GB (#1477) */
 		(void) pv_snprintf(str_disp, sizeof(str_disp), "%#4.3Lg", display_amount);
 		(void) pv_snprintf(sizestr_buffer, sizeof(sizestr_buffer), "%s%.2s%.16s", str_disp, si_prefix, suffix);
@@ -338,13 +374,13 @@ static void pv__format_init(pvstate_t state)
 	if (NULL == state)
 		return;
 
-	state->str_name[0] = 0;
-	state->str_transferred[0] = 0;
-	state->str_timer[0] = 0;
-	state->str_rate[0] = 0;
-	state->str_average_rate[0] = 0;
-	state->str_progress[0] = 0;
-	state->str_eta[0] = 0;
+	state->str_name[0] = '\0';
+	state->str_transferred[0] = '\0';
+	state->str_timer[0] = '\0';
+	state->str_rate[0] = '\0';
+	state->str_average_rate[0] = '\0';
+	state->str_progress[0] = '\0';
+	state->str_eta[0] = '\0';
 	memset(state->format, 0, PV_FORMAT_ARRAY_MAX * sizeof(state->format[0]));
 
 	if (state->name) {
@@ -648,7 +684,7 @@ static const char *pv__format(pvstate_t state,
 			state->exit_status |= 64;
 			return NULL;
 		}
-		state->display_buffer[0] = 0;
+		state->display_buffer[0] = '\0';
 	}
 
 	/*
@@ -662,7 +698,7 @@ static const char *pv__format(pvstate_t state,
 	if (state->numeric) {
 		char numericprefix[128];
 
-		numericprefix[0] = 0;
+		numericprefix[0] = '\0';
 
 		if ((state->components_used & PV_DISPLAY_TIMER) != 0)
 			(void) pv_snprintf(numericprefix, sizeof(numericprefix), "%.4Lf ", elapsed_sec);
@@ -692,25 +728,25 @@ static const char *pv__format(pvstate_t state,
 	 * to be placed in the output buffer.
 	 */
 
-	state->str_transferred[0] = 0;
-	state->str_bufpercent[0] = 0;
-	state->str_timer[0] = 0;
-	state->str_rate[0] = 0;
-	state->str_average_rate[0] = 0;
-	state->str_progress[0] = 0;
-	state->str_lastoutput[0] = 0;
-	state->str_eta[0] = 0;
-	state->str_fineta[0] = 0;
+	state->str_transferred[0] = '\0';
+	state->str_bufpercent[0] = '\0';
+	state->str_timer[0] = '\0';
+	state->str_rate[0] = '\0';
+	state->str_average_rate[0] = '\0';
+	state->str_progress[0] = '\0';
+	state->str_lastoutput[0] = '\0';
+	state->str_eta[0] = '\0';
+	state->str_fineta[0] = '\0';
 
 	/* If we're showing bytes transferred, set up the display string. */
 	if ((state->components_used & PV_DISPLAY_BYTES) != 0) {
 		if (state->bits && !state->linemode) {
 			pv__sizestr(state->str_transferred,
-				    PV_SIZEOF_STR_TRANSFERRED, "%s", (long double) total_bytes * 8, "", _("b"), 1);
+				    PV_SIZEOF_STR_TRANSFERRED, "%s", (long double) total_bytes * 8, "", _("b"), PV_TRANSFERCOUNT_BYTES);
 		} else {
 			pv__sizestr(state->str_transferred,
 				    PV_SIZEOF_STR_TRANSFERRED, "%s",
-				    (long double) total_bytes, "", _("B"), state->linemode ? 0 : 1);
+				    (long double) total_bytes, "", _("B"), state->linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
 		}
 	}
 
@@ -761,10 +797,10 @@ static const char *pv__format(pvstate_t state,
 	/* Rate - set up the display string. */
 	if ((state->components_used & PV_DISPLAY_RATE) != 0) {
 		if (state->bits && !state->linemode) {
-			pv__sizestr(state->str_rate, PV_SIZEOF_STR_RATE, "[%s]", 8 * rate, "", _("b/s"), 1);
+			pv__sizestr(state->str_rate, PV_SIZEOF_STR_RATE, "[%s]", 8 * rate, "", _("b/s"), PV_TRANSFERCOUNT_BYTES);
 		} else {
 			pv__sizestr(state->str_rate,
-				    PV_SIZEOF_STR_RATE, "[%s]", rate, _("/s"), _("B/s"), state->linemode ? 0 : 1);
+				    PV_SIZEOF_STR_RATE, "[%s]", rate, _("/s"), _("B/s"), state->linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
 		}
 	}
 
@@ -772,11 +808,11 @@ static const char *pv__format(pvstate_t state,
 	if ((state->components_used & PV_DISPLAY_AVERAGERATE) != 0) {
 		if (state->bits && !state->linemode) {
 			pv__sizestr(state->str_average_rate,
-				    PV_SIZEOF_STR_AVERAGE_RATE, "[%s]", 8 * average_rate, "", _("b/s"), 1);
+				    PV_SIZEOF_STR_AVERAGE_RATE, "[%s]", 8 * average_rate, "", _("b/s"), PV_TRANSFERCOUNT_BYTES);
 		} else {
 			pv__sizestr(state->str_average_rate,
 				    PV_SIZEOF_STR_AVERAGE_RATE,
-				    "[%s]", average_rate, _("/s"), _("B/s"), state->linemode ? 0 : 1);
+				    "[%s]", average_rate, _("/s"), _("B/s"), state->linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
 		}
 	}
 
@@ -788,7 +824,7 @@ static const char *pv__format(pvstate_t state,
 			c = state->lastoutput_buffer[idx];
 			state->str_lastoutput[idx] = isprint(c) ? c : '.';
 		}
-		state->str_lastoutput[idx] = 0;
+		state->str_lastoutput[idx] = '\0';
 	}
 
 	/* ETA (only if size is known) - set up the display string. */
@@ -933,17 +969,17 @@ static const char *pv__format(pvstate_t state,
 
 			for (i = 0; i < (available_width * state->percentage) / 100 - 1; i++) {
 				if (i < available_width)
-					pv_strlcat(state->str_progress, "=", PV_SIZEOF_STR_PROGRESS);
+					(void) pv_strlcat(state->str_progress, "=", PV_SIZEOF_STR_PROGRESS);
 			}
 			if (i < available_width) {
-				pv_strlcat(state->str_progress, ">", PV_SIZEOF_STR_PROGRESS);
+				(void) pv_strlcat(state->str_progress, ">", PV_SIZEOF_STR_PROGRESS);
 				i++;
 			}
 			for (; i < available_width; i++) {
-				pv_strlcat(state->str_progress, " ", PV_SIZEOF_STR_PROGRESS);
+				(void) pv_strlcat(state->str_progress, " ", PV_SIZEOF_STR_PROGRESS);
 			}
-			pv_strlcat(state->str_progress, "] ", PV_SIZEOF_STR_PROGRESS);
-			pv_strlcat(state->str_progress, pct, PV_SIZEOF_STR_PROGRESS);
+			(void) pv_strlcat(state->str_progress, "] ", PV_SIZEOF_STR_PROGRESS);
+			(void) pv_strlcat(state->str_progress, pct, PV_SIZEOF_STR_PROGRESS);
 		} else {
 			int p = state->percentage;
 
@@ -961,27 +997,27 @@ static const char *pv__format(pvstate_t state,
 				p = 200 - p;
 			for (i = 0; i < (available_width * p) / 100; i++) {
 				if (i < available_width)
-					pv_strlcat(state->str_progress, " ", PV_SIZEOF_STR_PROGRESS);
+					(void) pv_strlcat(state->str_progress, " ", PV_SIZEOF_STR_PROGRESS);
 			}
-			pv_strlcat(state->str_progress, "<=>", PV_SIZEOF_STR_PROGRESS);
+			(void) pv_strlcat(state->str_progress, "<=>", PV_SIZEOF_STR_PROGRESS);
 			for (; i < available_width; i++) {
-				pv_strlcat(state->str_progress, " ", PV_SIZEOF_STR_PROGRESS);
+				(void) pv_strlcat(state->str_progress, " ", PV_SIZEOF_STR_PROGRESS);
 			}
-			pv_strlcat(state->str_progress, "]", PV_SIZEOF_STR_PROGRESS);
+			(void) pv_strlcat(state->str_progress, "]", PV_SIZEOF_STR_PROGRESS);
 		}
 
 		/*
 		 * If the progress bar won't fit, drop it.
 		 */
 		if (strlen(state->str_progress) + static_portion_size > state->width)
-			state->str_progress[0] = 0;
+			state->str_progress[0] = '\0';
 	}
 
 	/*
 	 * We can now build the output string using the format structure.
 	 */
 
-	state->display_buffer[0] = 0;
+	state->display_buffer[0] = '\0';
 	display_string_length = 0;
 	for (segment = 0; state->format[segment].string; segment++) {
 		int segment_length;
@@ -1023,11 +1059,11 @@ static const char *pv__format(pvstate_t state,
 			spaces_to_add = 15;
 		}
 		output_length += spaces_to_add;
-		spaces[spaces_to_add] = 0;
+		spaces[spaces_to_add] = '\0';
 		while (--spaces_to_add >= 0) {
 			spaces[spaces_to_add] = ' ';
 		}
-		pv_strlcat(state->display_buffer, spaces, state->display_buffer_size);
+		(void) pv_strlcat(state->display_buffer, spaces, state->display_buffer_size);
 	}
 	state->prev_width = state->width;
 	state->prev_length = output_length;
