@@ -40,13 +40,20 @@ int pv_snprintf(char *str, size_t size, const char *format, ...)
 
 	va_start(ap, format);
 #ifdef HAVE_VSNPRINTF
-	ret = vsnprintf(str, size, format, ap);
+	ret = vsnprintf(str, size, format, ap);	/* flawfinder: ignore */
 #else				/* ! HAVE_VSNPRINTF */
-	ret = vsprintf(str, format, ap);
+	ret = vsprintf(str, format, ap);	/* flawfinder: ignore */
 #endif				/* HAVE_VSNPRINTF */
 	va_end(ap);
 
 	str[size - 1] = '\0';
+
+	/*
+	 * flawfinder rationale: this function replaces snprintf so
+	 * explicitly takes a non-constant format; also it explicitly
+	 * \0-terminates the output buffer, as flawfinder warns that some
+	 * sprintf() variants do not.
+	 */
 
 	return ret;
 }
@@ -82,8 +89,14 @@ size_t pv_strlcat(char *dst, const char *src, size_t dstsize)
 		return 0;
 
 	dst[dstsize - 1] = '\0';
-	dstlen = strlen(dst);
-	srclen = strlen(src);
+	dstlen = strlen(dst);	/* flawfinder: ignore */
+	srclen = strlen(src);	/* flawfinder: ignore */
+
+	/*
+	 * flawfinder rationale: src must explicitly be \0 terminated, so
+	 * this is up to the caller; with dst, we enforce \0 termination
+	 * before calling strlen().
+	 */
 
 	available = dstsize - dstlen;
 	if (available > 1)
