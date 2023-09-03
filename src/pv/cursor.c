@@ -95,18 +95,21 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 		return;
 	}
 
-	tmpdir = (char *) getenv("TMPDIR");
-	if (!tmpdir)
-		tmpdir = (char *) getenv("TMP");
-	if (!tmpdir)
-		tmpdir = "/tmp";
+	/*
+	 * We used to look at the TMPDIR or TMP environment variables to
+	 * override the temporary directory, but this leads to less
+	 * predictable behaviour, and flawfinder points out that relying on
+	 * environment variables in this way is not safe.  So the lock
+	 * directory is hard-coded to "/tmp" now (Sep 2023).
+	 */
+	tmpdir = "/tmp";
 
 	memset(state->crs_lock_file, 0, PV_SIZEOF_CRS_LOCK_FILE);
 	(void) pv_snprintf(state->crs_lock_file,
 			   PV_SIZEOF_CRS_LOCK_FILE, "%s/pv-%s-%i.lock", tmpdir, basename(ttydev), (int) geteuid());
 
 	/*
-	 * Pawel Piatek - not everyone has O_NOFOLLOW, e.g. AIX doesn't
+	 * Pawel Piatek - not everyone has O_NOFOLLOW, e.g. AIX doesn't.
 	 */
 #ifdef O_NOFOLLOW
 	openflags = O_RDWR | O_CREAT | O_NOFOLLOW;
@@ -114,7 +117,15 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 	openflags = O_RDWR | O_CREAT;
 #endif
 
-	state->crs_lock_fd = open(state->crs_lock_file, openflags, 0600);
+	state->crs_lock_fd = open(state->crs_lock_file, openflags, 0600); /* flawfinder: ignore */
+
+	/*
+	 * flawfinder rationale: we aren't truncating the lock file, we
+	 * don't change its contents, and we are attempting to use
+	 * O_NOFOLLOW where possible to avoid symlink attacks, so this
+	 * open() is as safe as we can make it.
+	 */
+
 	if (state->crs_lock_fd < 0) {
 		pv_error(state, "%s: %s: %s", state->crs_lock_file, _("failed to open lock file"), strerror(errno));
 		state->cursor = 0;
@@ -219,12 +230,17 @@ static void pv_crs_ipccount(pvstate_t state)
 /*
  * Get the current cursor Y co-ordinate by sending the ECMA-48 CPR code to
  * the terminal connected to the given file descriptor.
+ *
+ * This should only be called while the terminal is locked, to avoid
+ * confusing other "pv -c" instances about the current terminal attributes,
+ * since this function temporarily changes the terminal attributes and then
+ * puts them back.
  */
 static int pv_crs_get_ypos(int terminalfd)
 {
 	struct termios tty;
 	struct termios old_tty;
-	char cpr[32];
+	char cpr[32];	/* flawfinder: ignore - bounded, zeroed */
 	int ypos;
 	ssize_t r;
 #ifdef CURSOR_ANSWERBACK_BYTE_BY_BYTE
@@ -249,7 +265,8 @@ static int pv_crs_get_ypos(int terminalfd)
 #ifdef CURSOR_ANSWERBACK_BYTE_BY_BYTE
 	/* Read answerback byte by byte - fails on AIX */
 	for (got = 0, r = 0; got < (int) (sizeof(cpr) - 2); got += r) {
-		r = read(terminalfd, cpr + got, 1);
+		r = read(terminalfd, cpr + got, 1);	/* flawfinder: ignore */
+		/* flawfinder rationale: bounded to buffer size by "for" */
 		if (r <= 0) {
 			debug("got=%d, r=%d: %s", got, r, strerror(errno));
 			break;
@@ -264,7 +281,8 @@ static int pv_crs_get_ypos(int terminalfd)
 
 #else				/* !CURSOR_ANSWERBACK_BYTE_BY_BYTE */
 	/* Read answerback in one big lump - may fail on Solaris */
-	r = read(terminalfd, cpr, sizeof(cpr));
+	r = read(terminalfd, cpr, sizeof(cpr) - 2);	/* flawfinder: ignore */
+	/* flawfinder rationale: bounded to buffer size */
 	if (r <= 0) {
 		debug("r=%d: %s", r, strerror(errno));
 	} else {
@@ -273,7 +291,7 @@ static int pv_crs_get_ypos(int terminalfd)
 		     terminalfd, r, cpr[0], cpr[1], cpr[2], cpr[3], cpr[4], cpr[5]);
 
 	}
-#endif				/* CURSOR_ANSWERBACK_BYTE_BY_BYTE */
+#endif				/* !CURSOR_ANSWERBACK_BYTE_BY_BYTE */
 
 	ypos = (int) pv_getnum_ui(cpr + 2);
 
@@ -375,7 +393,7 @@ static int pv_crs_ipcinit(pvstate_t state, char *ttyfile, int terminalfd)
 void pv_crs_init(pvstate_t state)
 {
 	char *ttyfile;
-	int fd;
+	int terminalfd;
 
 	state->crs_lock_fd = -2;
 	state->crs_lock_file[0] = '\0';
@@ -386,20 +404,28 @@ void pv_crs_init(pvstate_t state)
 	debug("%s", "init");
 
 	ttyfile = ttyname(STDERR_FILENO);
-	if (!ttyfile) {
+	if (NULL == ttyfile) {
 		debug("%s: %s", "disabling cursor positioning because ttyname failed", strerror(errno));
 		state->cursor = false;
 		return;
 	}
 
-	fd = open(ttyfile, O_RDWR);
-	if (fd < 0) {
+	terminalfd = open(ttyfile, O_RDWR);	/* flawfinder: ignore */
+
+	/*
+	 * flawfinder rationale: the file we open won't be truncated but
+	 * could be corrupted by writes attempting to get the current Y
+	 * position; but we get the filename from ttyname() and it could be
+	 * a symbolic link, so we can't do much more than trust it.
+	 */
+
+	if (terminalfd < 0) {
 		pv_error(state, "%s: %s: %s", _("failed to open terminal"), ttyfile, strerror(errno));
 		state->cursor = false;
 		return;
 	}
 #ifdef HAVE_IPC
-	if (pv_crs_ipcinit(state, ttyfile, fd) != 0) {
+	if (pv_crs_ipcinit(state, ttyfile, terminalfd) != 0) {
 		debug("%s", "ipcinit failed, setting noipc flag");
 		state->crs_noipc = true;
 	}
@@ -425,8 +451,8 @@ void pv_crs_init(pvstate_t state)
 		/*
 		 * Get current cursor position + 1.
 		 */
-		pv_crs_lock(state, fd);
-		state->crs_y_start = pv_crs_get_ypos(fd);
+		pv_crs_lock(state, terminalfd);
+		state->crs_y_start = pv_crs_get_ypos(terminalfd);
 		/*
 		 * Move down a line while the terminal is locked, so that
 		 * other processes in the pipeline will get a different
@@ -434,13 +460,13 @@ void pv_crs_init(pvstate_t state)
 		 */
 		if (state->crs_y_start > 0)
 			pv_write_retry(STDERR_FILENO, "\n", 1);
-		pv_crs_unlock(state, fd);
+		pv_crs_unlock(state, terminalfd);
 
 		if (state->crs_y_start < 1)
 			state->cursor = 0;
 	}
 
-	(void) close(fd);
+	(void) close(terminalfd);
 }
 
 
@@ -492,13 +518,24 @@ static void pv_crs_reinit(pvstate_t state)
 
 
 /*
- * Output a single-line update, moving the cursor to the correct position to
- * do so.
+ * Output a single-line update (\0-terminated), using the ECMA-48 CSI "CUP"
+ * sequence to move the cursor to the correct position to do so.
  */
-void pv_crs_update(pvstate_t state, const char *str)
+void pv_crs_update(pvstate_t state, const char *output_line)
 {
-	char pos[32];
+	char cup_cmd[32];	/* flawfinder: ignore */
+	size_t cup_cmd_length, output_line_length;
 	int y;
+
+	/*
+	 * flawfinder rationale: the "cup_cmd" buffer is always zeroed
+	 * before each use, and is only written to by pv_snprintf() bounded
+	 * by its size; also, that function explictly zero-terminates the
+	 * string it writes.  The write() call is also bounded.
+	 */
+
+	 output_line_length = strlen(output_line);	/* flawfinder: ignore */
+	 /* flawfinder - output_line is explictly expected to be \0-terminated. */
 
 #ifdef HAVE_IPC
 	if (!state->crs_noipc) {
@@ -546,9 +583,10 @@ void pv_crs_update(pvstate_t state, const char *str)
 		if (0 == state->crs_y_offset) {
 			pv_crs_lock(state, STDERR_FILENO);
 
-			memset(pos, 0, sizeof(pos));
-			(void) pv_snprintf(pos, sizeof(pos), "\033[%u;1H", state->height);
-			pv_write_retry(STDERR_FILENO, pos, strlen(pos));
+			memset(cup_cmd, 0, sizeof(cup_cmd));
+			(void) pv_snprintf(cup_cmd, sizeof(cup_cmd), "\033[%u;1H", state->height);
+			cup_cmd_length = strlen(cup_cmd);	/* flawfinder: ignore */
+			pv_write_retry(STDERR_FILENO, cup_cmd, cup_cmd_length);
 			for (; offs > 0; offs--) {
 				pv_write_retry(STDERR_FILENO, "\n", 1);
 			}
@@ -565,18 +603,26 @@ void pv_crs_update(pvstate_t state, const char *str)
 
 	/*
 	 * Keep the Y co-ordinate within sensible bounds, so we can never
-	 * overflow the "pos" buffer.
+	 * overflow the "cup_cmd" buffer.
 	 */
 	if ((y < 1) || (y > 999999))
 		y = 1;
 
-	memset(pos, 0, sizeof(pos));
-	(void) pv_snprintf(pos, sizeof(pos), "\033[%d;1H", y);
+	memset(cup_cmd, 0, sizeof(cup_cmd));
+	(void) pv_snprintf(cup_cmd, sizeof(cup_cmd), "\033[%d;1H", y);
+	cup_cmd_length = strlen(cup_cmd);	/* flawfinder: ignore */
+
+	/*
+	 * flawfinder rationale: "cup_cmd" is only written to by
+	 * pv_snprintf(), which explicitly ensures that the string will be
+	 * \0-terminated, and the buffer is zeroed beforehand so if
+	 * pv_snprintf() fails to run the string will be of zero length.
+	 */
 
 	pv_crs_lock(state, STDERR_FILENO);
 
-	pv_write_retry(STDERR_FILENO, pos, strlen(pos));
-	pv_write_retry(STDERR_FILENO, str, strlen(str));
+	pv_write_retry(STDERR_FILENO, cup_cmd, cup_cmd_length);
+	pv_write_retry(STDERR_FILENO, output_line, output_line_length);
 
 	pv_crs_unlock(state, STDERR_FILENO);
 }
@@ -587,9 +633,11 @@ void pv_crs_update(pvstate_t state, const char *str)
  */
 void pv_crs_fini(pvstate_t state)
 {
-	char pos[32];
+	char cup_cmd[32];	/* flawfinder: ignore */
 	unsigned int y;
 	struct shmid_ds shm_buf;
+
+	/* flawfinder - "cup_cmd" is zeroed, and only written by pv_snprintf() */
 
 	memset(&shm_buf, 0, sizeof(shm_buf));
 
@@ -611,12 +659,13 @@ void pv_crs_fini(pvstate_t state)
 	if ((y < 1) || (y > 999999))
 		y = 1;
 
-	memset(pos, 0, sizeof(pos));
-	(void) pv_snprintf(pos, sizeof(pos), "\033[%u;1H\n", y);
+	memset(cup_cmd, 0, sizeof(cup_cmd));
+	(void) pv_snprintf(cup_cmd, sizeof(cup_cmd), "\033[%u;1H\n", y);
 
 	pv_crs_lock(state, STDERR_FILENO);
 
-	pv_write_retry(STDERR_FILENO, pos, strlen(pos));
+	pv_write_retry(STDERR_FILENO, cup_cmd, strlen(cup_cmd)); /* flawfinder: ignore */
+	/* flawfinder - pv_snprintf() always \0-terminates (see above). */
 
 	/*
 	 * If any other "pv -c" instances have set the terminal TOSTOP

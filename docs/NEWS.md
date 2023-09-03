@@ -6,6 +6,7 @@
   * feature: new "`--enable-static`" option to "`configure`" for static builds ([#75](https://codeberg.org/a-j-wood/pv/pull/75))
   * security: with "`--pidfile`", write to a temporary file and rename it into place, to improve security
   * security: keep self-contained copies of name and format string in PV internal state for memory safety
+  * security: ignore _TMP_ / _TMPDIR_ environment variables when using a terminal lock file
   * fix: only report errors about missing files when starting to transfer from them, not while calculating size, and behave more like `cat`(1) by skipping them and moving on
   * fix: auto-calculate total line count with "`--line-mode`" when all inputs are regular files
   * fix: use `clock_gettime()` in ETA calculation to cope with machine suspend/resume ([#13](https://codeberg.org/a-j-wood/pv/issues/13))
