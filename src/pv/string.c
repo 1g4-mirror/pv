@@ -77,7 +77,14 @@ int pv_snprintf(char *str, size_t size, const char *format, ...)
 size_t pv_strlcat(char *dst, const char *src, size_t dstsize)
 {
 #ifdef HAVE_STRLCAT
-	return strlcat(dst, src, dstsize);
+	size_t result;
+
+	result = strlcat(dst, src, dstsize);
+
+	if ((NULL != dst) && (dstsize > 0))
+		dst[dstsize - 1] = '\0';
+
+	return result;
 #else
 	size_t dstlen, srclen, available;
 
