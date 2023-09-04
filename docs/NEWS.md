@@ -4,15 +4,18 @@
   * feature: new "`--error-skip-block`" option to make "`--skip-errors`" skip whole blocks ([#37](https://codeberg.org/a-j-wood/pv/issues/37))
   * feature: use `posix_fadvise()` like `cat`(1) does, to improve efficiency ([#39](https://codeberg.org/a-j-wood/pv/issues/39))
   * feature: new "`--enable-static`" option to "`configure`" for static builds ([#75](https://codeberg.org/a-j-wood/pv/pull/75))
+
   * security: with "`--pidfile`", write to a temporary file and rename it into place, to improve security
   * security: keep self-contained copies of name and format string in PV internal state for memory safety
   * security: ignore _TMP_ / _TMPDIR_ environment variables when using a terminal lock file
+
   * fix: only report errors about missing files when starting to transfer from them, not while calculating size, and behave more like `cat`(1) by skipping them and moving on
   * fix: auto-calculate total line count with "`--line-mode`" when all inputs are regular files
   * fix: use `clock_gettime()` in ETA calculation to cope with machine suspend/resume ([#13](https://codeberg.org/a-j-wood/pv/issues/13))
   * fix: if "`--width`" or "`--height`" were provided, do not change them when the window size changes ([#36](https://codeberg.org/a-j-wood/pv/issues/36))
   * fix: when a file descriptor position in "`--watchfd`" moves backwards, show the rate using the correct prefix ([#41](https://codeberg.org/a-j-wood/pv/issues/41))
   * fix: rewrite terminal state save/restore so state is not intermittently garbled on exit when using "`--cursor`" ([#20](https://codeberg.org/a-j-wood/pv/issues/20)), ([#24](https://codeberg.org/a-j-wood/pv/issues/24))
+
   * cleanup: switched the build system to GNU Automake
   * cleanup: added a test for terminal width detection to "`make check`"
   * cleanup: added a test to "`make check`" to ensure that "`make install`" installs everything expected
@@ -20,6 +23,7 @@
   * cleanup: with "`--sync`", call `fsync()` instead of `fdatasync()` on incapable systems ([#73](https://codeberg.org/a-j-wood/pv/issues/73))
   * cleanup: replaced the test harness with the one native to GNU Automake
   * cleanup: the manual is now a static file instead of needing to be built with "`configure`"
+
   * dropped: dropped support for "`--enable-static-nls`"
   * dropped: removed the Linux Software Map file, as the LSM project appears to be long dead
   * dropped: will no longer publish to SourceForge as it has a chequered history and is unnecessary
