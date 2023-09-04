@@ -588,6 +588,7 @@ Padded to 9 characters with spaces, and suffixed with :.
 .TP
 .B %%
 A single %.
+
 .P
 The format string equivalent of turning on all display switches is
 .BR "\`%N %b %T %t %r %a %p %e'" .
@@ -662,8 +663,7 @@ contributors.
 .SH KNOWN PROBLEMS
 The following problems are known to exist in
 .BR pv :
-.TP
-.B *
+.IP \(bu 3
 In some versions of
 .BR bash (1)
 and
@@ -675,8 +675,7 @@ shell, due to the subprocess being run in a separate process group from the
 one that owns the terminal.  In these cases, use
 .BR \-\-force .
 .P
-.TP
-.B *
+.IP \(bu 3
 The
 .B -c
 option does not work properly on Cygwin without
@@ -687,8 +686,7 @@ the terminal scrolling).  To fix this, start
 before using
 .BR "pv -c" .
 .P
-.TP
-.B *
+.IP \(bu 3
 The
 .B -R
 option is not available on Cygwin without
@@ -703,11 +701,12 @@ If you find any other problems, please report them.
 
 
 .SH REPORTING BUGS
-Please report any bugs to: <https://codeberg.org/a-j-wood/pv/issues>
+Please report any bugs to
+.BR pv@ivarch.com .
 
-Alternatively, use the contact form linked from the
+Alternatively, use the issue tracker linked from the
 .B pv
-home page: <http://www.ivarch.com/programs/pv.shtml>
+home page: <https://www.ivarch.com/programs/pv.shtml>
 
 
 .SH "SEE ALSO"

@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: https://codeberg.org/a-j-wood/pv/issues\n"
-"POT-Creation-Date: 2023-09-02 22:07+0100\n"
+"Report-Msgid-Bugs-To: pv@ivarch.com\n"
+"POT-Creation-Date: 2023-09-04 20:35+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -336,51 +336,51 @@ msgstr ""
 msgid "failed to get terminal name"
 msgstr "erro ao ler o nome do terminal"
 
-#: src/pv/cursor.c:119
+#: src/pv/cursor.c:130
 msgid "failed to open lock file"
 msgstr "erro ao abrir arquivo de bloqueio"
 
-#: src/pv/cursor.c:152
+#: src/pv/cursor.c:163
 msgid "lock attempt failed"
 msgstr "tentativa de bloqueio falhou"
 
-#: src/pv/cursor.c:395
+#: src/pv/cursor.c:423
 msgid "failed to open terminal"
 msgstr "erro abrindo o terminal"
 
-#: src/pv/display.c:172
+#: src/pv/display.c:187
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:180
+#: src/pv/display.c:199
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:647 src/pv/transfer.c:760
+#: src/pv/display.c:683 src/pv/transfer.c:760
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
-#: src/pv/display.c:709
+#: src/pv/display.c:745
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:713 src/pv/transfer.c:481
+#: src/pv/display.c:749 src/pv/transfer.c:481
 msgid "B"
 msgstr ""
 
-#: src/pv/display.c:764 src/pv/display.c:775
+#: src/pv/display.c:800 src/pv/display.c:811
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:767 src/pv/display.c:779
+#: src/pv/display.c:803 src/pv/display.c:815
 msgid "/s"
 msgstr ""
 
-#: src/pv/display.c:767 src/pv/display.c:779
+#: src/pv/display.c:803 src/pv/display.c:815
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:815 src/pv/display.c:819 src/pv/display.c:878
+#: src/pv/display.c:851 src/pv/display.c:855 src/pv/display.c:914
 msgid "ETA"
 msgstr "ETA"
 

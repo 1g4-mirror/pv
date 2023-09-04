@@ -506,26 +506,18 @@ contributors.
 
 The following problems are known to exist in **pv**:
 
-**\***
-
-:   In some versions of **bash**(1) and **zsh**(1), the construct
+-   In some versions of **bash**(1) and **zsh**(1), the construct
     **\<(pv filename)** will not output any progress to the terminal
     when run from an interactive shell, due to the subprocess being run
     in a separate process group from the one that owns the terminal. In
     these cases, use **\--force**.
 
-
-**\***
-
-:   The **-c** option does not work properly on Cygwin without
+-   The **-c** option does not work properly on Cygwin without
     **cygserver** running, if started near the bottom of the screen (IPC
     is needed to handle the terminal scrolling). To fix this, start
     **cygserver** before using **pv -c**.
 
-
-**\***
-
-:   The **-R** option is not available on Cygwin without **cygserver**
+-   The **-R** option is not available on Cygwin without **cygserver**
     running (SYSV IPC is needed). To fix this, start **cygserver**
     before running the instance of **pv** you want, at runtime, to
     change the parameters of.
@@ -534,10 +526,10 @@ If you find any other problems, please report them.
 
 # REPORTING BUGS
 
-Please report any bugs to: \<https://codeberg.org/a-j-wood/pv/issues\>
+Please report any bugs to **pv@ivarch.com**.
 
-Alternatively, use the contact form linked from the **pv** home page:
-\<http://www.ivarch.com/programs/pv.shtml\>
+Alternatively, use the issue tracker linked from the **pv** home page:
+\<https://www.ivarch.com/programs/pv.shtml\>
 
 # SEE ALSO
 

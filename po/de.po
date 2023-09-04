@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: https://codeberg.org/a-j-wood/pv/issues\n"
-"POT-Creation-Date: 2023-09-02 22:07+0100\n"
+"Report-Msgid-Bugs-To: pv@ivarch.com\n"
+"POT-Creation-Date: 2023-09-04 20:35+0100\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -344,51 +344,51 @@ msgstr ""
 msgid "failed to get terminal name"
 msgstr "Terminalname konnte nicht gelesen werden"
 
-#: src/pv/cursor.c:119
+#: src/pv/cursor.c:130
 msgid "failed to open lock file"
 msgstr "Sperrdatei konnte nicht geöffnet werden"
 
-#: src/pv/cursor.c:152
+#: src/pv/cursor.c:163
 msgid "lock attempt failed"
 msgstr "Sperrversuch fehlgeschlagen"
 
-#: src/pv/cursor.c:395
+#: src/pv/cursor.c:423
 msgid "failed to open terminal"
 msgstr "Terminal konnte nicht geöffnet werden"
 
-#: src/pv/display.c:172
+#: src/pv/display.c:187
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:180
+#: src/pv/display.c:199
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:647 src/pv/transfer.c:760
+#: src/pv/display.c:683 src/pv/transfer.c:760
 msgid "buffer allocation failed"
 msgstr "Puffer konnte nicht allokiert werden"
 
-#: src/pv/display.c:709
+#: src/pv/display.c:745
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:713 src/pv/transfer.c:481
+#: src/pv/display.c:749 src/pv/transfer.c:481
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:764 src/pv/display.c:775
+#: src/pv/display.c:800 src/pv/display.c:811
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:767 src/pv/display.c:779
+#: src/pv/display.c:803 src/pv/display.c:815
 msgid "/s"
 msgstr ""
 
-#: src/pv/display.c:767 src/pv/display.c:779
+#: src/pv/display.c:803 src/pv/display.c:815
 msgid "B/s"
 msgstr ""
 
-#: src/pv/display.c:815 src/pv/display.c:819 src/pv/display.c:878
+#: src/pv/display.c:851 src/pv/display.c:855 src/pv/display.c:914
 msgid "ETA"
 msgstr "ETA"
 

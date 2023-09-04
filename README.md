@@ -41,12 +41,12 @@ This package is copyright 2023 Andrew Wood, and is being distributed under
 the terms of the Artistic License 2.0.  For more details of this license,
 see the file "[docs/COPYING](./docs/COPYING)".
 
-Report bugs in **pv** using the contact form linked from the home page, or
-though the [project issue tracker](https://codeberg.org/a-j-wood/pv/issues).
+Please report any bugs to **pv@ivarch.com**, or use the issue tracker linked
+from the **pv** home page.
 
 The **pv** home page is at:
 
-[http://www.ivarch.com/programs/pv.shtml](http://www.ivarch.com/programs/pv.shtml)
+[https://www.ivarch.com/programs/pv.shtml](https://www.ivarch.com/programs/pv.shtml)
 
 The latest version can always be found here.
 

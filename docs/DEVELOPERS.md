@@ -110,7 +110,8 @@ these will need to be corrected by translators.
 The package maintainer should run through these steps for a new release:
 
  * Check for patches and bug reports at https://tracker.debian.org/pkg/pv
- * Run "`make indent; make indent indentclean update-po check`"
+ * Run "`make indent; make indent indentclean check`"
+ * Run "`make -C po update-po`"
  * Run "`make analyse`" and see whether remaining warnings can be addressed
  * Version bump and documentation checks:
    * Update the version in `configure.ac` and `docs/NEWS.md`
