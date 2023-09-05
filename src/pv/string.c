@@ -42,7 +42,7 @@ int pv_snprintf(char *str, size_t size, const char *format, ...)
 #ifdef HAVE_VSNPRINTF
 	ret = vsnprintf(str, size, format, ap);	/* flawfinder: ignore */
 #else				/* ! HAVE_VSNPRINTF */
-	ret = vsprintf(str, format, ap);	/* flawfinder: ignore */
+	ret = vsprintf(str, format, ap);    /* flawfinder: ignore */
 #endif				/* HAVE_VSNPRINTF */
 	va_end(ap);
 
@@ -96,8 +96,8 @@ size_t pv_strlcat(char *dst, const char *src, size_t dstsize)
 		return 0;
 
 	dst[dstsize - 1] = '\0';
-	dstlen = strlen(dst);	/* flawfinder: ignore */
-	srclen = strlen(src);	/* flawfinder: ignore */
+	dstlen = strlen(dst);		    /* flawfinder: ignore */
+	srclen = strlen(src);		    /* flawfinder: ignore */
 
 	/*
 	 * flawfinder rationale: src must explicitly be \0 terminated, so

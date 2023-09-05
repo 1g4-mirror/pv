@@ -25,14 +25,14 @@
  */
 void pv_elapsedtime_read(struct timespec *return_time)
 {
-	/*@-unrecog@*/ /* splint doesn't know clock_gettime */
+	/*@-unrecog@ *//* splint doesn't know clock_gettime */
 	if (0 != clock_gettime(CLOCK_MONOTONIC, return_time)) {
 		fprintf(stderr, "%s: %s: %s\n", PACKAGE_NAME, "clock_gettime", strerror(errno));
-		/*@-exitarg@*/ /* we explicitly want a special exit status */
+		/*@-exitarg@ *//* we explicitly want a special exit status */
 		exit(16);
-		/*@+exitarg@*/
+		/*@+exitarg@ */
 	}
-	/*@+unrecog@*/
+	/*@+unrecog@ */
 }
 
 
@@ -126,10 +126,10 @@ void pv_elapsedtime_add(struct timespec *return_time, const struct timespec *fir
 	seconds += nanoseconds / 1000000000;
 	nanoseconds = nanoseconds % 1000000000;
 
-	/*@-type@*/
+	/*@-type@ */
 	return_time->tv_sec = seconds;
 	return_time->tv_nsec = nanoseconds;
-	/*@+type@*/
+	/*@+type@ */
 
 	/*
 	 * splint rationale: we know the types are different but should be
@@ -159,10 +159,10 @@ void pv_elapsedtime_add_nsec(struct timespec *return_time, long long add_nanosec
 	seconds += nanoseconds / 1000000000;
 	nanoseconds = nanoseconds % 1000000000;
 
-	/*@-type@*/ /* see above */
+	/*@-type@ *//* see above */
 	return_time->tv_sec = seconds;
 	return_time->tv_nsec = nanoseconds;
-	/*@+type@*/
+	/*@+type@ */
 }
 
 
@@ -198,10 +198,10 @@ void pv_elapsedtime_subtract(struct timespec *return_time, const struct timespec
 		nanoseconds = 1000000000 + nanoseconds;
 	}
 
-	/*@-type@*/ /* see above */
+	/*@-type@ *//* see above */
 	return_time->tv_sec = seconds;
 	return_time->tv_nsec = nanoseconds;
-	/*@+type@*/
+	/*@+type@ */
 }
 
 

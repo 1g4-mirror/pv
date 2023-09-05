@@ -117,7 +117,7 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 	openflags = O_RDWR | O_CREAT;
 #endif
 
-	state->crs_lock_fd = open(state->crs_lock_file, openflags, 0600); /* flawfinder: ignore */
+	state->crs_lock_fd = open(state->crs_lock_file, openflags, 0600);	/* flawfinder: ignore */
 
 	/*
 	 * flawfinder rationale: we aren't truncating the lock file, we
@@ -240,7 +240,7 @@ static int pv_crs_get_ypos(int terminalfd)
 {
 	struct termios tty;
 	struct termios old_tty;
-	char cpr[32];	/* flawfinder: ignore - bounded, zeroed */
+	char cpr[32];			 /* flawfinder: ignore - bounded, zeroed */
 	int ypos;
 	ssize_t r;
 #ifdef CURSOR_ANSWERBACK_BYTE_BY_BYTE
@@ -346,9 +346,10 @@ static int pv_crs_ipcinit(pvstate_t state, char *ttyfile, int terminalfd)
 		return 1;
 	}
 
-	/*@-nullpass@*//* splint doesn't know shmaddr can be NULL */
+	/*@-nullpass@ */
+	/* splint doesn't know shmaddr can be NULL */
 	state->crs_shared = shmat(state->crs_shmid, NULL, 0);
-	/*@+nullpass@*/
+	/*@+nullpass@ */
 
 	pv_crs_ipccount(state);
 
@@ -410,7 +411,7 @@ void pv_crs_init(pvstate_t state)
 		return;
 	}
 
-	terminalfd = open(ttyfile, O_RDWR);	/* flawfinder: ignore */
+	terminalfd = open(ttyfile, O_RDWR); /* flawfinder: ignore */
 
 	/*
 	 * flawfinder rationale: the file we open won't be truncated but
@@ -523,7 +524,7 @@ static void pv_crs_reinit(pvstate_t state)
  */
 void pv_crs_update(pvstate_t state, const char *output_line)
 {
-	char cup_cmd[32];	/* flawfinder: ignore */
+	char cup_cmd[32];		 /* flawfinder: ignore */
 	size_t cup_cmd_length, output_line_length;
 	int y;
 
@@ -534,8 +535,8 @@ void pv_crs_update(pvstate_t state, const char *output_line)
 	 * string it writes.  The write() call is also bounded.
 	 */
 
-	 output_line_length = strlen(output_line);	/* flawfinder: ignore */
-	 /* flawfinder - output_line is explictly expected to be \0-terminated. */
+	output_line_length = strlen(output_line);	/* flawfinder: ignore */
+	/* flawfinder - output_line is explictly expected to be \0-terminated. */
 
 #ifdef HAVE_IPC
 	if (!state->crs_noipc) {
@@ -610,7 +611,7 @@ void pv_crs_update(pvstate_t state, const char *output_line)
 
 	memset(cup_cmd, 0, sizeof(cup_cmd));
 	(void) pv_snprintf(cup_cmd, sizeof(cup_cmd), "\033[%d;1H", y);
-	cup_cmd_length = strlen(cup_cmd);	/* flawfinder: ignore */
+	cup_cmd_length = strlen(cup_cmd);   /* flawfinder: ignore */
 
 	/*
 	 * flawfinder rationale: "cup_cmd" is only written to by
@@ -633,7 +634,7 @@ void pv_crs_update(pvstate_t state, const char *output_line)
  */
 void pv_crs_fini(pvstate_t state)
 {
-	char cup_cmd[32];	/* flawfinder: ignore */
+	char cup_cmd[32];		 /* flawfinder: ignore */
 	unsigned int y;
 	struct shmid_ds shm_buf;
 
@@ -664,7 +665,7 @@ void pv_crs_fini(pvstate_t state)
 
 	pv_crs_lock(state, STDERR_FILENO);
 
-	pv_write_retry(STDERR_FILENO, cup_cmd, strlen(cup_cmd)); /* flawfinder: ignore */
+	pv_write_retry(STDERR_FILENO, cup_cmd, strlen(cup_cmd));	/* flawfinder: ignore */
 	/* flawfinder - pv_snprintf() always \0-terminates (see above). */
 
 	/*
