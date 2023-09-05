@@ -66,10 +66,10 @@ bool pv_in_foreground(void)
 		return true;
 	}
 
-	/*@-type@*/ /* __pid_t vs pid_t, not significant */
+	/*@-type@ *//* __pid_t vs pid_t, not significant */
 	our_process_group = getpgrp();
 	tty_process_group = tcgetpgrp(STDERR_FILENO);
-	/*@+type@*/
+	/*@+type@ */
 
 	if (tty_process_group == -1 && errno == ENOTTY) {
 		debug("%s: true: %s", "pv_in_foreground", "tty_process_group is -1, errno is ENOTTY");
@@ -145,8 +145,8 @@ static long pv__calc_eta(const long long so_far, const long long total, const lo
  * Types of transfer count - bytes or lines.
  */
 typedef enum {
-  PV_TRANSFERCOUNT_BYTES,
-  PV_TRANSFERCOUNT_LINES
+	PV_TRANSFERCOUNT_BYTES,
+	PV_TRANSFERCOUNT_LINES
 } pv__transfercount_t;
 
 /*
@@ -309,7 +309,7 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
  * The "format" string is in sprintf format and must contain exactly one %
  * parameter (a %s) which will expand to the string described above.
  */
-static void pv__sizestr(char *buffer, int bufsize, char *format,
+static void pv__sizestr(char *buffer, size_t bufsize, char *format,
 			long double amount, char *suffix_basic, char *suffix_bytes, pv__transfercount_t count_type)
 {
 	char sizestr_buffer[256];
@@ -413,16 +413,34 @@ static void pv__format_init(pvstate_t state)
 	 * these segments together.
 	 */
 	segment = 0;
-	for (strpos = 0; formatstr[strpos] != 0 && segment < 99; strpos++, segment++) {
+	for (strpos = 0; formatstr[strpos] != '\0' && segment < 99; strpos++, segment++) {
 		if ('%' == formatstr[strpos]) {
-			unsigned int num;
+			unsigned long number_prefix;
+#if HAVE_STRTOUL
+			char *number_end_ptr;
+#endif
+
 			strpos++;
-			num = 0;
+
+			/*
+			 * Check for a numeric prefix between the % and the
+			 * format character - currently only used with "%A".
+			 */
+#if HAVE_STRTOUL
+			number_end_ptr = NULL;
+			number_prefix = strtoul(&(formatstr[strpos]), &number_end_ptr, 10);
+			if ((NULL == number_end_ptr) || (number_end_ptr[0] == '\0'))
+				break;
+			if (number_end_ptr > &(formatstr[strpos]))
+				strpos += (number_end_ptr - &(formatstr[strpos]));
+#else				/* !HAVE_STRTOUL */
 			while (isdigit((int) (formatstr[strpos]))) {
-				num = num * 10;
-				num += formatstr[strpos] - '0';
+				number_prefix = number_prefix * 10;
+				number_prefix += formatstr[strpos] - '0';
 				strpos++;
 			}
+#endif				/* !HAVE_STRTOUL */
+
 			switch (formatstr[strpos]) {
 			case 'p':
 				state->format[segment].string = state->str_progress;
@@ -447,11 +465,11 @@ static void pv__format_init(pvstate_t state)
 			case 'A':
 				state->format[segment].string = state->str_lastoutput;
 				state->format[segment].length = 0;
-				if (num > PV_SIZEOF_LASTOUTPUT_BUFFER)
-					num = PV_SIZEOF_LASTOUTPUT_BUFFER;
-				if (num < 1)
-					num = 1;
-				state->lastoutput_length = num;
+				if (number_prefix > PV_SIZEOF_LASTOUTPUT_BUFFER)
+					number_prefix = PV_SIZEOF_LASTOUTPUT_BUFFER;
+				if (number_prefix < 1)
+					number_prefix = 1;
+				state->lastoutput_length = number_prefix;
 				state->components_used |= PV_DISPLAY_OUTPUTBUF;
 				break;
 			case 'r':
@@ -476,7 +494,7 @@ static void pv__format_init(pvstate_t state)
 				break;
 			case 'N':
 				state->format[segment].string = state->str_name;
-				state->format[segment].length = strlen(state->str_name);
+				state->format[segment].length = (int) strlen(state->str_name);
 				state->components_used |= PV_DISPLAY_NAME;
 				break;
 			case '%':
@@ -500,7 +518,7 @@ static void pv__format_init(pvstate_t state)
 			int foundlength;
 			searchptr = strchr(&(formatstr[strpos]), '%');
 			if (NULL == searchptr) {
-				foundlength = strlen(&(formatstr[strpos]));
+				foundlength = (int) strlen(&(formatstr[strpos]));
 			} else {
 				foundlength = searchptr - &(formatstr[strpos]);
 			}
@@ -562,7 +580,7 @@ static void update_history_avg_rate(pvstate_t state, long long total_bytes, long
 	} else {
 		long long bytes = (state->history[last].total_bytes - state->history[first].total_bytes);
 		long double sec = (state->history[last].elapsed_sec - state->history[first].elapsed_sec);
-		state->current_avg_rate = bytes / sec;
+		state->current_avg_rate = (long double) bytes / sec;
 	}
 }
 
@@ -742,11 +760,13 @@ static const char *pv__format(pvstate_t state,
 	if ((state->components_used & PV_DISPLAY_BYTES) != 0) {
 		if (state->bits && !state->linemode) {
 			pv__sizestr(state->str_transferred,
-				    PV_SIZEOF_STR_TRANSFERRED, "%s", (long double) total_bytes * 8, "", _("b"), PV_TRANSFERCOUNT_BYTES);
+				    PV_SIZEOF_STR_TRANSFERRED, "%s", (long double) total_bytes * 8, "", _("b"),
+				    PV_TRANSFERCOUNT_BYTES);
 		} else {
 			pv__sizestr(state->str_transferred,
 				    PV_SIZEOF_STR_TRANSFERRED, "%s",
-				    (long double) total_bytes, "", _("B"), state->linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
+				    (long double) total_bytes, "", _("B"),
+				    state->linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
 		}
 	}
 
@@ -797,10 +817,12 @@ static const char *pv__format(pvstate_t state,
 	/* Rate - set up the display string. */
 	if ((state->components_used & PV_DISPLAY_RATE) != 0) {
 		if (state->bits && !state->linemode) {
-			pv__sizestr(state->str_rate, PV_SIZEOF_STR_RATE, "[%s]", 8 * rate, "", _("b/s"), PV_TRANSFERCOUNT_BYTES);
+			pv__sizestr(state->str_rate, PV_SIZEOF_STR_RATE, "[%s]", 8 * rate, "", _("b/s"),
+				    PV_TRANSFERCOUNT_BYTES);
 		} else {
 			pv__sizestr(state->str_rate,
-				    PV_SIZEOF_STR_RATE, "[%s]", rate, _("/s"), _("B/s"), state->linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
+				    PV_SIZEOF_STR_RATE, "[%s]", rate, _("/s"), _("B/s"),
+				    state->linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
 		}
 	}
 
@@ -808,11 +830,13 @@ static const char *pv__format(pvstate_t state,
 	if ((state->components_used & PV_DISPLAY_AVERAGERATE) != 0) {
 		if (state->bits && !state->linemode) {
 			pv__sizestr(state->str_average_rate,
-				    PV_SIZEOF_STR_AVERAGE_RATE, "[%s]", 8 * average_rate, "", _("b/s"), PV_TRANSFERCOUNT_BYTES);
+				    PV_SIZEOF_STR_AVERAGE_RATE, "[%s]", 8 * average_rate, "", _("b/s"),
+				    PV_TRANSFERCOUNT_BYTES);
 		} else {
 			pv__sizestr(state->str_average_rate,
 				    PV_SIZEOF_STR_AVERAGE_RATE,
-				    "[%s]", average_rate, _("/s"), _("B/s"), state->linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
+				    "[%s]", average_rate, _("/s"), _("B/s"),
+				    state->linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
 		}
 	}
 

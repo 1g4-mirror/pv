@@ -24,7 +24,7 @@ if test "$USE_NLS" = "yes"; then
 fi
 AC_CHECK_FUNCS([getopt_long])
 AC_CHECK_HEADERS([getopt.h])
-AC_CHECK_FUNCS([memcpy basename vsnprintf strlcat])
+AC_CHECK_FUNCS([memcpy basename vsnprintf strlcat strtoul])
 AC_CHECK_FUNCS([fdatasync])
 AC_CHECK_FUNCS([fpathconf sysconf posix_memalign posix_fadvise])
 AC_SEARCH_LIBS([clock_gettime],[rt])
