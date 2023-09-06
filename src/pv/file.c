@@ -19,6 +19,8 @@
 #include <fcntl.h>
 #include <limits.h>
 
+/*@-type@*/
+/* splint has trouble with off_t and mode_t throughout this file. */
 
 /*
  * Calculate the total number of bytes to be transferred by adding up the
@@ -34,7 +36,7 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 {
 	unsigned long long total;
 	struct stat sb;
-	int file_idx;
+	unsigned int file_idx;
 
 	total = 0;
 	memset(&sb, 0, sizeof(sb));
@@ -44,7 +46,7 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 	 */
 	if (state->input_file_count < 1) {
 		if (0 == fstat(STDIN_FILENO, &sb))
-			total = sb.st_size;
+			total = (unsigned long long) (sb.st_size);
 		return total;
 	}
 
@@ -82,14 +84,18 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 				fd = open(state->input_files[file_idx], O_RDONLY);
 			}
 			if (fd >= 0) {
-				total += lseek(fd, 0, SEEK_END);
-				close(fd);
+				off_t end_position;
+				end_position = lseek(fd, 0, SEEK_END);
+				if (end_position > 0) {
+					total += (unsigned long long) end_position;
+				}
+				(void) close(fd);
 			} else {
 				total = 0;
 				return total;
 			}
 		} else if (S_ISREG(sb.st_mode)) {
-			total += sb.st_size;
+			total += (unsigned long long) (sb.st_size);
 		} else {
 			total = 0;
 		}
@@ -103,14 +109,19 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 	 * Further modified to check that stdout is not in append-only mode
 	 * and that we can seek back to the start after getting the size.
 	 */
-	if (total <= 0) {
+	if (total < 1) {
 		int rc;
 
 		rc = fstat(STDOUT_FILENO, &sb);
 
 		if ((0 == rc) && S_ISBLK(sb.st_mode)
 		    && (0 == (fcntl(STDOUT_FILENO, F_GETFL) & O_APPEND))) {
-			total = lseek(STDOUT_FILENO, 0, SEEK_END);
+			off_t end_position;
+			end_position = lseek(STDOUT_FILENO, 0, SEEK_END);
+			total = 0;
+			if (end_position > 0) {
+				total = (unsigned long long) end_position;
+			}
 			if (lseek(STDOUT_FILENO, 0, SEEK_SET) != 0) {
 				pv_error(state, "%s: %s: %s", "(stdout)",
 					 _("failed to seek to start of output"), strerror(errno));
@@ -146,7 +157,7 @@ static unsigned long long pv_calc_total_lines(pvstate_t state)
 {
 	unsigned long long total;
 	struct stat sb;
-	int file_idx;
+	unsigned int file_idx;
 
 	total = 0;
 
@@ -180,9 +191,9 @@ static unsigned long long pv_calc_total_lines(pvstate_t state)
 		(void) posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif
 
-		while (1) {
-			unsigned char scanbuf[1024];
-			int numread, buf_idx;
+		while (true) {
+			char scanbuf[1024];
+			ssize_t numread, buf_idx;
 
 			numread = read(fd, scanbuf, sizeof(scanbuf));
 			if (numread < 0) {
@@ -240,11 +251,12 @@ unsigned long long pv_calc_total_size(pvstate_t state)
  *
  * Updates state->current_file in the process.
  */
-int pv_next_file(pvstate_t state, int filenum, int oldfd)
+int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 {
 	struct stat isb;
 	struct stat osb;
-	int fd, input_file_is_stdout;
+	int fd;
+	bool input_file_is_stdout;
 
 	if (oldfd >= 0) {
 		if (0 != close(oldfd)) {
@@ -256,12 +268,6 @@ int pv_next_file(pvstate_t state, int filenum, int oldfd)
 
 	if (filenum >= state->input_file_count) {
 		debug("%s: %d >= %d", "filenum too large", filenum, state->input_file_count);
-		state->exit_status |= 8;
-		return -1;
-	}
-
-	if (filenum < 0) {
-		debug("%s: %d < 0", "filenum too small", filenum);
 		state->exit_status |= 8;
 		return -1;
 	}
@@ -278,16 +284,16 @@ int pv_next_file(pvstate_t state, int filenum, int oldfd)
 		}
 	}
 
-	if (fstat(fd, &isb)) {
+	if (0 != fstat(fd, &isb)) {
 		pv_error(state, "%s: %s: %s", _("failed to stat file"), state->input_files[filenum], strerror(errno));
-		close(fd);
+		(void) close(fd);
 		state->exit_status |= 2;
 		return -1;
 	}
 
-	if (fstat(STDOUT_FILENO, &osb)) {
+	if (0 != fstat(STDOUT_FILENO, &osb)) {
 		pv_error(state, "%s: %s", _("failed to stat output file"), strerror(errno));
-		close(fd);
+		(void) close(fd);
 		state->exit_status |= 2;
 		return -1;
 	}
@@ -297,19 +303,19 @@ int pv_next_file(pvstate_t state, int filenum, int oldfd)
 	 * destination. This restriction is ignored for anything other
 	 * than a regular file or block device.
 	 */
-	input_file_is_stdout = 1;
+	input_file_is_stdout = true;
 	if (isb.st_dev != osb.st_dev)
-		input_file_is_stdout = 0;
+		input_file_is_stdout = false;
 	if (isb.st_ino != osb.st_ino)
-		input_file_is_stdout = 0;
-	if (isatty(fd))
-		input_file_is_stdout = 0;
+		input_file_is_stdout = false;
+	if (0 != isatty(fd))
+		input_file_is_stdout = false;
 	if ((!S_ISREG(isb.st_mode)) && (!S_ISBLK(isb.st_mode)))
-		input_file_is_stdout = 0;
+		input_file_is_stdout = false;
 
 	if (input_file_is_stdout) {
 		pv_error(state, "%s: %s", _("input file is output file"), state->input_files[filenum]);
-		close(fd);
+		(void) close(fd);
 		state->exit_status |= 4;
 		return -1;
 	}
@@ -322,7 +328,9 @@ int pv_next_file(pvstate_t state, int filenum, int oldfd)
 	/*
 	 * Set or clear O_DIRECT on the file descriptor.
 	 */
-	fcntl(fd, F_SETFL, (state->direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL));
+	if (0 != fcntl(fd, F_SETFL, (state->direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL))) {
+		debug("%s: %s: %s", state->current_file, "fcntl", strerror(errno));
+	}
 	/*
 	 * We don't clear direct_io_changed here, to avoid race conditions
 	 * that could cause the input and output settings to differ.

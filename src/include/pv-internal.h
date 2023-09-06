@@ -287,7 +287,7 @@ int pv_main_loop(pvstate_t);
 void pv_display(pvstate_t, long double, long long, long long);
 long pv_transfer(pvstate_t, int, int *, int *, unsigned long long, long *);
 void pv_set_buffer_size(unsigned long long, int);
-int pv_next_file(pvstate_t, int, int);
+int pv_next_file(pvstate_t, unsigned int, int);
 
 void pv_write_retry(int, const char *, size_t);
 

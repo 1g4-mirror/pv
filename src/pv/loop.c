@@ -41,7 +41,8 @@ int pv_main_loop(pvstate_t state)
 	struct timespec init_time, next_remotecheck, transfer_elapsed;
 	long double elapsed_seconds;
 	struct stat sb;
-	int fd, file_idx;
+	int fd;
+	unsigned int file_idx;
 
 	/*
 	 * "written" is ALWAYS bytes written by the last transfer.
