@@ -19,6 +19,7 @@
 #include <fcntl.h>
 #include <limits.h>
 
+
 /*@-type@*/
 /* splint has trouble with off_t and mode_t throughout this file. */
 
@@ -249,7 +250,7 @@ unsigned long long pv_calc_total_size(pvstate_t state)
  * error). It is an error if the next input file is the same as the file
  * stdout is pointing to.
  *
- * Updates state->current_file in the process.
+ * Updates state->current_input_file in the process.
  */
 int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 {
@@ -320,16 +321,20 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		return -1;
 	}
 
-	state->current_file = state->input_files[filenum];
-	if (0 == strcmp(state->input_files[filenum], "-")) {
-		state->current_file = "(stdin)";
-	}
+	state->current_input_file = filenum;
 #ifdef O_DIRECT
 	/*
 	 * Set or clear O_DIRECT on the file descriptor.
 	 */
 	if (0 != fcntl(fd, F_SETFL, (state->direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL))) {
-		debug("%s: %s: %s", state->current_file, "fcntl", strerror(errno));
+		/*@-compdef@ */
+		/*
+		 * splint - passed or returned storage is undefined - but at
+		 * this point we know the input file list is been populated,
+		 * so that's OK.
+		 */
+		debug("%s: %s: %s", pv_current_file_name(state), "fcntl", strerror(errno));
+		/*@+compdef@ */
 	}
 	/*
 	 * We don't clear direct_io_changed here, to avoid race conditions
@@ -337,9 +342,69 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	 */
 #endif				/* O_DIRECT */
 
-	debug("%s: %d: %s: fd=%d", "next file opened", filenum, state->current_file, fd);
+	debug("%s: %d: %s: fd=%d", "next file opened", filenum, pv_current_file_name(state), fd);
 
 	return fd;
+}
+
+
+/*
+ * Return the name of the current file.  The returned buffer may point to
+ * internal state and must not be passed to free() or used after "state" is
+ * freed.
+ */
+/*@out@*/ const char *pv_current_file_name(pvstate_t state)
+{
+	static char *str_none = NULL;
+	static char *str_stdin = NULL;
+	const char *input_file_name = NULL;
+
+	/*@-observertrans@ */
+	/*@-onlytrans@ */
+	/*@-statictrans@ */
+	/*
+	 * Here we are doing bad things with regards to whether the returned
+	 * string is an allocated string from the state->input_files array,
+	 * a constant string, or a returned string from gettext(), but it
+	 * has no impact.  We explicitly document, above, that the returned
+	 * string expires with the state, and hence switch off the
+	 * associated splint warnings.
+	 */
+
+	if (NULL == str_none)
+		str_none = _("(none)");
+	if (NULL == str_stdin)
+		str_stdin = _("(stdin)");
+
+	/* Fallback in case of translation failure. */
+	if (NULL == str_none)
+		str_none = "(none)";
+	if (NULL == str_stdin)
+		str_stdin = "(stdin)";
+
+	if (state->current_input_file < 0)
+		return str_none;
+	if ((unsigned int) (state->current_input_file) >= state->input_file_count)
+		return str_none;
+
+	input_file_name = state->input_files[state->current_input_file];
+	if (NULL == input_file_name)
+		return str_none;
+	if (0 == strcmp(input_file_name, "-"))
+		return str_stdin;
+
+	/*@-compdef@ */
+	return input_file_name;
+	/*@+compdef@ */
+	/*
+	 * splint warns about state->input_files being undefined, but we
+	 * know it's been populated fully by the time this function is
+	 * called.
+	 */
+
+	/*@+statictrans@ */
+	/*@+onlytrans@ */
+	/*@+observertrans@ */
 }
 
 /* EOF */

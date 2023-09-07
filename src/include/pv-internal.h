@@ -129,7 +129,7 @@ struct pvstate_s {
 	 ******************/
 	const char *program_name;	 /* program name for error reporting */
 	char cwd[PV_SIZEOF_CWD];	 /* current working directory for relative path */
-	const char *current_file;	 /* current file being read */
+	int current_input_file;		 /* index of current file being read */
 	int exit_status; 		 /* exit status to give (0=OK) */
 
 	/*******************
@@ -288,6 +288,7 @@ void pv_display(pvstate_t, long double, long long, long long);
 long pv_transfer(pvstate_t, int, int *, int *, unsigned long long, long *);
 void pv_set_buffer_size(unsigned long long, int);
 int pv_next_file(pvstate_t, unsigned int, int);
+/*@out@*/ const char *pv_current_file_name(pvstate_t);
 
 void pv_write_retry(int, const char *, size_t);
 

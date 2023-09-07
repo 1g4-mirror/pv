@@ -56,7 +56,7 @@ pvstate_t pv_state_alloc(const char *program_name)
 	state->crs_lock_fd = -1;
 
 	state->reparse_display = 1;
-	state->current_file = _("none");
+	state->current_input_file = -1;
 #ifdef HAVE_SPLICE
 	state->splice_failed_fd = -1;
 #endif				/* HAVE_SPLICE */

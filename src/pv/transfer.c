@@ -367,7 +367,7 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 	 * reached the end of this file.
 	 */
 	if (do_not_skip_errors) {
-		pv_error(state, "%s: %s: %s", state->current_file, _("read failed"), strerror(errno));
+		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("read failed"), strerror(errno));
 		*eof_in = 1;
 		if (state->write_position >= state->read_position) {
 			*eof_out = 1;
@@ -382,7 +382,8 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 	amount_skipped = -1;
 
 	if (!state->read_error_warning_shown) {
-		pv_error(state, "%s: %s: %s", state->current_file, _("warning: read errors detected"), strerror(errno));
+		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("warning: read errors detected"),
+			 strerror(errno));
 		state->read_error_warning_shown = 1;
 	}
 
@@ -394,7 +395,7 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 	 * of the file.
 	 */
 	if (0 > orig_offset) {
-		pv_error(state, "%s: %s: %s", state->current_file, _("file is not seekable"), strerror(errno));
+		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("file is not seekable"), strerror(errno));
 		*eof_in = 1;
 		if (state->write_position >= state->read_position) {
 			*eof_out = 1;
@@ -462,7 +463,8 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 		 */
 		if (EINVAL != errno) {
 			pv_error(state,
-				 "%s: %s: %s", state->current_file, _("failed to seek past error"), strerror(errno));
+				 "%s: %s: %s", pv_current_file_name(state), _("failed to seek past error"),
+				 strerror(errno));
 		}
 	} else {
 		amount_skipped = skip_offset - orig_offset;
@@ -477,7 +479,7 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 		state->read_position += amount_skipped;
 		if (state->skip_errors < 2) {
 			pv_error(state, "%s: %s: %ld - %ld (%ld %s)",
-				 state->current_file,
+				 pv_current_file_name(state),
 				 _("skipped past read error"), orig_offset, skip_offset, amount_skipped, _("B"));
 		}
 	} else {
@@ -854,7 +856,8 @@ long pv_transfer(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned lo
 		/*
 		 * Any other error is a problem and we must report back.
 		 */
-		pv_error(state, "%s: %s: %d: %s", state->current_file, _("select call failed"), n, strerror(errno));
+		pv_error(state, "%s: %s: %d: %s", pv_current_file_name(state), _("select call failed"), n,
+			 strerror(errno));
 
 		state->exit_status |= 16;
 
