@@ -22,7 +22,7 @@
 void pv_crs_needreinit(pvstate_t);
 #endif
 
-static pvstate_t pv_sig_state = NULL;
+/*@null@*/ static pvstate_t pv_sig_state = NULL;
 
 
 /*
@@ -33,6 +33,9 @@ static pvstate_t pv_sig_state = NULL;
 static void pv_sig_ensure_tty_tostop()
 {
 	struct termios terminal_attributes;
+
+	if (NULL == pv_sig_state)
+		return;
 
 	if (0 != tcgetattr(STDERR_FILENO, &terminal_attributes)) {
 		debug("%s: %s", "failed to read terminal attributes", strerror(errno));
@@ -66,20 +69,39 @@ static void pv_sig_ensure_tty_tostop()
  * subsequent SIGCONT we can try writing to the terminal again, in case we
  * get backgrounded and later get foregrounded again.
  */
-static void pv_sig_ttou( __attribute__((unused))
+static void pv_sig_ttou( /*@unused@ */  __attribute__((unused))
 			int s)
 {
 	int fd;
 
-	fd = open("/dev/null", O_RDWR);
-	if (fd < 0)
+	if (NULL == pv_sig_state)
 		return;
+
+	fd = open("/dev/null", O_RDWR);	    /* flawfinder: ignore */
+	if (fd < 0) {
+		debug("%s: %s", "failed to open /dev/null", strerror(errno));
+		return;
+	}
+
+	/*
+	 * flawfinder rationale: not checking for symlinks because this is
+	 * explicitly a device file under /dev so we assume it is safe to
+	 * open.
+	 *
+	 * TODO: look at just preventing stderr output instead of writing to
+	 * stderr while backgrounded.
+	 */
 
 	if (-1 == pv_sig_state->pv_sig_old_stderr)
 		pv_sig_state->pv_sig_old_stderr = dup(STDERR_FILENO);
 
-	dup2(fd, STDERR_FILENO);
-	close(fd);
+	if (dup2(fd, STDERR_FILENO) < 0) {
+		debug("%s: %s", "failed to replace stderr", strerror(errno));
+	}
+
+	if (0 != close(fd)) {
+		debug("%s: %s", "failed to close /dev/null", strerror(errno));
+	}
 }
 
 
@@ -87,11 +109,15 @@ static void pv_sig_ttou( __attribute__((unused))
  * Handle SIGTSTP (stop typed at tty) by storing the time the signal
  * happened for later use by pv_sig_cont(), and then stopping the process.
  */
-static void pv_sig_tstp( __attribute__((unused))
+static void pv_sig_tstp( /*@unused@ */  __attribute__((unused))
 			int s)
 {
+	if (NULL == pv_sig_state)
+		return;
 	pv_elapsedtime_read(&(pv_sig_state->pv_sig_tstp_time));
-	raise(SIGSTOP);
+	if (0 != raise(SIGSTOP)) {
+		debug("%s: %s", "raise", strerror(errno));
+	}
 }
 
 
@@ -100,11 +126,14 @@ static void pv_sig_tstp( __attribute__((unused))
  * last SIGTSTP to the elapsed time offset, and by trying to write to the
  * terminal again (by replacing the /dev/null stderr with the old stderr).
  */
-static void pv_sig_cont( __attribute__((unused))
+static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 			int s)
 {
 	struct timespec current_time;
 	struct timespec time_spent_stopped;
+
+	if (NULL == pv_sig_state)
+		return;
 
 	pv_sig_state->pv_sig_newsize = 1;
 
@@ -113,6 +142,9 @@ static void pv_sig_cont( __attribute__((unused))
 	 * SIGTSTP such that we have a stop time.
 	 */
 	if (0 != pv_sig_state->pv_sig_tstp_time.tv_sec) {
+
+		memset(&current_time, 0, sizeof(current_time));
+		memset(&time_spent_stopped, 0, sizeof(time_spent_stopped));
 
 		pv_elapsedtime_read(&current_time);
 
@@ -131,8 +163,12 @@ static void pv_sig_cont( __attribute__((unused))
 	 * Restore the old stderr, if we had replaced it.
 	 */
 	if (pv_sig_state->pv_sig_old_stderr != -1) {
-		dup2(pv_sig_state->pv_sig_old_stderr, STDERR_FILENO);
-		close(pv_sig_state->pv_sig_old_stderr);
+		if (dup2(pv_sig_state->pv_sig_old_stderr, STDERR_FILENO) < 0) {
+			debug("%s: %s", "failed to restore old stderr", strerror(errno));
+		}
+		if (0 != close(pv_sig_state->pv_sig_old_stderr)) {
+			debug("%s: %s", "failed to close duplicate old stderr", strerror(errno));
+		}
 		pv_sig_state->pv_sig_old_stderr = -1;
 	}
 
@@ -144,22 +180,28 @@ static void pv_sig_cont( __attribute__((unused))
 }
 
 
+#ifdef SIGWINCH
 /*
  * Handle SIGWINCH (window size changed) by setting a flag.
  */
-static void pv_sig_winch( __attribute__((unused))
+static void pv_sig_winch( /*@unused@ */  __attribute__((unused))
 			 int s)
 {
+	if (NULL == pv_sig_state)
+		return;
 	pv_sig_state->pv_sig_newsize = 1;
 }
+#endif
 
 
 /*
  * Handle termination signals by setting the abort flag.
  */
-static void pv_sig_term( __attribute__((unused))
+static void pv_sig_term( /*@unused@ */  __attribute__((unused))
 			int s)
 {
+	if (NULL == pv_sig_state)
+		return;
 	pv_sig_state->pv_sig_abort = 1;
 }
 
@@ -169,7 +211,16 @@ static void pv_sig_term( __attribute__((unused))
  */
 void pv_sig_init(pvstate_t state)
 {
-	struct sigaction sa;
+	static struct sigaction sa;
+
+	memset(&sa, 0, sizeof(sa));
+
+	/*
+	 * Note that wherever we use a "struct sigaction", we declare it
+	 * static and explicitly zero it before use, because it may contain
+	 * deeper structures (e.g.  "sigset_t") which trigger splint
+	 * warnings about potential memory leaks.
+	 */
 
 	pv_sig_state = state;
 
@@ -178,31 +229,37 @@ void pv_sig_init(pvstate_t state)
 	pv_elapsedtime_zero(&(pv_sig_state->pv_sig_toffset));
 
 	/*
+	 * Note that we cast all sigemptyset() and sigaction() return values
+	 * to void, because there's nothing we can reasonably do about any
+	 * conceivable error they may return.
+	 */
+
+	/*
 	 * Ignore SIGPIPE, so we don't die if stdout is a pipe and the other
 	 * end closes unexpectedly.
 	 */
 	sa.sa_handler = SIG_IGN;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGPIPE, &sa, &(pv_sig_state->pv_sig_old_sigpipe));
+	(void) sigaction(SIGPIPE, &sa, &(pv_sig_state->pv_sig_old_sigpipe));
 
 	/*
 	 * Handle SIGTTOU by continuing with output switched off, so that we
 	 * can be stopped and backgrounded without messing up the terminal.
 	 */
 	sa.sa_handler = pv_sig_ttou;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGTTOU, &sa, &(pv_sig_state->pv_sig_old_sigttou));
+	(void) sigaction(SIGTTOU, &sa, &(pv_sig_state->pv_sig_old_sigttou));
 
 	/*
 	 * Handle SIGTSTP by storing the time the signal happened for later
 	 * use by pv_sig_cont(), and then stopping the process.
 	 */
 	sa.sa_handler = pv_sig_tstp;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGTSTP, &sa, &(pv_sig_state->pv_sig_old_sigtstp));
+	(void) sigaction(SIGTSTP, &sa, &(pv_sig_state->pv_sig_old_sigtstp));
 
 	/*
 	 * Handle SIGCONT by adding the elapsed time since the last SIGTSTP
@@ -210,37 +267,39 @@ void pv_sig_init(pvstate_t state)
 	 * terminal again.
 	 */
 	sa.sa_handler = pv_sig_cont;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGCONT, &sa, &(pv_sig_state->pv_sig_old_sigcont));
+	(void) sigaction(SIGCONT, &sa, &(pv_sig_state->pv_sig_old_sigcont));
 
 	/*
 	 * Handle SIGWINCH by setting a flag to let the main loop know it
 	 * has to reread the terminal size.
 	 */
+#ifdef SIGWINCH
 	sa.sa_handler = pv_sig_winch;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGWINCH, &sa, &(pv_sig_state->pv_sig_old_sigwinch));
+	(void) sigaction(SIGWINCH, &sa, &(pv_sig_state->pv_sig_old_sigwinch));
+#endif
 
 	/*
 	 * Handle SIGINT, SIGHUP, SIGTERM by setting a flag to let the
 	 * main loop know it should quit now.
 	 */
 	sa.sa_handler = pv_sig_term;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGINT, &sa, &(pv_sig_state->pv_sig_old_sigint));
+	(void) sigaction(SIGINT, &sa, &(pv_sig_state->pv_sig_old_sigint));
 
 	sa.sa_handler = pv_sig_term;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGHUP, &sa, &(pv_sig_state->pv_sig_old_sighup));
+	(void) sigaction(SIGHUP, &sa, &(pv_sig_state->pv_sig_old_sighup));
 
 	sa.sa_handler = pv_sig_term;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGTERM, &sa, &(pv_sig_state->pv_sig_old_sigterm));
+	(void) sigaction(SIGTERM, &sa, &(pv_sig_state->pv_sig_old_sigterm));
 
 	/*
 	 * Ensure that the TOSTOP terminal attribute is set, so that a
@@ -257,18 +316,23 @@ void pv_sig_init(pvstate_t state)
  * cursor "-c" mode, only do that if we're the last PV instance, otherwise
  * leave the terminal alone).
  */
-void pv_sig_fini( __attribute__((unused)) pvstate_t state)
+void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 {
 	bool need_to_clear_tostop = false;
 
-	sigaction(SIGPIPE, &(pv_sig_state->pv_sig_old_sigpipe), NULL);
-	sigaction(SIGTTOU, &(pv_sig_state->pv_sig_old_sigttou), NULL);
-	sigaction(SIGTSTP, &(pv_sig_state->pv_sig_old_sigtstp), NULL);
-	sigaction(SIGCONT, &(pv_sig_state->pv_sig_old_sigcont), NULL);
-	sigaction(SIGWINCH, &(pv_sig_state->pv_sig_old_sigwinch), NULL);
-	sigaction(SIGINT, &(pv_sig_state->pv_sig_old_sigint), NULL);
-	sigaction(SIGHUP, &(pv_sig_state->pv_sig_old_sighup), NULL);
-	sigaction(SIGTERM, &(pv_sig_state->pv_sig_old_sigterm), NULL);
+	if (NULL == pv_sig_state)
+		return;
+
+	(void) sigaction(SIGPIPE, &(pv_sig_state->pv_sig_old_sigpipe), NULL);
+	(void) sigaction(SIGTTOU, &(pv_sig_state->pv_sig_old_sigttou), NULL);
+	(void) sigaction(SIGTSTP, &(pv_sig_state->pv_sig_old_sigtstp), NULL);
+	(void) sigaction(SIGCONT, &(pv_sig_state->pv_sig_old_sigcont), NULL);
+#ifdef SIGWINCH
+	(void) sigaction(SIGWINCH, &(pv_sig_state->pv_sig_old_sigwinch), NULL);
+#endif
+	(void) sigaction(SIGINT, &(pv_sig_state->pv_sig_old_sigint), NULL);
+	(void) sigaction(SIGHUP, &(pv_sig_state->pv_sig_old_sighup), NULL);
+	(void) sigaction(SIGTERM, &(pv_sig_state->pv_sig_old_sigterm), NULL);
 
 	need_to_clear_tostop = pv_sig_state->pv_tty_tostop_added;
 
@@ -300,8 +364,9 @@ void pv_sig_fini( __attribute__((unused)) pvstate_t state)
 
 		debug("%s", "about to to clear TOSTOP terminal attribute if it is set");
 
-		tcgetattr(STDERR_FILENO, &terminal_attributes);
-		if (0 != (terminal_attributes.c_lflag & TOSTOP)) {
+		if (0 != tcgetattr(STDERR_FILENO, &terminal_attributes)) {
+			debug("%s: %s", "tcgetattr", strerror(errno));
+		} else if (0 != (terminal_attributes.c_lflag & TOSTOP)) {
 			terminal_attributes.c_lflag -= TOSTOP;
 			if (0 == tcsetattr(STDERR_FILENO, TCSANOW, &terminal_attributes)) {
 				debug("%s", "cleared TOSTOP terminal attribute");
@@ -320,17 +385,19 @@ void pv_sig_fini( __attribute__((unused)) pvstate_t state)
  */
 void pv_sig_nopause(void)
 {
-	struct sigaction sa;
+	static struct sigaction sa;
+
+	memset(&sa, 0, sizeof(sa));
 
 	sa.sa_handler = SIG_IGN;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGTSTP, &sa, NULL);
+	(void) sigaction(SIGTSTP, &sa, NULL);
 
 	sa.sa_handler = SIG_DFL;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGCONT, &sa, NULL);
+	(void) sigaction(SIGCONT, &sa, NULL);
 }
 
 
@@ -339,17 +406,19 @@ void pv_sig_nopause(void)
  */
 void pv_sig_allowpause(void)
 {
-	struct sigaction sa;
+	static struct sigaction sa;
+
+	memset(&sa, 0, sizeof(sa));
 
 	sa.sa_handler = pv_sig_tstp;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGTSTP, &sa, NULL);
+	(void) sigaction(SIGTSTP, &sa, NULL);
 
 	sa.sa_handler = pv_sig_cont;
-	sigemptyset(&(sa.sa_mask));
+	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	sigaction(SIGCONT, &sa, NULL);
+	(void) sigaction(SIGCONT, &sa, NULL);
 }
 
 
@@ -363,6 +432,9 @@ void pv_sig_checkbg(void)
 {
 	static time_t next_check = 0;
 
+	if (NULL == pv_sig_state)
+		return;
+
 	if (time(NULL) < next_check)
 		return;
 
@@ -371,8 +443,14 @@ void pv_sig_checkbg(void)
 	if (-1 == pv_sig_state->pv_sig_old_stderr)
 		return;
 
-	dup2(pv_sig_state->pv_sig_old_stderr, STDERR_FILENO);
-	close(pv_sig_state->pv_sig_old_stderr);
+	if (dup2(pv_sig_state->pv_sig_old_stderr, STDERR_FILENO) < 0) {
+		debug("%s: %s", "failed to restore old stderr", strerror(errno));
+	}
+
+	if (0 != close(pv_sig_state->pv_sig_old_stderr)) {
+		debug("%s: %s", "failed to close duplicate old stderr", strerror(errno));
+	}
+
 	pv_sig_state->pv_sig_old_stderr = -1;
 
 	pv_sig_ensure_tty_tostop();
