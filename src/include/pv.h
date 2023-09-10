@@ -79,6 +79,12 @@ extern int pv_snprintf(char *, size_t, const char *, ...);
 extern size_t pv_strlcat(char *, const char *, size_t);
 
 /*
+ * Allocate and return a duplicate of a \0-terminated string, ensuring that
+ * the duplicate is also \0-terminated.  Returns NULL on error.
+ */
+/*@null@ */ /*@only@ */ extern char *pv_strdup(const char *);
+
+/*
  * Functions relating to elapsed time.
  */
 

@@ -26,41 +26,6 @@ void display_version(void);
 
 
 /*
- * Allocate a duplicate of a \0-terminated string.
- */
-static					 /*@null@ */
- /*@only@ */
-char *xstrdup(const char *original)
-{
-	size_t length;
-	char *duplicate;
-
-	if (NULL == original) {
-		errno = EINVAL;
-		return NULL;
-	}
-
-	length = strlen(original);	    /* flawfinder: ignore */
-	/*
-	 * flawfinder rationale: the original string is explicitly required
-	 * to be \0 terminated.
-	 */
-	duplicate = calloc(1, 1 + length);
-	if (NULL == duplicate)
-		return NULL;
-
-	memcpy(duplicate, original, length);	/* flawfinder: ignore */
-	/*
-	 * flawfinder rationale: the buffer is explicitly allocated to be
-	 * large enough.
-	 */
-
-	duplicate[length] = '\0';
-
-	return duplicate;
-}
-
-/*
  * Free an opts_t object.
  */
 void opts_free( /*@only@ */ opts_t opts)
@@ -444,7 +409,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->height_set_manually = opts->height == 0 ? false : true;
 			break;
 		case 'N':
-			opts->name = xstrdup(optarg);
+			opts->name = pv_strdup(optarg);
 			if (NULL == opts->name) {
 				fprintf(stderr, "%s: -N: %s\n", opts->program_name, strerror(errno));
 				opts_free(opts);
@@ -484,7 +449,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->remote = pv_getnum_ui(optarg);
 			break;
 		case 'P':
-			opts->pidfile = xstrdup(optarg);
+			opts->pidfile = pv_strdup(optarg);
 			if (NULL == opts->pidfile) {
 				fprintf(stderr, "%s: -P: %s\n", opts->program_name, strerror(errno));
 				opts_free(opts);
@@ -492,7 +457,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'F':
-			opts->format = xstrdup(optarg);
+			opts->format = pv_strdup(optarg);
 			if (NULL == opts->format) {
 				fprintf(stderr, "%s: -F: %s\n", opts->program_name, strerror(errno));
 				opts_free(opts);

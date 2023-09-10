@@ -88,7 +88,7 @@ struct pvstate_s {
 	 * Input files *
 	 ***************/
 	unsigned int input_file_count;	 /* number of input files */
-	const char **input_files;	 /* input files (0=first) */
+	/*@only@*/ /*@null@*/ char **input_files; /* input files */
 
 	/*******************
 	 * Program control *
@@ -120,14 +120,14 @@ struct pvstate_s {
 	unsigned int height;             /* screen height */
 	bool width_set_manually;	 /* width was set manually, not detected */
 	bool height_set_manually;	 /* height was set manually, not detected */
-	/*@null@*/ char *name;		 /* display name */
+	/*@only@*/ /*@null@*/ char *name;		 /* display name */
 	char default_format[PV_SIZEOF_DEFAULT_FORMAT];	 /* default format string */
-	char *format_string;		 /* output format string */
+	/*@only@*/ /*@null@*/ char *format_string;	 /* output format string */
 
 	/******************
 	 * Program status *
 	 ******************/
-	const char *program_name;	 /* program name for error reporting */
+	/*@only@*/ char *program_name;		 /* program name for error reporting */
 	char cwd[PV_SIZEOF_CWD];	 /* current working directory for relative path */
 	int current_input_file;		 /* index of current file being read */
 	int exit_status; 		 /* exit status to give (0=OK) */
@@ -160,15 +160,15 @@ struct pvstate_s {
 	long double prev_trans;
 
 	/* Keep track of progress over last intervals to compute current average rate. */
-	pvhistory_t *history;            /* state at previous intervals (circular buffer) */
-	int history_len;		 /* total size */
+	/*@null@*/ pvhistory_t *history; /* state at previous intervals (circular buffer) */
+	unsigned int history_len;	 /* total size */
 	int history_interval;		 /* seconds between each history entry */
 	int history_first;
 	int history_last;
 	long double current_avg_rate;    /* current average rate over last history intervals */
 	
 	unsigned long long initial_offset;
-	char *display_buffer;
+	/*@only@*/ char *display_buffer;
 	long display_buffer_size;
 	int lastoutput_length;		 /* number of last-output bytes to show */
 	unsigned char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];

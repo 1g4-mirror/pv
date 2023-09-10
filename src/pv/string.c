@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <errno.h>
 
 
 /*
@@ -111,6 +112,43 @@ size_t pv_strlcat(char *dst, const char *src, size_t dstsize)
 
 	return dstlen + srclen;
 #endif
+}
+
+
+/*
+ * Allocate and return a duplicate of a \0-terminated string, ensuring that
+ * the duplicate is also \0-terminated.  Returns NULL on error.
+ */
+/*@null@ */
+/*@only@ */
+char *pv_strdup(const char *original)
+{
+	size_t length;
+	char *duplicate;
+
+	if (NULL == original) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	length = strlen(original);	    /* flawfinder: ignore */
+	/*
+	 * flawfinder rationale: the original string is explicitly required
+	 * to be \0 terminated.
+	 */
+	duplicate = calloc(1, 1 + length);
+	if (NULL == duplicate)
+		return NULL;
+
+	memcpy(duplicate, original, length);	/* flawfinder: ignore */
+	/*
+	 * flawfinder rationale: the buffer is explicitly allocated to be
+	 * large enough.
+	 */
+
+	duplicate[length] = '\0';
+
+	return duplicate;
 }
 
 /* EOF */
