@@ -36,8 +36,8 @@ extern "C" {
 #define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R */
 #define BUFFER_SIZE		409600		 /* default transfer buffer size */
 #define BUFFER_SIZE_MAX		524288		 /* max auto transfer buffer size */
-#define MAX_READ_AT_ONCE	524288		 /* max to read() in one go */
-#define MAX_WRITE_AT_ONCE	524288		 /* max to write() in one go */
+#define MAX_READ_AT_ONCE	(size_t) 524288	 /* max to read() in one go */
+#define MAX_WRITE_AT_ONCE	(size_t) 524288	 /* max to write() in one go */
 #define TRANSFER_READ_TIMEOUT	0.09L		 /* seconds to time reads out at */
 #define TRANSFER_WRITE_TIMEOUT	0.9L		 /* seconds to time writes out at */
 

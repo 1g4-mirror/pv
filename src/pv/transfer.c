@@ -22,6 +22,85 @@
 #include <signal.h>
 #include <sys/time.h>
 
+/*
+ * splint note: In a few places we use "#if SPLINT" to substitute other code
+ * while analysing with splint, to work around the issues it has with
+ * FD_ZERO, FD_SET, FD_ISSET - these macros expand to code it does not like,
+ * such as using << with an fd which may be negative, or comparing an
+ * unsigned integer with a size_t, and it doesn't seem to work to turn off
+ * those specific warnings where these macros are used.
+ */
+
+/*
+ * Return >0 if data is ready to read on fd_in, or write on fd_out, before
+ * "usec" microseconds have elapsed, 0 if not, or negative on error.  Either
+ * or both of "fd_in" and "fd_out" may be negative to ignore that side.  If
+ * fd_in_ready and/or fd_out_ready are not NULL, they will be populated with
+ * true or false depending on whether data is ready on those sides.
+ */
+static int is_data_ready(int fd_in, /*@null@ */ bool *fd_in_ready, int fd_out, /*@null@ */ bool *fd_out_ready,
+			 long usec)
+{
+	struct timeval tv;
+	fd_set readfds;
+	fd_set writefds;
+	fd_set exceptfds;
+	int max_fd;
+	int result;
+
+	max_fd = -1;
+	if (fd_in > max_fd)
+		max_fd = fd_in;
+	if (fd_out > max_fd)
+		max_fd = fd_out;
+
+	memset(&tv, 0, sizeof(tv));
+
+#if SPLINT
+	/* splint doesn't like FD_ZERO and FD_SET. */
+	memset(&readfds, 0, sizeof(readfds));
+	memset(&writefds, 0, sizeof(writefds));
+	memset(&exceptfds, 0, sizeof(exceptfds));
+#else				/* !SPLINT */
+	FD_ZERO(&readfds);
+	FD_ZERO(&writefds);
+	FD_ZERO(&exceptfds);
+	if (fd_in >= 0)
+		FD_SET(fd_in, &readfds);
+	if (fd_out >= 0)
+		FD_SET(fd_out, &writefds);
+#endif				/* !SPLINT */
+
+	tv.tv_sec = usec / 1000000;
+	tv.tv_usec = usec % 1000000;
+
+	if (NULL != fd_in_ready)
+		*fd_in_ready = false;
+	if (NULL != fd_out_ready)
+		*fd_out_ready = false;
+
+	result = select(max_fd + 1, &readfds, &writefds, &exceptfds, &tv);
+
+	if (result > 0) {
+		if ((fd_in >= 0) && (NULL != fd_in_ready)
+#ifndef SPLINT
+		    && (FD_ISSET(fd_in, &readfds))
+#endif
+		    ) {
+			*fd_in_ready = true;
+		}
+		if ((fd_out >= 0) && (NULL != fd_out_ready)
+#ifndef SPLINT
+		    && (FD_ISSET(fd_out, &writefds))
+#endif
+		    ) {
+			*fd_out_ready = true;
+		}
+	}
+
+	return result;
+}
+
 
 /*
  * Read up to "count" bytes from file descriptor "fd" into the buffer "buf",
@@ -39,6 +118,8 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
 	struct timespec start_time;
 	ssize_t total_read;
 
+	memset(&start_time, 0, sizeof(start_time));
+
 	pv_elapsedtime_read(&start_time);
 
 	total_read = 0;
@@ -48,7 +129,7 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
 		struct timespec cur_time, transfer_elapsed;
 		long double elapsed_seconds;
 
-		nread = read(fd, buf, count > MAX_READ_AT_ONCE ? MAX_READ_AT_ONCE : count);
+		nread = read(fd, buf, (size_t) (count > MAX_READ_AT_ONCE ? MAX_READ_AT_ONCE : count));
 		if (nread < 0)
 			return nread;
 
@@ -58,6 +139,10 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
 
 		if (0 == nread)
 			return total_read;
+
+		memset(&cur_time, 0, sizeof(cur_time));
+		memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
+		elapsed_seconds = 0.0;
 
 		pv_elapsedtime_read(&cur_time);
 		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &start_time);
@@ -70,18 +155,9 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
 		}
 
 		if (count > 0) {
-			fd_set readfds;
-			struct timeval tv;
-
-			tv.tv_sec = 0;
-			tv.tv_usec = 0;
-			FD_ZERO(&readfds);
-			FD_SET(fd, &readfds);
-
 			debug("%s %d: %s (%ld %s, %ld %s)", "fd", fd,
 			      "trying another read after partial buffer fill", nread, "read", count, "remaining");
-
-			if (select(fd + 1, &readfds, NULL, NULL, &tv) < 1)
+			if (is_data_ready(fd, NULL, -1, NULL, 0) < 1)
 				break;
 		}
 	}
@@ -108,6 +184,8 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
 {
 	struct timespec start_time;
 	ssize_t total_written;
+
+	memset(&start_time, 0, sizeof(start_time));
 
 	pv_elapsedtime_read(&start_time);
 
@@ -165,6 +243,10 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
 		if (0 == nwritten)
 			return total_written;
 
+		memset(&cur_time, 0, sizeof(cur_time));
+		memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
+		elapsed_seconds = 0.0;
+
 		pv_elapsedtime_read(&cur_time);
 		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &start_time);
 		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
@@ -182,23 +264,15 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
 		 * out of time - also on our elapsed time check.
 		 */
 		if (count > 0) {
-#if 0					    /* disabled after 1.6.0 - see comment above */
-			fd_set writefds;
-			struct timeval tv;
-#endif
-
 			debug("%s %d: %s (%ld %s, %ld %s)", "fd", fd,
 			      "trying another write after partial buffer flush",
 			      nwritten, "written", count, "remaining");
 
-#if 0					    /* disabled after 1.6.0 - see comment above */
-			tv.tv_sec = 0;
-			tv.tv_usec = 0;
-			FD_ZERO(&writefds);
-			FD_SET(fd, &writefds);
-			if (select(fd + 1, NULL, &writefds, NULL, &tv) < 1)
+#if 0					    /* removed after 1.6.0 - see comment above */
+			if (is_data_ready(-1, NULL, fd, NULL, 0) < 1) {
 				break;
-#endif
+			}
+#endif				/* end of removed section */
 		}
 	}
 
@@ -235,8 +309,8 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
 static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned long long allowed)
 {
 	bool do_not_skip_errors;
-	unsigned long bytes_can_read;
-	unsigned long amount_to_skip;
+	size_t bytes_can_read;
+	size_t amount_to_skip;
 	long amount_skipped;
 	long orig_offset;
 	long skip_offset;
@@ -346,11 +420,8 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 	 * bit and then return zero, since this was a transient error.
 	 */
 	if ((EINTR == errno) || (EAGAIN == errno)) {
-		struct timeval tv;
 		debug("%s %d: %s: %s", "fd", fd, "transient error - waiting briefly", strerror(errno));
-		tv.tv_sec = 0;
-		tv.tv_usec = 10000;
-		select(0, NULL, NULL, NULL, &tv);
+		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
 		return 0;
 	}
 
@@ -623,10 +694,8 @@ static int pv__transfer_write(pvstate_t state, int *eof_in, int *eof_out, long *
 	 * bit and then return zero, since this was a transient error.
 	 */
 	if ((EINTR == errno) || (EAGAIN == errno)) {
-		struct timeval tv;
-		tv.tv_sec = 0;
-		tv.tv_usec = 10000;
-		select(0, NULL, NULL, NULL, &tv);
+		debug("%s: %s", "transient write error - waiting briefly", strerror(errno));
+		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
 		return 0;
 	}
 
@@ -716,10 +785,8 @@ static unsigned char *pv__allocate_aligned_buffer(int fd, size_t target_size)
  */
 long pv_transfer(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned long long allowed, long *lineswritten)
 {
-	struct timeval tv;
-	fd_set readfds;
-	fd_set writefds;
-	int max_fd;
+	bool ready_to_read, ready_to_write;
+	int check_read_fd, check_write_fd;
 	int n;
 
 	if (NULL == state)
@@ -803,22 +870,15 @@ long pv_transfer(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned lo
 	if ((*eof_in) && (*eof_out))
 		return 0;
 
-	tv.tv_sec = 0;
-	tv.tv_usec = 90000;
-
-	FD_ZERO(&readfds);
-	FD_ZERO(&writefds);
-
-	max_fd = 0;
+	check_read_fd = -1;
+	check_write_fd = -1;
 
 	/*
 	 * If the input file is not at EOF and there's room in the buffer,
 	 * look for incoming data from it.
 	 */
 	if ((!(*eof_in)) && (state->read_position < state->buffer_size)) {
-		FD_SET(fd, &readfds);
-		if (fd > max_fd)
-			max_fd = fd;
+		check_read_fd = fd;
 	}
 
 	/*
@@ -839,12 +899,12 @@ long pv_transfer(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned lo
 	 * we're allowed to write, look for the stdout becoming writable.
 	 */
 	if ((!(*eof_out)) && (state->to_write > 0)) {
-		FD_SET(STDOUT_FILENO, &writefds);
-		if (STDOUT_FILENO > max_fd)
-			max_fd = STDOUT_FILENO;
+		check_write_fd = STDOUT_FILENO;
 	}
 
-	n = select(max_fd + 1, &readfds, &writefds, NULL, &tv);
+	ready_to_read = false;
+	ready_to_write = false;
+	n = is_data_ready(check_read_fd, &ready_to_read, check_write_fd, &ready_to_write, 90000);
 
 	if (n < 0) {
 		/*
@@ -872,7 +932,7 @@ long pv_transfer(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned lo
 	 *
 	 * NB this can update state->written because of splice().
 	 */
-	if (FD_ISSET(fd, &readfds)) {
+	if (ready_to_read) {
 		if (pv__transfer_read(state, fd, eof_in, eof_out, allowed) == 0)
 			return 0;
 	}
@@ -906,7 +966,7 @@ long pv_transfer(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned lo
 	 * we didn't use splice() this time, write some data.  Return early
 	 * if there was a transient write error.
 	 */
-	if (FD_ISSET(STDOUT_FILENO, &writefds)
+	if (ready_to_write
 #ifdef HAVE_SPLICE
 	    && (0 == state->splice_used)
 #endif				/* HAVE_SPLICE */

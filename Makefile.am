@@ -91,7 +91,7 @@ docs/pv.1.md: $(srcdir)/docs/pv.1
 SUFFIXES = .c .o .e
 
 .c.e:
-	-splint -badflag +posixlib $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $< > $@ 2>&1
+	-splint -badflag +posixlib $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) -DSPLINT=1 $< > $@ 2>&1
 	-flawfinder $< >> $@ 2>&1
 
 indent:
