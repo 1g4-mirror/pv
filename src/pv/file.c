@@ -45,7 +45,7 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 	/*
 	 * No files specified - check stdin.
 	 */
-	if (state->input_file_count < 1) {
+	if ((state->input_file_count < 1) || (NULL == state->input_files)) {
 		if (0 == fstat(STDIN_FILENO, &sb))
 			total = (unsigned long long) (sb.st_size);
 		return total;
@@ -62,8 +62,20 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 			}
 		} else {
 			rc = stat(state->input_files[file_idx], &sb);
-			if (0 == rc)
-				rc = access(state->input_files[file_idx], R_OK);
+			if (0 == rc) {
+				rc = access(state->input_files[file_idx], R_OK);	/* flawfinder: ignore */
+				/*
+				 * flawfinder rationale: we're not really
+				 * using access() to do permissions checks,
+				 * but to zero the total if we might be
+				 * unable to read the file later, so if an
+				 * attacker redirected one of the input
+				 * files in between this part and the actual
+				 * reading, the outcome would be that the
+				 * total byte count would be wrong or
+				 * missing, nothing useful.
+				 */
+			}
 		}
 
 		if (rc != 0) {
@@ -80,9 +92,17 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 			 * them and seeking to the end.
 			 */
 			if (0 == strcmp(state->input_files[file_idx], "-")) {
-				fd = open("/dev/stdin", O_RDONLY);
+				fd = open("/dev/stdin", O_RDONLY);	/* flawfinder: ignore */
+				/*
+				 * flawfinder rationale: "/dev/stdin" may be
+				 * a symlink, so can't use O_NOFOLLOW, and
+				 * so we have to assume that it being under
+				 * "/dev" means the path is less likely to
+				 * be under the control of someone else.
+				 */
 			} else {
-				fd = open(state->input_files[file_idx], O_RDONLY);
+				fd = open(state->input_files[file_idx], O_RDONLY);	/* flawfinder: ignore */
+				/* flawfinder - see last open() below. */
 			}
 			if (fd >= 0) {
 				off_t end_position;
@@ -162,7 +182,7 @@ static unsigned long long pv_calc_total_lines(pvstate_t state)
 
 	total = 0;
 
-	for (file_idx = 0; file_idx < state->input_file_count; file_idx++) {
+	for (file_idx = 0; file_idx < state->input_file_count && NULL != state->input_files; file_idx++) {
 		int fd = -1;
 		int rc = 0;
 
@@ -179,7 +199,8 @@ static unsigned long long pv_calc_total_lines(pvstate_t state)
 				total = 0;
 				return total;
 			}
-			fd = open(state->input_files[file_idx], O_RDONLY);
+			fd = open(state->input_files[file_idx], O_RDONLY);	/* flawfinder: ignore */
+			/* flawfinder - see last open() below. */
 		}
 
 		if (fd < 0) {
@@ -193,10 +214,18 @@ static unsigned long long pv_calc_total_lines(pvstate_t state)
 #endif
 
 		while (true) {
-			char scanbuf[1024];
+			char scanbuf[1024];	/* flawfinder: ignore */
 			ssize_t numread, buf_idx;
 
-			numread = read(fd, scanbuf, sizeof(scanbuf));
+			/* flawfinder - always bounded, below. */
+
+			numread = read(fd, scanbuf, sizeof(scanbuf));	/* flawfinder: ignore */
+			/*
+			 * flawfinder rationale: each time around the loop
+			 * we are always reading into the start of the
+			 * buffer, not moving along it, so the bounding is
+			 * OK.
+			 */
 			if (numread < 0) {
 				pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
 				state->exit_status |= 2;
@@ -273,10 +302,15 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		return -1;
 	}
 
-	if (0 == strcmp(state->input_files[filenum], "-")) {
+	if ((NULL == state->input_files) || (0 == strcmp(state->input_files[filenum], "-"))) {
 		fd = STDIN_FILENO;
 	} else {
-		fd = open(state->input_files[filenum], O_RDONLY);
+		fd = open(state->input_files[filenum], O_RDONLY);	/* flawfinder: ignore */
+		/*
+		 * flawfinder rationale: the input file list is under the
+		 * control of the operator by its nature, so we can't refuse
+		 * to open symlinks etc as that would be counterintuitive.
+		 */
 		if (fd < 0) {
 			pv_error(state, "%s: %s: %s",
 				 _("failed to read file"), state->input_files[filenum], strerror(errno));
@@ -286,7 +320,8 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	}
 
 	if (0 != fstat(fd, &isb)) {
-		pv_error(state, "%s: %s: %s", _("failed to stat file"), state->input_files[filenum], strerror(errno));
+		pv_error(state, "%s: %s: %s", _("failed to stat file"),
+			 NULL == state->input_files ? "-" : state->input_files[filenum], strerror(errno));
 		(void) close(fd);
 		state->exit_status |= 2;
 		return -1;
@@ -315,7 +350,8 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		input_file_is_stdout = false;
 
 	if (input_file_is_stdout) {
-		pv_error(state, "%s: %s", _("input file is output file"), state->input_files[filenum]);
+		pv_error(state, "%s: %s", _("input file is output file"),
+			 NULL == state->input_files ? "-" : state->input_files[filenum]);
 		(void) close(fd);
 		state->exit_status |= 4;
 		return -1;
@@ -387,7 +423,11 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	if ((unsigned int) (state->current_input_file) >= state->input_file_count)
 		return str_none;
 
-	input_file_name = state->input_files[state->current_input_file];
+	if (NULL == state->input_files) {
+		input_file_name = NULL;
+	} else {
+		input_file_name = state->input_files[state->current_input_file];
+	}
 	if (NULL == input_file_name)
 		return str_none;
 	if (0 == strcmp(input_file_name, "-"))
