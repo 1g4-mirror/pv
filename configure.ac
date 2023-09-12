@@ -22,18 +22,37 @@ if test "$USE_NLS" = "yes"; then
   CPPFLAGS="$CPPFLAGS -DLOCALEDIR=\\\"\$(localedir)\\\""
   LIBS="$LIBS $LIBINTL"
 fi
+
+dnl Items we can use if present, but can do without if not present.
 AC_CHECK_FUNCS([getopt_long])
-AC_CHECK_HEADERS([getopt.h])
-AC_CHECK_FUNCS([memcpy basename vsnprintf strlcat strtoul])
+AC_CHECK_FUNCS([vsnprintf strlcat strtoul])
 AC_CHECK_FUNCS([fdatasync])
 AC_CHECK_FUNCS([fpathconf sysconf posix_memalign posix_fadvise])
-AC_SEARCH_LIBS([clock_gettime],[rt])
+AC_CHECK_HEADERS([getopt.h])
 AC_CHECK_HEADERS([limits.h])
 AC_CHECK_HEADERS([wctype.h])
 AC_CHECK_HEADERS([termios.h])
 AC_CHECK_HEADERS([libgen.h])
 AC_CHECK_HEADERS([sys/ioctl.h])
 AC_CHECK_HEADERS([libintl.h locale.h])
+AC_CHECK_MEMBERS([struct stat.st_blksize])
+
+dnl Items we can't do without.
+AC_CHECK_FUNCS([alarm basename clock_gettime dup2 getcwd memcpy memmove memset select setlocale strchr strerror strrchr strstr], [], [AC_MSG_ERROR([required function is missing])])
+AC_CHECK_HEADERS([fcntl.h sys/file.h sys/time.h unistd.h], [], [AC_MSG_ERROR([required header file is missing])])
+
+dnl Libraries that may contain key functions.
+AC_SEARCH_LIBS([clock_gettime],[rt])
+
+dnl Make sure all the types we use are defined.
+AC_TYPE_INT32_T
+AC_TYPE_MODE_T
+AC_TYPE_OFF_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UID_T
+
 AH_BOTTOM([#include "config-aux.h"])
 
 AC_ARG_ENABLE([debugging],

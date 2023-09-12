@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-09-12 13:36+0100\n"
+"POT-Creation-Date: 2023-09-12 21:25+0100\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -420,7 +420,7 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:522 src/pv/loop.c:572 src/pv/loop.c:617 src/pv/watchpid.c:73
+#: src/pv/loop.c:524 src/pv/loop.c:574 src/pv/loop.c:619 src/pv/watchpid.c:73
 #: src/pv/watchpid.c:83 src/pv/watchpid.c:94 src/pv/watchpid.c:102
 #: src/pv/watchpid.c:139 src/pv/watchpid.c:150 src/pv/watchpid.c:158
 #: src/pv/watchpid.c:169 src/pv/watchpid.c:253 src/pv/watchpid.c:261

@@ -7,6 +7,9 @@
    language is requested. */
 #undef ENABLE_NLS
 
+/* Define to 1 if you have the `alarm' function. */
+#undef HAVE_ALARM
+
 /* Define to 1 if you have the `basename' function. */
 #undef HAVE_BASENAME
 
@@ -18,15 +21,27 @@
    the CoreFoundation framework. */
 #undef HAVE_CFPREFERENCESCOPYAPPVALUE
 
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
+
 /* Define if the GNU dcgettext() function is already present or preinstalled.
    */
 #undef HAVE_DCGETTEXT
+
+/* Define to 1 if you have the `dup2' function. */
+#undef HAVE_DUP2
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
 
 /* Define to 1 if you have the `fdatasync' function. */
 #undef HAVE_FDATASYNC
 
 /* Define to 1 if you have the `fpathconf' function. */
 #undef HAVE_FPATHCONF
+
+/* Define to 1 if you have the `getcwd' function. */
+#undef HAVE_GETCWD
 
 /* Define to 1 if you have the <getopt.h> header file. */
 #undef HAVE_GETOPT_H
@@ -61,6 +76,12 @@
 /* Define to 1 if you have the `memcpy' function. */
 #undef HAVE_MEMCPY
 
+/* Define to 1 if you have the `memmove' function. */
+#undef HAVE_MEMMOVE
+
+/* Define to 1 if you have the `memset' function. */
+#undef HAVE_MEMSET
+
 /* Define to 1 if you have the <minix/config.h> header file. */
 #undef HAVE_MINIX_CONFIG_H
 
@@ -72,6 +93,12 @@
 
 /* Define to 1 if you have the `posix_memalign' function. */
 #undef HAVE_POSIX_MEMALIGN
+
+/* Define to 1 if you have the `select' function. */
+#undef HAVE_SELECT
+
+/* Define to 1 if you have the `setlocale' function. */
+#undef HAVE_SETLOCALE
 
 /* Define to 1 if you have the `splice' function. */
 #undef HAVE_SPLICE
@@ -88,6 +115,12 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
+/* Define to 1 if you have the `strchr' function. */
+#undef HAVE_STRCHR
+
+/* Define to 1 if you have the `strerror' function. */
+#undef HAVE_STRERROR
+
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
@@ -97,11 +130,23 @@
 /* Define to 1 if you have the `strlcat' function. */
 #undef HAVE_STRLCAT
 
+/* Define to 1 if you have the `strrchr' function. */
+#undef HAVE_STRRCHR
+
+/* Define to 1 if you have the `strstr' function. */
+#undef HAVE_STRSTR
+
 /* Define to 1 if you have the `strtoul' function. */
 #undef HAVE_STRTOUL
 
+/* Define to 1 if `st_blksize' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_BLKSIZE
+
 /* Define to 1 if you have the `sysconf' function. */
 #undef HAVE_SYSCONF
+
+/* Define to 1 if you have the <sys/file.h> header file. */
+#undef HAVE_SYS_FILE_H
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
@@ -117,6 +162,9 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
@@ -264,5 +312,30 @@
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef gid_t
+
+/* Define to the type of a signed integer type of width exactly 32 bits if
+   such a type exists and the standard includes do not define it. */
+#undef int32_t
+
+/* Define to `int' if <sys/types.h> does not define. */
+#undef mode_t
+
+/* Define to `long int' if <sys/types.h> does not define. */
+#undef off_t
+
+/* Define as a signed integer type capable of holding a process identifier. */
+#undef pid_t
+
+/* Define to `unsigned int' if <sys/types.h> does not define. */
+#undef size_t
+
+/* Define to `int' if <sys/types.h> does not define. */
+#undef ssize_t
+
+/* Define to `int' if <sys/types.h> doesn't define. */
+#undef uid_t
 
 #include "config-aux.h"

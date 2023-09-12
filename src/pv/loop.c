@@ -118,6 +118,7 @@ int pv_main_loop(pvstate_t state)
 	state->direct_io_changed = false;
 #endif				/* O_DIRECT */
 
+#if HAVE_STRUCT_STAT_ST_BLKSIZE
 	/*
 	 * Set target buffer size if the initial file's block size can be
 	 * read and we weren't given a target buffer size.
@@ -129,6 +130,7 @@ int pv_main_loop(pvstate_t state)
 			sz = BUFFER_SIZE_MAX;
 		state->target_buffer_size = sz;
 	}
+#endif
 
 	if (0 == state->target_buffer_size)
 		state->target_buffer_size = BUFFER_SIZE;
