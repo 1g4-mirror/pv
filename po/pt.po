@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-09-12 21:25+0100\n"
+"POT-Creation-Date: 2023-09-12 23:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -356,7 +356,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:701 src/pv/transfer.c:829
+#: src/pv/display.c:701 src/pv/transfer.c:830
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
@@ -450,11 +450,11 @@ msgstr "não pode ir além do erro"
 msgid "skipped past read error"
 msgstr "ignorado erro de leitura"
 
-#: src/pv/transfer.c:712
+#: src/pv/transfer.c:713
 msgid "write failed"
 msgstr "erro de gravação"
 
-#: src/pv/transfer.c:919
+#: src/pv/transfer.c:920
 msgid "select call failed"
 msgstr "erro na chamada da função select"
 

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-09-12 21:25+0100\n"
+"POT-Creation-Date: 2023-09-12 23:45+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -365,7 +365,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:701 src/pv/transfer.c:829
+#: src/pv/display.c:701 src/pv/transfer.c:830
 msgid "buffer allocation failed"
 msgstr "l'allocation de mémoire tampon a échoué"
 
@@ -459,11 +459,11 @@ msgstr "n'a pas réussi à dépasser l'erreur"
 msgid "skipped past read error"
 msgstr "erreur de lecture dépassée"
 
-#: src/pv/transfer.c:712
+#: src/pv/transfer.c:713
 msgid "write failed"
 msgstr "l'écriture a échoué"
 
-#: src/pv/transfer.c:919
+#: src/pv/transfer.c:920
 msgid "select call failed"
 msgstr "appel de sélection a échoué"
 
