@@ -36,9 +36,9 @@ struct remote_msg {
 	bool bytes;			 /* bytes transferred flag */
 	bool bufpercent;		 /* transfer buffer percentage flag */
 	unsigned int lastwritten;	 /* last-written bytes count */
-	unsigned long long rate_limit;	 /* rate limit, in bytes per second */
-	unsigned long long buffer_size;	 /* buffer size, in bytes (0=default) */
-	unsigned long long size;	 /* total size of data */
+	size_t rate_limit;		 /* rate limit, in bytes per second */
+	size_t buffer_size;		 /* buffer size, in bytes (0=default) */
+	size_t size;			 /* total size of data */
 	double interval;		 /* interval between updates */
 	unsigned int width;		 /* screen width */
 	unsigned int height;		 /* screen height */

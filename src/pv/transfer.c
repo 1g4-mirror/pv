@@ -303,10 +303,10 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
  * state->skip_errors, tries to skip past the problem.
  *
  * If the end of the input file is reached or the error is unrecoverable,
- * sets *eof_in to 1.  If all data in the buffer has been written at this
- * point, then also sets *eof_out.
+ * sets *eof_in to true.  If all data in the buffer has been written at this
+ * point, then also sets *eof_out to true.
  */
-static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned long long allowed)
+static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, size_t allowed)
 {
 	bool do_not_skip_errors;
 	size_t bytes_can_read;
@@ -387,9 +387,9 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 		 * buffer, we set eof_out as well, so that the main loop can
 		 * move on to the next input file.
 		 */
-		*eof_in = 1;
+		*eof_in = true;
 		if (state->write_position >= state->read_position)
-			*eof_out = 1;
+			*eof_out = true;
 		return 1;
 	} else if (nread > 0) {
 		/*
@@ -439,9 +439,9 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 	 */
 	if (do_not_skip_errors) {
 		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("read failed"), strerror(errno));
-		*eof_in = 1;
+		*eof_in = true;
 		if (state->write_position >= state->read_position) {
-			*eof_out = 1;
+			*eof_out = true;
 		}
 		return 1;
 	}
@@ -467,9 +467,9 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 	 */
 	if (0 > orig_offset) {
 		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("file is not seekable"), strerror(errno));
-		*eof_in = 1;
+		*eof_in = true;
 		if (state->write_position >= state->read_position) {
-			*eof_out = 1;
+			*eof_out = true;
 		}
 		return 1;
 	}
@@ -526,7 +526,7 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 		 * Failed to skip - lseek() returned an error, so mark the
 		 * file as having ended.
 		 */
-		*eof_in = 1;
+		*eof_in = true;
 		/*
 		 * EINVAL means the file has ended since we've tried to go
 		 * past the end of it, so we don't bother with a warning
@@ -557,9 +557,9 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
 		/*
 		 * Failed to skip - mark file as ended.
 		 */
-		*eof_in = 1;
+		*eof_in = true;
 		if (state->write_position >= state->read_position) {
-			*eof_out = 1;
+			*eof_out = true;
 		}
 	}
 
@@ -574,15 +574,16 @@ static int pv__transfer_read(pvstate_t state, int fd, int *eof_in, int *eof_out,
  *
  * Updates state->write_position by moving it on by the number of bytes
  * written; adds the number of bytes written to state->written; sets
- * *eof_out on stdout EOF or when the write position catches up with the
- * read position AND *eof_in is 1 (meaning we've reached the end of data).
+ * *eof_out to true, on stdout EOF, or when the write position catches up
+ * with the read position AND *eof_in is true (meaning we've reached the end
+ * of data).
  *
- * On error, sets *eof_out to 1, sets state->written to -1, and updates
+ * On error, sets *eof_out to true, sets state->written to -1, and updates
  * state->exit_status.
  *
  * If state->discard_input is true, does not actually write anything.
  */
-static int pv__transfer_write(pvstate_t state, int *eof_in, int *eof_out, long *lineswritten)
+static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long *lineswritten)
 {
 	ssize_t nwritten;
 
@@ -601,7 +602,7 @@ static int pv__transfer_write(pvstate_t state, int *eof_in, int *eof_out, long *
 		/*
 		 * Write returned 0 - EOF on stdout.
 		 */
-		*eof_out = 1;
+		*eof_out = true;
 		return 1;
 	} else if (nwritten > 0) {
 		/*
@@ -679,7 +680,7 @@ static int pv__transfer_write(pvstate_t state, int *eof_in, int *eof_out, long *
 			state->write_position = 0;
 			state->read_position = 0;
 			if (*eof_in)
-				*eof_out = 1;
+				*eof_out = true;
 		}
 
 		return 1;
@@ -704,14 +705,14 @@ static int pv__transfer_write(pvstate_t state, int *eof_in, int *eof_out, long *
 	 * not really our error to report.
 	 */
 	if (EPIPE == errno) {
-		*eof_in = 1;
-		*eof_out = 1;
+		*eof_in = true;
+		*eof_out = true;
 		return 0;
 	}
 
 	pv_error(state, "%s: %s", _("write failed"), strerror(errno));
 	state->exit_status |= 16;
-	*eof_out = 1;
+	*eof_out = true;
 	state->written = -1;
 
 	return 1;
@@ -783,7 +784,7 @@ static unsigned char *pv__allocate_aligned_buffer(int fd, size_t target_size)
  * state->exit_status is updated). In line mode, the number of lines written
  * will be put into *lineswritten.
  */
-long pv_transfer(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned long long allowed, long *lineswritten)
+ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, size_t allowed, long *lineswritten)
 {
 	bool ready_to_read, ready_to_write;
 	int check_read_fd, check_write_fd;
@@ -889,7 +890,7 @@ long pv_transfer(pvstate_t state, int fd, int *eof_in, int *eof_out, unsigned lo
 	 */
 	state->to_write = state->read_position - state->write_position;
 	if ((state->rate_limit > 0) || (allowed > 0)) {
-		if ((unsigned long long) (state->to_write) > allowed) {
+		if (state->to_write > allowed) {
 			state->to_write = allowed;
 		}
 	}

@@ -376,7 +376,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				memset(&sb, 0, sizeof(sb));
 				rc = stat(size_file, &sb);
 				if (0 == rc) {
-					opts->size = (unsigned long long) (sb.st_size);
+					opts->size = (size_t) (sb.st_size);
 				} else {
 					/*@-mustfreefresh@ *//* see above */
 					fprintf(stderr, "%s: %s %s: %s\n",
@@ -387,7 +387,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 					/*@+mustfreefresh@ */
 				}
 			} else {
-				opts->size = pv_getnum_ull(optarg);
+				opts->size = pv_getnum_size(optarg);
 			}
 			break;
 		case 'l':
@@ -417,10 +417,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'L':
-			opts->rate_limit = pv_getnum_ull(optarg);
+			opts->rate_limit = pv_getnum_size(optarg);
 			break;
 		case 'B':
-			opts->buffer_size = pv_getnum_ull(optarg);
+			opts->buffer_size = pv_getnum_size(optarg);
 			opts->no_splice = true;
 			break;
 		case 'C':
@@ -430,7 +430,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->skip_errors++;
 			break;
 		case 'Z':
-			opts->error_skip_block = pv_getnum_ull(optarg);
+			opts->error_skip_block = pv_getnum_size(optarg);
 			break;
 		case 'S':
 			opts->stop_at_size = true;

@@ -51,9 +51,9 @@ extern double pv_getnum_d(const char *);
 extern unsigned int pv_getnum_ui(const char *);
 
 /*
- * Return the given string converted to an unsigned long long.
+ * Return the given string converted to a size_t.
  */
-extern unsigned long long pv_getnum_ull(const char *);
+extern size_t pv_getnum_size(const char *);
 
 /*
  * Return zero if the given string is a number of the given type. NB an
@@ -154,15 +154,15 @@ extern void pv_state_bits_set(pvstate_t, bool);
 extern void pv_state_null_terminated_lines_set(pvstate_t, bool);
 extern void pv_state_no_display_set(pvstate_t, bool);
 extern void pv_state_skip_errors_set(pvstate_t, unsigned int);
-extern void pv_state_error_skip_block_set(pvstate_t, unsigned long long);
+extern void pv_state_error_skip_block_set(pvstate_t, size_t);
 extern void pv_state_stop_at_size_set(pvstate_t, bool);
 extern void pv_state_sync_after_write_set(pvstate_t, bool);
 extern void pv_state_direct_io_set(pvstate_t, bool);
-extern void pv_state_rate_limit_set(pvstate_t, unsigned long long);
-extern void pv_state_target_buffer_size_set(pvstate_t, unsigned long long);
+extern void pv_state_rate_limit_set(pvstate_t, size_t);
+extern void pv_state_target_buffer_size_set(pvstate_t, size_t);
 extern void pv_state_no_splice_set(pvstate_t, bool);
 extern void pv_state_discard_input_set(pvstate_t, bool);
-extern void pv_state_size_set(pvstate_t, unsigned long long);
+extern void pv_state_size_set(pvstate_t, size_t);
 extern void pv_state_interval_set(pvstate_t, double);
 extern void pv_state_width_set(pvstate_t, unsigned int, bool);
 extern void pv_state_height_set(pvstate_t, unsigned int, bool);
@@ -187,7 +187,7 @@ extern void pv_screensize(unsigned int *width, unsigned int *height);
 /*
  * Calculate the total size of all input files.
  */
-extern unsigned long long pv_calc_total_size(pvstate_t);
+extern size_t pv_calc_total_size(pvstate_t);
 
 /*
  * Set up signal handlers ready for running the main loop.

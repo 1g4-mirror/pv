@@ -33,9 +33,9 @@
  *
  * Returns the total size, or 0 if it is unknown.
  */
-static unsigned long long pv_calc_total_bytes(pvstate_t state)
+static size_t pv_calc_total_bytes(pvstate_t state)
 {
-	unsigned long long total;
+	size_t total;
 	struct stat sb;
 	unsigned int file_idx;
 
@@ -47,7 +47,7 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 	 */
 	if ((state->input_file_count < 1) || (NULL == state->input_files)) {
 		if (0 == fstat(STDIN_FILENO, &sb))
-			total = (unsigned long long) (sb.st_size);
+			total = sb.st_size;
 		return total;
 	}
 
@@ -108,7 +108,7 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 				off_t end_position;
 				end_position = lseek(fd, 0, SEEK_END);
 				if (end_position > 0) {
-					total += (unsigned long long) end_position;
+					total += (size_t) end_position;
 				}
 				(void) close(fd);
 			} else {
@@ -116,7 +116,7 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 				return total;
 			}
 		} else if (S_ISREG(sb.st_mode)) {
-			total += (unsigned long long) (sb.st_size);
+			total += sb.st_size;
 		} else {
 			total = 0;
 		}
@@ -141,7 +141,7 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
 			end_position = lseek(STDOUT_FILENO, 0, SEEK_END);
 			total = 0;
 			if (end_position > 0) {
-				total = (unsigned long long) end_position;
+				total = (size_t) end_position;
 			}
 			if (lseek(STDOUT_FILENO, 0, SEEK_SET) != 0) {
 				pv_error(state, "%s: %s: %s", "(stdout)",
@@ -174,9 +174,9 @@ static unsigned long long pv_calc_total_bytes(pvstate_t state)
  *
  * Returns the total size, or 0 if it is unknown.
  */
-static unsigned long long pv_calc_total_lines(pvstate_t state)
+static size_t pv_calc_total_lines(pvstate_t state)
 {
-	unsigned long long total;
+	size_t total;
 	struct stat sb;
 	unsigned int file_idx;
 
@@ -263,7 +263,7 @@ static unsigned long long pv_calc_total_lines(pvstate_t state)
  *
  * Returns the total size, or 0 if it is unknown.
  */
-unsigned long long pv_calc_total_size(pvstate_t state)
+size_t pv_calc_total_size(pvstate_t state)
 {
 	if (state->linemode) {
 		return pv_calc_total_lines(state);

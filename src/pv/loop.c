@@ -36,7 +36,7 @@ int pv_main_loop(pvstate_t state)
 	long written, lineswritten;
 	long long total_written, transferred_since_last, cansend;
 	long double target;
-	int eof_in, eof_out, final_update;
+	bool eof_in, eof_out, final_update;
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
 	struct timespec init_time, next_remotecheck, transfer_elapsed;
 	long double elapsed_seconds;
@@ -64,8 +64,8 @@ int pv_main_loop(pvstate_t state)
 
 	pv_crs_init(state);
 
-	eof_in = 0;
-	eof_out = 0;
+	eof_in = false;
+	eof_out = false;
 	total_written = 0;
 	transferred_since_last = 0;
 	state->initial_offset = 0;
@@ -84,7 +84,7 @@ int pv_main_loop(pvstate_t state)
 	}
 
 	target = 0;
-	final_update = 0;
+	final_update = false;
 	file_idx = 0;
 
 	/*
@@ -175,8 +175,8 @@ int pv_main_loop(pvstate_t state)
 				&& (0 == state->rate_limit))) {
 				cansend = state->size - total_written;
 				if (0 >= cansend) {
-					eof_in = 1;
-					eof_out = 1;
+					eof_in = true;
+					eof_out = true;
 				}
 			}
 		}
@@ -213,8 +213,8 @@ int pv_main_loop(pvstate_t state)
 			file_idx++;
 			fd = pv_next_file(state, file_idx, fd);
 			if (fd >= 0) {
-				eof_in = 0;
-				eof_out = 0;
+				eof_in = false;
+				eof_out = false;
 			}
 		}
 
@@ -223,7 +223,7 @@ int pv_main_loop(pvstate_t state)
 
 		/* If full EOF, final update, and force a display updaate. */
 		if (eof_in && eof_out) {
-			final_update = 1;
+			final_update = true;
 			if ((state->display_visible)
 			    || (0 == state->delay_start)) {
 				pv_elapsedtime_copy(&next_update, &cur_time);

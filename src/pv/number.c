@@ -24,12 +24,12 @@ static bool pv__isdigit(char c)
 
 
 /*
- * Return the numeric value of "str", as an unsigned long long.
+ * Return the numeric value of "str", as a size_t.
  */
-unsigned long long pv_getnum_ull(const char *str)
+size_t pv_getnum_size(const char *str)
 {
-	unsigned long long n = 0;
-	unsigned long long decimal = 0;
+	size_t n = 0;
+	size_t decimal = 0;
 	unsigned int decdivisor = 1;
 	unsigned int shift = 0;
 
@@ -41,7 +41,7 @@ unsigned long long pv_getnum_ull(const char *str)
 
 	for (; pv__isdigit(str[0]); str++) {
 		n = n * 10;
-		n += (unsigned long long) (str[0] - '0');
+		n += (size_t) (str[0] - '0');
 	}
 
 	/*
@@ -52,7 +52,7 @@ unsigned long long pv_getnum_ull(const char *str)
 		for (; pv__isdigit(str[0]); str++) {
 			if (decdivisor < 10000) {
 				decimal = decimal * 10;
-				decimal += (unsigned long long) (str[0] - '0');
+				decimal += (size_t) (str[0] - '0');
 				decdivisor = decdivisor * 10;
 			}
 		}
@@ -99,8 +99,8 @@ unsigned long long pv_getnum_ull(const char *str)
 		if (shiftby > 30)
 			shiftby = 30;
 
-		n = n << shiftby;
-		decimal = decimal << shiftby;
+		n = (size_t) (n << shiftby);
+		decimal = (size_t) (decimal << shiftby);
 		shift -= shiftby;
 	}
 
@@ -152,7 +152,7 @@ double pv_getnum_d(const char *str)
  */
 unsigned int pv_getnum_ui(const char *str)
 {
-	return (unsigned int) pv_getnum_ull(str);
+	return (unsigned int) pv_getnum_size(str);
 }
 
 

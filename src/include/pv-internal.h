@@ -45,7 +45,7 @@ extern "C" {
 
 
 typedef struct pvhistory {
-	long long   total_bytes;
+	size_t total_bytes;
 	long double elapsed_sec;
 } pvhistory_t;
 
@@ -102,16 +102,16 @@ struct pvstate_s {
 	bool null_terminated_lines;      /* lines are null-terminated */
 	bool no_display;                 /* do nothing other than pipe data */
 	unsigned int skip_errors;        /* skip read errors counter */
-	unsigned long long error_skip_block; /* skip block size, 0 for adaptive */
+	size_t error_skip_block;         /* skip block size, 0 for adaptive */
 	bool stop_at_size;               /* set if we stop at "size" bytes */
 	bool sync_after_write;           /* set if we sync after every write */
 	bool direct_io;                  /* set if O_DIRECT is to be used */
 	bool direct_io_changed;          /* set when direct_io is changed */
 	bool no_splice;                  /* never use splice() */
 	bool discard_input;              /* write nothing to stdout */
-	unsigned long long rate_limit;   /* rate limit, in bytes per second */
-	unsigned long long target_buffer_size;  /* buffer size (0=default) */
-	unsigned long long size;         /* total size of data */
+	size_t rate_limit;               /* rate limit, in bytes per second */
+	size_t target_buffer_size;       /* buffer size (0=default) */
+	size_t size;                     /* total size of data */
 	double interval;                 /* interval between updates */
 	double delay_start;              /* delay before first display */
 	unsigned int watch_pid;		 /* process to watch fds of */
@@ -167,7 +167,7 @@ struct pvstate_s {
 	int history_last;
 	long double current_avg_rate;    /* current average rate over last history intervals */
 	
-	unsigned long long initial_offset;
+	size_t initial_offset;
 	/*@only@*/ char *display_buffer;
 	long display_buffer_size;
 	int lastoutput_length;		 /* number of last-output bytes to show */
@@ -227,9 +227,9 @@ struct pvstate_s {
 	 * will always be less than or equal to read_position.
 	 */
 	unsigned char *transfer_buffer;	 /* data transfer buffer */
-	unsigned long long buffer_size;	 /* size of buffer */
-	unsigned long read_position;	 /* amount of data in buffer */
-	unsigned long write_position;	 /* buffered data written */
+	size_t buffer_size;		 /* size of buffer */
+	size_t read_position;		 /* amount of data in buffer */
+	size_t write_position;		 /* buffered data written */
 
 	/*
 	 * While reading from a file descriptor we keep track of how many
@@ -245,7 +245,7 @@ struct pvstate_s {
 	 * This way, we're treating each input file separately.
 	 */
 	int last_read_skip_fd;
-	unsigned long read_errors_in_a_row;
+	size_t read_errors_in_a_row;
 	int read_error_warning_shown;
 #ifdef HAVE_SPLICE
 	/*
@@ -258,8 +258,8 @@ struct pvstate_s {
 	int splice_failed_fd;
 	int splice_used;
 #endif
-	long to_write;			 /* max to write this time around */
-	long written;			 /* bytes sent to stdout this time */
+	ssize_t to_write;		 /* max to write this time around */
+	ssize_t written;		 /* bytes sent to stdout this time */
 };
 
 
@@ -275,8 +275,8 @@ struct pvwatchfd_s {
 	char display_name[PV_SIZEOF_DISPLAY_NAME]; /* name to show on progress bar */
 	struct stat sb_fd;		 /* stat of fd symlink */
 	struct stat sb_fd_link;		 /* lstat of fd symlink */
-	unsigned long long size;	 /* size of whole file, 0 if unknown */
-	long long position;		 /* position last seen at */
+	size_t size;			 /* size of whole file, 0 if unknown */
+	ssize_t position;		 /* position last seen at */
 	struct timespec start_time;	 /* time we started watching the fd */
 };
 typedef struct pvwatchfd_s *pvwatchfd_t;
@@ -284,9 +284,8 @@ typedef struct pvwatchfd_s *pvwatchfd_t;
 void pv_error(pvstate_t, char *, ...);
 
 int pv_main_loop(pvstate_t);
-void pv_display(pvstate_t, long double, long long, long long);
-long pv_transfer(pvstate_t, int, int *, int *, unsigned long long, long *);
-void pv_set_buffer_size(unsigned long long, int);
+void pv_display(pvstate_t, long double, ssize_t, ssize_t);
+ssize_t pv_transfer(pvstate_t, int, bool *, bool *, size_t, long *);
 int pv_next_file(pvstate_t, unsigned int, int);
 /*@out@*/ const char *pv_current_file_name(pvstate_t);
 
