@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-09-04 20:35+0100\n"
+"POT-Creation-Date: 2023-09-12 13:36+0100\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -250,45 +250,45 @@ msgstr "Bitte senden Sie Fehlerberichte an %s"
 msgid "state allocation failed"
 msgstr "Zustandszuweisung fehlgeschlagen"
 
-#: src/main/options.c:208
+#: src/main/options.c:173
 msgid "option structure allocation failed"
 msgstr "`option' konnte nicht allokiert werden"
 
-#: src/main/options.c:227
+#: src/main/options.c:192
 msgid "option structure argv allocation failed"
 msgstr "`option' (argv) konnte nicht allokiert werden"
 
-#: src/main/options.c:289
+#: src/main/options.c:254
 msgid "integer argument expected"
 msgstr "Ganzzahliges Argument erwartet"
 
-#: src/main/options.c:300
+#: src/main/options.c:265
 msgid "numeric argument expected"
 msgstr "numerisches Argument erwartet"
 
-#: src/main/options.c:311
+#: src/main/options.c:276
 msgid "process ID or pid:fd pair expected"
 msgstr "Prozess-ID oder PID:FD-Paar erwartet"
 
-#: src/main/options.c:318
+#: src/main/options.c:283
 msgid "invalid process ID"
 msgstr "ungültige Prozess-ID"
 
-#: src/main/options.c:419 src/pv/file.c:282
+#: src/main/options.c:384 src/pv/file.c:323
 msgid "failed to stat file"
 msgstr "Dateiinformationen konnten nicht gelesen werden"
 
-#: src/main/options.c:520
+#: src/main/options.c:485
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "`%s --help' zeigt weitere Informationen an."
 
-#: src/main/options.c:522
+#: src/main/options.c:487
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "`%s -h' zeigt weitere Informationen an."
 
-#: src/main/options.c:553
+#: src/main/options.c:518
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -296,23 +296,23 @@ msgstr ""
 "Beim Anzeigen von Dateideskriptoren können keine Optionen für den "
 "Zeilenmodus oder den Übertragungsmodifikator verwendet werden"
 
-#: src/main/options.c:562
+#: src/main/options.c:527
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "Beim Anzeigen von Dateideskriptoren können keine Zeilenmodus- oder "
 "Übertragungsmodifikatoroptionen verwendet werden."
 
-#: src/main/options.c:571
+#: src/main/options.c:536
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "kann keine Fernbedienung verwenden, wenn Dateideskriptoren angezeigt werden"
 
-#: src/main/options.c:580
+#: src/main/options.c:545
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "Dateien können beim Betrachten von Dateideskriptoren nicht übertragen werden"
 
-#: src/main/options.c:595
+#: src/main/options.c:560
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "Nicht verfügbar auf Systemen ohne /proc/self/fdinfo"
 
@@ -352,7 +352,7 @@ msgstr "Sperrdatei konnte nicht geöffnet werden"
 msgid "lock attempt failed"
 msgstr "Sperrversuch fehlgeschlagen"
 
-#: src/pv/cursor.c:423
+#: src/pv/cursor.c:424
 msgid "failed to open terminal"
 msgstr "Terminal konnte nicht geöffnet werden"
 
@@ -364,55 +364,63 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:683 src/pv/transfer.c:760
+#: src/pv/display.c:701 src/pv/transfer.c:829
 msgid "buffer allocation failed"
 msgstr "Puffer konnte nicht allokiert werden"
 
-#: src/pv/display.c:745
+#: src/pv/display.c:763
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:749 src/pv/transfer.c:481
+#: src/pv/display.c:768 src/pv/transfer.c:554
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:800 src/pv/display.c:811
+#: src/pv/display.c:820 src/pv/display.c:833
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:803 src/pv/display.c:815
+#: src/pv/display.c:824 src/pv/display.c:838
 msgid "/s"
 msgstr ""
 
-#: src/pv/display.c:803 src/pv/display.c:815
+#: src/pv/display.c:824 src/pv/display.c:838
 msgid "B/s"
 msgstr ""
 
-#: src/pv/display.c:851 src/pv/display.c:855 src/pv/display.c:914
+#: src/pv/display.c:875 src/pv/display.c:879 src/pv/display.c:938
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/file.c:116
+#: src/pv/file.c:148
 msgid "failed to seek to start of output"
 msgstr "Konnte nicht versuchen, die Ausgabe zu starten"
 
-#: src/pv/file.c:251
+#: src/pv/file.c:293
 msgid "failed to close file"
 msgstr "Datei konnte nicht geschlossen werden"
 
-#: src/pv/file.c:275
+#: src/pv/file.c:316
 msgid "failed to read file"
 msgstr "Datei konnte nicht gelesen werden"
 
-#: src/pv/file.c:289
+#: src/pv/file.c:331
 msgid "failed to stat output file"
 msgstr "Dateiinformationen für Ausgabe-Datei konnten nicht gelesen werden"
 
-#: src/pv/file.c:311
+#: src/pv/file.c:353
 msgid "input file is output file"
 msgstr "Eingabe-Datei ist Ausgabe-Datei"
 
-#: src/pv/loop.c:521 src/pv/loop.c:571 src/pv/loop.c:616 src/pv/watchpid.c:73
+#: src/pv/file.c:411
+msgid "(none)"
+msgstr ""
+
+#: src/pv/file.c:413
+msgid "(stdin)"
+msgstr ""
+
+#: src/pv/loop.c:522 src/pv/loop.c:572 src/pv/loop.c:617 src/pv/watchpid.c:73
 #: src/pv/watchpid.c:83 src/pv/watchpid.c:94 src/pv/watchpid.c:102
 #: src/pv/watchpid.c:139 src/pv/watchpid.c:150 src/pv/watchpid.c:158
 #: src/pv/watchpid.c:169 src/pv/watchpid.c:253 src/pv/watchpid.c:261
@@ -420,39 +428,41 @@ msgstr "Eingabe-Datei ist Ausgabe-Datei"
 msgid "pid"
 msgstr ""
 
-#: src/pv/state.c:30
+#: src/pv/state.c:36
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:59
-msgid "none"
-msgstr ""
+#: src/pv/state.c:382 src/pv/state.c:392
+#, fuzzy
+#| msgid "state allocation failed"
+msgid "file list allocation failed"
+msgstr "Zustandszuweisung fehlgeschlagen"
 
-#: src/pv/transfer.c:370
+#: src/pv/transfer.c:441
 msgid "read failed"
 msgstr "read-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:385
+#: src/pv/transfer.c:456
 msgid "warning: read errors detected"
 msgstr "warnung: lesefehler erkannt"
 
-#: src/pv/transfer.c:397
+#: src/pv/transfer.c:469
 msgid "file is not seekable"
 msgstr "datei ist nicht durchsuchbar"
 
-#: src/pv/transfer.c:465
+#: src/pv/transfer.c:537
 msgid "failed to seek past error"
 msgstr "konnte den Fehler nicht überwinden"
 
-#: src/pv/transfer.c:481
+#: src/pv/transfer.c:554
 msgid "skipped past read error"
 msgstr "über den Lesefehler hinaus verschoben"
 
-#: src/pv/transfer.c:641
+#: src/pv/transfer.c:712
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:857
+#: src/pv/transfer.c:919
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 

@@ -1,4 +1,4 @@
-### 0.0.20230902-UNRELEASED
+### 0.0.20230912-UNRELEASED
 
 #### Features
 
@@ -24,12 +24,13 @@
 
 #### Cleanups
 
+ * cleanup: addressed many potential issues highlighted by the software auditing tools "`splint`" and "`flawfinder`" (see new target "`make analyse`")
  * cleanup: switched the build system to GNU Automake
+ * cleanup: replaced the test harness with the one native to GNU Automake
  * cleanup: added a test for terminal width detection to "`make check`"
  * cleanup: added a test to "`make check`" to ensure that "`make install`" installs everything expected
  * cleanup: replaced *AC_HEADER_TIOCGWINSZ* with *AC_CHECK_HEADERS(sys/ioctl.h)* for better MacOS compatibility ([#74](https://codeberg.org/a-j-wood/pv/issues/74))
  * cleanup: with "`--sync`", call `fsync()` instead of `fdatasync()` on incapable systems ([#73](https://codeberg.org/a-j-wood/pv/issues/73))
- * cleanup: replaced the test harness with the one native to GNU Automake
  * cleanup: the manual is now a static file instead of needing to be built with "`configure`"
 
 #### Dropped items
