@@ -37,12 +37,12 @@ AC_CHECK_HEADERS([sys/ioctl.h])
 AC_CHECK_HEADERS([libintl.h locale.h])
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 
+dnl Libraries that may contain key functions.
+AC_SEARCH_LIBS([clock_gettime],[rt])
+
 dnl Items we can't do without.
 AC_CHECK_FUNCS([alarm basename clock_gettime dup2 getcwd memcpy memmove memset select setlocale strchr strerror strrchr strstr], [], [AC_MSG_ERROR([required function is missing])])
 AC_CHECK_HEADERS([fcntl.h sys/file.h sys/time.h unistd.h], [], [AC_MSG_ERROR([required header file is missing])])
-
-dnl Libraries that may contain key functions.
-AC_SEARCH_LIBS([clock_gettime],[rt])
 
 dnl Make sure all the types we use are defined.
 AC_TYPE_INT32_T
