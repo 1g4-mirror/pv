@@ -1,6 +1,7 @@
 #!/bin/sh
 #
-# Check that process ID can be written to a file as described in the manual.
+# Check that the process ID can be written to a file as described in the
+# manual.
 
 # Dummy assignments for "shellcheck".
 testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"
