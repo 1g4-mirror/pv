@@ -61,6 +61,7 @@ tests/Display_-_--quiet.test \
 tests/Display_-_--rate_-_displayed_value_changes.test \
 tests/Display_-_--timer_-_displayed_value_changes.test \
 tests/General_-_--pidfile.test \
+tests/General_-_--size_argument_handling.test \
 tests/Integrity_-_Basic.test \
 tests/Integrity_-_Binary_data.test \
 tests/Integrity_-_From_bursty_source.test \
