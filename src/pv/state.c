@@ -246,7 +246,7 @@ void pv_state_skip_errors_set(pvstate_t state, unsigned int val)
 	state->skip_errors = val;
 }
 
-void pv_state_error_skip_block_set(pvstate_t state, size_t val)
+void pv_state_error_skip_block_set(pvstate_t state, off_t val)
 {
 	state->error_skip_block = val;
 }
@@ -272,7 +272,7 @@ void pv_state_discard_input_set(pvstate_t state, bool val)
 	state->discard_input = val;
 }
 
-void pv_state_rate_limit_set(pvstate_t state, size_t val)
+void pv_state_rate_limit_set(pvstate_t state, off_t val)
 {
 	state->rate_limit = val;
 }
@@ -287,7 +287,7 @@ void pv_state_no_splice_set(pvstate_t state, bool val)
 	state->no_splice = val;
 }
 
-void pv_state_size_set(pvstate_t state, size_t val)
+void pv_state_size_set(pvstate_t state, off_t val)
 {
 	state->size = val;
 }

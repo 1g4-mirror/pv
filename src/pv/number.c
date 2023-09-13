@@ -24,12 +24,12 @@ static bool pv__isdigit(char c)
 
 
 /*
- * Return the numeric value of "str", as a size_t.
+ * Return the numeric value of "str", as an off_t.
  */
-size_t pv_getnum_size(const char *str)
+off_t pv_getnum_size(const char *str)
 {
-	size_t n = 0;
-	size_t decimal = 0;
+	off_t n = 0;
+	off_t decimal = 0;
 	unsigned int decdivisor = 1;
 	unsigned int shift = 0;
 
@@ -41,7 +41,7 @@ size_t pv_getnum_size(const char *str)
 
 	for (; pv__isdigit(str[0]); str++) {
 		n = n * 10;
-		n += (size_t) (str[0] - '0');
+		n += (off_t) (str[0] - '0');
 	}
 
 	/*
@@ -52,7 +52,7 @@ size_t pv_getnum_size(const char *str)
 		for (; pv__isdigit(str[0]); str++) {
 			if (decdivisor < 10000) {
 				decimal = decimal * 10;
-				decimal += (size_t) (str[0] - '0');
+				decimal += (off_t) (str[0] - '0');
 				decdivisor = decdivisor * 10;
 			}
 		}
@@ -99,8 +99,8 @@ size_t pv_getnum_size(const char *str)
 		if (shiftby > 30)
 			shiftby = 30;
 
-		n = (size_t) (n << shiftby);
-		decimal = (size_t) (decimal << shiftby);
+		n = (off_t) (n << shiftby);
+		decimal = (off_t) (decimal << shiftby);
 		shift -= shiftby;
 	}
 

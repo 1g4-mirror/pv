@@ -33,9 +33,9 @@
  *
  * Returns the total size, or 0 if it is unknown.
  */
-static size_t pv_calc_total_bytes(pvstate_t state)
+static off_t pv_calc_total_bytes(pvstate_t state)
 {
-	size_t total;
+	off_t total;
 	struct stat sb;
 	unsigned int file_idx;
 
@@ -108,7 +108,7 @@ static size_t pv_calc_total_bytes(pvstate_t state)
 				off_t end_position;
 				end_position = lseek(fd, 0, SEEK_END);
 				if (end_position > 0) {
-					total += (size_t) end_position;
+					total += end_position;
 				}
 				(void) close(fd);
 			} else {
@@ -141,7 +141,7 @@ static size_t pv_calc_total_bytes(pvstate_t state)
 			end_position = lseek(STDOUT_FILENO, 0, SEEK_END);
 			total = 0;
 			if (end_position > 0) {
-				total = (size_t) end_position;
+				total = end_position;
 			}
 			if (lseek(STDOUT_FILENO, 0, SEEK_SET) != 0) {
 				pv_error(state, "%s: %s: %s", "(stdout)",
@@ -174,9 +174,9 @@ static size_t pv_calc_total_bytes(pvstate_t state)
  *
  * Returns the total size, or 0 if it is unknown.
  */
-static size_t pv_calc_total_lines(pvstate_t state)
+static off_t pv_calc_total_lines(pvstate_t state)
 {
-	size_t total;
+	off_t total;
 	struct stat sb;
 	unsigned int file_idx;
 
@@ -263,7 +263,7 @@ static size_t pv_calc_total_lines(pvstate_t state)
  *
  * Returns the total size, or 0 if it is unknown.
  */
-size_t pv_calc_total_size(pvstate_t state)
+off_t pv_calc_total_size(pvstate_t state)
 {
 	if (state->linemode) {
 		return pv_calc_total_lines(state);

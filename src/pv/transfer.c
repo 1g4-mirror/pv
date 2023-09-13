@@ -784,7 +784,7 @@ static unsigned char *pv__allocate_aligned_buffer(int fd, size_t target_size)
  * state->exit_status is updated). In line mode, the number of lines written
  * will be put into *lineswritten.
  */
-ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, size_t allowed, long *lineswritten)
+off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t allowed, long *lineswritten)
 {
 	bool ready_to_read, ready_to_write;
 	int check_read_fd, check_write_fd;

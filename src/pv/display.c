@@ -1107,7 +1107,7 @@ static const char *pv__format(pvstate_t state,
  *
  * In line mode, "sl" and "tot" are in lines, not bytes.
  */
-void pv_display(pvstate_t state, long double esec, ssize_t sl, ssize_t tot)
+void pv_display(pvstate_t state, long double esec, off_t sl, off_t tot)
 {
 	const char *display;
 

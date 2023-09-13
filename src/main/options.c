@@ -376,7 +376,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				memset(&sb, 0, sizeof(sb));
 				rc = stat(size_file, &sb);
 				if (0 == rc) {
-					opts->size = (size_t) (sb.st_size);
+					opts->size = (off_t) (sb.st_size);
 				} else {
 					/*@-mustfreefresh@ *//* see above */
 					fprintf(stderr, "%s: %s %s: %s\n",
@@ -420,7 +420,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->rate_limit = pv_getnum_size(optarg);
 			break;
 		case 'B':
-			opts->buffer_size = pv_getnum_size(optarg);
+			opts->buffer_size = (size_t) pv_getnum_size(optarg);
 			opts->no_splice = true;
 			break;
 		case 'C':

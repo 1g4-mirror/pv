@@ -14,6 +14,7 @@
 #endif
 
 #include <stdlib.h>
+#include <sys/types.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,13 +43,13 @@ struct opts_s {           /* structure describing run-time options */
 	bool linemode;                 /* count lines instead of bytes */
 	bool null_terminated_lines;    /* lines are null-terminated */
 	bool no_display;               /* do nothing other than pipe data */
-	size_t rate_limit;             /* rate limit, in bytes per second */
+	off_t rate_limit;              /* rate limit, in bytes per second */
 	size_t buffer_size;            /* buffer size, in bytes (0=default) */
 	unsigned int remote;           /* PID of pv to update settings of */
-	size_t size;                   /* total size of data */
+	off_t size;                    /* total size of data */
 	bool no_splice;                /* flag set if never to use splice */
 	unsigned int skip_errors;      /* skip read errors counter */
-	size_t error_skip_block;       /* skip block size, 0 for adaptive */
+	off_t error_skip_block;        /* skip block size, 0 for adaptive */
 	bool stop_at_size;             /* set if we stop at "size" bytes */
 	bool sync_after_write;         /* set if we sync after every write */
 	bool direct_io;                /* set if O_DIRECT is to be used */
