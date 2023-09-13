@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Check that size arguments are processed correctly.
+
+# Dummy assignments for "shellcheck".
+testSubject="${testSubject:-false}"
+
+# Pass size argument $1 and check that the last reported number is $2.
+checkSizeArgument () {
+	reportedCount=$("${testSubject}" -XfnbSs "$1" /dev/zero 2>&1 | sed -n '$p' | tr -dc '0-9')
+	if ! test "${reportedCount}" = "$2"; then
+		echo "passed size argument $1, expected count of $2, but got ${reportedCount}"
+		exit 1
+	fi
+}
+
+checkSizeArgument 10000 10000
+checkSizeArgument 1k 1024
+checkSizeArgument 1M 1048576
+checkSizeArgument 8G 8589934592
+
+exit 0
+
+# EOF
