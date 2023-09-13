@@ -34,10 +34,10 @@ extern "C" {
 #define RATE_GRANULARITY	100000000.0L	 /* nsec between -L rate chunks */
 #define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
 #define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R */
-#define BUFFER_SIZE		409600		 /* default transfer buffer size */
-#define BUFFER_SIZE_MAX		524288		 /* max auto transfer buffer size */
-#define MAX_READ_AT_ONCE	(off_t) 524288	 /* max to read() in one go */
-#define MAX_WRITE_AT_ONCE	(off_t) 524288	 /* max to write() in one go */
+#define BUFFER_SIZE		(size_t) 409600	 /* default transfer buffer size */
+#define BUFFER_SIZE_MAX		(size_t) 524288	 /* max auto transfer buffer size */
+#define MAX_READ_AT_ONCE	(size_t) 524288	 /* max to read() in one go */
+#define MAX_WRITE_AT_ONCE	(size_t) 524288	 /* max to write() in one go */
 #define TRANSFER_READ_TIMEOUT	0.09L		 /* seconds to time reads out at */
 #define TRANSFER_WRITE_TIMEOUT	0.9L		 /* seconds to time writes out at */
 
@@ -238,25 +238,25 @@ struct pvstate_s {
 	 * on this fd (read_error_warning_shown).
 	 *
 	 * Whenever the active file descriptor changes from
-	 * last_read_skip_fd, we reset read_errors_in_a_row and
-	 * read_error_warning_shown to 0 for the new file descriptor and set
-	 * last_read_skip_fd to the new fd number.
+	 * last_read_skip_fd, we reset read_errors_in_a_row to 0 and
+	 * read_error_warning_shown to false for the new file descriptor and
+	 * set last_read_skip_fd to the new fd number.
 	 *
 	 * This way, we're treating each input file separately.
 	 */
 	int last_read_skip_fd;
 	off_t read_errors_in_a_row;
-	int read_error_warning_shown;
+	bool read_error_warning_shown;
 #ifdef HAVE_SPLICE
 	/*
 	 * These variables are used to keep track of whether splice() was
 	 * used; splice_failed_fd is the file descriptor that splice() last
 	 * failed on, so that we don't keep trying to use it on an fd that
-	 * doesn't support it, and splice_used is set to 1 if splice() was
-	 * used this time within pv_transfer().
+	 * doesn't support it, and splice_used is set to true if splice()
+	 * was used this time within pv_transfer().
 	 */
 	int splice_failed_fd;
-	int splice_used;
+	bool splice_used;
 #endif
 	ssize_t to_write;		 /* max to write this time around */
 	ssize_t written;		 /* bytes sent to stdout this time */

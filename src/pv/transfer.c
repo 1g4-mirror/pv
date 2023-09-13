@@ -290,7 +290,7 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
  * then the maximum number of bytes read will be the number remaining unused
  * in the input buffer or the value of "allowed", whichever is smaller.
  *
- * If splice() was successfully used, sets state->splice_used to 1; if it
+ * If splice() was successfully used, sets state->splice_used to true; if it
  * failed, then state->splice_failed_fd is updated to the current fd so
  * splice() won't be tried again until the next input file.
  *
@@ -310,7 +310,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 {
 	bool do_not_skip_errors;
 	size_t bytes_can_read;
-	size_t amount_to_skip;
+	off_t amount_to_skip;
 	long amount_skipped;
 	long orig_offset;
 	long skip_offset;
@@ -324,24 +324,31 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		do_not_skip_errors = true;
 
 	bytes_can_read = state->buffer_size - state->read_position;
+	nread = 0;
 
 #ifdef HAVE_SPLICE
-	state->splice_used = 0;
+	state->splice_used = false;
 	if ((!state->linemode) && (!state->no_splice)
 	    && (fd != state->splice_failed_fd)
 	    && (0 == state->to_write)) {
-		if (state->rate_limit || allowed != 0)
+		if (state->rate_limit > 0 || allowed != 0) {
 			bytes_to_splice = allowed;
-		else
+		} else {
 			bytes_to_splice = bytes_can_read;
+		}
 
+		/*@-nullpass@ */
+		/*@-type@ */
+		/* splint doesn't know about splice */
 		nread = splice(fd, NULL, STDOUT_FILENO, NULL, bytes_to_splice, SPLICE_F_MORE);
+		/*@+type@ */
+		/*@+nullpass@ */
 
-		state->splice_used = 1;
+		state->splice_used = true;
 		if ((nread < 0) && (EINVAL == errno)) {
 			debug("%s %d: %s", "fd", fd, "splice failed with EINVAL - disabling");
 			state->splice_failed_fd = fd;
-			state->splice_used = 0;
+			state->splice_used = false;
 			/*
 			 * Fall through to read() below.
 			 */
@@ -353,7 +360,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 				 * Ignore non IO errors, such as EBADFD (bad file
 				 * descriptor), EINVAL (non syncable fd, such as a
 				 * pipe), etc - only treat EIO as a failure.
-				 *
+
 				 * Since this is a write error, not a read
 				 * error, we cannot skip it, so set
 				 * "do_not_skip_errors".
@@ -369,10 +376,10 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 			/* nothing read yet - do nothing */
 		} else {
 			/* EOF might not really be EOF, it seems */
-			state->splice_used = 0;
+			state->splice_used = false;
 		}
 	}
-	if (0 == state->splice_used) {
+	if (!state->splice_used) {
 		nread = pv__transfer_read_repeated(fd, state->transfer_buffer + state->read_position, bytes_can_read);
 	}
 #else
@@ -403,7 +410,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		 * If we used splice(), there isn't any more data in the
 		 * buffer than there was before.
 		 */
-		if (0 == state->splice_used)
+		if (!state->splice_used)
 			state->read_position += nread;
 #else
 		state->read_position += nread;
@@ -455,7 +462,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	if (!state->read_error_warning_shown) {
 		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("warning: read errors detected"),
 			 strerror(errno));
-		state->read_error_warning_shown = 1;
+		state->read_error_warning_shown = true;
 	}
 
 	orig_offset = lseek(fd, 0, SEEK_CUR);
@@ -817,7 +824,7 @@ off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t al
 	if (fd != state->last_read_skip_fd) {
 		state->last_read_skip_fd = fd;
 		state->read_errors_in_a_row = 0;
-		state->read_error_warning_shown = 0;
+		state->read_error_warning_shown = false;
 	}
 
 	/*
@@ -969,7 +976,7 @@ off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t al
 	 */
 	if (ready_to_write
 #ifdef HAVE_SPLICE
-	    && (0 == state->splice_used)
+	    && (!state->splice_used)
 #endif				/* HAVE_SPLICE */
 	    && (state->read_position > state->write_position)
 	    && (state->to_write > 0)) {
