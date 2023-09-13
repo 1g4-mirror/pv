@@ -12,7 +12,7 @@ testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"; workFile2=
 dd if=/dev/urandom of="${workFile1}" bs=1024 count=2560 2>/dev/null
 
 inputChecksum=$(cksum "${workFile1}" | awk '{print $1}')
-doubleInputChecksum=$(cat "${workFile1}" "${workFile1}" | cksum - | awk '{print $1}')
+doubleInputChecksum=$(cat "${workFile1}" "${workFile1}" | cksum | awk '{print $1}')
 
 # read through pv and test afterwards
 "${testSubject}" -q "${workFile1}" > "${workFile2}"
