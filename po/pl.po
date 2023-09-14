@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-09-12 23:45+0100\n"
+"POT-Creation-Date: 2023-09-14 22:22+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -353,7 +353,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:701 src/pv/transfer.c:830
+#: src/pv/display.c:701 src/pv/transfer.c:892
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 
@@ -361,7 +361,7 @@ msgstr "nie udało się zaalokować bufora"
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:768 src/pv/transfer.c:554
+#: src/pv/display.c:768 src/pv/transfer.c:584
 msgid "B"
 msgstr "B"
 
@@ -410,7 +410,7 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:524 src/pv/loop.c:574 src/pv/loop.c:619 src/pv/watchpid.c:73
+#: src/pv/loop.c:540 src/pv/loop.c:593 src/pv/loop.c:638 src/pv/watchpid.c:73
 #: src/pv/watchpid.c:83 src/pv/watchpid.c:94 src/pv/watchpid.c:102
 #: src/pv/watchpid.c:139 src/pv/watchpid.c:150 src/pv/watchpid.c:158
 #: src/pv/watchpid.c:169 src/pv/watchpid.c:253 src/pv/watchpid.c:261
@@ -422,37 +422,43 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:382 src/pv/state.c:392
-#, fuzzy
-#| msgid "buffer allocation failed"
+#: src/pv/state.c:385 src/pv/state.c:395
 msgid "file list allocation failed"
-msgstr "nie udało się zaalokować bufora"
+msgstr ""
 
-#: src/pv/transfer.c:441
+#: src/pv/transfer.c:446
 msgid "read failed"
 msgstr "błąd odczytu"
 
-#: src/pv/transfer.c:456
+#: src/pv/transfer.c:469
 msgid "warning: read errors detected"
 msgstr ""
 
-#: src/pv/transfer.c:469
+#: src/pv/transfer.c:485
 msgid "file is not seekable"
 msgstr ""
 
-#: src/pv/transfer.c:537
+#: src/pv/transfer.c:563
 msgid "failed to seek past error"
 msgstr ""
 
-#: src/pv/transfer.c:554
+#: src/pv/transfer.c:583
 msgid "skipped past read error"
 msgstr ""
 
-#: src/pv/transfer.c:713
+#: src/pv/transfer.c:623
+msgid "no transfer buffer allocated"
+msgstr ""
+
+#: src/pv/transfer.c:636
+msgid "failed to set alarm signal handler"
+msgstr ""
+
+#: src/pv/transfer.c:759
 msgid "write failed"
 msgstr "błąd zapisu"
 
-#: src/pv/transfer.c:920
+#: src/pv/transfer.c:983
 msgid "select call failed"
 msgstr "nie udało się wywołać funkcji select"
 
