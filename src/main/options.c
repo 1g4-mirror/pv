@@ -341,7 +341,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->no_splice = true;
 			break;
 		case 'A':
-			opts->lastwritten = pv_getnum_ui(optarg);
+			opts->lastwritten = (size_t) pv_getnum_ui(optarg);
 			numopts++;
 			opts->no_splice = true;
 			break;

@@ -35,7 +35,7 @@ struct opts_s {           /* structure describing run-time options */
 	bool bytes;                    /* bytes transferred flag */
 	bool bits;                     /* report transfer size in bits */
 	bool bufpercent;               /* transfer buffer percentage flag */
-	unsigned int lastwritten;      /* show N bytes last written */
+	size_t lastwritten;            /* show N bytes last written */
 	bool force;                    /* force-if-not-terminal flag */
 	bool cursor;                   /* whether to use cursor positioning */
 	bool numeric;                  /* numeric output only */

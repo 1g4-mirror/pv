@@ -33,8 +33,8 @@
  */
 int pv_main_loop(pvstate_t state)
 {
-	long written, lineswritten;
-	long long total_written, transferred_since_last, cansend;
+	long lineswritten;
+	off_t written, total_written, transferred_since_last, cansend;
 	long double target;
 	bool eof_in, eof_out, final_update;
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
@@ -67,11 +67,19 @@ int pv_main_loop(pvstate_t state)
 	eof_in = false;
 	eof_out = false;
 	total_written = 0;
+	lineswritten = 0;
 	transferred_since_last = 0;
 	state->initial_offset = 0;
 
+	memset(&cur_time, 0, sizeof(cur_time));
+	memset(&start_time, 0, sizeof(start_time));
+
 	pv_elapsedtime_read(&cur_time);
 	pv_elapsedtime_copy(&start_time, &cur_time);
+
+	memset(&next_ratecheck, 0, sizeof(next_ratecheck));
+	memset(&next_remotecheck, 0, sizeof(next_remotecheck));
+	memset(&next_update, 0, sizeof(next_update));
 
 	pv_elapsedtime_copy(&next_ratecheck, &cur_time);
 	pv_elapsedtime_copy(&next_remotecheck, &cur_time);
@@ -124,8 +132,8 @@ int pv_main_loop(pvstate_t state)
 	 * read and we weren't given a target buffer size.
 	 */
 	if ((0 == fstat(fd, &sb)) && (0 == state->target_buffer_size)) {
-		unsigned long long sz;
-		sz = sb.st_blksize * 32;
+		size_t sz;
+		sz = (size_t) (sb.st_blksize * 32);
 		if (sz > BUFFER_SIZE_MAX)
 			sz = BUFFER_SIZE_MAX;
 		state->target_buffer_size = sz;
@@ -147,7 +155,7 @@ int pv_main_loop(pvstate_t state)
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
-		if (state->pv_sig_abort)
+		if (1 == state->pv_sig_abort)
 			break;
 
 		if (state->rate_limit > 0) {
@@ -155,14 +163,15 @@ int pv_main_loop(pvstate_t state)
 			if (pv_elapsedtime_compare(&cur_time, &next_ratecheck) > 0) {
 				target +=
 				    ((long double) (state->rate_limit)) / (long double) (1000000000.0 /
-											 RATE_GRANULARITY);
+											 (long
+											  double) (RATE_GRANULARITY));
 				long double burst_max = ((long double) (state->rate_limit * RATE_BURST_WINDOW));
 				if (target > burst_max) {
 					target = burst_max;
 				}
 				pv_elapsedtime_add_nsec(&next_ratecheck, RATE_GRANULARITY);
 			}
-			cansend = target;
+			cansend = (off_t) target;
 		}
 
 		/*
@@ -170,7 +179,7 @@ int pv_main_loop(pvstate_t state)
 		 * try to write more than we're allowed to.
 		 */
 		if ((0 < state->size) && (state->stop_at_size)) {
-			if (((long) (state->size) < (total_written + cansend))
+			if ((state->size < (total_written + cansend))
 			    || ((0 == cansend)
 				&& (0 == state->rate_limit))) {
 				cansend = state->size - total_written;
@@ -225,7 +234,7 @@ int pv_main_loop(pvstate_t state)
 		if (eof_in && eof_out) {
 			final_update = true;
 			if ((state->display_visible)
-			    || (0 == state->delay_start)) {
+			    || (state->delay_start < 0.001)) {
 				pv_elapsedtime_copy(&next_update, &cur_time);
 			}
 		}
@@ -290,12 +299,14 @@ int pv_main_loop(pvstate_t state)
 		 * Calculate the effective start time: the time we actually
 		 * started, plus the total time we spent stopped.
 		 */
+		memset(&init_time, 0, sizeof(init_time));
 		pv_elapsedtime_add(&init_time, &start_time, &(state->pv_sig_toffset));
 
 		/*
 		 * Now get the effective elapsed transfer time - current
 		 * time minus effective start time.
 		 */
+		memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
 		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
 
 		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
@@ -304,7 +315,7 @@ int pv_main_loop(pvstate_t state)
 			transferred_since_last = -1;
 
 		/* Resize the display, if a resize signal was received. */
-		if (state->pv_sig_newsize) {
+		if (1 == state->pv_sig_newsize) {
 			unsigned int new_width, new_height;
 
 			state->pv_sig_newsize = 0;
@@ -332,7 +343,7 @@ int pv_main_loop(pvstate_t state)
 			pv_write_retry(STDERR_FILENO, "\n", 1);
 	}
 
-	if (state->pv_sig_abort)
+	if (1 == state->pv_sig_abort)
 		state->exit_status |= 32;
 
 	if (fd >= 0)
@@ -360,6 +371,7 @@ int pv_watchfd_loop(pvstate_t state)
 	int first_check;
 	int rc;
 
+	memset(&info, 0, sizeof(info));
 	info.watch_pid = state->watch_pid;
 	info.watch_fd = state->watch_fd;
 	rc = pv_watchfd_info(state, &info, 0);
@@ -385,6 +397,10 @@ int pv_watchfd_loop(pvstate_t state)
 		}
 	}
 
+	memset(&cur_time, 0, sizeof(cur_time));
+	memset(&next_remotecheck, 0, sizeof(next_remotecheck));
+	memset(&next_update, 0, sizeof(next_update));
+
 	pv_elapsedtime_read(&cur_time);
 	pv_elapsedtime_copy(&(info.start_time), &cur_time);
 	pv_elapsedtime_copy(&next_remotecheck, &cur_time);
@@ -405,7 +421,7 @@ int pv_watchfd_loop(pvstate_t state)
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
-		if (state->pv_sig_abort)
+		if (1 == state->pv_sig_abort)
 			break;
 
 		position_now = pv_watchfd_position(&info);
@@ -465,7 +481,7 @@ int pv_watchfd_loop(pvstate_t state)
 			transferred_since_last = -1;
 
 		/* Resize the display, if a resize signal was received. */
-		if (state->pv_sig_newsize) {
+		if (1 == state->pv_sig_newsize) {
 			unsigned int new_width, new_height;
 
 			state->pv_sig_newsize = 0;
@@ -488,7 +504,7 @@ int pv_watchfd_loop(pvstate_t state)
 	if (!state->numeric)
 		pv_write_retry(STDERR_FILENO, "\n", 1);
 
-	if (state->pv_sig_abort)
+	if (1 == state->pv_sig_abort)
 		state->exit_status |= 32;
 
 	return state->exit_status;
@@ -514,7 +530,7 @@ int pv_watchpid_loop(pvstate_t state)
 	struct timespec next_update, cur_time;
 	int idx;
 	int prev_displayed_lines, blank_lines;
-	int first_pass = 1;
+	bool first_pass = true;
 
 	/*
 	 * Make sure the process exists first, so we can give an error if
@@ -551,6 +567,9 @@ int pv_watchpid_loop(pvstate_t state)
 	 * Get things ready for the main loop.
 	 */
 
+	memset(&cur_time, 0, sizeof(cur_time));
+	memset(&next_update, 0, sizeof(next_update));
+
 	pv_elapsedtime_read(&cur_time);
 	pv_elapsedtime_copy(&next_update, &cur_time);
 	pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->interval));
@@ -561,10 +580,10 @@ int pv_watchpid_loop(pvstate_t state)
 
 	prev_displayed_lines = 0;
 
-	while (1) {
+	while (true) {
 		int rc, fd, displayed_lines;
 
-		if (state->pv_sig_abort)
+		if (1 == state->pv_sig_abort)
 			break;
 
 		pv_elapsedtime_read(&cur_time);
@@ -601,7 +620,7 @@ int pv_watchpid_loop(pvstate_t state)
 			pv_elapsedtime_copy(&next_update, &cur_time);
 
 		/* Resize the display, if a resize signal was received. */
-		if (state->pv_sig_newsize) {
+		if (1 == state->pv_sig_newsize) {
 			state->pv_sig_newsize = 0;
 			pv_screensize(&(state->width), &(state->height));
 			for (idx = 0; idx < array_length; idx++) {
@@ -627,7 +646,7 @@ int pv_watchpid_loop(pvstate_t state)
 			break;
 		}
 
-		first_pass = 0;
+		first_pass = false;
 		displayed_lines = 0;
 
 		for (fd = 0; fd < FD_SETSIZE; fd++) {

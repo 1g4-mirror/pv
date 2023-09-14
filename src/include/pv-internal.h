@@ -31,7 +31,7 @@ extern "C" {
 #define PV_DISPLAY_OUTPUTBUF	256
 #define PV_DISPLAY_FINETA	512
 
-#define RATE_GRANULARITY	100000000.0L	 /* nsec between -L rate chunks */
+#define RATE_GRANULARITY	100000000	 /* nsec between -L rate chunks */
 #define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
 #define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R */
 #define BUFFER_SIZE		(size_t) 409600	 /* default transfer buffer size */
@@ -170,8 +170,8 @@ struct pvstate_s {
 	off_t initial_offset;
 	/*@only@*/ char *display_buffer;
 	long display_buffer_size;
-	int lastoutput_length;		 /* number of last-output bytes to show */
-	unsigned char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
+	size_t lastoutput_length;	 /* number of last-output bytes to show */
+	char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
 	int prev_width;			 /* screen width last time we were called */
 	int prev_length;		 /* length of last string we output */
 	char str_name[PV_SIZEOF_STR_NAME];
@@ -226,7 +226,7 @@ struct pvstate_s {
 	 * is the offset in the buffer that we've written data up to.  It
 	 * will always be less than or equal to read_position.
 	 */
-	unsigned char *transfer_buffer;	 /* data transfer buffer */
+	/*@keep@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
 	size_t buffer_size;		 /* size of buffer */
 	size_t read_position;		 /* amount of data in buffer */
 	size_t write_position;		 /* buffered data written */
@@ -285,7 +285,7 @@ void pv_error(pvstate_t, char *, ...);
 
 int pv_main_loop(pvstate_t);
 void pv_display(pvstate_t, long double, off_t, off_t);
-off_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);
+ssize_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);
 int pv_next_file(pvstate_t, unsigned int, int);
 /*@out@*/ const char *pv_current_file_name(pvstate_t);
 

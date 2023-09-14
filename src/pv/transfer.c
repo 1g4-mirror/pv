@@ -306,14 +306,11 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
  * sets *eof_in to true.  If all data in the buffer has been written at this
  * point, then also sets *eof_out to true.
  */
-static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, size_t allowed)
+static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t allowed)
 {
 	bool do_not_skip_errors;
 	size_t bytes_can_read;
-	off_t amount_to_skip;
-	long amount_skipped;
-	long orig_offset;
-	long skip_offset;
+	off_t amount_to_skip, amount_skipped, orig_offset, skip_offset;
 	ssize_t nread;
 #ifdef HAVE_SPLICE
 	size_t bytes_to_splice;
@@ -332,7 +329,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	    && (fd != state->splice_failed_fd)
 	    && (0 == state->to_write)) {
 		if (state->rate_limit > 0 || allowed != 0) {
-			bytes_to_splice = allowed;
+			bytes_to_splice = (size_t) allowed;
 		} else {
 			bytes_to_splice = bytes_can_read;
 		}
@@ -445,7 +442,15 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 * reached the end of this file.
 	 */
 	if (do_not_skip_errors) {
+		/*@-compdef@ */
 		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("read failed"), strerror(errno));
+		/*@+compdef@ */
+		/*
+		 * splint says the storage pointed to by the result of
+		 * pv_current_file_name() is not fully defined.
+		 *
+		 * TODO: investigate and fix the reason for this.
+		 */
 		*eof_in = true;
 		if (state->write_position >= state->read_position) {
 			*eof_out = true;
@@ -460,12 +465,15 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	amount_skipped = -1;
 
 	if (!state->read_error_warning_shown) {
+		/*@-compdef@ */
 		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("warning: read errors detected"),
 			 strerror(errno));
+		/*@+compdef@ */
+		/* splint - see previous pv_current_file_name() call. */
 		state->read_error_warning_shown = true;
 	}
 
-	orig_offset = lseek(fd, 0, SEEK_CUR);
+	orig_offset = (off_t) lseek(fd, 0, SEEK_CUR);
 
 	/*
 	 * If the file is not seekable, we can't skip past the error, so we
@@ -473,7 +481,10 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 * of the file.
 	 */
 	if (0 > orig_offset) {
+		/*@-compdef@ */
 		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("file is not seekable"), strerror(errno));
+		/*@+compdef@ */
+		/* splint - see previous pv_current_file_name() calls. */
 		*eof_in = true;
 		if (state->write_position >= state->read_position) {
 			*eof_out = true;
@@ -490,9 +501,10 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		amount_to_skip = state->error_skip_block;
 	} else {
 		if (state->read_errors_in_a_row < 10) {
-			amount_to_skip = state->read_errors_in_a_row < 5 ? 1 : 2;
+			amount_to_skip = (off_t) (state->read_errors_in_a_row < 5 ? 1 : 2);
 		} else if (state->read_errors_in_a_row < 20) {
-			amount_to_skip = 1 << (state->read_errors_in_a_row - 10);
+			unsigned int shift_by = (unsigned int) (state->read_errors_in_a_row - 10);
+			amount_to_skip = (off_t) (1 << shift_by);
 		} else {
 			amount_to_skip = 512;
 		}
@@ -514,10 +526,13 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	/*
 	 * Trim the skip amount so we wouldn't read too much.
 	 */
-	if (amount_to_skip > bytes_can_read)
-		amount_to_skip = bytes_can_read;
+	if (amount_to_skip > (off_t) bytes_can_read)
+		amount_to_skip = (off_t) bytes_can_read;
 
-	skip_offset = lseek(fd, orig_offset + amount_to_skip, SEEK_SET);
+	/*@+longintegral@ */
+	/* splint complains about __off_t vs off_t */
+	skip_offset = (off_t) lseek(fd, (off_t) (orig_offset + amount_to_skip), SEEK_SET);
+	/*@-longintegral@ */
 
 	/*
 	 * If the skip we just tried didn't work, try only skipping 1 byte
@@ -525,7 +540,10 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 */
 	if (skip_offset < 0) {
 		amount_to_skip = 1;
-		skip_offset = lseek(fd, orig_offset + amount_to_skip, SEEK_SET);
+		/*@+longintegral@ */
+		/* see above */
+		skip_offset = (off_t) lseek(fd, (off_t) (orig_offset + amount_to_skip), SEEK_SET);
+		/*@-longintegral@ */
 	}
 
 	if (skip_offset < 0) {
@@ -540,9 +558,12 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		 * since it just means we've reached the end anyway.
 		 */
 		if (EINVAL != errno) {
+			/*@-compdef@ */
 			pv_error(state,
 				 "%s: %s: %s", pv_current_file_name(state), _("failed to seek past error"),
 				 strerror(errno));
+			/*@+compdef@ */
+			/* splint - see previous pv_current_file_name() calls. */
 		}
 	} else {
 		amount_skipped = skip_offset - orig_offset;
@@ -553,12 +574,16 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 * of the transfer buffer, and update the buffer position.
 	 */
 	if (amount_skipped > 0) {
-		memset(state->transfer_buffer + state->read_position, 0, amount_skipped);
+		memset(state->transfer_buffer + state->read_position, 0, (size_t) amount_skipped);
 		state->read_position += amount_skipped;
 		if (state->skip_errors < 2) {
+			/*@-compdef@ */
 			pv_error(state, "%s: %s: %ld - %ld (%ld %s)",
 				 pv_current_file_name(state),
-				 _("skipped past read error"), orig_offset, skip_offset, amount_skipped, _("B"));
+				 _("skipped past read error"), (long) orig_offset, (long) skip_offset,
+				 (long) amount_skipped, _("B"));
+			/*@+compdef@ */
+			/* splint - see previous pv_current_file_name() calls. */
 		}
 	} else {
 		/*
@@ -594,15 +619,29 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 {
 	ssize_t nwritten;
 
+	if (NULL == state->transfer_buffer) {
+		pv_error(state, "%s", _("no transfer buffer allocated"));
+		state->exit_status |= 64;
+		*eof_out = true;
+		state->written = -1;
+		return 1;
+	}
+
+	nwritten = 0;
+
 	if (state->discard_input) {
 		nwritten = state->to_write;
-	} else {
-		signal(SIGALRM, SIG_IGN);
-		alarm(1);
+	} else if (state->to_write > 0) {
+		if (signal(SIGALRM, SIG_IGN) == SIG_ERR) {
+			pv_error(state, "%s: %s", _("failed to set alarm signal handler"), strerror(errno));
+		} else {
+			(void) alarm(1);
+		}
 		nwritten = pv__transfer_write_repeated(STDOUT_FILENO,
 						       state->transfer_buffer +
-						       state->write_position, state->to_write, state->sync_after_write);
-		alarm(0);
+						       state->write_position, (size_t) (state->to_write),
+						       state->sync_after_write);
+		(void) alarm(0);
 	}
 
 	if (0 == nwritten) {
@@ -619,12 +658,12 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			/*
 			 * Guillaume Marcais: use strchr to count \n
 			 */
-			unsigned char save;
+			char save;
 			char *ptr;
 			long lines = 0;
 
 			save = state->transfer_buffer[state->write_position + nwritten];
-			state->transfer_buffer[state->write_position + nwritten] = 0;
+			state->transfer_buffer[state->write_position + nwritten] = '\0';
 			ptr = (char *) (state->transfer_buffer + state->write_position - 1);
 
 			if (state->null_terminated_lines) {
@@ -653,9 +692,9 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		 */
 		if (((state->components_used & PV_DISPLAY_OUTPUTBUF) != 0)
 		    && (nwritten > 0)) {
-			long new_portion_length, old_portion_length;
+			size_t new_portion_length, old_portion_length;
 
-			new_portion_length = nwritten;
+			new_portion_length = (size_t) nwritten;
 			if (new_portion_length > state->lastoutput_length)
 				new_portion_length = state->lastoutput_length;
 
@@ -738,13 +777,13 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
  *
  * Returns NULL on complete allocation failure.
  */
-static unsigned char *pv__allocate_aligned_buffer(int fd, size_t target_size)
+	   /*@null@*//*@only@ */ static char *pv__allocate_aligned_buffer(int fd, size_t target_size)
 {
-	unsigned char *newptr;
+	char *newptr;
 
 #if defined(HAVE_FPATHCONF) && defined(HAVE_POSIX_MEMALIGN) && defined(_PC_REC_XFER_ALIGN)
 	long input_alignment, output_alignment, min_alignment;
-	size_t required_alignment;
+	long required_alignment;
 
 	input_alignment = fd >= 0 ? fpathconf(fd, _PC_REC_XFER_ALIGN) : -1;
 	output_alignment = fpathconf(STDOUT_FILENO, _PC_REC_XFER_ALIGN);
@@ -769,12 +808,21 @@ static unsigned char *pv__allocate_aligned_buffer(int fd, size_t target_size)
 		required_alignment = min_alignment;
 	}
 
-	if (0 != posix_memalign((void **) (&newptr), required_alignment, target_size)) {
-		newptr = (unsigned char *) malloc(target_size);
+	newptr = NULL;
+
+	/*@-unrecog@ */
+	/* splice doesn't know of posix_memalign(). */
+	if (0 != posix_memalign((void **) (&newptr), (size_t) required_alignment, target_size)) {
+		newptr = malloc(target_size);
 	}
+	/*@+unrecog@ */
 #else				/* ! defined(HAVE_FPATHCONF) && defined(HAVE_POSIX_MEMALIGN) && defined(_PC_REC_XFER_ALIGN) */
-	newptr = (unsigned char *) malloc(target_size);
+	newptr = malloc(target_size);
 #endif				/* defined(HAVE_FPATHCONF) && defined(HAVE_POSIX_MEMALIGN) && defined(_PC_REC_XFER_ALIGN) */
+
+	/* Initialise the buffer with zeroes. */
+	if (NULL != newptr)
+		memset(newptr, 0, target_size);
 
 	return newptr;
 }
@@ -791,7 +839,7 @@ static unsigned char *pv__allocate_aligned_buffer(int fd, size_t target_size)
  * state->exit_status is updated). In line mode, the number of lines written
  * will be put into *lineswritten.
  */
-off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t allowed, long *lineswritten)
+ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t allowed, long *lineswritten)
 {
 	bool ready_to_read, ready_to_write;
 	int check_read_fd, check_write_fd;
@@ -807,11 +855,18 @@ off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t al
 	 */
 	if (state->direct_io_changed) {
 		if (!(*eof_in)) {
-			fcntl(fd, F_SETFL, (state->direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL));
+			if (0 != fcntl(fd, F_SETFL, (state->direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL))) {
+				/*@-compdef@ */
+				debug("%s: %s: %s", pv_current_file_name(state), "fcntl", strerror(errno));
+				/*@+compdef@ */
+				/* splint - see previous pv_current_file_name() calls. */
+			}
 		}
 		if (!(*eof_out)) {
-			fcntl(STDOUT_FILENO, F_SETFL,
-			      (state->direct_io ? O_DIRECT : 0) | fcntl(STDOUT_FILENO, F_GETFL));
+			if (0 != fcntl(STDOUT_FILENO, F_SETFL,
+				       (state->direct_io ? O_DIRECT : 0) | fcntl(STDOUT_FILENO, F_GETFL))) {
+				debug("%s: %s: %s", "(stdout)", "fcntl", strerror(errno));
+			}
 		}
 		state->direct_io_changed = false;
 	}
@@ -849,7 +904,7 @@ off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t al
 	 * and we can't realloc() an aligned buffer.
 	 */
 	if (state->buffer_size < state->target_buffer_size) {
-		unsigned char *newptr;
+		char *newptr;
 		newptr = pv__allocate_aligned_buffer(fd, state->target_buffer_size + 32);
 		if (NULL == newptr) {
 			/*
@@ -895,10 +950,10 @@ off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t al
 	 * is >0, then this puts an upper limit on how much we're allowed to
 	 * write.
 	 */
-	state->to_write = state->read_position - state->write_position;
+	state->to_write = (ssize_t) (state->read_position - state->write_position);
 	if ((state->rate_limit > 0) || (allowed > 0)) {
-		if (state->to_write > allowed) {
-			state->to_write = allowed;
+		if ((off_t) (state->to_write) > allowed) {
+			state->to_write = (ssize_t) allowed;
 		}
 	}
 
@@ -924,8 +979,11 @@ off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t al
 		/*
 		 * Any other error is a problem and we must report back.
 		 */
+		/*@-compdef@ */
 		pv_error(state, "%s: %s: %d: %s", pv_current_file_name(state), _("select call failed"), n,
 			 strerror(errno));
+		/*@+compdef@ */
+		/* splint - see previous pv_current_file_name() calls. */
 
 		state->exit_status |= 16;
 
@@ -953,12 +1011,12 @@ off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t al
 		/*
 		 * Guillaume Marcais: use strrchr to find last \n
 		 */
-		unsigned char save;
+		char save;
 		char *start;
 		char *end;
 
 		save = state->transfer_buffer[state->write_position + state->to_write];
-		state->transfer_buffer[state->write_position + state->to_write] = 0;
+		state->transfer_buffer[state->write_position + state->to_write] = '\0';
 
 		start = (char *) (state->transfer_buffer + state->write_position);
 		end = strrchr(start, '\n');
@@ -979,7 +1037,8 @@ off_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t al
 	    && (!state->splice_used)
 #endif				/* HAVE_SPLICE */
 	    && (state->read_position > state->write_position)
-	    && (state->to_write > 0)) {
+	    && (state->to_write > 0)
+	    && (NULL != lineswritten)) {
 		if (pv__transfer_write(state, eof_in, eof_out, lineswritten) == 0)
 			return 0;
 	}

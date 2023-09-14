@@ -35,7 +35,7 @@ struct remote_msg {
 	bool average_rate;		 /* average rate counter flag */
 	bool bytes;			 /* bytes transferred flag */
 	bool bufpercent;		 /* transfer buffer percentage flag */
-	unsigned int lastwritten;	 /* last-written bytes count */
+	size_t lastwritten;		 /* last-written bytes count */
 	off_t rate_limit;		 /* rate limit, in bytes per second */
 	size_t buffer_size;		 /* buffer size, in bytes (0=default) */
 	off_t size;			 /* total size of data */

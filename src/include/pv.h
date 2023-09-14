@@ -139,7 +139,7 @@ extern void pv_state_set_format(pvstate_t state, bool progress,
 				bool fineta, bool rate,
 				bool average_rate, bool bytes,
 				bool bufpercent,
-				unsigned int lastwritten,
+				size_t lastwritten,
 				/*@null@*/ const char *name);
 
 /*

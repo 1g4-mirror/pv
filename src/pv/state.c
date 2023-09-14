@@ -124,9 +124,12 @@ void pv_state_free(pvstate_t state)
 		state->format_string = NULL;
 	}
 
+	/*@-keeptrans@ */
 	if (NULL != state->transfer_buffer)
 		free(state->transfer_buffer);
 	state->transfer_buffer = NULL;
+	/*@+keeptrans@ */
+	/* splint - explicitly freeing this structure, so free() here is OK. */
 
 	if (NULL != state->history)
 		free(state->history);
@@ -153,7 +156,7 @@ void pv_state_free(pvstate_t state)
 /*
  * Set the formatting string, given a set of old-style formatting options.
  */
-void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, bool fineta, bool rate, bool average_rate, bool bytes, bool bufpercent, unsigned int lastwritten,	/*@null@ */
+void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, bool fineta, bool rate, bool average_rate, bool bytes, bool bufpercent, size_t lastwritten,	/*@null@ */
 			 const char *name)
 {
 #define PV_ADDFORMAT(x,y) if (x) { \
@@ -175,7 +178,7 @@ void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, b
 	if (lastwritten > 0) {
 		char buf[16];		 /* flawfinder: ignore */
 		memset(buf, 0, sizeof(buf));
-		(void) pv_snprintf(buf, sizeof(buf), "%%%uA", lastwritten);
+		(void) pv_snprintf(buf, sizeof(buf), "%%%uA", (unsigned int) lastwritten);
 		PV_ADDFORMAT(lastwritten > 0, buf);
 		/*
 		 * flawfinder rationale: large enough for string, zeroed
