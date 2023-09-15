@@ -293,7 +293,7 @@ static int pv_crs_get_ypos(int terminalfd)
 	}
 #endif				/* !CURSOR_ANSWERBACK_BYTE_BY_BYTE */
 
-	ypos = (int) pv_getnum_ui(cpr + 2);
+	ypos = (int) pv_getnum_count(cpr + 2);
 
 	if (0 != tcsetattr(terminalfd, TCSANOW | TCSAFLUSH, &old_tty)) {
 		debug("%s: %s", "tcsetattr (2) failed", strerror(errno));

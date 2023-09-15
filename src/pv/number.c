@@ -24,36 +24,50 @@ static bool pv__isdigit(char c)
 
 
 /*
- * Return the numeric value of "str", as an off_t.
+ * Return the numeric value of "str", as an off_t, where "str" is expected
+ * to be a sequence of digits (without a thousands separator), possibly with
+ * a fractional part, optionally followed by a units suffix such as "K" for
+ * kibibytes.
  */
 off_t pv_getnum_size(const char *str)
 {
-	off_t n = 0;
-	off_t decimal = 0;
-	unsigned int decdivisor = 1;
+	off_t integral_part = 0;
+	off_t fractional_part = 0;
+	unsigned int fractional_divisor = 1;
 	unsigned int shift = 0;
 
 	if (NULL == str)
-		return n;
+		return (off_t) 0;
 
+	/* Skip any non-numeric leading characters. */
 	while (str[0] != '\0' && (!pv__isdigit(str[0])))
 		str++;
 
+	/*
+	 * Parse the integral part of the number - the digits before the
+	 * decimal mark or units.
+	 */
 	for (; pv__isdigit(str[0]); str++) {
-		n = n * 10;
-		n += (off_t) (str[0] - '0');
+		integral_part = integral_part * 10;
+		integral_part += (off_t) (str[0] - '0');
 	}
 
 	/*
-	 * If a decimal value was given, skip the decimal part.
+	 * If the next character is a decimal mark, skip over it and parse
+	 * the following digits as the fractional part of the number.
+	 *
+	 * Note that we hard-code the decimal mark as '.' or ',' so this
+	 * will fail if there are any locales whose decimal mark is not one
+	 * of those two characters.
 	 */
 	if (('.' == str[0]) || (',' == str[0])) {
 		str++;
 		for (; pv__isdigit(str[0]); str++) {
-			if (decdivisor < 10000) {
-				decimal = decimal * 10;
-				decimal += (off_t) (str[0] - '0');
-				decdivisor = decdivisor * 10;
+			/* Stop counting below 0.0001. */
+			if (fractional_divisor < 10000) {
+				fractional_part = fractional_part * 10;
+				fractional_part += (off_t) (str[0] - '0');
+				fractional_divisor = fractional_divisor * 10;
 			}
 		}
 	}
@@ -63,6 +77,7 @@ off_t pv_getnum_size(const char *str)
 	 * T=TiB=1024GiB).
 	 */
 	if (str[0] != '\0') {
+		/* Skip any spaces or tabs after the digits. */
 		while ((' ' == str[0]) || ('\t' == str[0]))
 			str++;
 		switch (str[0]) {
@@ -99,98 +114,126 @@ off_t pv_getnum_size(const char *str)
 		if (shiftby > 30)
 			shiftby = 30;
 
-		n = (off_t) (n << shiftby);
-		decimal = (off_t) (decimal << shiftby);
+		/*@-shiftimplementation@*/
+		/*
+		 * splint note: ignore the fact that the types we are
+		 * shifting are signed, because we know they are definitely
+		 * not negative.
+		 */
+		integral_part = (off_t) (integral_part << shiftby);
+		fractional_part = (off_t) (fractional_part << shiftby);
+		/*@+shiftimplementation@*/
+
 		shift -= shiftby;
 	}
 
 	/*
-	 * Add any decimal component.
+	 * Add the fractional part, divided by its divisor, to the integral
+	 * part, now that we've multiplied everything by the appropriate
+	 * units.
 	 */
-	decimal = decimal / decdivisor;
-	n += decimal;
+	fractional_part = fractional_part / fractional_divisor;
+	integral_part += fractional_part;
 
-	return n;
+	return integral_part;
 }
 
 
 /*
- * Return the numeric value of "str", as a double.
+ * Return the numeric value of "str", as a double, where "str" is expected
+ * to be a positive decimal number expressing a time interval.
  */
-double pv_getnum_d(const char *str)
+double pv_getnum_interval(const char *str)
 {
-	double n = 0.0;
+	double result = 0.0;
 	double step = 1;
 
 	if (NULL == str)
-		return n;
+		return 0.0;
 
+	/* Skip any non-digit characters at the start. */
 	while (str[0] != '\0' && (!pv__isdigit(str[0])))
 		str++;
 
+	/* Parse the digits before the decimal mark. */
 	for (; pv__isdigit(str[0]); str++) {
-		n = n * 10;
-		n += (double) (str[0] - '0');
+		result = result * 10;
+		result += (double) (str[0] - '0');
 	}
 
+	/* If there is no decimal mark, return the value as-is. */
 	if ((str[0] != '.') && (str[0] != ','))
-		return n;
+		return result;
 
+	/* Move past the decimal mark. */
 	str++;
 
+	/* Parse the digits after the decimal mark, up to 0.0000001. */
 	for (; pv__isdigit(str[0]) && step < 1000000; str++) {
 		step = step * 10;
-		n += ((double) (str[0] - '0')) / step;
+		result += ((double) (str[0] - '0')) / step;
 	}
 
-	return n;
+	return result;
 }
 
 
 /*
- * Return the numeric value of "str", as an unsigned int.
+ * Return the numeric value of "str", as an unsigned int, following the same
+ * rules as pv_getnum_size(), expecting "str" to express a value to be used
+ * as a count (such as number of screen columns, or size of a buffer).
  */
-unsigned int pv_getnum_ui(const char *str)
+unsigned int pv_getnum_count(const char *str)
 {
 	return (unsigned int) pv_getnum_size(str);
 }
 
 
 /*
- * Return nonzero if the given string is not a valid number of the given
- * type.
+ * Return true if the given string is a valid number of the given type.
  */
-int pv_getnum_check(const char *str, pv_numtype_t type)
+bool pv_getnum_check(const char *str, pv_numtype type)
 {
-	if (0 == str)
-		return 1;
+	if (NULL == str)
+		return false;
 
+	/* Skip leading spaces and tabs. */
 	while ((' ' == str[0]) || ('\t' == str[0]))
 		str++;
 
+	/* If the next character isn't a digit, this isn't a number. */
 	if (!pv__isdigit(str[0]))
-		return 1;
+		return false;
 
+	/* Skip over the digits. */
 	for (; pv__isdigit(str[0]); str++);
 
+	/*
+	 * If there's a decimal mark (see note in pv_getnum_size() above),
+	 * check that too.
+	 */
 	if (('.' == str[0]) || (',' == str[0])) {
+		/* Integers should have no decimal mark. */
 		if (type == PV_NUMTYPE_INTEGER)
-			return 1;
+			return false;
+		/* Skip the decimal mark, then all digits. */
 		str++;
 		for (; pv__isdigit(str[0]); str++);
 	}
 
+	/* If the string ends here, this is a valid number. */
 	if ('\0' == str[0])
-		return 0;
+		return true;
 
-	/*
-	 * Suffixes are not allowed for doubles, only for integers.
-	 */
+	/* A units suffix is not allowed for doubles, only for integers. */
 	if (type == PV_NUMTYPE_DOUBLE)
-		return 1;
+		return false;
 
+	/* Skip trailing spaces or tabs. */
 	while ((' ' == str[0]) || ('\t' == str[0]))
 		str++;
+
+	/* Check the units suffix is one we know about. */
 	switch (str[0]) {
 	case 'k':
 	case 'K':
@@ -203,13 +246,14 @@ int pv_getnum_check(const char *str, pv_numtype_t type)
 		str++;
 		break;
 	default:
-		return 1;
+		return false;
 	}
 
+	/* If the string has trailing text, it's not a valid number. */
 	if (str[0] != '\0')
-		return 1;
+		return false;
 
-	return 0;
+	return true;
 }
 
 /* EOF */

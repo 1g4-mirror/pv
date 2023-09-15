@@ -34,7 +34,7 @@ typedef struct pvstate_s *pvstate_t;
 typedef enum {
   PV_NUMTYPE_INTEGER,
   PV_NUMTYPE_DOUBLE
-} pv_numtype_t;
+} pv_numtype;
 
 
 /*
@@ -42,25 +42,27 @@ typedef enum {
  */
 
 /*
- * Return the given string converted to a double.
+ * Return the given string converted to a double, for use as a time
+ * interval.
  */
-extern double pv_getnum_d(const char *);
+extern double pv_getnum_interval(const char *);
 
 /*
- * Return the given string converted to an unsigned integer.
- */
-extern unsigned int pv_getnum_ui(const char *);
-
-/*
- * Return the given string converted to an off_t.
+ * Return the given string converted to an off_t, for use as a size.
  */
 extern off_t pv_getnum_size(const char *);
 
 /*
- * Return zero if the given string is a number of the given type. NB an
+ * Return the given string converted to an unsigned integer, for use as a
+ * count such as screen width.
+ */
+extern unsigned int pv_getnum_count(const char *);
+
+/*
+ * Return true if the given string is a number of the given type.  NB an
  * integer is both a valid integer and a valid double.
  */
-extern int pv_getnum_check(const char *, pv_numtype_t);
+extern bool pv_getnum_check(const char *, pv_numtype);
 
 /*
  * String handling wrappers.

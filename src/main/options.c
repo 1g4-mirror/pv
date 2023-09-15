@@ -249,7 +249,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'm':
 			/*@fallthrough@ */
 		case 'Z':
-			if (pv_getnum_check(optarg, PV_NUMTYPE_INTEGER) != 0) {
+			if (!pv_getnum_check(optarg, PV_NUMTYPE_INTEGER)) {
 				/*@-mustfreefresh@ *//* see above */
 				fprintf(stderr, "%s: -%c: %s\n", opts->program_name, c, _("integer argument expected"));
 				opts_free(opts);
@@ -260,7 +260,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'i':
 			/*@fallthrough@ */
 		case 'D':
-			if (pv_getnum_check(optarg, PV_NUMTYPE_DOUBLE) != 0) {
+			if (!pv_getnum_check(optarg, PV_NUMTYPE_DOUBLE)) {
 				/*@-mustfreefresh@ *//* see above */
 				fprintf(stderr, "%s: -%c: %s\n", opts->program_name, c, _("numeric argument expected"));
 				opts_free(opts);
@@ -341,7 +341,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->no_splice = true;
 			break;
 		case 'A':
-			opts->lastwritten = (size_t) pv_getnum_ui(optarg);
+			opts->lastwritten = (size_t) pv_getnum_count(optarg);
 			numopts++;
 			opts->no_splice = true;
 			break;
@@ -363,7 +363,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->wait = true;
 			break;
 		case 'D':
-			opts->delay_start = pv_getnum_d(optarg);
+			opts->delay_start = pv_getnum_interval(optarg);
 			break;
 		case 's':
 			/* Permit "@<filename>" as well as just a number. */
@@ -398,14 +398,14 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->linemode = true;
 			break;
 		case 'i':
-			opts->interval = pv_getnum_d(optarg);
+			opts->interval = pv_getnum_interval(optarg);
 			break;
 		case 'w':
-			opts->width = pv_getnum_ui(optarg);
+			opts->width = pv_getnum_count(optarg);
 			opts->width_set_manually = opts->width == 0 ? false : true;
 			break;
 		case 'H':
-			opts->height = pv_getnum_ui(optarg);
+			opts->height = pv_getnum_count(optarg);
 			opts->height_set_manually = opts->height == 0 ? false : true;
 			break;
 		case 'N':
@@ -446,7 +446,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->no_splice = true;
 			break;
 		case 'R':
-			opts->remote = pv_getnum_ui(optarg);
+			opts->remote = pv_getnum_count(optarg);
 			break;
 		case 'P':
 			opts->pidfile = pv_strdup(optarg);
@@ -471,7 +471,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			(void) sscanf(optarg, "%u:%d", &(opts->watch_pid), &(opts->watch_fd));
 			break;
 		case 'm':
-			opts->average_rate_window = pv_getnum_ui(optarg);
+			opts->average_rate_window = pv_getnum_count(optarg);
 			break;
 #ifdef ENABLE_DEBUGGING
 		case '!':
