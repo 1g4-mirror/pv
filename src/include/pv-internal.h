@@ -114,7 +114,7 @@ struct pvstate_s {
 	off_t size;                      /* total size of data */
 	double interval;                 /* interval between updates */
 	double delay_start;              /* delay before first display */
-	unsigned int watch_pid;		 /* process to watch fds of */
+	pid_t watch_pid;		 /* process to watch fds of */
 	int watch_fd;			 /* fd to watch */
 	unsigned int width;              /* screen width */
 	unsigned int height;             /* screen height */
@@ -264,7 +264,7 @@ struct pvstate_s {
 
 
 struct pvwatchfd_s {
-	unsigned int watch_pid;		 /* PID to watch */
+	pid_t watch_pid;		 /* PID to watch */
 	int watch_fd;			 /* fd to watch, -1 = not displayed */
 #ifdef __APPLE__
 #else
@@ -309,7 +309,7 @@ int pv_remote_set(pvstate_t);
 
 int pv_watchfd_info(pvstate_t, pvwatchfd_t, int);
 int pv_watchfd_changed(pvwatchfd_t);
-long long pv_watchfd_position(pvwatchfd_t);
+off_t pv_watchfd_position(pvwatchfd_t);
 int pv_watchpid_scanfds(pvstate_t, pvstate_t, unsigned int, int *, pvwatchfd_t *, pvstate_t *, int *);
 void pv_watchpid_setname(pvstate_t, pvwatchfd_t);
 

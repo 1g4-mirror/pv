@@ -211,9 +211,10 @@ int pv_watchfd_changed(pvwatchfd_t info)
  * Return the current file position of the given file descriptor, or -1 if
  * the fd has closed or has changed in some way.
  */
-long long pv_watchfd_position(pvwatchfd_t info)
+off_t pv_watchfd_position(pvwatchfd_t info)
 {
-	long long position;
+	off_t position;
+	unsigned long long pos_long;
 #ifdef __APPLE__
 	struct vnode_fdinfowithpath vnodeInfo = { };
 	int32_t proc_fd = (int32_t) info->watch_fd;
@@ -225,7 +226,7 @@ long long pv_watchfd_position(pvwatchfd_t info)
 		return -1;
 	}
 
-	position = (long long) vnodeInfo.pfi.fi_offset;
+	position = (off_t) vnodeInfo.pfi.fi_offset;
 #else
 	FILE *fptr;
 
@@ -235,9 +236,10 @@ long long pv_watchfd_position(pvwatchfd_t info)
 	fptr = fopen(info->file_fdinfo, "r");
 	if (NULL == fptr)
 		return -1;
+	pos_long = -1;
 	position = -1;
-	if (1 != fscanf(fptr, "pos: %llu", &position))
-		position = -1;
+	if (1 == fscanf(fptr, "pos: %llu", &pos_long))
+		position = (off_t) pos_long;
 	fclose(fptr);
 #endif
 
@@ -317,7 +319,7 @@ int pv_watchpid_scanfds(pvstate_t state, pvstate_t pristine,
 	while ((d = readdir(dptr)) != NULL) {
 #endif
 		int fd, check_idx, use_idx, rc;
-		long long position_now;
+		off_t position_now;
 
 		fd = -1;
 #ifdef __APPLE__

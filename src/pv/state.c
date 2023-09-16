@@ -332,7 +332,7 @@ void pv_state_format_string_set(pvstate_t state, /*@null@ */ const char *val)
 		state->format_string = pv_strdup(val);
 }
 
-void pv_state_watch_pid_set(pvstate_t state, unsigned int val)
+void pv_state_watch_pid_set(pvstate_t state, pid_t val)
 {
 	state->watch_pid = val;
 }

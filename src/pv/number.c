@@ -114,7 +114,7 @@ off_t pv_getnum_size(const char *str)
 		if (shiftby > 30)
 			shiftby = 30;
 
-		/*@-shiftimplementation@*/
+		/*@-shiftimplementation@ */
 		/*
 		 * splint note: ignore the fact that the types we are
 		 * shifting are signed, because we know they are definitely
@@ -122,7 +122,7 @@ off_t pv_getnum_size(const char *str)
 		 */
 		integral_part = (off_t) (integral_part << shiftby);
 		fractional_part = (off_t) (fractional_part << shiftby);
-		/*@+shiftimplementation@*/
+		/*@+shiftimplementation@ */
 
 		shift -= shiftby;
 	}

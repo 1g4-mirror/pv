@@ -777,7 +777,9 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
  *
  * Returns NULL on complete allocation failure.
  */
-	   /*@null@*//*@only@ */ static char *pv__allocate_aligned_buffer(int fd, size_t target_size)
+/*@null@*/
+/*@only@*/
+static char *pv__allocate_aligned_buffer(int fd, size_t target_size)
 {
 	char *newptr;
 

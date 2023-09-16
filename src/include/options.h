@@ -56,7 +56,7 @@ struct opts_s {           /* structure describing run-time options */
 	bool discard_input;            /* set to write nothing to stdout */
 	double interval;               /* interval between updates */
 	double delay_start;            /* delay before first display */
-	unsigned int watch_pid;	       /* process to watch fds of */
+	pid_t watch_pid;	       /* process to watch fds of */
 	int watch_fd;		       /* fd to watch */
 	unsigned int average_rate_window; /* time window in seconds for average rate calculations */
 	unsigned int width;            /* screen width */

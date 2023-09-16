@@ -157,8 +157,8 @@ opts_t opts_parse(unsigned int argc, char **argv)
 #endif
 	    ;
 	int c, numopts;
-	unsigned int check_pid;
-	int check_fd;
+	unsigned int check_pid, parse_pid;
+	int check_fd, parse_fd;
 	opts_t opts;
 	char *leafptr;
 
@@ -465,10 +465,12 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'd':
-			opts->watch_pid = 0;
-			opts->watch_fd = -1;
+			parse_pid = 0;
+			parse_fd = -1;
 			/* No syntax check here, already done earlier */
-			(void) sscanf(optarg, "%u:%d", &(opts->watch_pid), &(opts->watch_fd));
+			(void) sscanf(optarg, "%u:%d", &parse_pid, &parse_fd);
+			opts->watch_pid = (pid_t) parse_pid;
+			opts->watch_fd = parse_fd;
 			break;
 		case 'm':
 			opts->average_rate_window = pv_getnum_count(optarg);

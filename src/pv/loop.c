@@ -34,7 +34,8 @@
 int pv_main_loop(pvstate_t state)
 {
 	long lineswritten;
-	off_t written, total_written, transferred_since_last, cansend;
+	off_t total_written, transferred_since_last, cansend;
+	ssize_t written;
 	long double target;
 	bool eof_in, eof_out, final_update;
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
@@ -197,6 +198,7 @@ int pv_main_loop(pvstate_t state)
 			written = pv_transfer(state, fd, &eof_in, &eof_out, cansend, &lineswritten);
 		}
 
+		/* End on write error. */
 		if (written < 0) {
 			if (state->cursor)
 				pv_crs_fini(state);
@@ -363,12 +365,11 @@ int pv_main_loop(pvstate_t state)
 int pv_watchfd_loop(pvstate_t state)
 {
 	struct pvwatchfd_s info;
-	long long position_now, total_written, transferred_since_last;
+	off_t position_now, total_written, transferred_since_last;
 	struct timespec next_update, cur_time;
 	struct timespec init_time, next_remotecheck, transfer_elapsed;
 	long double elapsed_seconds;
-	int ended;
-	int first_check;
+	bool ended, first_check;
 	int rc;
 
 	memset(&info, 0, sizeof(info));
@@ -407,10 +408,10 @@ int pv_watchfd_loop(pvstate_t state)
 	pv_elapsedtime_copy(&next_update, &cur_time);
 	pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->interval));
 
-	ended = 0;
+	ended = false;
 	total_written = 0;
 	transferred_since_last = 0;
-	first_check = 1;
+	first_check = true;
 
 	while (!ended) {
 		/*
@@ -427,13 +428,13 @@ int pv_watchfd_loop(pvstate_t state)
 		position_now = pv_watchfd_position(&info);
 
 		if (position_now < 0) {
-			ended = 1;
+			ended = true;
 		} else {
 			transferred_since_last += position_now - total_written;
 			total_written = position_now;
 			if (first_check) {
 				state->initial_offset = position_now;
-				first_check = 0;
+				first_check = false;
 			}
 		}
 
@@ -441,7 +442,6 @@ int pv_watchfd_loop(pvstate_t state)
 
 		/* Ended - force a display update. */
 		if (ended) {
-			ended = 1;
 			pv_elapsedtime_copy(&next_update, &cur_time);
 		}
 
