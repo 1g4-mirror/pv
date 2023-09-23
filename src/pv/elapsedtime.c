@@ -239,12 +239,12 @@ void pv_nanosleep(long long nanoseconds)
 #else
 	struct timeval tv;
 	tv.tv_sec = 0;
-	/*@-type@*/
+	/*@-type@ */
 	tv.tv_usec = nanoseconds / 1000;
-	/*@+type@*/ /* splint rationale - best effort */
-	/*@-null@*/
+	/*@+type@ *//* splint rationale - best effort */
+	/*@-null@ */
 	(void) select(0, NULL, NULL, NULL, &tv);
-	/*@+null@*/ /* splint doesn't know about select() */
+	/*@+null@ *//* splint doesn't know about select() */
 #endif
 }
 
