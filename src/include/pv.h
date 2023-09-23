@@ -123,6 +123,9 @@ void pv_elapsedtime_subtract(struct timespec *, const struct timespec *, const s
 /* Convert a timespec to seconds. */
 long double pv_elapsedtime_seconds(const struct timespec *);
 
+/* Sleep for a number of nanoseconds. */
+void pv_nanosleep(long long);
+
           
 /*
  * Main PV functions.

@@ -307,7 +307,7 @@ void pv_remote_check(pvstate_t);
 void pv_remote_fini(pvstate_t);
 int pv_remote_set(pvstate_t);
 
-int pv_watchfd_info(pvstate_t, pvwatchfd_t, int);
+int pv_watchfd_info(pvstate_t, pvwatchfd_t, bool);
 int pv_watchfd_changed(pvwatchfd_t);
 off_t pv_watchfd_position(pvwatchfd_t);
 int pv_watchpid_scanfds(pvstate_t, pvstate_t, unsigned int, int *, pvwatchfd_t *, pvstate_t *, int *);

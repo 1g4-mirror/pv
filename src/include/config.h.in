@@ -88,6 +88,9 @@
 /* Define to 1 if you have the `msgget' function. */
 #undef HAVE_MSGGET
 
+/* Define to 1 if you have the `nanosleep' function. */
+#undef HAVE_NANOSLEEP
+
 /* Define to 1 if you have the `posix_fadvise' function. */
 #undef HAVE_POSIX_FADVISE
 

@@ -123,7 +123,9 @@ int pv_main_loop(pvstate_t state)
 	/*
 	 * Set or clear O_DIRECT on the output.
 	 */
-	fcntl(STDOUT_FILENO, F_SETFL, (state->direct_io ? O_DIRECT : 0) | fcntl(STDOUT_FILENO, F_GETFL));
+	if (0 != fcntl(STDOUT_FILENO, F_SETFL, (state->direct_io ? O_DIRECT : 0) | fcntl(STDOUT_FILENO, F_GETFL))) {
+		debug("%s: %s", "fcntl", strerror(errno));
+	}
 	state->direct_io_changed = false;
 #endif				/* O_DIRECT */
 
@@ -349,7 +351,7 @@ int pv_main_loop(pvstate_t state)
 		state->exit_status |= 32;
 
 	if (fd >= 0)
-		close(fd);
+		(void) close(fd);
 
 	return state->exit_status;
 }
@@ -375,7 +377,7 @@ int pv_watchfd_loop(pvstate_t state)
 	memset(&info, 0, sizeof(info));
 	info.watch_pid = state->watch_pid;
 	info.watch_fd = state->watch_fd;
-	rc = pv_watchfd_info(state, &info, 0);
+	rc = pv_watchfd_info(state, &info, false);
 	if (0 != rc) {
 		state->exit_status |= 2;
 		return state->exit_status;
@@ -401,6 +403,8 @@ int pv_watchfd_loop(pvstate_t state)
 	memset(&cur_time, 0, sizeof(cur_time));
 	memset(&next_remotecheck, 0, sizeof(next_remotecheck));
 	memset(&next_update, 0, sizeof(next_update));
+	memset(&init_time, 0, sizeof(init_time));
+	memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
 
 	pv_elapsedtime_read(&cur_time);
 	pv_elapsedtime_copy(&(info.start_time), &cur_time);
@@ -450,10 +454,7 @@ int pv_watchfd_loop(pvstate_t state)
 		 * update the display.
 		 */
 		if (pv_elapsedtime_compare(&cur_time, &next_update) < 0) {
-			struct timeval tv;
-			tv.tv_sec = 0;
-			tv.tv_usec = 50000;
-			select(0, NULL, NULL, NULL, &tv);
+			pv_nanosleep(50000000);
 			continue;
 		}
 
@@ -522,11 +523,11 @@ int pv_watchpid_loop(pvstate_t state)
 {
 	struct pvstate_s state_copy;
 	const char *original_format_string;
-	char new_format_string[512] = { 0, };
+	char new_format_string[512];
 	struct pvwatchfd_s *info_array = NULL;
 	struct pvstate_s *state_array = NULL;
 	int array_length = 0;
-	int fd_to_idx[FD_SETSIZE] = { 0, };
+	int fd_to_idx[FD_SETSIZE];
 	struct timespec next_update, cur_time;
 	int idx;
 	int prev_displayed_lines, blank_lines;
@@ -553,6 +554,7 @@ int pv_watchpid_loop(pvstate_t state)
 	 * it's not present.
 	 */
 	original_format_string = state->format_string ? state->format_string : state->default_format;
+	memset(new_format_string, 0, sizeof(new_format_string));
 	if (NULL == strstr(original_format_string, "%N")) {
 		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N %s", original_format_string);
 	} else {
@@ -606,10 +608,7 @@ int pv_watchpid_loop(pvstate_t state)
 		 * update the display.
 		 */
 		if (pv_elapsedtime_compare(&cur_time, &next_update) < 0) {
-			struct timeval tv;
-			tv.tv_sec = 0;
-			tv.tv_usec = 50000;
-			select(0, NULL, NULL, NULL, &tv);
+			pv_nanosleep(50000000);
 			continue;
 		}
 
@@ -650,7 +649,7 @@ int pv_watchpid_loop(pvstate_t state)
 		displayed_lines = 0;
 
 		for (fd = 0; fd < FD_SETSIZE; fd++) {
-			long long position_now, transferred_since_last;
+			off_t position_now, transferred_since_last;
 			struct timespec init_time, transfer_elapsed;
 			long double elapsed_seconds;
 
@@ -690,6 +689,9 @@ int pv_watchpid_loop(pvstate_t state)
 
 			transferred_since_last = position_now - info_array[idx].position;
 			info_array[idx].position = position_now;
+
+			memset(&init_time, 0, sizeof(init_time));
+			memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
 
 			/*
 			 * Calculate the effective start time: the time we actually

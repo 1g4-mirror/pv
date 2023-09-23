@@ -59,7 +59,7 @@ int filesize(pvwatchfd_t info)
 }
 
 #ifdef __APPLE__
-int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, int automatic)
+int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 {
 	struct vnode_fdinfowithpath vnodeInfo = { };
 
@@ -123,11 +123,11 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, int automatic)
  *   3 - stat or lstat on /proc/pid/fd/N failed
  *   4 - file descriptor is not opened on a regular file
  *
- * If "automatic" is nonzero, then this fd was picked automatically, and so
- * if it's not readable or not a regular file, no error is displayed and the
+ * If "automatic" is true, then this fd was picked automatically, and so if
+ * it's not readable or not a regular file, no error is displayed and the
  * function just returns an error code.
  */
-int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, int automatic)
+int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 {
 	if (NULL == state)
 		return -1;
@@ -403,7 +403,7 @@ int pv_watchpid_scanfds(pvstate_t state, pvstate_t pristine,
 			continue;
 		}
 #endif
-		rc = pv_watchfd_info(state, &(info_array[use_idx]), 1);
+		rc = pv_watchfd_info(state, &(info_array[use_idx]), true);
 
 		/*
 		 * Lookup failed - mark this slot as being free for re-use.

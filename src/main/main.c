@@ -310,10 +310,10 @@ int main(int argc, char **argv)
 		pv_remote_init();
 		retcode = pv_main_loop(state);
 		pv_remote_fini();
-	} else if (0 != opts->watch_pid && 0 == opts->watch_fd) {
+	} else if (0 != opts->watch_pid && -1 == opts->watch_fd) {
 		/* "Watch all file descriptors of another process" mode. */
 		retcode = pv_watchpid_loop(state);
-	} else if (0 != opts->watch_pid && 0 != opts->watch_fd) {
+	} else if (0 != opts->watch_pid && -1 != opts->watch_fd) {
 		/* "Watch a specific file descriptor of another process" mode. */
 		retcode = pv_watchfd_loop(state);
 	}

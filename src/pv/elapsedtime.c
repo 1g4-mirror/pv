@@ -221,4 +221,31 @@ long double pv_elapsedtime_seconds(const struct timespec *elapsed_time)
 	return seconds;
 }
 
+
+/*
+ * Sleep for a number of nanoseconds.
+ */
+void pv_nanosleep(long long nanoseconds)
+{
+#if HAVE_NANOSLEEP
+	struct timespec sleep_for, time_remaining;
+
+	memset(&sleep_for, 0, sizeof(sleep_for));
+	memset(&time_remaining, 0, sizeof(time_remaining));
+
+	sleep_for.tv_sec = 0;
+	sleep_for.tv_nsec = nanoseconds;
+	(void) nanosleep(&sleep_for, &time_remaining);
+#else
+	struct timeval tv;
+	tv.tv_sec = 0;
+	/*@-type@*/
+	tv.tv_usec = nanoseconds / 1000;
+	/*@+type@*/ /* splint rationale - best effort */
+	/*@-null@*/
+	(void) select(0, NULL, NULL, NULL, &tv);
+	/*@+null@*/ /* splint doesn't know about select() */
+#endif
+}
+
 /* EOF */
