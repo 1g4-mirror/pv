@@ -3,7 +3,7 @@
  *
  * Copyright 2023 Andrew Wood
  *
- * Distributed under the Artistic License v2.0; see `docs/COPYING'.
+ * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
 
 #include "config.h"

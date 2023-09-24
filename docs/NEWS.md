@@ -40,6 +40,10 @@
  * dropped: will no longer publish to SourceForge as it has a chequered history and is unnecessary
  * dropped: removed project from GitHub and moved to Codeberg - see "[Give Up GitHub](https://giveupgithub.org/)"
 
+#### Other items
+
+ * licensing change from Artistic 2.0 to GPLv3+
+
 ### 1.7.24 - 30 July 2023
 
  * fix: correct terminal size detection, broken in 1.7.17 by the configuration script rewrite ([#72](https://codeberg.org/a-j-wood/pv/issues/72))

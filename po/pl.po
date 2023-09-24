@@ -313,7 +313,7 @@ msgid "IPC not supported on this system"
 msgstr ""
 
 #: src/main/version.c:28
-msgid "License: Artistic v2.0 <https://opensource.org/license/artistic-2-0/>"
+msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
 msgstr ""
 
 #: src/main/version.c:29
@@ -470,6 +470,3 @@ msgstr ""
 #: src/pv/watchpid.c:104 src/pv/watchpid.c:171
 msgid "not a regular file or block device"
 msgstr ""
-
-#~ msgid "Web site: %s"
-#~ msgstr "Strona WWW: %s"

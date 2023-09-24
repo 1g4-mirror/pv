@@ -535,6 +535,12 @@ Alternatively, use the issue tracker linked from the **pv** home page:
 
 **cat**(1), **dialog**(1), **splice**(2), **open**(2) (for **O_DIRECT**)
 
-# LICENSE
+# COPYRIGHT
 
-This is free software, distributed under the ARTISTIC 2.0 license.
+Copyright © 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood.
+
+License GPLv3+: GNU GPL version 3 or later
+\<https://www.gnu.org/licenses/gpl-3.0.html\>.
+
+This is free software: you are free to change and redistribute it. There
+is NO WARRANTY, to the extent permitted by law.

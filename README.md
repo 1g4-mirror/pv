@@ -1,5 +1,4 @@
-Introduction
-------------
+# Introduction
 
 This is the README for **pv** ("Pipe Viewer"), a terminal-based tool for
 monitoring the progress of data through a pipeline.  It can be inserted into
@@ -8,8 +7,7 @@ quickly data is passing through, how long it has taken, how near to
 completion it is, and an estimate of how long it will be until completion.
 
 
-Documentation
--------------
+# Documentation
 
 A manual page is included in this distribution ("`man pv`").  Before
 installation, it is in "[docs/pv.1](./docs/pv.1.md)".
@@ -19,8 +17,7 @@ Changes are listed in "[docs/NEWS.md](./docs/NEWS.md)".  The to-do list is "[doc
 Developers and translators, please see "[docs/DEVELOPERS.md](./docs/DEVELOPERS.md)".
 
 
-Compilation
------------
+# Compilation
 
 To compile the package, type "`sh ./configure`", which should generate a
 Makefile for your system.  You may then type "`make`" to build everything,
@@ -34,12 +31,25 @@ development tools.  You can then run "`autoreconf -is`" to generate the
 "`configure`" script.
 
 
-Author and acknowledgements
----------------------------
+# Copyright, bug reporting, and acknowledgements
 
-This package is copyright 2023 Andrew Wood, and is being distributed under
-the terms of the Artistic License 2.0.  For more details of this license,
-see the file "[docs/COPYING](./docs/COPYING)".
+Copyright (C) 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood.
+
+License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl-3.0.html>.
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option)
+any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+more details.
+
+You should have received a copy of the GNU General Public License, version
+3, in "[docs/COPYING](./docs/COPYING)".  If not, see
+<https://www.gnu.org/licenses/gpl-3.0.html>.
 
 Please report any bugs to **pv@ivarch.com**, or use the issue tracker linked
 from the **pv** home page.

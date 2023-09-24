@@ -3,7 +3,7 @@
  *
  * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
  *
- * Distributed under the Artistic License v2.0; see `docs/COPYING'.
+ * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
 
 #include "config.h"
@@ -25,7 +25,7 @@ void display_version(void)
 	/* GNU standard second line format - "Copyright" always in English */
 	printf("Copyright %s %s\n", "2023", "Andrew Wood");
 	/* GNU standard license line and free software notice */
-	printf("%s\n", _("License: Artistic v2.0 <https://opensource.org/license/artistic-2-0/>"));
+	printf("%s\n", _("License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"));
 	printf("%s\n", _("This is free software: you are free to change and redistribute it."));
 	printf("%s\n", _("There is NO WARRANTY, to the extent permitted by law."));
 	/* Project web site link */

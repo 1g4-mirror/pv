@@ -27,6 +27,5 @@ Things still to do.  (#n) indicates the issue tracker number.
  * ([#67](https://codeberg.org/a-j-wood/pv/issues/67)) Wrap another process to monitor its stdin & stdout ([Alex Mason](https://github.com/axman6))
  * ([#76](https://codeberg.org/a-j-wood/pv/issues/76)) Provide a way to test translations without installing
  * ([#77](https://codeberg.org/a-j-wood/pv/issues/77)) Eliminate all warnings from "splint" and "flawfinder"
- * Switch license to GPLv3+
 
 Any assistance would be appreciated.
