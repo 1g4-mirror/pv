@@ -1,4 +1,4 @@
-### 0.0.20230923-UNRELEASED
+### 1.8.0 - 24 September 2023
 
 #### Features
 
