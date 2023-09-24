@@ -234,8 +234,12 @@ void pv_nanosleep(long long nanoseconds)
 	memset(&time_remaining, 0, sizeof(time_remaining));
 
 	sleep_for.tv_sec = 0;
+	/*@-type@ */
 	sleep_for.tv_nsec = nanoseconds;
+	/*@+type@ *//* splint rationale - best effort */
+	/*@-unrecog@ */
 	(void) nanosleep(&sleep_for, &time_remaining);
+	/*@+unrecog@ *//* splint rationale - doesn't know of nanosleep() */
 #else
 	struct timeval tv;
 	tv.tv_sec = 0;
