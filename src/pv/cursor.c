@@ -665,6 +665,7 @@ void pv_crs_fini(pvstate_t state)
 	pv_write_retry(STDERR_FILENO, cup_cmd, strlen(cup_cmd));	/* flawfinder: ignore */
 	/* flawfinder - pv_snprintf() always \0-terminates (see above). */
 
+#ifdef HAVE_IPC
 	/*
 	 * If any other "pv -c" instances have set the terminal TOSTOP
 	 * attribute, set our local flag so pv_sig_fini() will know about
@@ -677,8 +678,6 @@ void pv_crs_fini(pvstate_t state)
 		}
 	}
 
-
-#ifdef HAVE_IPC
 	pv_crs_ipccount(state);
 	if (NULL != state->crs_shared) {
 		(void) shmdt(state->crs_shared);
