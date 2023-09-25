@@ -188,6 +188,8 @@ int pv_remote_set(opts_t opts)
 		return 1;
 	}
 
+	debug("%s", "message sent");
+
 	timeout = 1100000;
 
 	while (timeout > 10000) {
@@ -215,6 +217,7 @@ int pv_remote_set(opts_t opts)
 		 * before we sent our message, assume it was received.
 		 */
 		if (qbuf.msg_qnum <= initial_qnum) {
+			debug("%s: %lu <= %lu", "message received", (unsigned long)(qbuf.msg_qnum), initial_qnum);
 			return 0;
 		}
 	}
