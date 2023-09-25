@@ -1,3 +1,8 @@
+### 1.8.x-UNRELEASED
+
+ * fix: corrected compilation failure when without IPC support
+ * cleanup: compilation warnings fixed on non-IPC and MacOS systems
+
 ### 1.8.0 - 24 September 2023
 
 #### Features
