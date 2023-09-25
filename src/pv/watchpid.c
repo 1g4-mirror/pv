@@ -214,7 +214,6 @@ int pv_watchfd_changed(pvwatchfd_t info)
 off_t pv_watchfd_position(pvwatchfd_t info)
 {
 	off_t position;
-	unsigned long long pos_long;
 #ifdef __APPLE__
 	struct vnode_fdinfowithpath vnodeInfo = { };
 	int32_t proc_fd = (int32_t) info->watch_fd;
@@ -228,6 +227,7 @@ off_t pv_watchfd_position(pvwatchfd_t info)
 
 	position = (off_t) vnodeInfo.pfi.fi_offset;
 #else
+	unsigned long long pos_long;
 	FILE *fptr;
 
 	if (pv_watchfd_changed(info))
@@ -238,8 +238,9 @@ off_t pv_watchfd_position(pvwatchfd_t info)
 		return -1;
 	pos_long = -1;
 	position = -1;
-	if (1 == fscanf(fptr, "pos: %llu", &pos_long))
+	if (1 == fscanf(fptr, "pos: %llu", &pos_long)) {
 		position = (off_t) pos_long;
+	}
 	fclose(fptr);
 #endif
 
@@ -281,7 +282,6 @@ int pv_watchpid_scanfds(pvstate_t state, pvstate_t pristine,
 			unsigned int watch_pid, int *array_length_ptr,
 			pvwatchfd_t * info_array_ptr, pvstate_t * state_array_ptr, int *fd_to_idx)
 {
-	char fd_dir[512] = { 0, };
 	int array_length = 0;
 	struct pvwatchfd_s *info_array = NULL;
 	struct pvstate_s *state_array = NULL;
@@ -295,9 +295,11 @@ int pv_watchpid_scanfds(pvstate_t state, pvstate_t pristine,
 		return -1;
 	}
 #else
+	char fd_dir[512];
 	DIR *dptr;
 	struct dirent *d;
 
+	memset(fd_dir, 0, sizeof(fd_dir));
 	(void) pv_snprintf(fd_dir, sizeof(fd_dir), "/proc/%u/fd", watch_pid);
 
 	dptr = opendir(fd_dir);
