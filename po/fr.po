@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-09-24 21:33+0100\n"
+"POT-Creation-Date: 2023-09-25 22:18+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -317,11 +317,11 @@ msgstr ""
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "non disponible sur les systèmes sans /proc/self/fdinfo"
 
-#: src/main/remote.c:242
+#: src/main/remote.c:247
 msgid "message not received"
 msgstr "message non reçu"
 
-#: src/main/remote.c:351
+#: src/main/remote.c:356
 msgid "IPC not supported on this system"
 msgstr "IPC non pris en charge sur ce système"
 
@@ -421,11 +421,11 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:541 src/pv/loop.c:595 src/pv/loop.c:637 src/pv/watchpid.c:73
+#: src/pv/loop.c:545 src/pv/loop.c:599 src/pv/loop.c:641 src/pv/watchpid.c:73
 #: src/pv/watchpid.c:83 src/pv/watchpid.c:94 src/pv/watchpid.c:102
 #: src/pv/watchpid.c:139 src/pv/watchpid.c:150 src/pv/watchpid.c:158
-#: src/pv/watchpid.c:169 src/pv/watchpid.c:255 src/pv/watchpid.c:263
-#: src/pv/watchpid.c:294 src/pv/watchpid.c:314
+#: src/pv/watchpid.c:169 src/pv/watchpid.c:256 src/pv/watchpid.c:264
+#: src/pv/watchpid.c:294 src/pv/watchpid.c:316
 msgid "pid"
 msgstr ""
 
