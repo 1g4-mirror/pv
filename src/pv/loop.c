@@ -41,7 +41,6 @@ int pv_main_loop(pvstate_t state)
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
 	struct timespec init_time, next_remotecheck, transfer_elapsed;
 	long double elapsed_seconds;
-	struct stat sb;
 	int fd;
 	unsigned int file_idx;
 
@@ -134,12 +133,17 @@ int pv_main_loop(pvstate_t state)
 	 * Set target buffer size if the initial file's block size can be
 	 * read and we weren't given a target buffer size.
 	 */
-	if ((0 == fstat(fd, &sb)) && (0 == state->target_buffer_size)) {
-		size_t sz;
-		sz = (size_t) (sb.st_blksize * 32);
-		if (sz > BUFFER_SIZE_MAX)
-			sz = BUFFER_SIZE_MAX;
-		state->target_buffer_size = sz;
+	if (0 == state->target_buffer_size) {
+		struct stat sb;
+		memset(&sb, 0, sizeof(sb));
+		if (0 == fstat(fd, &sb)) {
+			size_t sz;
+			sz = (size_t) (sb.st_blksize * 32);
+			if (sz > BUFFER_SIZE_MAX) {
+				sz = BUFFER_SIZE_MAX;
+			}
+			state->target_buffer_size = sz;
+		}
 	}
 #endif
 
