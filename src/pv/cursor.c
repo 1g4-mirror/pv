@@ -636,11 +636,8 @@ void pv_crs_fini(pvstate_t state)
 {
 	char cup_cmd[32];		 /* flawfinder: ignore */
 	unsigned int y;
-	struct shmid_ds shm_buf;
 
 	/* flawfinder - "cup_cmd" is zeroed, and only written by pv_snprintf() */
-
-	memset(&shm_buf, 0, sizeof(shm_buf));
 
 	debug("%s", "fini");
 
@@ -692,8 +689,11 @@ void pv_crs_fini(pvstate_t state)
 	 * If we are the last instance detaching from the shared memory,
 	 * delete it so it's not left lying around.
 	 */
-	if (state->crs_pvcount < 2)
+	if (state->crs_pvcount < 2) {
+		struct shmid_ds shm_buf;
+		memset(&shm_buf, 0, sizeof(shm_buf));
 		(void) shmctl(state->crs_shmid, IPC_RMID, &shm_buf);
+	}
 
 #endif				/* HAVE_IPC */
 
