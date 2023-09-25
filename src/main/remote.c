@@ -205,8 +205,10 @@ int pv_remote_set(opts_t opts)
 		 * If we can't stat the queue, it must have been deleted.
 		 */
 		memset(&qbuf, 0, sizeof(qbuf));
-		if (msgctl(msgid, IPC_STAT, &qbuf) < 0)
+		if (msgctl(msgid, IPC_STAT, &qbuf) < 0) {
+			debug("%s(%d) pid %ld: %s", "msgctl", (int) msgid, (long) opts->remote, strerror(errno));
 			break;
+		}
 
 		/*
 		 * If the message count is at or below the message count
