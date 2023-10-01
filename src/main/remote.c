@@ -11,6 +11,7 @@
 #include "pv.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <signal.h>
@@ -18,6 +19,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 
 #ifdef SA_SIGINFO
 void pv_error(pvstate_t, char *, ...);
@@ -73,19 +75,48 @@ static FILE *pv__control_file(char *filename, size_t bufsize, pid_t control_pid,
 			   (unsigned long) control_pid);
 	control_fd = open(filename, open_flags, open_mode);	/* flawfinder: ignore */
 
+	/*
+	 * If /run/user/<uid> wasn't usable, try $HOME/.pv instead.
+	 */
 	if (control_fd < 0) {
-		(void) pv_snprintf(filename, bufsize, "/tmp/pv.remote.%lu", (unsigned long) control_pid);
+		char *home_dir;
+
+		home_dir = getenv("HOME");  /* flawfinder: ignore */
+		if (NULL == home_dir)
+			return NULL;
+
+		(void) pv_snprintf(filename, bufsize, "%s/.pv/remote.%lu", home_dir, (unsigned long) control_pid);
 		control_fd = open(filename, open_flags, open_mode);	/* flawfinder: ignore */
+
+		/*
+		 * If the open failed, try creating the $HOME/.pv directory
+		 * first.
+		 */
+		if (control_fd < 0) {
+			(void) pv_snprintf(filename, bufsize, "%s/.pv", home_dir);
+			(void) mkdir(filename, 0700);
+			/* In case of weird umask, explicitly chmod the dir. */
+			(void) chmod(filename, 0700);	/* flawfinder: ignore */
+			(void) pv_snprintf(filename, bufsize, "%s/.pv/remote.%lu", home_dir,
+					   (unsigned long) control_pid);
+			control_fd = open(filename, open_flags, open_mode);	/* flawfinder: ignore */
+		}
 	}
 
 	/*
 	 * flawfinder rationale: the files are in a directory whose parents
 	 * cannot be manipulated, and we are not allowing the final
-	 * component to be a symbolic link.
+	 * component to be a symbolic link.  We are checking that $HOME is
+	 * not NULL, and it's bounded by pv_snprintf() so it can't overshoot
+	 * the filename buffer.  When we chmod $HOME/.pv, we assume that an
+	 * attacker is unlikely to be able to manipulate $HOME's contents to
+	 * make use of us setting $HOME/.pv to mode 700.
 	 */
 
 	if (control_fd < 0)
 		return NULL;
+
+	debug("%s: %s", "control filename", filename);
 
 	control_fptr = fdopen(control_fd, sender ? "wb" : "rb");
 
@@ -102,7 +133,7 @@ static FILE *pv__control_file(char *filename, size_t bufsize, pid_t control_pid,
  */
 int pv_remote_set(opts_t opts, pvstate_t state)
 {
-	char control_filename[4096];	/* flawfinder: ignore */
+	char control_filename[4096];	 /* flawfinder: ignore */
 	FILE *control_fptr;
 	struct remote_msg msgbuf;
 	pid_t signal_sender;
@@ -212,7 +243,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 		(void) remove(control_filename);
 		return 1;
 	}
-	
+
 	debug("%s", "message sent");
 
 	/*
@@ -277,7 +308,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 void pv_remote_check(pvstate_t state)
 {
 	pid_t signal_sender;
-	char control_filename[4096];	/* flawfinder: ignore */
+	char control_filename[4096];	 /* flawfinder: ignore */
 	FILE *control_fptr;
 	struct remote_msg msgbuf;
 
@@ -319,7 +350,7 @@ void pv_remote_check(pvstate_t state)
 	if (kill(signal_sender, SIGUSR2) != 0) {
 		debug("%u: %s", signal_sender, strerror(errno));
 	}
-	
+
 	debug("%s", "received remote message");
 
 	pv_state_format_string_set(state, NULL);
@@ -376,7 +407,7 @@ void pv_remote_init(void)
 {
 }
 
-void pv_remote_check(/*@unused@*/ __attribute__((unused)) pvstate_t state)
+void pv_remote_check( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 {
 }
 
@@ -384,9 +415,10 @@ void pv_remote_fini(void)
 {
 }
 
-int pv_remote_set(/*@unused@*/ __attribute__((unused)) opts_t opts, /*@unused@*/ __attribute__((unused)) pvstate_t state)
+int pv_remote_set(			 /*@unused@ */
+			 __attribute__((unused)) opts_t opts, /*@unused@ */  __attribute__((unused)) pvstate_t state)
 {
-	/*@-mustfreefresh@ */ /* splint - see above */
+	/*@-mustfreefresh@ *//* splint - see above */
 	fprintf(stderr, "%s\n", _("SA_SIGINFO not supported on this system"));
 	/*@+mustfreefresh@ */
 	return 1;
