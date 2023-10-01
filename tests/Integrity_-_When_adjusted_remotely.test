@@ -6,9 +6,9 @@
 # Dummy assignments for "shellcheck".
 testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"; workFile2="${workFile2:-.tmp2}"; workFile3="${workFile3:-.tmp3}"; workFile4="${workFile4:-.tmp4}"
 
-# Do nothing if IPC is not supported.
+# Do nothing if it is not supported.
 if ! "${testSubject}" -h 2>/dev/null | grep -Eq "^  -R,"; then
-	echo "IPC is not supported on this platform"
+	echo "Not supported on this platform"
 	exit 77
 fi
 
