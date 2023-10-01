@@ -518,7 +518,7 @@ The following problems are known to exist in **pv**:
     **cygserver** before using **pv -c**.
 
 -   The **-R** option requires that either **/run/user/\<uid\>/** or
-    **$HOME/** can be written to, for inter-process communication.
+    **\$HOME/** can be written to, for inter-process communication.
 
 If you find any other problems, please report them.
 
