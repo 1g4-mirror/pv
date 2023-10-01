@@ -85,9 +85,6 @@
 /* Define to 1 if you have the <minix/config.h> header file. */
 #undef HAVE_MINIX_CONFIG_H
 
-/* Define to 1 if you have the `msgget' function. */
-#undef HAVE_MSGGET
-
 /* Define to 1 if you have the `nanosleep' function. */
 #undef HAVE_NANOSLEEP
 
@@ -102,6 +99,9 @@
 
 /* Define to 1 if you have the `setlocale' function. */
 #undef HAVE_SETLOCALE
+
+/* Define to 1 if you have the `shmget' function. */
+#undef HAVE_SHMGET
 
 /* Define to 1 if you have the `splice' function. */
 #undef HAVE_SPLICE
@@ -156,9 +156,6 @@
 
 /* Define to 1 if you have the <sys/ipc.h> header file. */
 #undef HAVE_SYS_IPC_H
-
-/* Define to 1 if you have the <sys/msg.h> header file. */
-#undef HAVE_SYS_MSG_H
 
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
