@@ -689,13 +689,11 @@ before using
 .IP \(bu 3
 The
 .B -R
-option is not available on Cygwin without
-.B cygserver
-running (SYSV IPC is needed). To fix this, start
-.B cygserver
-before running the instance of
-.B pv
-you want, at runtime, to change the parameters of.
+option requires that either
+.B /run/user/<uid>/
+or
+.B /tmp/
+can be written to, for inter-process communication.
 .P
 If you find any other problems, please report them.
 

@@ -9,6 +9,7 @@
 #include "config.h"
 #include "pv.h"
 #include <stdio.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -383,11 +384,11 @@ void display_help(void)
 		{ "-X", "--discard", NULL,
 		 N_("discard input instead of writing to output"),
 		 { 0, 0, 0, 0} },
-#ifdef HAVE_IPC
+#ifdef SA_SIGINFO
 		{ "-R", "--remote", N_("PID"),
 		 N_("update settings of process PID"),
 		 { 0, 0, 0, 0} },
-#endif				/* HAVE_IPC */
+#endif				/* SA_SIGINFO */
 		{ "", NULL, NULL, NULL, { 0, 0, 0, 0} },
 		{ "-P", "--pidfile", N_("FILE"),
 		 N_("save process ID in FILE"),

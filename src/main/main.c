@@ -24,7 +24,7 @@
 #include <sys/stat.h>
 
 
-int pv_remote_set(opts_t);
+int pv_remote_set(opts_t, pvstate_t);
 void pv_remote_init(void);
 void pv_remote_fini(void);
 
@@ -61,15 +61,6 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * -R specified - send the message, then exit.
-	 */
-	if (opts->remote > 0) {
-		retcode = pv_remote_set(opts);
-		opts_free(opts);
-		return retcode;
-	}
-
-	/*
 	 * Allocate our internal state buffer.
 	 */
 	state = pv_state_alloc(opts->program_name);
@@ -85,6 +76,23 @@ int main(int argc, char **argv)
 		debug("%s: %d", "exiting with status", 64);
 		return 64;
 		/*@+mustfreefresh@ */
+	}
+
+	/*
+	 * -R specified - send the message, then exit.
+	 */
+	if (opts->remote > 0) {
+		/* Initialise signal handling. */
+		pv_sig_init(state);
+		/* Send the message. */
+		retcode = pv_remote_set(opts, state);
+		/* Close down the signal handling. */
+		pv_sig_fini(state);
+		/* Free resources. */
+		pv_state_free(state);
+		opts_free(opts);
+		/* Early exit. */
+		return retcode;
 	}
 
 	/*

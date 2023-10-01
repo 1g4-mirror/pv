@@ -1,5 +1,6 @@
 ### 1.8.x-UNRELEASED
 
+ * fix: replaced "`--remote`" mechanism, using a temporary file instead of SysV IPC, so it can work reliably even when there are multiple PV instances
  * fix: corrected compilation failure when without IPC support
  * cleanup: compilation warnings fixed on non-IPC and MacOS systems
 

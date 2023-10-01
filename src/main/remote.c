@@ -15,18 +15,14 @@
 #include <errno.h>
 #include <signal.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/time.h>
 
-#ifdef HAVE_IPC
-#include <sys/ipc.h>
-#include <sys/msg.h>
-#endif				/* HAVE_IPC */
+#ifdef SA_SIGINFO
+void pv_error(pvstate_t, char *, ...);
 
-
-#ifdef HAVE_IPC
 struct remote_msg {
-	long mtype;
 	bool progress;			 /* progress bar flag */
 	bool timer;			 /* timer flag */
 	bool eta;			 /* ETA flag */
@@ -53,67 +49,77 @@ struct remote_msg {
  * bounded to one less than their size so they are always \0 terminated.
  */
 
-static int remote__msgid = -1;
-
 
 /*
- * Return a key for use with msgget() which will be unique to the current
- * user.
- *
- * We can't just use ftok() because the queue needs to be user-specific
- * so that a user cannot send messages to another user's process, and we
- * can't easily find out the terminal a given process is connected to in a
- * cross-platform way.
+ * Return a stream pointer, and populate the filename buffer, for a control
+ * file associated with a particular process ID; it will be opened for
+ * writing if "sender" is true.  Returns NULL on error.
  */
-static key_t remote__genkey(void)
+static FILE *pv__control_file(char *filename, size_t bufsize, pid_t control_pid, bool sender)
 {
-	uid_t uid;
-	key_t key;
+	int open_flags, open_mode, control_fd;
+	FILE *control_fptr;
 
-	/*@-type@ *//* splint doesn't like uid_t */
-	uid = geteuid();
-	/*@+type@ */
+	open_flags = O_RDONLY;
+#ifdef O_NOFOLLOW
+	open_flags += O_NOFOLLOW;
+#endif
+	if (sender)
+		open_flags = O_WRONLY | O_CREAT | O_EXCL;
 
-	key = ftok("/tmp", (int) 'P') | uid;
+	open_mode = 0644;
 
-	return key;
+	(void) pv_snprintf(filename, bufsize, "/run/user/%lu/pv.remote.%lu", (unsigned long) geteuid(),
+			   (unsigned long) control_pid);
+	control_fd = open(filename, open_flags, open_mode);	/* flawfinder: ignore */
+
+	if (control_fd < 0) {
+		(void) pv_snprintf(filename, bufsize, "/tmp/pv.remote.%lu", (unsigned long) control_pid);
+		control_fd = open(filename, open_flags, open_mode);	/* flawfinder: ignore */
+	}
+
+	/*
+	 * flawfinder rationale: the files are in a directory whose parents
+	 * cannot be manipulated, and we are not allowing the final
+	 * component to be a symbolic link.
+	 */
+
+	if (control_fd < 0)
+		return NULL;
+
+	control_fptr = fdopen(control_fd, sender ? "wb" : "rb");
+
+	return control_fptr;
 }
 
 
 /*
- * Return a message queue ID that is unique to the current user and the
- * given process ID, or -1 on error.
- */
-static int remote__msgget(void)
-{
-	/* Catch SIGSYS in case msgget() raises it, so we get ENOSYS */
-	/*@-unrecog@ *//* splint doesn't see SIGSYS */
-	(void) signal(SIGSYS, SIG_IGN);
-	/*@+unrecog@ */
-	return msgget(remote__genkey(), IPC_CREAT | 0600);
-}
-
-
-/*
- * Set the options of a remote process by setting up an IPC message queue,
- * sending a message containing the new options, and then waiting for the
- * message to be consumed by the remote process.
+ * Set the options of a remote process by writing them to a file, sending a
+ * signal to the receiving process, and waiting for the message to be
+ * consumed by the remote process.
  *
  * Returns nonzero on error.
  */
-int pv_remote_set(opts_t opts)
+int pv_remote_set(opts_t opts, pvstate_t state)
 {
+	char control_filename[4096];	/* flawfinder: ignore */
+	FILE *control_fptr;
 	struct remote_msg msgbuf;
-	struct msqid_ds qbuf;
+	pid_t signal_sender;
 	long timeout;
-	int msgid;
-	unsigned long initial_qnum;
+	bool received;
+
+	/*
+	 * flawfinder rationale: buffer is large enough, explicitly zeroed,
+	 * and always bounded properly as we are only writing to it with
+	 * pv_snprintf().
+	 */
 
 	/*
 	 * Check that the remote process exists.
 	 */
 	if (kill((pid_t) (opts->remote), 0) != 0) {
-		fprintf(stderr, "%s: %u: %s\n", opts->program_name, opts->remote, strerror(errno));
+		pv_error(state, "%u: %s", opts->remote, strerror(errno));
 		return 1;
 	}
 
@@ -137,7 +143,6 @@ int pv_remote_set(opts_t opts)
 	 * Copy parameters into message buffer.
 	 */
 	memset(&msgbuf, 0, sizeof(msgbuf));
-	msgbuf.mtype = (long) (opts->remote);
 	msgbuf.progress = opts->progress;
 	msgbuf.timer = opts->timer;
 	msgbuf.eta = opts->eta;
@@ -169,30 +174,56 @@ int pv_remote_set(opts_t opts)
 	 * terminated by memset() earlier.
 	 */
 
-	msgid = remote__msgget();
-	if (msgid < 0) {
-		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+	/*
+	 * Get the filename and file stream to use for remote control.
+	 */
+	memset(control_filename, 0, sizeof(control_filename));
+	control_fptr = pv__control_file(control_filename, sizeof(control_filename), getpid(), true);
+	if (NULL == control_fptr) {
+		pv_error(state, "%s", strerror(errno));
 		return 1;
 	}
 
-	memset(&qbuf, 0, sizeof(qbuf));
-	if (msgctl(msgid, IPC_STAT, &qbuf) < 0) {
-		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+	/*
+	 * Write the message buffer to the remote control file, and close
+	 * it.
+	 */
+	if (1 != fwrite(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
+		pv_error(state, "%s", strerror(errno));
+		(void) fclose(control_fptr);
+		(void) remove(control_filename);
 		return 1;
 	}
 
-	initial_qnum = qbuf.msg_qnum;
-
-	if (msgsnd(msgid, &msgbuf, sizeof(msgbuf) - sizeof(long), 0) != 0) {
-		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+	if (0 != fclose(control_fptr)) {
+		pv_error(state, "%s", strerror(errno));
+		(void) remove(control_filename);
 		return 1;
 	}
 
+	/*
+	 * Send a SIGUSR2 signal to the remote process, to tell it a message
+	 * is ready to read, after clearing our own "SIGUSR2 received" flag.
+	 */
+	signal_sender = 0;
+	(void) pv_sigusr2_received(state, &signal_sender);
+	if (kill((pid_t) (opts->remote), SIGUSR2) != 0) {
+		pv_error(state, "%u: %s", opts->remote, strerror(errno));
+		(void) remove(control_filename);
+		return 1;
+	}
+	
 	debug("%s", "message sent");
 
-	timeout = 1100000;
+	/*
+	 * Wait for a signal from the remote process to say it has received
+	 * the message.
+	 */
 
-	while (timeout > 10000) {
+	timeout = 1100000;
+	received = false;
+
+	while (timeout > 10000 && !received) {
 		struct timeval tv;
 
 		memset(&tv, 0, sizeof(tv));
@@ -203,40 +234,26 @@ int pv_remote_set(opts_t opts)
 		/*@+nullpass@ */
 		timeout -= 10000;
 
-		/*
-		 * If we can't stat the queue, it must have been deleted.
-		 */
-		memset(&qbuf, 0, sizeof(qbuf));
-		if (msgctl(msgid, IPC_STAT, &qbuf) < 0) {
-			debug("%s(%d) pid %ld: %s", "msgctl", (int) msgid, (long) opts->remote, strerror(errno));
-			break;
-		}
-
-		/*
-		 * If the message count is at or below the message count
-		 * before we sent our message, assume it was received.
-		 */
-		if (qbuf.msg_qnum <= initial_qnum) {
-			debug("%s: %lu <= %lu", "message received", (unsigned long)(qbuf.msg_qnum), initial_qnum);
-			return 0;
+		if (pv_sigusr2_received(state, &signal_sender)) {
+			if (signal_sender == opts->remote) {
+				debug("%s", "message received");
+				received = true;
+			}
 		}
 	}
 
 	/*
-	 * Message not received - delete it.
+	 * Remove the remote control file.
 	 */
-	memset(&qbuf, 0, sizeof(qbuf));
-	if (msgctl(msgid, IPC_STAT, &qbuf) >= 0) {
-		(void) msgrcv(msgid, &msgbuf, sizeof(msgbuf) - sizeof(long), (long) (opts->remote), IPC_NOWAIT);
-		/*
-		 * If this leaves nothing on the queue, remove the
-		 * queue, in case we created one for no reason.
-		 */
-		if (msgctl(msgid, IPC_STAT, &qbuf) >= 0) {
-			if (qbuf.msg_qnum < 1)
-				(void) msgctl(msgid, IPC_RMID, &qbuf);
-		}
+	if (0 != remove(control_filename)) {
+		pv_error(state, "%s", strerror(errno));
 	}
+
+	/*
+	 * Return 0 if the message was received.
+	 */
+	if (received)
+		return 0;
 
 	/*@-mustfreefresh@ */
 	/*
@@ -244,43 +261,65 @@ int pv_remote_set(opts_t opts)
 	 * warnings, but in this case it's unavoidable, and mitigated by the
 	 * fact we only translate each string once.
 	 */
-	fprintf(stderr, "%s: %u: %s\n", opts->program_name, opts->remote, _("message not received"));
+	pv_error(state, "%u: %s", opts->remote, _("message not received"));
 	return 1;
 	/*@+mustfreefresh @ */
 }
 
 
 /*
- * Check for an IPC remote handling message and, if there is one, replace
- * the current process's options with those being passed in.
+ * Check for a remote control message and, if there is one, replace the
+ * current process's options with those being passed in.
  *
  * NB relies on pv_state_set_format() causing the output format to be
  * reparsed.
  */
 void pv_remote_check(pvstate_t state)
 {
+	pid_t signal_sender;
+	char control_filename[4096];	/* flawfinder: ignore */
+	FILE *control_fptr;
 	struct remote_msg msgbuf;
-	ssize_t got;
 
-	if (remote__msgid < 0)
+	/* flawfinder rationale: as above. */
+
+	/*
+	 * Return early if a SIGUSR2 signal has not been received.
+	 */
+	signal_sender = 0;
+	if (!pv_sigusr2_received(state, &signal_sender))
 		return;
 
-	memset(&msgbuf, 0, sizeof(msgbuf));
-
-	got = msgrcv(remote__msgid, &msgbuf, sizeof(msgbuf) - sizeof(long), getpid(), IPC_NOWAIT);
-	if (got < 0) {
-		/*
-		 * If our queue had been deleted, re-create it.
-		 */
-		/*@-unrecog@ *//* splint doesn't see ENOMSG */
-		if (errno != EAGAIN && errno != ENOMSG) {
-			remote__msgid = remote__msgget();
-		}
-		/*@+unrecog@ */
+	memset(control_filename, 0, sizeof(control_filename));
+	control_fptr = pv__control_file(control_filename, sizeof(control_filename), signal_sender, false);
+	if (NULL == control_fptr) {
+		pv_error(state, "%s", strerror(errno));
+		return;
 	}
-	if (got < 1)
-		return;
 
+	/*
+	 * Read the message buffer from the remote control file, and close
+	 * it.
+	 */
+	if (1 != fread(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
+		pv_error(state, "%s", strerror(errno));
+		(void) fclose(control_fptr);
+		return;
+	}
+
+	if (0 != fclose(control_fptr)) {
+		pv_error(state, "%s", strerror(errno));
+		return;
+	}
+
+	/*
+	 * Send a SIGUSR2 signal to the sending process, to tell it the
+	 * message has been received.
+	 */
+	if (kill(signal_sender, SIGUSR2) != 0) {
+		debug("%u: %s", signal_sender, strerror(errno));
+	}
+	
 	debug("%s", "received remote message");
 
 	pv_state_format_string_set(state, NULL);
@@ -318,7 +357,6 @@ void pv_remote_check(pvstate_t state)
  */
 void pv_remote_init(void)
 {
-	remote__msgid = remote__msgget();
 }
 
 
@@ -327,23 +365,18 @@ void pv_remote_init(void)
  */
 void pv_remote_fini(void)
 {
-	if (remote__msgid >= 0) {
-		struct msqid_ds qbuf;
-		memset(&qbuf, 0, sizeof(qbuf));
-		(void) msgctl(remote__msgid, IPC_RMID, &qbuf);
-	}
 }
 
-#else				/* !HAVE_IPC */
+#else				/* !SA_SIGINFO */
 
 /*
- * Dummy stubs for remote control when we don't have IPC.
+ * Dummy stubs for remote control when we don't have SA_SIGINFO.
  */
 void pv_remote_init(void)
 {
 }
 
-void pv_remote_check(pvstate_t state)
+void pv_remote_check(/*@unused@*/ __attribute__((unused)) pvstate_t state)
 {
 }
 
@@ -351,12 +384,14 @@ void pv_remote_fini(void)
 {
 }
 
-int pv_remote_set(pvstate_t state)
+int pv_remote_set(/*@unused@*/ __attribute__((unused)) opts_t opts, /*@unused@*/ __attribute__((unused)) pvstate_t state)
 {
-	fprintf(stderr, "%s\n", _("IPC not supported on this system"));
+	/*@-mustfreefresh@ */ /* splint - see above */
+	fprintf(stderr, "%s\n", _("SA_SIGINFO not supported on this system"));
+	/*@+mustfreefresh@ */
 	return 1;
 }
 
-#endif				/* HAVE_IPC */
+#endif				/* SA_SIGINFO */
 
 /* EOF */

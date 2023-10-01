@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <signal.h>
 #include <time.h>
 #include <sys/types.h>
 
@@ -199,6 +200,13 @@ extern off_t pv_calc_total_size(pvstate_t);
  * Set up signal handlers ready for running the main loop.
  */
 extern void pv_sig_init(pvstate_t);
+
+#ifdef SA_SIGINFO
+/*
+ * Return true if SIGUSR2 has been received, and indicate the sender.
+ */
+extern bool pv_sigusr2_received(pvstate_t, pid_t *);
+#endif
 
 /*
  * Enter the main transfer loop, transferring all input files to the output.

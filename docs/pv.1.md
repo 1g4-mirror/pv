@@ -517,10 +517,8 @@ The following problems are known to exist in **pv**:
     is needed to handle the terminal scrolling). To fix this, start
     **cygserver** before using **pv -c**.
 
--   The **-R** option is not available on Cygwin without **cygserver**
-    running (SYSV IPC is needed). To fix this, start **cygserver**
-    before running the instance of **pv** you want, at runtime, to
-    change the parameters of.
+-   The **-R** option requires that either **/run/user/\<uid\>/** or
+    **/tmp/** can be written to, for inter-process communication.
 
 If you find any other problems, please report them.
 

@@ -142,6 +142,10 @@ struct pvstate_s {
 	volatile sig_atomic_t pv_sig_newsize;	 /* whether we need to get term size again */
 	volatile sig_atomic_t pv_sig_abort;	 /* whether we need to abort right now */
 	volatile sig_atomic_t reparse_display;	 /* whether to re-check format string */
+#ifdef SA_SIGINFO
+	volatile sig_atomic_t pv_sig_rxusr2;	 /* whether SIGUSR2 was received */
+	volatile pid_t pv_sig_sender;		 /* PID of sending process for SIGUSR2 */
+#endif
 	struct sigaction pv_sig_old_sigpipe;
 	struct sigaction pv_sig_old_sigttou;
 	struct sigaction pv_sig_old_sigtstp;
@@ -150,6 +154,9 @@ struct pvstate_s {
 	struct sigaction pv_sig_old_sigint;
 	struct sigaction pv_sig_old_sighup;
 	struct sigaction pv_sig_old_sigterm;
+#ifdef SA_SIGINFO
+	struct sigaction pv_sig_old_sigusr2;
+#endif
 
 	/*****************
 	 * Display state *

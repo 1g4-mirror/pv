@@ -206,6 +206,43 @@ static void pv_sig_term( /*@unused@ */  __attribute__((unused))
 }
 
 
+#ifdef SA_SIGINFO
+/*
+ * Handle a SIGUSR2 by setting a flag to say we received it, after recording
+ * the sending PID.
+ */
+static void pv_sig_usr2( /*@unused@ */  __attribute__((unused))
+			int sig, siginfo_t * info, /*@unused@ */  __attribute__((unused))
+			void *ucontext)
+{
+	if (NULL == pv_sig_state)
+		return;
+	if (NULL == info)
+		return;
+	pv_sig_state->pv_sig_rxusr2 = 1;
+	pv_sig_state->pv_sig_sender = info->si_pid;
+}
+
+
+/*
+ * Return true if a SIGUSR2 signal has been received since the last time
+ * this function was called, populating *pid with the sending PID if so.
+ */
+bool pv_sigusr2_received(pvstate_t state, pid_t *pid)
+{
+	if (NULL == state)
+		return false;
+	if (0 == state->pv_sig_rxusr2)
+		return false;
+	if (NULL != pid)
+		*pid = state->pv_sig_sender;
+	state->pv_sig_rxusr2 = 0;
+	return true;
+}
+
+#endif
+
+
 /*
  * Initialise signal handling.
  */
@@ -301,6 +338,21 @@ void pv_sig_init(pvstate_t state)
 	sa.sa_flags = 0;
 	(void) sigaction(SIGTERM, &sa, &(pv_sig_state->pv_sig_old_sigterm));
 
+#ifdef SA_SIGINFO
+	/*
+	 * Handle SIGUSR2 by setting a flag to say the signal has been
+	 * received, and storing the sending process's PID.
+	 */
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_sigaction = pv_sig_usr2;
+	(void) sigemptyset(&(sa.sa_mask));
+	/*@-unrecog@ *//* splint doesn't know about SA_SIGINFO */
+	sa.sa_flags = SA_SIGINFO;
+	/*@+unrecog@ */
+	(void) sigaction(SIGUSR2, &sa, &(pv_sig_state->pv_sig_old_sigusr2));
+	memset(&sa, 0, sizeof(sa));
+#endif
+
 	/*
 	 * Ensure that the TOSTOP terminal attribute is set, so that a
 	 * SIGTTOU signal will be raised if we try to write to the terminal
@@ -333,6 +385,9 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 	(void) sigaction(SIGINT, &(pv_sig_state->pv_sig_old_sigint), NULL);
 	(void) sigaction(SIGHUP, &(pv_sig_state->pv_sig_old_sighup), NULL);
 	(void) sigaction(SIGTERM, &(pv_sig_state->pv_sig_old_sigterm), NULL);
+#ifdef SA_SIGINFO
+	(void) sigaction(SIGUSR2, &(pv_sig_state->pv_sig_old_sigusr2), NULL);
+#endif
 
 	need_to_clear_tostop = pv_sig_state->pv_tty_tostop_added;
 
