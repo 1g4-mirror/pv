@@ -228,7 +228,7 @@ static void pv_sig_usr2( /*@unused@ */  __attribute__((unused))
  * Return true if a SIGUSR2 signal has been received since the last time
  * this function was called, populating *pid with the sending PID if so.
  */
-bool pv_sigusr2_received(pvstate_t state, pid_t *pid)
+bool pv_sigusr2_received(pvstate_t state, pid_t * pid)
 {
 	if (NULL == state)
 		return false;
