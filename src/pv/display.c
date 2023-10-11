@@ -981,7 +981,7 @@ static const char *pv__format(pvstate_t state,
 				state->percentage = 0;
 			if (state->percentage > 100000)
 				state->percentage = 100000;
-			(void) pv_snprintf(pct, sizeof(pct), "%2ld%%", state->percentage);
+			(void) pv_snprintf(pct, sizeof(pct), "%3ld%%", state->percentage);
 
 			available_width = state->width - static_portion_size - strlen(pct) - 3;
 

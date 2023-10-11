@@ -88,5 +88,6 @@ is acknowledged and greatly appreciated:
  * Matějů Miroslav, Ing. - suggested fix for ETA and elapsed time faults when suspending and resuming a machine ([#13](https://codeberg.org/a-j-wood/pv/issues/13))
  * Anthony DeRobertis - suggested the "`--error-skip-block`" option ([#37](https://codeberg.org/a-j-wood/pv/issues/37))
  * Benoit Pierre - provided patches for compilation without IPC support, without HAVE_STRUCT_STAT_ST_BLKSIZE, and on MacOS
+ * [gustav-b](https://codeberg.org/gustav-b) - suggested percentage formatting correction ([#80](https://codeberg.org/a-j-wood/pv/issues/80))
 
 ---
