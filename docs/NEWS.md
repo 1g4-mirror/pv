@@ -4,6 +4,7 @@
  * fix: corrected compilation failure when without IPC support
  * fix: corrected percentage formatting so it doesn't jump from 2 to 3 characters wide at 100% ([#80](https://codeberg.org/a-j-wood/pv/issues/80))
  * cleanup: compilation warnings fixed on non-IPC and MacOS systems
+ * cleanup: addressed more potential issues highlighted by the software auditing tools "`splint`" and "`flawfinder`" (see "`make analyse`")
 
 ### 1.8.0 - 24 September 2023
 
