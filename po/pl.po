@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-10-01 15:09+0100\n"
+"POT-Creation-Date: 2023-10-14 00:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -353,7 +353,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:701 src/pv/transfer.c:894
+#: src/pv/display.c:701 src/pv/transfer.c:903
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 
@@ -361,7 +361,7 @@ msgstr "nie udało się zaalokować bufora"
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:768 src/pv/transfer.c:584
+#: src/pv/display.c:768 src/pv/transfer.c:591
 msgid "B"
 msgstr "B"
 
@@ -426,39 +426,39 @@ msgstr ""
 msgid "file list allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:446
+#: src/pv/transfer.c:453
 msgid "read failed"
 msgstr "błąd odczytu"
 
-#: src/pv/transfer.c:469
+#: src/pv/transfer.c:476
 msgid "warning: read errors detected"
 msgstr ""
 
-#: src/pv/transfer.c:485
+#: src/pv/transfer.c:492
 msgid "file is not seekable"
 msgstr ""
 
-#: src/pv/transfer.c:563
+#: src/pv/transfer.c:570
 msgid "failed to seek past error"
 msgstr ""
 
-#: src/pv/transfer.c:583
+#: src/pv/transfer.c:590
 msgid "skipped past read error"
 msgstr ""
 
-#: src/pv/transfer.c:623
+#: src/pv/transfer.c:630
 msgid "no transfer buffer allocated"
 msgstr ""
 
-#: src/pv/transfer.c:636
+#: src/pv/transfer.c:643
 msgid "failed to set alarm signal handler"
 msgstr ""
 
-#: src/pv/transfer.c:759
+#: src/pv/transfer.c:768
 msgid "write failed"
 msgstr "błąd zapisu"
 
-#: src/pv/transfer.c:985
+#: src/pv/transfer.c:1000
 msgid "select call failed"
 msgstr "nie udało się wywołać funkcji select"
 
