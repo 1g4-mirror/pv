@@ -223,7 +223,7 @@ struct pvstate_s {
 	 * to the output when splice() is not available.
 	 *
 	 * If buffer_size is smaller than pv__target_bufsize, then
-	 * pv_transfer will try to reallocate transfer_buffer to make
+	 * pv_transfer() will try to reallocate transfer_buffer to make
 	 * buffer_size equal to pv__target_bufsize.
 	 *
 	 * Data from the input files is read into the buffer; read_position
@@ -233,7 +233,7 @@ struct pvstate_s {
 	 * is the offset in the buffer that we've written data up to.  It
 	 * will always be less than or equal to read_position.
 	 */
-	/*@keep@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
+	/*@only@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
 	size_t buffer_size;		 /* size of buffer */
 	size_t read_position;		 /* amount of data in buffer */
 	size_t write_position;		 /* buffered data written */

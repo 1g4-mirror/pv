@@ -160,9 +160,9 @@ char *pv_strdup(const char *original)
 void *pv_memrchr(const void *buffer, int match, size_t length)
 {
 #ifdef HAVE_MEMRCHR
-	/*@-unrecog @*/ /* splint doesn't know of memrchr() */
+	/*@-unrecog @ *//* splint doesn't know of memrchr() */
 	return memrchr(buffer, match, length);
-	/*@+unrecog @*/
+	/*@+unrecog @ */
 #else
 	unsigned char *ptr;
 
