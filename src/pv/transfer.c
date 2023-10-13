@@ -129,7 +129,14 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
 		struct timespec cur_time, transfer_elapsed;
 		long double elapsed_seconds;
 
-		nread = read(fd, buf, (size_t) (count > MAX_READ_AT_ONCE ? MAX_READ_AT_ONCE : count));
+		nread = read(fd, buf, (size_t) (count > MAX_READ_AT_ONCE ? MAX_READ_AT_ONCE : count));	/* flawfinder: ignore */
+
+		/*
+		 * flawfinder rationale: reads stop after "count" bytes, and
+		 * we handle negative and zero results from read(), so it is
+		 * bounded to the buffer size the caller told us to use.
+		 */
+
 		if (nread < 0)
 			return nread;
 
@@ -703,9 +710,19 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			/*
 			 * Copy the new data in.
 			 */
-			memcpy(state->lastoutput_buffer +
+			memcpy(state->lastoutput_buffer +	/* flawfinder: ignore */
 			       old_portion_length,
 			       state->transfer_buffer + state->write_position - new_portion_length, new_portion_length);
+			/*
+			 * flawfinder rationale: calculations above ensure
+			 * that old_portion_length + new_portion_length is
+			 * always <= lastoutput_length, and
+			 * lastoutput_length is guaranteed by
+			 * pv__format_init() to be no more than
+			 * PV_SIZEOF_LASTOUTPUT_BUFFER, which is the size of
+			 * lastoutput_buffer, so the memcpy() will always
+			 * fit into the buffer.
+			 */
 		}
 
 		/*
@@ -913,8 +930,14 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 			 * Copy the old buffer contents into the new buffer,
 			 * and free the old one.
 			 */
-			if (state->buffer_size > 0)
-				memcpy(newptr, state->transfer_buffer, state->buffer_size);
+			if (state->buffer_size > 0) {
+				memcpy(newptr, state->transfer_buffer, state->buffer_size);	/* flawfinder: ignore */
+			}
+			/*
+			 * flawfinder rationale: number of bytes copied is
+			 * definitely always smaller than the new buffer
+			 * size.
+			 */
 			free(state->transfer_buffer);
 			state->transfer_buffer = newptr;
 			state->buffer_size = state->target_buffer_size;
