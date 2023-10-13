@@ -655,32 +655,24 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		 * Write returned >0 - data successfully written.
 		 */
 		if ((state->linemode) && (lineswritten != NULL)) {
-			/*
-			 * Guillaume Marcais: use strchr to count \n
-			 */
-			char save;
+			char separator;
 			char *ptr;
 			long lines = 0;
 
-			save = state->transfer_buffer[state->write_position + nwritten];
-			state->transfer_buffer[state->write_position + nwritten] = '\0';
-			ptr = (char *) (state->transfer_buffer + state->write_position - 1);
-
 			if (state->null_terminated_lines) {
-				for (ptr++;
-				     ptr -
-				     (char *) state->transfer_buffer -
-				     state->write_position < (size_t) nwritten; ptr++) {
-					if (*ptr == '\0')
-						++lines;
-				}
+				separator = '\0';
 			} else {
-				while ((ptr = strchr((char *) (ptr + 1), '\n')))
+				separator = '\n';
+			}
+
+			ptr = (char *) (state->transfer_buffer + state->write_position - 1);
+			for (ptr++;
+			     ptr - (char *) state->transfer_buffer - state->write_position < (size_t) nwritten; ptr++) {
+				if (*ptr == separator)
 					++lines;
 			}
 
 			*lineswritten += lines;
-			state->transfer_buffer[state->write_position + nwritten] = save;
 		}
 
 		state->write_position += nwritten;
@@ -1010,22 +1002,14 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * so that we're writing output line-by-line.
 	 */
 	if ((state->to_write > 0) && (state->linemode) && !(state->null_terminated_lines)) {
-		/*
-		 * Guillaume Marcais: use strrchr to find last \n
-		 */
-		char save;
 		char *start;
 		char *end;
 
-		save = state->transfer_buffer[state->write_position + state->to_write];
-		state->transfer_buffer[state->write_position + state->to_write] = '\0';
-
 		start = (char *) (state->transfer_buffer + state->write_position);
-		end = strrchr(start, '\n');
-		state->transfer_buffer[state->write_position + state->to_write] = save;
+		end = pv_memrchr(start, (int) '\n', (size_t) (state->to_write));
 
-		if (end != NULL) {
-			state->to_write = (end - start) + 1;
+		if (NULL != end) {
+			state->to_write = (ssize_t) ((end - start) + 1);
 		}
 	}
 

@@ -151,4 +151,33 @@ char *pv_strdup(const char *original)
 	return duplicate;
 }
 
+/*
+ * Return a pointer to the last matching character in the buffer, or NULL if
+ * not found.
+ */
+/*@null@ */
+/*@temp@ */
+void *pv_memrchr(const void *buffer, int match, size_t length)
+{
+#ifdef HAVE_MEMRCHR
+	/*@-unrecog @*/ /* splint doesn't know of memrchr() */
+	return memrchr(buffer, match, length);
+	/*@+unrecog @*/
+#else
+	unsigned char *ptr;
+
+	if (length < 1)
+		return NULL;
+
+	ptr = ((unsigned char *) buffer) + length - 1;
+	while (ptr >= (unsigned char *) buffer) {
+		if ((int) (ptr[0]) == match)
+			return (void *) ptr;
+		ptr--;
+	}
+
+	return NULL;
+#endif
+}
+
 /* EOF */

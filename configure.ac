@@ -25,7 +25,7 @@ fi
 
 dnl Items we can use if present, but can do without if not present.
 AC_CHECK_FUNCS([getopt_long])
-AC_CHECK_FUNCS([vsnprintf strlcat strtoul])
+AC_CHECK_FUNCS([vsnprintf strlcat strtoul memrchr])
 AC_CHECK_FUNCS([fdatasync])
 AC_CHECK_FUNCS([fpathconf sysconf posix_memalign posix_fadvise])
 AC_CHECK_FUNCS([nanosleep])

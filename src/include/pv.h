@@ -89,6 +89,12 @@ extern size_t pv_strlcat(char *, const char *, size_t);
 /*@null@ */ /*@only@ */ extern char *pv_strdup(const char *);
 
 /*
+ * Return a pointer to the last matching character in the buffer, or NULL if
+ * not found.
+ */
+/*@null@ */ /*@temp@ */ extern void *pv_memrchr(const void *, int, size_t);
+
+/*
  * Functions relating to elapsed time.
  */
 
