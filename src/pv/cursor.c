@@ -79,18 +79,18 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 	char *tmpdir;
 	int openflags;
 
-	state->crs_lock_fd = -1;
+	state->cursor.lock_fd = -1;
 
 	ttydev = ttyname(fd);
 	if (!ttydev) {
-		if (!state->force) {
+		if (!state->control.force) {
 			pv_error(state, "%s: %s", _("failed to get terminal name"), strerror(errno));
 		}
 		/*
 		 * If we don't know our terminal name, we can neither do IPC
 		 * nor make a lock file, so turn off cursor positioning.
 		 */
-		state->cursor = 0;
+		state->control.cursor = 0;
 		debug("%s", "ttyname failed - cursor positioning disabled");
 		return;
 	}
@@ -104,8 +104,8 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 	 */
 	tmpdir = "/tmp";
 
-	memset(state->crs_lock_file, 0, PV_SIZEOF_CRS_LOCK_FILE);
-	(void) pv_snprintf(state->crs_lock_file,
+	memset(state->cursor.lock_file, 0, PV_SIZEOF_CRS_LOCK_FILE);
+	(void) pv_snprintf(state->cursor.lock_file,
 			   PV_SIZEOF_CRS_LOCK_FILE, "%s/pv-%s-%i.lock", tmpdir, basename(ttydev), (int) geteuid());
 
 	/*
@@ -117,7 +117,7 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 	openflags = O_RDWR | O_CREAT;
 #endif
 
-	state->crs_lock_fd = open(state->crs_lock_file, openflags, 0600);	/* flawfinder: ignore */
+	state->cursor.lock_fd = open(state->cursor.lock_file, openflags, 0600);	/* flawfinder: ignore */
 
 	/*
 	 * flawfinder rationale: we aren't truncating the lock file, we
@@ -126,9 +126,9 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 	 * open() is as safe as we can make it.
 	 */
 
-	if (state->crs_lock_fd < 0) {
-		pv_error(state, "%s: %s: %s", state->crs_lock_file, _("failed to open lock file"), strerror(errno));
-		state->cursor = 0;
+	if (state->cursor.lock_fd < 0) {
+		pv_error(state, "%s: %s: %s", state->cursor.lock_file, _("failed to open lock file"), strerror(errno));
+		state->control.cursor = 0;
 		return;
 	}
 }
@@ -144,8 +144,8 @@ static void pv_crs_lock(pvstate_t state, int fd)
 	int lock_fd;
 
 	lock_fd = fd;
-	if (state->crs_lock_fd >= 0)
-		lock_fd = state->crs_lock_fd;
+	if (state->cursor.lock_fd >= 0)
+		lock_fd = state->cursor.lock_fd;
 
 	memset(&lock, 0, sizeof(lock));
 	lock.l_type = (short) F_WRLCK;
@@ -154,10 +154,10 @@ static void pv_crs_lock(pvstate_t state, int fd)
 	lock.l_len = 1;
 	while (fcntl(lock_fd, F_SETLKW, &lock) < 0) {
 		if (errno != EINTR) {
-			if (state->crs_lock_fd == -2) {
+			if (state->cursor.lock_fd == -2) {
 				pv_crs_open_lockfile(state, fd);
-				if (state->crs_lock_fd >= 0) {
-					lock_fd = state->crs_lock_fd;
+				if (state->cursor.lock_fd >= 0) {
+					lock_fd = state->cursor.lock_fd;
 				}
 			} else {
 				pv_error(state, "%s: %s", _("lock attempt failed"), strerror(errno));
@@ -166,8 +166,8 @@ static void pv_crs_lock(pvstate_t state, int fd)
 		}
 	}
 
-	if (state->crs_lock_fd >= 0) {
-		debug("%s: %s", state->crs_lock_file, "terminal lockfile acquired");
+	if (state->cursor.lock_fd >= 0) {
+		debug("%s: %s", state->cursor.lock_file, "terminal lockfile acquired");
 	} else {
 		debug("%s", "terminal lock acquired");
 	}
@@ -184,8 +184,8 @@ static void pv_crs_unlock(pvstate_t state, int fd)
 	int lock_fd;
 
 	lock_fd = fd;
-	if (state->crs_lock_fd >= 0)
-		lock_fd = state->crs_lock_fd;
+	if (state->cursor.lock_fd >= 0)
+		lock_fd = state->cursor.lock_fd;
 
 	memset(&lock, 0, sizeof(lock));
 	lock.l_type = (short) F_UNLCK;
@@ -194,8 +194,8 @@ static void pv_crs_unlock(pvstate_t state, int fd)
 	lock.l_len = 1;
 	(void) fcntl(lock_fd, F_SETLK, &lock);
 
-	if (state->crs_lock_fd >= 0) {
-		debug("%s: %s", state->crs_lock_file, "terminal lockfile released");
+	if (state->cursor.lock_fd >= 0) {
+		debug("%s: %s", state->cursor.lock_file, "terminal lockfile released");
 	} else {
 		debug("%s", "terminal lock released");
 	}
@@ -216,13 +216,13 @@ static void pv_crs_ipccount(pvstate_t state)
 	memset(&buf, 0, sizeof(buf));
 	buf.shm_nattch = 0;
 
-	(void) shmctl(state->crs_shmid, IPC_STAT, &buf);
-	state->crs_pvcount = (int) (buf.shm_nattch);
+	(void) shmctl(state->cursor.shmid, IPC_STAT, &buf);
+	state->cursor.pvcount = (int) (buf.shm_nattch);
 
-	if (state->crs_pvcount > state->crs_pvmax)
-		state->crs_pvmax = state->crs_pvcount;
+	if (state->cursor.pvcount > state->cursor.pvmax)
+		state->cursor.pvmax = state->cursor.pvcount;
 
-	debug("%s: %d", "pvcount", state->crs_pvcount);
+	debug("%s: %d", "pvcount", state->cursor.pvcount);
 }
 #endif				/* HAVE_IPC */
 
@@ -334,13 +334,13 @@ static int pv_crs_ipcinit(pvstate_t state, char *ttyfile, int terminalfd)
 	}
 
 	pv_crs_lock(state, terminalfd);
-	if (!state->cursor) {
+	if (!state->control.cursor) {
 		debug("%s", "early return - cursor has been disabled");
 		return 1;
 	}
 
-	state->crs_shmid = shmget(key, sizeof(struct pvcursorstate_s), 0600 | IPC_CREAT);
-	if (state->crs_shmid < 0) {
+	state->cursor.shmid = shmget(key, sizeof(struct pvcursorstate_s), 0600 | IPC_CREAT);
+	if (state->cursor.shmid < 0) {
 		debug("%s: %s", "shmget failed", strerror(errno));
 		pv_crs_unlock(state, terminalfd);
 		return 1;
@@ -348,7 +348,7 @@ static int pv_crs_ipcinit(pvstate_t state, char *ttyfile, int terminalfd)
 
 	/*@-nullpass@ */
 	/* splint doesn't know shmaddr can be NULL */
-	state->crs_shared = shmat(state->crs_shmid, NULL, 0);
+	state->cursor.shared = shmat(state->cursor.shmid, NULL, 0);
 	/*@+nullpass@ */
 
 	pv_crs_ipccount(state);
@@ -359,26 +359,26 @@ static int pv_crs_ipcinit(pvstate_t state, char *ttyfile, int terminalfd)
 	 * current Y cursor co-ordinate and with an initial false value for
 	 * the TOSTOP-added flag.
 	 */
-	if (state->crs_pvcount < 2) {
-		state->crs_y_start = pv_crs_get_ypos(terminalfd);
-		state->crs_shared->y_topmost = state->crs_y_start;
-		state->crs_shared->tty_tostop_added = false;
-		state->crs_y_lastread = state->crs_y_start;
+	if (state->cursor.pvcount < 2) {
+		state->cursor.y_start = pv_crs_get_ypos(terminalfd);
+		state->cursor.shared->y_topmost = state->cursor.y_start;
+		state->cursor.shared->tty_tostop_added = false;
+		state->cursor.y_lastread = state->cursor.y_start;
 		debug("%s", "we are the first to attach");
 	}
 
-	state->crs_y_offset = state->crs_pvcount - 1;
-	if (state->crs_y_offset < 0)
-		state->crs_y_offset = 0;
+	state->cursor.y_offset = state->cursor.pvcount - 1;
+	if (state->cursor.y_offset < 0)
+		state->cursor.y_offset = 0;
 
 	/*
 	 * If anyone else had attached to the shared memory segment, we need
 	 * to read the top Y co-ordinate from it.
 	 */
-	if (state->crs_pvcount > 1) {
-		state->crs_y_start = state->crs_shared->y_topmost;
-		state->crs_y_lastread = state->crs_y_start;
-		debug("%s: %d", "not the first to attach - got top y", state->crs_y_start);
+	if (state->cursor.pvcount > 1) {
+		state->cursor.y_start = state->cursor.shared->y_topmost;
+		state->cursor.y_lastread = state->cursor.y_start;
+		debug("%s: %d", "not the first to attach - got top y", state->cursor.y_start);
 	}
 
 	pv_crs_unlock(state, terminalfd);
@@ -396,10 +396,10 @@ void pv_crs_init(pvstate_t state)
 	char *ttyfile;
 	int terminalfd;
 
-	state->crs_lock_fd = -2;
-	state->crs_lock_file[0] = '\0';
+	state->cursor.lock_fd = -2;
+	state->cursor.lock_file[0] = '\0';
 
-	if (!state->cursor)
+	if (!state->control.cursor)
 		return;
 
 	debug("%s", "init");
@@ -407,7 +407,7 @@ void pv_crs_init(pvstate_t state)
 	ttyfile = ttyname(STDERR_FILENO);
 	if (NULL == ttyfile) {
 		debug("%s: %s", "disabling cursor positioning because ttyname failed", strerror(errno));
-		state->cursor = false;
+		state->control.cursor = false;
 		return;
 	}
 
@@ -422,22 +422,22 @@ void pv_crs_init(pvstate_t state)
 
 	if (terminalfd < 0) {
 		pv_error(state, "%s: %s: %s", _("failed to open terminal"), ttyfile, strerror(errno));
-		state->cursor = false;
+		state->control.cursor = false;
 		return;
 	}
 #ifdef HAVE_IPC
 	if (pv_crs_ipcinit(state, ttyfile, terminalfd) != 0) {
 		debug("%s", "ipcinit failed, setting noipc flag");
-		state->crs_noipc = true;
+		state->cursor.noipc = true;
 	}
 
 	/*
 	 * If we have already set the terminal TOSTOP attribute, set the
 	 * flag in shared memory to let the other instances know.
 	 */
-	if ((!state->crs_noipc) && state->pv_tty_tostop_added && (NULL != state->crs_shared)) {
+	if ((!state->cursor.noipc) && state->signal.pv_tty_tostop_added && (NULL != state->cursor.shared)) {
 		debug("%s", "propagating local pv_tty_tostop_added true value to shared flag");
-		state->crs_shared->tty_tostop_added = true;
+		state->cursor.shared->tty_tostop_added = true;
 	}
 
 	/*
@@ -445,7 +445,7 @@ void pv_crs_init(pvstate_t state)
 	 * co-ordinate. If we are using IPC, then the pv_crs_ipcinit()
 	 * function takes care of this in a more multi-process-friendly way.
 	 */
-	if (state->crs_noipc) {
+	if (state->cursor.noipc) {
 #else				/* ! HAVE_IPC */
 	if (1) {
 #endif				/* HAVE_IPC */
@@ -453,18 +453,18 @@ void pv_crs_init(pvstate_t state)
 		 * Get current cursor position + 1.
 		 */
 		pv_crs_lock(state, terminalfd);
-		state->crs_y_start = pv_crs_get_ypos(terminalfd);
+		state->cursor.y_start = pv_crs_get_ypos(terminalfd);
 		/*
 		 * Move down a line while the terminal is locked, so that
 		 * other processes in the pipeline will get a different
 		 * initial ypos.
 		 */
-		if (state->crs_y_start > 0)
+		if (state->cursor.y_start > 0)
 			pv_write_retry(STDERR_FILENO, "\n", 1);
 		pv_crs_unlock(state, terminalfd);
 
-		if (state->crs_y_start < 1)
-			state->cursor = 0;
+		if (state->cursor.y_start < 1)
+			state->control.cursor = 0;
 	}
 
 	(void) close(terminalfd);
@@ -477,9 +477,9 @@ void pv_crs_init(pvstate_t state)
  */
 void pv_crs_needreinit(pvstate_t state)
 {
-	state->crs_needreinit += 2;
-	if (state->crs_needreinit > 3)
-		state->crs_needreinit = 3;
+	state->cursor.needreinit += 2;
+	if (state->cursor.needreinit > 3)
+		state->cursor.needreinit = 3;
 }
 #endif
 
@@ -495,23 +495,23 @@ static void pv_crs_reinit(pvstate_t state)
 
 	pv_crs_lock(state, STDERR_FILENO);
 
-	state->crs_needreinit--;
-	if (state->crs_y_offset < 1)
-		state->crs_needreinit = 0;
+	state->cursor.needreinit--;
+	if (state->cursor.y_offset < 1)
+		state->cursor.needreinit = 0;
 
-	if (state->crs_needreinit > 0) {
+	if (state->cursor.needreinit > 0) {
 		pv_crs_unlock(state, STDERR_FILENO);
 		return;
 	}
 
 	debug("%s", "reinit full");
 
-	state->crs_y_start = pv_crs_get_ypos(STDERR_FILENO);
+	state->cursor.y_start = pv_crs_get_ypos(STDERR_FILENO);
 
-	if ((state->crs_y_offset < 1) && (NULL != state->crs_shared)) {
-		state->crs_shared->y_topmost = state->crs_y_start;
+	if ((state->cursor.y_offset < 1) && (NULL != state->cursor.shared)) {
+		state->cursor.shared->y_topmost = state->cursor.y_start;
 	}
-	state->crs_y_lastread = state->crs_y_start;
+	state->cursor.y_lastread = state->cursor.y_start;
 
 	pv_crs_unlock(state, STDERR_FILENO);
 }
@@ -539,24 +539,24 @@ void pv_crs_update(pvstate_t state, const char *output_line)
 	/* flawfinder - output_line is explictly expected to be \0-terminated. */
 
 #ifdef HAVE_IPC
-	if (!state->crs_noipc) {
-		if (state->crs_needreinit > 0)
+	if (!state->cursor.noipc) {
+		if (state->cursor.needreinit > 0)
 			pv_crs_reinit(state);
 
 		pv_crs_ipccount(state);
-		if (NULL != state->crs_shared) {
-			if (state->crs_y_lastread != state->crs_shared->y_topmost) {
-				state->crs_y_start = state->crs_shared->y_topmost;
-				state->crs_y_lastread = state->crs_y_start;
+		if (NULL != state->cursor.shared) {
+			if (state->cursor.y_lastread != state->cursor.shared->y_topmost) {
+				state->cursor.y_start = state->cursor.shared->y_topmost;
+				state->cursor.y_lastread = state->cursor.y_start;
 			}
 		}
 
-		if (state->crs_needreinit > 0)
+		if (state->cursor.needreinit > 0)
 			return;
 	}
 #endif				/* HAVE_IPC */
 
-	y = state->crs_y_start;
+	y = state->cursor.y_start;
 
 #ifdef HAVE_IPC
 	/*
@@ -565,27 +565,27 @@ void pv_crs_update(pvstate_t state, const char *output_line)
 	 * scroll the screen (only if we're the first `pv'), and then move
 	 * our initial Y co-ordinate up.
 	 */
-	if (((state->crs_y_start + state->crs_pvmax) > (int) (state->height))
-	    && (!state->crs_noipc)
+	if (((state->cursor.y_start + state->cursor.pvmax) > (int) (state->control.height))
+	    && (!state->cursor.noipc)
 	    ) {
 		int offs;
 
-		offs = ((state->crs_y_start + state->crs_pvmax) - state->height);
+		offs = ((state->cursor.y_start + state->cursor.pvmax) - state->control.height);
 
-		state->crs_y_start -= offs;
-		if (state->crs_y_start < 1)
-			state->crs_y_start = 1;
+		state->cursor.y_start -= offs;
+		if (state->cursor.y_start < 1)
+			state->cursor.y_start = 1;
 
 		debug("%s: %d", "scroll offset", offs);
 
 		/*
 		 * Scroll the screen if we're the first `pv'.
 		 */
-		if (0 == state->crs_y_offset) {
+		if (0 == state->cursor.y_offset) {
 			pv_crs_lock(state, STDERR_FILENO);
 
 			memset(cup_cmd, 0, sizeof(cup_cmd));
-			(void) pv_snprintf(cup_cmd, sizeof(cup_cmd), "\033[%u;1H", state->height);
+			(void) pv_snprintf(cup_cmd, sizeof(cup_cmd), "\033[%u;1H", state->control.height);
 			cup_cmd_length = strlen(cup_cmd);	/* flawfinder: ignore */
 			pv_write_retry(STDERR_FILENO, cup_cmd, cup_cmd_length);
 			for (; offs > 0; offs--) {
@@ -598,8 +598,8 @@ void pv_crs_update(pvstate_t state, const char *output_line)
 		}
 	}
 
-	if (!state->crs_noipc)
-		y = state->crs_y_start + state->crs_y_offset;
+	if (!state->cursor.noipc)
+		y = state->cursor.y_start + state->cursor.y_offset;
 #endif				/* HAVE_IPC */
 
 	/*
@@ -641,15 +641,15 @@ void pv_crs_fini(pvstate_t state)
 
 	debug("%s", "fini");
 
-	y = (unsigned int) (state->crs_y_start);
+	y = (unsigned int) (state->cursor.y_start);
 
 #ifdef HAVE_IPC
-	if ((state->crs_pvmax > 0) && (!state->crs_noipc))
-		y += state->crs_pvmax - 1;
+	if ((state->cursor.pvmax > 0) && (!state->cursor.noipc))
+		y += state->cursor.pvmax - 1;
 #endif				/* HAVE_IPC */
 
-	if (y > state->height)
-		y = state->height;
+	if (y > state->control.height)
+		y = state->control.height;
 
 	/*
 	 * Absolute bounds check.
@@ -671,40 +671,40 @@ void pv_crs_fini(pvstate_t state)
 	 * attribute, set our local flag so pv_sig_fini() will know about
 	 * it.
 	 */
-	if ((!state->crs_noipc) && (NULL != state->crs_shared) && state->crs_shared->tty_tostop_added) {
-		if (!state->pv_tty_tostop_added) {
+	if ((!state->cursor.noipc) && (NULL != state->cursor.shared) && state->cursor.shared->tty_tostop_added) {
+		if (!state->signal.pv_tty_tostop_added) {
 			debug("%s", "propagating shared tty_tostop_added true value to local flag");
-			state->pv_tty_tostop_added = true;
+			state->signal.pv_tty_tostop_added = true;
 		}
 	}
 
 	pv_crs_ipccount(state);
-	if (NULL != state->crs_shared) {
-		(void) shmdt(state->crs_shared);
+	if (NULL != state->cursor.shared) {
+		(void) shmdt(state->cursor.shared);
 	}
-	state->crs_shared = NULL;
+	state->cursor.shared = NULL;
 
 	/*
 	 * If we are the last instance detaching from the shared memory,
 	 * delete it so it's not left lying around.
 	 */
-	if (state->crs_pvcount < 2) {
+	if (state->cursor.pvcount < 2) {
 		struct shmid_ds shm_buf;
 		memset(&shm_buf, 0, sizeof(shm_buf));
-		(void) shmctl(state->crs_shmid, IPC_RMID, &shm_buf);
+		(void) shmctl(state->cursor.shmid, IPC_RMID, &shm_buf);
 	}
 
 #endif				/* HAVE_IPC */
 
 	pv_crs_unlock(state, STDERR_FILENO);
 
-	if (state->crs_lock_fd >= 0) {
-		(void) close(state->crs_lock_fd);
+	if (state->cursor.lock_fd >= 0) {
+		(void) close(state->cursor.lock_fd);
 		/*
 		 * We can get away with removing this on exit because all
 		 * the other PVs will be finishing at the same sort of time.
 		 */
-		(void) remove(state->crs_lock_file);
+		(void) remove(state->cursor.lock_file);
 	}
 }
 

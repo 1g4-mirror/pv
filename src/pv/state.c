@@ -20,26 +20,26 @@
 /* alloc / realloc history buffer */
 static void pv_alloc_history(pvstate_t state)
 {
-	if (NULL != state->history)
-		free(state->history);
-	state->history = NULL;
+	if (NULL != state->display.history)
+		free(state->display.history);
+	state->display.history = NULL;
 
-	state->history = calloc((size_t) (state->history_len), sizeof(state->history[0]));
-	if (NULL == state->history) {
+	state->display.history = calloc((size_t) (state->display.history_len), sizeof(state->display.history[0]));
+	if (NULL == state->display.history) {
 		/*@-mustfreefresh@ */
 		/*
 		 * splint note: the gettext calls made by _() cause memory
 		 * leak warnings, but in this case it's unavoidable, and
 		 * mitigated by the fact we only translate each string once.
 		 */
-		fprintf(stderr, "%s: %s: %s\n", state->program_name,
+		fprintf(stderr, "%s: %s: %s\n", state->status.program_name,
 			_("history structure allocation failed"), strerror(errno));
 		/*@+mustfreefresh@ */
 		return;
 	}
 
-	state->history_first = state->history_last = 0;
-	state->history[0].elapsed_sec = 0.0;	/* to be safe, memset() not recommended for doubles */
+	state->display.history_first = state->display.history_last = 0;
+	state->display.history[0].elapsed_sec = 0.0;	/* to be safe, memset() not recommended for doubles */
 }
 
 /*
@@ -55,44 +55,44 @@ pvstate_t pv_state_alloc(const char *program_name)
 	memset(state, 0, sizeof(*state));
 
 	/* splint 3.1.2 thinks this is required for some reason. */
-	if (NULL != state->program_name) {
-		free(state->program_name);
+	if (NULL != state->status.program_name) {
+		free(state->status.program_name);
 	}
 
-	state->program_name = pv_strdup(program_name);
-	if (NULL == state->program_name) {
+	state->status.program_name = pv_strdup(program_name);
+	if (NULL == state->status.program_name) {
 		free(state);
 		return NULL;
 	}
 
-	state->watch_pid = 0;
-	state->watch_fd = -1;
+	state->control.watch_pid = 0;
+	state->control.watch_fd = -1;
 #ifdef HAVE_IPC
-	state->crs_shmid = -1;
-	state->crs_pvcount = 1;
+	state->cursor.shmid = -1;
+	state->cursor.pvcount = 1;
 #endif				/* HAVE_IPC */
-	state->crs_lock_fd = -1;
+	state->cursor.lock_fd = -1;
 
-	state->reparse_display = 1;
-	state->current_input_file = -1;
+	state->flag.reparse_display = 1;
+	state->status.current_input_file = -1;
 #ifdef HAVE_SPLICE
-	state->splice_failed_fd = -1;
+	state->transfer.splice_failed_fd = -1;
 #endif				/* HAVE_SPLICE */
-	state->display_visible = false;
+	state->display.display_visible = false;
 
 	/*
 	 * Get the current working directory, if possible, as a base for
 	 * showing relative filenames with --watchfd.
 	 */
-	if (NULL == getcwd(state->cwd, PV_SIZEOF_CWD - 1)) {
+	if (NULL == getcwd(state->status.cwd, PV_SIZEOF_CWD - 1)) {
 		/* failed - will always show full path */
-		state->cwd[0] = '\0';
+		state->status.cwd[0] = '\0';
 	}
-	if ('\0' == state->cwd[1]) {
+	if ('\0' == state->status.cwd[1]) {
 		/* CWD is root directory - always show full path */
-		state->cwd[0] = '\0';
+		state->status.cwd[0] = '\0';
 	}
-	state->cwd[PV_SIZEOF_CWD - 1] = '\0';
+	state->status.cwd[PV_SIZEOF_CWD - 1] = '\0';
 
 	return state;
 }
@@ -106,45 +106,45 @@ void pv_state_free(pvstate_t state)
 	if (0 == state)
 		return;
 
-	if (NULL != state->program_name)
-		free(state->program_name);
-	state->program_name = NULL;
+	if (NULL != state->status.program_name)
+		free(state->status.program_name);
+	state->status.program_name = NULL;
 
-	if (NULL != state->display_buffer)
-		free(state->display_buffer);
-	state->display_buffer = NULL;
+	if (NULL != state->display.display_buffer)
+		free(state->display.display_buffer);
+	state->display.display_buffer = NULL;
 
-	if (NULL != state->name) {
-		free(state->name);
-		state->name = NULL;
+	if (NULL != state->control.name) {
+		free(state->control.name);
+		state->control.name = NULL;
 	}
 
-	if (NULL != state->format_string) {
-		free(state->format_string);
-		state->format_string = NULL;
+	if (NULL != state->control.format_string) {
+		free(state->control.format_string);
+		state->control.format_string = NULL;
 	}
 
 	/*@-keeptrans@ */
-	if (NULL != state->transfer_buffer)
-		free(state->transfer_buffer);
-	state->transfer_buffer = NULL;
+	if (NULL != state->transfer.transfer_buffer)
+		free(state->transfer.transfer_buffer);
+	state->transfer.transfer_buffer = NULL;
 	/*@+keeptrans@ */
 	/* splint - explicitly freeing this structure, so free() here is OK. */
 
-	if (NULL != state->history)
-		free(state->history);
-	state->history = NULL;
+	if (NULL != state->display.history)
+		free(state->display.history);
+	state->display.history = NULL;
 
-	if (NULL != state->input_files) {
+	if (NULL != state->files.filename) {
 		unsigned int file_idx;
-		for (file_idx = 0; file_idx < state->input_file_count; file_idx++) {
+		for (file_idx = 0; file_idx < state->files.file_count; file_idx++) {
 			/*@-unqualifiedtrans@ */
-			free(state->input_files[file_idx]);
+			free(state->files.filename[file_idx]);
 			/*@+unqualifiedtrans@ */
 			/* splint: see similar code below. */
 		}
-		free(state->input_files);
-		state->input_files = NULL;
+		free(state->files.filename);
+		state->files.filename = NULL;
 	}
 
 	free(state);
@@ -160,12 +160,12 @@ void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, b
 			 const char *name)
 {
 #define PV_ADDFORMAT(x,y) if (x) { \
-		if (state->default_format[0] != '\0') \
-			(void) pv_strlcat(state->default_format, " ", sizeof(state->default_format)); \
-		(void) pv_strlcat(state->default_format, y, sizeof(state->default_format)); \
+		if (state->control.default_format[0] != '\0') \
+			(void) pv_strlcat(state->control.default_format, " ", sizeof(state->control.default_format)); \
+		(void) pv_strlcat(state->control.default_format, y, sizeof(state->control.default_format)); \
 	}
 
-	state->default_format[0] = '\0';
+	state->control.default_format[0] = '\0';
 	PV_ADDFORMAT(name, "%N");
 	PV_ADDFORMAT(bytes, "%b");
 	PV_ADDFORMAT(bufpercent, "%T");
@@ -187,159 +187,159 @@ void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, b
 		 */
 	}
 
-	if (NULL != state->name) {
-		free(state->name);
-		state->name = NULL;
+	if (NULL != state->control.name) {
+		free(state->control.name);
+		state->control.name = NULL;
 	}
 
 	if (NULL != name)
-		state->name = pv_strdup(name);
+		state->control.name = pv_strdup(name);
 
-	state->reparse_display = 1;
+	state->flag.reparse_display = 1;
 }
 
 
 void pv_state_force_set(pvstate_t state, bool val)
 {
-	state->force = val;
+	state->control.force = val;
 }
 
 void pv_state_cursor_set(pvstate_t state, bool val)
 {
-	state->cursor = val;
+	state->control.cursor = val;
 }
 
 void pv_state_numeric_set(pvstate_t state, bool val)
 {
-	state->numeric = val;
+	state->control.numeric = val;
 }
 
 void pv_state_wait_set(pvstate_t state, bool val)
 {
-	state->wait = val;
+	state->control.wait = val;
 }
 
 void pv_state_delay_start_set(pvstate_t state, double val)
 {
-	state->delay_start = val;
+	state->control.delay_start = val;
 }
 
 void pv_state_linemode_set(pvstate_t state, bool val)
 {
-	state->linemode = val;
+	state->control.linemode = val;
 }
 
 void pv_state_bits_set(pvstate_t state, bool bits)
 {
-	state->bits = bits;
+	state->control.bits = bits;
 }
 
 void pv_state_null_terminated_lines_set(pvstate_t state, bool val)
 {
-	state->null_terminated_lines = val;
+	state->control.null_terminated_lines = val;
 }
 
 void pv_state_no_display_set(pvstate_t state, bool val)
 {
-	state->no_display = val;
+	state->control.no_display = val;
 }
 
 void pv_state_skip_errors_set(pvstate_t state, unsigned int val)
 {
-	state->skip_errors = val;
+	state->control.skip_errors = val;
 }
 
 void pv_state_error_skip_block_set(pvstate_t state, off_t val)
 {
-	state->error_skip_block = val;
+	state->control.error_skip_block = val;
 }
 
 void pv_state_stop_at_size_set(pvstate_t state, bool val)
 {
-	state->stop_at_size = val;
+	state->control.stop_at_size = val;
 }
 
 void pv_state_sync_after_write_set(pvstate_t state, bool val)
 {
-	state->sync_after_write = val;
+	state->control.sync_after_write = val;
 }
 
 void pv_state_direct_io_set(pvstate_t state, bool val)
 {
-	state->direct_io = val;
-	state->direct_io_changed = true;
+	state->control.direct_io = val;
+	state->control.direct_io_changed = true;
 }
 
 void pv_state_discard_input_set(pvstate_t state, bool val)
 {
-	state->discard_input = val;
+	state->control.discard_input = val;
 }
 
 void pv_state_rate_limit_set(pvstate_t state, off_t val)
 {
-	state->rate_limit = val;
+	state->control.rate_limit = val;
 }
 
 void pv_state_target_buffer_size_set(pvstate_t state, size_t val)
 {
-	state->target_buffer_size = val;
+	state->control.target_buffer_size = val;
 }
 
 void pv_state_no_splice_set(pvstate_t state, bool val)
 {
-	state->no_splice = val;
+	state->control.no_splice = val;
 }
 
 void pv_state_size_set(pvstate_t state, off_t val)
 {
-	state->size = val;
+	state->control.size = val;
 }
 
 void pv_state_interval_set(pvstate_t state, double val)
 {
-	state->interval = val;
+	state->control.interval = val;
 }
 
 void pv_state_width_set(pvstate_t state, unsigned int val, bool was_set_manually)
 {
-	state->width = val;
-	state->width_set_manually = was_set_manually;
+	state->control.width = val;
+	state->control.width_set_manually = was_set_manually;
 }
 
 void pv_state_height_set(pvstate_t state, unsigned int val, bool was_set_manually)
 {
-	state->height = val;
-	state->height_set_manually = was_set_manually;
+	state->control.height = val;
+	state->control.height_set_manually = was_set_manually;
 }
 
 void pv_state_name_set(pvstate_t state, /*@null@ */ const char *val)
 {
-	if (NULL != state->name) {
-		free(state->name);
-		state->name = NULL;
+	if (NULL != state->control.name) {
+		free(state->control.name);
+		state->control.name = NULL;
 	}
 	if (NULL != val)
-		state->name = pv_strdup(val);
+		state->control.name = pv_strdup(val);
 }
 
 void pv_state_format_string_set(pvstate_t state, /*@null@ */ const char *val)
 {
-	if (NULL != state->format_string) {
-		free(state->format_string);
-		state->format_string = NULL;
+	if (NULL != state->control.format_string) {
+		free(state->control.format_string);
+		state->control.format_string = NULL;
 	}
 	if (NULL != val)
-		state->format_string = pv_strdup(val);
+		state->control.format_string = pv_strdup(val);
 }
 
 void pv_state_watch_pid_set(pvstate_t state, pid_t val)
 {
-	state->watch_pid = val;
+	state->control.watch_pid = val;
 }
 
 void pv_state_watch_fd_set(pvstate_t state, int val)
 {
-	state->watch_fd = val;
+	state->control.watch_fd = val;
 }
 
 void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
@@ -347,11 +347,11 @@ void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
 	if (val < 1)
 		val = 1;
 	if (val >= 20) {
-		state->history_len = val / 5 + 1;
-		state->history_interval = 5;
+		state->display.history_len = val / 5 + 1;
+		state->display.history_interval = 5;
 	} else {
-		state->history_len = val + 1;
-		state->history_interval = 1;
+		state->display.history_len = val + 1;
+		state->display.history_interval = 1;
 	}
 	pv_alloc_history(state);
 }
@@ -364,10 +364,10 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 {
 	unsigned int file_idx;
 
-	if (NULL != state->input_files) {
-		for (file_idx = 0; file_idx < state->input_file_count; file_idx++) {
+	if (NULL != state->files.filename) {
+		for (file_idx = 0; file_idx < state->files.file_count; file_idx++) {
 			/*@-unqualifiedtrans@ */
-			free(state->input_files[file_idx]);
+			free(state->files.filename[file_idx]);
 			/*@+unqualifiedtrans@ */
 			/*
 			 * TODO: find a way to tell splint the array
@@ -375,29 +375,30 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 			 * array itself.
 			 */
 		}
-		free(state->input_files);
-		state->input_files = NULL;
-		state->input_file_count = 0;
+		free(state->files.filename);
+		state->files.filename = NULL;
+		state->files.file_count = 0;
 	}
-	state->input_files = calloc((size_t) (input_file_count + 1), sizeof(char *));
-	if (NULL == state->input_files) {
+	state->files.filename = calloc((size_t) (input_file_count + 1), sizeof(char *));
+	if (NULL == state->files.filename) {
 		/*@-mustfreefresh@ *//* see similar _() issue above */
-		fprintf(stderr, "%s: %s: %s\n", state->program_name, _("file list allocation failed"), strerror(errno));
+		fprintf(stderr, "%s: %s: %s\n", state->status.program_name, _("file list allocation failed"),
+			strerror(errno));
 		/*@+mustfreefresh@ */
 		return;
 	}
 	for (file_idx = 0; file_idx < input_file_count; file_idx++) {
 		/*@-nullstate@ */
-		state->input_files[file_idx] = pv_strdup(input_files[file_idx]);
-		if (NULL == state->input_files[file_idx]) {
+		state->files.filename[file_idx] = pv_strdup(input_files[file_idx]);
+		if (NULL == state->files.filename[file_idx]) {
 			/*@-mustfreefresh@ *//* see similar _() issue above */
-			fprintf(stderr, "%s: %s: %s\n", state->program_name,
+			fprintf(stderr, "%s: %s: %s\n", state->status.program_name,
 				_("file list allocation failed"), strerror(errno));
 			/*@+mustfreefresh@ */
 			return;
 		}
 	}
-	state->input_file_count = input_file_count;
+	state->files.file_count = input_file_count;
 }
 
 /*@+nullstate@*/

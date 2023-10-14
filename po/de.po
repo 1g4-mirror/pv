@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-10-14 00:07+0100\n"
+"POT-Creation-Date: 2023-10-14 01:21+0100\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -364,31 +364,31 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:701 src/pv/transfer.c:903
+#: src/pv/display.c:704 src/pv/transfer.c:911
 msgid "buffer allocation failed"
 msgstr "Puffer konnte nicht allokiert werden"
 
-#: src/pv/display.c:763
+#: src/pv/display.c:767
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:768 src/pv/transfer.c:591
+#: src/pv/display.c:772 src/pv/transfer.c:595
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:820 src/pv/display.c:833
+#: src/pv/display.c:825 src/pv/display.c:838
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:824 src/pv/display.c:838
+#: src/pv/display.c:829 src/pv/display.c:843
 msgid "/s"
 msgstr ""
 
-#: src/pv/display.c:824 src/pv/display.c:838
+#: src/pv/display.c:829 src/pv/display.c:843
 msgid "B/s"
 msgstr ""
 
-#: src/pv/display.c:875 src/pv/display.c:879 src/pv/display.c:938
+#: src/pv/display.c:880 src/pv/display.c:884 src/pv/display.c:943
 msgid "ETA"
 msgstr "ETA"
 
@@ -420,7 +420,7 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:545 src/pv/loop.c:599 src/pv/loop.c:641 src/pv/watchpid.c:73
+#: src/pv/loop.c:546 src/pv/loop.c:601 src/pv/loop.c:643 src/pv/watchpid.c:73
 #: src/pv/watchpid.c:83 src/pv/watchpid.c:94 src/pv/watchpid.c:102
 #: src/pv/watchpid.c:139 src/pv/watchpid.c:150 src/pv/watchpid.c:158
 #: src/pv/watchpid.c:169 src/pv/watchpid.c:256 src/pv/watchpid.c:264
@@ -432,43 +432,43 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:385 src/pv/state.c:395
+#: src/pv/state.c:385 src/pv/state.c:396
 msgid "file list allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:453
+#: src/pv/transfer.c:457
 msgid "read failed"
 msgstr "read-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:476
+#: src/pv/transfer.c:480
 msgid "warning: read errors detected"
 msgstr "warnung: lesefehler erkannt"
 
-#: src/pv/transfer.c:492
+#: src/pv/transfer.c:496
 msgid "file is not seekable"
 msgstr "datei ist nicht durchsuchbar"
 
-#: src/pv/transfer.c:570
+#: src/pv/transfer.c:574
 msgid "failed to seek past error"
 msgstr "konnte den Fehler nicht überwinden"
 
-#: src/pv/transfer.c:590
+#: src/pv/transfer.c:594
 msgid "skipped past read error"
 msgstr "über den Lesefehler hinaus verschoben"
 
-#: src/pv/transfer.c:630
+#: src/pv/transfer.c:634
 msgid "no transfer buffer allocated"
 msgstr ""
 
-#: src/pv/transfer.c:643
+#: src/pv/transfer.c:647
 msgid "failed to set alarm signal handler"
 msgstr ""
 
-#: src/pv/transfer.c:768
+#: src/pv/transfer.c:775
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:1000
+#: src/pv/transfer.c:1008
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 

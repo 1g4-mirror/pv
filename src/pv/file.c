@@ -45,25 +45,25 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 	/*
 	 * No files specified - check stdin.
 	 */
-	if ((state->input_file_count < 1) || (NULL == state->input_files)) {
+	if ((state->files.file_count < 1) || (NULL == state->files.filename)) {
 		if (0 == fstat(STDIN_FILENO, &sb))
 			total = sb.st_size;
 		return total;
 	}
 
-	for (file_idx = 0; file_idx < state->input_file_count; file_idx++) {
+	for (file_idx = 0; file_idx < state->files.file_count; file_idx++) {
 		int rc;
 
-		if (0 == strcmp(state->input_files[file_idx], "-")) {
+		if (0 == strcmp(state->files.filename[file_idx], "-")) {
 			rc = fstat(STDIN_FILENO, &sb);
 			if (rc != 0) {
 				total = 0;
 				return total;
 			}
 		} else {
-			rc = stat(state->input_files[file_idx], &sb);
+			rc = stat(state->files.filename[file_idx], &sb);
 			if (0 == rc) {
-				rc = access(state->input_files[file_idx], R_OK);	/* flawfinder: ignore */
+				rc = access(state->files.filename[file_idx], R_OK);	/* flawfinder: ignore */
 				/*
 				 * flawfinder rationale: we're not really
 				 * using access() to do permissions checks,
@@ -79,7 +79,7 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 		}
 
 		if (rc != 0) {
-			debug("%s: %s", state->input_files[file_idx], strerror(errno));
+			debug("%s: %s", state->files.filename[file_idx], strerror(errno));
 			total = 0;
 			return total;
 		}
@@ -91,7 +91,7 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 			 * Get the size of block devices by opening
 			 * them and seeking to the end.
 			 */
-			if (0 == strcmp(state->input_files[file_idx], "-")) {
+			if (0 == strcmp(state->files.filename[file_idx], "-")) {
 				fd = open("/dev/stdin", O_RDONLY);	/* flawfinder: ignore */
 				/*
 				 * flawfinder rationale: "/dev/stdin" may be
@@ -101,7 +101,7 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 				 * be under the control of someone else.
 				 */
 			} else {
-				fd = open(state->input_files[file_idx], O_RDONLY);	/* flawfinder: ignore */
+				fd = open(state->files.filename[file_idx], O_RDONLY);	/* flawfinder: ignore */
 				/* flawfinder - see last open() below. */
 			}
 			if (fd >= 0) {
@@ -146,7 +146,7 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 			if (lseek(STDOUT_FILENO, 0, SEEK_SET) != 0) {
 				pv_error(state, "%s: %s: %s", "(stdout)",
 					 _("failed to seek to start of output"), strerror(errno));
-				state->exit_status |= 2;
+				state->status.exit_status |= 2;
 			}
 			/*
 			 * If we worked out a size, then set the
@@ -155,7 +155,7 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 			 * device.
 			 */
 			if (total > 0) {
-				state->stop_at_size = true;
+				state->control.stop_at_size = true;
 			}
 		}
 	}
@@ -182,11 +182,11 @@ static off_t pv_calc_total_lines(pvstate_t state)
 
 	total = 0;
 
-	for (file_idx = 0; file_idx < state->input_file_count && NULL != state->input_files; file_idx++) {
+	for (file_idx = 0; file_idx < state->files.file_count && NULL != state->files.filename; file_idx++) {
 		int fd = -1;
 		int rc = 0;
 
-		if (0 == strcmp(state->input_files[file_idx], "-")) {
+		if (0 == strcmp(state->files.filename[file_idx], "-")) {
 			rc = fstat(STDIN_FILENO, &sb);
 			if ((rc != 0) || (!S_ISREG(sb.st_mode))) {
 				total = 0;
@@ -194,17 +194,17 @@ static off_t pv_calc_total_lines(pvstate_t state)
 			}
 			fd = dup(STDIN_FILENO);
 		} else {
-			rc = stat(state->input_files[file_idx], &sb);
+			rc = stat(state->files.filename[file_idx], &sb);
 			if ((rc != 0) || (!S_ISREG(sb.st_mode))) {
 				total = 0;
 				return total;
 			}
-			fd = open(state->input_files[file_idx], O_RDONLY);	/* flawfinder: ignore */
+			fd = open(state->files.filename[file_idx], O_RDONLY);	/* flawfinder: ignore */
 			/* flawfinder - see last open() below. */
 		}
 
 		if (fd < 0) {
-			debug("%s: %s", state->input_files[file_idx], strerror(errno));
+			debug("%s: %s", state->files.filename[file_idx], strerror(errno));
 			total = 0;
 			return total;
 		}
@@ -227,14 +227,14 @@ static off_t pv_calc_total_lines(pvstate_t state)
 			 * OK.
 			 */
 			if (numread < 0) {
-				pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
-				state->exit_status |= 2;
+				pv_error(state, "%s: %s", state->files.filename[file_idx], strerror(errno));
+				state->status.exit_status |= 2;
 				break;
 			} else if (0 == numread) {
 				break;
 			}
 			for (buf_idx = 0; buf_idx < numread; buf_idx++) {
-				if (state->null_terminated_lines) {
+				if (state->control.null_terminated_lines) {
 					if ('\0' == scanbuf[buf_idx])
 						total++;
 				} else {
@@ -245,8 +245,8 @@ static off_t pv_calc_total_lines(pvstate_t state)
 		}
 
 		if (0 != lseek(fd, 0, SEEK_SET)) {
-			pv_error(state, "%s: %s", state->input_files[file_idx], strerror(errno));
-			state->exit_status |= 2;
+			pv_error(state, "%s: %s", state->files.filename[file_idx], strerror(errno));
+			state->status.exit_status |= 2;
 		}
 
 		(void) close(fd);
@@ -259,13 +259,13 @@ static off_t pv_calc_total_lines(pvstate_t state)
 /*
  * Work out the total size of all data by adding up the sizes of all input
  * files, using either pv_calc_total_bytes() or pv_calc_total_lines()
- * depending on whether state->linemode is true.
+ * depending on whether state->control.linemode is true.
  *
  * Returns the total size, or 0 if it is unknown.
  */
 off_t pv_calc_total_size(pvstate_t state)
 {
-	if (state->linemode) {
+	if (state->control.linemode) {
 		return pv_calc_total_lines(state);
 	} else {
 		return pv_calc_total_bytes(state);
@@ -279,7 +279,7 @@ off_t pv_calc_total_size(pvstate_t state)
  * error). It is an error if the next input file is the same as the file
  * stdout is pointing to.
  *
- * Updates state->current_input_file in the process.
+ * Updates state->status.current_input_file in the process.
  */
 int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 {
@@ -291,21 +291,21 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	if (oldfd >= 0) {
 		if (0 != close(oldfd)) {
 			pv_error(state, "%s: %s", _("failed to close file"), strerror(errno));
-			state->exit_status |= 8;
+			state->status.exit_status |= 8;
 			return -1;
 		}
 	}
 
-	if (filenum >= state->input_file_count) {
-		debug("%s: %d >= %d", "filenum too large", filenum, state->input_file_count);
-		state->exit_status |= 8;
+	if (filenum >= state->files.file_count) {
+		debug("%s: %d >= %d", "filenum too large", filenum, state->files.file_count);
+		state->status.exit_status |= 8;
 		return -1;
 	}
 
-	if ((NULL == state->input_files) || (0 == strcmp(state->input_files[filenum], "-"))) {
+	if ((NULL == state->files.filename) || (0 == strcmp(state->files.filename[filenum], "-"))) {
 		fd = STDIN_FILENO;
 	} else {
-		fd = open(state->input_files[filenum], O_RDONLY);	/* flawfinder: ignore */
+		fd = open(state->files.filename[filenum], O_RDONLY);	/* flawfinder: ignore */
 		/*
 		 * flawfinder rationale: the input file list is under the
 		 * control of the operator by its nature, so we can't refuse
@@ -313,24 +313,24 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		 */
 		if (fd < 0) {
 			pv_error(state, "%s: %s: %s",
-				 _("failed to read file"), state->input_files[filenum], strerror(errno));
-			state->exit_status |= 2;
+				 _("failed to read file"), state->files.filename[filenum], strerror(errno));
+			state->status.exit_status |= 2;
 			return -1;
 		}
 	}
 
 	if (0 != fstat(fd, &isb)) {
 		pv_error(state, "%s: %s: %s", _("failed to stat file"),
-			 NULL == state->input_files ? "-" : state->input_files[filenum], strerror(errno));
+			 NULL == state->files.filename ? "-" : state->files.filename[filenum], strerror(errno));
 		(void) close(fd);
-		state->exit_status |= 2;
+		state->status.exit_status |= 2;
 		return -1;
 	}
 
 	if (0 != fstat(STDOUT_FILENO, &osb)) {
 		pv_error(state, "%s: %s", _("failed to stat output file"), strerror(errno));
 		(void) close(fd);
-		state->exit_status |= 2;
+		state->status.exit_status |= 2;
 		return -1;
 	}
 
@@ -351,18 +351,18 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 
 	if (input_file_is_stdout) {
 		pv_error(state, "%s: %s", _("input file is output file"),
-			 NULL == state->input_files ? "-" : state->input_files[filenum]);
+			 NULL == state->files.filename ? "-" : state->files.filename[filenum]);
 		(void) close(fd);
-		state->exit_status |= 4;
+		state->status.exit_status |= 4;
 		return -1;
 	}
 
-	state->current_input_file = filenum;
+	state->status.current_input_file = filenum;
 #ifdef O_DIRECT
 	/*
 	 * Set or clear O_DIRECT on the file descriptor.
 	 */
-	if (0 != fcntl(fd, F_SETFL, (state->direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL))) {
+	if (0 != fcntl(fd, F_SETFL, (state->control.direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL))) {
 		/*@-compdef@ */
 		/*
 		 * splint - passed or returned storage is undefined - but at
@@ -400,7 +400,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	/*@-statictrans@ */
 	/*
 	 * Here we are doing bad things with regards to whether the returned
-	 * string is an allocated string from the state->input_files array,
+	 * string is an allocated string from the state->files.filename array,
 	 * a constant string, or a returned string from gettext(), but it
 	 * has no impact.  We explicitly document, above, that the returned
 	 * string expires with the state, and hence switch off the
@@ -418,15 +418,15 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	if (NULL == str_stdin)
 		str_stdin = "(stdin)";
 
-	if (state->current_input_file < 0)
+	if (state->status.current_input_file < 0)
 		return str_none;
-	if ((unsigned int) (state->current_input_file) >= state->input_file_count)
+	if ((unsigned int) (state->status.current_input_file) >= state->files.file_count)
 		return str_none;
 
-	if (NULL == state->input_files) {
+	if (NULL == state->files.filename) {
 		input_file_name = NULL;
 	} else {
-		input_file_name = state->input_files[state->current_input_file];
+		input_file_name = state->files.filename[state->status.current_input_file];
 	}
 	if (NULL == input_file_name)
 		return str_none;
@@ -437,7 +437,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	return input_file_name;
 	/*@+compdef@ */
 	/*
-	 * splint warns about state->input_files being undefined, but we
+	 * splint warns about state->files.filename being undefined, but we
 	 * know it's been populated fully by the time this function is
 	 * called.
 	 */

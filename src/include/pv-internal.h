@@ -84,136 +84,154 @@ struct pvcursorstate_s {
  * Structure for holding PV internal state. Opaque outside the PV library.
  */
 struct pvstate_s {
+	/******************
+	 * Program status *
+	 ******************/
+	struct {
+		/*@only@*/ char *program_name;		 /* program name for error reporting */
+		char cwd[PV_SIZEOF_CWD];	 /* current working directory for relative path */
+		int current_input_file;		 /* index of current file being read */
+		int exit_status; 		 /* exit status to give (0=OK) */
+	} status;
+
 	/***************
 	 * Input files *
 	 ***************/
-	unsigned int input_file_count;	 /* number of input files */
-	/*@only@*/ /*@null@*/ char **input_files; /* input files */
+	struct {
+		unsigned int file_count;	 /* number of input files */
+		/*@only@*/ /*@null@*/ char **filename; /* input filenames */
+	} files;
 
 	/*******************
 	 * Program control *
 	 *******************/
-	bool force;                      /* display even if not on terminal */
-	bool cursor;                     /* use cursor positioning */
-	bool numeric;                    /* numeric output only */
-	bool wait;                       /* wait for data before display */
-	bool linemode;                   /* count lines instead of bytes */
-	bool bits;			 /* report bits instead of bytes */
-	bool null_terminated_lines;      /* lines are null-terminated */
-	bool no_display;                 /* do nothing other than pipe data */
-	unsigned int skip_errors;        /* skip read errors counter */
-	off_t error_skip_block;          /* skip block size, 0 for adaptive */
-	bool stop_at_size;               /* set if we stop at "size" bytes */
-	bool sync_after_write;           /* set if we sync after every write */
-	bool direct_io;                  /* set if O_DIRECT is to be used */
-	bool direct_io_changed;          /* set when direct_io is changed */
-	bool no_splice;                  /* never use splice() */
-	bool discard_input;              /* write nothing to stdout */
-	off_t rate_limit;                /* rate limit, in bytes per second */
-	size_t target_buffer_size;       /* buffer size (0=default) */
-	off_t size;                      /* total size of data */
-	double interval;                 /* interval between updates */
-	double delay_start;              /* delay before first display */
-	pid_t watch_pid;		 /* process to watch fds of */
-	int watch_fd;			 /* fd to watch */
-	unsigned int width;              /* screen width */
-	unsigned int height;             /* screen height */
-	bool width_set_manually;	 /* width was set manually, not detected */
-	bool height_set_manually;	 /* height was set manually, not detected */
-	/*@only@*/ /*@null@*/ char *name;		 /* display name */
-	char default_format[PV_SIZEOF_DEFAULT_FORMAT];	 /* default format string */
-	/*@only@*/ /*@null@*/ char *format_string;	 /* output format string */
-
-	/******************
-	 * Program status *
-	 ******************/
-	/*@only@*/ char *program_name;		 /* program name for error reporting */
-	char cwd[PV_SIZEOF_CWD];	 /* current working directory for relative path */
-	int current_input_file;		 /* index of current file being read */
-	int exit_status; 		 /* exit status to give (0=OK) */
+	struct {
+		bool force;                      /* display even if not on terminal */
+		bool cursor;                     /* use cursor positioning */
+		bool numeric;                    /* numeric output only */
+		bool wait;                       /* wait for data before display */
+		bool linemode;                   /* count lines instead of bytes */
+		bool bits;			 /* report bits instead of bytes */
+		bool null_terminated_lines;      /* lines are null-terminated */
+		bool no_display;                 /* do nothing other than pipe data */
+		unsigned int skip_errors;        /* skip read errors counter */
+		off_t error_skip_block;          /* skip block size, 0 for adaptive */
+		bool stop_at_size;               /* set if we stop at "size" bytes */
+		bool sync_after_write;           /* set if we sync after every write */
+		bool direct_io;                  /* set if O_DIRECT is to be used */
+		bool direct_io_changed;          /* set when direct_io is changed */
+		bool no_splice;                  /* never use splice() */
+		bool discard_input;              /* write nothing to stdout */
+		off_t rate_limit;                /* rate limit, in bytes per second */
+		size_t target_buffer_size;       /* buffer size (0=default) */
+		off_t size;                      /* total size of data */
+		double interval;                 /* interval between updates */
+		double delay_start;              /* delay before first display */
+		pid_t watch_pid;		 /* process to watch fds of */
+		int watch_fd;			 /* fd to watch */
+		unsigned int width;              /* screen width */
+		unsigned int height;             /* screen height */
+		bool width_set_manually;	 /* width was set manually, not detected */
+		bool height_set_manually;	 /* height was set manually, not detected */
+		/*@only@*/ /*@null@*/ char *name;		 /* display name */
+		char default_format[PV_SIZEOF_DEFAULT_FORMAT];	 /* default format string */
+		/*@only@*/ /*@null@*/ char *format_string;	 /* output format string */
+	} control;
 
 	/*******************
 	 * Signal handling *
 	 *******************/
-	int pv_sig_old_stderr;		 /* see pv_sig_ttou() */
-	bool pv_tty_tostop_added;	 /* whether we had to set TOSTOP on the terminal */
-	struct timespec pv_sig_tstp_time; /* see pv_sig_tstp() / __cont() */
-	struct timespec pv_sig_toffset;		 /* total time spent stopped */
-	volatile sig_atomic_t pv_sig_newsize;	 /* whether we need to get term size again */
-	volatile sig_atomic_t pv_sig_abort;	 /* whether we need to abort right now */
-	volatile sig_atomic_t reparse_display;	 /* whether to re-check format string */
+	struct {
+		int old_stderr;		 /* see pv_sig_ttou() */
+		bool pv_tty_tostop_added;	 /* whether we had to set TOSTOP on the terminal */
+		struct timespec tstp_time; /* see pv_sig_tstp() / __cont() */
+		struct timespec toffset;		 /* total time spent stopped */
 #ifdef SA_SIGINFO
-	volatile sig_atomic_t pv_sig_rxusr2;	 /* whether SIGUSR2 was received */
-	volatile pid_t pv_sig_sender;		 /* PID of sending process for SIGUSR2 */
+		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
+		volatile pid_t sender;		 /* PID of sending process for SIGUSR2 */
 #endif
-	struct sigaction pv_sig_old_sigpipe;
-	struct sigaction pv_sig_old_sigttou;
-	struct sigaction pv_sig_old_sigtstp;
-	struct sigaction pv_sig_old_sigcont;
-	struct sigaction pv_sig_old_sigwinch;
-	struct sigaction pv_sig_old_sigint;
-	struct sigaction pv_sig_old_sighup;
-	struct sigaction pv_sig_old_sigterm;
+		struct sigaction old_sigpipe;
+		struct sigaction old_sigttou;
+		struct sigaction old_sigtstp;
+		struct sigaction old_sigcont;
+		struct sigaction old_sigwinch;
+		struct sigaction old_sigint;
+		struct sigaction old_sighup;
+		struct sigaction old_sigterm;
 #ifdef SA_SIGINFO
-	struct sigaction pv_sig_old_sigusr2;
+		struct sigaction old_sigusr2;
 #endif
+	} signal;
+
+	/*******************
+	 * Transient flags *
+	 *******************/
+	struct {
+		volatile sig_atomic_t reparse_display;	 /* whether to re-check format string */
+		volatile sig_atomic_t terminal_resized;	 /* whether we need to get term size again */
+		volatile sig_atomic_t trigger_exit;	 /* whether we need to abort right now */
+	} flag;
 
 	/*****************
 	 * Display state *
 	 *****************/
-	long percentage;
-	long double prev_elapsed_sec;
-	long double prev_rate;
-	long double prev_trans;
-
-	/* Keep track of progress over last intervals to compute current average rate. */
-	/*@null@*/ pvhistory_t *history; /* state at previous intervals (circular buffer) */
-	unsigned int history_len;	 /* total size */
-	int history_interval;		 /* seconds between each history entry */
-	int history_first;
-	int history_last;
-	long double current_avg_rate;    /* current average rate over last history intervals */
-	
-	off_t initial_offset;
-	/*@only@*/ char *display_buffer;
-	long display_buffer_size;
-	size_t lastoutput_length;	 /* number of last-output bytes to show */
-	char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
-	int prev_width;			 /* screen width last time we were called */
-	int prev_length;		 /* length of last string we output */
-	char str_name[PV_SIZEOF_STR_NAME];
-	char str_transferred[PV_SIZEOF_STR_TRANSFERRED];
-	char str_bufpercent[PV_SIZEOF_STR_BUFPERCENT];
-	char str_timer[PV_SIZEOF_STR_TIMER];
-	char str_rate[PV_SIZEOF_STR_RATE];
-	char str_average_rate[PV_SIZEOF_STR_AVERAGE_RATE];
-	char str_progress[PV_SIZEOF_STR_PROGRESS];
-	char str_lastoutput[PV_SIZEOF_STR_LASTOUTPUT];
-	char str_eta[PV_SIZEOF_STR_ETA];
-	char str_fineta[PV_SIZEOF_STR_FINETA];
-	unsigned long components_used;	 /* bitmask of components used */
 	struct {
-		const char *string;
-		int length;
-	} format[PV_FORMAT_ARRAY_MAX];
-	bool display_visible;		 /* set once anything written to terminal */
+		long percentage;
+		long double prev_elapsed_sec;
+		long double prev_rate;
+		long double prev_trans;
+
+		/* Keep track of progress over last intervals to compute current average rate. */
+		/*@null@*/ pvhistory_t *history; /* state at previous intervals (circular buffer) */
+		unsigned int history_len;	 /* total size */
+		int history_interval;		 /* seconds between each history entry */
+		int history_first;
+		int history_last;
+		long double current_avg_rate;    /* current average rate over last history intervals */
+	
+		off_t initial_offset;
+		/*@only@*/ char *display_buffer;
+		long display_buffer_size;
+		size_t lastoutput_length;	 /* number of last-output bytes to show */
+		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
+		int prev_width;			 /* screen width last time we were called */
+		int prev_length;		 /* length of last string we output */
+		char str_name[PV_SIZEOF_STR_NAME];
+		char str_transferred[PV_SIZEOF_STR_TRANSFERRED];
+		char str_bufpercent[PV_SIZEOF_STR_BUFPERCENT];
+		char str_timer[PV_SIZEOF_STR_TIMER];
+		char str_rate[PV_SIZEOF_STR_RATE];
+		char str_average_rate[PV_SIZEOF_STR_AVERAGE_RATE];
+		char str_progress[PV_SIZEOF_STR_PROGRESS];
+		char str_lastoutput[PV_SIZEOF_STR_LASTOUTPUT];
+		char str_eta[PV_SIZEOF_STR_ETA];
+		char str_fineta[PV_SIZEOF_STR_FINETA];
+		unsigned long components_used;	 /* bitmask of components used */
+		struct {
+			const char *string;
+			int length;
+		} format[PV_FORMAT_ARRAY_MAX];
+		bool display_visible;		 /* set once anything written to terminal */
+	} display;
 
 	/********************
 	 * Cursor/IPC state *
 	 ********************/
+	struct {
 #ifdef HAVE_IPC
-	int crs_shmid;			 /* ID of our shared memory segment */
-	int crs_pvcount;		 /* number of `pv' processes in total */
-	int crs_pvmax;			 /* highest number of `pv's seen */
-	/*@keep@*/ /*@null@*/ struct pvcursorstate_s *crs_shared; /* data shared between instances */
-	int crs_y_lastread;		 /* last value of _y_top seen */
-	int crs_y_offset;		 /* our Y offset from this top position */
-	int crs_needreinit;		 /* counter if we need to reinit cursor pos */
-	bool crs_noipc;			 /* set if we can't use IPC */
+		int shmid;		 /* ID of our shared memory segment */
+		int pvcount;		 /* number of `pv' processes in total */
+		int pvmax;		 /* highest number of `pv's seen */
+		/*@keep@*/ /*@null@*/ struct pvcursorstate_s *shared; /* data shared between instances */
+		int y_lastread;		 /* last value of _y_top seen */
+		int y_offset;		 /* our Y offset from this top position */
+		int needreinit;		 /* counter if we need to reinit cursor pos */
+		bool noipc;		 /* set if we can't use IPC */
 #endif				/* HAVE_IPC */
-	int crs_lock_fd;		 /* fd of lockfile, -1 if none open */
-	char crs_lock_file[PV_SIZEOF_CRS_LOCK_FILE];
-	int crs_y_start;		 /* our initial Y coordinate */
+		int lock_fd;		 /* fd of lockfile, -1 if none open */
+		char lock_file[PV_SIZEOF_CRS_LOCK_FILE];
+		int y_start;		 /* our initial Y coordinate */
+	} cursor;
 
 	/*******************
 	 * Transfer state  *
@@ -233,40 +251,45 @@ struct pvstate_s {
 	 * is the offset in the buffer that we've written data up to.  It
 	 * will always be less than or equal to read_position.
 	 */
-	/*@only@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
-	size_t buffer_size;		 /* size of buffer */
-	size_t read_position;		 /* amount of data in buffer */
-	size_t write_position;		 /* buffered data written */
+	struct {
+		/*@only@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
+		size_t buffer_size;		 /* size of buffer */
+		size_t read_position;		 /* amount of data in buffer */
+		size_t write_position;		 /* buffered data written */
 
-	/*
-	 * While reading from a file descriptor we keep track of how many
-	 * times in a row we've seen errors (read_errors_in_a_row), and
-	 * whether or not we have put a warning on stderr about read errors
-	 * on this fd (read_error_warning_shown).
-	 *
-	 * Whenever the active file descriptor changes from
-	 * last_read_skip_fd, we reset read_errors_in_a_row to 0 and
-	 * read_error_warning_shown to false for the new file descriptor and
-	 * set last_read_skip_fd to the new fd number.
-	 *
-	 * This way, we're treating each input file separately.
-	 */
-	int last_read_skip_fd;
-	off_t read_errors_in_a_row;
-	bool read_error_warning_shown;
+		/*
+		 * While reading from a file descriptor we keep track of how
+		 * many times in a row we've seen errors
+		 * (read_errors_in_a_row), and whether or not we have put a
+		 * warning on stderr about read errors on this fd
+		 * (read_error_warning_shown).
+		 *
+		 * Whenever the active file descriptor changes from
+		 * last_read_skip_fd, we reset read_errors_in_a_row to 0 and
+		 * read_error_warning_shown to false for the new file
+		 * descriptor and set last_read_skip_fd to the new fd
+		 * number.
+		 *
+		 * This way, we're treating each input file separately.
+		 */
+		int last_read_skip_fd;
+		off_t read_errors_in_a_row;
+		bool read_error_warning_shown;
 #ifdef HAVE_SPLICE
-	/*
-	 * These variables are used to keep track of whether splice() was
-	 * used; splice_failed_fd is the file descriptor that splice() last
-	 * failed on, so that we don't keep trying to use it on an fd that
-	 * doesn't support it, and splice_used is set to true if splice()
-	 * was used this time within pv_transfer().
-	 */
-	int splice_failed_fd;
-	bool splice_used;
+		/*
+		 * These variables are used to keep track of whether
+		 * splice() was used; splice_failed_fd is the file
+		 * descriptor that splice() last failed on, so that we don't
+		 * keep trying to use it on an fd that doesn't support it,
+		 * and splice_used is set to true if splice() was used this
+		 * time within pv_transfer().
+		 */
+		int splice_failed_fd;
+		bool splice_used;
 #endif
-	ssize_t to_write;		 /* max to write this time around */
-	ssize_t written;		 /* bytes sent to stdout this time */
+		ssize_t to_write;		 /* max to write this time around */
+		ssize_t written;		 /* bytes sent to stdout this time */
+	} transfer;
 };
 
 

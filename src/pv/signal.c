@@ -45,7 +45,7 @@ static void pv_sig_ensure_tty_tostop()
 	if (0 == (terminal_attributes.c_lflag & TOSTOP)) {
 		terminal_attributes.c_lflag |= TOSTOP;
 		if (0 == tcsetattr(STDERR_FILENO, TCSANOW, &terminal_attributes)) {
-			pv_sig_state->pv_tty_tostop_added = true;
+			pv_sig_state->signal.pv_tty_tostop_added = true;
 			debug("%s", "set terminal TOSTOP attribute");
 		} else {
 			debug("%s: %s", "failed to set terminal TOSTOP attribute", strerror(errno));
@@ -55,8 +55,9 @@ static void pv_sig_ensure_tty_tostop()
 		 * In "-c" mode with IPC, make all "pv -c" instances aware
 		 * that we set TOSTOP, so the last one can clear it on exit.
 		 */
-		if (pv_sig_state->cursor && (NULL != pv_sig_state->crs_shared) && (!pv_sig_state->crs_noipc)) {
-			pv_sig_state->crs_shared->tty_tostop_added = true;
+		if (pv_sig_state->control.cursor && (NULL != pv_sig_state->cursor.shared)
+		    && (!pv_sig_state->cursor.noipc)) {
+			pv_sig_state->cursor.shared->tty_tostop_added = true;
 		}
 #endif
 	}
@@ -92,8 +93,8 @@ static void pv_sig_ttou( /*@unused@ */  __attribute__((unused))
 	 * stderr while backgrounded.
 	 */
 
-	if (-1 == pv_sig_state->pv_sig_old_stderr)
-		pv_sig_state->pv_sig_old_stderr = dup(STDERR_FILENO);
+	if (-1 == pv_sig_state->signal.old_stderr)
+		pv_sig_state->signal.old_stderr = dup(STDERR_FILENO);
 
 	if (dup2(fd, STDERR_FILENO) < 0) {
 		debug("%s: %s", "failed to replace stderr", strerror(errno));
@@ -114,7 +115,7 @@ static void pv_sig_tstp( /*@unused@ */  __attribute__((unused))
 {
 	if (NULL == pv_sig_state)
 		return;
-	pv_elapsedtime_read(&(pv_sig_state->pv_sig_tstp_time));
+	pv_elapsedtime_read(&(pv_sig_state->signal.tstp_time));
 	if (0 != raise(SIGSTOP)) {
 		debug("%s: %s", "raise", strerror(errno));
 	}
@@ -135,13 +136,13 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 	if (NULL == pv_sig_state)
 		return;
 
-	pv_sig_state->pv_sig_newsize = 1;
+	pv_sig_state->flag.terminal_resized = 1;
 
 	/*
 	 * We can only make the time adjustments if this SIGCONT followed a
 	 * SIGTSTP such that we have a stop time.
 	 */
-	if (0 != pv_sig_state->pv_sig_tstp_time.tv_sec) {
+	if (0 != pv_sig_state->signal.tstp_time.tv_sec) {
 
 		memset(&current_time, 0, sizeof(current_time));
 		memset(&time_spent_stopped, 0, sizeof(time_spent_stopped));
@@ -149,27 +150,27 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 		pv_elapsedtime_read(&current_time);
 
 		/* time spent stopped = current time - time SIGTSTP received */
-		pv_elapsedtime_subtract(&time_spent_stopped, &current_time, &(pv_sig_state->pv_sig_tstp_time));
+		pv_elapsedtime_subtract(&time_spent_stopped, &current_time, &(pv_sig_state->signal.tstp_time));
 
 		/* add time spent stopped the total stopped-time count */
-		pv_elapsedtime_add(&(pv_sig_state->pv_sig_toffset), &(pv_sig_state->pv_sig_toffset),
+		pv_elapsedtime_add(&(pv_sig_state->signal.toffset), &(pv_sig_state->signal.toffset),
 				   &time_spent_stopped);
 
 		/* reset the SIGTSTP receipt time */
-		pv_elapsedtime_zero(&(pv_sig_state->pv_sig_tstp_time));
+		pv_elapsedtime_zero(&(pv_sig_state->signal.tstp_time));
 	}
 
 	/*
 	 * Restore the old stderr, if we had replaced it.
 	 */
-	if (pv_sig_state->pv_sig_old_stderr != -1) {
-		if (dup2(pv_sig_state->pv_sig_old_stderr, STDERR_FILENO) < 0) {
+	if (pv_sig_state->signal.old_stderr != -1) {
+		if (dup2(pv_sig_state->signal.old_stderr, STDERR_FILENO) < 0) {
 			debug("%s: %s", "failed to restore old stderr", strerror(errno));
 		}
-		if (0 != close(pv_sig_state->pv_sig_old_stderr)) {
+		if (0 != close(pv_sig_state->signal.old_stderr)) {
 			debug("%s: %s", "failed to close duplicate old stderr", strerror(errno));
 		}
-		pv_sig_state->pv_sig_old_stderr = -1;
+		pv_sig_state->signal.old_stderr = -1;
 	}
 
 	pv_sig_ensure_tty_tostop();
@@ -189,7 +190,7 @@ static void pv_sig_winch( /*@unused@ */  __attribute__((unused))
 {
 	if (NULL == pv_sig_state)
 		return;
-	pv_sig_state->pv_sig_newsize = 1;
+	pv_sig_state->flag.terminal_resized = 1;
 }
 #endif
 
@@ -202,7 +203,7 @@ static void pv_sig_term( /*@unused@ */  __attribute__((unused))
 {
 	if (NULL == pv_sig_state)
 		return;
-	pv_sig_state->pv_sig_abort = 1;
+	pv_sig_state->flag.trigger_exit = 1;
 }
 
 
@@ -219,8 +220,8 @@ static void pv_sig_usr2( /*@unused@ */  __attribute__((unused))
 		return;
 	if (NULL == info)
 		return;
-	pv_sig_state->pv_sig_rxusr2 = 1;
-	pv_sig_state->pv_sig_sender = info->si_pid;
+	pv_sig_state->signal.rxusr2 = 1;
+	pv_sig_state->signal.sender = info->si_pid;
 }
 
 
@@ -232,11 +233,11 @@ bool pv_sigusr2_received(pvstate_t state, pid_t * pid)
 {
 	if (NULL == state)
 		return false;
-	if (0 == state->pv_sig_rxusr2)
+	if (0 == state->signal.rxusr2)
 		return false;
 	if (NULL != pid)
-		*pid = state->pv_sig_sender;
-	state->pv_sig_rxusr2 = 0;
+		*pid = state->signal.sender;
+	state->signal.rxusr2 = 0;
 	return true;
 }
 
@@ -261,9 +262,9 @@ void pv_sig_init(pvstate_t state)
 
 	pv_sig_state = state;
 
-	pv_sig_state->pv_sig_old_stderr = -1;
-	pv_elapsedtime_zero(&(pv_sig_state->pv_sig_tstp_time));
-	pv_elapsedtime_zero(&(pv_sig_state->pv_sig_toffset));
+	pv_sig_state->signal.old_stderr = -1;
+	pv_elapsedtime_zero(&(pv_sig_state->signal.tstp_time));
+	pv_elapsedtime_zero(&(pv_sig_state->signal.toffset));
 
 	/*
 	 * Note that we cast all sigemptyset() and sigaction() return values
@@ -278,7 +279,7 @@ void pv_sig_init(pvstate_t state)
 	sa.sa_handler = SIG_IGN;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	(void) sigaction(SIGPIPE, &sa, &(pv_sig_state->pv_sig_old_sigpipe));
+	(void) sigaction(SIGPIPE, &sa, &(pv_sig_state->signal.old_sigpipe));
 
 	/*
 	 * Handle SIGTTOU by continuing with output switched off, so that we
@@ -287,7 +288,7 @@ void pv_sig_init(pvstate_t state)
 	sa.sa_handler = pv_sig_ttou;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	(void) sigaction(SIGTTOU, &sa, &(pv_sig_state->pv_sig_old_sigttou));
+	(void) sigaction(SIGTTOU, &sa, &(pv_sig_state->signal.old_sigttou));
 
 	/*
 	 * Handle SIGTSTP by storing the time the signal happened for later
@@ -296,7 +297,7 @@ void pv_sig_init(pvstate_t state)
 	sa.sa_handler = pv_sig_tstp;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	(void) sigaction(SIGTSTP, &sa, &(pv_sig_state->pv_sig_old_sigtstp));
+	(void) sigaction(SIGTSTP, &sa, &(pv_sig_state->signal.old_sigtstp));
 
 	/*
 	 * Handle SIGCONT by adding the elapsed time since the last SIGTSTP
@@ -306,7 +307,7 @@ void pv_sig_init(pvstate_t state)
 	sa.sa_handler = pv_sig_cont;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	(void) sigaction(SIGCONT, &sa, &(pv_sig_state->pv_sig_old_sigcont));
+	(void) sigaction(SIGCONT, &sa, &(pv_sig_state->signal.old_sigcont));
 
 	/*
 	 * Handle SIGWINCH by setting a flag to let the main loop know it
@@ -316,7 +317,7 @@ void pv_sig_init(pvstate_t state)
 	sa.sa_handler = pv_sig_winch;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	(void) sigaction(SIGWINCH, &sa, &(pv_sig_state->pv_sig_old_sigwinch));
+	(void) sigaction(SIGWINCH, &sa, &(pv_sig_state->signal.old_sigwinch));
 #endif
 
 	/*
@@ -326,17 +327,17 @@ void pv_sig_init(pvstate_t state)
 	sa.sa_handler = pv_sig_term;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	(void) sigaction(SIGINT, &sa, &(pv_sig_state->pv_sig_old_sigint));
+	(void) sigaction(SIGINT, &sa, &(pv_sig_state->signal.old_sigint));
 
 	sa.sa_handler = pv_sig_term;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	(void) sigaction(SIGHUP, &sa, &(pv_sig_state->pv_sig_old_sighup));
+	(void) sigaction(SIGHUP, &sa, &(pv_sig_state->signal.old_sighup));
 
 	sa.sa_handler = pv_sig_term;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
-	(void) sigaction(SIGTERM, &sa, &(pv_sig_state->pv_sig_old_sigterm));
+	(void) sigaction(SIGTERM, &sa, &(pv_sig_state->signal.old_sigterm));
 
 #ifdef SA_SIGINFO
 	/*
@@ -349,7 +350,7 @@ void pv_sig_init(pvstate_t state)
 	/*@-unrecog@ *//* splint doesn't know about SA_SIGINFO */
 	sa.sa_flags = SA_SIGINFO;
 	/*@+unrecog@ */
-	(void) sigaction(SIGUSR2, &sa, &(pv_sig_state->pv_sig_old_sigusr2));
+	(void) sigaction(SIGUSR2, &sa, &(pv_sig_state->signal.old_sigusr2));
 	memset(&sa, 0, sizeof(sa));
 #endif
 
@@ -375,23 +376,23 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 	if (NULL == pv_sig_state)
 		return;
 
-	(void) sigaction(SIGPIPE, &(pv_sig_state->pv_sig_old_sigpipe), NULL);
-	(void) sigaction(SIGTTOU, &(pv_sig_state->pv_sig_old_sigttou), NULL);
-	(void) sigaction(SIGTSTP, &(pv_sig_state->pv_sig_old_sigtstp), NULL);
-	(void) sigaction(SIGCONT, &(pv_sig_state->pv_sig_old_sigcont), NULL);
+	(void) sigaction(SIGPIPE, &(pv_sig_state->signal.old_sigpipe), NULL);
+	(void) sigaction(SIGTTOU, &(pv_sig_state->signal.old_sigttou), NULL);
+	(void) sigaction(SIGTSTP, &(pv_sig_state->signal.old_sigtstp), NULL);
+	(void) sigaction(SIGCONT, &(pv_sig_state->signal.old_sigcont), NULL);
 #ifdef SIGWINCH
-	(void) sigaction(SIGWINCH, &(pv_sig_state->pv_sig_old_sigwinch), NULL);
+	(void) sigaction(SIGWINCH, &(pv_sig_state->signal.old_sigwinch), NULL);
 #endif
-	(void) sigaction(SIGINT, &(pv_sig_state->pv_sig_old_sigint), NULL);
-	(void) sigaction(SIGHUP, &(pv_sig_state->pv_sig_old_sighup), NULL);
-	(void) sigaction(SIGTERM, &(pv_sig_state->pv_sig_old_sigterm), NULL);
+	(void) sigaction(SIGINT, &(pv_sig_state->signal.old_sigint), NULL);
+	(void) sigaction(SIGHUP, &(pv_sig_state->signal.old_sighup), NULL);
+	(void) sigaction(SIGTERM, &(pv_sig_state->signal.old_sigterm), NULL);
 #ifdef SA_SIGINFO
-	(void) sigaction(SIGUSR2, &(pv_sig_state->pv_sig_old_sigusr2), NULL);
+	(void) sigaction(SIGUSR2, &(pv_sig_state->signal.old_sigusr2), NULL);
 #endif
 
-	need_to_clear_tostop = pv_sig_state->pv_tty_tostop_added;
+	need_to_clear_tostop = pv_sig_state->signal.pv_tty_tostop_added;
 
-	if (pv_sig_state->cursor) {
+	if (pv_sig_state->control.cursor) {
 #ifdef HAVE_IPC
 		/*
 		 * We won't clear TOSTOP if other "pv -c" instances
@@ -400,7 +401,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 		 * TODO: we need a better way to determine if we're the last
 		 * "pv" left.
 		 */
-		if (pv_sig_state->cursor && pv_sig_state->crs_pvcount > 1) {
+		if (pv_sig_state->control.cursor && pv_sig_state->cursor.pvcount > 1) {
 			need_to_clear_tostop = false;
 		}
 #else				/* !HAVE_IPC */
@@ -430,7 +431,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 			}
 		}
 
-		pv_sig_state->pv_tty_tostop_added = false;
+		pv_sig_state->signal.pv_tty_tostop_added = false;
 	}
 }
 
@@ -495,18 +496,18 @@ void pv_sig_checkbg(void)
 
 	next_check = time(NULL) + 1;
 
-	if (-1 == pv_sig_state->pv_sig_old_stderr)
+	if (-1 == pv_sig_state->signal.old_stderr)
 		return;
 
-	if (dup2(pv_sig_state->pv_sig_old_stderr, STDERR_FILENO) < 0) {
+	if (dup2(pv_sig_state->signal.old_stderr, STDERR_FILENO) < 0) {
 		debug("%s: %s", "failed to restore old stderr", strerror(errno));
 	}
 
-	if (0 != close(pv_sig_state->pv_sig_old_stderr)) {
+	if (0 != close(pv_sig_state->signal.old_stderr)) {
 		debug("%s: %s", "failed to close duplicate old stderr", strerror(errno));
 	}
 
-	pv_sig_state->pv_sig_old_stderr = -1;
+	pv_sig_state->signal.old_stderr = -1;
 
 	pv_sig_ensure_tty_tostop();
 #ifdef HAVE_IPC

@@ -293,21 +293,21 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
  * returns 1.
  *
  * At most, the number of bytes read will be the number of bytes remaining
- * in the input buffer.  If state->rate_limit is >0, and/or "allowed" is >0,
+ * in the input buffer.  If state->control.rate_limit is >0, and/or "allowed" is >0,
  * then the maximum number of bytes read will be the number remaining unused
  * in the input buffer or the value of "allowed", whichever is smaller.
  *
- * If splice() was successfully used, sets state->splice_used to true; if it
- * failed, then state->splice_failed_fd is updated to the current fd so
+ * If splice() was successfully used, sets state->transfer.splice_used to true; if it
+ * failed, then state->transfer.splice_failed_fd is updated to the current fd so
  * splice() won't be tried again until the next input file.
  *
- * Updates state->read_position by the number of bytes read, unless splice()
+ * Updates state->transfer.read_position by the number of bytes read, unless splice()
  * was used, in which case it does not since there's nothing in the buffer
- * (and it also adds the bytes to state->written since they've been written
+ * (and it also adds the bytes to state->transfer.written since they've been written
  * to the output).
  *
- * On read error, updates state->exit_status, and if allowed by
- * state->skip_errors, tries to skip past the problem.
+ * On read error, updates state->status.exit_status, and if allowed by
+ * state->control.skip_errors, tries to skip past the problem.
  *
  * If the end of the input file is reached or the error is unrecoverable,
  * sets *eof_in to true.  If all data in the buffer has been written at this
@@ -324,18 +324,18 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 #endif				/* HAVE_SPLICE */
 
 	do_not_skip_errors = false;
-	if (0 == state->skip_errors)
+	if (0 == state->control.skip_errors)
 		do_not_skip_errors = true;
 
-	bytes_can_read = state->buffer_size - state->read_position;
+	bytes_can_read = state->transfer.buffer_size - state->transfer.read_position;
 	nread = 0;
 
 #ifdef HAVE_SPLICE
-	state->splice_used = false;
-	if ((!state->linemode) && (!state->no_splice)
-	    && (fd != state->splice_failed_fd)
-	    && (0 == state->to_write)) {
-		if (state->rate_limit > 0 || allowed != 0) {
+	state->transfer.splice_used = false;
+	if ((!state->control.linemode) && (!state->control.no_splice)
+	    && (fd != state->transfer.splice_failed_fd)
+	    && (0 == state->transfer.to_write)) {
+		if (state->control.rate_limit > 0 || allowed != 0) {
 			bytes_to_splice = (size_t) allowed;
 		} else {
 			bytes_to_splice = bytes_can_read;
@@ -348,18 +348,18 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		/*@+type@ */
 		/*@+nullpass@ */
 
-		state->splice_used = true;
+		state->transfer.splice_used = true;
 		if ((nread < 0) && (EINVAL == errno)) {
 			debug("%s %d: %s", "fd", fd, "splice failed with EINVAL - disabling");
-			state->splice_failed_fd = fd;
-			state->splice_used = false;
+			state->transfer.splice_failed_fd = fd;
+			state->transfer.splice_used = false;
 			/*
 			 * Fall through to read() below.
 			 */
 		} else if (nread > 0) {
-			state->written = nread;
+			state->transfer.written = nread;
 #ifdef HAVE_FDATASYNC
-			if (state->sync_after_write) {
+			if (state->control.sync_after_write) {
 				/*
 				 * Ignore non IO errors, such as EBADFD (bad file
 				 * descriptor), EINVAL (non syncable fd, such as a
@@ -380,14 +380,18 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 			/* nothing read yet - do nothing */
 		} else {
 			/* EOF might not really be EOF, it seems */
-			state->splice_used = false;
+			state->transfer.splice_used = false;
 		}
 	}
-	if (!state->splice_used) {
-		nread = pv__transfer_read_repeated(fd, state->transfer_buffer + state->read_position, bytes_can_read);
+	if (!state->transfer.splice_used) {
+		nread =
+		    pv__transfer_read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
+					       bytes_can_read);
 	}
 #else
-	nread = pv__transfer_read_repeated(fd, state->transfer_buffer + state->read_position, bytes_can_read);
+	nread =
+	    pv__transfer_read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
+				       bytes_can_read);
 #endif				/* HAVE_SPLICE */
 
 
@@ -399,7 +403,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		 * move on to the next input file.
 		 */
 		*eof_in = true;
-		if (state->write_position >= state->read_position)
+		if (state->transfer.write_position >= state->transfer.read_position)
 			*eof_out = true;
 		return 1;
 	} else if (nread > 0) {
@@ -408,16 +412,16 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		 * the error counter and update our record of how much data
 		 * we've got in the buffer.
 		 */
-		state->read_errors_in_a_row = 0;
+		state->transfer.read_errors_in_a_row = 0;
 #ifdef HAVE_SPLICE
 		/*
 		 * If we used splice(), there isn't any more data in the
 		 * buffer than there was before.
 		 */
-		if (!state->splice_used)
-			state->read_position += nread;
+		if (!state->transfer.splice_used)
+			state->transfer.read_position += nread;
 #else
-		state->read_position += nread;
+		state->transfer.read_position += nread;
 #endif				/* HAVE_SPLICE */
 		return 1;
 	}
@@ -441,8 +445,8 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 * exit status, regardless of whether we're skipping errors, and
 	 * increment the error counter.
 	 */
-	state->exit_status |= 16;
-	state->read_errors_in_a_row++;
+	state->status.exit_status |= 16;
+	state->transfer.read_errors_in_a_row++;
 
 	/*
 	 * If we aren't skipping errors, show the error and pretend we
@@ -459,7 +463,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		 * TODO: investigate and fix the reason for this.
 		 */
 		*eof_in = true;
-		if (state->write_position >= state->read_position) {
+		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;
 		}
 		return 1;
@@ -471,13 +475,13 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 	amount_skipped = -1;
 
-	if (!state->read_error_warning_shown) {
+	if (!state->transfer.read_error_warning_shown) {
 		/*@-compdef@ */
 		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("warning: read errors detected"),
 			 strerror(errno));
 		/*@+compdef@ */
 		/* splint - see previous pv_current_file_name() call. */
-		state->read_error_warning_shown = true;
+		state->transfer.read_error_warning_shown = true;
 	}
 
 	orig_offset = (off_t) lseek(fd, 0, SEEK_CUR);
@@ -493,7 +497,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		/*@+compdef@ */
 		/* splint - see previous pv_current_file_name() calls. */
 		*eof_in = true;
-		if (state->write_position >= state->read_position) {
+		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;
 		}
 		return 1;
@@ -504,13 +508,13 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 * otherwise start small and ramp up based on the number of errors
 	 * in a row.
 	 */
-	if (state->error_skip_block > 0) {
-		amount_to_skip = state->error_skip_block;
+	if (state->control.error_skip_block > 0) {
+		amount_to_skip = state->control.error_skip_block;
 	} else {
-		if (state->read_errors_in_a_row < 10) {
-			amount_to_skip = (off_t) (state->read_errors_in_a_row < 5 ? 1 : 2);
-		} else if (state->read_errors_in_a_row < 20) {
-			unsigned int shift_by = (unsigned int) (state->read_errors_in_a_row - 10);
+		if (state->transfer.read_errors_in_a_row < 10) {
+			amount_to_skip = (off_t) (state->transfer.read_errors_in_a_row < 5 ? 1 : 2);
+		} else if (state->transfer.read_errors_in_a_row < 20) {
+			unsigned int shift_by = (unsigned int) (state->transfer.read_errors_in_a_row - 10);
 			amount_to_skip = (off_t) (1 << shift_by);
 		} else {
 			amount_to_skip = 512;
@@ -581,9 +585,9 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 * of the transfer buffer, and update the buffer position.
 	 */
 	if (amount_skipped > 0) {
-		memset(state->transfer_buffer + state->read_position, 0, (size_t) amount_skipped);
-		state->read_position += amount_skipped;
-		if (state->skip_errors < 2) {
+		memset(state->transfer.transfer_buffer + state->transfer.read_position, 0, (size_t) amount_skipped);
+		state->transfer.read_position += amount_skipped;
+		if (state->control.skip_errors < 2) {
 			/*@-compdef@ */
 			pv_error(state, "%s: %s: %ld - %ld (%ld %s)",
 				 pv_current_file_name(state),
@@ -597,7 +601,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		 * Failed to skip - mark file as ended.
 		 */
 		*eof_in = true;
-		if (state->write_position >= state->read_position) {
+		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;
 		}
 	}
@@ -607,47 +611,48 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 
 /*
- * Write state->to_write bytes of data from the transfer buffer to stdout.
+ * Write state->transfer.to_write bytes of data from the transfer buffer to stdout.
  * Returns zero if there was a transient error and we need to return 0 from
  * pv_transfer, otherwise returns 1.
  *
- * Updates state->write_position by moving it on by the number of bytes
- * written; adds the number of bytes written to state->written; sets
+ * Updates state->transfer.write_position by moving it on by the number of bytes
+ * written; adds the number of bytes written to state->transfer.written; sets
  * *eof_out to true, on stdout EOF, or when the write position catches up
  * with the read position AND *eof_in is true (meaning we've reached the end
  * of data).
  *
- * On error, sets *eof_out to true, sets state->written to -1, and updates
- * state->exit_status.
+ * On error, sets *eof_out to true, sets state->transfer.written to -1, and updates
+ * state->status.exit_status.
  *
- * If state->discard_input is true, does not actually write anything.
+ * If state->control.discard_input is true, does not actually write anything.
  */
 static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long *lineswritten)
 {
 	ssize_t nwritten;
 
-	if (NULL == state->transfer_buffer) {
+	if (NULL == state->transfer.transfer_buffer) {
 		pv_error(state, "%s", _("no transfer buffer allocated"));
-		state->exit_status |= 64;
+		state->status.exit_status |= 64;
 		*eof_out = true;
-		state->written = -1;
+		state->transfer.written = -1;
 		return 1;
 	}
 
 	nwritten = 0;
 
-	if (state->discard_input) {
-		nwritten = state->to_write;
-	} else if (state->to_write > 0) {
+	if (state->control.discard_input) {
+		nwritten = state->transfer.to_write;
+	} else if (state->transfer.to_write > 0) {
 		if (signal(SIGALRM, SIG_IGN) == SIG_ERR) {
 			pv_error(state, "%s: %s", _("failed to set alarm signal handler"), strerror(errno));
 		} else {
 			(void) alarm(1);
 		}
 		nwritten = pv__transfer_write_repeated(STDOUT_FILENO,
-						       state->transfer_buffer +
-						       state->write_position, (size_t) (state->to_write),
-						       state->sync_after_write);
+						       state->transfer.transfer_buffer +
+						       state->transfer.write_position,
+						       (size_t) (state->transfer.to_write),
+						       state->control.sync_after_write);
 		(void) alarm(0);
 	}
 
@@ -661,20 +666,21 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		/*
 		 * Write returned >0 - data successfully written.
 		 */
-		if ((state->linemode) && (lineswritten != NULL)) {
+		if ((state->control.linemode) && (lineswritten != NULL)) {
 			char separator;
 			char *ptr;
 			long lines = 0;
 
-			if (state->null_terminated_lines) {
+			if (state->control.null_terminated_lines) {
 				separator = '\0';
 			} else {
 				separator = '\n';
 			}
 
-			ptr = (char *) (state->transfer_buffer + state->write_position - 1);
+			ptr = (char *) (state->transfer.transfer_buffer + state->transfer.write_position - 1);
 			for (ptr++;
-			     ptr - (char *) state->transfer_buffer - state->write_position < (size_t) nwritten; ptr++) {
+			     ptr - (char *) state->transfer.transfer_buffer - state->transfer.write_position <
+			     (size_t) nwritten; ptr++) {
 				if (*ptr == separator)
 					++lines;
 			}
@@ -682,37 +688,38 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			*lineswritten += lines;
 		}
 
-		state->write_position += nwritten;
-		state->written += nwritten;
+		state->transfer.write_position += nwritten;
+		state->transfer.written += nwritten;
 
 		/*
 		 * If we're monitoring the output, update our copy of the
 		 * last few bytes we've written.
 		 */
-		if (((state->components_used & PV_DISPLAY_OUTPUTBUF) != 0)
+		if (((state->display.components_used & PV_DISPLAY_OUTPUTBUF) != 0)
 		    && (nwritten > 0)) {
 			size_t new_portion_length, old_portion_length;
 
 			new_portion_length = (size_t) nwritten;
-			if (new_portion_length > state->lastoutput_length)
-				new_portion_length = state->lastoutput_length;
+			if (new_portion_length > state->display.lastoutput_length)
+				new_portion_length = state->display.lastoutput_length;
 
-			old_portion_length = state->lastoutput_length - new_portion_length;
+			old_portion_length = state->display.lastoutput_length - new_portion_length;
 
 			/*
 			 * Make room for the new portion.
 			 */
 			if (old_portion_length > 0) {
-				memmove(state->lastoutput_buffer,
-					state->lastoutput_buffer + new_portion_length, old_portion_length);
+				memmove(state->display.lastoutput_buffer,
+					state->display.lastoutput_buffer + new_portion_length, old_portion_length);
 			}
 
 			/*
 			 * Copy the new data in.
 			 */
-			memcpy(state->lastoutput_buffer +	/* flawfinder: ignore */
+			memcpy(state->display.lastoutput_buffer +	/* flawfinder: ignore */
 			       old_portion_length,
-			       state->transfer_buffer + state->write_position - new_portion_length, new_portion_length);
+			       state->transfer.transfer_buffer + state->transfer.write_position - new_portion_length,
+			       new_portion_length);
 			/*
 			 * flawfinder rationale: calculations above ensure
 			 * that old_portion_length + new_portion_length is
@@ -731,9 +738,9 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		 * EOF, set eof_out as well to indicate that we've written
 		 * everything for this input file.
 		 */
-		if (state->write_position >= state->read_position) {
-			state->write_position = 0;
-			state->read_position = 0;
+		if (state->transfer.write_position >= state->transfer.read_position) {
+			state->transfer.write_position = 0;
+			state->transfer.read_position = 0;
 			if (*eof_in)
 				*eof_out = true;
 		}
@@ -766,9 +773,9 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	}
 
 	pv_error(state, "%s: %s", _("write failed"), strerror(errno));
-	state->exit_status |= 16;
+	state->status.exit_status |= 16;
 	*eof_out = true;
-	state->written = -1;
+	state->transfer.written = -1;
 
 	return 1;
 }
@@ -841,13 +848,13 @@ static char *pv__allocate_aligned_buffer(int fd, size_t target_size)
 
 /*
  * Transfer some data from "fd" to standard output, timing out after 9/100
- * of a second.  If state->rate_limit is >0, and/or "allowed" is >0, only up
+ * of a second.  If state->control.rate_limit is >0, and/or "allowed" is >0, only up
  * to "allowed" bytes can be written.  The variables that "eof_in" and
  * "eof_out" point to are used to flag that we've finished reading and
  * writing respectively.
  *
  * Returns the number of bytes written, or negative on error (in which case
- * state->exit_status is updated). In line mode, the number of lines written
+ * state->status.exit_status is updated). In line mode, the number of lines written
  * will be put into *lineswritten.
  */
 ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t allowed, long *lineswritten)
@@ -864,9 +871,9 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * Set or clear O_DIRECT on the input and output file descriptors,
 	 * if the setting has changed.
 	 */
-	if (state->direct_io_changed) {
+	if (state->control.direct_io_changed) {
 		if (!(*eof_in)) {
-			if (0 != fcntl(fd, F_SETFL, (state->direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL))) {
+			if (0 != fcntl(fd, F_SETFL, (state->control.direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL))) {
 				/*@-compdef@ */
 				debug("%s: %s: %s", pv_current_file_name(state), "fcntl", strerror(errno));
 				/*@+compdef@ */
@@ -875,11 +882,11 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		}
 		if (!(*eof_out)) {
 			if (0 != fcntl(STDOUT_FILENO, F_SETFL,
-				       (state->direct_io ? O_DIRECT : 0) | fcntl(STDOUT_FILENO, F_GETFL))) {
+				       (state->control.direct_io ? O_DIRECT : 0) | fcntl(STDOUT_FILENO, F_GETFL))) {
 				debug("%s: %s: %s", "(stdout)", "fcntl", strerror(errno));
 			}
 		}
-		state->direct_io_changed = false;
+		state->control.direct_io_changed = false;
 	}
 #endif				/* O_DIRECT */
 
@@ -887,24 +894,25 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * Reinitialise the error skipping variables if the file descriptor
 	 * has changed since the last time we were called.
 	 */
-	if (fd != state->last_read_skip_fd) {
-		state->last_read_skip_fd = fd;
-		state->read_errors_in_a_row = 0;
-		state->read_error_warning_shown = false;
+	if (fd != state->transfer.last_read_skip_fd) {
+		state->transfer.last_read_skip_fd = fd;
+		state->transfer.read_errors_in_a_row = 0;
+		state->transfer.read_error_warning_shown = false;
 	}
 
 	/*
 	 * Allocate a new buffer, aligned appropriately for the input file
 	 * (important if using O_DIRECT).
 	 */
-	if (NULL == state->transfer_buffer) {
-		state->transfer_buffer = pv__allocate_aligned_buffer(fd, state->target_buffer_size + 32);
-		if (NULL == state->transfer_buffer) {
+	if (NULL == state->transfer.transfer_buffer) {
+		state->transfer.transfer_buffer =
+		    pv__allocate_aligned_buffer(fd, state->control.target_buffer_size + 32);
+		if (NULL == state->transfer.transfer_buffer) {
 			pv_error(state, "%s: %s", _("buffer allocation failed"), strerror(errno));
-			state->exit_status |= 64;
+			state->status.exit_status |= 64;
 			return -1;
 		}
-		state->buffer_size = state->target_buffer_size;
+		state->transfer.buffer_size = state->control.target_buffer_size;
 	}
 
 	/*
@@ -914,37 +922,37 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * memory) because the buffer may need to be aligned for O_DIRECT,
 	 * and we can't realloc() an aligned buffer.
 	 */
-	if (state->buffer_size < state->target_buffer_size) {
+	if (state->transfer.buffer_size < state->control.target_buffer_size) {
 		char *newptr;
-		newptr = pv__allocate_aligned_buffer(fd, state->target_buffer_size + 32);
+		newptr = pv__allocate_aligned_buffer(fd, state->control.target_buffer_size + 32);
 		if (NULL == newptr) {
 			/*
 			 * Reset target if realloc failed so we don't keep
 			 * trying to realloc over and over.
 			 */
 			debug("realloc: %s", strerror(errno));
-			state->target_buffer_size = state->buffer_size;
+			state->control.target_buffer_size = state->transfer.buffer_size;
 		} else {
-			debug("%s: %ld", "buffer resized", state->buffer_size);
+			debug("%s: %ld", "buffer resized", state->transfer.buffer_size);
 			/*
 			 * Copy the old buffer contents into the new buffer,
 			 * and free the old one.
 			 */
-			if (state->buffer_size > 0) {
-				memcpy(newptr, state->transfer_buffer, state->buffer_size);	/* flawfinder: ignore */
+			if (state->transfer.buffer_size > 0) {
+				memcpy(newptr, state->transfer.transfer_buffer, state->transfer.buffer_size);	/* flawfinder: ignore */
 			}
 			/*
 			 * flawfinder rationale: number of bytes copied is
 			 * definitely always smaller than the new buffer
 			 * size.
 			 */
-			free(state->transfer_buffer);
-			state->transfer_buffer = newptr;
-			state->buffer_size = state->target_buffer_size;
+			free(state->transfer.transfer_buffer);
+			state->transfer.transfer_buffer = newptr;
+			state->transfer.buffer_size = state->control.target_buffer_size;
 		}
 	}
 
-	if ((state->linemode) && (lineswritten != NULL))
+	if ((state->control.linemode) && (lineswritten != NULL))
 		*lineswritten = 0;
 
 	if ((*eof_in) && (*eof_out))
@@ -957,7 +965,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * If the input file is not at EOF and there's room in the buffer,
 	 * look for incoming data from it.
 	 */
-	if ((!(*eof_in)) && (state->read_position < state->buffer_size)) {
+	if ((!(*eof_in)) && (state->transfer.read_position < state->transfer.buffer_size)) {
 		check_read_fd = fd;
 	}
 
@@ -967,10 +975,10 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * is >0, then this puts an upper limit on how much we're allowed to
 	 * write.
 	 */
-	state->to_write = (ssize_t) (state->read_position - state->write_position);
-	if ((state->rate_limit > 0) || (allowed > 0)) {
-		if ((off_t) (state->to_write) > allowed) {
-			state->to_write = (ssize_t) allowed;
+	state->transfer.to_write = (ssize_t) (state->transfer.read_position - state->transfer.write_position);
+	if ((state->control.rate_limit > 0) || (allowed > 0)) {
+		if ((off_t) (state->transfer.to_write) > allowed) {
+			state->transfer.to_write = (ssize_t) allowed;
 		}
 	}
 
@@ -978,7 +986,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * If we don't think we've finished writing and there's anything
 	 * we're allowed to write, look for the stdout becoming writable.
 	 */
-	if ((!(*eof_out)) && (state->to_write > 0)) {
+	if ((!(*eof_out)) && (state->transfer.to_write > 0)) {
 		check_write_fd = STDOUT_FILENO;
 	}
 
@@ -1002,18 +1010,18 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		/*@+compdef@ */
 		/* splint - see previous pv_current_file_name() calls. */
 
-		state->exit_status |= 16;
+		state->status.exit_status |= 16;
 
 		return -1;
 	}
 
-	state->written = 0;
+	state->transfer.written = 0;
 
 	/*
 	 * If there is data to read, try to read some in. Return early if
 	 * there was a transient read error.
 	 *
-	 * NB this can update state->written because of splice().
+	 * NB this can update state->transfer.written because of splice().
 	 */
 	if (ready_to_read) {
 		if (pv__transfer_read(state, fd, eof_in, eof_out, allowed) == 0)
@@ -1024,15 +1032,15 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * In line mode, only write up to and including the last newline,
 	 * so that we're writing output line-by-line.
 	 */
-	if ((state->to_write > 0) && (state->linemode) && !(state->null_terminated_lines)) {
+	if ((state->transfer.to_write > 0) && (state->control.linemode) && !(state->control.null_terminated_lines)) {
 		char *start;
 		char *end;
 
-		start = (char *) (state->transfer_buffer + state->write_position);
-		end = pv_memrchr(start, (int) '\n', (size_t) (state->to_write));
+		start = (char *) (state->transfer.transfer_buffer + state->transfer.write_position);
+		end = pv_memrchr(start, (int) '\n', (size_t) (state->transfer.to_write));
 
 		if (NULL != end) {
-			state->to_write = (ssize_t) ((end - start) + 1);
+			state->transfer.to_write = (ssize_t) ((end - start) + 1);
 		}
 	}
 
@@ -1043,10 +1051,10 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 */
 	if (ready_to_write
 #ifdef HAVE_SPLICE
-	    && (!state->splice_used)
+	    && (!state->transfer.splice_used)
 #endif				/* HAVE_SPLICE */
-	    && (state->read_position > state->write_position)
-	    && (state->to_write > 0)
+	    && (state->transfer.read_position > state->transfer.write_position)
+	    && (state->transfer.to_write > 0)
 	    && (NULL != lineswritten)) {
 		if (pv__transfer_write(state, eof_in, eof_out, lineswritten) == 0)
 			return 0;
@@ -1056,21 +1064,22 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * Rotate the written bytes out of the buffer so that it can be
 	 * filled up completely by the next read.
 	 */
-	if (state->write_position > 0) {
-		if (state->write_position < state->read_position) {
-			memmove(state->transfer_buffer,
-				state->transfer_buffer +
-				state->write_position, state->read_position - state->write_position);
-			state->read_position -= state->write_position;
-			state->write_position = 0;
+	if (state->transfer.write_position > 0) {
+		if (state->transfer.write_position < state->transfer.read_position) {
+			memmove(state->transfer.transfer_buffer,
+				state->transfer.transfer_buffer +
+				state->transfer.write_position,
+				state->transfer.read_position - state->transfer.write_position);
+			state->transfer.read_position -= state->transfer.write_position;
+			state->transfer.write_position = 0;
 		} else {
-			state->write_position = 0;
-			state->read_position = 0;
+			state->transfer.write_position = 0;
+			state->transfer.read_position = 0;
 		}
 	}
 #endif				/* MAXIMISE_BUFFER_FILL */
 
-	return state->written;
+	return state->transfer.written;
 }
 
 /* EOF */

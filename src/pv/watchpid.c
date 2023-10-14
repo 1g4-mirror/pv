@@ -385,8 +385,8 @@ int pv_watchpid_scanfds(pvstate_t state, pvstate_t pristine,
 			*array_length_ptr = array_length;
 
 			for (check_idx = 0; check_idx < array_length; check_idx++) {
-				state_array[check_idx].name = info_array[check_idx].display_name;
-				state_array[check_idx].reparse_display = 1;
+				state_array[check_idx].control.name = info_array[check_idx].display_name;
+				state_array[check_idx].flag.reparse_display = 1;
 			}
 		}
 
@@ -427,31 +427,31 @@ int pv_watchpid_scanfds(pvstate_t state, pvstate_t pristine,
 			info_array[use_idx].watch_fd = -1;
 		}
 
-		state_array[use_idx].size = info_array[use_idx].size;
-		if (state_array[use_idx].size < 1) {
+		state_array[use_idx].control.size = info_array[use_idx].size;
+		if (state_array[use_idx].control.size < 1) {
 			char *fmt;
-			while (NULL != (fmt = strstr(state_array[use_idx].default_format, "%e"))) {
+			while (NULL != (fmt = strstr(state_array[use_idx].control.default_format, "%e"))) {
 				debug("%s", "zero size - removing ETA");
 				/* strlen-1 here to include trailing NUL */
 				memmove(fmt, fmt + 2, strlen(fmt) - 1);
-				state_array[use_idx].reparse_display = 1;
+				state_array[use_idx].flag.reparse_display = 1;
 			}
 		}
 
-		state_array[use_idx].name = info_array[use_idx].display_name;
+		state_array[use_idx].control.name = info_array[use_idx].display_name;
 
 		pv_watchpid_setname(state, &(info_array[use_idx]));
 
-		state_array[use_idx].reparse_display = 1;
+		state_array[use_idx].flag.reparse_display = 1;
 
 		pv_elapsedtime_read(&(info_array[use_idx].start_time));
 
-		state_array[use_idx].initial_offset = 0;
+		state_array[use_idx].display.initial_offset = 0;
 		info_array[use_idx].position = 0;
 
 		position_now = pv_watchfd_position(&(info_array[use_idx]));
 		if (position_now >= 0) {
-			state_array[use_idx].initial_offset = position_now;
+			state_array[use_idx].display.initial_offset = position_now;
 			info_array[use_idx].position = position_now;
 		}
 	}
@@ -482,15 +482,15 @@ void pv_watchpid_setname(pvstate_t state, pvwatchfd_t info)
 	memset(info->display_name, 0, PV_SIZEOF_DISPLAY_NAME);
 
 	path_length = strlen(info->file_fdpath);
-	cwd_length = strlen(state->cwd);
+	cwd_length = strlen(state->status.cwd);
 	if (cwd_length > 0 && path_length > cwd_length) {
-		if (0 == strncmp(info->file_fdpath, state->cwd, cwd_length)) {
+		if (0 == strncmp(info->file_fdpath, state->status.cwd, cwd_length)) {
 			file_fdpath += cwd_length + 1;
 			path_length -= cwd_length + 1;
 		}
 	}
 
-	max_display_length = (state->width / 2) - 6;
+	max_display_length = (state->control.width / 2) - 6;
 	if (max_display_length >= path_length) {
 		(void) pv_snprintf(info->display_name,
 				   PV_SIZEOF_DISPLAY_NAME, "%4d:%.498s", info->watch_fd, file_fdpath);
