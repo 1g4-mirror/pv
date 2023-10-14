@@ -20,16 +20,25 @@
 extern "C" {
 #endif
 
-#define PV_DISPLAY_PROGRESS	1
-#define PV_DISPLAY_TIMER	2
-#define PV_DISPLAY_ETA		4
-#define PV_DISPLAY_RATE		8
-#define PV_DISPLAY_AVERAGERATE	16
-#define PV_DISPLAY_BYTES	32
-#define PV_DISPLAY_NAME		64
-#define PV_DISPLAY_BUFPERCENT	128
-#define PV_DISPLAY_OUTPUTBUF	256
-#define PV_DISPLAY_FINETA	512
+/*
+ * Types of display component that make up an output string.
+ */
+typedef enum {
+  PV_COMPONENT_STRING,		/* fixed string */
+  PV_COMPONENT_PROGRESS,	/* progress bar, with percentage if known */
+  PV_COMPONENT_BYTES,		/* number of bytes transferred */
+  PV_COMPONENT_TIMER,		/* elapsed time */
+  PV_COMPONENT_RATE,		/* current transfer rate */
+  PV_COMPONENT_AVERAGERATE,	/* average transfer rate */
+  PV_COMPONENT_ETA,		/* estimated time remaining until completion */
+  PV_COMPONENT_FINETA,		/* estimated time of completion */
+  PV_COMPONENT_NAME,		/* name prefix */
+  PV_COMPONENT_BUFPERCENT,	/* percentage of buffer used */
+  PV_COMPONENT_OUTPUTBUF,	/* recent bytes in output buffer */
+  PV_COMPONENT__MAX
+} pv_display_component;
+
+#define PV_SIZEOF_COMPONENT_STR	1024	/* size of buffer for each component */
 
 #define RATE_GRANULARITY	100000000	 /* nsec between -L rate chunks */
 #define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
@@ -43,25 +52,9 @@ extern "C" {
 
 #define MAXIMISE_BUFFER_FILL	1
 
-
-typedef struct pvhistory {
-	off_t total_bytes;
-	long double elapsed_sec;
-} pvhistory_t;
-
 #define PV_SIZEOF_DEFAULT_FORMAT	512
 #define PV_SIZEOF_CWD			4096
 #define PV_SIZEOF_LASTOUTPUT_BUFFER	256
-#define PV_SIZEOF_STR_NAME		512
-#define PV_SIZEOF_STR_TRANSFERRED	128
-#define PV_SIZEOF_STR_BUFPERCENT	128
-#define PV_SIZEOF_STR_TIMER		128
-#define PV_SIZEOF_STR_RATE		128
-#define PV_SIZEOF_STR_AVERAGE_RATE	128
-#define PV_SIZEOF_STR_PROGRESS		1024
-#define PV_SIZEOF_STR_LASTOUTPUT	512
-#define PV_SIZEOF_STR_ETA		128
-#define PV_SIZEOF_STR_FINETA		128
 #define PV_FORMAT_ARRAY_MAX		100
 #define PV_SIZEOF_CRS_LOCK_FILE		1024
 
@@ -182,36 +175,39 @@ struct pvstate_s {
 		long double prev_trans;
 
 		/* Keep track of progress over last intervals to compute current average rate. */
-		/*@null@*/ pvhistory_t *history; /* state at previous intervals (circular buffer) */
-		unsigned int history_len;	 /* total size */
+		/*@null@*/ struct {	 /* state at previous intervals (circular buffer) */
+			long long total_bytes;
+			long double elapsed_sec;
+		} *history;
+		size_t history_len;		 /* total size of history array */
 		int history_interval;		 /* seconds between each history entry */
-		int history_first;
-		int history_last;
+		size_t history_first;
+		size_t history_last;
 		long double current_avg_rate;    /* current average rate over last history intervals */
-	
-		off_t initial_offset;
-		/*@only@*/ char *display_buffer;
+
+		off_t initial_offset;		 /* offset when first opened (when watching fds) */
+
+		/*@null@*/ /*@only@*/ char *display_buffer;
 		long display_buffer_size;
 		size_t lastoutput_length;	 /* number of last-output bytes to show */
 		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
 		int prev_width;			 /* screen width last time we were called */
 		int prev_length;		 /* length of last string we output */
-		char str_name[PV_SIZEOF_STR_NAME];
-		char str_transferred[PV_SIZEOF_STR_TRANSFERRED];
-		char str_bufpercent[PV_SIZEOF_STR_BUFPERCENT];
-		char str_timer[PV_SIZEOF_STR_TIMER];
-		char str_rate[PV_SIZEOF_STR_RATE];
-		char str_average_rate[PV_SIZEOF_STR_AVERAGE_RATE];
-		char str_progress[PV_SIZEOF_STR_PROGRESS];
-		char str_lastoutput[PV_SIZEOF_STR_LASTOUTPUT];
-		char str_eta[PV_SIZEOF_STR_ETA];
-		char str_fineta[PV_SIZEOF_STR_FINETA];
-		unsigned long components_used;	 /* bitmask of components used */
-		struct {
-			const char *string;
-			int length;
-		} format[PV_FORMAT_ARRAY_MAX];
 		bool display_visible;		 /* set once anything written to terminal */
+
+		size_t format_segment_count;	 /* number of format string segments */
+		struct {	/* format string broken into display components */
+			pv_display_component type;	/* type of display component */
+			size_t str_start;		/* for strings: start offset */
+			size_t str_length;		/* for strings: length */
+		} format[PV_FORMAT_ARRAY_MAX];
+
+		struct {	/* display components */
+			bool required;				/* true if included in format */
+			char content[PV_SIZEOF_COMPONENT_STR];	/* string to display */
+			size_t length;				/* number of bytes in string */
+		} component[PV_COMPONENT__MAX];
+
 	} display;
 
 	/********************

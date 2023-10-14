@@ -695,8 +695,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		 * If we're monitoring the output, update our copy of the
 		 * last few bytes we've written.
 		 */
-		if (((state->display.components_used & PV_DISPLAY_OUTPUTBUF) != 0)
-		    && (nwritten > 0)) {
+		if (state->display.component[PV_COMPONENT_OUTPUTBUF].required && (nwritten > 0)) {
 			size_t new_portion_length, old_portion_length;
 
 			new_portion_length = (size_t) nwritten;
