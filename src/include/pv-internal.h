@@ -169,6 +169,14 @@ struct pvstate_s {
 	 * Display state *
 	 *****************/
 	struct {
+		/*@only@*/ /*@null@*/ char *display_buffer;
+		size_t display_buffer_size;
+		size_t lastoutput_length;	 /* number of last-output bytes to show */
+		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
+		int prev_width;			 /* screen width last time we were called */
+		int prev_length;		 /* length of last string we output */
+		bool display_visible;		 /* set once anything written to terminal */
+
 		long percentage;
 		long double prev_elapsed_sec;
 		long double prev_rate;
@@ -186,14 +194,6 @@ struct pvstate_s {
 		long double current_avg_rate;    /* current average rate over last history intervals */
 
 		off_t initial_offset;		 /* offset when first opened (when watching fds) */
-
-		/*@null@*/ /*@only@*/ char *display_buffer;
-		long display_buffer_size;
-		size_t lastoutput_length;	 /* number of last-output bytes to show */
-		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
-		int prev_width;			 /* screen width last time we were called */
-		int prev_length;		 /* length of last string we output */
-		bool display_visible;		 /* set once anything written to terminal */
 
 		size_t format_segment_count;	 /* number of format string segments */
 		struct {	/* format string broken into display components */

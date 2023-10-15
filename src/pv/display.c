@@ -593,12 +593,12 @@ static void update_history_avg_rate(pvstate_t state, long long total_bytes, long
 }
 
 /*
- * Return a pointer to a string (which must not be freed), containing status
- * information formatted according to the state held within the given
- * structure, where "elapsed_sec" is the seconds elapsed since the transfer
- * started, "bytes_since_last" is the number of bytes transferred since the
- * last update, and "total_bytes" is the total number of bytes transferred
- * so far.
+ * Update state->display.display_buffer with status information formatted
+ * according to the state held within the given structure, where
+ * "elapsed_sec" is the seconds elapsed since the transfer started,
+ * "bytes_since_last" is the number of bytes transferred since the last
+ * update, and "total_bytes" is the total number of bytes transferred so
+ * far.
  *
  * If "bytes_since_last" is negative, this is the final update so the rate
  * is given as an an average over the whole transfer; otherwise the current
@@ -606,11 +606,12 @@ static void update_history_avg_rate(pvstate_t state, long long total_bytes, long
  *
  * In line mode, "bytes_since_last" and "total_bytes" are in lines, not bytes.
  *
- * If "total_bytes" is negative, then free all allocated memory and return
- * NULL.
+ * Returns true if the display buffer can be used, false if not.
+ *
+ * If "total_bytes" is negative, then free the display buffer and return
+ * false.
  */
-/*@null@*/
-static const char *pv__format(pvstate_t state,
+static bool pv__format(pvstate_t state,
 			      long double elapsed_sec, long long bytes_since_last, long long total_bytes)
 {
 	long double time_since_last, rate, average_rate;
@@ -622,22 +623,22 @@ static const char *pv__format(pvstate_t state,
 	int display_string_length;
 	const char *formatstr;
 
-	/* Quick sanity check - state must exist */
+	/* Quick sanity check - state must exist. */
 	if (NULL == state)
-		return NULL;
+		return false;
 
-	/* Negative total transfer - free memory and exit */
+	/* Negative total transfer - free memory and return false. */
 	if (total_bytes < 0) {
-		if (state->display.display_buffer)
+		if (NULL != state->display.display_buffer)
 			free(state->display.display_buffer);
 		state->display.display_buffer = NULL;
-		return NULL;
+		return false;
 	}
 
 	/* The format string is needed for the static segments. */
 	formatstr = state->control.format_string ? state->control.format_string : state->control.default_format;
 	if (NULL == formatstr)
-		return NULL;
+		return false;
 
 	/*
 	 * In case the time since the last update is very small, we keep
@@ -700,7 +701,7 @@ static const char *pv__format(pvstate_t state,
 	/*
 	 * Reallocate output buffer if width changes.
 	 */
-	if (state->display.display_buffer != NULL && state->display.display_buffer_size < (state->control.width * 2)) {
+	if (state->display.display_buffer != NULL && state->display.display_buffer_size < (size_t)((state->control.width * 2))) {
 		free(state->display.display_buffer);
 		state->display.display_buffer = NULL;
 		state->display.display_buffer_size = 0;
@@ -710,14 +711,14 @@ static const char *pv__format(pvstate_t state,
 	 * Allocate output buffer if there isn't one.
 	 */
 	if (NULL == state->display.display_buffer) {
-		state->display.display_buffer_size = (2 * state->control.width) + 80;
+		state->display.display_buffer_size = (size_t)((2 * state->control.width) + 80);
 		if (state->control.name)
 			state->display.display_buffer_size += strlen(state->control.name);
 		state->display.display_buffer = malloc(state->display.display_buffer_size + 16);
 		if (NULL == state->display.display_buffer) {
 			pv_error(state, "%s: %s", _("buffer allocation failed"), strerror(errno));
 			state->status.exit_status |= 64;
-			return NULL;
+			return false;
 		}
 		state->display.display_buffer[0] = '\0';
 	}
@@ -754,7 +755,7 @@ static const char *pv__format(pvstate_t state,
 					   state->display.percentage);
 		}
 
-		return state->display.display_buffer;
+		return true;
 	}
 
 	/*
@@ -766,6 +767,13 @@ static const char *pv__format(pvstate_t state,
 
 	for (component_type = 0; component_type < PV_COMPONENT__MAX; component_type++) {
 		char *component_content;
+		size_t buf_idx;
+		bool show_eta;
+		time_t now;
+		time_t then;
+		struct tm *time_ptr;
+		char *time_format;
+
 		if (!state->display.component[component_type].required)
 			continue;
 
@@ -909,15 +917,15 @@ static const char *pv__format(pvstate_t state,
 
 		case PV_COMPONENT_FINETA:
 			/* Estimated time of completion - if size is known. */
+
+			now = time(NULL);
+			show_eta = true;
+			time_format = NULL;
+
 			/*
 			 * The ETA may be hidden by a failed ETA string
 			 * generation.
 			 */
-			bool show_eta = true;
-			time_t now = time(NULL);
-			time_t then;
-			struct tm *time_ptr;
-			char *time_format = NULL;
 
 			eta =
 			    pv__calc_eta(total_bytes - state->display.initial_offset,
@@ -992,7 +1000,6 @@ static const char *pv__format(pvstate_t state,
 
 		case PV_COMPONENT_OUTPUTBUF:
 			/* Recently transferred bytes. */
-			size_t buf_idx;
 			for (buf_idx = 0; buf_idx < state->display.lastoutput_length; buf_idx++) {
 				int display_char;
 				display_char = (int) (state->display.lastoutput_buffer[buf_idx]);
@@ -1168,7 +1175,7 @@ static const char *pv__format(pvstate_t state,
 	state->display.prev_width = state->control.width;
 	state->display.prev_length = output_length;
 
-	return state->display.display_buffer;
+	return true;
 }
 
 
@@ -1185,8 +1192,6 @@ static const char *pv__format(pvstate_t state,
  */
 void pv_display(pvstate_t state, long double esec, off_t sl, off_t tot)
 {
-	const char *display;
-
 	if (NULL == state)
 		return;
 
@@ -1201,26 +1206,25 @@ void pv_display(pvstate_t state, long double esec, off_t sl, off_t tot)
 
 	pv_sig_checkbg();
 
-	display = pv__format(state, esec, sl, tot);
-	if (NULL == display)
+	if (!pv__format(state, esec, sl, tot))
 		return;
 
 	if (state->control.numeric) {
-		pv_write_retry(STDERR_FILENO, display, strlen(display));
+		pv_write_retry(STDERR_FILENO, state->display.display_buffer, strlen(state->display.display_buffer));
 	} else if (state->control.cursor) {
 		if (state->control.force || pv_in_foreground()) {
-			pv_crs_update(state, display);
+			pv_crs_update(state, state->display.display_buffer);
 			state->display.display_visible = true;
 		}
 	} else {
 		if (state->control.force || pv_in_foreground()) {
-			pv_write_retry(STDERR_FILENO, display, strlen(display));
+			pv_write_retry(STDERR_FILENO, state->display.display_buffer, strlen(state->display.display_buffer));
 			pv_write_retry(STDERR_FILENO, "\r", 1);
 			state->display.display_visible = true;
 		}
 	}
 
-	debug("%s: [%s]", "display", display);
+	debug("%s: [%s]", "display", state->display.display_buffer);
 }
 
 /* EOF */
