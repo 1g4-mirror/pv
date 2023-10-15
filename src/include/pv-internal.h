@@ -81,7 +81,7 @@ struct pvstate_s {
 	 * Program status *
 	 ******************/
 	struct {
-		/*@only@*/ char *program_name;		 /* program name for error reporting */
+		/*@only@*/ char *program_name;	 /* program name for error reporting */
 		char cwd[PV_SIZEOF_CWD];	 /* current working directory for relative path */
 		int current_input_file;		 /* index of current file being read */
 		int exit_status; 		 /* exit status to give (0=OK) */
@@ -171,20 +171,18 @@ struct pvstate_s {
 	struct {
 		/*@only@*/ /*@null@*/ char *display_buffer;
 		size_t display_buffer_size;
-		size_t lastoutput_length;	 /* number of last-output bytes to show */
-		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
-		int prev_width;			 /* screen width last time we were called */
-		int prev_length;		 /* length of last string we output */
+		unsigned int prev_screen_width;	 /* screen width last time we were called */
+		unsigned int prev_output_cols;	 /* visible width of the last string we output */
 		bool display_visible;		 /* set once anything written to terminal */
 
-		long percentage;
+		int percentage;
 		long double prev_elapsed_sec;
 		long double prev_rate;
 		long double prev_trans;
 
 		/* Keep track of progress over last intervals to compute current average rate. */
 		/*@null@*/ struct {	 /* state at previous intervals (circular buffer) */
-			long long total_bytes;
+			off_t total_bytes;
 			long double elapsed_sec;
 		} *history;
 		size_t history_len;		 /* total size of history array */
@@ -194,6 +192,9 @@ struct pvstate_s {
 		long double current_avg_rate;    /* current average rate over last history intervals */
 
 		off_t initial_offset;		 /* offset when first opened (when watching fds) */
+
+		size_t lastoutput_length;	 /* number of last-output bytes to show */
+		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
 
 		size_t format_segment_count;	 /* number of format string segments */
 		struct {	/* format string broken into display components */

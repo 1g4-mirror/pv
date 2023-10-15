@@ -347,10 +347,10 @@ void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
 	if (val < 1)
 		val = 1;
 	if (val >= 20) {
-		state->display.history_len = val / 5 + 1;
+		state->display.history_len = (size_t) (val / 5 + 1);
 		state->display.history_interval = 5;
 	} else {
-		state->display.history_len = val + 1;
+		state->display.history_len = (size_t) (val + 1);
 		state->display.history_interval = 1;
 	}
 	pv_alloc_history(state);
