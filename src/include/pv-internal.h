@@ -137,12 +137,13 @@ struct pvstate_s {
 	struct {
 		int old_stderr;		 /* see pv_sig_ttou() */
 		bool pv_tty_tostop_added;	 /* whether we had to set TOSTOP on the terminal */
-		struct timespec tstp_time; /* see pv_sig_tstp() / __cont() */
-		struct timespec toffset;		 /* total time spent stopped */
+		struct timespec tstp_time;	 /* see pv_sig_tstp() / __cont() */
+		struct timespec toffset;	 /* total time spent stopped */
 #ifdef SA_SIGINFO
 		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
 		volatile pid_t sender;		 /* PID of sending process for SIGUSR2 */
 #endif
+		/* old signal handlers to restore in pv_sig_fini(). */
 		struct sigaction old_sigpipe;
 		struct sigaction old_sigttou;
 		struct sigaction old_sigtstp;
@@ -175,20 +176,21 @@ struct pvstate_s {
 		unsigned int prev_output_cols;	 /* visible width of the last string we output */
 		bool display_visible;		 /* set once anything written to terminal */
 
-		int percentage;
-		long double prev_elapsed_sec;
-		long double prev_rate;
-		long double prev_trans;
+		int percentage;			 /* transfer percentage completion */
+
+		long double prev_elapsed_sec;	 /* elapsed sec at which rate last calculated */
+		long double prev_rate;		 /* last calculated instantaneous transfer rate */
+		long double prev_trans;		 /* bytes transferred since last rate calculation */
 
 		/* Keep track of progress over last intervals to compute current average rate. */
 		/*@null@*/ struct {	 /* state at previous intervals (circular buffer) */
-			off_t total_bytes;
-			long double elapsed_sec;
+			long double elapsed_sec;	/* time since start of transfer */
+			off_t total_bytes;		/* amount transferred by that time */
 		} *history;
 		size_t history_len;		 /* total size of history array */
 		int history_interval;		 /* seconds between each history entry */
-		size_t history_first;
-		size_t history_last;
+		size_t history_first;		 /* index of oldest entry */
+		size_t history_last;		 /* index of newest entry */
 		long double current_avg_rate;    /* current average rate over last history intervals */
 
 		off_t initial_offset;		 /* offset when first opened (when watching fds) */

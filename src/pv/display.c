@@ -546,7 +546,9 @@ static long bound_long(long x, long min, long max)
 
 /*
  * Update the current average rate, using a ring buffer of past transfer
- * rates.
+ * positions - if this is the first entry, use the provided instantaneous
+ * rate, otherwise calulate the average rate from the difference between the
+ * current position + elapsed time pair, and the oldest pair in the buffer.
  */
 static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, long double elapsed_sec,
 					    long double rate)
