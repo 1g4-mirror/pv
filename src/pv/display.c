@@ -571,7 +571,7 @@ static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, 
 		return;
 
 	/*
-	 * This is not the first call, so add a new entry to the circular
+	 * If this is not the first call, add a new entry to the circular
 	 * buffer.
 	 */
 	if (last_elapsed > 0.0) {
