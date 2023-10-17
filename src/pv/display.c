@@ -46,9 +46,13 @@ void pv_error(pvstate_t state, char *format, ...)
 		fprintf(stderr, "\n");
 	fprintf(stderr, "%s: ", state->status.program_name);
 	va_start(ap, format);
-	(void) vfprintf(stderr, format, ap);
+	(void) vfprintf(stderr, format, ap);	/* flawfinder: ignore */
 	va_end(ap);
 	fprintf(stderr, "\n");
+	/*
+	 * flawfinder: this function relies on callers always having a
+	 * static format string, not directly subject to outside influences.
+	 */
 }
 
 
@@ -320,11 +324,19 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
 static void pv__sizestr(char *buffer, size_t bufsize, char *format,
 			long double amount, char *suffix_basic, char *suffix_bytes, pv__transfercount_t count_type)
 {
-	char sizestr_buffer[256];
-	char si_prefix[8];
+	char sizestr_buffer[256];	 /* flawfinder: ignore */
+	char si_prefix[8];		 /* flawfinder: ignore */
 	long double divider;
 	long double display_amount;
 	char *suffix;
+
+	/*
+	 * flawfinder: sizestr_buffer and si_prefix are explicitly zeroed;
+	 * sizestr_buffer is only ever used with pv_snprintf() along with
+	 * its buffer size; si_prefix is only populated by pv_snprintf()
+	 * along with its size, and by pv__si_prefix() which explicitly only
+	 * needs 3 bytes.
+	 */
 
 	memset(sizestr_buffer, 0, sizeof(sizestr_buffer));
 	memset(si_prefix, 0, sizeof(si_prefix));
@@ -358,7 +370,7 @@ static void pv__sizestr(char *buffer, size_t bufsize, char *format,
 		 * AIX blows up with %4.3Lg%.2s%.16s for some reason, so we
 		 * write display_amount separately first.
 		 */
-		char str_disp[64];
+		char str_disp[64];	 /* flawfinder: ignore - only used with pv_snprintf(). */
 		memset(str_disp, 0, sizeof(str_disp));
 		/* # to get 13.0GB instead of 13GB (#1477) */
 		(void) pv_snprintf(str_disp, sizeof(str_disp), "%#4.3Lg", display_amount);
@@ -388,8 +400,8 @@ static void pv__format_init(pvstate_t state)
 	if (state->control.name) {
 		(void) pv_snprintf(state->display.component[PV_COMPONENT_NAME].content, PV_SIZEOF_COMPONENT_STR,
 				   "%9.500s:", state->control.name);
-		state->display.component[PV_COMPONENT_NAME].length =
-		    strlen(state->display.component[PV_COMPONENT_NAME].content);
+		state->display.component[PV_COMPONENT_NAME].length = strlen(state->display.component[PV_COMPONENT_NAME].content);	/* flawfinder: ignore */
+		/* flawfinder: content always bounded thanks to pv_snprintf(). */
 	}
 
 	formatstr = state->control.format_string ? state->control.format_string : state->control.default_format;
@@ -720,8 +732,9 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		size_t new_size;
 
 		new_size = (size_t) ((2 * state->control.width) + 80);
-		if (state->control.name)
-			new_size += strlen(state->control.name);
+		if (NULL != state->control.name)
+			new_size += strlen(state->control.name);	/* flawfinder: ignore */
+		/* flawfinder: name is always set by pv_strdup(), which bounds with a \0. */
 
 		new_buffer = malloc(new_size + 16);
 		if (NULL == new_buffer) {
@@ -745,7 +758,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 	 * of the percentage. (Or lines, if --lines was given with --bytes).
 	 */
 	if (state->control.numeric) {
-		char numericprefix[128];
+		char numericprefix[128]; /* flawfinder: ignore - only populated by pv_snprintf(). */
 
 		numericprefix[0] = '\0';
 
@@ -983,12 +996,15 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 				 * functions.
 				 */
 				struct tm time = *time_ptr;
+				size_t component_content_length;
 
 				/*@-mustfreefresh @ */
 				(void) pv_snprintf(component_content, component_buf_size, "%.16s ", _("ETA"));
 				/*@+mustfreefresh @ *//* splint: see above. */
-				(void) strftime(component_content + strlen(component_content),
-						component_buf_size - 1 - strlen(component_content), time_format, &time);
+				component_content_length = strlen(component_content);	/* flawfinder: ignore */
+				/* flawfinder: always bounded with \0 by pv_snprintf(). */
+				(void) strftime(component_content + component_content_length,
+						component_buf_size - 1 - component_content_length, time_format, &time);
 			}
 
 			if (!show_eta) {
@@ -1011,16 +1027,14 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 
 		case PV_COMPONENT_BUFPERCENT:
 			/* Transfer buffer percentage utilisation. */
-			if (state->transfer.buffer_size > 0)
-				(void) pv_snprintf(component_content,
-						   component_buf_size, "{%3ld%%}", pv__calc_percentage((off_t)
-												       (state->transfer.
-													read_position -
-													state->transfer.
-													write_position),
-												       (off_t) (state->
-														transfer.
-														buffer_size)));
+			if (state->transfer.buffer_size > 0) {
+				int pct_used = pv__calc_percentage((off_t)
+								   (state->transfer.read_position -
+								    state->transfer.write_position),
+								   (off_t)
+								   (state->transfer.buffer_size));
+				(void) pv_snprintf(component_content, component_buf_size, "{%3d%%}", pct_used);
+			}
 #ifdef HAVE_SPLICE
 			if (state->transfer.splice_used)
 				(void) pv_snprintf(component_content, component_buf_size, "{%s}", "----");
@@ -1042,7 +1056,8 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		}
 
 		/* Record the string length for this component. */
-		state->display.component[component_type].length = strlen(component_content);
+		state->display.component[component_type].length = strlen(component_content);	/* flawfinder: ignore */
+		/* flawfinder: always bounded by \0 either explicitly or by pv_snprintf(). */
 	}
 
 
@@ -1068,7 +1083,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 	if (state->display.component[PV_COMPONENT_PROGRESS].required) {
 		char *component_content;
 		size_t component_buf_size;
-		char pct[16];
+		char pct[16];		 /* flawfinder: ignore - only populated by pv_snprintf(). */
 		int available_width, bar_length, pad_count;
 
 		component_content = state->display.component[PV_COMPONENT_PROGRESS].content;
@@ -1220,7 +1235,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 	output_length = (unsigned int) strlen(state->display.display_buffer);
 	if ((output_length < state->display.prev_output_cols)
 	    && (state->control.width >= state->display.prev_screen_width)) {
-		char spaces[32];
+		char spaces[32];	 /* flawfinder: ignore - terminated, bounded */
 		int spaces_to_add;
 
 		spaces_to_add = (int) (state->display.prev_output_cols - output_length);
