@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-10-15 23:51+0100\n"
+"POT-Creation-Date: 2023-10-18 23:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -348,39 +348,39 @@ msgstr "tentativa de bloqueio falhou"
 msgid "failed to open terminal"
 msgstr "erro abrindo o terminal"
 
-#: src/pv/display.c:188
+#: src/pv/display.c:192
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:206
+#: src/pv/display.c:210
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:726 src/pv/transfer.c:910
+#: src/pv/display.c:746 src/pv/transfer.c:910
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
-#: src/pv/display.c:822
+#: src/pv/display.c:845
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:825 src/pv/transfer.c:595
+#: src/pv/display.c:848 src/pv/transfer.c:595
 msgid "B"
 msgstr ""
 
-#: src/pv/display.c:867 src/pv/display.c:884
+#: src/pv/display.c:890 src/pv/display.c:907
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:872 src/pv/display.c:889
+#: src/pv/display.c:895 src/pv/display.c:912
 msgid "/s"
 msgstr ""
 
-#: src/pv/display.c:872 src/pv/display.c:889
+#: src/pv/display.c:895 src/pv/display.c:912
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:917 src/pv/display.c:921 src/pv/display.c:986
+#: src/pv/display.c:940 src/pv/display.c:944 src/pv/display.c:1010
 msgid "ETA"
 msgstr "ETA"
 
