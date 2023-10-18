@@ -525,7 +525,8 @@ static void pv__format_init(pvstate_t state)
 
 			searchptr = strchr(&(formatstr[strpos]), '%');
 			if (NULL == searchptr) {
-				foundlength = (int) strlen(&(formatstr[strpos]));
+				foundlength = (int) strlen(&(formatstr[strpos]));	/* flawfinder: ignore */
+				/* flawfinder: formatstr is explicitly \0-terminated. */
 			} else {
 				foundlength = searchptr - &(formatstr[strpos]);
 			}
@@ -625,6 +626,10 @@ static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, 
  *
  * Returns true if the display buffer can be used, false if not.
  *
+ * When returning true, this function will have also set
+ * state->display.display_string_len to the length of the string in
+ * state->display.display_buffer, in bytes.
+ *
  * If "total_bytes" is negative, then free the display buffer and return
  * false.
  */
@@ -635,8 +640,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 	int static_portion_size;
 	pv_display_component component_type;
 	size_t segment;
-	unsigned int output_length;
-	size_t display_string_length;
+	size_t new_display_string_len;
 	const char *formatstr;
 
 	/* Quick sanity check - state must exist. */
@@ -648,6 +652,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		if (NULL != state->display.display_buffer)
 			free(state->display.display_buffer);
 		state->display.display_buffer = NULL;
+		state->display.display_buffer_size = 0;
 		return false;
 	}
 
@@ -780,6 +785,9 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 					   state->display.display_buffer_size, "%.99s%ld\n", numericprefix,
 					   state->display.percentage);
 		}
+
+		state->display.display_string_len = strlen(state->display.display_buffer);	/* flawfinder: ignore */
+		/* flawfinder: always \0 terminated by pv_snprintf(). */
 
 		return true;
 	}
@@ -1097,14 +1105,17 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 
 		if (state->control.size > 0) {
 			/* Known size; show a bar and a percentage. */
+			size_t pct_width;
 
 			if (state->display.percentage < 0)
 				state->display.percentage = 0;
 			if (state->display.percentage > 100000)
 				state->display.percentage = 100000;
 			(void) pv_snprintf(pct, sizeof(pct), "%3ld%%", state->display.percentage);
+			pct_width = strlen(pct);	/* flawfinder: ignore */
+			/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
 
-			available_width = (int) (state->control.width) - static_portion_size - (int) (strlen(pct)) - 3;
+			available_width = (int) (state->control.width) - static_portion_size - (int) (pct_width) - 3;
 
 			if (available_width < 0)
 				available_width = 0;
@@ -1177,22 +1188,26 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			(void) pv_strlcat(component_content, "]", component_buf_size);
 		}
 
+		/* Record the string length for this component. */
+		state->display.component[PV_COMPONENT_PROGRESS].length = strlen(component_content);	/* flawfinder: ignore */
+		/* flawfinder: always bounded with \0 by pv_strlcat(). */
+
 		/*
 		 * If the progress bar won't fit, drop it.
 		 */
-		if ((unsigned int) (strlen(component_content) + static_portion_size) > state->control.width)
+		if ((unsigned int) (state->display.component[PV_COMPONENT_PROGRESS].length + static_portion_size) >
+		    state->control.width) {
 			component_content[0] = '\0';
-
-		/* Record the string length for this component. */
-		state->display.component[PV_COMPONENT_PROGRESS].length = strlen(component_content);
+			state->display.component[PV_COMPONENT_PROGRESS].length = 0;
+		}
 	}
 
 	/*
 	 * We can now build the output string using the format structure.
 	 */
 
-	state->display.display_buffer[0] = '\0';
-	display_string_length = 0;
+	memset(state->display.display_buffer, 0, state->display.display_buffer_size);
+	new_display_string_len = 0;
 	for (segment = 0; segment < state->display.format_segment_count; segment++) {
 		const char *segment_content;
 		size_t segment_length;
@@ -1213,45 +1228,53 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		 * Truncate the segment if it would make the display string
 		 * overflow the buffer.
 		 */
-		if (segment_length + display_string_length > state->display.display_buffer_size - 2)
-			segment_length = state->display.display_buffer_size - display_string_length - 2;
+		if (segment_length + new_display_string_len > state->display.display_buffer_size - 2)
+			segment_length = state->display.display_buffer_size - new_display_string_len - 2;
 		if (segment_length < 1)
 			break;
 
 		/* Skip the segment if it would make the display too wide. */
-		if ((unsigned int) (segment_length + display_string_length) > state->control.width)
+		if ((unsigned int) (segment_length + new_display_string_len) > state->control.width)
 			break;
 
 		/* Append the segment to the output string. */
-		strncat(state->display.display_buffer, segment_content, segment_length);
+		strncat(state->display.display_buffer, segment_content, segment_length);	/* flawfinder: ignore */
+		/* flawfinder: length is checked above, and buffer is \0 terminated already. */
 
-		display_string_length += segment_length;
+		new_display_string_len += segment_length;
 	}
+
+	debug("%s: %d", "display string length counted by format segments", (int) new_display_string_len);
+
+	/* Recalculate display string length with strlen() in case of miscounting. */
+	new_display_string_len = strlen(state->display.display_buffer);	/* flawfinder: ignore */
+	/* flawfinder: \0 terminated by memset() above and then by segment bounds checking. */
+	debug("%s: %d", "display string length from strlen()", (int) new_display_string_len);
 
 	/*
 	 * If the size of our output shrinks, we need to keep appending
 	 * spaces at the end, so that we don't leave dangling bits behind.
 	 */
-	output_length = (unsigned int) strlen(state->display.display_buffer);
-	if ((output_length < state->display.prev_output_cols)
+	if ((new_display_string_len < state->display.display_string_len)
 	    && (state->control.width >= state->display.prev_screen_width)) {
 		char spaces[32];	 /* flawfinder: ignore - terminated, bounded */
 		int spaces_to_add;
 
-		spaces_to_add = (int) (state->display.prev_output_cols - output_length);
+		spaces_to_add = (int) (state->display.display_string_len - new_display_string_len);
 		/* Upper boundary on number of spaces */
 		if (spaces_to_add > 15) {
 			spaces_to_add = 15;
 		}
-		output_length += spaces_to_add;
+		new_display_string_len += spaces_to_add;
 		spaces[spaces_to_add] = '\0';
 		while (--spaces_to_add >= 0) {
 			spaces[spaces_to_add] = ' ';
 		}
 		(void) pv_strlcat(state->display.display_buffer, spaces, state->display.display_buffer_size);
 	}
+
+	state->display.display_string_len = new_display_string_len;
 	state->display.prev_screen_width = state->control.width;
-	state->display.prev_output_cols = output_length;
 
 	return true;
 }
@@ -1291,7 +1314,7 @@ void pv_display(pvstate_t state, long double esec, off_t sl, off_t tot)
 		return;
 
 	if (state->control.numeric) {
-		pv_write_retry(STDERR_FILENO, state->display.display_buffer, strlen(state->display.display_buffer));
+		pv_write_retry(STDERR_FILENO, state->display.display_buffer, state->display.display_string_len);
 	} else if (state->control.cursor) {
 		if (state->control.force || pv_in_foreground()) {
 			pv_crs_update(state, state->display.display_buffer);
@@ -1299,8 +1322,7 @@ void pv_display(pvstate_t state, long double esec, off_t sl, off_t tot)
 		}
 	} else {
 		if (state->control.force || pv_in_foreground()) {
-			pv_write_retry(STDERR_FILENO, state->display.display_buffer,
-				       strlen(state->display.display_buffer));
+			pv_write_retry(STDERR_FILENO, state->display.display_buffer, state->display.display_string_len);
 			pv_write_retry(STDERR_FILENO, "\r", 1);
 			state->display.display_visible = true;
 		}

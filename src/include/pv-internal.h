@@ -170,10 +170,10 @@ struct pvstate_s {
 	 * Display state *
 	 *****************/
 	struct {
-		/*@only@*/ /*@null@*/ char *display_buffer;
-		size_t display_buffer_size;
+		/*@only@*/ /*@null@*/ char *display_buffer;	/* buffer for display string */
+		size_t display_buffer_size;	 /* size allocated to display buffer */
+		size_t display_string_len;	 /* length of string in display buffer */
 		unsigned int prev_screen_width;	 /* screen width last time we were called */
-		unsigned int prev_output_cols;	 /* visible width of the last string we output */
 		bool display_visible;		 /* set once anything written to terminal */
 
 		int percentage;			 /* transfer percentage completion */
