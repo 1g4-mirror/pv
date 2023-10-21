@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-10-18 23:08+0100\n"
+"POT-Creation-Date: 2023-10-22 00:08+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -412,7 +412,7 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:546 src/pv/loop.c:601 src/pv/loop.c:643 src/pv/watchpid.c:73
+#: src/pv/loop.c:555 src/pv/loop.c:606 src/pv/loop.c:648 src/pv/watchpid.c:73
 #: src/pv/watchpid.c:83 src/pv/watchpid.c:94 src/pv/watchpid.c:102
 #: src/pv/watchpid.c:139 src/pv/watchpid.c:150 src/pv/watchpid.c:158
 #: src/pv/watchpid.c:169 src/pv/watchpid.c:256 src/pv/watchpid.c:264
