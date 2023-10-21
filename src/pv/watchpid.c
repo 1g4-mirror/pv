@@ -177,16 +177,16 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 #endif
 
 #ifdef __APPLE__
-int pv_watchfd_changed(pvwatchfd_t info)
+bool pv_watchfd_changed(pvwatchfd_t info)
 {
-	return 1;
+	return true;
 }
 #else
 /*
- * Return nonzero if the given file descriptor has changed in some way since
- * we started looking at it (i.e.  changed destination or permissions).
+ * Return true if the given file descriptor has changed in some way since
+ * we started looking at it (i.e. changed destination or permissions).
  */
-int pv_watchfd_changed(pvwatchfd_t info)
+bool pv_watchfd_changed(pvwatchfd_t info)
 {
 	struct stat sb_fd, sb_fd_link;
 
@@ -196,13 +196,13 @@ int pv_watchfd_changed(pvwatchfd_t info)
 		    || (sb_fd.st_ino != info->sb_fd.st_ino)
 		    || (sb_fd_link.st_mode != info->sb_fd_link.st_mode)
 		    ) {
-			return 1;
+			return true;
 		}
 	} else {
-		return 1;
+		return true;
 	}
 
-	return 0;
+	return false;
 }
 #endif
 
@@ -278,8 +278,8 @@ static int pidfds(pvstate_t state, unsigned int pid, struct proc_fdinfo **fds, i
  * Returns 0 on success, 1 if the process no longer exists or could not be
  * read, or 2 for a memory allocation error.
  */
-int pv_watchpid_scanfds(pvstate_t state, pvstate_t pristine,
-			unsigned int watch_pid, int *array_length_ptr,
+int pv_watchpid_scanfds(pvstate_t state,
+			pid_t watch_pid, int *array_length_ptr,
 			pvwatchfd_t * info_array_ptr, pvstate_t * state_array_ptr, int *fd_to_idx)
 {
 	int array_length = 0;
@@ -395,7 +395,7 @@ int pv_watchpid_scanfds(pvstate_t state, pvstate_t pristine,
 		/*
 		 * Initialise the details of this new entry.
 		 */
-		memcpy(&(state_array[use_idx]), pristine, sizeof(*pristine));
+		memcpy(&(state_array[use_idx]), state, sizeof(*state));
 		memset(&(info_array[use_idx]), 0, sizeof(info_array[use_idx]));
 
 		info_array[use_idx].watch_pid = watch_pid;

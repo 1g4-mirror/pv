@@ -399,8 +399,9 @@ int pv_watchfd_loop(pvstate_t state)
 		char *fmt;
 		while (NULL != (fmt = strstr(state->control.default_format, "%e"))) {
 			debug("%s", "zero size - removing ETA");
-			/* strlen-1 here to include trailing NUL */
-			memmove(fmt, fmt + 2, strlen(fmt) - 1);
+			/* strlen-1 here to include trailing \0 */
+			memmove(fmt, fmt + 2, strlen(fmt) - 1);	/* flawfinder: ignore */
+			/* flawfinder: default_format is always \0 terminated */
 			state->flag.reparse_display = 1;
 		}
 	}
@@ -522,13 +523,15 @@ int pv_watchfd_loop(pvstate_t state)
  * and show details about the transfers on standard error according to the
  * given options.
  *
+ * Replaces format_string in "state" so that starts with "%N " if it doesn't
+ * already do so.
+ *
  * Returns nonzero on error.
  */
 int pv_watchpid_loop(pvstate_t state)
 {
-	struct pvstate_s state_copy;
 	const char *original_format_string;
-	char new_format_string[512];
+	char new_format_string[512];	/* flawfinder: ignore */
 	struct pvwatchfd_s *info_array = NULL;
 	struct pvstate_s *state_array = NULL;
 	int array_length = 0;
@@ -537,6 +540,12 @@ int pv_watchpid_loop(pvstate_t state)
 	int idx;
 	int prev_displayed_lines, blank_lines;
 	bool first_pass = true;
+
+	/*
+	 * flawfinder rationale (new_format_string): zeroed with memset(),
+	 * only written to with pv_snprintf() which checks boundaries, and
+	 * explicitly terminated with \0.
+	 */
 
 	/*
 	 * Make sure the process exists first, so we can give an error if
@@ -549,27 +558,23 @@ int pv_watchpid_loop(pvstate_t state)
 	}
 
 	/*
-	 * Make a copy of our state, ready to change in preparation for
-	 * duplication.
-	 */
-	memcpy(&state_copy, state, sizeof(state_copy));
-
-	/*
 	 * Make sure there's a format string, and then insert %N into it if
 	 * it's not present.
 	 */
 	original_format_string =
-	    state->control.format_string ? state->control.format_string : state->control.default_format;
+	    NULL != state->control.format_string ? state->control.format_string : state->control.default_format;
 	memset(new_format_string, 0, sizeof(new_format_string));
-	if (NULL == strstr(original_format_string, "%N")) {
+	if (NULL == original_format_string) {
+		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N");
+	} else if (NULL == strstr(original_format_string, "%N")) {
 		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N %s", original_format_string);
 	} else {
 		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%s", original_format_string);
 	}
 	new_format_string[sizeof(new_format_string) - 1] = '\0';
-	state_copy.control.format_string = NULL;
-	(void) pv_snprintf(state_copy.control.default_format, PV_SIZEOF_DEFAULT_FORMAT, "%.510s", new_format_string);
-	state_copy.control.default_format[PV_SIZEOF_DEFAULT_FORMAT - 1] = '\0';
+	if (NULL != state->control.format_string)
+		free(state->control.format_string);
+	state->control.format_string = pv_strdup(new_format_string);
 
 	/*
 	 * Get things ready for the main loop.
@@ -628,7 +633,7 @@ int pv_watchpid_loop(pvstate_t state)
 		if (1 == state->flag.terminal_resized) {
 			state->flag.terminal_resized = 0;
 			pv_screensize(&(state->control.width), &(state->control.height));
-			for (idx = 0; idx < array_length; idx++) {
+			for (idx = 0; NULL != state_array && NULL != info_array && idx < array_length; idx++) {
 				state_array[idx].control.width = state->control.width;
 				state_array[idx].control.height = state->control.height;
 				pv_watchpid_setname(state, &(info_array[idx]));
@@ -636,8 +641,8 @@ int pv_watchpid_loop(pvstate_t state)
 			}
 		}
 
-		rc = pv_watchpid_scanfds(state, &state_copy,
-					 state->control.watch_pid, &array_length, &info_array, &state_array, fd_to_idx);
+		rc = pv_watchpid_scanfds(state, state->control.watch_pid, &array_length, &info_array, &state_array,
+					 fd_to_idx);
 		if (rc != 0) {
 			if (first_pass) {
 				pv_error(state, "%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
@@ -654,7 +659,7 @@ int pv_watchpid_loop(pvstate_t state)
 		first_pass = false;
 		displayed_lines = 0;
 
-		for (fd = 0; fd < FD_SETSIZE; fd++) {
+		for (fd = 0; fd < FD_SETSIZE && NULL != info_array && NULL != state_array; fd++) {
 			off_t position_now, transferred_since_last;
 			struct timespec init_time, transfer_elapsed;
 			long double elapsed_seconds;
