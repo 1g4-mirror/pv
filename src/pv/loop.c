@@ -385,7 +385,10 @@ int pv_watchfd_loop(pvstate_t state)
 	rc = pv_watchfd_info(state, &info, false);
 	if (0 != rc) {
 		state->status.exit_status |= 2;
+		/*@-compdestroy@ */
 		return state->status.exit_status;
+		/*@+compdestroy@ */
+		/* splint: no leak of info.state as it is unused so far. */
 	}
 
 	/*
@@ -514,7 +517,20 @@ int pv_watchfd_loop(pvstate_t state)
 	if (1 == state->flag.trigger_exit)
 		state->status.exit_status |= 32;
 
+	/*
+	 * Free the state structure specific to this file descriptor. 
+	 * Uunused so far - this is so that in future we could watch
+	 * multiple file descriptors similar to pv_watchpid_loop().
+	 */
+	if (NULL != info.state) {
+		pv_state_free(info.state);
+		info.state = NULL;
+	}
+
+	/*@-compdestroy@ */
 	return state->status.exit_status;
+	/*@+compdestroy@ */
+	/* splint: no leak of info.state as we just freed it above. */
 }
 
 
@@ -531,9 +547,8 @@ int pv_watchfd_loop(pvstate_t state)
 int pv_watchpid_loop(pvstate_t state)
 {
 	const char *original_format_string;
-	char new_format_string[512];	/* flawfinder: ignore */
+	char new_format_string[512];	 /* flawfinder: ignore */
 	struct pvwatchfd_s *info_array = NULL;
-	struct pvstate_s *state_array = NULL;
 	int array_length = 0;
 	int fd_to_idx[FD_SETSIZE];
 	struct timespec next_update, cur_time;
@@ -607,8 +622,6 @@ int pv_watchpid_loop(pvstate_t state)
 				state->status.exit_status |= 2;
 				if (NULL != info_array)
 					free(info_array);
-				if (NULL != state_array)
-					free(state_array);
 				return 2;
 			}
 			break;
@@ -633,24 +646,23 @@ int pv_watchpid_loop(pvstate_t state)
 		if (1 == state->flag.terminal_resized) {
 			state->flag.terminal_resized = 0;
 			pv_screensize(&(state->control.width), &(state->control.height));
-			for (idx = 0; NULL != state_array && NULL != info_array && idx < array_length; idx++) {
-				state_array[idx].control.width = state->control.width;
-				state_array[idx].control.height = state->control.height;
+			for (idx = 0; NULL != info_array && idx < array_length; idx++) {
+				if (NULL == info_array[idx].state)
+					continue;
+				info_array[idx].state->control.width = state->control.width;
+				info_array[idx].state->control.height = state->control.height;
 				pv_watchpid_setname(state, &(info_array[idx]));
-				state_array[idx].flag.reparse_display = 1;
+				info_array[idx].state->flag.reparse_display = 1;
 			}
 		}
 
-		rc = pv_watchpid_scanfds(state, state->control.watch_pid, &array_length, &info_array, &state_array,
-					 fd_to_idx);
+		rc = pv_watchpid_scanfds(state, state->control.watch_pid, &array_length, &info_array, fd_to_idx);
 		if (rc != 0) {
 			if (first_pass) {
 				pv_error(state, "%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
 				state->status.exit_status |= 2;
 				if (NULL != info_array)
 					free(info_array);
-				if (NULL != state_array)
-					free(state_array);
 				return 2;
 			}
 			break;
@@ -659,7 +671,7 @@ int pv_watchpid_loop(pvstate_t state)
 		first_pass = false;
 		displayed_lines = 0;
 
-		for (fd = 0; fd < FD_SETSIZE && NULL != info_array && NULL != state_array; fd++) {
+		for (fd = 0; fd < FD_SETSIZE && NULL != info_array; fd++) {
 			off_t position_now, transferred_since_last;
 			struct timespec init_time, transfer_elapsed;
 			long double elapsed_seconds;
@@ -682,6 +694,11 @@ int pv_watchpid_loop(pvstate_t state)
 					info_array[idx].watch_pid = 0;
 					debug("%s %d: %s", "fd", fd, "removing");
 				}
+				continue;
+			}
+
+			if (NULL == info_array[idx].state) {
+				debug("%s %d: %s", "fd", fd, "null state - skipping");
 				continue;
 			}
 
@@ -726,7 +743,7 @@ int pv_watchpid_loop(pvstate_t state)
 			debug("%s %d [%d]: %Lf / %Ld / %Ld", "fd", fd, idx, elapsed_seconds, transferred_since_last,
 			      position_now);
 
-			pv_display(&(state_array[idx]), elapsed_seconds, transferred_since_last, position_now);
+			pv_display(info_array[idx].state, elapsed_seconds, transferred_since_last, position_now);
 			displayed_lines++;
 		}
 
@@ -777,10 +794,18 @@ int pv_watchpid_loop(pvstate_t state)
 		prev_displayed_lines--;
 	}
 
+	/*
+	 * Free the per-fd state.
+	 */
+	for (idx = 0; NULL != info_array && idx < array_length; idx++) {
+		if (NULL == info_array[idx].state)
+			continue;
+		pv_state_free(info_array[idx].state);
+		info_array[idx].state = NULL;
+	}
+
 	if (NULL != info_array)
 		free(info_array);
-	if (NULL != state_array)
-		free(state_array);
 
 	return 0;
 }

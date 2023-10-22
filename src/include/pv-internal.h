@@ -122,6 +122,7 @@ struct pvstate_s {
 		double delay_start;              /* delay before first display */
 		pid_t watch_pid;		 /* process to watch fds of */
 		int watch_fd;			 /* fd to watch */
+		unsigned int average_rate_window; /* time window in seconds for average rate calculations */
 		unsigned int width;              /* screen width */
 		unsigned int height;             /* screen height */
 		bool width_set_manually;	 /* width was set manually, not detected */
@@ -307,6 +308,7 @@ struct pvwatchfd_s {
 	off_t size;			 /* size of whole file, 0 if unknown */
 	off_t position;			 /* position last seen at */
 	struct timespec start_time;	 /* time we started watching the fd */
+	/*@null@*/ pvstate_t state;	 /* state object for flags and display */
 };
 typedef struct pvwatchfd_s *pvwatchfd_t;
 
@@ -339,7 +341,7 @@ int pv_remote_set(pvstate_t);
 int pv_watchfd_info(pvstate_t, pvwatchfd_t, bool);
 bool pv_watchfd_changed(pvwatchfd_t);
 off_t pv_watchfd_position(pvwatchfd_t);
-int pv_watchpid_scanfds(pvstate_t, pid_t, int *, pvwatchfd_t *, pvstate_t *, int *);
+int pv_watchpid_scanfds(pvstate_t, pid_t, int *, pvwatchfd_t *, int *);
 void pv_watchpid_setname(pvstate_t, pvwatchfd_t);
 
 #ifdef __cplusplus
