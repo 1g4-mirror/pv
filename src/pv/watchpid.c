@@ -37,8 +37,8 @@
 /*
  * Set info->size to the size of the file info->file_fdpath points to,
  * assuming that info->sb_fd has been populated by stat(), or to 0 if the
- * file size could not be determined; returns false if the file was not a
- * block device or regular file.
+ * file size could not be determined or the file was opened in write mode;
+ * returns false if the file was not a block device or regular file.
  */
 static bool filesize(pvwatchfd_t info)
 {
@@ -49,9 +49,24 @@ static bool filesize(pvwatchfd_t info)
 		 * Get the size of block devices by opening
 		 * them and seeking to the end.
 		 */
-		fd = open(info->file_fdpath, O_RDONLY);
+		fd = open(info->file_fdpath, O_RDONLY);	/* flawfinder: ignore */
+		/*
+		 * flawfinder: redirection check below; risk is minimal as
+		 * we are not actually reading any data here.
+		 */
 		if (fd >= 0) {
-			info->size = lseek(fd, 0, SEEK_END);
+			/*
+			 * TOCTOU mitigation: check it's still a block
+			 * device before trying to seek to the end. 
+			 * Otherwise treat it as unreadable and set the size
+			 * to 0.
+			 */
+			struct stat check_fd_sb;
+			memset(&check_fd_sb, 0, sizeof(check_fd_sb));
+			info->size = 0;
+			if (0 == fstat(fd, &check_fd_sb) && S_ISBLK(check_fd_sb.st_mode)) {
+				info->size = lseek(fd, 0, SEEK_END);
+			}
 			(void) close(fd);
 		} else {
 			info->size = 0;
@@ -155,7 +170,15 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 	(void) pv_snprintf(info->file_fd, PV_SIZEOF_FILE_FD, "/proc/%u/fd/%d", info->watch_pid, info->watch_fd);
 
 	memset(info->file_fdpath, 0, PV_SIZEOF_FILE_FDPATH);
-	if (readlink(info->file_fd, info->file_fdpath, PV_SIZEOF_FILE_FDPATH - 1) < 0) {
+	if (readlink(info->file_fd, info->file_fdpath, PV_SIZEOF_FILE_FDPATH - 1) < 0) {	/* flawfinder: ignore */
+		/*
+		 * flawfinder: memset() has put \0 at the end already, and
+		 * we tell readlink() to use 1 byte less than the buffer
+		 * length, so \0 termination is assured.  There is no
+		 * mitigation for the risk of the link changing while we
+		 * read it, but we are only reading from the destination,
+		 * and then only if it's a block device - see filesize().
+		 */
 		if (!automatic)
 			pv_error(state, "%s %u: %s %d: %s",
 				 _("pid"), info->watch_pid, _("fd"), info->watch_fd, strerror(errno));
@@ -246,7 +269,8 @@ off_t pv_watchfd_position(pvwatchfd_t info)
 	if (pv_watchfd_changed(info))
 		return -1;
 
-	fptr = fopen(info->file_fdinfo, "r");
+	fptr = fopen(info->file_fdinfo, "r");	/* flawfinder: ignore */
+	/* flawfinder: trusted location (/proc). */
 	if (NULL == fptr)
 		return -1;
 	pos_long = -1;
@@ -354,7 +378,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 		return -1;
 	}
 #else
-	char fd_dir[512];
+	char fd_dir[512];		 /* flawfinder: ignore - zeroed, bounded with pv_snprintf(). */
 	DIR *dptr;
 	struct dirent *d;
 
@@ -439,7 +463,8 @@ int pv_watchpid_scanfds(pvstate_t state,
 			return 2;
 
 		/* Copy the main status.cwd value to the new state. */
-		memcpy(&(info_array[use_idx].state->status.cwd), &(state->status.cwd), sizeof(state->status.cwd));
+		memcpy(&(info_array[use_idx].state->status.cwd), &(state->status.cwd), sizeof(state->status.cwd));	/* flawfinder: ignore */
+		/* flawfinder: bounded to destination object size. */
 
 		/*
 		 * Copy over all the control values, blanking out the
@@ -448,7 +473,8 @@ int pv_watchpid_scanfds(pvstate_t state,
 		 * instead of allocating a new dynamic format string for the
 		 * copy (so there's less dynamic allocation going on).
 		 */
-		memcpy(&(info_array[use_idx].state->control), &(state->control), sizeof(state->control));
+		memcpy(&(info_array[use_idx].state->control), &(state->control), sizeof(state->control));	/* flawfinder: ignore */
+		/* flawfinder: bounded to destination object size. */
 		/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
 		info_array[use_idx].state->control.name = NULL;
 		info_array[use_idx].state->control.format_string = NULL;
@@ -466,7 +492,8 @@ int pv_watchpid_scanfds(pvstate_t state,
 		 * average rate window so that a new history buffer is
 		 * allocated for this state.
 		 */
-		memcpy(&(info_array[use_idx].state->display), &(state->display), sizeof(state->display));
+		memcpy(&(info_array[use_idx].state->display), &(state->display), sizeof(state->display));	/* flawfinder: ignore */
+		/* flawfinder: bounded to destination object size. */
 		/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
 		info_array[use_idx].state->display.display_buffer = NULL;
 		info_array[use_idx].state->display.display_buffer_size = 0;
@@ -588,8 +615,9 @@ void pv_watchpid_setname(pvstate_t state, pvwatchfd_t info)
 
 	memset(info->display_name, 0, PV_SIZEOF_DISPLAY_NAME);
 
-	path_length = strlen(info->file_fdpath);
-	cwd_length = strlen(state->status.cwd);
+	path_length = strlen(info->file_fdpath);	/* flawfinder: ignore */
+	cwd_length = strlen(state->status.cwd);	/* flawfinder: ignore */
+	/* flawfinder: both strings are always \0 terminated. */
 	if (cwd_length > 0 && path_length > cwd_length) {
 		if (0 == strncmp(info->file_fdpath, state->status.cwd, cwd_length)) {
 			file_fdpath += cwd_length + 1;
