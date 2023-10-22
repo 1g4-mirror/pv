@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-10-22 00:08+0100\n"
+"POT-Creation-Date: 2023-10-22 17:44+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -410,11 +410,11 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:555 src/pv/loop.c:606 src/pv/loop.c:648 src/pv/watchpid.c:73
-#: src/pv/watchpid.c:83 src/pv/watchpid.c:94 src/pv/watchpid.c:102
-#: src/pv/watchpid.c:139 src/pv/watchpid.c:150 src/pv/watchpid.c:158
-#: src/pv/watchpid.c:169 src/pv/watchpid.c:256 src/pv/watchpid.c:264
-#: src/pv/watchpid.c:294 src/pv/watchpid.c:316
+#: src/pv/loop.c:570 src/pv/loop.c:621 src/pv/loop.c:662 src/pv/watchpid.c:99
+#: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
+#: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
+#: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
+#: src/pv/watchpid.c:377 src/pv/watchpid.c:398
 msgid "pid"
 msgstr ""
 
@@ -422,7 +422,7 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:385 src/pv/state.c:396
+#: src/pv/state.c:386 src/pv/state.c:397
 msgid "file list allocation failed"
 msgstr ""
 
@@ -462,11 +462,11 @@ msgstr "błąd zapisu"
 msgid "select call failed"
 msgstr "nie udało się wywołać funkcji select"
 
-#: src/pv/watchpid.c:83 src/pv/watchpid.c:95 src/pv/watchpid.c:104
-#: src/pv/watchpid.c:150 src/pv/watchpid.c:159 src/pv/watchpid.c:171
+#: src/pv/watchpid.c:109 src/pv/watchpid.c:121 src/pv/watchpid.c:130
+#: src/pv/watchpid.c:184 src/pv/watchpid.c:193 src/pv/watchpid.c:204
 msgid "fd"
 msgstr ""
 
-#: src/pv/watchpid.c:104 src/pv/watchpid.c:171
+#: src/pv/watchpid.c:130 src/pv/watchpid.c:204
 msgid "not a regular file or block device"
 msgstr ""
