@@ -774,16 +774,16 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			if (state->control.bits) {
 				(void) pv_snprintf(state->display.display_buffer,
 						   state->display.display_buffer_size,
-						   "%.99s%lld\n", numericprefix, 8 * total_bytes);
+						   "%.99s%lld\n", numericprefix, (long long) (8 * total_bytes));
 			} else {
 				(void) pv_snprintf(state->display.display_buffer,
 						   state->display.display_buffer_size,
-						   "%.99s%lld\n", numericprefix, total_bytes);
+						   "%.99s%lld\n", numericprefix, (long long) total_bytes);
 			}
 		} else {
 			(void) pv_snprintf(state->display.display_buffer,
 					   state->display.display_buffer_size, "%.99s%ld\n", numericprefix,
-					   state->display.percentage);
+					   (long) (state->display.percentage));
 		}
 
 		state->display.display_string_len = strlen(state->display.display_buffer);	/* flawfinder: ignore */
