@@ -1,4 +1,4 @@
-### 1.8.x-UNRELEASED
+### 1.8.5 - 19 November 2023
 
  * fix: corrected percentage formatting so it doesn't jump from 2 to 3 characters wide at 100% ([#80](https://codeberg.org/a-j-wood/pv/issues/80))
  * fix: replaced "`--remote`" mechanism, using a temporary file instead of SysV IPC, so it can work reliably even when there are multiple PV instances
