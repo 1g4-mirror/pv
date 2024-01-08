@@ -26,5 +26,6 @@ Things still to do.  (#n) indicates the issue tracker number.
  * ([#56](https://codeberg.org/a-j-wood/pv/issues/56)) Support for backgrounding pv, and allowing it to be monitored separately ([jimbobmcgee](https://github.com/jimbobmcgee))
  * ([#67](https://codeberg.org/a-j-wood/pv/issues/67)) Wrap another process to monitor its stdin & stdout ([Alex Mason](https://github.com/axman6))
  * ([#76](https://codeberg.org/a-j-wood/pv/issues/76)) Provide a way to test translations without installing
+ * ([#81](https://codeberg.org/a-j-wood/pv/issues/81)) Keep last output on terminal when "pv -d" is done
 
 Any assistance would be appreciated.
