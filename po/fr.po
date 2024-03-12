@@ -22,23 +22,23 @@ msgstr ""
 
 #: src/main/help.c:284
 msgid "show progress bar"
-msgstr "affiche la barre de progression"
+msgstr "afficher la barre de progression"
 
 #: src/main/help.c:287
 msgid "show elapsed time"
-msgstr "affiche le temps écoulé"
+msgstr "afficher le temps écoulé"
 
 #: src/main/help.c:290
 msgid "show estimated time of arrival (completion)"
-msgstr "affiche l'heure approximative de l'achèvement de la tâche"
+msgstr "afficher l'heure approximative de l'achèvement de la tâche"
 
 #: src/main/help.c:293
 msgid "show absolute estimated time of arrival (completion)"
-msgstr "affiche l'heure absolute de l'achèvement de la tâche"
+msgstr "afficher l'heure absolute de l'achèvement de la tâche"
 
 #: src/main/help.c:296
 msgid "show data transfer rate counter"
-msgstr "affiche le taux de tranfert des données"
+msgstr "afficher le taux de tranfert des données"
 
 #: src/main/help.c:299
 msgid "show data transfer average rate counter"
@@ -50,15 +50,15 @@ msgstr "SEC"
 
 #: src/main/help.c:302
 msgid "compute average rate over past SEC seconds (default 30s)"
-msgstr ""
+msgstr "calculer le taux moyen d'après les SEC dernières secondes (30s par défaut)"
 
 #: src/main/help.c:305
 msgid "show number of bytes transferred"
-msgstr "affiche le nombre d'octets transférés"
+msgstr "afficher le nombre d'octets transférés"
 
 #: src/main/help.c:308
 msgid "show number of bits transferred"
-msgstr ""
+msgstr "afficher le nombre de bits transférés"
 
 #: src/main/help.c:311
 msgid "show percentage of transfer buffer in use"
@@ -66,15 +66,15 @@ msgstr "afficher le pourcentage de tampon de transfert utilisé"
 
 #: src/main/help.c:313
 msgid "NUM"
-msgstr ""
+msgstr "NUM"
 
 #: src/main/help.c:314
 msgid "show NUM bytes last written"
-msgstr "affiche NUM octets pour la dernière fois écrits"
+msgstr "afficher les derniers NUM octets écrits"
 
 #: src/main/help.c:316
 msgid "FORMAT"
-msgstr ""
+msgstr "FORMAT"
 
 #: src/main/help.c:317
 msgid "set output format to FORMAT"
@@ -82,7 +82,7 @@ msgstr "définir le format de sortie sur FORMAT"
 
 #: src/main/help.c:320
 msgid "output percentages, not visual information"
-msgstr "imprime en pourcentage, pas les informations visuelles"
+msgstr "imprimer en pourcentage plutôt que des informations visuelles"
 
 #: src/main/help.c:323
 msgid "do not output any transfer information at all"
@@ -94,7 +94,7 @@ msgstr "ne rien afficher avant qu'au moins un octet soit tranféré"
 
 #: src/main/help.c:330
 msgid "display nothing until SEC seconds have passed"
-msgstr "n'afficher rien jusqu'à ce que SEC secondes se soient écoulées"
+msgstr "ne rien afficher jusqu'à ce que SEC secondes se soient écoulées"
 
 #: src/main/help.c:332
 msgid "SIZE"
@@ -102,19 +102,19 @@ msgstr "TAILLE"
 
 #: src/main/help.c:333
 msgid "set estimated data size to SIZE bytes"
-msgstr "ajuste la taille estimée des données à TAILLE octets"
+msgstr "ajuster la taille estimée des données à TAILLE octets"
 
 #: src/main/help.c:336
 msgid "count lines instead of bytes"
-msgstr "compte les lignes au lieu des octets"
+msgstr "compter les lignes au lieu des octets"
 
 #: src/main/help.c:339
 msgid "lines are null-terminated"
-msgstr "les lignes sont terminées par un nul"
+msgstr "les lignes sont terminées par un caractère nul"
 
 #: src/main/help.c:342
 msgid "update every SEC seconds"
-msgstr "mise-à-jour toute les SEC secondes"
+msgstr "mettre à jour toutes les SEC secondes"
 
 #: src/main/help.c:344
 msgid "WIDTH"
@@ -142,7 +142,7 @@ msgstr "préfixer les informations visuelles avec NOM"
 
 #: src/main/help.c:354
 msgid "output even if standard error is not a terminal"
-msgstr "imprime vers la sortie d'erreur même si ce n'est pas un terminal"
+msgstr "imprimer vers la sortie d'erreur standard même si ce n'est pas un terminal"
 
 #: src/main/help.c:357
 msgid "use cursor positioning escape sequences"
@@ -154,7 +154,7 @@ msgstr "TAUX"
 
 #: src/main/help.c:361
 msgid "limit transfer to RATE bytes per second"
-msgstr "limite le taux de transfer à TAUX octets par seconde"
+msgstr "limite le taux de transfert à TAUX octets par seconde"
 
 #: src/main/help.c:363 src/main/help.c:372
 msgid "BYTES"
@@ -166,7 +166,7 @@ msgstr "Utiliser une mémoire tampon de OCTETS octets"
 
 #: src/main/help.c:367
 msgid "never use splice(), always use read/write"
-msgstr "n'utilisez jamais splice(), utilisez toujours read/write"
+msgstr "ne jamais utiliser splice(), toujours utiliser read/write"
 
 #: src/main/help.c:370
 msgid "skip read errors in input"
@@ -174,7 +174,7 @@ msgstr "ignorer les erreurs de lecture dans l'entrée"
 
 #: src/main/help.c:373
 msgid "skip errors in BYTES blocks at a time"
-msgstr ""
+msgstr "ignorer les erreurs dans OCTETS blocs à la fois"
 
 #: src/main/help.c:376
 msgid "stop after --size bytes have been transferred"
@@ -182,15 +182,15 @@ msgstr "arrêter après le transfert de --size octets"
 
 #: src/main/help.c:379
 msgid "flush cache to disk after every write"
-msgstr ""
+msgstr "vider le cache sur le disque après chaque écriture"
 
 #: src/main/help.c:382
 msgid "use direct I/O to bypass cache"
-msgstr ""
+msgstr "utiliser les E/S directes pour contourner le cache"
 
 #: src/main/help.c:385
 msgid "discard input instead of writing to output"
-msgstr ""
+msgstr "rejeter l'entrée au lieu de l'écrire vers la sortie"
 
 #: src/main/help.c:388
 msgid "PID"
@@ -198,23 +198,23 @@ msgstr "PID"
 
 #: src/main/help.c:389
 msgid "update settings of process PID"
-msgstr "mettre-à-jour la configuration du processus PID"
+msgstr "mettre à jour la configuration du processus PID"
 
 #: src/main/help.c:393 src/main/help.c:408
 msgid "FILE"
-msgstr ""
+msgstr "FICHIER"
 
 #: src/main/help.c:394
 msgid "save process ID in FILE"
-msgstr "enregistrer l'ID de processus dans FILE"
+msgstr "enregistrer l'ID de processus dans FICHIER"
 
 #: src/main/help.c:397
 msgid "PID[:FD]"
-msgstr ""
+msgstr "PID[:FD]"
 
 #: src/main/help.c:398
 msgid "watch file FD opened by process PID"
-msgstr "regarder le fichier FD ouvert par le processus PID"
+msgstr "surveiller le fichier FD ouvert par le processus PID"
 
 #: src/main/help.c:402
 msgid "show this help and exit"
@@ -226,7 +226,7 @@ msgstr "afficher la version puis quitter"
 
 #: src/main/help.c:409
 msgid "write debug logs to FILE"
-msgstr ""
+msgstr "écrire les journaux de déboggage vers FICHIER"
 
 #: src/main/help.c:434
 #, c-format
@@ -237,13 +237,13 @@ msgstr "Utilisation : %s [OPTIONS] [FICHIER]..."
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
-"Concatène FICHIER(s), ou l'entrée standard, sur la sortie standard avec "
+"Concaténer FICHIER(s), ou l'entrée standard, sur la sortie standard avec "
 "monitorage."
 
 #: src/main/help.c:582
 #, c-format
 msgid "Please report any bugs to: %s"
-msgstr "SVP rapporter touts bogues à %s"
+msgstr "SVP rapporter tous bogues à %s"
 
 #: src/main/main.c:74
 msgid "state allocation failed"
@@ -251,11 +251,11 @@ msgstr "échec de l'allocation de mémoire de condition"
 
 #: src/main/options.c:173
 msgid "option structure allocation failed"
-msgstr "l'allocation pour la structure d'une option a echoué"
+msgstr "l'allocation pour la structure d'une option a échoué"
 
 #: src/main/options.c:192
 msgid "option structure argv allocation failed"
-msgstr "l'allocation pour la structure de l'option argv a echoué"
+msgstr "l'allocation pour la structure de l'option argv a échoué"
 
 #: src/main/options.c:254
 msgid "integer argument expected"
@@ -280,12 +280,12 @@ msgstr "échec à statuer sur le fichier"
 #: src/main/options.c:487
 #, c-format
 msgid "Try `%s --help' for more information."
-msgstr "Essayez `%s --help' pour plus d'information."
+msgstr "Essayez `%s --help' pour plus d'informations."
 
 #: src/main/options.c:489
 #, c-format
 msgid "Try `%s -h' for more information."
-msgstr "Essayez `%s -h' pour plus d'information."
+msgstr "Essayez `%s -h' pour plus d'informations."
 
 #: src/main/options.c:520
 msgid ""
@@ -327,19 +327,20 @@ msgstr "SA_SIGINFO non pris en charge sur ce système"
 
 #: src/main/version.c:28
 msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
-msgstr ""
+msgstr "License : GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
 
 #: src/main/version.c:29
 msgid "This is free software: you are free to change and redistribute it."
-msgstr ""
+msgstr "Ceci est un logiciel libre : vous êtes libre de le modifier et de "
+"le redistribuer."
 
 #: src/main/version.c:30
 msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr ""
+msgstr "Il n'y a AUCUNE GARANTIE, dans la mesure permise par la loi."
 
 #: src/main/version.c:32
 msgid "Project web site"
-msgstr ""
+msgstr "Site web du projet"
 
 #: src/pv/cursor.c:87
 msgid "failed to get terminal name"
@@ -351,11 +352,11 @@ msgstr "échec de l'ouverture du fichier de verrouillage"
 
 #: src/pv/cursor.c:163
 msgid "lock attempt failed"
-msgstr "tentative de verrouillage échoué"
+msgstr "échec de la tentative de verrouillage"
 
 #: src/pv/cursor.c:424
 msgid "failed to open terminal"
-msgstr "l'ouverture du terminal a échoué"
+msgstr "éhec de l'ouverture du terminal"
 
 #: src/pv/display.c:192
 msgid "yzafpnum kMGTPEZY"
@@ -367,7 +368,7 @@ msgstr ""
 
 #: src/pv/display.c:746 src/pv/transfer.c:910
 msgid "buffer allocation failed"
-msgstr "l'allocation de mémoire tampon a échoué"
+msgstr "échec de l'allocation de mémoire tampon"
 
 #: src/pv/display.c:845
 msgid "b"
@@ -415,7 +416,7 @@ msgstr "fichiers d'entré et de sortie sont les mêmes"
 
 #: src/pv/file.c:411
 msgid "(none)"
-msgstr ""
+msgstr "(aucun)"
 
 #: src/pv/file.c:413
 msgid "(stdin)"
@@ -431,11 +432,11 @@ msgstr ""
 
 #: src/pv/state.c:36
 msgid "history structure allocation failed"
-msgstr ""
+msgstr "l'allocation de la structure de l'historique a échoué"
 
 #: src/pv/state.c:386 src/pv/state.c:397
 msgid "file list allocation failed"
-msgstr ""
+msgstr "échec de l'allocation de la liste de fichiers"
 
 #: src/pv/transfer.c:457
 msgid "read failed"
@@ -443,7 +444,7 @@ msgstr "la lecture a échoué"
 
 #: src/pv/transfer.c:480
 msgid "warning: read errors detected"
-msgstr "avertissement: erreurs de lecture détectées"
+msgstr "avertissement : erreurs de lecture détectées"
 
 #: src/pv/transfer.c:496
 msgid "file is not seekable"
@@ -459,11 +460,11 @@ msgstr "erreur de lecture dépassée"
 
 #: src/pv/transfer.c:634
 msgid "no transfer buffer allocated"
-msgstr ""
+msgstr "aucun tampon de transfert alloué"
 
 #: src/pv/transfer.c:647
 msgid "failed to set alarm signal handler"
-msgstr ""
+msgstr "échec de la définition du gestionnaire de signal d'alarme"
 
 #: src/pv/transfer.c:774
 msgid "write failed"
@@ -471,7 +472,7 @@ msgstr "l'écriture a échoué"
 
 #: src/pv/transfer.c:1007
 msgid "select call failed"
-msgstr "appel de sélection a échoué"
+msgstr "l'appel de sélection a échoué"
 
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:121 src/pv/watchpid.c:130
 #: src/pv/watchpid.c:184 src/pv/watchpid.c:193 src/pv/watchpid.c:204
