@@ -1,3 +1,7 @@
+### NOT YET RELEASED
+
+ * i18n: corrections and missing strings added to French translations (pull request [#83](https://codeberg.org/a-j-wood/pv/pulls/83)) supplied by [Thomas Bertels](https://codeberg.org/tbertels)
+
 ### 1.8.5 - 19 November 2023
 
  * fix: corrected percentage formatting so it doesn't jump from 2 to 3 characters wide at 100% ([#80](https://codeberg.org/a-j-wood/pv/issues/80))
