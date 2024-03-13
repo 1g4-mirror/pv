@@ -356,7 +356,7 @@ msgstr "échec de la tentative de verrouillage"
 
 #: src/pv/cursor.c:424
 msgid "failed to open terminal"
-msgstr "éhec de l'ouverture du terminal"
+msgstr "échec de l'ouverture du terminal"
 
 #: src/pv/display.c:192
 msgid "yzafpnum kMGTPEZY"
