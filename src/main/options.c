@@ -114,6 +114,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "average-rate", 0, NULL, (int) 'a' },
 		{ "bytes", 0, NULL, (int) 'b' },
 		{ "bits", 0, NULL, (int) '8' },
+		{ "si", 0, NULL, (int) 'k' },
 		{ "buffer-percent", 0, NULL, (int) 'T' },
 		{ "last-written", 1, NULL, (int) 'A' },
 		{ "force", 0, NULL, (int) 'f' },
@@ -151,7 +152,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8TA:fnqcWD:s:l0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:"
+	char *short_options = "hVpteIrab8kTA:fnqcWD:s:l0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -334,6 +335,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->bytes = true;
 			opts->bits = true;
 			numopts++;
+			break;
+		case 'k':
+			opts->si = true;
 			break;
 		case 'T':
 			opts->bufpercent = true;

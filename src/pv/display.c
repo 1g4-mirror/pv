@@ -146,10 +146,11 @@ static long pv__seconds_remaining(const off_t so_far, const off_t total, const l
 }
 
 /*
- * Types of transfer count - bytes or lines.
+ * Types of transfer count - bytes, decimal bytes or lines.
  */
 typedef enum {
 	PV_TRANSFERCOUNT_BYTES,
+	PV_TRANSFERCOUNT_DECBYTES,
 	PV_TRANSFERCOUNT_LINES
 } pv__transfercount_t;
 
@@ -346,6 +347,9 @@ static void pv__sizestr(char *buffer, size_t bufsize, char *format,
 	if (count_type == PV_TRANSFERCOUNT_BYTES) {
 		suffix = suffix_bytes;
 		divider = 1024.0;
+	} else if (count_type == PV_TRANSFERCOUNT_DECBYTES) {
+		suffix = suffix_bytes;
+		divider = 1000.0;
 	} else {
 		suffix = suffix_basic;
 		divider = 1000.0;
@@ -808,6 +812,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		time_t then;
 		struct tm *time_ptr;
 		char *time_format;
+		pv__transfercount_t count_type;
 
 		if (!state->display.component[component_type].required)
 			continue;
@@ -828,6 +833,12 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		component_content[0] = '\0';
 		component_buf_size = PV_SIZEOF_COMPONENT_STR;
 
+		count_type = PV_TRANSFERCOUNT_BYTES;
+		if (state->control.linemode)
+			count_type = PV_TRANSFERCOUNT_LINES;
+		else if (state->control.si)
+			count_type = PV_TRANSFERCOUNT_DECBYTES;
+
 		switch (component_type) {
 
 		case PV_COMPONENT_STRING:
@@ -842,11 +853,10 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			/*@-mustfreefresh @ */
 			if (state->control.bits && !state->control.linemode) {
 				pv__sizestr(component_content, component_buf_size, "%s",
-					    (long double) total_bytes * 8, "", _("b"), PV_TRANSFERCOUNT_BYTES);
+					    (long double) total_bytes * 8, "", _("b"), count_type);
 			} else {
 				pv__sizestr(component_content, component_buf_size, "%s",
-					    (long double) total_bytes, "", _("B"),
-					    state->control.linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
+					    (long double) total_bytes, "", _("B"), count_type);
 			}
 			/*@+mustfreefresh @ */
 			/* splint: we trust gettext() not to really leak memory. */
@@ -888,12 +898,11 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			if (state->control.bits && !state->control.linemode) {
 				/* bits per second */
 				pv__sizestr(component_content, component_buf_size, "[%s]", 8 * rate, "", _("b/s"),
-					    PV_TRANSFERCOUNT_BYTES);
+					    count_type);
 			} else {
 				/* bytes or lines per second */
 				pv__sizestr(component_content, component_buf_size,
-					    "[%s]", rate, _("/s"), _("B/s"),
-					    state->control.linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
+					    "[%s]", rate, _("/s"), _("B/s"), count_type);
 			}
 			/*@+mustfreefresh @ *//* splint: see above. */
 			break;
@@ -904,13 +913,12 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			if (state->control.bits && !state->control.linemode) {
 				/* bits per second */
 				pv__sizestr(component_content, component_buf_size,
-					    "[%s]", 8 * average_rate, "", _("b/s"), PV_TRANSFERCOUNT_BYTES);
+					    "[%s]", 8 * average_rate, "", _("b/s"), count_type);
 			} else {
 				/* bytes or lines per second */
 				pv__sizestr(component_content,
 					    component_buf_size,
-					    "[%s]", average_rate, _("/s"), _("B/s"),
-					    state->control.linemode ? PV_TRANSFERCOUNT_LINES : PV_TRANSFERCOUNT_BYTES);
+					    "[%s]", average_rate, _("/s"), _("B/s"), count_type);
 			}
 			/*@+mustfreefresh @ *//* splint: see above. */
 			break;
