@@ -90,5 +90,6 @@ is acknowledged and greatly appreciated:
  * Benoit Pierre - provided patches for compilation without IPC support, without HAVE_STRUCT_STAT_ST_BLKSIZE, and on MacOS
  * [gustav-b](https://codeberg.org/gustav-b) - suggested percentage formatting correction ([#80](https://codeberg.org/a-j-wood/pv/issues/80))
  * [Thomas Bertels](https://codeberg.org/tbertels) - updated French translations ([#83](https://codeberg.org/a-j-wood/pv/pulls/83))
+ * [kevinruddy](https://codeberg.org/kevinruddy) - added decimal units option ([#85](https://codeberg.org/a-j-wood/pv/pulls/85))
 
 ---
