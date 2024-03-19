@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-dnl Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
+dnl Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
 dnl
 dnl License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 

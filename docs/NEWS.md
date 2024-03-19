@@ -66,7 +66,7 @@
  * cleanup: word wrapping of "`--help`" output is now multi-byte locale aware
  * cleanup: adjusted "`indent`" rules to line length of 120 and reformatted code
 
-### 1.7.18 - 28 July 2023 
+### 1.7.18 - 28 July 2023
 
  * fix: language file installation had been broken by the configuration script rewrite
 
