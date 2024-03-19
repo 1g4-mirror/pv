@@ -1,7 +1,7 @@
 /*
  * Functions used across the program.
  *
- * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
+ * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
@@ -49,15 +49,17 @@ typedef enum {
 extern double pv_getnum_interval(const char *);
 
 /*
- * Return the given string converted to an off_t, for use as a size.
+ * Return the given string converted to an off_t, for use as a size,
+ * optionally interpreting suffixes in decimal units (multiples of 1000)
+ * instead of multiples of 1024.
  */
-extern off_t pv_getnum_size(const char *);
+extern off_t pv_getnum_size(const char *, bool);
 
 /*
  * Return the given string converted to an unsigned integer, for use as a
  * count such as screen width.
  */
-extern unsigned int pv_getnum_count(const char *);
+extern unsigned int pv_getnum_count(const char *, bool);
 
 /*
  * Return true if the given string is a number of the given type.  NB an
@@ -164,7 +166,7 @@ extern void pv_state_wait_set(pvstate_t, bool);
 extern void pv_state_delay_start_set(pvstate_t, double);
 extern void pv_state_linemode_set(pvstate_t, bool);
 extern void pv_state_bits_set(pvstate_t, bool);
-extern void pv_state_si_set(pvstate_t, bool);
+extern void pv_state_decimal_units_set(pvstate_t, bool);
 extern void pv_state_null_terminated_lines_set(pvstate_t, bool);
 extern void pv_state_no_display_set(pvstate_t, bool);
 extern void pv_state_skip_errors_set(pvstate_t, unsigned int);

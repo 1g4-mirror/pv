@@ -121,6 +121,12 @@ that are explicitly switched on will be shown.
 :   Display the total bits instead of the total bytes. The output suffix
     will be \"b\" instead of \"B\".
 
+**-k, \--si**
+
+:   Display and interpret suffixes as multiples of 1000 rather than the
+    default of 1024. Note that this only takes effect on options after
+    this one, so for consistency, specify this option first.
+
 **-T, \--buffer-percent**
 
 :   Turn on the transfer buffer percentage display. This will show the
@@ -255,7 +261,9 @@ that are explicitly switched on will be shown.
 
 :   Limit the transfer to a maximum of *RATE* bytes per second. A suffix
     of \"K\", \"M\", \"G\", or \"T\" can be added to denote kibibytes
-    (\*1024), mebibytes, and so on.
+    (\*1024), mebibytes, and so on. If **\--si** was also passed,
+    suffixes will denote kilobytes (\*1000), megabytes, etc. Note the
+    caveat about the positioning of **\--si .**
 
 **-B BYTES, \--buffer-size BYTES**
 
@@ -535,7 +543,8 @@ Alternatively, use the issue tracker linked from the **pv** home page:
 
 # COPYRIGHT
 
-Copyright © 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood.
+Copyright © 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew
+Wood.
 
 License GPLv3+: GNU GPL version 3 or later
 \<https://www.gnu.org/licenses/gpl-3.0.html\>.

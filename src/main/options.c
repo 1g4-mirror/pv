@@ -1,7 +1,7 @@
 /*
  * Parse command-line options.
  *
- * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
+ * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
@@ -337,7 +337,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			numopts++;
 			break;
 		case 'k':
-			opts->si = true;
+			opts->decimal_units = true;
 			break;
 		case 'T':
 			opts->bufpercent = true;
@@ -345,7 +345,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->no_splice = true;
 			break;
 		case 'A':
-			opts->lastwritten = (size_t) pv_getnum_count(optarg);
+			opts->lastwritten = (size_t) pv_getnum_count(optarg, opts->decimal_units);
 			numopts++;
 			opts->no_splice = true;
 			break;
@@ -391,7 +391,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 					/*@+mustfreefresh@ */
 				}
 			} else {
-				opts->size = pv_getnum_size(optarg);
+				opts->size = pv_getnum_size(optarg, opts->decimal_units);
 			}
 			break;
 		case 'l':
@@ -405,11 +405,11 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->interval = pv_getnum_interval(optarg);
 			break;
 		case 'w':
-			opts->width = pv_getnum_count(optarg);
+			opts->width = pv_getnum_count(optarg, opts->decimal_units);
 			opts->width_set_manually = opts->width == 0 ? false : true;
 			break;
 		case 'H':
-			opts->height = pv_getnum_count(optarg);
+			opts->height = pv_getnum_count(optarg, opts->decimal_units);
 			opts->height_set_manually = opts->height == 0 ? false : true;
 			break;
 		case 'N':
@@ -421,10 +421,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'L':
-			opts->rate_limit = pv_getnum_size(optarg);
+			opts->rate_limit = pv_getnum_size(optarg, opts->decimal_units);
 			break;
 		case 'B':
-			opts->buffer_size = (size_t) pv_getnum_size(optarg);
+			opts->buffer_size = (size_t) pv_getnum_size(optarg, opts->decimal_units);
 			opts->no_splice = true;
 			break;
 		case 'C':
@@ -434,7 +434,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->skip_errors++;
 			break;
 		case 'Z':
-			opts->error_skip_block = pv_getnum_size(optarg);
+			opts->error_skip_block = pv_getnum_size(optarg, opts->decimal_units);
 			break;
 		case 'S':
 			opts->stop_at_size = true;
@@ -450,7 +450,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->no_splice = true;
 			break;
 		case 'R':
-			opts->remote = pv_getnum_count(optarg);
+			opts->remote = pv_getnum_count(optarg, false);
 			break;
 		case 'P':
 			opts->pidfile = pv_strdup(optarg);
@@ -477,7 +477,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->watch_fd = parse_fd;
 			break;
 		case 'm':
-			opts->average_rate_window = pv_getnum_count(optarg);
+			opts->average_rate_window = pv_getnum_count(optarg, opts->decimal_units);
 			break;
 #ifdef ENABLE_DEBUGGING
 		case '!':

@@ -1,7 +1,7 @@
 /*
  * Display functions.
  *
- * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
+ * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
@@ -836,7 +836,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		count_type = PV_TRANSFERCOUNT_BYTES;
 		if (state->control.linemode)
 			count_type = PV_TRANSFERCOUNT_LINES;
-		else if (state->control.si)
+		else if (state->control.decimal_units)
 			count_type = PV_TRANSFERCOUNT_DECBYTES;
 
 		switch (component_type) {

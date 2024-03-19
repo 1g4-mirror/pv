@@ -1,7 +1,7 @@
 /*
  * Global program option structure and the parsing function prototype.
  *
- * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
+ * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
@@ -34,7 +34,7 @@ struct opts_s {           /* structure describing run-time options */
 	bool average_rate;             /* average rate counter flag */
 	bool bytes;                    /* bytes transferred flag */
 	bool bits;                     /* report transfer size in bits */
-	bool si;                       /* decimal prefix flag */
+	bool decimal_units;            /* decimal prefix flag */
 	bool bufpercent;               /* transfer buffer percentage flag */
 	size_t lastwritten;            /* show N bytes last written */
 	bool force;                    /* force-if-not-terminal flag */

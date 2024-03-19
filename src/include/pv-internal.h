@@ -1,7 +1,7 @@
 /*
  * Functions internal to the PV library.  Include "config.h" first.
  *
- * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
+ * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
@@ -105,7 +105,7 @@ struct pvstate_s {
 		bool wait;                       /* wait for data before display */
 		bool linemode;                   /* count lines instead of bytes */
 		bool bits;			 /* report bits instead of bytes */
-		bool si;			 /* use decimal prefixes */
+		bool decimal_units;		 /* use decimal prefixes */
 		bool null_terminated_lines;      /* lines are null-terminated */
 		bool no_display;                 /* do nothing other than pipe data */
 		unsigned int skip_errors;        /* skip read errors counter */

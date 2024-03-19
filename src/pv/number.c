@@ -1,7 +1,7 @@
 /*
  * Functions for converting strings to numbers.
  *
- * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
+ * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
@@ -27,14 +27,16 @@ static bool pv__isdigit(char c)
  * Return the numeric value of "str", as an off_t, where "str" is expected
  * to be a sequence of digits (without a thousands separator), possibly with
  * a fractional part, optionally followed by a units suffix such as "K" for
- * kibibytes.
+ * kibibytes.  If "decimal_units" is true, suffixes are interpreted as
+ * multiples of 1000, rather than multiples of 1024.
  */
-off_t pv_getnum_size(const char *str)
+off_t pv_getnum_size(const char *str, bool decimal_units)
 {
 	off_t integral_part = 0;
 	off_t fractional_part = 0;
 	unsigned int fractional_divisor = 1;
-	unsigned int shift = 0;
+	unsigned int binary_shift = 0;
+	off_t decimal_multiplier = 0;
 
 	if (NULL == str)
 		return (off_t) 0;
@@ -74,7 +76,7 @@ off_t pv_getnum_size(const char *str)
 
 	/*
 	 * Parse any units given (K=KiB=*1024, M=MiB=1024KiB, G=GiB=1024MiB,
-	 * T=TiB=1024GiB).
+	 * T=TiB=1024GiB; replace 1024 with 1000 if decimal_units is true).
 	 */
 	if (str[0] != '\0') {
 		/* Skip any spaces or tabs after the digits. */
@@ -83,19 +85,23 @@ off_t pv_getnum_size(const char *str)
 		switch (str[0]) {
 		case 'k':
 		case 'K':
-			shift = 10;
+			binary_shift = 10;
+			decimal_multiplier = 1000;
 			break;
 		case 'm':
 		case 'M':
-			shift = 20;
+			binary_shift = 20;
+			decimal_multiplier = 1000000;
 			break;
 		case 'g':
 		case 'G':
-			shift = 30;
+			binary_shift = 30;
+			decimal_multiplier = 1000000000;
 			break;
 		case 't':
 		case 'T':
-			shift = 40;
+			binary_shift = 40;
+			decimal_multiplier = 1000000000000;
 			break;
 		default:
 			break;
@@ -103,14 +109,24 @@ off_t pv_getnum_size(const char *str)
 	}
 
 	/*
-	 * Binary left-shift the supplied number by "shift" times, i.e.
+	 * If decimal_units is false, zero decimal_multiplier; if true, zero
+	 * binary_shift.  This is so we only do one or the other.
+	 */
+	if (decimal_units) {
+		binary_shift = 0;
+	} else {
+		decimal_multiplier = 0;
+	}
+
+	/*
+	 * Binary left-shift the supplied number by "binary_shift" times, i.e.
 	 * apply the given units (KiB, MiB, etc) to it, but never shift left
 	 * more than 30 at a time to avoid overflows.
 	 */
-	while (shift > 0) {
+	while (binary_shift > 0) {
 		unsigned int shiftby;
 
-		shiftby = shift;
+		shiftby = binary_shift;
 		if (shiftby > 30)
 			shiftby = 30;
 
@@ -124,7 +140,15 @@ off_t pv_getnum_size(const char *str)
 		fractional_part = (off_t) (fractional_part << shiftby);
 		/*@+shiftimplementation@ */
 
-		shift -= shiftby;
+		binary_shift -= shiftby;
+	}
+
+	/*
+	 * Multiply the supplied number by the decimal multiplier.
+	 */
+	if (decimal_multiplier > 0) {
+		integral_part = integral_part * decimal_multiplier;
+		fractional_part = fractional_part * decimal_multiplier;
 	}
 
 	/*
@@ -183,9 +207,9 @@ double pv_getnum_interval(const char *str)
  * rules as pv_getnum_size(), expecting "str" to express a value to be used
  * as a count (such as number of screen columns, or size of a buffer).
  */
-unsigned int pv_getnum_count(const char *str)
+unsigned int pv_getnum_count(const char *str, bool decimal_units)
 {
-	return (unsigned int) pv_getnum_size(str);
+	return (unsigned int) pv_getnum_size(str, decimal_units);
 }
 
 

@@ -1,4 +1,4 @@
-.TH PV 1 "November 2023" Linux "User Manuals"
+.TH PV 1 "March 2024" Linux "User Manuals"
 .SH NAME
 pv \- monitor the progress of data through a pipe
 .SH SYNOPSIS
@@ -153,6 +153,11 @@ data transferred so far.
 .B \-8, \-\-bits
 Display the total bits instead of the total bytes.  The output suffix will
 be "b" instead of "B".
+.TP
+.B \-k, \-\-si
+Display and interpret suffixes as multiples of 1000 rather than the default
+of 1024.  Note that this only takes effect on options after this one, so for
+consistency, specify this option first.
 .TP
 .B \-T, \-\-buffer\-percent
 Turn on the transfer buffer percentage display.  This will show the
@@ -343,7 +348,11 @@ invocations in a single, long, pipeline.
 Limit the transfer to a maximum of
 .I RATE
 bytes per second.  A suffix of "K", "M", "G", or "T" can be added to denote
-kibibytes (*1024), mebibytes, and so on.
+kibibytes (*1024), mebibytes, and so on.  If
+.B \-\-si
+was also passed, suffixes will denote kilobytes (*1000), megabytes, etc. 
+Note the caveat about the positioning of
+.B \-\-si .
 .TP
 .BI \-B\  BYTES \fR,\ \fB\-\-buffer-size\  BYTES
 Use a transfer buffer size of
@@ -716,7 +725,7 @@ home page: <https://www.ivarch.com/programs/pv.shtml>
 .BR O_DIRECT )
 
 .SH COPYRIGHT
-Copyright \(co 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood.
+Copyright \(co 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood.
 
 License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl-3.0.html>.
 

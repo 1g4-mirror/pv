@@ -1,7 +1,7 @@
 /*
  * State management functions.
  *
- * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
+ * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
@@ -234,9 +234,9 @@ void pv_state_bits_set(pvstate_t state, bool bits)
 	state->control.bits = bits;
 }
 
-void pv_state_si_set(pvstate_t state, bool si)
+void pv_state_decimal_units_set(pvstate_t state, bool decimal_units)
 {
-	state->control.si = si;
+	state->control.decimal_units = decimal_units;
 }
 
 void pv_state_null_terminated_lines_set(pvstate_t state, bool val)

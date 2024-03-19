@@ -308,7 +308,7 @@ void display_help(void)
 		 N_("show number of bits transferred"),
 		 { 0, 0, 0, 0} },
 		{ "-k", "--si", NULL,
-		 N_("show sizes in powers of 1000 (e.g., 1.1G)"),
+		 N_("treat suffixes as multiples of 1000 rather than 1024"),
 		 { 0, 0, 0, 0} },
 		{ "-T", "--buffer-percent", NULL,
 		 N_("show percentage of transfer buffer in use"),

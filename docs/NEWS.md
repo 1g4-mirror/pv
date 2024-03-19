@@ -1,5 +1,6 @@
 ### NOT YET RELEASED
 
+ * feature: new "`--si`" option to display and interpret size suffixes in multiples of 1000 rather than 1024 (pull request [#85](https://codeberg.org/a-j-wood/pv/pulls/85)) supplied by [kevinruddy](https://codeberg.org/kevinruddy)
  * i18n: corrections and missing strings added to French translations (pull request [#83](https://codeberg.org/a-j-wood/pv/pulls/83)) supplied by [Thomas Bertels](https://codeberg.org/tbertels)
 
 ### 1.8.5 - 19 November 2023

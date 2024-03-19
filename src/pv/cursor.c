@@ -10,7 +10,7 @@
  * terminal, so we try to use a lockfile if terminal locking doesn't work,
  * and finally abort if even that is unavailable.
  *
- * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023 Andrew Wood
+ * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
@@ -293,7 +293,7 @@ static int pv_crs_get_ypos(int terminalfd)
 	}
 #endif				/* !CURSOR_ANSWERBACK_BYTE_BY_BYTE */
 
-	ypos = (int) pv_getnum_count(cpr + 2);
+	ypos = (int) pv_getnum_count(cpr + 2, false);
 
 	if (0 != tcsetattr(terminalfd, TCSANOW | TCSAFLUSH, &old_tty)) {
 		debug("%s: %s", "tcsetattr (2) failed", strerror(errno));
