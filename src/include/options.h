@@ -34,6 +34,7 @@ struct opts_s {           /* structure describing run-time options */
 	bool average_rate;             /* average rate counter flag */
 	bool bytes;                    /* bytes transferred flag */
 	bool bits;                     /* report transfer size in bits */
+	bool si;                       /* decimal prefix flag */
 	bool bufpercent;               /* transfer buffer percentage flag */
 	size_t lastwritten;            /* show N bytes last written */
 	bool force;                    /* force-if-not-terminal flag */

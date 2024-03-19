@@ -234,6 +234,11 @@ void pv_state_bits_set(pvstate_t state, bool bits)
 	state->control.bits = bits;
 }
 
+void pv_state_si_set(pvstate_t state, bool si)
+{
+	state->control.si = si;
+}
+
 void pv_state_null_terminated_lines_set(pvstate_t state, bool val)
 {
 	state->control.null_terminated_lines = val;

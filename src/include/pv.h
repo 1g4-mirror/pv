@@ -164,6 +164,7 @@ extern void pv_state_wait_set(pvstate_t, bool);
 extern void pv_state_delay_start_set(pvstate_t, double);
 extern void pv_state_linemode_set(pvstate_t, bool);
 extern void pv_state_bits_set(pvstate_t, bool);
+extern void pv_state_si_set(pvstate_t, bool);
 extern void pv_state_null_terminated_lines_set(pvstate_t, bool);
 extern void pv_state_no_display_set(pvstate_t, bool);
 extern void pv_state_skip_errors_set(pvstate_t, unsigned int);
