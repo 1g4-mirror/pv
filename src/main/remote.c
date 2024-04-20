@@ -87,7 +87,8 @@ static FILE *pv__control_file(char *filename, size_t bufsize, pid_t control_pid,
 		if ('\0' == home_dir[0])
 			return NULL;
 
-		/* flawfinder rationale: null and zero-size values are
+		/*
+		 * flawfinder rationale: null and zero-size values are
 		 * rejected, and the destination buffer is bounded.
 		 */
 
