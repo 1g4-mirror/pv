@@ -84,6 +84,12 @@ static FILE *pv__control_file(char *filename, size_t bufsize, pid_t control_pid,
 		home_dir = getenv("HOME");  /* flawfinder: ignore */
 		if (NULL == home_dir)
 			return NULL;
+		if ('\0' == home_dir[0])
+			return NULL;
+
+		/* flawfinder rationale: null and zero-size values are
+		 * rejected, and the destination buffer is bounded.
+		 */
 
 		(void) pv_snprintf(filename, bufsize, "%s/.pv/remote.%lu", home_dir, (unsigned long) control_pid);
 		control_fd = open(filename, open_flags, open_mode);	/* flawfinder: ignore */
