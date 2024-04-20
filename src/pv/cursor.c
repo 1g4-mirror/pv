@@ -95,14 +95,16 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 		return;
 	}
 
+	tmpdir = (char *) getenv("TMPDIR");		/* flawfinder: ignore */
+	if ((NULL == tmpdir) || ('\0' == tmpdir[0]))
+		tmpdir = (char *) getenv("TMP");	/* flawfinder: ignore */
+	if ((NULL == tmpdir) || ('\0' == tmpdir[0]))
+		tmpdir = "/tmp";
+
 	/*
-	 * We used to look at the TMPDIR or TMP environment variables to
-	 * override the temporary directory, but this leads to less
-	 * predictable behaviour, and flawfinder points out that relying on
-	 * environment variables in this way is not safe.  So the lock
-	 * directory is hard-coded to "/tmp" now (Sep 2023).
+	 * flawfinder rationale: null and zero-size values of $TMPDIR and
+	 * $TMP are rejected, and the destination buffer is bounded.
 	 */
-	tmpdir = "/tmp";
 
 	memset(state->cursor.lock_file, 0, PV_SIZEOF_CRS_LOCK_FILE);
 	(void) pv_snprintf(state->cursor.lock_file,
