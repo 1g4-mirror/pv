@@ -156,8 +156,8 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
 		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 		if (elapsed_seconds > TRANSFER_READ_TIMEOUT) {
-			debug("%s %d: %s (%lf %s)", "fd", fd,
-			      "stopping read - timer expired", elapsed_seconds, "sec elapsed");
+			debug("%s %d: %s (%f %s)", "fd", fd,
+			      "stopping read - timer expired", (double) elapsed_seconds, "sec elapsed");
 			return total_read;
 		}
 
@@ -259,8 +259,8 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
 		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 		if (elapsed_seconds > TRANSFER_WRITE_TIMEOUT) {
-			debug("%s %d: %s (%lf %s)", "fd", fd,
-			      "stopping write - timer expired", elapsed_seconds, "sec elapsed");
+			debug("%s %d: %s (%f %s)", "fd", fd,
+			      "stopping write - timer expired", (double) elapsed_seconds, "sec elapsed");
 			return total_written;
 		}
 
