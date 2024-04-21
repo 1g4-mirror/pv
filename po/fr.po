@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2023-11-19 14:19+0000\n"
+"POT-Creation-Date: 2024-04-21 14:15+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -44,13 +44,14 @@ msgstr "afficher le taux de tranfert des données"
 msgid "show data transfer average rate counter"
 msgstr "afficher le compteur de taux moyen de transfert de données"
 
-#: src/main/help.c:301 src/main/help.c:329 src/main/help.c:341
+#: src/main/help.c:301 src/main/help.c:332 src/main/help.c:344
 msgid "SEC"
 msgstr "SEC"
 
 #: src/main/help.c:302
 msgid "compute average rate over past SEC seconds (default 30s)"
-msgstr "calculer le taux moyen d'après les SEC dernières secondes (30s par défaut)"
+msgstr ""
+"calculer le taux moyen d'après les SEC dernières secondes (30s par défaut)"
 
 #: src/main/help.c:305
 msgid "show number of bytes transferred"
@@ -61,186 +62,191 @@ msgid "show number of bits transferred"
 msgstr "afficher le nombre de bits transférés"
 
 #: src/main/help.c:311
+msgid "treat suffixes as multiples of 1000 rather than 1024"
+msgstr ""
+
+#: src/main/help.c:314
 msgid "show percentage of transfer buffer in use"
 msgstr "afficher le pourcentage de tampon de transfert utilisé"
 
-#: src/main/help.c:313
+#: src/main/help.c:316
 msgid "NUM"
 msgstr "NUM"
 
-#: src/main/help.c:314
+#: src/main/help.c:317
 msgid "show NUM bytes last written"
 msgstr "afficher les derniers NUM octets écrits"
 
-#: src/main/help.c:316
+#: src/main/help.c:319
 msgid "FORMAT"
 msgstr "FORMAT"
 
-#: src/main/help.c:317
+#: src/main/help.c:320
 msgid "set output format to FORMAT"
 msgstr "définir le format de sortie sur FORMAT"
 
-#: src/main/help.c:320
+#: src/main/help.c:323
 msgid "output percentages, not visual information"
 msgstr "imprimer en pourcentage plutôt que des informations visuelles"
 
-#: src/main/help.c:323
+#: src/main/help.c:326
 msgid "do not output any transfer information at all"
 msgstr "n'afficher aucune information de transfert"
 
-#: src/main/help.c:327
+#: src/main/help.c:330
 msgid "display nothing until first byte transferred"
 msgstr "ne rien afficher avant qu'au moins un octet soit tranféré"
 
-#: src/main/help.c:330
+#: src/main/help.c:333
 msgid "display nothing until SEC seconds have passed"
 msgstr "ne rien afficher jusqu'à ce que SEC secondes se soient écoulées"
 
-#: src/main/help.c:332
+#: src/main/help.c:335
 msgid "SIZE"
 msgstr "TAILLE"
 
-#: src/main/help.c:333
+#: src/main/help.c:336
 msgid "set estimated data size to SIZE bytes"
 msgstr "ajuster la taille estimée des données à TAILLE octets"
 
-#: src/main/help.c:336
+#: src/main/help.c:339
 msgid "count lines instead of bytes"
 msgstr "compter les lignes au lieu des octets"
 
-#: src/main/help.c:339
+#: src/main/help.c:342
 msgid "lines are null-terminated"
 msgstr "les lignes sont terminées par un caractère nul"
 
-#: src/main/help.c:342
+#: src/main/help.c:345
 msgid "update every SEC seconds"
 msgstr "mettre à jour toutes les SEC secondes"
 
-#: src/main/help.c:344
+#: src/main/help.c:347
 msgid "WIDTH"
 msgstr "LARGEUR"
 
-#: src/main/help.c:345
+#: src/main/help.c:348
 msgid "assume terminal is WIDTH characters wide"
 msgstr "présumer la largeur du terminal à LARGEUR caractères"
 
-#: src/main/help.c:347
+#: src/main/help.c:350
 msgid "HEIGHT"
 msgstr "HAUTEUR"
 
-#: src/main/help.c:348
+#: src/main/help.c:351
 msgid "assume terminal is HEIGHT rows high"
 msgstr "présumer la hauteur du terminal à HAUTEUR lignes"
 
-#: src/main/help.c:350
+#: src/main/help.c:353
 msgid "NAME"
 msgstr "NOM"
 
-#: src/main/help.c:351
+#: src/main/help.c:354
 msgid "prefix visual information with NAME"
 msgstr "préfixer les informations visuelles avec NOM"
 
-#: src/main/help.c:354
-msgid "output even if standard error is not a terminal"
-msgstr "imprimer vers la sortie d'erreur standard même si ce n'est pas un terminal"
-
 #: src/main/help.c:357
+msgid "output even if standard error is not a terminal"
+msgstr ""
+"imprimer vers la sortie d'erreur standard même si ce n'est pas un terminal"
+
+#: src/main/help.c:360
 msgid "use cursor positioning escape sequences"
 msgstr "utiliser les séquences d'échappements de positionnement de curseur"
 
-#: src/main/help.c:360
+#: src/main/help.c:363
 msgid "RATE"
 msgstr "TAUX"
 
-#: src/main/help.c:361
+#: src/main/help.c:364
 msgid "limit transfer to RATE bytes per second"
 msgstr "limite le taux de transfert à TAUX octets par seconde"
 
-#: src/main/help.c:363 src/main/help.c:372
+#: src/main/help.c:366 src/main/help.c:375
 msgid "BYTES"
 msgstr "OCTETS"
 
-#: src/main/help.c:364
+#: src/main/help.c:367
 msgid "use a buffer size of BYTES"
 msgstr "Utiliser une mémoire tampon de OCTETS octets"
 
-#: src/main/help.c:367
+#: src/main/help.c:370
 msgid "never use splice(), always use read/write"
 msgstr "ne jamais utiliser splice(), toujours utiliser read/write"
 
-#: src/main/help.c:370
+#: src/main/help.c:373
 msgid "skip read errors in input"
 msgstr "ignorer les erreurs de lecture dans l'entrée"
 
-#: src/main/help.c:373
+#: src/main/help.c:376
 msgid "skip errors in BYTES blocks at a time"
 msgstr "ignorer les erreurs dans OCTETS blocs à la fois"
 
-#: src/main/help.c:376
+#: src/main/help.c:379
 msgid "stop after --size bytes have been transferred"
 msgstr "arrêter après le transfert de --size octets"
 
-#: src/main/help.c:379
+#: src/main/help.c:382
 msgid "flush cache to disk after every write"
 msgstr "vider le cache sur le disque après chaque écriture"
 
-#: src/main/help.c:382
+#: src/main/help.c:385
 msgid "use direct I/O to bypass cache"
 msgstr "utiliser les E/S directes pour contourner le cache"
 
-#: src/main/help.c:385
+#: src/main/help.c:388
 msgid "discard input instead of writing to output"
 msgstr "rejeter l'entrée au lieu de l'écrire vers la sortie"
 
-#: src/main/help.c:388
+#: src/main/help.c:391
 msgid "PID"
 msgstr "PID"
 
-#: src/main/help.c:389
+#: src/main/help.c:392
 msgid "update settings of process PID"
 msgstr "mettre à jour la configuration du processus PID"
 
-#: src/main/help.c:393 src/main/help.c:408
+#: src/main/help.c:396 src/main/help.c:411
 msgid "FILE"
 msgstr "FICHIER"
 
-#: src/main/help.c:394
+#: src/main/help.c:397
 msgid "save process ID in FILE"
 msgstr "enregistrer l'ID de processus dans FICHIER"
 
-#: src/main/help.c:397
+#: src/main/help.c:400
 msgid "PID[:FD]"
 msgstr "PID[:FD]"
 
-#: src/main/help.c:398
+#: src/main/help.c:401
 msgid "watch file FD opened by process PID"
 msgstr "surveiller le fichier FD ouvert par le processus PID"
 
-#: src/main/help.c:402
+#: src/main/help.c:405
 msgid "show this help and exit"
 msgstr "afficher cette aide puis quitter"
 
-#: src/main/help.c:405
+#: src/main/help.c:408
 msgid "show version information and exit"
 msgstr "afficher la version puis quitter"
 
-#: src/main/help.c:409
+#: src/main/help.c:412
 msgid "write debug logs to FILE"
 msgstr "écrire les journaux de déboggage vers FICHIER"
 
-#: src/main/help.c:434
+#: src/main/help.c:437
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Utilisation : %s [OPTIONS] [FICHIER]..."
 
-#: src/main/help.c:445
+#: src/main/help.c:448
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Concaténer FICHIER(s), ou l'entrée standard, sur la sortie standard avec "
 "monitorage."
 
-#: src/main/help.c:582
+#: src/main/help.c:585
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "SVP rapporter tous bogues à %s"
@@ -249,45 +255,45 @@ msgstr "SVP rapporter tous bogues à %s"
 msgid "state allocation failed"
 msgstr "échec de l'allocation de mémoire de condition"
 
-#: src/main/options.c:173
+#: src/main/options.c:174
 msgid "option structure allocation failed"
 msgstr "l'allocation pour la structure d'une option a échoué"
 
-#: src/main/options.c:192
+#: src/main/options.c:193
 msgid "option structure argv allocation failed"
 msgstr "l'allocation pour la structure de l'option argv a échoué"
 
-#: src/main/options.c:254
+#: src/main/options.c:255
 msgid "integer argument expected"
 msgstr "Valeur entière attendue"
 
-#: src/main/options.c:265
+#: src/main/options.c:266
 msgid "numeric argument expected"
 msgstr "Valeur numérique attendue"
 
-#: src/main/options.c:276
+#: src/main/options.c:277
 msgid "process ID or pid:fd pair expected"
 msgstr "ID de processus ou paire pid:fd attendue"
 
-#: src/main/options.c:283
+#: src/main/options.c:284
 msgid "invalid process ID"
 msgstr "ID de processus non valide"
 
-#: src/main/options.c:384 src/pv/file.c:323
+#: src/main/options.c:388 src/pv/file.c:323
 msgid "failed to stat file"
 msgstr "échec à statuer sur le fichier"
 
-#: src/main/options.c:487
+#: src/main/options.c:491
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Essayez `%s --help' pour plus d'informations."
 
-#: src/main/options.c:489
+#: src/main/options.c:493
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Essayez `%s -h' pour plus d'informations."
 
-#: src/main/options.c:520
+#: src/main/options.c:524
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -295,33 +301,33 @@ msgstr ""
 "impossible d'utiliser le mode ligne ou les options de modificateur de "
 "transfert lors de la visualisation des descripteurs de fichiers"
 
-#: src/main/options.c:529
+#: src/main/options.c:533
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "impossible d'utiliser le positionnement du curseur lors de la visualisation "
 "des descripteurs de fichier"
 
-#: src/main/options.c:538
+#: src/main/options.c:542
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "impossible d'utiliser la télécommande lors de la visualisation des "
 "descripteurs de fichiers"
 
-#: src/main/options.c:547
+#: src/main/options.c:551
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "impossible de transférer des fichiers lorsque vous regardez des descripteurs "
 "de fichiers"
 
-#: src/main/options.c:562
+#: src/main/options.c:566
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "non disponible sur les systèmes sans /proc/self/fdinfo"
 
-#: src/main/remote.c:295
+#: src/main/remote.c:302
 msgid "message not received"
 msgstr "message non reçu"
 
-#: src/main/remote.c:422
+#: src/main/remote.c:429
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO non pris en charge sur ce système"
 
@@ -331,8 +337,9 @@ msgstr "License : GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
 
 #: src/main/version.c:29
 msgid "This is free software: you are free to change and redistribute it."
-msgstr "Ceci est un logiciel libre : vous êtes libre de le modifier et de "
-"le redistribuer."
+msgstr ""
+"Ceci est un logiciel libre : vous êtes libre de le modifier et de le "
+"redistribuer."
 
 #: src/main/version.c:30
 msgid "There is NO WARRANTY, to the extent permitted by law."
@@ -346,51 +353,51 @@ msgstr "Site web du projet"
 msgid "failed to get terminal name"
 msgstr "échec de lecture du nom du terminal"
 
-#: src/pv/cursor.c:130
+#: src/pv/cursor.c:132
 msgid "failed to open lock file"
 msgstr "échec de l'ouverture du fichier de verrouillage"
 
-#: src/pv/cursor.c:163
+#: src/pv/cursor.c:165
 msgid "lock attempt failed"
 msgstr "échec de la tentative de verrouillage"
 
-#: src/pv/cursor.c:424
+#: src/pv/cursor.c:426
 msgid "failed to open terminal"
 msgstr "échec de l'ouverture du terminal"
 
-#: src/pv/display.c:192
+#: src/pv/display.c:193
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:210
+#: src/pv/display.c:211
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:746 src/pv/transfer.c:910
+#: src/pv/display.c:750 src/pv/transfer.c:954
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 
-#: src/pv/display.c:845
+#: src/pv/display.c:856
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:848 src/pv/transfer.c:595
+#: src/pv/display.c:859 src/pv/transfer.c:596
 msgid "B"
 msgstr "O"
 
-#: src/pv/display.c:890 src/pv/display.c:907
+#: src/pv/display.c:900 src/pv/display.c:916
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:895 src/pv/display.c:912
+#: src/pv/display.c:905 src/pv/display.c:920
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:895 src/pv/display.c:912
+#: src/pv/display.c:905 src/pv/display.c:920
 msgid "B/s"
 msgstr "O/s"
 
-#: src/pv/display.c:940 src/pv/display.c:944 src/pv/display.c:1010
+#: src/pv/display.c:947 src/pv/display.c:951 src/pv/display.c:1017
 msgid "ETA"
 msgstr "ETA"
 
@@ -434,43 +441,47 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr "l'allocation de la structure de l'historique a échoué"
 
-#: src/pv/state.c:386 src/pv/state.c:397
+#: src/pv/state.c:391 src/pv/state.c:402
 msgid "file list allocation failed"
 msgstr "échec de l'allocation de la liste de fichiers"
 
-#: src/pv/transfer.c:457
+#: src/pv/transfer.c:458
 msgid "read failed"
 msgstr "la lecture a échoué"
 
-#: src/pv/transfer.c:480
+#: src/pv/transfer.c:481
 msgid "warning: read errors detected"
 msgstr "avertissement : erreurs de lecture détectées"
 
-#: src/pv/transfer.c:496
+#: src/pv/transfer.c:497
 msgid "file is not seekable"
 msgstr "ne peut pas se déplacer dans le fichier"
 
-#: src/pv/transfer.c:574
+#: src/pv/transfer.c:575
 msgid "failed to seek past error"
 msgstr "n'a pas réussi à dépasser l'erreur"
 
-#: src/pv/transfer.c:594
+#: src/pv/transfer.c:595
 msgid "skipped past read error"
 msgstr "erreur de lecture dépassée"
 
-#: src/pv/transfer.c:634
+#: src/pv/transfer.c:635
 msgid "no transfer buffer allocated"
 msgstr "aucun tampon de transfert alloué"
 
-#: src/pv/transfer.c:647
-msgid "failed to set alarm signal handler"
-msgstr "échec de la définition du gestionnaire de signal d'alarme"
+#: src/pv/transfer.c:676
+msgid "failed to set interval timer"
+msgstr ""
 
-#: src/pv/transfer.c:774
+#: src/pv/transfer.c:694
+msgid "failed to clear interval timer"
+msgstr ""
+
+#: src/pv/transfer.c:818
 msgid "write failed"
 msgstr "l'écriture a échoué"
 
-#: src/pv/transfer.c:1007
+#: src/pv/transfer.c:1051
 msgid "select call failed"
 msgstr "l'appel de sélection a échoué"
 
@@ -482,3 +493,6 @@ msgstr ""
 #: src/pv/watchpid.c:130 src/pv/watchpid.c:204
 msgid "not a regular file or block device"
 msgstr "pas un fichier ordinaire ou un périphérique de bloc"
+
+#~ msgid "failed to set alarm signal handler"
+#~ msgstr "échec de la définition du gestionnaire de signal d'alarme"
