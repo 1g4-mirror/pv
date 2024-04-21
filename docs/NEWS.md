@@ -1,6 +1,7 @@
 ### NOT YET RELEASED
 
  * feature: new "`--si`" option to display and interpret size suffixes in multiples of 1000 rather than 1024 (pull request [#85](https://codeberg.org/a-j-wood/pv/pulls/85)) supplied by [kevinruddy](https://codeberg.org/kevinruddy)
+ * fix: continue producing progress output when the output is blocking writes ([#34](https://codeberg.org/a-j-wood/pv/issues/34), [#86](https://codeberg.org/a-j-wood/pv/issues/86), [#87](https://codeberg.org/a-j-wood/pv/issues/87))
  * fix: honour the _TMPDIR_ / _TMP_ environment variables again, rather than hard-coding "`/tmp`", when using a terminal lock file (originally removed in 1.8.0) ([#88](https://codeberg.org/a-j-wood/pv/issues/88))
  * i18n: corrections and missing strings added to French translations (pull request [#83](https://codeberg.org/a-j-wood/pv/pulls/83)) supplied by [Thomas Bertels](https://codeberg.org/tbertels)
 

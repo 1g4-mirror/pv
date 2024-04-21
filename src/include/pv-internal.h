@@ -157,6 +157,7 @@ struct pvstate_s {
 #ifdef SA_SIGINFO
 		struct sigaction old_sigusr2;
 #endif
+		struct sigaction old_sigalrm;
 	} signal;
 
 	/*******************

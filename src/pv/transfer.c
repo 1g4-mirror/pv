@@ -231,8 +231,8 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
 			if ((EINTR == errno) || (EAGAIN == errno)) {
 				/*
 				 * Interrupted by a signal - probably our
-				 * alarm() - so just return what we've
-				 * written so far.
+				 * alarm or interval timer - so just return
+				 * what we've written so far.
 				 */
 				return total_written;
 			} else {
@@ -267,8 +267,9 @@ static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool
 		/*
 		 * Running the select() here seems to make PV eat a lot of
 		 * CPU in some cases, so instead we just go round the loop
-		 * again and rely on our alarm() to interrupt us if we run
-		 * out of time - also on our elapsed time check.
+		 * again and rely on our alarm or interval timer to
+		 * interrupt us if we run out of time - also on our elapsed
+		 * time check.
 		 */
 		if (count > 0) {
 			debug("%s %d: %s (%ld %s, %ld %s)", "fd", fd,
@@ -643,17 +644,60 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	if (state->control.discard_input) {
 		nwritten = state->transfer.to_write;
 	} else if (state->transfer.to_write > 0) {
-		if (signal(SIGALRM, SIG_IGN) == SIG_ERR) {
-			pv_error(state, "%s: %s", _("failed to set alarm signal handler"), strerror(errno));
-		} else {
-			(void) alarm(1);
+
+		/*
+		 * Set an interval timer or an alarm to interrupt the write
+		 * with a signal if the write takes too long, so we can
+		 * continue producing progress information.
+		 */
+#if HAVE_SETITIMER
+		struct itimerval new_timer;
+
+		/*@-unrecog@ */
+		/* splint doesn't know setitimer or ITIMER_REAL */
+		memset(&new_timer, 0, sizeof(new_timer));
+		new_timer.it_value.tv_sec = (time_t) (state->control.interval);
+		new_timer.it_value.tv_usec = (suseconds_t) (((long) (state->control.interval * 1000000.0)) % 1000000);
+
+		/*
+		 * We have to set the interval so that the timer continues
+		 * to repeat while writes are attempted, especially as it's
+		 * possible that the initial timer run will expire
+		 * immediately if the period is less than 1 second.
+		 */
+
+		new_timer.it_interval.tv_sec = new_timer.it_value.tv_sec;
+		new_timer.it_interval.tv_usec = new_timer.it_value.tv_usec;
+
+		debug("%s: [%lds,%ldus]", "setting interval timer", (long) (new_timer.it_value.tv_sec),
+		      (long) (new_timer.it_value.tv_usec));
+
+		if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
+			pv_error(state, "%s: %s", _("failed to set interval timer"), strerror(errno));
 		}
+
+#else				/* ! HAVE_SETITIMER */
+		(void) alarm(1);
+#endif				/* HAVE_SETITIMER */
 		nwritten = pv__transfer_write_repeated(STDOUT_FILENO,
 						       state->transfer.transfer_buffer +
 						       state->transfer.write_position,
 						       (size_t) (state->transfer.to_write),
 						       state->control.sync_after_write);
+#if HAVE_SETITIMER
+		memset(&new_timer, 0, sizeof(new_timer));
+		new_timer.it_interval.tv_sec = 0;
+		new_timer.it_interval.tv_usec = 0;
+		new_timer.it_value.tv_sec = 0;
+		new_timer.it_value.tv_usec = 0;
+		if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
+			pv_error(state, "%s: %s", _("failed to clear interval timer"), strerror(errno));
+		}
+
+		/*@+unrecog@ */
+#else				/* ! HAVE_SETITIMER */
 		(void) alarm(0);
+#endif				/* HAVE_SETITIMER */
 	}
 
 	if (0 == nwritten) {

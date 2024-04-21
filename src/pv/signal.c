@@ -245,6 +245,22 @@ bool pv_sigusr2_received(pvstate_t state, pid_t * pid)
 
 
 /*
+ * Handle alarm signals by doing nothing.
+ *
+ * Note that we have to use a signal handler like this, instead of using
+ * SIG_IGN, because if we ignore the signal entirely, it does nothing,
+ * including not interrupting blocking write() calls - which is what we're
+ * using alarm signals for in the first place.
+ */
+static void pv_sig_alrm( /*@unused@ */  __attribute__((unused))
+			int s)
+{
+	debug("%s", "SIGALRM received");
+	/* Do nothing. */
+}
+
+
+/*
  * Initialise signal handling.
  */
 void pv_sig_init(pvstate_t state)
@@ -360,6 +376,15 @@ void pv_sig_init(pvstate_t state)
 	 * while backgrounded (see the SIGTTOU handler above).
 	 */
 	pv_sig_ensure_tty_tostop();
+
+	/*
+	 * Handle SIGALRM by doing nothing, so we can use alarms or interval
+	 * timers to interrupt blocking writes (returning EINTR).
+	 */
+	sa.sa_handler = pv_sig_alrm;
+	(void) sigemptyset(&(sa.sa_mask));
+	sa.sa_flags = 0;
+	(void) sigaction(SIGALRM, &sa, &(pv_sig_state->signal.old_sigalrm));
 }
 
 
@@ -389,6 +414,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 #ifdef SA_SIGINFO
 	(void) sigaction(SIGUSR2, &(pv_sig_state->signal.old_sigusr2), NULL);
 #endif
+	(void) sigaction(SIGALRM, &(pv_sig_state->signal.old_sigalrm), NULL);
 
 	need_to_clear_tostop = pv_sig_state->signal.pv_tty_tostop_added;
 
