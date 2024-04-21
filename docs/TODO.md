@@ -2,7 +2,6 @@ Things still to do.  (#n) indicates the issue tracker number.
 
  * ([#3](https://codeberg.org/a-j-wood/pv/issues/3)) Option ("`-x`"?) to use xterm title line for status (Joachim Haga)
  * ([#4](https://codeberg.org/a-j-wood/pv/issues/4)) Option for process title (Martin Sarsale) as "`pv - name:FooProcess -xyz - transferred: 1.3GB - 500KB/s - running: 10:15:30s`"
- * ([#6](https://codeberg.org/a-j-wood/pv/issues/6)) Look at effect of *O_SYNC* or `fsync` on performance; update counters during buffer flush
  * ([#9](https://codeberg.org/a-j-wood/pv/issues/9)) Option to switch rate to per minute if really slow
  * ([#10](https://codeberg.org/a-j-wood/pv/issues/10)) Add watchfd tests
  * ([#11](https://codeberg.org/a-j-wood/pv/issues/11)) Option "`--progress-from FILE`", read last number and use it as bytes read (Jacek Wielemborek)
