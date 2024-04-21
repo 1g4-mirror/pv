@@ -34,10 +34,10 @@ the expected size to **pv**:
 A more complicated example using numeric output to feed into the
 **dialog**(1) program for a full-screen progress display:
 
-> ** (tar cf - . \\ ** \
-> ** \| pv -n -s \$(du -sb . \| awk \'{print \$1}\') \\ ** \
-> ** \| gzip -9 \> out.tgz) 2\>&1 \\ ** \
-> ** \| dialog \--gauge \'Progress\' 7 70**
+> **(tar cf - . \\** \
+> **\| pv -n -s \$(du -sb . \| awk \'{print \$1}\') \\** \
+> **\| gzip -9 \> out.tgz) 2\>&1 \\** \
+> **\| dialog \--gauge \'Progress\' 7 70**
 
 Taking an image of a disk, skipping errors:
 
