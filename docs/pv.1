@@ -1,4 +1,4 @@
-.TH PV 1 "March 2024" Linux "User Manuals"
+.TH PV 1 "April 2024" Linux "User Manuals"
 .SH NAME
 pv \- monitor the progress of data through a pipe
 .SH SYNOPSIS
@@ -661,6 +661,40 @@ Memory allocation failed.
 
 .P
 A zero exit status indicates no problems.
+
+
+.SH ENVIRONMENT
+The following environment variables may affect
+.BR pv :
+
+.TP
+.B HOME
+The current user's home directory.  This may be used by the remote control
+mechanism
+(the
+.B \-\-remote
+option)
+to exchange messages between
+.B pv
+instances: if the
+.I /run/user/UID/
+directory does not exist (where
+.I UID
+is the current user ID), then
+.I $HOME/.pv/
+will be used instead.
+.TP
+.BR TMPDIR ", " TMP
+The directory to create per-tty lock files for the terminal when using the
+.B \-\-cursor
+option.  If
+.B TMPDIR
+is set to a non-empty value, it is the directory under which lock files are
+created.  Otherwise, if
+.B TMP
+is set, then it is used; and if neither are set, then
+.I /tmp
+is used.
 
 
 .SH AUTHOR

@@ -504,6 +504,26 @@ Any other exit status is a bitmask of the following:
 
 A zero exit status indicates no problems.
 
+# ENVIRONMENT
+
+The following environment variables may affect **pv**:
+
+**HOME**
+
+:   The current user\'s home directory. This may be used by the remote
+    control mechanism (the **\--remote** option) to exchange messages
+    between **pv** instances: if the */run/user/UID/* directory does not
+    exist (where *UID* is the current user ID), then *\$HOME/.pv/* will
+    be used instead.
+
+**TMPDIR**, **TMP**
+
+:   The directory to create per-tty lock files for the terminal when
+    using the **\--cursor** option. If **TMPDIR** is set to a non-empty
+    value, it is the directory under which lock files are created.
+    Otherwise, if **TMP** is set, then it is used; and if neither are
+    set, then */tmp* is used.
+
 # AUTHOR
 
 Written by Andrew Wood, with patches submitted by various other people.
