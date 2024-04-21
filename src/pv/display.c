@@ -917,8 +917,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			} else {
 				/* bytes or lines per second */
 				pv__sizestr(component_content,
-					    component_buf_size,
-					    "[%s]", average_rate, _("/s"), _("B/s"), count_type);
+					    component_buf_size, "[%s]", average_rate, _("/s"), _("B/s"), count_type);
 			}
 			/*@+mustfreefresh @ *//* splint: see above. */
 			break;

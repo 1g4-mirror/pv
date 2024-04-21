@@ -95,7 +95,7 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 		return;
 	}
 
-	tmpdir = (char *) getenv("TMPDIR");		/* flawfinder: ignore */
+	tmpdir = (char *) getenv("TMPDIR"); /* flawfinder: ignore */
 	if ((NULL == tmpdir) || ('\0' == tmpdir[0]))
 		tmpdir = (char *) getenv("TMP");	/* flawfinder: ignore */
 	if ((NULL == tmpdir) || ('\0' == tmpdir[0]))
