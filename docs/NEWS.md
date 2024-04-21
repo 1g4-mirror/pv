@@ -1,4 +1,4 @@
-### NOT YET RELEASED
+### 1.8.9 - 21 April 2024
 
  * feature: new "`--si`" option to display and interpret size suffixes in multiples of 1000 rather than 1024 (pull request [#85](https://codeberg.org/a-j-wood/pv/pulls/85)) supplied by [kevinruddy](https://codeberg.org/kevinruddy)
  * fix: continue producing progress output when the output is blocking writes ([#34](https://codeberg.org/a-j-wood/pv/issues/34), [#86](https://codeberg.org/a-j-wood/pv/issues/86), [#87](https://codeberg.org/a-j-wood/pv/issues/87))
