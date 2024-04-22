@@ -119,6 +119,7 @@ The package maintainer should run through these steps for a new release:
    * Check that `docs/TODO.md` is up to date
    * Check that the manual `docs/pv.1` is up to date
    * Run "`make docs/pv.1.md`" and, if using VPATH, copy the result to the source directory
+   * Check that the year displayed by src/main/version.c is correct
  * Ensure everything has been committed to the repository
  * Run "`autoreconf`" in the source directory
  * Consistency and build checks:

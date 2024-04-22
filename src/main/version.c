@@ -23,7 +23,7 @@ void display_version(void)
 	/* GNU standard first line format: program and version only */
 	printf("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
 	/* GNU standard second line format - "Copyright" always in English */
-	printf("Copyright %s %s\n", "2023", "Andrew Wood");
+	printf("Copyright %s %s\n", "2024", "Andrew Wood");
 	/* GNU standard license line and free software notice */
 	printf("%s\n", _("License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"));
 	printf("%s\n", _("This is free software: you are free to change and redistribute it."));
