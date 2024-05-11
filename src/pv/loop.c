@@ -192,6 +192,7 @@ int pv_main_loop(pvstate_t state)
 				&& (0 == state->control.rate_limit))) {
 				cansend = state->control.size - total_written;
 				if (0 >= cansend) {
+					debug("%s", "write limit reached (size explicitly set) - setting EOF flags");
 					eof_in = true;
 					eof_out = true;
 				}
@@ -207,6 +208,7 @@ int pv_main_loop(pvstate_t state)
 
 		/* End on write error. */
 		if (written < 0) {
+			debug("%s: %s", "write error from pv_transfer", strerror(errno));
 			if (state->control.cursor)
 				pv_crs_fini(state);
 			return state->status.exit_status;
@@ -343,6 +345,9 @@ int pv_main_loop(pvstate_t state)
 
 		transferred_since_last = 0;
 	}
+
+	debug("%s: %s=%s, %s=%s", "loop ended", "eof_in", eof_in ? "true" : "false", "eof_out",
+	      eof_out ? "true" : "false");
 
 	if (state->control.cursor) {
 		pv_crs_fini(state);

@@ -678,12 +678,15 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 
 #else				/* ! HAVE_SETITIMER */
 		(void) alarm(1);
+		debug("%s", "setting alarm");
 #endif				/* HAVE_SETITIMER */
+		debug("%s: %ld %s", "beginning write attempt", (long) (state->transfer.to_write), "bytes");
 		nwritten = pv__transfer_write_repeated(STDOUT_FILENO,
 						       state->transfer.transfer_buffer +
 						       state->transfer.write_position,
 						       (size_t) (state->transfer.to_write),
 						       state->control.sync_after_write);
+		debug("%s: %ld", "bytes written", (long) nwritten);
 #if HAVE_SETITIMER
 		memset(&new_timer, 0, sizeof(new_timer));
 		new_timer.it_interval.tv_sec = 0;
@@ -696,6 +699,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 
 		/*@+unrecog@ */
 #else				/* ! HAVE_SETITIMER */
+		debug("%s", "cancelling alarm");
 		(void) alarm(0);
 #endif				/* HAVE_SETITIMER */
 	}
