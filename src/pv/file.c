@@ -144,7 +144,8 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 				total = end_position;
 			}
 			if (lseek(state->control.output_fd, 0, SEEK_SET) != 0) {
-				pv_error(state, "%s: %s: %s", state->control.output_name,
+				pv_error(state, "%s: %s: %s",
+					 NULL == state->control.output_name ? "(null)" : state->control.output_name,
 					 _("failed to seek to start of output"), strerror(errno));
 				state->status.exit_status |= 2;
 			}

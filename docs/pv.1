@@ -347,7 +347,8 @@ invocations in a single, long, pipeline.
 .BI \-o\  FILE \fR,\ \fB\-\-output\  FILE
 Write data to
 .I FILE
-rather than stdout.
+rather than standard output.  If the file already exists, it will be
+overwritten from the start, but not truncated.
 .TP
 .BI \-L\  RATE \fR,\ \fB\-\-rate-limit\  RATE
 Limit the transfer to a maximum of

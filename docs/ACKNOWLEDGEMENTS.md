@@ -91,5 +91,6 @@ is acknowledged and greatly appreciated:
  * [gustav-b](https://codeberg.org/gustav-b) - suggested percentage formatting correction ([#80](https://codeberg.org/a-j-wood/pv/issues/80))
  * [Thomas Bertels](https://codeberg.org/tbertels) - updated French translations ([#83](https://codeberg.org/a-j-wood/pv/pulls/83))
  * [kevinruddy](https://codeberg.org/kevinruddy) - added decimal units option ([#85](https://codeberg.org/a-j-wood/pv/pulls/85))
+ * [xmort](https://codeberg.org/xmort) - added "`--output`" option ([#90](https://codeberg.org/a-j-wood/pv/pulls/90))
 
 ---

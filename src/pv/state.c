@@ -107,6 +107,26 @@ void pv_state_free(pvstate_t state)
 	if (0 == state)
 		return;
 
+	/*
+	 * Close the output file first, so we can report any errors while we
+	 * still know the program name and output filename.
+	 */
+	if (state->control.output_fd >= 0) {
+		if (STDOUT_FILENO != state->control.output_fd) {
+			if (close(state->control.output_fd) < 0) {
+				fprintf(stderr, "%s: %s: %s\n", state->status.program_name,
+					NULL == state->control.output_name ? "(null)" : state->control.output_name,
+					strerror(errno));
+			}
+		}
+		state->control.output_fd = -1;
+	}
+
+	if (NULL != state->control.output_name) {
+		free(state->control.output_name);
+		state->control.output_name = NULL;
+	}
+
 	if (NULL != state->status.program_name)
 		free(state->status.program_name);
 	state->status.program_name = NULL;
@@ -123,23 +143,6 @@ void pv_state_free(pvstate_t state)
 	if (NULL != state->control.format_string) {
 		free(state->control.format_string);
 		state->control.format_string = NULL;
-	}
-
-	if (NULL != state->control.output_name) {
-		free(state->control.output_name);
-		state->control.output_name = NULL;
-	}
-
-	if (NULL != state->control.output_name) {
-		free(state->control.output_name);
-		state->control.output_name = NULL;
-	}
-
-	if (state->control.output_fd >= 0) {
-		if (STDOUT_FILENO != state->control.output_fd) {
-			close(state->control.output_fd);
-		}
-		state->control.output_fd = -1;
 	}
 
 	/*@-keeptrans@ */
@@ -367,12 +370,21 @@ void pv_state_watch_fd_set(pvstate_t state, int val)
 
 void pv_state_output_set(pvstate_t state, int fd, const char *name)
 {
+	/*
+	 * Close any previous output file first, so we can report any errors
+	 * before we store the new output filename.
+	 */
+	if (state->control.output_fd >= 0 && state->control.output_fd != STDOUT_FILENO) {
+		if (close(state->control.output_fd) < 0) {
+			fprintf(stderr, "%s: %s: %s\n", state->status.program_name,
+				NULL == state->control.output_name ? "(null)" : state->control.output_name,
+				strerror(errno));
+		}
+	}
 	if (NULL != state->control.output_name)
 		free(state->control.output_name);
-	if (state->control.output_fd >= 0 && state->control.output_fd != STDOUT_FILENO)
-		close(state->control.output_fd);
 	state->control.output_fd = fd;
-	state->control.output_name = strdup(name);
+	state->control.output_name = pv_strdup(name);
 }
 
 void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)

@@ -12,7 +12,7 @@
 #include "pv.h"
 
 /* We do not set this because it breaks "dd" - see below. */
-/* #undef MAKE_STDOUT_NONBLOCKING */
+/* #undef MAKE_OUTPUT_NONBLOCKING */
 
 #include <stdio.h>
 #include <string.h>
@@ -306,23 +306,32 @@ int main(int argc, char **argv)
 	if (NULL == opts->output || 0 == strcmp(opts->output, "-")) {
 		pv_state_output_set(state, STDOUT_FILENO, "(stdout)");
 	} else {
-		int fd = open(opts->output, O_WRONLY | O_CREAT);
+		int fd = open(opts->output, O_WRONLY | O_CREAT, 0600);	/* flawfinder: ignore */
+		/*
+		 * flawfinder rationale: the output filename has been
+		 * explicitly provided, and in many cases the operator will
+		 * want to write to device files and other special
+		 * destinations, so there is no sense-checking we can do to
+		 * make this safer.
+		 */
 		if (fd < 0) {
 			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->output, strerror(errno));
-			return 1;
+			pv_state_free(state);
+			opts_free(opts);
+			return 2;
 		}
 		pv_state_output_set(state, fd, opts->output);
 	}
 
-#ifdef MAKE_STDOUT_NONBLOCKING
+#ifdef MAKE_OUTPUT_NONBLOCKING
 	/*
-	 * Try and make standard output use non-blocking I/O.
+	 * Try and make the output use non-blocking I/O.
 	 *
 	 * Note that this can cause problems with (broken) applications
-	 * such as dd.
+	 * such as dd when used in a pipeline.
 	 */
-	fcntl(STDOUT_FILENO, F_SETFL, O_NONBLOCK | fcntl(STDOUT_FILENO, F_GETFL));
-#endif				/* MAKE_STDOUT_NONBLOCKING */
+	fcntl(state->control.output_fd, F_SETFL, O_NONBLOCK | fcntl(state->control.output_fd, F_GETFL));
+#endif				/* MAKE_OUTPUT_NONBLOCKING */
 
 	/* Initialise the signal handling. */
 	pv_sig_init(state);

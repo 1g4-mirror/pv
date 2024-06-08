@@ -931,7 +931,9 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 			if (0 != fcntl(state->control.output_fd, F_SETFL,
 				       (state->control.direct_io ? O_DIRECT : 0) |
 				       fcntl(state->control.output_fd, F_GETFL))) {
-				debug("%s: %s: %s", state->control.output_name, "fcntl", strerror(errno));
+				debug("%s: %s: %s",
+				      NULL == state->control.output_name ? "(null)" : state->control.output_name,
+				      "fcntl", strerror(errno));
 			}
 		}
 		state->control.direct_io_changed = false;

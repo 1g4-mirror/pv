@@ -1,3 +1,7 @@
+### NOT YET RELEASED
+
+ * feature: new "`--output`" option to write to a file instead of standard output (pull request [#90](https://codeberg.org/a-j-wood/pv/pulls/90)) supplied by [xmort](https://codeberg.org/xmort)
+
 ### 1.8.9 - 21 April 2024
 
  * feature: new "`--si`" option to display and interpret size suffixes in multiples of 1000 rather than 1024 (pull request [#85](https://codeberg.org/a-j-wood/pv/pulls/85)) supplied by [kevinruddy](https://codeberg.org/kevinruddy)

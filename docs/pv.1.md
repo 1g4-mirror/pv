@@ -257,6 +257,12 @@ that are explicitly switched on will be shown.
 
 # DATA TRANSFER MODIFIERS
 
+**-o FILE, \--output FILE**
+
+:   Write data to *FILE* rather than standard output. If the file
+    already exists, it will be overwritten from the start, but not
+    truncated.
+
 **-L RATE, \--rate-limit RATE**
 
 :   Limit the transfer to a maximum of *RATE* bytes per second. A suffix
