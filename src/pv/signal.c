@@ -289,8 +289,8 @@ void pv_sig_init(pvstate_t state)
 	 */
 
 	/*
-	 * Ignore SIGPIPE, so we don't die if stdout is a pipe and the other
-	 * end closes unexpectedly.
+	 * Ignore SIGPIPE, so we don't die if the output is a pipe and the
+	 * other end closes unexpectedly.
 	 */
 	sa.sa_handler = SIG_IGN;
 	(void) sigemptyset(&(sa.sa_mask));

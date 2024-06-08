@@ -67,6 +67,7 @@ pvstate_t pv_state_alloc(const char *program_name)
 
 	state->control.watch_pid = 0;
 	state->control.watch_fd = -1;
+	state->control.output_fd = -1;
 #ifdef HAVE_IPC
 	state->cursor.shmid = -1;
 	state->cursor.pvcount = 1;
@@ -122,6 +123,23 @@ void pv_state_free(pvstate_t state)
 	if (NULL != state->control.format_string) {
 		free(state->control.format_string);
 		state->control.format_string = NULL;
+	}
+
+	if (NULL != state->control.output_name) {
+		free(state->control.output_name);
+		state->control.output_name = NULL;
+	}
+
+	if (NULL != state->control.output_name) {
+		free(state->control.output_name);
+		state->control.output_name = NULL;
+	}
+
+	if (state->control.output_fd >= 0) {
+		if (STDOUT_FILENO != state->control.output_fd) {
+			close(state->control.output_fd);
+		}
+		state->control.output_fd = -1;
 	}
 
 	/*@-keeptrans@ */
@@ -345,6 +363,16 @@ void pv_state_watch_pid_set(pvstate_t state, pid_t val)
 void pv_state_watch_fd_set(pvstate_t state, int val)
 {
 	state->control.watch_fd = val;
+}
+
+void pv_state_output_set(pvstate_t state, int fd, const char *name)
+{
+	if (NULL != state->control.output_name)
+		free(state->control.output_name);
+	if (state->control.output_fd >= 0 && state->control.output_fd != STDOUT_FILENO)
+		close(state->control.output_fd);
+	state->control.output_fd = fd;
+	state->control.output_name = strdup(name);
 }
 
 void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)

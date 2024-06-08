@@ -44,6 +44,8 @@ void opts_free( /*@only@ */ opts_t opts)
 		free(opts->format);
 	if (NULL != opts->pidfile)
 		free(opts->pidfile);
+	if (NULL != opts->output)
+		free(opts->output);
 	if (NULL != opts->argv)
 		free(opts->argv);
 	/*@+keeptrans@ */
@@ -143,6 +145,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "remote", 1, NULL, (int) 'R' },
 		{ "pidfile", 1, NULL, (int) 'P' },
 		{ "watchfd", 1, NULL, (int) 'd' },
+		{ "output", 1, NULL, (int) 'o' },
 		{ "average-rate-window", 1, NULL, (int) 'm' },
 #ifdef ENABLE_DEBUGGING
 		{ "debug", 1, NULL, (int) '!' },
@@ -152,7 +155,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fnqcWD:s:l0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:"
+	char *short_options = "hVpteIrab8kTA:fnqcWD:s:l0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:o:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -475,6 +478,14 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			(void) sscanf(optarg, "%u:%d", &parse_pid, &parse_fd);
 			opts->watch_pid = (pid_t) parse_pid;
 			opts->watch_fd = parse_fd;
+			break;
+		case 'o':
+			opts->output = pv_strdup(optarg);
+			if (NULL == opts->output) {
+				fprintf(stderr, "%s: -o: %s\n", opts->program_name, strerror(errno));
+				opts_free(opts);
+				return NULL;
+			}
 			break;
 		case 'm':
 			opts->average_rate_window = pv_getnum_count(optarg, opts->decimal_units);

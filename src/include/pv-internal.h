@@ -123,6 +123,8 @@ struct pvstate_s {
 		double delay_start;              /* delay before first display */
 		pid_t watch_pid;		 /* process to watch fds of */
 		int watch_fd;			 /* fd to watch */
+		int output_fd;                   /* fd to write output to */
+		/*@null@*/ char *output_name;    /* name of the output, for diagnostics */
 		unsigned int average_rate_window; /* time window in seconds for average rate calculations */
 		unsigned int width;              /* screen width */
 		unsigned int height;             /* screen height */
