@@ -158,7 +158,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	 */
 	if (kill((pid_t) (opts->remote), 0) != 0) {
 		pv_error(state, "%u: %s", opts->remote, strerror(errno));
-		return 1;
+		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
 	/*
@@ -219,7 +219,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	control_fptr = pv__control_file(control_filename, sizeof(control_filename), getpid(), true);
 	if (NULL == control_fptr) {
 		pv_error(state, "%s", strerror(errno));
-		return 1;
+		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
 	/*
@@ -230,13 +230,13 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 		pv_error(state, "%s", strerror(errno));
 		(void) fclose(control_fptr);
 		(void) remove(control_filename);
-		return 1;
+		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
 	if (0 != fclose(control_fptr)) {
 		pv_error(state, "%s", strerror(errno));
 		(void) remove(control_filename);
-		return 1;
+		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
 	/*
@@ -248,7 +248,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	if (kill((pid_t) (opts->remote), SIGUSR2) != 0) {
 		pv_error(state, "%u: %s", opts->remote, strerror(errno));
 		(void) remove(control_filename);
-		return 1;
+		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
 	debug("%s", "message sent");
@@ -300,7 +300,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	 * fact we only translate each string once.
 	 */
 	pv_error(state, "%u: %s", opts->remote, _("message not received"));
-	return 1;
+	return PV_ERROREXIT_REMOTE_OR_PID;
 	/*@+mustfreefresh @ */
 }
 
@@ -428,7 +428,7 @@ int pv_remote_set(			 /*@unused@ */
 	/*@-mustfreefresh@ *//* splint - see above */
 	fprintf(stderr, "%s\n", _("SA_SIGINFO not supported on this system"));
 	/*@+mustfreefresh@ */
-	return 1;
+	return PV_ERROREXIT_REMOTE_OR_PID;
 }
 
 #endif				/* SA_SIGINFO */

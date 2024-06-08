@@ -49,8 +49,8 @@ int main(int argc, char **argv)
 	/* Parse the command line arguments. */
 	opts = opts_parse(argc >= 0 ? (unsigned int) argc : 0, argv);
 	if (NULL == opts) {
-		debug("%s: %d", "exiting with status", 64);
-		return 64;
+		debug("%s: %d", "exiting with status", PV_ERROREXIT_MEMORY);
+		return PV_ERROREXIT_MEMORY;
 	}
 
 	/* Early exit if necessary, such as with "-h". */
@@ -73,8 +73,8 @@ int main(int argc, char **argv)
 		 */
 		fprintf(stderr, "%s: %s: %s\n", opts->program_name, _("state allocation failed"), strerror(errno));
 		opts_free(opts);
-		debug("%s: %d", "exiting with status", 64);
-		return 64;
+		debug("%s: %d", "exiting with status", PV_ERROREXIT_MEMORY);
+		return PV_ERROREXIT_MEMORY;
 		/*@+mustfreefresh@ */
 	}
 
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 			pv_state_free(state);
 			opts_free(opts);
-			return 1;
+			return PV_ERROREXIT_REMOTE_OR_PID;
 		}
 		memset(pidfile_tmp_name, 0, pidfile_tmp_bufsize);
 		(void) pv_snprintf(pidfile_tmp_name, pidfile_tmp_bufsize, "%s.XXXXXX", opts->pidfile);
@@ -133,7 +133,7 @@ int main(int argc, char **argv)
 			free(pidfile_tmp_name);
 			pv_state_free(state);
 			opts_free(opts);
-			return 1;
+			return PV_ERROREXIT_REMOTE_OR_PID;
 		}
 
 		(void) umask(prev_umask);   /* flawfinder: ignore */
@@ -159,7 +159,7 @@ int main(int argc, char **argv)
 			free(pidfile_tmp_name);
 			pv_state_free(state);
 			opts_free(opts);
-			return 1;
+			return PV_ERROREXIT_REMOTE_OR_PID;
 		}
 
 		fprintf(pidfile_tmp_fptr, "%d\n", getpid());
@@ -183,7 +183,7 @@ int main(int argc, char **argv)
 		if (!opts_add_file(opts, "-")) {
 			pv_state_free(state);
 			opts_free(opts);
-			return 64;
+			return PV_ERROREXIT_MEMORY;
 		}
 	}
 
@@ -318,7 +318,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->output, strerror(errno));
 			pv_state_free(state);
 			opts_free(opts);
-			return 2;
+			return PV_ERROREXIT_ACCESS;
 		}
 		pv_state_output_set(state, fd, opts->output);
 	}
