@@ -300,6 +300,20 @@ int main(int argc, char **argv)
 			    opts->fineta, opts->rate, opts->average_rate,
 			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
 
+	/*
+	 * Set output file, treating no output or "-" as stdout
+	 */
+	if (NULL == opts->output || 0 == strcmp(opts->output, "-")) {
+		pv_state_output_set(state, STDOUT_FILENO, "(stdout)");
+	} else {
+		int fd = open(opts->output, O_WRONLY | O_CREAT);
+		if (fd < 0) {
+			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->output, strerror(errno));
+			return 1;
+		}
+		pv_state_output_set(state, fd, opts->output);
+	}
+
 #ifdef MAKE_STDOUT_NONBLOCKING
 	/*
 	 * Try and make standard output use non-blocking I/O.

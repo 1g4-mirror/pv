@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-04-21 14:15+0100\n"
+"POT-Creation-Date: 2024-06-08 12:44+0200\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -373,7 +373,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:750 src/pv/transfer.c:954
+#: src/pv/display.c:750 src/pv/transfer.c:958
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 
@@ -429,7 +429,7 @@ msgstr "(aucun)"
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:570 src/pv/loop.c:621 src/pv/loop.c:662 src/pv/watchpid.c:99
+#: src/pv/loop.c:575 src/pv/loop.c:626 src/pv/loop.c:667 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
@@ -473,15 +473,15 @@ msgstr "aucun tampon de transfert alloué"
 msgid "failed to set interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:694
+#: src/pv/transfer.c:697
 msgid "failed to clear interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:818
+#: src/pv/transfer.c:822
 msgid "write failed"
 msgstr "l'écriture a échoué"
 
-#: src/pv/transfer.c:1051
+#: src/pv/transfer.c:1055
 msgid "select call failed"
 msgstr "l'appel de sélection a échoué"
 

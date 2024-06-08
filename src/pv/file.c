@@ -127,24 +127,24 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 	 * input, but we are writing to a block device, then use the size of
 	 * the output block device.
 	 *
-	 * Further modified to check that stdout is not in append-only mode
+	 * Further modified to check that output is not in append-only mode
 	 * and that we can seek back to the start after getting the size.
 	 */
 	if (total < 1) {
 		int rc;
 
-		rc = fstat(STDOUT_FILENO, &sb);
+		rc = fstat(state->control.output_fd, &sb);
 
 		if ((0 == rc) && S_ISBLK(sb.st_mode)
-		    && (0 == (fcntl(STDOUT_FILENO, F_GETFL) & O_APPEND))) {
+		    && (0 == (fcntl(state->control.output_fd, F_GETFL) & O_APPEND))) {
 			off_t end_position;
-			end_position = lseek(STDOUT_FILENO, 0, SEEK_END);
+			end_position = lseek(state->control.output_fd, 0, SEEK_END);
 			total = 0;
 			if (end_position > 0) {
 				total = end_position;
 			}
-			if (lseek(STDOUT_FILENO, 0, SEEK_SET) != 0) {
-				pv_error(state, "%s: %s: %s", "(stdout)",
+			if (lseek(state->control.output_fd, 0, SEEK_SET) != 0) {
+				pv_error(state, "%s: %s: %s", state->control.output_name,
 					 _("failed to seek to start of output"), strerror(errno));
 				state->status.exit_status |= 2;
 			}
@@ -277,7 +277,7 @@ off_t pv_calc_total_size(pvstate_t state)
  * Close the given file descriptor and open the next one, whose number in
  * the list is "filenum", returning the new file descriptor (or negative on
  * error). It is an error if the next input file is the same as the file
- * stdout is pointing to.
+ * the output is pointing to.
  *
  * Updates state->status.current_input_file in the process.
  */
@@ -286,7 +286,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	struct stat isb;
 	struct stat osb;
 	int fd;
-	bool input_file_is_stdout;
+	bool input_file_is_output;
 
 	if (oldfd >= 0) {
 		if (0 != close(oldfd)) {
@@ -327,7 +327,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		return -1;
 	}
 
-	if (0 != fstat(STDOUT_FILENO, &osb)) {
+	if (0 != fstat(state->control.output_fd, &osb)) {
 		pv_error(state, "%s: %s", _("failed to stat output file"), strerror(errno));
 		(void) close(fd);
 		state->status.exit_status |= 2;
@@ -335,21 +335,21 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	}
 
 	/*
-	 * Check that this new input file is not the same as stdout's
+	 * Check that this new input file is not the same as output's
 	 * destination. This restriction is ignored for anything other
 	 * than a regular file or block device.
 	 */
-	input_file_is_stdout = true;
+	input_file_is_output = true;
 	if (isb.st_dev != osb.st_dev)
-		input_file_is_stdout = false;
+		input_file_is_output = false;
 	if (isb.st_ino != osb.st_ino)
-		input_file_is_stdout = false;
+		input_file_is_output = false;
 	if (0 != isatty(fd))
-		input_file_is_stdout = false;
+		input_file_is_output = false;
 	if ((!S_ISREG(isb.st_mode)) && (!S_ISBLK(isb.st_mode)))
-		input_file_is_stdout = false;
+		input_file_is_output = false;
 
-	if (input_file_is_stdout) {
+	if (input_file_is_output) {
 		pv_error(state, "%s: %s", _("input file is output file"),
 			 NULL == state->files.filename ? "-" : state->files.filename[filenum]);
 		(void) close(fd);

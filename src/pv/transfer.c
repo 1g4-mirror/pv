@@ -345,7 +345,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		/*@-nullpass@ */
 		/*@-type@ */
 		/* splint doesn't know about splice */
-		nread = splice(fd, NULL, STDOUT_FILENO, NULL, bytes_to_splice, SPLICE_F_MORE);
+		nread = splice(fd, NULL, state->control.output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
 		/*@+type@ */
 		/*@+nullpass@ */
 
@@ -370,7 +370,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 				 * error, we cannot skip it, so set
 				 * "do_not_skip_errors".
 				 */
-				if ((fdatasync(STDOUT_FILENO) < 0)
+				if ((fdatasync(state->control.output_fd) < 0)
 				    && (EIO == errno)) {
 					nread = -1;
 					do_not_skip_errors = true;
@@ -612,13 +612,13 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 
 /*
- * Write state->transfer.to_write bytes of data from the transfer buffer to stdout.
+ * Write state->transfer.to_write bytes of data from the transfer buffer to the output.
  * Returns zero if there was a transient error and we need to return 0 from
  * pv_transfer, otherwise returns 1.
  *
  * Updates state->transfer.write_position by moving it on by the number of bytes
  * written; adds the number of bytes written to state->transfer.written; sets
- * *eof_out to true, on stdout EOF, or when the write position catches up
+ * *eof_out to true, on output EOF, or when the write position catches up
  * with the read position AND *eof_in is true (meaning we've reached the end
  * of data).
  *
@@ -681,7 +681,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		debug("%s", "setting alarm");
 #endif				/* HAVE_SETITIMER */
 		debug("%s: %ld %s", "beginning write attempt", (long) (state->transfer.to_write), "bytes");
-		nwritten = pv__transfer_write_repeated(STDOUT_FILENO,
+		nwritten = pv__transfer_write_repeated(state->control.output_fd,
 						       state->transfer.transfer_buffer +
 						       state->transfer.write_position,
 						       (size_t) (state->transfer.to_write),
@@ -706,7 +706,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 
 	if (0 == nwritten) {
 		/*
-		 * Write returned 0 - EOF on stdout.
+		 * Write returned 0 - EOF on output.
 		 */
 		*eof_out = true;
 		return 1;
@@ -842,7 +842,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
  */
 /*@null@*/
 /*@only@*/
-static char *pv__allocate_aligned_buffer(int fd, size_t target_size)
+static char *pv__allocate_aligned_buffer(int outfd, int infd, size_t target_size)
 {
 	char *newptr;
 
@@ -850,8 +850,8 @@ static char *pv__allocate_aligned_buffer(int fd, size_t target_size)
 	long input_alignment, output_alignment, min_alignment;
 	long required_alignment;
 
-	input_alignment = fd >= 0 ? fpathconf(fd, _PC_REC_XFER_ALIGN) : -1;
-	output_alignment = fpathconf(STDOUT_FILENO, _PC_REC_XFER_ALIGN);
+	input_alignment = infd >= 0 ? fpathconf(infd, _PC_REC_XFER_ALIGN) : -1;
+	output_alignment = fpathconf(outfd, _PC_REC_XFER_ALIGN);
 #if defined(HAVE_SYSCONF) && defined(_SC_PAGESIZE)
 	min_alignment = sysconf(_SC_PAGESIZE);
 #else				/* ! defined(HAVE_SYSCONF) && defined(_SC_PAGESIZE) */
@@ -928,9 +928,10 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 			}
 		}
 		if (!(*eof_out)) {
-			if (0 != fcntl(STDOUT_FILENO, F_SETFL,
-				       (state->control.direct_io ? O_DIRECT : 0) | fcntl(STDOUT_FILENO, F_GETFL))) {
-				debug("%s: %s: %s", "(stdout)", "fcntl", strerror(errno));
+			if (0 != fcntl(state->control.output_fd, F_SETFL,
+				       (state->control.direct_io ? O_DIRECT : 0) |
+				       fcntl(state->control.output_fd, F_GETFL))) {
+				debug("%s: %s: %s", state->control.output_name, "fcntl", strerror(errno));
 			}
 		}
 		state->control.direct_io_changed = false;
@@ -953,7 +954,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 */
 	if (NULL == state->transfer.transfer_buffer) {
 		state->transfer.transfer_buffer =
-		    pv__allocate_aligned_buffer(fd, state->control.target_buffer_size + 32);
+		    pv__allocate_aligned_buffer(state->control.output_fd, fd, state->control.target_buffer_size + 32);
 		if (NULL == state->transfer.transfer_buffer) {
 			pv_error(state, "%s: %s", _("buffer allocation failed"), strerror(errno));
 			state->status.exit_status |= 64;
@@ -971,7 +972,8 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 */
 	if (state->transfer.buffer_size < state->control.target_buffer_size) {
 		char *newptr;
-		newptr = pv__allocate_aligned_buffer(fd, state->control.target_buffer_size + 32);
+		newptr =
+		    pv__allocate_aligned_buffer(state->control.output_fd, fd, state->control.target_buffer_size + 32);
 		if (NULL == newptr) {
 			/*
 			 * Reset target if realloc failed so we don't keep
@@ -1031,10 +1033,10 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 
 	/*
 	 * If we don't think we've finished writing and there's anything
-	 * we're allowed to write, look for the stdout becoming writable.
+	 * we're allowed to write, look for the output becoming writable.
 	 */
 	if ((!(*eof_out)) && (state->transfer.to_write > 0)) {
-		check_write_fd = STDOUT_FILENO;
+		check_write_fd = state->control.output_fd;
 	}
 
 	ready_to_read = false;
@@ -1092,9 +1094,9 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	}
 
 	/*
-	 * If there is data to write, and stdout is ready to receive it, and
-	 * we didn't use splice() this time, write some data.  Return early
-	 * if there was a transient write error.
+	 * If there is data to write, and the output is ready to receive it,
+	 * and we didn't use splice() this time, write some data. 
+	 * Return early if there was a transient write error.
 	 */
 	if (ready_to_write
 #ifdef HAVE_SPLICE
