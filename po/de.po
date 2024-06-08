@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-06-08 12:44+0200\n"
+"POT-Creation-Date: 2024-06-08 22:04+0100\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -153,99 +153,103 @@ msgstr ""
 msgid "use cursor positioning escape sequences"
 msgstr "benutze Escape-Sequenzen zur Cursor-Positionierung"
 
-#: src/main/help.c:363
-msgid "RATE"
-msgstr ""
-
-#: src/main/help.c:364
-msgid "limit transfer to RATE bytes per second"
-msgstr "beschränke die Transferrate auf RATE Byte pro Sekunde"
-
-#: src/main/help.c:366 src/main/help.c:375
-msgid "BYTES"
-msgstr ""
-
-#: src/main/help.c:367
-msgid "use a buffer size of BYTES"
-msgstr "BYTES benutze einen Puffer in der Größe von BYTES"
-
-#: src/main/help.c:370
-msgid "never use splice(), always use read/write"
-msgstr "anstelle von splice() immer read/write benutzen"
-
-#: src/main/help.c:373
-msgid "skip read errors in input"
-msgstr "Lesefehler in der Eingabe nicht beachten"
-
-#: src/main/help.c:376
-msgid "skip errors in BYTES blocks at a time"
-msgstr ""
-
-#: src/main/help.c:379
-msgid "stop after --size bytes have been transferred"
-msgstr "anhalten, nachdem --size Bytes übertragen wurden"
-
-#: src/main/help.c:382
-msgid "flush cache to disk after every write"
-msgstr ""
-
-#: src/main/help.c:385
-msgid "use direct I/O to bypass cache"
-msgstr ""
-
-#: src/main/help.c:388
-msgid "discard input instead of writing to output"
-msgstr ""
-
-#: src/main/help.c:391
-msgid "PID"
-msgstr ""
-
-#: src/main/help.c:392
-msgid "update settings of process PID"
-msgstr "Einstellungen der Prozess-PID updaten"
-
-#: src/main/help.c:396 src/main/help.c:411
+#: src/main/help.c:363 src/main/help.c:399 src/main/help.c:414
 msgid "FILE"
 msgstr ""
 
-#: src/main/help.c:397
+#: src/main/help.c:364
+msgid "write output to FILE instead of stdout"
+msgstr ""
+
+#: src/main/help.c:366
+msgid "RATE"
+msgstr ""
+
+#: src/main/help.c:367
+msgid "limit transfer to RATE bytes per second"
+msgstr "beschränke die Transferrate auf RATE Byte pro Sekunde"
+
+#: src/main/help.c:369 src/main/help.c:378
+msgid "BYTES"
+msgstr ""
+
+#: src/main/help.c:370
+msgid "use a buffer size of BYTES"
+msgstr "BYTES benutze einen Puffer in der Größe von BYTES"
+
+#: src/main/help.c:373
+msgid "never use splice(), always use read/write"
+msgstr "anstelle von splice() immer read/write benutzen"
+
+#: src/main/help.c:376
+msgid "skip read errors in input"
+msgstr "Lesefehler in der Eingabe nicht beachten"
+
+#: src/main/help.c:379
+msgid "skip errors in BYTES blocks at a time"
+msgstr ""
+
+#: src/main/help.c:382
+msgid "stop after --size bytes have been transferred"
+msgstr "anhalten, nachdem --size Bytes übertragen wurden"
+
+#: src/main/help.c:385
+msgid "flush cache to disk after every write"
+msgstr ""
+
+#: src/main/help.c:388
+msgid "use direct I/O to bypass cache"
+msgstr ""
+
+#: src/main/help.c:391
+msgid "discard input instead of writing to output"
+msgstr ""
+
+#: src/main/help.c:394
+msgid "PID"
+msgstr ""
+
+#: src/main/help.c:395
+msgid "update settings of process PID"
+msgstr "Einstellungen der Prozess-PID updaten"
+
+#: src/main/help.c:400
 msgid "save process ID in FILE"
 msgstr "Prozess-ID in FILE speichern"
 
-#: src/main/help.c:400
+#: src/main/help.c:403
 msgid "PID[:FD]"
 msgstr ""
 
-#: src/main/help.c:401
+#: src/main/help.c:404
 msgid "watch file FD opened by process PID"
 msgstr "die vom Prozess PID geöffnete Datei FD beobachten"
 
-#: src/main/help.c:405
+#: src/main/help.c:408
 msgid "show this help and exit"
 msgstr "zeige diese Hilfe und beende"
 
-#: src/main/help.c:408
+#: src/main/help.c:411
 msgid "show version information and exit"
 msgstr "zeige Versionsinformationen und beende"
 
-#: src/main/help.c:412
+#: src/main/help.c:415
 msgid "write debug logs to FILE"
 msgstr ""
 
-#: src/main/help.c:437
+#: src/main/help.c:440
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Syntax: %s [OPTION] [DATEI]..."
 
-#: src/main/help.c:448
+#: src/main/help.c:451
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Verbindet DATEI(en) oder den Standard-Eingabe-Kanal mit dem Standard-Ausgabe-"
 "Kanal und misst den Datenstrom."
 
-#: src/main/help.c:585
+#: src/main/help.c:588
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Bitte senden Sie Fehlerberichte an %s"
@@ -254,45 +258,45 @@ msgstr "Bitte senden Sie Fehlerberichte an %s"
 msgid "state allocation failed"
 msgstr "Zustandszuweisung fehlgeschlagen"
 
-#: src/main/options.c:174
+#: src/main/options.c:177
 msgid "option structure allocation failed"
 msgstr "`option' konnte nicht allokiert werden"
 
-#: src/main/options.c:193
+#: src/main/options.c:196
 msgid "option structure argv allocation failed"
 msgstr "`option' (argv) konnte nicht allokiert werden"
 
-#: src/main/options.c:255
+#: src/main/options.c:258
 msgid "integer argument expected"
 msgstr "Ganzzahliges Argument erwartet"
 
-#: src/main/options.c:266
+#: src/main/options.c:269
 msgid "numeric argument expected"
 msgstr "numerisches Argument erwartet"
 
-#: src/main/options.c:277
+#: src/main/options.c:280
 msgid "process ID or pid:fd pair expected"
 msgstr "Prozess-ID oder PID:FD-Paar erwartet"
 
-#: src/main/options.c:284
+#: src/main/options.c:287
 msgid "invalid process ID"
 msgstr "ungültige Prozess-ID"
 
-#: src/main/options.c:388 src/pv/file.c:323
+#: src/main/options.c:391 src/pv/file.c:324
 msgid "failed to stat file"
 msgstr "Dateiinformationen konnten nicht gelesen werden"
 
-#: src/main/options.c:491
+#: src/main/options.c:502
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "`%s --help' zeigt weitere Informationen an."
 
-#: src/main/options.c:493
+#: src/main/options.c:504
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "`%s -h' zeigt weitere Informationen an."
 
-#: src/main/options.c:524
+#: src/main/options.c:535
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -300,23 +304,23 @@ msgstr ""
 "Beim Anzeigen von Dateideskriptoren können keine Optionen für den "
 "Zeilenmodus oder den Übertragungsmodifikator verwendet werden"
 
-#: src/main/options.c:533
+#: src/main/options.c:544
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "Beim Anzeigen von Dateideskriptoren können keine Zeilenmodus- oder "
 "Übertragungsmodifikatoroptionen verwendet werden."
 
-#: src/main/options.c:542
+#: src/main/options.c:553
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "kann keine Fernbedienung verwenden, wenn Dateideskriptoren angezeigt werden"
 
-#: src/main/options.c:551
+#: src/main/options.c:562
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "Dateien können beim Betrachten von Dateideskriptoren nicht übertragen werden"
 
-#: src/main/options.c:566
+#: src/main/options.c:577
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "Nicht verfügbar auf Systemen ohne /proc/self/fdinfo"
 
@@ -368,7 +372,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:750 src/pv/transfer.c:958
+#: src/pv/display.c:750 src/pv/transfer.c:961
 msgid "buffer allocation failed"
 msgstr "Puffer konnte nicht allokiert werden"
 
@@ -396,31 +400,31 @@ msgstr ""
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/file.c:148
+#: src/pv/file.c:149
 msgid "failed to seek to start of output"
 msgstr "Konnte nicht versuchen, die Ausgabe zu starten"
 
-#: src/pv/file.c:293
+#: src/pv/file.c:294
 msgid "failed to close file"
 msgstr "Datei konnte nicht geschlossen werden"
 
-#: src/pv/file.c:316
+#: src/pv/file.c:317
 msgid "failed to read file"
 msgstr "Datei konnte nicht gelesen werden"
 
-#: src/pv/file.c:331
+#: src/pv/file.c:332
 msgid "failed to stat output file"
 msgstr "Dateiinformationen für Ausgabe-Datei konnten nicht gelesen werden"
 
-#: src/pv/file.c:353
+#: src/pv/file.c:354
 msgid "input file is output file"
 msgstr "Eingabe-Datei ist Ausgabe-Datei"
 
-#: src/pv/file.c:411
+#: src/pv/file.c:412
 msgid "(none)"
 msgstr ""
 
-#: src/pv/file.c:413
+#: src/pv/file.c:414
 msgid "(stdin)"
 msgstr ""
 
@@ -436,7 +440,7 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:391 src/pv/state.c:402
+#: src/pv/state.c:431 src/pv/state.c:442
 msgid "file list allocation failed"
 msgstr ""
 
@@ -476,7 +480,7 @@ msgstr ""
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:1055
+#: src/pv/transfer.c:1059
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-06-08 12:44+0200\n"
+"POT-Creation-Date: 2024-06-08 22:04+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -154,99 +154,103 @@ msgstr ""
 msgid "use cursor positioning escape sequences"
 msgstr "utiliser les séquences d'échappements de positionnement de curseur"
 
-#: src/main/help.c:363
-msgid "RATE"
-msgstr "TAUX"
-
-#: src/main/help.c:364
-msgid "limit transfer to RATE bytes per second"
-msgstr "limite le taux de transfert à TAUX octets par seconde"
-
-#: src/main/help.c:366 src/main/help.c:375
-msgid "BYTES"
-msgstr "OCTETS"
-
-#: src/main/help.c:367
-msgid "use a buffer size of BYTES"
-msgstr "Utiliser une mémoire tampon de OCTETS octets"
-
-#: src/main/help.c:370
-msgid "never use splice(), always use read/write"
-msgstr "ne jamais utiliser splice(), toujours utiliser read/write"
-
-#: src/main/help.c:373
-msgid "skip read errors in input"
-msgstr "ignorer les erreurs de lecture dans l'entrée"
-
-#: src/main/help.c:376
-msgid "skip errors in BYTES blocks at a time"
-msgstr "ignorer les erreurs dans OCTETS blocs à la fois"
-
-#: src/main/help.c:379
-msgid "stop after --size bytes have been transferred"
-msgstr "arrêter après le transfert de --size octets"
-
-#: src/main/help.c:382
-msgid "flush cache to disk after every write"
-msgstr "vider le cache sur le disque après chaque écriture"
-
-#: src/main/help.c:385
-msgid "use direct I/O to bypass cache"
-msgstr "utiliser les E/S directes pour contourner le cache"
-
-#: src/main/help.c:388
-msgid "discard input instead of writing to output"
-msgstr "rejeter l'entrée au lieu de l'écrire vers la sortie"
-
-#: src/main/help.c:391
-msgid "PID"
-msgstr "PID"
-
-#: src/main/help.c:392
-msgid "update settings of process PID"
-msgstr "mettre à jour la configuration du processus PID"
-
-#: src/main/help.c:396 src/main/help.c:411
+#: src/main/help.c:363 src/main/help.c:399 src/main/help.c:414
 msgid "FILE"
 msgstr "FICHIER"
 
-#: src/main/help.c:397
+#: src/main/help.c:364
+msgid "write output to FILE instead of stdout"
+msgstr ""
+
+#: src/main/help.c:366
+msgid "RATE"
+msgstr "TAUX"
+
+#: src/main/help.c:367
+msgid "limit transfer to RATE bytes per second"
+msgstr "limite le taux de transfert à TAUX octets par seconde"
+
+#: src/main/help.c:369 src/main/help.c:378
+msgid "BYTES"
+msgstr "OCTETS"
+
+#: src/main/help.c:370
+msgid "use a buffer size of BYTES"
+msgstr "Utiliser une mémoire tampon de OCTETS octets"
+
+#: src/main/help.c:373
+msgid "never use splice(), always use read/write"
+msgstr "ne jamais utiliser splice(), toujours utiliser read/write"
+
+#: src/main/help.c:376
+msgid "skip read errors in input"
+msgstr "ignorer les erreurs de lecture dans l'entrée"
+
+#: src/main/help.c:379
+msgid "skip errors in BYTES blocks at a time"
+msgstr "ignorer les erreurs dans OCTETS blocs à la fois"
+
+#: src/main/help.c:382
+msgid "stop after --size bytes have been transferred"
+msgstr "arrêter après le transfert de --size octets"
+
+#: src/main/help.c:385
+msgid "flush cache to disk after every write"
+msgstr "vider le cache sur le disque après chaque écriture"
+
+#: src/main/help.c:388
+msgid "use direct I/O to bypass cache"
+msgstr "utiliser les E/S directes pour contourner le cache"
+
+#: src/main/help.c:391
+msgid "discard input instead of writing to output"
+msgstr "rejeter l'entrée au lieu de l'écrire vers la sortie"
+
+#: src/main/help.c:394
+msgid "PID"
+msgstr "PID"
+
+#: src/main/help.c:395
+msgid "update settings of process PID"
+msgstr "mettre à jour la configuration du processus PID"
+
+#: src/main/help.c:400
 msgid "save process ID in FILE"
 msgstr "enregistrer l'ID de processus dans FICHIER"
 
-#: src/main/help.c:400
+#: src/main/help.c:403
 msgid "PID[:FD]"
 msgstr "PID[:FD]"
 
-#: src/main/help.c:401
+#: src/main/help.c:404
 msgid "watch file FD opened by process PID"
 msgstr "surveiller le fichier FD ouvert par le processus PID"
 
-#: src/main/help.c:405
+#: src/main/help.c:408
 msgid "show this help and exit"
 msgstr "afficher cette aide puis quitter"
 
-#: src/main/help.c:408
+#: src/main/help.c:411
 msgid "show version information and exit"
 msgstr "afficher la version puis quitter"
 
-#: src/main/help.c:412
+#: src/main/help.c:415
 msgid "write debug logs to FILE"
 msgstr "écrire les journaux de déboggage vers FICHIER"
 
-#: src/main/help.c:437
+#: src/main/help.c:440
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Utilisation : %s [OPTIONS] [FICHIER]..."
 
-#: src/main/help.c:448
+#: src/main/help.c:451
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Concaténer FICHIER(s), ou l'entrée standard, sur la sortie standard avec "
 "monitorage."
 
-#: src/main/help.c:585
+#: src/main/help.c:588
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "SVP rapporter tous bogues à %s"
@@ -255,45 +259,45 @@ msgstr "SVP rapporter tous bogues à %s"
 msgid "state allocation failed"
 msgstr "échec de l'allocation de mémoire de condition"
 
-#: src/main/options.c:174
+#: src/main/options.c:177
 msgid "option structure allocation failed"
 msgstr "l'allocation pour la structure d'une option a échoué"
 
-#: src/main/options.c:193
+#: src/main/options.c:196
 msgid "option structure argv allocation failed"
 msgstr "l'allocation pour la structure de l'option argv a échoué"
 
-#: src/main/options.c:255
+#: src/main/options.c:258
 msgid "integer argument expected"
 msgstr "Valeur entière attendue"
 
-#: src/main/options.c:266
+#: src/main/options.c:269
 msgid "numeric argument expected"
 msgstr "Valeur numérique attendue"
 
-#: src/main/options.c:277
+#: src/main/options.c:280
 msgid "process ID or pid:fd pair expected"
 msgstr "ID de processus ou paire pid:fd attendue"
 
-#: src/main/options.c:284
+#: src/main/options.c:287
 msgid "invalid process ID"
 msgstr "ID de processus non valide"
 
-#: src/main/options.c:388 src/pv/file.c:323
+#: src/main/options.c:391 src/pv/file.c:324
 msgid "failed to stat file"
 msgstr "échec à statuer sur le fichier"
 
-#: src/main/options.c:491
+#: src/main/options.c:502
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Essayez `%s --help' pour plus d'informations."
 
-#: src/main/options.c:493
+#: src/main/options.c:504
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Essayez `%s -h' pour plus d'informations."
 
-#: src/main/options.c:524
+#: src/main/options.c:535
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -301,25 +305,25 @@ msgstr ""
 "impossible d'utiliser le mode ligne ou les options de modificateur de "
 "transfert lors de la visualisation des descripteurs de fichiers"
 
-#: src/main/options.c:533
+#: src/main/options.c:544
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "impossible d'utiliser le positionnement du curseur lors de la visualisation "
 "des descripteurs de fichier"
 
-#: src/main/options.c:542
+#: src/main/options.c:553
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "impossible d'utiliser la télécommande lors de la visualisation des "
 "descripteurs de fichiers"
 
-#: src/main/options.c:551
+#: src/main/options.c:562
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "impossible de transférer des fichiers lorsque vous regardez des descripteurs "
 "de fichiers"
 
-#: src/main/options.c:566
+#: src/main/options.c:577
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "non disponible sur les systèmes sans /proc/self/fdinfo"
 
@@ -373,7 +377,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:750 src/pv/transfer.c:958
+#: src/pv/display.c:750 src/pv/transfer.c:961
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 
@@ -401,31 +405,31 @@ msgstr "O/s"
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/file.c:148
+#: src/pv/file.c:149
 msgid "failed to seek to start of output"
 msgstr "ne peut pas passer au début de la sortie"
 
-#: src/pv/file.c:293
+#: src/pv/file.c:294
 msgid "failed to close file"
 msgstr "la fermeture du fichier a échoué"
 
-#: src/pv/file.c:316
+#: src/pv/file.c:317
 msgid "failed to read file"
 msgstr "la lecture du fichier a échoué"
 
-#: src/pv/file.c:331
+#: src/pv/file.c:332
 msgid "failed to stat output file"
 msgstr "échec à statuer sur le fichier de sortie"
 
-#: src/pv/file.c:353
+#: src/pv/file.c:354
 msgid "input file is output file"
 msgstr "fichiers d'entré et de sortie sont les mêmes"
 
-#: src/pv/file.c:411
+#: src/pv/file.c:412
 msgid "(none)"
 msgstr "(aucun)"
 
-#: src/pv/file.c:413
+#: src/pv/file.c:414
 msgid "(stdin)"
 msgstr ""
 
@@ -441,7 +445,7 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr "l'allocation de la structure de l'historique a échoué"
 
-#: src/pv/state.c:391 src/pv/state.c:402
+#: src/pv/state.c:431 src/pv/state.c:442
 msgid "file list allocation failed"
 msgstr "échec de l'allocation de la liste de fichiers"
 
@@ -481,7 +485,7 @@ msgstr ""
 msgid "write failed"
 msgstr "l'écriture a échoué"
 
-#: src/pv/transfer.c:1055
+#: src/pv/transfer.c:1059
 msgid "select call failed"
 msgstr "l'appel de sélection a échoué"
 
