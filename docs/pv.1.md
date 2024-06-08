@@ -260,8 +260,7 @@ that are explicitly switched on will be shown.
 **-o FILE, \--output FILE**
 
 :   Write data to *FILE* rather than standard output. If the file
-    already exists, it will be overwritten from the start, but not
-    truncated.
+    already exists, it will be truncated.
 
 **-L RATE, \--rate-limit RATE**
 

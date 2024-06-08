@@ -306,7 +306,7 @@ int main(int argc, char **argv)
 	if (NULL == opts->output || 0 == strcmp(opts->output, "-")) {
 		pv_state_output_set(state, STDOUT_FILENO, "(stdout)");
 	} else {
-		int fd = open(opts->output, O_WRONLY | O_CREAT, 0600);	/* flawfinder: ignore */
+		int fd = open(opts->output, O_WRONLY | O_CREAT | O_TRUNC, 0600);	/* flawfinder: ignore */
 		/*
 		 * flawfinder rationale: the output filename has been
 		 * explicitly provided, and in many cases the operator will
