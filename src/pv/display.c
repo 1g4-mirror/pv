@@ -748,7 +748,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		new_buffer = malloc(new_size + 16);
 		if (NULL == new_buffer) {
 			pv_error(state, "%s: %s", _("buffer allocation failed"), strerror(errno));
-			state->status.exit_status |= 64;
+			state->status.exit_status |= PV_ERROREXIT_MEMORY;
 			state->display.display_buffer = NULL;
 			return false;
 		}

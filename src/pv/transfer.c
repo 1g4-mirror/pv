@@ -446,7 +446,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 * exit status, regardless of whether we're skipping errors, and
 	 * increment the error counter.
 	 */
-	state->status.exit_status |= 16;
+	state->status.exit_status |= PV_ERROREXIT_TRANSFER;
 	state->transfer.read_errors_in_a_row++;
 
 	/*
@@ -633,7 +633,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 
 	if (NULL == state->transfer.transfer_buffer) {
 		pv_error(state, "%s", _("no transfer buffer allocated"));
-		state->status.exit_status |= 64;
+		state->status.exit_status |= PV_ERROREXIT_MEMORY;
 		*eof_out = true;
 		state->transfer.written = -1;
 		return 1;
@@ -820,7 +820,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	}
 
 	pv_error(state, "%s: %s", _("write failed"), strerror(errno));
-	state->status.exit_status |= 16;
+	state->status.exit_status |= PV_ERROREXIT_TRANSFER;
 	*eof_out = true;
 	state->transfer.written = -1;
 
@@ -959,7 +959,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		    pv__allocate_aligned_buffer(state->control.output_fd, fd, state->control.target_buffer_size + 32);
 		if (NULL == state->transfer.transfer_buffer) {
 			pv_error(state, "%s: %s", _("buffer allocation failed"), strerror(errno));
-			state->status.exit_status |= 64;
+			state->status.exit_status |= PV_ERROREXIT_MEMORY;
 			return -1;
 		}
 		state->transfer.buffer_size = state->control.target_buffer_size;
@@ -1061,7 +1061,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		/*@+compdef@ */
 		/* splint - see previous pv_current_file_name() calls. */
 
-		state->status.exit_status |= 16;
+		state->status.exit_status |= PV_ERROREXIT_TRANSFER;
 
 		return -1;
 	}

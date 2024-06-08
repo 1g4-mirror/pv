@@ -21,7 +21,7 @@
  * suspended.  See clock_gettime(2) with CLOCK_MONOTONIC.
  *
  * The read should not fail; if it does, the program is aborted with exit
- * status 16.
+ * status 16 (transfer error).
  */
 void pv_elapsedtime_read(struct timespec *return_time)
 {
@@ -29,7 +29,7 @@ void pv_elapsedtime_read(struct timespec *return_time)
 	if (0 != clock_gettime(CLOCK_MONOTONIC, return_time)) {
 		fprintf(stderr, "%s: %s: %s\n", PACKAGE_NAME, "clock_gettime", strerror(errno));
 		/*@-exitarg@ *//* we explicitly want a special exit status */
-		exit(16);
+		exit(PV_ERROREXIT_TRANSFER);
 		/*@+exitarg@ */
 	}
 	/*@+unrecog@ */

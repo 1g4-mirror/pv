@@ -147,7 +147,7 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 				pv_error(state, "%s: %s: %s",
 					 NULL == state->control.output_name ? "(null)" : state->control.output_name,
 					 _("failed to seek to start of output"), strerror(errno));
-				state->status.exit_status |= 2;
+				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			}
 			/*
 			 * If we worked out a size, then set the
@@ -229,7 +229,7 @@ static off_t pv_calc_total_lines(pvstate_t state)
 			 */
 			if (numread < 0) {
 				pv_error(state, "%s: %s", state->files.filename[file_idx], strerror(errno));
-				state->status.exit_status |= 2;
+				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				break;
 			} else if (0 == numread) {
 				break;
@@ -247,7 +247,7 @@ static off_t pv_calc_total_lines(pvstate_t state)
 
 		if (0 != lseek(fd, 0, SEEK_SET)) {
 			pv_error(state, "%s: %s", state->files.filename[file_idx], strerror(errno));
-			state->status.exit_status |= 2;
+			state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		}
 
 		(void) close(fd);
@@ -292,14 +292,14 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	if (oldfd >= 0) {
 		if (0 != close(oldfd)) {
 			pv_error(state, "%s: %s", _("failed to close file"), strerror(errno));
-			state->status.exit_status |= 8;
+			state->status.exit_status |= PV_ERROREXIT_TRANSITION;
 			return -1;
 		}
 	}
 
 	if (filenum >= state->files.file_count) {
 		debug("%s: %d >= %d", "filenum too large", filenum, state->files.file_count);
-		state->status.exit_status |= 8;
+		state->status.exit_status |= PV_ERROREXIT_TRANSITION;
 		return -1;
 	}
 
@@ -315,7 +315,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		if (fd < 0) {
 			pv_error(state, "%s: %s: %s",
 				 _("failed to read file"), state->files.filename[filenum], strerror(errno));
-			state->status.exit_status |= 2;
+			state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			return -1;
 		}
 	}
@@ -324,14 +324,14 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		pv_error(state, "%s: %s: %s", _("failed to stat file"),
 			 NULL == state->files.filename ? "-" : state->files.filename[filenum], strerror(errno));
 		(void) close(fd);
-		state->status.exit_status |= 2;
+		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		return -1;
 	}
 
 	if (0 != fstat(state->control.output_fd, &osb)) {
 		pv_error(state, "%s: %s", _("failed to stat output file"), strerror(errno));
 		(void) close(fd);
-		state->status.exit_status |= 2;
+		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		return -1;
 	}
 
@@ -354,7 +354,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		pv_error(state, "%s: %s", _("input file is output file"),
 			 NULL == state->files.filename ? "-" : state->files.filename[filenum]);
 		(void) close(fd);
-		state->status.exit_status |= 4;
+		state->status.exit_status |= PV_ERROREXIT_OUROBOROS;
 		return -1;
 	}
 

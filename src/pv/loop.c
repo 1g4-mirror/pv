@@ -358,7 +358,7 @@ int pv_main_loop(pvstate_t state)
 	}
 
 	if (1 == state->flag.trigger_exit)
-		state->status.exit_status |= 32;
+		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
 
 	if (fd >= 0)
 		(void) close(fd);
@@ -389,7 +389,7 @@ int pv_watchfd_loop(pvstate_t state)
 	info.watch_fd = state->control.watch_fd;
 	rc = pv_watchfd_info(state, &info, false);
 	if (0 != rc) {
-		state->status.exit_status |= 2;
+		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		/*@-compdestroy@ */
 		return state->status.exit_status;
 		/*@+compdestroy@ */
@@ -520,7 +520,7 @@ int pv_watchfd_loop(pvstate_t state)
 		pv_write_retry(STDERR_FILENO, "\n", 1);
 
 	if (1 == state->flag.trigger_exit)
-		state->status.exit_status |= 32;
+		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
 
 	/*
 	 * Free the state structure specific to this file descriptor. 
@@ -573,8 +573,8 @@ int pv_watchpid_loop(pvstate_t state)
 	 */
 	if (kill(state->control.watch_pid, 0) != 0) {
 		pv_error(state, "%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
-		state->status.exit_status |= 2;
-		return 2;
+		state->status.exit_status |= PV_ERROREXIT_ACCESS;
+		return PV_ERROREXIT_ACCESS;
 	}
 
 	/*
@@ -624,10 +624,10 @@ int pv_watchpid_loop(pvstate_t state)
 		if (kill(state->control.watch_pid, 0) != 0) {
 			if (first_pass) {
 				pv_error(state, "%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
-				state->status.exit_status |= 2;
+				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				if (NULL != info_array)
 					free(info_array);
-				return 2;
+				return PV_ERROREXIT_ACCESS;
 			}
 			break;
 		}
@@ -665,10 +665,10 @@ int pv_watchpid_loop(pvstate_t state)
 		if (rc != 0) {
 			if (first_pass) {
 				pv_error(state, "%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
-				state->status.exit_status |= 2;
+				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				if (NULL != info_array)
 					free(info_array);
-				return 2;
+				return PV_ERROREXIT_ACCESS;
 			}
 			break;
 		}

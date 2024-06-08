@@ -24,6 +24,17 @@ extern "C" {
 #endif
 
 /*
+ * Exit status bitmask values.
+ */
+#define PV_ERROREXIT_REMOTE     1
+#define PV_ERROREXIT_ACCESS     2
+#define PV_ERROREXIT_OUROBOROS  4
+#define PV_ERROREXIT_TRANSITION 8
+#define PV_ERROREXIT_TRANSFER   16
+#define PV_ERROREXIT_SIGNAL     32
+#define PV_ERROREXIT_MEMORY     64
+
+/*
  * Opaque structure for PV internal state.
  */
 struct pvstate_s;
