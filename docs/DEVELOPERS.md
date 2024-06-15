@@ -73,20 +73,32 @@ It is the "`msgstr`" lines which need to be updated by translators.
 
 Message catalogue files should all be encoded as UTF-8.
 
-_FIXME: The test below doesn't work on Debian with only en_GB installed, and
-also it looks like the compiled-in LOCALEDIR is overriding LOCPATH._
-
 After making a change to a "`.po`" file, test it by compiling it and installing
 to a temporary location, like this:
 
-    make install DESTDIR=/tmp/yourtest
-    localedef -f UTF-8 -i de_DE /tmp/yourtest/usr/local/share/locale/de_DE.UTF-8
-    LOCPATH=/tmp/yourtest/usr/local/share/locale \
-    LC_ALL=de_DE.UTF-8 ./pv --help
+    ./configure --enable-debugging --prefix=/tmp/yourtest
+    make clean
+    make install
+    localedef -f UTF-8 -i de_DE /tmp/yourtest/share/locale/de_DE.UTF-8
+    bash
+    export LOCPATH=/tmp/yourtest/share/locale
+    export LC_ALL=de_DE.UTF-8
+    export LANGUAGE=de_DE
+    /tmp/yourtest/bin/pv --help
+    exit
 
 Replace "`--help`" with whatever is appropriate for your test.  In this
 example, the language being tested is "`de`" (German), on a system which is
 running with UTF-8 support.
+
+In the example above, a new shell is started by typing "`bash`" so that
+after your tests, "`exit`" will return you to your previous shell with your
+language settings intact.
+
+Note that at the start, you have to re-run "`configure`" with "`--prefix`"
+rather than using "`make DESTDIR=...`", because the locale directory is set
+at compile time.  Also, on Debian at least, both "`LC_ALL`" and "`LANGUAGE`"
+must be set.
 
 To add a new language, create the new message catalogue file under "`po/`"
 by copying "`po/pv.pot`" to "`po/xx.po`", where "`xx`" is the language code,
