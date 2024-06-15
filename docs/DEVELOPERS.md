@@ -100,6 +100,13 @@ rather than using "`make DESTDIR=...`", because the locale directory is set
 at compile time.  Also, on Debian at least, both "`LC_ALL`" and "`LANGUAGE`"
 must be set.
 
+To find untranslated strings in a language that's already supported but
+which you can help with gaps in, use this command:
+
+    msgattrib --untranslated < po/fr.po
+
+replacing "`po/fr.po`" as appropriate.
+
 To add a new language, create the new message catalogue file under "`po/`"
 by copying "`po/pv.pot`" to "`po/xx.po`", where "`xx`" is the language code,
 and adjusting it.  The "`.pot`" file is generated automatically by "`make`".
