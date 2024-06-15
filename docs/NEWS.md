@@ -1,4 +1,4 @@
-### NOT YET RELEASED
+### 1.8.10 - 15 June 2024
 
  * feature: new "`--output`" option to write to a file instead of standard output (pull request [#90](https://codeberg.org/a-j-wood/pv/pulls/90)) supplied by [xmort](https://codeberg.org/xmort)
 
