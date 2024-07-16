@@ -804,7 +804,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	 */
 	if ((0 == nwritten) || (EINTR == errno) || (EAGAIN == errno)) {
 		if (0 == nwritten) {
-			debug("%s", "write returned zero - waiting briefly", strerror(errno));
+			debug("%s", "write returned zero - waiting briefly");
 		} else {
 			debug("%s: %s", "transient write error - waiting briefly", strerror(errno));
 		}
