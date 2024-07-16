@@ -92,6 +92,6 @@ is acknowledged and greatly appreciated:
  * [Thomas Bertels](https://codeberg.org/tbertels) - updated French translations ([#83](https://codeberg.org/a-j-wood/pv/pulls/83))
  * [kevinruddy](https://codeberg.org/kevinruddy) - added decimal units option ([#85](https://codeberg.org/a-j-wood/pv/pulls/85))
  * [xmort](https://codeberg.org/xmort) - added "`--output`" option ([#90](https://codeberg.org/a-j-wood/pv/pulls/90))
- * [bogiord](https://codeberg.org/bogiord) - reported the loss of output block device size detection in 1.8.10 ([#91](https://codeberg.org/a-j-wood/pv/issues/91))
+ * [bogiord](https://codeberg.org/bogiord) - reported the loss of output block device size detection in 1.8.10, and suggested the fix ([#91](https://codeberg.org/a-j-wood/pv/issues/91))
 
 ---
