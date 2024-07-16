@@ -10,11 +10,15 @@
 #include "pv.h"
 #include "pv-internal.h"
 
+/* We do not set this because it breaks "dd" - see below. */
+/* #undef MAKE_OUTPUT_NONBLOCKING */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <fcntl.h>
 
 
 /* alloc / realloc history buffer */
@@ -385,6 +389,15 @@ void pv_state_output_set(pvstate_t state, int fd, const char *name)
 		free(state->control.output_name);
 	state->control.output_fd = fd;
 	state->control.output_name = pv_strdup(name);
+#ifdef MAKE_OUTPUT_NONBLOCKING
+	/*
+	 * Try and make the output use non-blocking I/O.
+	 *
+	 * Note that this can cause problems with (broken) applications
+	 * such as dd when used in a pipeline.
+	 */
+	fcntl(state->control.output_fd, F_SETFL, O_NONBLOCK | fcntl(state->control.output_fd, F_GETFL));
+#endif				/* MAKE_OUTPUT_NONBLOCKING */
 }
 
 void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)

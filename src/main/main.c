@@ -11,9 +11,6 @@
 #include "options.h"
 #include "pv.h"
 
-/* We do not set this because it breaks "dd" - see below. */
-/* #undef MAKE_OUTPUT_NONBLOCKING */
-
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
@@ -334,16 +331,6 @@ int main(int argc, char **argv)
 	pv_state_set_format(state, opts->progress, opts->timer, opts->eta,
 			    opts->fineta, opts->rate, opts->average_rate,
 			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
-
-#ifdef MAKE_OUTPUT_NONBLOCKING
-	/*
-	 * Try and make the output use non-blocking I/O.
-	 *
-	 * Note that this can cause problems with (broken) applications
-	 * such as dd when used in a pipeline.
-	 */
-	fcntl(state->control.output_fd, F_SETFL, O_NONBLOCK | fcntl(state->control.output_fd, F_GETFL));
-#endif				/* MAKE_OUTPUT_NONBLOCKING */
 
 	/* Initialise the signal handling. */
 	pv_sig_init(state);
