@@ -790,7 +790,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	}
 
 	/*
-	 * If we reach this point, nwritten<0, so there may be an error.
+	 * If we reach this point, nwritten<=0, so there may be an error.
 	 */
 
 	/*
