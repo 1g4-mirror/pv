@@ -1,6 +1,7 @@
 ### UNRELEASED
 
  * fix: correct the detection of output block device size that was broken in 1.8.10 ([#91](https://codeberg.org/a-j-wood/pv/issues/91))
+ * fix: do not treat a zero write as an end of file (pull request [#92](https://codeberg.org/a-j-wood/pv/pulls/92))
 
 ### 1.8.10 - 15 June 2024
 
