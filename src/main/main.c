@@ -194,27 +194,6 @@ int main(int argc, char **argv)
 		pv_state_inputfiles(state, opts->argc, (const char **) (opts->argv));
 	}
 
-	/* Total size calculation, in normal transfer mode. */
-	if (0 == opts->watch_pid) {
-		/*
-		 * If no size was given, try to calculate the total size.
-		 */
-		if (0 == opts->size) {
-			pv_state_linemode_set(state, opts->linemode);
-			pv_state_null_terminated_lines_set(state, opts->null_terminated_lines);
-			opts->size = pv_calc_total_size(state);
-			debug("%s: %llu", "no size given - calculated", opts->size);
-		}
-
-		/*
-		 * If the size is unknown, we cannot have an ETA.
-		 */
-		if (opts->size < 1) {
-			opts->eta = false;
-			debug("%s", "size unknown - ETA disabled");
-		}
-	}
-
 	/*
 	 * If stderr is not a terminal and we're neither forcing output nor
 	 * outputting numerically, we will have nothing to display at all.
@@ -265,8 +244,56 @@ int main(int argc, char **argv)
 		opts->interval = 600;
 
 	/*
+	 * Set output file, treating no output or "-" as stdout; we have to
+	 * do this before looking at setting the size, as the size
+	 * calculation looks at the output file if the input size can't be
+	 * calculated (issue #91).
+	 */
+	if (NULL == opts->output || 0 == strcmp(opts->output, "-")) {
+		pv_state_output_set(state, STDOUT_FILENO, "(stdout)");
+	} else {
+		int fd = open(opts->output, O_WRONLY | O_CREAT | O_TRUNC, 0600);	/* flawfinder: ignore */
+		/*
+		 * flawfinder rationale: the output filename has been
+		 * explicitly provided, and in many cases the operator will
+		 * want to write to device files and other special
+		 * destinations, so there is no sense-checking we can do to
+		 * make this safer.
+		 */
+		if (fd < 0) {
+			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->output, strerror(errno));
+			pv_state_free(state);
+			opts_free(opts);
+			return PV_ERROREXIT_ACCESS;
+		}
+		pv_state_output_set(state, fd, opts->output);
+	}
+
+	/* Total size calculation, in normal transfer mode. */
+	if (0 == opts->watch_pid) {
+		/*
+		 * If no size was given, try to calculate the total size.
+		 */
+		if (0 == opts->size) {
+			pv_state_linemode_set(state, opts->linemode);
+			pv_state_null_terminated_lines_set(state, opts->null_terminated_lines);
+			opts->size = pv_calc_total_size(state);
+			debug("%s: %llu", "no size given - calculated", opts->size);
+		}
+
+		/*
+		 * If the size is unknown, we cannot have an ETA.
+		 */
+		if (opts->size < 1) {
+			opts->eta = false;
+			debug("%s", "size unknown - ETA disabled");
+		}
+	}
+
+	/*
 	 * Copy parameters from options into main state.
 	 */
+
 	pv_state_interval_set(state, opts->interval);
 	pv_state_width_set(state, opts->width, opts->width_set_manually);
 	pv_state_height_set(state, opts->height, opts->height_set_manually);
@@ -299,29 +326,6 @@ int main(int argc, char **argv)
 	pv_state_set_format(state, opts->progress, opts->timer, opts->eta,
 			    opts->fineta, opts->rate, opts->average_rate,
 			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
-
-	/*
-	 * Set output file, treating no output or "-" as stdout
-	 */
-	if (NULL == opts->output || 0 == strcmp(opts->output, "-")) {
-		pv_state_output_set(state, STDOUT_FILENO, "(stdout)");
-	} else {
-		int fd = open(opts->output, O_WRONLY | O_CREAT | O_TRUNC, 0600);	/* flawfinder: ignore */
-		/*
-		 * flawfinder rationale: the output filename has been
-		 * explicitly provided, and in many cases the operator will
-		 * want to write to device files and other special
-		 * destinations, so there is no sense-checking we can do to
-		 * make this safer.
-		 */
-		if (fd < 0) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->output, strerror(errno));
-			pv_state_free(state);
-			opts_free(opts);
-			return PV_ERROREXIT_ACCESS;
-		}
-		pv_state_output_set(state, fd, opts->output);
-	}
 
 #ifdef MAKE_OUTPUT_NONBLOCKING
 	/*
