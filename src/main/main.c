@@ -269,6 +269,14 @@ int main(int argc, char **argv)
 		pv_state_output_set(state, fd, opts->output);
 	}
 
+	/*
+	 * Copy the "stop at size" option before checking the total size,
+	 * since calculating the size from the output block device size
+	 * after this may want to force this setting on, and if we set it
+	 * afterwards, we undo the override.
+	 */
+	pv_state_stop_at_size_set(state, opts->stop_at_size);
+
 	/* Total size calculation, in normal transfer mode. */
 	if (0 == opts->watch_pid) {
 		/*
@@ -291,7 +299,8 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Copy parameters from options into main state.
+	 * Copy the remaining parameters from the options into the main
+	 * state.
 	 */
 
 	pv_state_interval_set(state, opts->interval);
@@ -309,7 +318,6 @@ int main(int argc, char **argv)
 	pv_state_null_terminated_lines_set(state, opts->null_terminated_lines);
 	pv_state_skip_errors_set(state, opts->skip_errors);
 	pv_state_error_skip_block_set(state, opts->error_skip_block);
-	pv_state_stop_at_size_set(state, opts->stop_at_size);
 	pv_state_sync_after_write_set(state, opts->sync_after_write);
 	pv_state_direct_io_set(state, opts->direct_io);
 	pv_state_discard_input_set(state, opts->discard_input);
