@@ -704,13 +704,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 #endif				/* HAVE_SETITIMER */
 	}
 
-	if (0 == nwritten) {
-		/*
-		 * Write returned 0 - EOF on output.
-		 */
-		*eof_out = true;
-		return 1;
-	} else if (nwritten > 0) {
+	if (nwritten > 0) {
 		/*
 		 * Write returned >0 - data successfully written.
 		 */
@@ -796,14 +790,15 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	}
 
 	/*
-	 * If we reach this point, nwritten<0, so there was an error.
+	 * If we reach this point, nwritten<=0, so there may be an error.
 	 */
 
 	/*
-	 * If a write error occurred but it was EINTR or EAGAIN, just wait a
-	 * bit and then return zero, since this was a transient error.
+	 * If a write error occurred but it was EINTR or EAGAIN, or write(2)
+	 * returned 0 (not an error), just wait a bit and then return zero,
+	 * since this was a transient error.
 	 */
-	if ((EINTR == errno) || (EAGAIN == errno)) {
+	if ((nwritten == 0) || (EINTR == errno) || (EAGAIN == errno)) {
 		debug("%s: %s", "transient write error - waiting briefly", strerror(errno));
 		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
 		return 0;
