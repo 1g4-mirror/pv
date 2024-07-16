@@ -798,8 +798,12 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	 * returned 0 (not an error), just wait a bit and then return zero,
 	 * since this was a transient error.
 	 */
-	if ((nwritten == 0) || (EINTR == errno) || (EAGAIN == errno)) {
-		debug("%s: %s", "transient write error - waiting briefly", strerror(errno));
+	if ((0 == nwritten) || (EINTR == errno) || (EAGAIN == errno)) {
+		if (0 == nwritten) {
+			debug("%s", "write returned zero - waiting briefly", strerror(errno));
+		} else {
+			debug("%s: %s", "transient write error - waiting briefly", strerror(errno));
+		}
 		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
 		return 0;
 	}
