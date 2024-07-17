@@ -181,11 +181,11 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
  * see if we can write any more, and keep trying, to make sure we empty the
  * buffer as much as we can.
  *
- * while this is called after a successful write-possible select(), write() is
+ * While this is called after a successful write-possible select(), write() is
  * not guaranteed to succeed for _all_ sizes; we may end up returning 0 if this
  * occurs. (The first write() may return -1 / EINTR if the consumer doesn't
  * read any data before our timeout and the buffer of whatever stdout is is
- * near-full.)
+ * near-full.) (see https://codeberg.org/a-j-wood/pv/pulls/93)
  *
  * If "sync_after_write" is true, we call fdatasync() after each write() (or
  * fsync() if _POSIX_SYNCHRONIZED_IO is not > 0).
