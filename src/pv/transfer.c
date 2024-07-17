@@ -181,6 +181,12 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
  * see if we can write any more, and keep trying, to make sure we empty the
  * buffer as much as we can.
  *
+ * while this is called after a successful write-possible select(), write() is
+ * not guaranteed to succeed for _all_ sizes; we may end up returning 0 if this
+ * occurs. (The first write() may return -1 / EINTR if the consumer doesn't
+ * read any data before our timeout and the buffer of whatever stdout is is
+ * near-full.)
+ *
  * If "sync_after_write" is true, we call fdatasync() after each write() (or
  * fsync() if _POSIX_SYNCHRONIZED_IO is not > 0).
  *
@@ -799,12 +805,12 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 
 	/*
 	 * If a write error occurred but it was EINTR or EAGAIN, or write(2)
-	 * returned 0 (not an error), just wait a bit and then return zero,
-	 * since this was a transient error.
+	 * blocked on first write such that nwritten == 0, just wait a bit and
+	 * then return zero, since this was a transient error.
 	 */
 	if ((0 == nwritten) || (EINTR == errno) || (EAGAIN == errno)) {
 		if (0 == nwritten) {
-			debug("%s", "write returned zero - waiting briefly");
+			debug("%s", "attempted write blocked - waiting briefly");
 		} else {
 			debug("%s: %s", "transient write error - waiting briefly", strerror(errno));
 		}
