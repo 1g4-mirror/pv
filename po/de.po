@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-06-15 23:26+0100\n"
+"POT-Creation-Date: 2024-07-18 22:07+0100\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -254,7 +254,7 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr "Bitte senden Sie Fehlerberichte an %s"
 
-#: src/main/main.c:74
+#: src/main/main.c:71
 msgid "state allocation failed"
 msgstr "Zustandszuweisung fehlgeschlagen"
 
@@ -372,7 +372,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:750 src/pv/transfer.c:961
+#: src/pv/display.c:750 src/pv/transfer.c:970
 msgid "buffer allocation failed"
 msgstr "Puffer konnte nicht allokiert werden"
 
@@ -380,7 +380,7 @@ msgstr "Puffer konnte nicht allokiert werden"
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:859 src/pv/transfer.c:596
+#: src/pv/display.c:859 src/pv/transfer.c:602
 msgid "B"
 msgstr "B"
 
@@ -436,51 +436,51 @@ msgstr ""
 msgid "pid"
 msgstr ""
 
-#: src/pv/state.c:36
+#: src/pv/state.c:40
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:431 src/pv/state.c:442
+#: src/pv/state.c:444 src/pv/state.c:455
 msgid "file list allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:458
+#: src/pv/transfer.c:464
 msgid "read failed"
 msgstr "read-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:481
+#: src/pv/transfer.c:487
 msgid "warning: read errors detected"
 msgstr "warnung: lesefehler erkannt"
 
-#: src/pv/transfer.c:497
+#: src/pv/transfer.c:503
 msgid "file is not seekable"
 msgstr "datei ist nicht durchsuchbar"
 
-#: src/pv/transfer.c:575
+#: src/pv/transfer.c:581
 msgid "failed to seek past error"
 msgstr "konnte den Fehler nicht überwinden"
 
-#: src/pv/transfer.c:595
+#: src/pv/transfer.c:601
 msgid "skipped past read error"
 msgstr "über den Lesefehler hinaus verschoben"
 
-#: src/pv/transfer.c:635
+#: src/pv/transfer.c:641
 msgid "no transfer buffer allocated"
 msgstr ""
 
-#: src/pv/transfer.c:676
+#: src/pv/transfer.c:682
 msgid "failed to set interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:697
+#: src/pv/transfer.c:707
 msgid "failed to clear interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:822
+#: src/pv/transfer.c:831
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:1059
+#: src/pv/transfer.c:1068
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 

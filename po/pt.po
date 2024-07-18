@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-06-15 23:26+0100\n"
+"POT-Creation-Date: 2024-07-18 22:07+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -248,7 +248,7 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr "Por favor, reporte quaisquer defeitos para %s"
 
-#: src/main/main.c:74
+#: src/main/main.c:71
 msgid "state allocation failed"
 msgstr "alocação de memória de status falhou"
 
@@ -364,7 +364,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:750 src/pv/transfer.c:961
+#: src/pv/display.c:750 src/pv/transfer.c:970
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
@@ -372,7 +372,7 @@ msgstr "erro alocando o buffer"
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:859 src/pv/transfer.c:596
+#: src/pv/display.c:859 src/pv/transfer.c:602
 msgid "B"
 msgstr ""
 
@@ -428,51 +428,51 @@ msgstr ""
 msgid "pid"
 msgstr ""
 
-#: src/pv/state.c:36
+#: src/pv/state.c:40
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:431 src/pv/state.c:442
+#: src/pv/state.c:444 src/pv/state.c:455
 msgid "file list allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:458
+#: src/pv/transfer.c:464
 msgid "read failed"
 msgstr "erro de leitura"
 
-#: src/pv/transfer.c:481
+#: src/pv/transfer.c:487
 msgid "warning: read errors detected"
 msgstr "aviso: erros de leitura detectados"
 
-#: src/pv/transfer.c:497
+#: src/pv/transfer.c:503
 msgid "file is not seekable"
 msgstr "não pode mover dentro do arquivo"
 
-#: src/pv/transfer.c:575
+#: src/pv/transfer.c:581
 msgid "failed to seek past error"
 msgstr "não pode ir além do erro"
 
-#: src/pv/transfer.c:595
+#: src/pv/transfer.c:601
 msgid "skipped past read error"
 msgstr "ignorado erro de leitura"
 
-#: src/pv/transfer.c:635
+#: src/pv/transfer.c:641
 msgid "no transfer buffer allocated"
 msgstr ""
 
-#: src/pv/transfer.c:676
+#: src/pv/transfer.c:682
 msgid "failed to set interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:697
+#: src/pv/transfer.c:707
 msgid "failed to clear interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:822
+#: src/pv/transfer.c:831
 msgid "write failed"
 msgstr "erro de gravação"
 
-#: src/pv/transfer.c:1059
+#: src/pv/transfer.c:1068
 msgid "select call failed"
 msgstr "erro na chamada da função select"
 
