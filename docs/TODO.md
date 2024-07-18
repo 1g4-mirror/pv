@@ -20,10 +20,14 @@ Things still to do.  (#n) indicates the issue tracker number.
  * ([#48](https://codeberg.org/a-j-wood/pv/issues/48)) Option to show multiple files with individual sizes and a cumulative total (Zach Riggle - Jul 2021)
  * ([#49](https://codeberg.org/a-j-wood/pv/issues/49)) Option to provide stats for avg/min/max/stddev throughput (Venky.N.Iyer)
  * ([#50](https://codeberg.org/a-j-wood/pv/issues/50)) Allow pv to report on a whole pipeline at once (Will Entriken - Feb 2011)
+ * ([#52](https://codeberg.org/a-j-wood/pv/issues/52)) Strange race condition that affects --wait when writing to GnuPG ([danielyli](https://github.com/danielyli))
  * ([#54](https://codeberg.org/a-j-wood/pv/issues/54)) Run command every n percent ([haarp](https://github.com/haarp))
  * ([#56](https://codeberg.org/a-j-wood/pv/issues/56)) Support for backgrounding pv, and allowing it to be monitored separately ([jimbobmcgee](https://github.com/jimbobmcgee))
+ * ([#59](https://codeberg.org/a-j-wood/pv/issues/59)) Slow transfer under termux but faster if strace is used ([lateautumn233](https://github.com/lateautumn233))
  * ([#67](https://codeberg.org/a-j-wood/pv/issues/67)) Wrap another process to monitor its stdin & stdout ([Alex Mason](https://github.com/axman6))
- * ([#76](https://codeberg.org/a-j-wood/pv/issues/76)) Provide a way to test translations without installing
- * ([#81](https://codeberg.org/a-j-wood/pv/issues/81)) Keep last output on terminal when "pv -d" is done
+ * ([#81](https://codeberg.org/a-j-wood/pv/issues/81)) Keep last output on terminal when "`pv -d`" is done ([KimHansen](https://codeberg.org/KimHansen))
+ * ([#84](https://codeberg.org/a-j-wood/pv/issues/84)) Allow using "`--size`" with "`--watchfd`" to show total progress of a process ([tbertels](https://codeberg.org/tbertels))
+ * ([#87](https://codeberg.org/a-j-wood/pv/issues/87)) Inconsistent buffer filling when writes are stuck, particularly on Cygwin ([basinilya](https://codeberg.org/basinilya))
+ * ([#89](https://codeberg.org/a-j-wood/pv/issues/89)) Intermittent terminal settings reset failures after multi PV pipeline completes ([stdedos](https://codeberg.org/stdedos))
 
 Any assistance would be appreciated.
