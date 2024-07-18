@@ -1,4 +1,4 @@
-### UNRELEASED
+### 1.8.12 - 18 July 2024
 
  * fix: correct the detection of output block device size that was broken in 1.8.10 ([#91](https://codeberg.org/a-j-wood/pv/issues/91))
  * fix: do not treat a zero/interrupted write as an end of file (pull requests [#92](https://codeberg.org/a-j-wood/pv/pulls/92) and [#93](https://codeberg.org/a-j-wood/pv/pulls/93))
