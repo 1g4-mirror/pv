@@ -94,5 +94,6 @@ is acknowledged and greatly appreciated:
  * [xmort](https://codeberg.org/xmort) - added "`--output`" option ([#90](https://codeberg.org/a-j-wood/pv/pulls/90))
  * [bogiord](https://codeberg.org/bogiord) - reported the loss of output block device size detection in 1.8.10, and suggested the fix ([#91](https://codeberg.org/a-j-wood/pv/issues/91))
  * [eborisch](https://codeberg.org/eborisch) - provided fix for misbehaviour when used with "`zfs send`" due to treating zero sized writes (generally due to timer interruption) as end of file ([#92](https://codeberg.org/a-j-wood/pv/pulls/92), [#93](https://codeberg.org/a-j-wood/pv/pulls/93))
+ * [alexanderperlis](https://codeberg.org/alexanderperlis) - provided initial support for block devices with "`--size @FILE`"  ([#94](https://codeberg.org/a-j-wood/pv/pulls/94))
 
 ---

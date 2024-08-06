@@ -15,6 +15,14 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_SYSMACROS_H
+#include <sys/sysmacros.h>
+#ifdef major
+#ifdef minor
+#define CAN_BUILD_SYSFS_FILENAME 1
+#endif
+#endif
+#endif
 #include <fcntl.h>
 #include <unistd.h>
 #ifdef HAVE_GETOPT_H
@@ -85,6 +93,154 @@ bool opts_add_file(opts_t opts, const char *filename)
 
 	opts->argv[opts->argc++] = filename;
 
+	return true;
+}
+
+
+/*
+ * Set opts->size from the size of the file whose name is size_file,
+ * returning false (and reporting the error) if there is a problem.
+ *
+ * If size_file points to a block device, the size of the block device is
+ * used.
+ */
+static bool opts_use_size_of_file(opts_t opts, const char *size_file)
+{
+	struct stat sb;
+	int stat_rc;
+#ifdef CAN_BUILD_SYSFS_FILENAME
+	char sysfs_filename[512];	 /* flawfinder: ignore */
+	FILE *sysfs_fptr;
+	long long sysfs_size;
+#endif				/* CAN_BUILD_SYSFS_FILENAME */
+	int device_fd;
+	off_t device_size;
+
+	/*
+	 * flawfinder rationale: sysfs_filename is only used with
+	 * pv_snprintf() which guarantees it will be bounded and zero
+	 * terminated.
+	 */
+
+	stat_rc = 0;
+	memset(&sb, 0, sizeof(sb));
+
+	stat_rc = stat(size_file, &sb);
+
+	if (0 != stat_rc) {
+		/*@-mustfreefresh@ */
+		/*
+		 * splint note: the gettext calls made by _() cause memory
+		 * leak warnings, but in this case it's unavoidable, and
+		 * mitigated by the fact we only translate each string once.
+		 */
+		fprintf(stderr, "%s: %s: %s: %s\n",
+			opts->program_name, size_file, _("failed to stat file"), strerror(errno));
+		return false;
+		/*@+mustfreefresh@ */
+	}
+
+	/* This was a regular file - use its size and return. */
+	if (S_ISREG((mode_t) (sb.st_mode))) {
+		opts->size = (off_t) (sb.st_size);
+		return true;
+	}
+
+	/* This was a directory - report an error. */
+	if (S_ISDIR((mode_t) (sb.st_mode))) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s: %s\n", opts->program_name, size_file, _("is a directory"));
+		return false;
+		/*@+mustfreefresh@ */
+	}
+
+	/* This was not a block device - just use the size and return. */
+	if (!S_ISBLK((mode_t) (sb.st_mode))) {
+		opts->size = (off_t) (sb.st_size);
+		return true;
+	}
+
+	/*
+	 * Block device - determine its size by looking for
+	 * /sys/dev/block/MAJOR:MINOR/size, and if that fails, try opening
+	 * the file and seeking to the end.
+	 */
+
+#ifdef CAN_BUILD_SYSFS_FILENAME
+	/*
+	 * Try the sysfs method - lightest touch and requires no read access
+	 * to the actual block device.
+	 */
+
+	memset(sysfs_filename, 0, sizeof(sysfs_filename));
+	if (pv_snprintf
+	    (sysfs_filename, sizeof(sysfs_filename), "/sys/dev/block/%u:%u/size", major(sb.st_rdev),
+	     minor(sb.st_rdev)) < 0) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s: %s: %s\n",
+			opts->program_name, size_file, _("failed to generate sysfs filename"), strerror(errno));
+		return false;
+		/*@+mustfreefresh@ */
+	}
+
+	sysfs_fptr = fopen(sysfs_filename, "r");	/* flawfinder: ignore */
+	/*
+	 * flawfinder rationale: sysfs is trusted here, the filename is
+	 * predictable, and we are restricted to reading one number.
+	 */
+	if (NULL != sysfs_fptr) {
+		sysfs_size = -1;
+		if (1 == fscanf(sysfs_fptr, "%lld", &sysfs_size)) {
+			/* Read successful - use the value (* 512) and return. */
+			(void) fclose(sysfs_fptr);
+			opts->size = (off_t) sysfs_size *512;
+			return true;
+		}
+		/* Read not successful - report the error and return. */
+		/* NB we must fclose() after reporting to retain errno. */
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s: %s: %s\n",
+			opts->program_name, size_file, _("failed to read sysfs size file"), strerror(errno));
+		(void) fclose(sysfs_fptr);
+		return false;
+		/*@+mustfreefresh@ */
+	}
+#endif				/* CAN_BUILD_SYSFS_FILENAME */
+
+	/*
+	 * Try opening the block device and seeking to the end.
+	 */
+	device_fd = open(size_file, O_RDONLY);	/* flawfinder: ignore */
+	/*
+	 * flawfinder rationale: the filename is under the direct control of
+	 * the operator by its nature, so we can't refuse to open symlinks
+	 * etc as that would be counterintuitive.
+	 */
+
+	if (device_fd < 0) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s: %s: %s\n",
+			opts->program_name, size_file, _("failed to open block device"), strerror(errno));
+		return false;
+		/*@+mustfreefresh@ */
+	}
+
+	device_size = (off_t) lseek(device_fd, 0, SEEK_END);
+
+	if (device_size < 0) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s: %s: %s\n",
+			opts->program_name, size_file, _("failed to determine size of block device"), strerror(errno));
+		/* NB close() after reporting error, to preserve errno. */
+		(void) close(device_fd);
+		return false;
+		/*@+mustfreefresh@ */
+	}
+
+	(void) close(device_fd);
+
+	/* Use the size we found. */
+	opts->size = device_size;
 	return true;
 }
 
@@ -374,51 +530,16 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->delay_start = pv_getnum_interval(optarg);
 			break;
 		case 's':
-			/* Permit "@<filename>" as well as just a number. */
-			if ('@' == *optarg) {
+			if ('@' != *optarg) {
+				/* A number was passed, not "@<filename>". */
+				opts->size = pv_getnum_size(optarg, opts->decimal_units);
+			} else {
+				/* Permit "@<filename>". */
 				const char *size_file = 1 + optarg;
-				struct stat sb;
-				int rc;
-
-				rc = 0;
-				memset(&sb, 0, sizeof(sb));
-				rc = stat(size_file, &sb);
-				if (0 != rc) {
-					/*@-mustfreefresh@ *//* see above */
-					fprintf(stderr, "%s: %s %s: %s\n",
-						opts->program_name,
-						_("failed to stat file"), size_file, strerror(errno));
+				if (!opts_use_size_of_file(opts, size_file)) {
 					opts_free(opts);
 					return NULL;
-					/*@+mustfreefresh@ */
 				}
-				opts->size = (off_t) (sb.st_size);
-				if (0 == opts->size && S_ISBLK(sb.st_mode)) {
-					int fd = open(size_file, O_RDONLY);
-					if (fd < 0) {
-						/*@-mustfreefresh@ *//* see above */
-						fprintf(stderr, "%s: %s %s: %s\n",
-						opts->program_name,
-						_("failed to open block device"), size_file, strerror(errno));
-						opts_free(opts);
-						return NULL;
-						/*@+mustfreefresh@ */
-					}
-					off_t size = lseek(fd, 0, SEEK_END);
-					close(fd);
-					if (size < 0) {
-						/*@-mustfreefresh@ *//* see above */
-						fprintf(stderr, "%s: %s %s: %s\n",
-						opts->program_name,
-						_("failed to seek size of block device"), size_file, strerror(errno));
-						opts_free(opts);
-						return NULL;
-						/*@+mustfreefresh@ */
-					}
-					opts->size = size;
-				}
-			} else {
-				opts->size = pv_getnum_size(optarg, opts->decimal_units);
 			}
 			break;
 		case 'l':

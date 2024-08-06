@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * feature: when using "`--size @FILE`", _FILE_ can be a block device, and its size will be used (pull request [#94](https://codeberg.org/a-j-wood/pv/pulls/94)) supplied by [alexanderperlis](https://codeberg.org/alexanderperlis)
+
 ### 1.8.12 - 18 July 2024
 
  * fix: correct the detection of output block device size that was broken in 1.8.10 ([#91](https://codeberg.org/a-j-wood/pv/issues/91))

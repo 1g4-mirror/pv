@@ -37,6 +37,7 @@ AC_CHECK_HEADERS([termios.h])
 AC_CHECK_HEADERS([libgen.h])
 AC_CHECK_HEADERS([sys/ioctl.h])
 AC_CHECK_HEADERS([libintl.h locale.h])
+AC_CHECK_HEADERS([sys/sysmacros.h])
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 
 dnl Libraries that may contain key functions.
