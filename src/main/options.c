@@ -15,6 +15,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
@@ -382,9 +383,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				rc = 0;
 				memset(&sb, 0, sizeof(sb));
 				rc = stat(size_file, &sb);
-				if (0 == rc) {
-					opts->size = (off_t) (sb.st_size);
-				} else {
+				if (0 != rc) {
 					/*@-mustfreefresh@ *//* see above */
 					fprintf(stderr, "%s: %s %s: %s\n",
 						opts->program_name,
@@ -392,6 +391,31 @@ opts_t opts_parse(unsigned int argc, char **argv)
 					opts_free(opts);
 					return NULL;
 					/*@+mustfreefresh@ */
+				}
+				opts->size = (off_t) (sb.st_size);
+				if (0 == opts->size && S_ISBLK(sb.st_mode)) {
+					int fd = open(size_file, O_RDONLY);
+					if (fd < 0) {
+						/*@-mustfreefresh@ *//* see above */
+						fprintf(stderr, "%s: %s %s: %s\n",
+						opts->program_name,
+						_("failed to open block device"), size_file, strerror(errno));
+						opts_free(opts);
+						return NULL;
+						/*@+mustfreefresh@ */
+					}
+					off_t size = lseek(fd, 0, SEEK_END);
+					close(fd);
+					if (size < 0) {
+						/*@-mustfreefresh@ *//* see above */
+						fprintf(stderr, "%s: %s %s: %s\n",
+						opts->program_name,
+						_("failed to seek size of block device"), size_file, strerror(errno));
+						opts_free(opts);
+						return NULL;
+						/*@+mustfreefresh@ */
+					}
+					opts->size = size;
 				}
 			} else {
 				opts->size = pv_getnum_size(optarg, opts->decimal_units);
