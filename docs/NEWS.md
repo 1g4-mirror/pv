@@ -1,4 +1,4 @@
-### UNRELEASED
+### 1.8.13 - 18 August 2024
 
  * feature: when using "`--size @FILE`", _FILE_ can be a block device, and its size will be used (pull request [#94](https://codeberg.org/a-j-wood/pv/pulls/94)) supplied by [alexanderperlis](https://codeberg.org/alexanderperlis)
 
