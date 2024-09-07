@@ -1,4 +1,4 @@
-### UNRELEASED
+### 1.8.14 - 7 September 2024
 
  * fix: correct double-free on exit when using "`--watchfd`" ([#96](https://codeberg.org/a-j-wood/pv/issues/96)) reported by [jettero](https://codeberg.org/jettero)
 
