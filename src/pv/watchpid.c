@@ -478,6 +478,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 		/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
 		info_array[use_idx].state->control.name = NULL;
 		info_array[use_idx].state->control.format_string = NULL;
+		info_array[use_idx].state->control.output_name = NULL;
 		/*@+mustfreeonly@ */
 		info_array[use_idx].state->control.default_format[0] = '\0';
 		use_format_string =

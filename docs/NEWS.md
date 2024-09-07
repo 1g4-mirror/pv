@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * fix: correct double-free on exit when using "`--watchfd`" ([#96](https://codeberg.org/a-j-wood/pv/issues/96)) reported by [jettero](https://codeberg.org/jettero)
+
 ### 1.8.13 - 18 August 2024
 
  * feature: when using "`--size @FILE`", _FILE_ can be a block device, and its size will be used (pull request [#94](https://codeberg.org/a-j-wood/pv/pulls/94)) supplied by [alexanderperlis](https://codeberg.org/alexanderperlis)
