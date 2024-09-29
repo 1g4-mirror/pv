@@ -17,7 +17,9 @@ Changes are listed in "[docs/NEWS.md](./docs/NEWS.md)".  The to-do list is "[doc
 Developers and translators, please see "[docs/DEVELOPERS.md](./docs/DEVELOPERS.md)".
 
 Translators can use the Weblate instance hosted by Codeberg:
-[https://translate.codeberg.org/projects/pv/](https://translate.codeberg.org/projects/pv/)
+[https://translate.codeberg.org/engage/pv/](https://translate.codeberg.org/engage/pv/)
+
+[![Translation status](https://translate.codeberg.org/widget/pv/multi-auto.svg)](https://translate.codeberg.org/engage/pv/)
 
 
 # Compilation
