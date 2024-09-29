@@ -3,11 +3,11 @@ msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-08-18 22:01+0100\n"
 "PO-Revision-Date: 2024-09-29 10:47+0000\n"
-"Last-Translator: Hartmut Goebel <htgoebel@users.noreply.translate.codeberg."
-"org>\n"
+"Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.7.2\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -25,7 +25,6 @@ msgstr ""
 "nls/intl/gettext.c src/nls/intl/loadmsgcat.c src/nls/intl/localealias.c src/"
 "nls/intl/textdomain.c src/nls/intl-cat/cat-compat.c src/nls/intl-gett/intl-"
 "compat.c\n"
-"Content-Transfer-Encoding: 8bit\n"
 
 #: src/main/help.c:284
 msgid "show progress bar"
@@ -183,6 +182,7 @@ msgid "BYTES"
 msgstr "BYTES"
 
 #: src/main/help.c:370
+#, fuzzy
 msgid "use a buffer size of BYTES"
 msgstr "BYTES benutze einen Puffer in der Größe von BYTES"
 
