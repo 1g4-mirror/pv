@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-08-18 22:01+0100\n"
-"PO-Revision-Date: 2024-09-29 10:47+0000\n"
+"PO-Revision-Date: 2024-09-29 11:07+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
 "Language: de\n"
@@ -182,9 +182,8 @@ msgid "BYTES"
 msgstr "BYTES"
 
 #: src/main/help.c:370
-#, fuzzy
 msgid "use a buffer size of BYTES"
-msgstr "BYTES benutze einen Puffer in der Größe von BYTES"
+msgstr "benutze einen Puffer in der Größe von BYTES"
 
 #: src/main/help.c:373
 msgid "never use splice(), always use read/write"
