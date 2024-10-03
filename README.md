@@ -12,7 +12,7 @@ completion it is, and an estimate of how long it will be until completion.
 A manual page is included in this distribution ("`man pv`").  Before
 installation, it is in "[docs/pv.1](./docs/pv.1.md)".
 
-Changes are listed in "[docs/NEWS.md](./docs/NEWS.md)".  The to-do list is "[docs/TODO.md](./docs/TODO.md)".
+Changes are listed in "[docs/NEWS.md](./docs/NEWS.md)".
 
 Developers and translators, please see "[docs/DEVELOPERS.md](./docs/DEVELOPERS.md)".
 

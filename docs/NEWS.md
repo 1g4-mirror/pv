@@ -1,6 +1,7 @@
 ### UNRELEASED
 
  * fix: complete set of German translations supplied by Hartmut Goebel ([#98](https://codeberg.org/a-j-wood/pv/pulls/98))
+ * cleanup: removed TODO.md, since it's just an outdated copy of the issue tracker
 
 ### 1.8.14 - 7 September 2024
 
