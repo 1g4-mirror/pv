@@ -70,6 +70,18 @@ void pv_write_retry(int fd, const char *buf, size_t count)
 
 
 /*
+ * Write the given buffer to the terminal with pv_write_retry(), unless
+ * stderr is suspended.
+ */
+void pv_tty_write(pvstate_t state, const char *buf, size_t count)
+{
+	if (1 == state->flag.suspend_stderr)
+		return;
+	pv_write_retry(STDERR_FILENO, buf, count);
+}
+
+
+/*
  * Create a per-euid, per-tty, lockfile in ${TMPDIR:-${TMP:-/tmp}} for the
  * tty on the given file descriptor.
  */
@@ -462,7 +474,7 @@ void pv_crs_init(pvstate_t state)
 		 * initial ypos.
 		 */
 		if (state->cursor.y_start > 0)
-			pv_write_retry(STDERR_FILENO, "\n", 1);
+			pv_tty_write(state, "\n", 1);
 		pv_crs_unlock(state, terminalfd);
 
 		if (state->cursor.y_start < 1)
@@ -589,9 +601,9 @@ void pv_crs_update(pvstate_t state, const char *output_line)
 			memset(cup_cmd, 0, sizeof(cup_cmd));
 			(void) pv_snprintf(cup_cmd, sizeof(cup_cmd), "\033[%u;1H", state->control.height);
 			cup_cmd_length = strlen(cup_cmd);	/* flawfinder: ignore */
-			pv_write_retry(STDERR_FILENO, cup_cmd, cup_cmd_length);
+			pv_tty_write(state, cup_cmd, cup_cmd_length);
 			for (; offs > 0; offs--) {
-				pv_write_retry(STDERR_FILENO, "\n", 1);
+				pv_tty_write(state, "\n", 1);
 			}
 
 			pv_crs_unlock(state, STDERR_FILENO);
@@ -624,8 +636,8 @@ void pv_crs_update(pvstate_t state, const char *output_line)
 
 	pv_crs_lock(state, STDERR_FILENO);
 
-	pv_write_retry(STDERR_FILENO, cup_cmd, cup_cmd_length);
-	pv_write_retry(STDERR_FILENO, output_line, output_line_length);
+	pv_tty_write(state, cup_cmd, cup_cmd_length);
+	pv_tty_write(state, output_line, output_line_length);
 
 	pv_crs_unlock(state, STDERR_FILENO);
 }
@@ -664,7 +676,7 @@ void pv_crs_fini(pvstate_t state)
 
 	pv_crs_lock(state, STDERR_FILENO);
 
-	pv_write_retry(STDERR_FILENO, cup_cmd, strlen(cup_cmd));	/* flawfinder: ignore */
+	pv_tty_write(state, cup_cmd, strlen(cup_cmd));	/* flawfinder: ignore */
 	/* flawfinder - pv_snprintf() always \0-terminates (see above). */
 
 #ifdef HAVE_IPC

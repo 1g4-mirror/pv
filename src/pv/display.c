@@ -1321,7 +1321,7 @@ void pv_display(pvstate_t state, long double esec, off_t sl, off_t tot)
 		return;
 
 	if (state->control.numeric) {
-		pv_write_retry(STDERR_FILENO, state->display.display_buffer, state->display.display_string_len);
+		pv_tty_write(state, state->display.display_buffer, state->display.display_string_len);
 	} else if (state->control.cursor) {
 		if (state->control.force || pv_in_foreground()) {
 			pv_crs_update(state, state->display.display_buffer);
@@ -1329,8 +1329,8 @@ void pv_display(pvstate_t state, long double esec, off_t sl, off_t tot)
 		}
 	} else {
 		if (state->control.force || pv_in_foreground()) {
-			pv_write_retry(STDERR_FILENO, state->display.display_buffer, state->display.display_string_len);
-			pv_write_retry(STDERR_FILENO, "\r", 1);
+			pv_tty_write(state, state->display.display_buffer, state->display.display_string_len);
+			pv_tty_write(state, "\r", 1);
 			state->display.display_visible = true;
 		}
 	}

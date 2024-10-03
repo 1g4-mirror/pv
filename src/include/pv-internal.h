@@ -160,7 +160,6 @@ struct pvstate_s {
 		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
 		volatile pid_t sender;		 /* PID of sending process for SIGUSR2 */
 #endif
-		int old_stderr;			 /* see pv_sig_ttou() */
 	} signal;
 
 	/*******************
@@ -171,6 +170,7 @@ struct pvstate_s {
 		volatile sig_atomic_t terminal_resized;	 /* whether we need to get term size again */
 		volatile sig_atomic_t trigger_exit;	 /* whether we need to abort right now */
 		volatile sig_atomic_t clear_tty_tostop_on_exit;	/* whether to clear tty TOSTOP on exit */
+		volatile sig_atomic_t suspend_stderr;	 /* whether writing to stderr is suspended */
 	} flag;
 
 	/*****************
@@ -330,6 +330,7 @@ int pv_next_file(pvstate_t, unsigned int, int);
 /*@out@*/ const char *pv_current_file_name(pvstate_t);
 
 void pv_write_retry(int, const char *, size_t);
+void pv_tty_write(pvstate_t, const char *, size_t);
 
 void pv_crs_fini(pvstate_t);
 void pv_crs_init(pvstate_t);

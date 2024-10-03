@@ -354,7 +354,7 @@ int pv_main_loop(pvstate_t state)
 	} else {
 		if ((!state->control.numeric) && (!state->control.no_display)
 		    && (state->display.display_visible))
-			pv_write_retry(STDERR_FILENO, "\n", 1);
+			pv_tty_write(state, "\n", 1);
 	}
 
 	if (1 == state->flag.trigger_exit)
@@ -517,7 +517,7 @@ int pv_watchfd_loop(pvstate_t state)
 	}
 
 	if (!state->control.numeric)
-		pv_write_retry(STDERR_FILENO, "\n", 1);
+		pv_tty_write(state, "\n", 1);
 
 	if (1 == state->flag.trigger_exit)
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
@@ -742,7 +742,7 @@ int pv_watchpid_loop(pvstate_t state)
 
 			if (displayed_lines > 0) {
 				debug("%s", "adding newline");
-				pv_write_retry(STDERR_FILENO, "\n", 1);
+				pv_tty_write(state, "\n", 1);
 			}
 
 			debug("%s %d [%d]: %Lf / %Ld / %Ld", "fd", fd, idx, elapsed_seconds, transferred_since_last,
@@ -765,10 +765,10 @@ int pv_watchpid_loop(pvstate_t state)
 		while (blank_lines > 0) {
 			unsigned int x;
 			if (displayed_lines > 0)
-				pv_write_retry(STDERR_FILENO, "\n", 1);
+				pv_tty_write(state, "\n", 1);
 			for (x = 0; x < state->control.width; x++)
-				pv_write_retry(STDERR_FILENO, " ", 1);
-			pv_write_retry(STDERR_FILENO, "\r", 1);
+				pv_tty_write(state, " ", 1);
+			pv_tty_write(state, "\r", 1);
 			blank_lines--;
 			displayed_lines++;
 		}
@@ -776,7 +776,7 @@ int pv_watchpid_loop(pvstate_t state)
 		debug("%s: %d", "displayed lines", displayed_lines);
 
 		while (displayed_lines > 1) {
-			pv_write_retry(STDERR_FILENO, "\033[A", 3);
+			pv_tty_write(state, "\033[A", 3);
 			displayed_lines--;
 		}
 	}
@@ -788,14 +788,14 @@ int pv_watchpid_loop(pvstate_t state)
 	while (blank_lines > 0) {
 		unsigned int x;
 		for (x = 0; x < state->control.width; x++)
-			pv_write_retry(STDERR_FILENO, " ", 1);
-		pv_write_retry(STDERR_FILENO, "\r", 1);
+			pv_tty_write(state, " ", 1);
+		pv_tty_write(state, "\r", 1);
 		blank_lines--;
 		if (blank_lines > 0)
-			pv_write_retry(STDERR_FILENO, "\n", 1);
+			pv_tty_write(state, "\n", 1);
 	}
 	while (prev_displayed_lines > 1) {
-		pv_write_retry(STDERR_FILENO, "\033[A", 3);
+		pv_tty_write(state, "\033[A", 3);
 		prev_displayed_lines--;
 	}
 

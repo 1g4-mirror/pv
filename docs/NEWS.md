@@ -4,6 +4,7 @@
  * cleanup: removed TODO.md, since it's just an outdated copy of the issue tracker
  * cleanup: re-ordered structure members to reduce padding
  * cleanup: improved readability of SIGTTOU handling code
+ * cleanup: instead of moving stderr when backgrounded, set a suspend-output flag
 
 ### 1.8.14 - 7 September 2024
 

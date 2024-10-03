@@ -69,44 +69,21 @@ static void pv_sig_ensure_tty_tostop()
 }
 
 /*
- * Handle SIGTTOU (tty output for background process) by redirecting stderr
- * to /dev/null, so that we can be stopped and backgrounded without messing
- * up the terminal. We store the old stderr file descriptor so that on a
- * subsequent SIGCONT we can try writing to the terminal again, in case we
- * get backgrounded and later get foregrounded again.
+ * Handle SIGTTOU (tty output for background process) by setting the flag to
+ * suspend writes to stderr, so that we can be stopped and backgrounded
+ * without messing up the terminal.  On a subsequent SIGCONT we will try
+ * writing to the terminal again, in case we get backgrounded and later get
+ * foregrounded again.
  */
 static void pv_sig_ttou( /*@unused@ */  __attribute__((unused))
 			int s)
 {
-	int fd;
-
 	if (NULL == pv_sig_state)
 		return;
 
-	fd = open("/dev/null", O_RDWR);	    /* flawfinder: ignore */
-	if (fd < 0) {
-		debug("%s: %s", "failed to open /dev/null", strerror(errno));
-		return;
-	}
-
-	/*
-	 * flawfinder rationale: not checking for symlinks because this is
-	 * explicitly a device file under /dev so we assume it is safe to
-	 * open.
-	 *
-	 * TODO: look at just preventing stderr output instead of writing to
-	 * stderr while backgrounded.
-	 */
-
-	if (-1 == pv_sig_state->signal.old_stderr)
-		pv_sig_state->signal.old_stderr = dup(STDERR_FILENO);
-
-	if (dup2(fd, STDERR_FILENO) < 0) {
-		debug("%s: %s", "failed to replace stderr", strerror(errno));
-	}
-
-	if (0 != close(fd)) {
-		debug("%s: %s", "failed to close /dev/null", strerror(errno));
+	if (1 != pv_sig_state->flag.suspend_stderr) {
+		debug("%s", "SIGTTOU - suspending stderr");
+		pv_sig_state->flag.suspend_stderr = 1;
 	}
 }
 
@@ -130,7 +107,7 @@ static void pv_sig_tstp( /*@unused@ */  __attribute__((unused))
 /*
  * Handle SIGCONT (continue if stopped) by adding the elapsed time since the
  * last SIGTSTP to the elapsed time offset, and by trying to write to the
- * terminal again (by replacing the /dev/null stderr with the old stderr).
+ * terminal again.
  */
 static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 			int s)
@@ -166,16 +143,11 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 	}
 
 	/*
-	 * Restore the old stderr, if we had replaced it.
+	 * Try resuming our use of stderr, if we had suspended it.
 	 */
-	if (pv_sig_state->signal.old_stderr != -1) {
-		if (dup2(pv_sig_state->signal.old_stderr, STDERR_FILENO) < 0) {
-			debug("%s: %s", "failed to restore old stderr", strerror(errno));
-		}
-		if (0 != close(pv_sig_state->signal.old_stderr)) {
-			debug("%s: %s", "failed to close duplicate old stderr", strerror(errno));
-		}
-		pv_sig_state->signal.old_stderr = -1;
+	if (1 == pv_sig_state->flag.suspend_stderr) {
+		debug("%s", "SIGCONT - resuming stderr");
+		pv_sig_state->flag.suspend_stderr = 0;
 	}
 
 	pv_sig_ensure_tty_tostop();
@@ -283,7 +255,7 @@ void pv_sig_init(pvstate_t state)
 
 	pv_sig_state = state;
 
-	pv_sig_state->signal.old_stderr = -1;
+	pv_sig_state->flag.suspend_stderr = 0;
 	pv_elapsedtime_zero(&(pv_sig_state->signal.tstp_time));
 	pv_elapsedtime_zero(&(pv_sig_state->signal.toffset));
 
@@ -510,10 +482,9 @@ void pv_sig_allowpause(void)
 
 
 /*
- * If we have redirected stderr to /dev/null, check every second or so to
- * see whether we can write to the terminal again - this is so that if we
- * get backgrounded, then foregrounded again, we start writing to the
- * terminal again.
+ * If we have suspended stderr, check every second or so to see whether we
+ * can write to the terminal again - this is so that if we get backgrounded,
+ * then foregrounded again, we start writing to the terminal again.
  */
 void pv_sig_checkbg(void)
 {
@@ -527,18 +498,11 @@ void pv_sig_checkbg(void)
 
 	next_check = time(NULL) + 1;
 
-	if (-1 == pv_sig_state->signal.old_stderr)
+	if (0 == pv_sig_state->flag.suspend_stderr)
 		return;
 
-	if (dup2(pv_sig_state->signal.old_stderr, STDERR_FILENO) < 0) {
-		debug("%s: %s", "failed to restore old stderr", strerror(errno));
-	}
-
-	if (0 != close(pv_sig_state->signal.old_stderr)) {
-		debug("%s: %s", "failed to close duplicate old stderr", strerror(errno));
-	}
-
-	pv_sig_state->signal.old_stderr = -1;
+	debug("%s: %s", "pv_sig_checkbg", "attempting to resume stderr");
+	pv_sig_state->flag.suspend_stderr = 0;
 
 	pv_sig_ensure_tty_tostop();
 #ifdef HAVE_IPC
