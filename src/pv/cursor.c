@@ -437,8 +437,8 @@ void pv_crs_init(pvstate_t state)
 	 * If we have already set the terminal TOSTOP attribute, set the
 	 * flag in shared memory to let the other instances know.
 	 */
-	if ((!state->cursor.noipc) && state->signal.pv_tty_tostop_added && (NULL != state->cursor.shared)) {
-		debug("%s", "propagating local pv_tty_tostop_added true value to shared flag");
+	if ((!state->cursor.noipc) && (1 == state->flag.clear_tty_tostop_on_exit) && (NULL != state->cursor.shared)) {
+		debug("%s", "propagating local clear_tty_tostop_on_exit true value to shared tty_tostop_added flag");
 		state->cursor.shared->tty_tostop_added = true;
 	}
 
@@ -674,9 +674,9 @@ void pv_crs_fini(pvstate_t state)
 	 * it.
 	 */
 	if ((!state->cursor.noipc) && (NULL != state->cursor.shared) && state->cursor.shared->tty_tostop_added) {
-		if (!state->signal.pv_tty_tostop_added) {
-			debug("%s", "propagating shared tty_tostop_added true value to local flag");
-			state->signal.pv_tty_tostop_added = true;
+		if (0 == state->flag.clear_tty_tostop_on_exit) {
+			debug("%s", "propagating shared tty_tostop_added true value to local clear_tty_tostop_on_exit flag");
+			state->flag.clear_tty_tostop_on_exit = 1;
 		}
 	}
 

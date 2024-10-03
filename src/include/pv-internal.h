@@ -160,8 +160,7 @@ struct pvstate_s {
 		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
 		volatile pid_t sender;		 /* PID of sending process for SIGUSR2 */
 #endif
-		int old_stderr;		 /* see pv_sig_ttou() */
-		bool pv_tty_tostop_added;	 /* whether we had to set TOSTOP on the terminal */
+		int old_stderr;			 /* see pv_sig_ttou() */
 	} signal;
 
 	/*******************
@@ -171,6 +170,7 @@ struct pvstate_s {
 		volatile sig_atomic_t reparse_display;	 /* whether to re-check format string */
 		volatile sig_atomic_t terminal_resized;	 /* whether we need to get term size again */
 		volatile sig_atomic_t trigger_exit;	 /* whether we need to abort right now */
+		volatile sig_atomic_t clear_tty_tostop_on_exit;	/* whether to clear tty TOSTOP on exit */
 	} flag;
 
 	/*****************

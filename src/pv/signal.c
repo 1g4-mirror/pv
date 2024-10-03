@@ -27,8 +27,13 @@ void pv_crs_needreinit(pvstate_t);
 
 /*
  * Ensure that terminal attribute TOSTOP is set.  If we have to set it,
- * record that fact by setting the state boolean "pv_tty_tostop_added" to
- * true, so that in pv_sig_fini() we can turn it back off again.
+ * record that fact by setting "clear_tty_tostop_on_exit" to 1, so that in
+ * pv_sig_fini() we can turn it back off again.
+ *
+ * In "-c" mode with IPC, then if we have to set TOSTOP, we also tell the
+ * other PV instances about it via the shared "tty_tostop_added" flag, so
+ * those instances can set their own on-exit flag, meaning that if any of
+ * the PV instances set it, the last one to exit will clear it.
  */
 static void pv_sig_ensure_tty_tostop()
 {
@@ -45,7 +50,7 @@ static void pv_sig_ensure_tty_tostop()
 	if (0 == (terminal_attributes.c_lflag & TOSTOP)) {
 		terminal_attributes.c_lflag |= TOSTOP;
 		if (0 == tcsetattr(STDERR_FILENO, TCSANOW, &terminal_attributes)) {
-			pv_sig_state->signal.pv_tty_tostop_added = true;
+			pv_sig_state->flag.clear_tty_tostop_on_exit = 1;
 			debug("%s", "set terminal TOSTOP attribute");
 		} else {
 			debug("%s: %s", "failed to set terminal TOSTOP attribute", strerror(errno));
@@ -416,7 +421,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 #endif
 	(void) sigaction(SIGALRM, &(pv_sig_state->signal.old_sigalrm), NULL);
 
-	need_to_clear_tostop = pv_sig_state->signal.pv_tty_tostop_added;
+	need_to_clear_tostop = 1 == pv_sig_state->flag.clear_tty_tostop_on_exit ? true : false;
 
 	if (pv_sig_state->control.cursor) {
 #ifdef HAVE_IPC
@@ -457,7 +462,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 			}
 		}
 
-		pv_sig_state->signal.pv_tty_tostop_added = false;
+		pv_sig_state->flag.clear_tty_tostop_on_exit = 0;
 	}
 }
 
