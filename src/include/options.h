@@ -23,8 +23,34 @@ extern "C" {
 struct opts_s;
 typedef struct opts_s *opts_t;
 
-struct opts_s {           /* structure describing run-time options */
+/*
+ * Structure describing run-time options.
+ *
+ * Members are ordered by size to minimise padding.
+ */
+struct opts_s {
+	double interval;               /* interval between updates */
+	double delay_start;            /* delay before first display */
 	/*@keep@*/ const char *program_name; /* name the program is running as */
+	/*@keep@*/ /*@null@*/ char *output; /* fd to write output to */
+	/*@keep@*/ /*@null@*/ char *name;    /* display name, if any */
+	/*@keep@*/ /*@null@*/ char *format;  /* output format, if any */
+	/*@keep@*/ /*@null@*/ char *pidfile; /* PID file, if any */
+	/*@keep@*/ /*@null@*/ const char **argv;   /* array of non-option arguments */
+	size_t lastwritten;            /* show N bytes last written */
+	off_t rate_limit;              /* rate limit, in bytes per second */
+	size_t buffer_size;            /* buffer size, in bytes (0=default) */
+	off_t size;                    /* total size of data */
+	off_t error_skip_block;        /* skip block size, 0 for adaptive */
+	unsigned int remote;           /* PID of pv to update settings of */
+	unsigned int skip_errors;      /* skip read errors counter */
+	pid_t watch_pid;	       /* process to watch fds of */
+	int watch_fd;		       /* fd to watch */
+	unsigned int average_rate_window; /* time window in seconds for average rate calculations */
+	unsigned int width;            /* screen width */
+	unsigned int height;           /* screen height */
+	unsigned int argc;             /* number of non-option arguments */
+	unsigned int argv_length;      /* allocated array size */
 	bool do_nothing;               /* exit-without-doing-anything flag */
 	bool progress;                 /* progress bar flag */
 	bool timer;                    /* timer flag */
@@ -36,7 +62,6 @@ struct opts_s {           /* structure describing run-time options */
 	bool bits;                     /* report transfer size in bits */
 	bool decimal_units;            /* decimal prefix flag */
 	bool bufpercent;               /* transfer buffer percentage flag */
-	size_t lastwritten;            /* show N bytes last written */
 	bool force;                    /* force-if-not-terminal flag */
 	bool cursor;                   /* whether to use cursor positioning */
 	bool numeric;                  /* numeric output only */
@@ -44,33 +69,13 @@ struct opts_s {           /* structure describing run-time options */
 	bool linemode;                 /* count lines instead of bytes */
 	bool null_terminated_lines;    /* lines are null-terminated */
 	bool no_display;               /* do nothing other than pipe data */
-	off_t rate_limit;              /* rate limit, in bytes per second */
-	size_t buffer_size;            /* buffer size, in bytes (0=default) */
-	unsigned int remote;           /* PID of pv to update settings of */
-	off_t size;                    /* total size of data */
 	bool no_splice;                /* flag set if never to use splice */
-	unsigned int skip_errors;      /* skip read errors counter */
-	off_t error_skip_block;        /* skip block size, 0 for adaptive */
 	bool stop_at_size;             /* set if we stop at "size" bytes */
 	bool sync_after_write;         /* set if we sync after every write */
 	bool direct_io;                /* set if O_DIRECT is to be used */
 	bool discard_input;            /* set to write nothing to output */
-	double interval;               /* interval between updates */
-	double delay_start;            /* delay before first display */
-	pid_t watch_pid;	       /* process to watch fds of */
-	int watch_fd;		       /* fd to watch */
-	/*@keep@*/ /*@null@*/ char *output; /* fd to write output to */
-	unsigned int average_rate_window; /* time window in seconds for average rate calculations */
-	unsigned int width;            /* screen width */
-	unsigned int height;           /* screen height */
 	bool width_set_manually;       /* width was set manually, not detected */
 	bool height_set_manually;      /* height was set manually, not detected */
-	/*@keep@*/ /*@null@*/ char *name;    /* display name, if any */
-	/*@keep@*/ /*@null@*/ char *format;  /* output format, if any */
-	/*@keep@*/ /*@null@*/ char *pidfile; /* PID file, if any */
-	unsigned int argc;             /* number of non-option arguments */
-	/*@keep@*/ /*@null@*/ const char **argv;   /* array of non-option arguments */
-	unsigned int argv_length;      /* allocated array size */
 };
 
 /*@-exportlocal@*/

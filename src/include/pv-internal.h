@@ -75,6 +75,8 @@ struct pvcursorstate_s {
 
 /*
  * Structure for holding PV internal state. Opaque outside the PV library.
+ *
+ * In general, members are ordered by size, to minimise padding.
  */
 struct pvstate_s {
 	/******************
@@ -91,14 +93,31 @@ struct pvstate_s {
 	 * Input files *
 	 ***************/
 	struct {
-		unsigned int file_count;	 /* number of input files */
 		/*@only@*/ /*@null@*/ char **filename; /* input filenames */
+		unsigned int file_count;	 /* number of input files */
 	} files;
 
 	/*******************
 	 * Program control *
 	 *******************/
 	struct {
+		char default_format[PV_SIZEOF_DEFAULT_FORMAT];	 /* default format string */
+		double interval;                 /* interval between updates */
+		double delay_start;              /* delay before first display */
+		/*@only@*/ /*@null@*/ char *name;		 /* display name */
+		/*@only@*/ /*@null@*/ char *format_string;	 /* output format string */
+		/*@null@*/ char *output_name;    /* name of the output, for diagnostics */
+		off_t error_skip_block;          /* skip block size, 0 for adaptive */
+		off_t rate_limit;                /* rate limit, in bytes per second */
+		size_t target_buffer_size;       /* buffer size (0=default) */
+		off_t size;                      /* total size of data */
+		pid_t watch_pid;		 /* process to watch fds of */
+		unsigned int skip_errors;        /* skip read errors counter */
+		int watch_fd;			 /* fd to watch */
+		int output_fd;                   /* fd to write output to */
+		unsigned int average_rate_window; /* time window in seconds for average rate calculations */
+		unsigned int width;              /* screen width */
+		unsigned int height;             /* screen height */
 		bool force;                      /* display even if not on terminal */
 		bool cursor;                     /* use cursor positioning */
 		bool numeric;                    /* numeric output only */
@@ -108,45 +127,20 @@ struct pvstate_s {
 		bool decimal_units;		 /* use decimal prefixes */
 		bool null_terminated_lines;      /* lines are null-terminated */
 		bool no_display;                 /* do nothing other than pipe data */
-		unsigned int skip_errors;        /* skip read errors counter */
-		off_t error_skip_block;          /* skip block size, 0 for adaptive */
 		bool stop_at_size;               /* set if we stop at "size" bytes */
 		bool sync_after_write;           /* set if we sync after every write */
 		bool direct_io;                  /* set if O_DIRECT is to be used */
 		bool direct_io_changed;          /* set when direct_io is changed */
 		bool no_splice;                  /* never use splice() */
 		bool discard_input;              /* write nothing to stdout */
-		off_t rate_limit;                /* rate limit, in bytes per second */
-		size_t target_buffer_size;       /* buffer size (0=default) */
-		off_t size;                      /* total size of data */
-		double interval;                 /* interval between updates */
-		double delay_start;              /* delay before first display */
-		pid_t watch_pid;		 /* process to watch fds of */
-		int watch_fd;			 /* fd to watch */
-		int output_fd;                   /* fd to write output to */
-		/*@null@*/ char *output_name;    /* name of the output, for diagnostics */
-		unsigned int average_rate_window; /* time window in seconds for average rate calculations */
-		unsigned int width;              /* screen width */
-		unsigned int height;             /* screen height */
 		bool width_set_manually;	 /* width was set manually, not detected */
 		bool height_set_manually;	 /* height was set manually, not detected */
-		/*@only@*/ /*@null@*/ char *name;		 /* display name */
-		char default_format[PV_SIZEOF_DEFAULT_FORMAT];	 /* default format string */
-		/*@only@*/ /*@null@*/ char *format_string;	 /* output format string */
 	} control;
 
 	/*******************
 	 * Signal handling *
 	 *******************/
 	struct {
-		int old_stderr;		 /* see pv_sig_ttou() */
-		bool pv_tty_tostop_added;	 /* whether we had to set TOSTOP on the terminal */
-		struct timespec tstp_time;	 /* see pv_sig_tstp() / __cont() */
-		struct timespec toffset;	 /* total time spent stopped */
-#ifdef SA_SIGINFO
-		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
-		volatile pid_t sender;		 /* PID of sending process for SIGUSR2 */
-#endif
 		/* old signal handlers to restore in pv_sig_fini(). */
 		struct sigaction old_sigpipe;
 		struct sigaction old_sigttou;
@@ -160,6 +154,14 @@ struct pvstate_s {
 		struct sigaction old_sigusr2;
 #endif
 		struct sigaction old_sigalrm;
+		struct timespec tstp_time;	 /* see pv_sig_tstp() / __cont() */
+		struct timespec toffset;	 /* total time spent stopped */
+#ifdef SA_SIGINFO
+		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
+		volatile pid_t sender;		 /* PID of sending process for SIGUSR2 */
+#endif
+		int old_stderr;		 /* see pv_sig_ttou() */
+		bool pv_tty_tostop_added;	 /* whether we had to set TOSTOP on the terminal */
 	} signal;
 
 	/*******************
@@ -175,17 +177,30 @@ struct pvstate_s {
 	 * Display state *
 	 *****************/
 	struct {
-		/*@only@*/ /*@null@*/ char *display_buffer;	/* buffer for display string */
-		size_t display_buffer_size;	 /* size allocated to display buffer */
-		size_t display_string_len;	 /* length of string in display buffer */
-		unsigned int prev_screen_width;	 /* screen width last time we were called */
-		bool display_visible;		 /* set once anything written to terminal */
 
-		int percentage;			 /* transfer percentage completion */
+		struct {	/* format string broken into display components */
+			size_t str_start;		/* for strings: start offset */
+			size_t str_length;		/* for strings: length */
+			pv_display_component type;	/* type of display component */
+		} format[PV_FORMAT_ARRAY_MAX];
+
+		struct {	/* display components */
+			char content[PV_SIZEOF_COMPONENT_STR];	/* string to display */
+			size_t length;				/* number of bytes in string */
+			bool required;				/* true if included in format */
+		} component[PV_COMPONENT__MAX];
+
+		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
 
 		long double prev_elapsed_sec;	 /* elapsed sec at which rate last calculated */
 		long double prev_rate;		 /* last calculated instantaneous transfer rate */
 		long double prev_trans;		 /* bytes transferred since last rate calculation */
+		long double current_avg_rate;    /* current average rate over last history intervals */
+		/*@only@*/ /*@null@*/ char *display_buffer;	/* buffer for display string */
+		size_t display_buffer_size;	 /* size allocated to display buffer */
+		size_t display_string_len;	 /* length of string in display buffer */
+		off_t initial_offset;		 /* offset when first opened (when watching fds) */
+		size_t lastoutput_length;	 /* number of last-output bytes to show */
 
 		/* Keep track of progress over last intervals to compute current average rate. */
 		/*@null@*/ struct {	 /* state at previous intervals (circular buffer) */
@@ -193,28 +208,14 @@ struct pvstate_s {
 			off_t total_bytes;		/* amount transferred by that time */
 		} *history;
 		size_t history_len;		 /* total size of history array */
-		int history_interval;		 /* seconds between each history entry */
 		size_t history_first;		 /* index of oldest entry */
 		size_t history_last;		 /* index of newest entry */
-		long double current_avg_rate;    /* current average rate over last history intervals */
-
-		off_t initial_offset;		 /* offset when first opened (when watching fds) */
-
-		size_t lastoutput_length;	 /* number of last-output bytes to show */
-		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
-
 		size_t format_segment_count;	 /* number of format string segments */
-		struct {	/* format string broken into display components */
-			pv_display_component type;	/* type of display component */
-			size_t str_start;		/* for strings: start offset */
-			size_t str_length;		/* for strings: length */
-		} format[PV_FORMAT_ARRAY_MAX];
 
-		struct {	/* display components */
-			bool required;				/* true if included in format */
-			char content[PV_SIZEOF_COMPONENT_STR];	/* string to display */
-			size_t length;				/* number of bytes in string */
-		} component[PV_COMPONENT__MAX];
+		int history_interval;		 /* seconds between each history entry */
+		unsigned int prev_screen_width;	 /* screen width last time we were called */
+		int percentage;			 /* transfer percentage completion */
+		bool display_visible;		 /* set once anything written to terminal */
 
 	} display;
 
@@ -222,19 +223,21 @@ struct pvstate_s {
 	 * Cursor/IPC state *
 	 ********************/
 	struct {
+		char lock_file[PV_SIZEOF_CRS_LOCK_FILE];
 #ifdef HAVE_IPC
+		/*@keep@*/ /*@null@*/ struct pvcursorstate_s *shared; /* data shared between instances */
 		int shmid;		 /* ID of our shared memory segment */
 		int pvcount;		 /* number of `pv' processes in total */
 		int pvmax;		 /* highest number of `pv's seen */
-		/*@keep@*/ /*@null@*/ struct pvcursorstate_s *shared; /* data shared between instances */
 		int y_lastread;		 /* last value of _y_top seen */
 		int y_offset;		 /* our Y offset from this top position */
 		int needreinit;		 /* counter if we need to reinit cursor pos */
-		bool noipc;		 /* set if we can't use IPC */
 #endif				/* HAVE_IPC */
 		int lock_fd;		 /* fd of lockfile, -1 if none open */
-		char lock_file[PV_SIZEOF_CRS_LOCK_FILE];
 		int y_start;		 /* our initial Y coordinate */
+#ifdef HAVE_IPC
+		bool noipc;		 /* set if we can't use IPC */
+#endif				/* HAVE_IPC */
 	} cursor;
 
 	/*******************
@@ -261,6 +264,9 @@ struct pvstate_s {
 		size_t read_position;		 /* amount of data in buffer */
 		size_t write_position;		 /* buffered data written */
 
+		ssize_t to_write;		 /* max to write this time around */
+		ssize_t written;		 /* bytes sent to stdout this time */
+
 		/*
 		 * While reading from a file descriptor we keep track of how
 		 * many times in a row we've seen errors
@@ -276,9 +282,9 @@ struct pvstate_s {
 		 *
 		 * This way, we're treating each input file separately.
 		 */
-		int last_read_skip_fd;
 		off_t read_errors_in_a_row;
-		bool read_error_warning_shown;
+		int last_read_skip_fd;
+		/* read_error_warning_shown is defined below. */
 #ifdef HAVE_SPLICE
 		/*
 		 * These variables are used to keep track of whether
@@ -291,15 +297,12 @@ struct pvstate_s {
 		int splice_failed_fd;
 		bool splice_used;
 #endif
-		ssize_t to_write;		 /* max to write this time around */
-		ssize_t written;		 /* bytes sent to stdout this time */
+		bool read_error_warning_shown;
 	} transfer;
 };
 
 
 struct pvwatchfd_s {
-	pid_t watch_pid;		 /* PID to watch */
-	int watch_fd;			 /* fd to watch, -1 = not displayed */
 #ifdef __APPLE__
 #else
 	char file_fdinfo[PV_SIZEOF_FILE_FDINFO]; /* path to /proc fdinfo file */
@@ -313,6 +316,8 @@ struct pvwatchfd_s {
 	off_t position;			 /* position last seen at */
 	struct timespec start_time;	 /* time we started watching the fd */
 	/*@null@*/ pvstate_t state;	 /* state object for flags and display */
+	pid_t watch_pid;		 /* PID to watch */
+	int watch_fd;			 /* fd to watch, -1 = not displayed */
 };
 typedef struct pvwatchfd_s *pvwatchfd_t;
 
