@@ -131,7 +131,14 @@ these will need to be corrected by translators.
 
 The package maintainer should run through these steps for a new release:
 
- * Check for patches and bug reports at https://tracker.debian.org/pkg/pv
+ * Check for patches and bug reports:
+   * <https://codeberg.org/a-j-wood/pv/issues>
+   * <https://tracker.debian.org/pkg/pv>
+   * <https://launchpad.net/ubuntu/+source/pv>
+   * <https://archlinux.org/packages/extra/x86_64/pv/>
+   * <https://packages.gentoo.org/packages/sys-apps/pv>
+   * <https://cvsweb.openbsd.org/ports/sysutils/pv/>
+   * <https://packages.fedoraproject.org/pkgs/pv/pv/>
  * Run "`make indent; make indent indentclean check`"
  * Run "`make -C po update-po`"
  * Run "`make analyse`" and see whether remaining warnings can be addressed
