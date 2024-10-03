@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-08-18 22:01+0100\n"
+"POT-Creation-Date: 2024-10-03 22:45+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -373,19 +373,19 @@ msgstr "Il n'y a AUCUNE GARANTIE, dans la mesure permise par la loi."
 msgid "Project web site"
 msgstr "Site web du projet"
 
-#: src/pv/cursor.c:87
+#: src/pv/cursor.c:99
 msgid "failed to get terminal name"
 msgstr "échec de lecture du nom du terminal"
 
-#: src/pv/cursor.c:132
+#: src/pv/cursor.c:144
 msgid "failed to open lock file"
 msgstr "échec de l'ouverture du fichier de verrouillage"
 
-#: src/pv/cursor.c:165
+#: src/pv/cursor.c:177
 msgid "lock attempt failed"
 msgstr "échec de la tentative de verrouillage"
 
-#: src/pv/cursor.c:426
+#: src/pv/cursor.c:438
 msgid "failed to open terminal"
 msgstr "échec de l'ouverture du terminal"
 

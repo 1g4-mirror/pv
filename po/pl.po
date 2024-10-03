@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-08-18 22:01+0100\n"
+"POT-Creation-Date: 2024-10-03 22:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -356,20 +356,20 @@ msgstr ""
 msgid "Project web site"
 msgstr ""
 
-#: src/pv/cursor.c:87
+#: src/pv/cursor.c:99
 msgid "failed to get terminal name"
 msgstr ""
 
 # "Przewidywany czas ukończenia" for ETA is too long
-#: src/pv/cursor.c:132
+#: src/pv/cursor.c:144
 msgid "failed to open lock file"
 msgstr ""
 
-#: src/pv/cursor.c:165
+#: src/pv/cursor.c:177
 msgid "lock attempt failed"
 msgstr ""
 
-#: src/pv/cursor.c:426
+#: src/pv/cursor.c:438
 msgid "failed to open terminal"
 msgstr "nie udało się otworzyć terminala"
 
