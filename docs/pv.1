@@ -141,12 +141,13 @@ this option will have no effect if the total data size cannot be determined.
 .TP
 .B \-r, \-\-rate
 Turn the rate counter on.  This will display the current rate of data
-transfer.
+transfer.  The rate is shown in square brackets [].
 .TP
 .B \-a, \-\-average\-rate
 Turn the average rate counter on.  This will display the current average
 rate of data transfer (default: last 30s, see
 .BR \-m ).
+The average rate is shown in brackets ().
 .TP
 .B \-b, \-\-bytes
 Turn the total byte counter on.  This will display the total amount of
@@ -169,6 +170,7 @@ in the
 .B FORMATTING
 section below.  Implies
 .BR \-C .
+The transfer buffer percentage is shown in curly brackets {}.
 .TP
 .BI \-A\  NUM \fR,\ \fB\-\-last\-written\  NUM
 Show the last

@@ -106,12 +106,13 @@ display types that are explicitly switched on will be shown.
 **-r, \--rate**
 
 :   Turn the rate counter on. This will display the current rate of data
-    transfer.
+    transfer. The rate is shown in square brackets \[\].
 
 **-a, \--average-rate**
 
 :   Turn the average rate counter on. This will display the current
-    average rate of data transfer (default: last 30s, see **-m**).
+    average rate of data transfer (default: last 30s, see **-m**). The
+    average rate is shown in brackets ().
 
 **-b, \--bytes**
 
@@ -133,7 +134,8 @@ display types that are explicitly switched on will be shown.
 
 :   Turn on the transfer buffer percentage display. This will show the
     percentage of the transfer buffer in use - but see the caveat under
-    **%T** in the **FORMATTING** section below. Implies **-C**.
+    **%T** in the **FORMATTING** section below. Implies **-C**. The
+    transfer buffer percentage is shown in curly brackets {}.
 
 **-A NUM, \--last-written NUM**
 

@@ -848,11 +848,11 @@ bool pv_format(pvstate_t state, bool final)
 			if (state->control.bits && !state->control.linemode) {
 				/* bits per second */
 				pv__sizestr(component_content, component_buf_size,
-					    "[%s]", 8 * state->calc.average_rate, "", _("b/s"), count_type);
+					    "(%s)", 8 * state->calc.average_rate, "", _("b/s"), count_type);
 			} else {
 				/* bytes or lines per second */
 				pv__sizestr(component_content,
-					    component_buf_size, "[%s]", state->calc.average_rate, _("/s"), _("B/s"),
+					    component_buf_size, "(%s)", state->calc.average_rate, _("/s"), _("B/s"),
 					    count_type);
 			}
 			/*@+mustfreefresh @ *//* splint: see above. */
