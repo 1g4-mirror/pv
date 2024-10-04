@@ -4,8 +4,9 @@
  * feature: "`--rate`" can now be used with "`--numeric`" ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
  * i18n: complete set of German translations supplied by Hartmut Goebel ([#98](https://codeberg.org/a-j-wood/pv/pulls/98))
  * fix: resume stopped pipelines when running in the background (part of [#56](https://codeberg.org/a-j-wood/pv/issues/56))
- * fix: write UTC timestamps in debugging mode to avoid lockups in signal handlers
+ * fix: prefix completion time ("`--fineta`") with *FIN* rather than *ETA* ([#43](https://codeberg.org/a-j-wood/pv/issues/43))
  * fix: correct a memory leak in "`--watchfd PID`"
+ * fix: write UTC timestamps in debugging mode to avoid lockups in signal handlers
  * cleanup: removed TODO.md, since it's just an outdated copy of the issue tracker
  * cleanup: re-ordered structure members to reduce padding
  * cleanup: improved readability of SIGTTOU handling code

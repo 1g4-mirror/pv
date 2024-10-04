@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-04 14:48+0100\n"
+"POT-Creation-Date: 2024-10-04 19:39+0100\n"
 "PO-Revision-Date: 2024-09-29 11:07+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -397,41 +397,45 @@ msgstr "Sperrversuch fehlgeschlagen"
 msgid "failed to open terminal"
 msgstr "konnte Terminal nicht öffnen"
 
-#: src/pv/display.c:231
+#: src/pv/display.c:216
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnµm kMGTPEZY"
 
-#: src/pv/display.c:249
+#: src/pv/display.c:234
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:829 src/pv/transfer.c:970
+#: src/pv/display.c:653 src/pv/transfer.c:970
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
-#: src/pv/display.c:938
+#: src/pv/display.c:789
 msgid "b"
 msgstr "b"
 
-#: src/pv/display.c:941 src/pv/transfer.c:602
+#: src/pv/display.c:792 src/pv/transfer.c:602
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:985 src/pv/display.c:1000 src/pv/loop.c:418
+#: src/pv/display.c:836 src/pv/display.c:851 src/pv/loop.c:418
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/display.c:989 src/pv/display.c:1004
+#: src/pv/display.c:840 src/pv/display.c:855
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:989 src/pv/display.c:1004 src/pv/loop.c:418
+#: src/pv/display.c:840 src/pv/display.c:855 src/pv/loop.c:418
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:1032 src/pv/display.c:1036 src/pv/display.c:1102
+#: src/pv/display.c:883 src/pv/display.c:887
 msgid "ETA"
 msgstr "ETA"
+
+#: src/pv/display.c:953
+msgid "FIN"
+msgstr ""
 
 #: src/pv/file.c:149
 msgid "failed to seek to start of output"

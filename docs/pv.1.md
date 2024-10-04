@@ -71,9 +71,8 @@ output modifiers, and general options.
 # DISPLAY SWITCHES
 
 If no display switches are specified, **pv** behaves as if **-p**,
-**-t**, **-e**, **-r**, and **-b** had been given (i.e. everything
-except average rate is switched on). Otherwise, only those display types
-that are explicitly switched on will be shown.
+**-t**, **-e**, **-r**, and **-b** had been given. Otherwise, only those
+display types that are explicitly switched on will be shown.
 
 **-p, \--progress**
 
@@ -92,14 +91,17 @@ that are explicitly switched on will be shown.
 
 :   Turn the ETA timer on. This will attempt to guess, based on current
     transfer rates and the total data size, how long it will be before
-    completion. This option will have no effect if the total data size
-    cannot be determined.
+    completion. The countdown is prefixed with \"ETA\". This option will
+    have no effect if the total data size cannot be determined.
 
 **-I, \--fineta**
 
-:   Turn the ETA timer on, but display the estimated local time of
-    arrival instead of time left. When the estimated time is more than 6
-    hours in the future, the date is shown as well.
+:   Turn the ETA timer on, but display the estimated local time at which
+    the transfer will finish, instead of the amount of time remaining.
+    When the estimated time is more than 6 hours in the future, the date
+    is shown as well. The time is prefixed with \"FIN\" for finish time.
+    As with **\--eta**, this option will have no effect if the total
+    data size cannot be determined.
 
 **-r, \--rate**
 
@@ -413,7 +415,8 @@ be used:
 
 **%I**
 
-:   ETA as local time of completion. Equivalent to **-I**.
+:   ETA as local time at which the transfer will finish. Equivalent to
+    **-I**.
 
 **%r**
 
@@ -453,7 +456,7 @@ be used:
 :   A single %.
 
 The format string equivalent of turning on all display switches is
-**\`%N %b %T %t %r %a %p %e\'**.
+**\`%N %b %T %t %r %a %p %e %I\'**.
 
 # COMMON SWITCHES
 

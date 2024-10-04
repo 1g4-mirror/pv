@@ -740,7 +740,7 @@ bool pv_format(pvstate_t state, bool final)
 		char *component_content;
 		size_t component_buf_size;
 		size_t buf_idx;
-		bool show_eta;
+		bool show_fineta;
 		time_t now;
 		time_t then;
 		struct tm *time_ptr;
@@ -907,12 +907,12 @@ bool pv_format(pvstate_t state, bool final)
 			/* Estimated time of completion - if size is known. */
 
 			now = time(NULL);
-			show_eta = true;
+			show_fineta = true;
 			time_format = NULL;
 
 			/*
-			 * The ETA may be hidden by a failed ETA string
-			 * generation.
+			 * The completion clock time may be hidden by a
+			 * failed localtime lookup.
 			 */
 
 			eta =
@@ -940,7 +940,7 @@ bool pv_format(pvstate_t state, bool final)
 			time_ptr = localtime(&then);
 
 			if (NULL == time_ptr) {
-				show_eta = false;
+				show_fineta = false;
 			} else {
 				/* Localtime keeps data stored in a static
 				 * buffer that gets overwritten by time
@@ -950,7 +950,7 @@ bool pv_format(pvstate_t state, bool final)
 				size_t component_content_length;
 
 				/*@-mustfreefresh @ */
-				(void) pv_snprintf(component_content, component_buf_size, "%.16s ", _("ETA"));
+				(void) pv_snprintf(component_content, component_buf_size, "%.16s ", _("FIN"));
 				/*@+mustfreefresh @ *//* splint: see above. */
 				component_content_length = strlen(component_content);	/* flawfinder: ignore */
 				/* flawfinder: always bounded with \0 by pv_snprintf(). */
@@ -958,7 +958,7 @@ bool pv_format(pvstate_t state, bool final)
 						component_buf_size - 1 - component_content_length, time_format, &time);
 			}
 
-			if (!show_eta) {
+			if (!show_fineta) {
 				size_t erase_idx;
 				for (erase_idx = 0;
 				     erase_idx < component_buf_size && component_content[erase_idx] != '\0';
