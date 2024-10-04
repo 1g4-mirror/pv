@@ -608,21 +608,21 @@ static long bound_long(long x, long min, long max)
 static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, long double elapsed_sec,
 					    long double rate)
 {
-	size_t first = state->display.history_first;
-	size_t last = state->display.history_last;
+	size_t first = state->calc.history_first;
+	size_t last = state->calc.history_last;
 	long double last_elapsed;
 
-	if (NULL == state->display.history)
+	if (NULL == state->calc.history)
 		return;
 
-	last_elapsed = state->display.history[last].elapsed_sec;
+	last_elapsed = state->calc.history[last].elapsed_sec;
 
 	/*
 	 * Do nothing if this is not the first call but not enough time has
 	 * elapsed since the previous call yet.
 	 */
 	if ((last_elapsed > 0.0)
-	    && (elapsed_sec < (last_elapsed + state->display.history_interval)))
+	    && (elapsed_sec < (last_elapsed + state->control.history_interval)))
 		return;
 
 	/*
@@ -630,25 +630,24 @@ static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, 
 	 * buffer.
 	 */
 	if (last_elapsed > 0.0) {
-		size_t len = state->display.history_len;
+		size_t len = state->calc.history_len;
 		last = (last + 1) % len;
-		state->display.history_last = last;
+		state->calc.history_last = last;
 		if (last == first) {
 			first = (first + 1) % len;
-			state->display.history_first = first;
+			state->calc.history_first = first;
 		}
 	}
 
-	state->display.history[last].elapsed_sec = elapsed_sec;
-	state->display.history[last].total_bytes = total_bytes;
+	state->calc.history[last].elapsed_sec = elapsed_sec;
+	state->calc.history[last].total_bytes = total_bytes;
 
 	if (first == last) {
-		state->display.current_avg_rate = rate;
+		state->calc.current_avg_rate = rate;
 	} else {
-		off_t bytes = (state->display.history[last].total_bytes - state->display.history[first].total_bytes);
-		long double sec =
-		    (state->display.history[last].elapsed_sec - state->display.history[first].elapsed_sec);
-		state->display.current_avg_rate = (long double) bytes / sec;
+		off_t bytes = (state->calc.history[last].total_bytes - state->calc.history[first].total_bytes);
+		long double sec = (state->calc.history[last].elapsed_sec - state->calc.history[first].elapsed_sec);
+		state->calc.current_avg_rate = (long double) bytes / sec;
 	}
 }
 
@@ -709,20 +708,20 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 	 * adding to that until a reasonable amount of time has passed to
 	 * avoid rate spikes or division by zero.
 	 */
-	time_since_last = elapsed_sec - state->display.prev_elapsed_sec;
+	time_since_last = elapsed_sec - state->calc.prev_elapsed_sec;
 	if (time_since_last <= 0.01) {
-		rate = state->display.prev_rate;
-		state->display.prev_trans += bytes_since_last;
+		rate = state->calc.prev_rate;
+		state->calc.prev_trans += bytes_since_last;
 	} else {
-		rate = ((long double) bytes_since_last + state->display.prev_trans) / time_since_last;
-		state->display.prev_elapsed_sec = elapsed_sec;
-		state->display.prev_trans = 0;
+		rate = ((long double) bytes_since_last + state->calc.prev_trans) / time_since_last;
+		state->calc.prev_elapsed_sec = elapsed_sec;
+		state->calc.prev_trans = 0;
 	}
-	state->display.prev_rate = rate;
+	state->calc.prev_rate = rate;
 
 	/* Update history and current average rate for ETA. */
 	pv__update_average_rate_history(state, total_bytes, elapsed_sec, rate);
-	average_rate = state->display.current_avg_rate;
+	average_rate = state->calc.current_avg_rate;
 
 	/*
 	 * If this is the final update at the end of the transfer, we
@@ -749,16 +748,16 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		 * 0%-100%, 100%-0%, 0%-100%, and so on.
 		 */
 		if (rate > 0)
-			state->display.percentage += 2;
-		if (state->display.percentage > 199)
-			state->display.percentage = 0;
+			state->calc.percentage += 2;
+		if (state->calc.percentage > 199)
+			state->calc.percentage = 0;
 	} else if (state->control.numeric || state->display.component[PV_COMPONENT_PROGRESS].required) {
 		/*
 		 * If we do know the total size, and we're going to show
 		 * the percentage (numeric mode or a progress bar),
 		 * calculate the percentage completion.
 		 */
-		state->display.percentage = pv__calc_percentage(total_bytes, state->control.size);
+		state->calc.percentage = pv__calc_percentage(total_bytes, state->control.size);
 	}
 
 	/*
@@ -825,7 +824,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		} else {
 			(void) pv_snprintf(state->display.display_buffer,
 					   state->display.display_buffer_size, "%.99s%ld\n", numericprefix,
-					   (long) (state->display.percentage));
+					   (long) (state->calc.percentage));
 		}
 
 		state->display.display_string_len = strlen(state->display.display_buffer);	/* flawfinder: ignore */
@@ -965,7 +964,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			eta =
 			    pv__seconds_remaining(((off_t) total_bytes - state->display.initial_offset),
 						  state->control.size - state->display.initial_offset,
-						  state->display.current_avg_rate);
+						  state->calc.current_avg_rate);
 
 			/*
 			 * Bounds check, so we don't overrun the suffix buffer. This
@@ -1020,7 +1019,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			eta =
 			    pv__seconds_remaining((off_t) (total_bytes - state->display.initial_offset),
 						  state->control.size - state->display.initial_offset,
-						  state->display.current_avg_rate);
+						  state->calc.current_avg_rate);
 
 			/*
 			 * Bounds check, so we don't overrun the suffix buffer. This
@@ -1152,11 +1151,11 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			/* Known size; show a bar and a percentage. */
 			size_t pct_width;
 
-			if (state->display.percentage < 0)
-				state->display.percentage = 0;
-			if (state->display.percentage > 100000)
-				state->display.percentage = 100000;
-			(void) pv_snprintf(pct, sizeof(pct), "%3ld%%", state->display.percentage);
+			if (state->calc.percentage < 0)
+				state->calc.percentage = 0;
+			if (state->calc.percentage > 100000)
+				state->calc.percentage = 100000;
+			(void) pv_snprintf(pct, sizeof(pct), "%3ld%%", state->calc.percentage);
 			pct_width = strlen(pct);	/* flawfinder: ignore */
 			/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
 
@@ -1169,7 +1168,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 				available_width = (int) (component_buf_size - 16);
 
 			/* The bar portion. */
-			bar_length = (int) ((available_width * state->display.percentage) / 100 - 1);
+			bar_length = (int) ((available_width * state->calc.percentage) / 100 - 1);
 			for (pad_count = 0; pad_count < bar_length; pad_count++) {
 				if (pad_count < available_width)
 					(void) pv_strlcat(component_content, "=", component_buf_size);
@@ -1193,7 +1192,7 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		} else {
 			/* Unknown size; show a moving indicator. */
 
-			int indicator_position = state->display.percentage;
+			int indicator_position = state->calc.percentage;
 
 			available_width = (int) (state->control.width) - static_portion_size - 5;
 

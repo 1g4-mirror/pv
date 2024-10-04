@@ -498,8 +498,8 @@ int pv_watchpid_scanfds(pvstate_t state,
 		/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
 		info_array[use_idx].state->display.display_buffer = NULL;
 		info_array[use_idx].state->display.display_buffer_size = 0;
-		info_array[use_idx].state->display.history = NULL;
-		info_array[use_idx].state->display.history_len = 0;
+		info_array[use_idx].state->calc.history = NULL;
+		info_array[use_idx].state->calc.history_len = 0;
 		/*@+mustfreeonly@ */
 		pv_state_average_rate_window_set(info_array[use_idx].state, state->control.average_rate_window);
 

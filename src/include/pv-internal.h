@@ -116,6 +116,7 @@ struct pvstate_s {
 		int watch_fd;			 /* fd to watch */
 		int output_fd;                   /* fd to write output to */
 		unsigned int average_rate_window; /* time window in seconds for average rate calculations */
+		unsigned int history_interval;	 /* seconds between each average rate calc history entry */
 		unsigned int width;              /* screen width */
 		unsigned int height;             /* screen height */
 		bool force;                      /* display even if not on terminal */
@@ -193,15 +194,27 @@ struct pvstate_s {
 
 		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
 
-		long double prev_elapsed_sec;	 /* elapsed sec at which rate last calculated */
-		long double prev_rate;		 /* last calculated instantaneous transfer rate */
-		long double prev_trans;		 /* bytes transferred since last rate calculation */
-		long double current_avg_rate;    /* current average rate over last history intervals */
 		/*@only@*/ /*@null@*/ char *display_buffer;	/* buffer for display string */
 		size_t display_buffer_size;	 /* size allocated to display buffer */
 		size_t display_string_len;	 /* length of string in display buffer */
 		off_t initial_offset;		 /* offset when first opened (when watching fds) */
 		size_t lastoutput_length;	 /* number of last-output bytes to show */
+
+		size_t format_segment_count;	 /* number of format string segments */
+
+		unsigned int prev_screen_width;	 /* screen width last time we were called */
+		bool display_visible;		 /* set once anything written to terminal */
+
+	} display;
+
+	/************************************
+	 * Calculated state of the transfer *
+	 ************************************/
+	struct {
+		long double prev_elapsed_sec;	 /* elapsed sec at which rate last calculated */
+		long double prev_rate;		 /* last calculated instantaneous transfer rate */
+		long double prev_trans;		 /* bytes transferred since last rate calculation */
+		long double current_avg_rate;    /* current average rate over last history intervals */
 
 		/* Keep track of progress over last intervals to compute current average rate. */
 		/*@null@*/ struct {	 /* state at previous intervals (circular buffer) */
@@ -211,14 +224,9 @@ struct pvstate_s {
 		size_t history_len;		 /* total size of history array */
 		size_t history_first;		 /* index of oldest entry */
 		size_t history_last;		 /* index of newest entry */
-		size_t format_segment_count;	 /* number of format string segments */
 
-		int history_interval;		 /* seconds between each history entry */
-		unsigned int prev_screen_width;	 /* screen width last time we were called */
 		int percentage;			 /* transfer percentage completion */
-		bool display_visible;		 /* set once anything written to terminal */
-
-	} display;
+	} calc;
 
 	/********************
 	 * Cursor/IPC state *

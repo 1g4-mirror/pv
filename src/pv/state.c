@@ -24,12 +24,12 @@
 /* alloc / realloc history buffer */
 static void pv_alloc_history(pvstate_t state)
 {
-	if (NULL != state->display.history)
-		free(state->display.history);
-	state->display.history = NULL;
+	if (NULL != state->calc.history)
+		free(state->calc.history);
+	state->calc.history = NULL;
 
-	state->display.history = calloc((size_t) (state->display.history_len), sizeof(state->display.history[0]));
-	if (NULL == state->display.history) {
+	state->calc.history = calloc((size_t) (state->calc.history_len), sizeof(state->calc.history[0]));
+	if (NULL == state->calc.history) {
 		/*@-mustfreefresh@ */
 		/*
 		 * splint note: the gettext calls made by _() cause memory
@@ -42,8 +42,8 @@ static void pv_alloc_history(pvstate_t state)
 		return;
 	}
 
-	state->display.history_first = state->display.history_last = 0;
-	state->display.history[0].elapsed_sec = 0.0;	/* to be safe, memset() not recommended for doubles */
+	state->calc.history_first = state->calc.history_last = 0;
+	state->calc.history[0].elapsed_sec = 0.0;	/* to be safe, memset() not recommended for doubles */
 }
 
 /*
@@ -156,9 +156,9 @@ void pv_state_free(pvstate_t state)
 	/*@+keeptrans@ */
 	/* splint - explicitly freeing this structure, so free() here is OK. */
 
-	if (NULL != state->display.history)
-		free(state->display.history);
-	state->display.history = NULL;
+	if (NULL != state->calc.history)
+		free(state->calc.history);
+	state->calc.history = NULL;
 
 	if (NULL != state->files.filename) {
 		unsigned int file_idx;
@@ -406,11 +406,11 @@ void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
 		val = 1;
 	state->control.average_rate_window = val;
 	if (val >= 20) {
-		state->display.history_len = (size_t) (val / 5 + 1);
-		state->display.history_interval = 5;
+		state->calc.history_len = (size_t) (val / 5 + 1);
+		state->control.history_interval = 5;
 	} else {
-		state->display.history_len = (size_t) (val + 1);
-		state->display.history_interval = 1;
+		state->calc.history_len = (size_t) (val + 1);
+		state->control.history_interval = 1;
 	}
 	pv_alloc_history(state);
 }
