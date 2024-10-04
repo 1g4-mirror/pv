@@ -63,8 +63,18 @@ void debugging_output(const char *function, const char *file, int line, const ch
 		return;
 	}
 
+	/*
+	 * Note that here we use gmtime() rather than localtime(), otherwise
+	 * we can get stuck in signal handlers - testing with "strace"
+	 * showed many cases where "pv </dev/zero | cat >/dev/null" being
+	 * paused and backgrounded would cause pv to be stuck in
+	 * futex_wait() inside a pv_sig_alrm() inside a pv_sig_cont().  The
+	 * backtrace mentioned many time zone conversion steps, and all of
+	 * that goes away with gmtime().
+	 */
+
 	(void) time(&t);
-	tm = localtime(&t);
+	tm = gmtime(&t);
 	tbuf[0] = '\0';
 	if (0 == strftime(tbuf, sizeof(tbuf), "%Y-%m-%d %H:%M:%S", tm)) {
 		tbuf[0] = '\0';
