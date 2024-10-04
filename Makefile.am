@@ -17,6 +17,7 @@ src/main/main.c \
 src/main/options.c \
 src/main/remote.c \
 src/main/version.c \
+src/pv/calc.c \
 src/pv/cursor.c \
 src/pv/display.c \
 src/pv/elapsedtime.c \
