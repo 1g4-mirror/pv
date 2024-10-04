@@ -460,15 +460,15 @@ static void pv__format_init(pvstate_t state)
 	 * with a particular length.
 	 *
 	 * A type other than PV_COMPONENT_STRING indicates that the segment
-	 * is a string updated by pv__format(), whose contents will be in
+	 * is a string updated by pv_format(), whose contents will be in
 	 * component[type].
 	 *
-	 * In pv__format(), the content of a PV_COMPONENT_PROGRESS component
+	 * In pv_format(), the content of a PV_COMPONENT_PROGRESS component
 	 * is calculated after first populating all the other components
 	 * referenced by the format segments.
 	 *
-	 * Then, pv_format() generates the output string by sticking all of
-	 * these segments together.
+	 * Then, that function generates the output string by sticking all
+	 * of these segments together.
 	 */
 	segment = 0;
 	for (strpos = 0; formatstr[strpos] != '\0' && segment < PV_FORMAT_ARRAY_MAX; strpos++, segment++) {
@@ -590,6 +590,7 @@ static void pv__format_init(pvstate_t state)
 	}
 }
 
+
 /*
  * Return the original value x so that it has been clamped between
  * [min..max]
@@ -598,6 +599,7 @@ static long bound_long(long x, long min, long max)
 {
 	return x < min ? min : x > max ? max : x;
 }
+
 
 /*
  * Update the current average rate, using a ring buffer of past transfer
@@ -651,6 +653,96 @@ static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, 
 	}
 }
 
+
+/*
+ * Update all calculated transfer state (state->calc), where "elapsed_sec"
+ * is the seconds elapsed since the transfer started, "bytes_since_last" is
+ * the number of bytes transferred since the last update, and "total_bytes"
+ * is the total number of bytes transferred so far.
+ *
+ * If "bytes_since_last" is negative, this is the final update, so
+ * state->calc.transfer_rate and state->calc.average_rate are given as an
+ * average over the whole transfer; otherwise they are the current transfer
+ * rate and current average rate.
+ *
+ * The value of state->calc.percentage will reflect the percentage
+ * completion if state->control.size is greater than zero, otherwise it will
+ * increase by 2 each call and wrap at 200.
+ */
+void pv_calculate_transfer_rate(pvstate_t state, long double elapsed_sec, off_t bytes_since_last, off_t total_bytes)
+{
+	long double time_since_last, transfer_rate, average_rate;
+
+	/* Quick sanity check - state must exist, total_bytes must be >= 0. */
+	if (NULL == state)
+		return;
+	if (total_bytes < 0)
+		return;
+
+	/*
+	 * In case the time since the last update is very small, we keep
+	 * track of amount transferred since the last update, and just keep
+	 * adding to that until a reasonable amount of time has passed to
+	 * avoid rate spikes or division by zero.
+	 */
+	time_since_last = elapsed_sec - state->calc.prev_elapsed_sec;
+	if (time_since_last <= 0.01) {
+		transfer_rate = state->calc.prev_rate;
+		state->calc.prev_trans += bytes_since_last;
+	} else {
+		transfer_rate = ((long double) bytes_since_last + state->calc.prev_trans) / time_since_last;
+		state->calc.prev_elapsed_sec = elapsed_sec;
+		state->calc.prev_trans = 0;
+	}
+	state->calc.prev_rate = transfer_rate;
+
+	/* Update history and current average rate for ETA. */
+	pv__update_average_rate_history(state, total_bytes, elapsed_sec, transfer_rate);
+	average_rate = state->calc.current_avg_rate;
+
+	/*
+	 * If this is the final update at the end of the transfer, we
+	 * recalculate the rate - and the average rate - across the whole
+	 * period of the transfer.
+	 */
+	if (bytes_since_last < 0) {
+		/* Sanity check to avoid division by zero */
+		if (elapsed_sec < 0.000001)
+			elapsed_sec = 0.000001;
+		average_rate =
+		    (((long double) total_bytes) -
+		     ((long double) state->display.initial_offset)) / (long double) elapsed_sec;
+		transfer_rate = average_rate;
+	}
+
+	state->calc.transfer_rate = transfer_rate;
+	state->calc.average_rate = average_rate;
+
+	if (state->control.size <= 0) {
+		/*
+		 * If we don't know the total size of the incoming data,
+		 * then for a percentage, we gradually increase the
+		 * percentage completion as data arrives, to a maximum of
+		 * 200, then reset it - we use this if we can't calculate
+		 * it, so that the numeric percentage output will go
+		 * 0%-100%, 100%-0%, 0%-100%, and so on.
+		 */
+		if (transfer_rate > 0)
+			state->calc.percentage += 2;
+		if (state->calc.percentage > 199)
+			state->calc.percentage = 0;
+	} else {
+		state->calc.percentage = pv__calc_percentage(total_bytes, state->control.size);
+	}
+
+	/* Ensure the percentage is never negative or huge. */
+	if (state->calc.percentage < 0)
+		state->calc.percentage = 0;
+	if (state->calc.percentage > 100000)
+		state->calc.percentage = 100000;
+}
+
+
 /*
  * Update state->display.display_buffer with status information formatted
  * according to the state held within the given structure, where
@@ -674,9 +766,8 @@ static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, 
  * If "total_bytes" is negative, then free the display buffer and return
  * false.
  */
-static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last, off_t total_bytes)
+bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last, off_t total_bytes)
 {
-	long double time_since_last, rate, average_rate;
 	long eta;
 	int static_portion_size;
 	pv_display_component component_type;
@@ -697,68 +788,19 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 		return false;
 	}
 
+	/*
+	 * If the display options need reparsing, do so to generate new
+	 * formatting parameters.
+	 */
+	if (0 != state->flag.reparse_display) {
+		pv__format_init(state);
+		state->flag.reparse_display = 0;
+	}
+
 	/* The format string is needed for the static segments. */
 	formatstr = state->control.format_string ? state->control.format_string : state->control.default_format;
 	if (NULL == formatstr)
 		return false;
-
-	/*
-	 * In case the time since the last update is very small, we keep
-	 * track of amount transferred since the last update, and just keep
-	 * adding to that until a reasonable amount of time has passed to
-	 * avoid rate spikes or division by zero.
-	 */
-	time_since_last = elapsed_sec - state->calc.prev_elapsed_sec;
-	if (time_since_last <= 0.01) {
-		rate = state->calc.prev_rate;
-		state->calc.prev_trans += bytes_since_last;
-	} else {
-		rate = ((long double) bytes_since_last + state->calc.prev_trans) / time_since_last;
-		state->calc.prev_elapsed_sec = elapsed_sec;
-		state->calc.prev_trans = 0;
-	}
-	state->calc.prev_rate = rate;
-
-	/* Update history and current average rate for ETA. */
-	pv__update_average_rate_history(state, total_bytes, elapsed_sec, rate);
-	average_rate = state->calc.current_avg_rate;
-
-	/*
-	 * If this is the final update at the end of the transfer, we
-	 * recalculate the rate - and the average rate - across the whole
-	 * period of the transfer.
-	 */
-	if (bytes_since_last < 0) {
-		/* Sanity check to avoid division by zero */
-		if (elapsed_sec < 0.000001)
-			elapsed_sec = 0.000001;
-		average_rate =
-		    (((long double) total_bytes) -
-		     ((long double) state->display.initial_offset)) / (long double) elapsed_sec;
-		rate = average_rate;
-	}
-
-	if (state->control.size <= 0) {
-		/*
-		 * If we don't know the total size of the incoming data,
-		 * then for a percentage, we gradually increase the
-		 * percentage completion as data arrives, to a maximum of
-		 * 200, then reset it - we use this if we can't calculate
-		 * it, so that the numeric percentage output will go
-		 * 0%-100%, 100%-0%, 0%-100%, and so on.
-		 */
-		if (rate > 0)
-			state->calc.percentage += 2;
-		if (state->calc.percentage > 199)
-			state->calc.percentage = 0;
-	} else if (state->control.numeric || state->display.component[PV_COMPONENT_PROGRESS].required) {
-		/*
-		 * If we do know the total size, and we're going to show
-		 * the percentage (numeric mode or a progress bar),
-		 * calculate the percentage completion.
-		 */
-		state->calc.percentage = pv__calc_percentage(total_bytes, state->control.size);
-	}
 
 	/*
 	 * Reallocate output buffer if width changes.
@@ -934,12 +976,12 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			/*@-mustfreefresh @ */
 			if (state->control.bits && !state->control.linemode) {
 				/* bits per second */
-				pv__sizestr(component_content, component_buf_size, "[%s]", 8 * rate, "", _("b/s"),
-					    count_type);
+				pv__sizestr(component_content, component_buf_size, "[%s]",
+					    8 * state->calc.transfer_rate, "", _("b/s"), count_type);
 			} else {
 				/* bytes or lines per second */
 				pv__sizestr(component_content, component_buf_size,
-					    "[%s]", rate, _("/s"), _("B/s"), count_type);
+					    "[%s]", state->calc.transfer_rate, _("/s"), _("B/s"), count_type);
 			}
 			/*@+mustfreefresh @ *//* splint: see above. */
 			break;
@@ -950,11 +992,12 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			if (state->control.bits && !state->control.linemode) {
 				/* bits per second */
 				pv__sizestr(component_content, component_buf_size,
-					    "[%s]", 8 * average_rate, "", _("b/s"), count_type);
+					    "[%s]", 8 * state->calc.average_rate, "", _("b/s"), count_type);
 			} else {
 				/* bytes or lines per second */
 				pv__sizestr(component_content,
-					    component_buf_size, "[%s]", average_rate, _("/s"), _("B/s"), count_type);
+					    component_buf_size, "[%s]", state->calc.average_rate, _("/s"), _("B/s"),
+					    count_type);
 			}
 			/*@+mustfreefresh @ *//* splint: see above. */
 			break;
@@ -1151,10 +1194,6 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			/* Known size; show a bar and a percentage. */
 			size_t pct_width;
 
-			if (state->calc.percentage < 0)
-				state->calc.percentage = 0;
-			if (state->calc.percentage > 100000)
-				state->calc.percentage = 100000;
 			(void) pv_snprintf(pct, sizeof(pct), "%3ld%%", state->calc.percentage);
 			pct_width = strlen(pct);	/* flawfinder: ignore */
 			/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
@@ -1205,11 +1244,11 @@ static bool pv__format(pvstate_t state, long double elapsed_sec, off_t bytes_sin
 			debug("available_width: %d", available_width);
 
 			/*
-			 * Earlier code in this function sets the percentage
-			 * when the size is unknown to a value that goes 0 -
-			 * 200 and resets, so here we make values above 100
-			 * send the indicator back down again, so it moves
-			 * back and forth.
+			 * Note that pv_calculate_transfer_rate() sets the
+			 * percentage when the size is unknown to a value
+			 * that goes 0 - 200 and resets, so here we make
+			 * values above 100 send the indicator back down
+			 * again, so it moves back and forth.
 			 */
 			if (indicator_position > 100)
 				indicator_position = 200 - indicator_position;
@@ -1340,18 +1379,11 @@ void pv_display(pvstate_t state, long double esec, off_t sl, off_t tot)
 	if (NULL == state)
 		return;
 
-	/*
-	 * If the display options need reparsing, do so to generate new
-	 * formatting parameters.
-	 */
-	if (0 != state->flag.reparse_display) {
-		pv__format_init(state);
-		state->flag.reparse_display = 0;
-	}
-
 	pv_sig_checkbg();
 
-	if (!pv__format(state, esec, sl, tot))
+	pv_calculate_transfer_rate(state, esec, sl, tot);
+
+	if (!pv_format(state, esec, sl, tot))
 		return;
 
 	if (NULL == state->display.display_buffer)

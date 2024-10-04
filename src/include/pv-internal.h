@@ -211,6 +211,9 @@ struct pvstate_s {
 	 * Calculated state of the transfer *
 	 ************************************/
 	struct {
+		long double transfer_rate;	 /* calculated transfer rate */
+		long double average_rate;	 /* calculated average transfer rate */
+
 		long double prev_elapsed_sec;	 /* elapsed sec at which rate last calculated */
 		long double prev_rate;		 /* last calculated instantaneous transfer rate */
 		long double prev_trans;		 /* bytes transferred since last rate calculation */
@@ -333,6 +336,8 @@ typedef struct pvwatchfd_s *pvwatchfd_t;
 void pv_error(pvstate_t, char *, ...);
 
 int pv_main_loop(pvstate_t);
+void pv_calculate_transfer_rate(pvstate_t, long double, off_t, off_t);
+bool pv_format(pvstate_t, long double, off_t, off_t);
 void pv_display(pvstate_t, long double, off_t, off_t);
 ssize_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);
 int pv_next_file(pvstate_t, unsigned int, int);
