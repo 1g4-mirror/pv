@@ -42,29 +42,38 @@ static void pv_sig_ensure_tty_tostop()
 	if (NULL == pv_sig_state)
 		return;
 
+	/* Can't look at terminal flags if backgrounded. */
+	if (1 == pv_sig_state->flag.suspend_stderr)
+		return;
+
 	if (0 != tcgetattr(STDERR_FILENO, &terminal_attributes)) {
 		debug("%s: %s", "failed to read terminal attributes", strerror(errno));
 		return;
 	}
+
+	/* Can't set terminal flags if backgrounded. */
+	if (1 == pv_sig_state->flag.suspend_stderr)
+		return;
 
 	if (0 == (terminal_attributes.c_lflag & TOSTOP)) {
 		terminal_attributes.c_lflag |= TOSTOP;
 		if (0 == tcsetattr(STDERR_FILENO, TCSANOW, &terminal_attributes)) {
 			pv_sig_state->flag.clear_tty_tostop_on_exit = 1;
 			debug("%s", "set terminal TOSTOP attribute");
+#if HAVE_IPC
+			/*
+			 * In "-c" mode with IPC, make all "pv -c" instances
+			 * aware that we set TOSTOP, so the last one can
+			 * clear it on exit.
+			 */
+			if (pv_sig_state->control.cursor && (NULL != pv_sig_state->cursor.shared)
+			    && (!pv_sig_state->cursor.noipc)) {
+				pv_sig_state->cursor.shared->tty_tostop_added = true;
+			}
+#endif
 		} else {
 			debug("%s: %s", "failed to set terminal TOSTOP attribute", strerror(errno));
 		}
-#if HAVE_IPC
-		/*
-		 * In "-c" mode with IPC, make all "pv -c" instances aware
-		 * that we set TOSTOP, so the last one can clear it on exit.
-		 */
-		if (pv_sig_state->control.cursor && (NULL != pv_sig_state->cursor.shared)
-		    && (!pv_sig_state->cursor.noipc)) {
-			pv_sig_state->cursor.shared->tty_tostop_added = true;
-		}
-#endif
 	}
 }
 
@@ -74,6 +83,11 @@ static void pv_sig_ensure_tty_tostop()
  * without messing up the terminal.  On a subsequent SIGCONT we will try
  * writing to the terminal again, in case we get backgrounded and later get
  * foregrounded again.
+ *
+ * When we get backgrounded and cause a SIGTTOU, the rest of the pipeline
+ * gets stopped too, so transfers involving pipelines need us to send a
+ * SIGCONT to the rest of the process group here, otherwise backgrounding
+ * stops transfers involving pipes.
  */
 static void pv_sig_ttou( /*@unused@ */  __attribute__((unused))
 			int s)
@@ -84,6 +98,16 @@ static void pv_sig_ttou( /*@unused@ */  __attribute__((unused))
 	if (1 != pv_sig_state->flag.suspend_stderr) {
 		debug("%s", "SIGTTOU - suspending stderr");
 		pv_sig_state->flag.suspend_stderr = 1;
+		/* Also tell the SIGCONT handler to do nothing next time. */
+		pv_sig_state->flag.skip_next_sigcont++;
+		/* Raise an immediate SIGCONT to bring the rest of the pipeline back up. */
+		/*@-unrecog@ *//* splint doesn't know about killpg() */
+		if (0 != killpg(getpgrp(), SIGCONT)) {
+			debug("%s: %s", "killpg", strerror(errno));
+		}
+		/*@+unrecog@ */
+	} else {
+		debug("%s", "SIGTTOU - but stderr was already suspended");
 	}
 }
 
@@ -118,6 +142,18 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 	if (NULL == pv_sig_state)
 		return;
 
+	if (pv_sig_state->flag.skip_next_sigcont > 0) {
+		debug("%s: %d", "SIGCONT received but ignored - current value of skip_next_sigcont",
+		      pv_sig_state->flag.skip_next_sigcont);
+		pv_sig_state->flag.skip_next_sigcont--;
+		return;
+	} else if (pv_sig_state->flag.skip_next_sigcont < 0) {
+		pv_sig_state->flag.skip_next_sigcont = 0;
+		debug("%s", "skip_next_sigcont underrun cleared");
+	}
+
+	debug("%s: %d", "SIGCONT received - current value of suspend_stderr", pv_sig_state->flag.suspend_stderr);
+
 	pv_sig_state->flag.terminal_resized = 1;
 
 	/*
@@ -143,18 +179,24 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 	}
 
 	/*
-	 * Try resuming our use of stderr, if we had suspended it.
+	 * Try resuming our use of stderr, if we had suspended it, but only
+	 * if we're now in the foreground.
 	 */
 	if (1 == pv_sig_state->flag.suspend_stderr) {
-		debug("%s", "SIGCONT - resuming stderr");
-		pv_sig_state->flag.suspend_stderr = 0;
+		if (pv_in_foreground()) {
+			debug("%s", "SIGCONT - resuming stderr");
+			pv_sig_state->flag.suspend_stderr = 0;
+		} else {
+			debug("%s", "SIGCONT but still in background - not resuming stderr");
+		}
 	}
 
-	pv_sig_ensure_tty_tostop();
-
+	if (0 == pv_sig_state->flag.suspend_stderr) {
+		pv_sig_ensure_tty_tostop();
 #ifdef HAVE_IPC
-	pv_crs_needreinit(pv_sig_state);
+		pv_crs_needreinit(pv_sig_state);
 #endif
+	}
 }
 
 
@@ -249,7 +291,7 @@ void pv_sig_init(pvstate_t state)
 	/*
 	 * Note that wherever we use a "struct sigaction", we declare it
 	 * static and explicitly zero it before use, because it may contain
-	 * deeper structures (e.g.  "sigset_t") which trigger splint
+	 * deeper structures (e.g. "sigset_t") which trigger splint
 	 * warnings about potential memory leaks.
 	 */
 
@@ -278,6 +320,7 @@ void pv_sig_init(pvstate_t state)
 	 * Handle SIGTTOU by continuing with output switched off, so that we
 	 * can be stopped and backgrounded without messing up the terminal.
 	 */
+	pv_sig_state->flag.skip_next_sigcont = 0;
 	sa.sa_handler = pv_sig_ttou;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
@@ -393,7 +436,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 #endif
 	(void) sigaction(SIGALRM, &(pv_sig_state->signal.old_sigalrm), NULL);
 
-	need_to_clear_tostop = 1 == pv_sig_state->flag.clear_tty_tostop_on_exit ? true : false;
+	need_to_clear_tostop = (1 == pv_sig_state->flag.clear_tty_tostop_on_exit) ? true : false;
 
 	if (pv_sig_state->control.cursor) {
 #ifdef HAVE_IPC
@@ -444,19 +487,17 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
  */
 void pv_sig_nopause(void)
 {
-	static struct sigaction sa;
+	sigset_t signal_set, signal_oldset;
 
-	memset(&sa, 0, sizeof(sa));
+	debug("%s", "blocking SIGTSTP, SIGCONT");
 
-	sa.sa_handler = SIG_IGN;
-	(void) sigemptyset(&(sa.sa_mask));
-	sa.sa_flags = 0;
-	(void) sigaction(SIGTSTP, &sa, NULL);
+	(void) sigemptyset(&signal_set);
+	(void) sigaddset(&signal_set, SIGTSTP);
+	(void) sigaddset(&signal_set, SIGCONT);
 
-	sa.sa_handler = SIG_DFL;
-	(void) sigemptyset(&(sa.sa_mask));
-	sa.sa_flags = 0;
-	(void) sigaction(SIGCONT, &sa, NULL);
+	if (0 != sigprocmask(SIG_BLOCK, &signal_set, &signal_oldset)) {
+		debug("%s: %s", "failed to set signal mask", strerror(errno));
+	}
 }
 
 
@@ -465,19 +506,17 @@ void pv_sig_nopause(void)
  */
 void pv_sig_allowpause(void)
 {
-	static struct sigaction sa;
+	sigset_t signal_set, signal_oldset;
 
-	memset(&sa, 0, sizeof(sa));
+	debug("%s", "unblocking SIGTSTP, SIGCONT");
 
-	sa.sa_handler = pv_sig_tstp;
-	(void) sigemptyset(&(sa.sa_mask));
-	sa.sa_flags = 0;
-	(void) sigaction(SIGTSTP, &sa, NULL);
+	(void) sigemptyset(&signal_set);
+	(void) sigaddset(&signal_set, SIGTSTP);
+	(void) sigaddset(&signal_set, SIGCONT);
 
-	sa.sa_handler = pv_sig_cont;
-	(void) sigemptyset(&(sa.sa_mask));
-	sa.sa_flags = 0;
-	(void) sigaction(SIGCONT, &sa, NULL);
+	if (0 != sigprocmask(SIG_UNBLOCK, &signal_set, &signal_oldset)) {
+		debug("%s: %s", "failed to set signal mask", strerror(errno));
+	}
 }
 
 
@@ -499,6 +538,9 @@ void pv_sig_checkbg(void)
 	next_check = time(NULL) + 1;
 
 	if (0 == pv_sig_state->flag.suspend_stderr)
+		return;
+
+	if (!pv_in_foreground())
 		return;
 
 	debug("%s: %s", "pv_sig_checkbg", "attempting to resume stderr");
