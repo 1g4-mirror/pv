@@ -134,6 +134,7 @@ struct pvstate_s {
 		bool direct_io_changed;          /* set when direct_io is changed */
 		bool no_splice;                  /* never use splice() */
 		bool discard_input;              /* write nothing to stdout */
+		bool show_stats;		 /* show statistics on exit */
 		bool width_set_manually;	 /* width was set manually, not detected */
 		bool height_set_manually;	 /* height was set manually, not detected */
 	} control;
@@ -218,6 +219,12 @@ struct pvstate_s {
 		long double prev_rate;		 /* last calculated instantaneous transfer rate */
 		long double prev_trans;		 /* amount transferred since last rate calculation */
 		long double current_avg_rate;    /* current average rate over last history intervals */
+
+		long double rate_min;		 /* minimum measured transfer rate */
+		long double rate_max;		 /* maximum measured transfer rate */
+		long double rate_sum;		 /* sum of all measured transfer rates */
+		long double ratesquared_sum;	 /* sum of the squares of each transfer rate */
+		unsigned long measurements_taken; /* how many times the rate was measured */
 
 		/* Keep track of progress over last intervals to compute current average rate. */
 		/*@null@*/ struct {	 /* state at previous intervals (circular buffer) */

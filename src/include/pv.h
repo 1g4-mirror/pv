@@ -172,6 +172,7 @@ extern void pv_state_set_format(pvstate_t state, bool progress,
  */
 extern void pv_state_force_set(pvstate_t, bool);
 extern void pv_state_cursor_set(pvstate_t, bool);
+extern void pv_state_show_stats_set(pvstate_t, bool);
 extern void pv_state_numeric_set(pvstate_t, bool);
 extern void pv_state_wait_set(pvstate_t, bool);
 extern void pv_state_delay_start_set(pvstate_t, double);

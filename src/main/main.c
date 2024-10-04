@@ -306,6 +306,7 @@ int main(int argc, char **argv)
 	pv_state_no_display_set(state, opts->no_display);
 	pv_state_force_set(state, opts->force);
 	pv_state_cursor_set(state, opts->cursor);
+	pv_state_show_stats_set(state, opts->show_stats);
 	pv_state_numeric_set(state, opts->numeric);
 	pv_state_wait_set(state, opts->wait);
 	pv_state_delay_start_set(state, opts->delay_start);

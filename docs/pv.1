@@ -1,4 +1,4 @@
-.TH PV 1 "September 2024" Linux "User Manuals"
+.TH PV 1 "October 2024" Linux "User Manuals"
 .SH NAME
 pv \- monitor the progress of data through a pipe
 .SH SYNOPSIS
@@ -194,6 +194,12 @@ and instead use the format string
 to determine the output format.  See the
 .B FORMATTING
 section below.
+.TP
+.B \-v, \-\-stats
+At the end of the transfer, write an additional line showing the transfer
+rate minimum, maximum, mean, and standard deviation.  The values are always
+in bytes per second (or bits, with
+.BR \-8 ).
 .TP
 .B \-n, \-\-numeric
 Numeric output.  Instead of giving a visual indication of progress,

@@ -694,6 +694,24 @@ void pv_calculate_transfer_rate(pvstate_t state, bool final)
 		transfer_rate = ((long double) bytes_since_last + state->calc.prev_trans) / time_since_last;
 		state->calc.prev_elapsed_sec = state->transfer.elapsed_seconds;
 		state->calc.prev_trans = 0;
+
+		/* Maintain information for statistics. */
+		if (state->control.show_stats) {
+			long double measured_rate = transfer_rate;
+
+			if (state->control.bits)
+				measured_rate = 8.0 * measured_rate;
+
+			if ((state->calc.measurements_taken < 1) || (measured_rate < state->calc.rate_min)) {
+				state->calc.rate_min = measured_rate;
+			}
+			if (measured_rate > state->calc.rate_max) {
+				state->calc.rate_max = measured_rate;
+			}
+			state->calc.rate_sum += measured_rate;
+			state->calc.ratesquared_sum += (measured_rate * measured_rate);
+			state->calc.measurements_taken++;
+		}
 	}
 	state->calc.prev_rate = transfer_rate;
 

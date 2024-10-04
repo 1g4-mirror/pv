@@ -86,6 +86,22 @@ pvstate_t pv_state_alloc(const char *program_name)
 	state->display.display_visible = false;
 
 	/*
+	 * Explicitly set important floating point values to 0, as memset()
+	 * is not recommended for this.
+	 */
+	state->calc.transfer_rate = 0.0;
+	state->calc.average_rate = 0.0;
+	state->calc.prev_elapsed_sec = 0.0;
+	state->calc.prev_rate = 0.0;
+	state->calc.prev_trans = 0.0;
+	state->calc.current_avg_rate = 0.0;
+	state->calc.rate_min = 0.0;
+	state->calc.rate_max = 0.0;
+	state->calc.rate_sum = 0.0;
+	state->calc.ratesquared_sum = 0.0;
+	state->transfer.elapsed_seconds = 0.0;
+
+	/*
 	 * Get the current working directory, if possible, as a base for
 	 * showing relative filenames with --watchfd.
 	 */
@@ -232,6 +248,11 @@ void pv_state_force_set(pvstate_t state, bool val)
 void pv_state_cursor_set(pvstate_t state, bool val)
 {
 	state->control.cursor = val;
+}
+
+void pv_state_show_stats_set(pvstate_t state, bool val)
+{
+	state->control.show_stats = val;
 }
 
 void pv_state_numeric_set(pvstate_t state, bool val)

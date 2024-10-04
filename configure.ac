@@ -40,6 +40,10 @@ AC_CHECK_HEADERS([libintl.h locale.h])
 AC_CHECK_HEADERS([sys/sysmacros.h])
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 
+AC_SEARCH_LIBS([sqrtl],[m])
+AC_CHECK_HEADERS([math.h])
+AC_CHECK_FUNCS([sqrtl])
+
 dnl Libraries that may contain key functions.
 AC_SEARCH_LIBS([clock_gettime],[rt])
 

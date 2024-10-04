@@ -73,6 +73,9 @@
 /* Define to 1 if you have the <locale.h> header file. */
 #undef HAVE_LOCALE_H
 
+/* Define to 1 if you have the <math.h> header file. */
+#undef HAVE_MATH_H
+
 /* Define to 1 if you have the `memcpy' function. */
 #undef HAVE_MEMCPY
 
@@ -111,6 +114,9 @@
 
 /* Define to 1 if you have the `splice' function. */
 #undef HAVE_SPLICE
+
+/* Define to 1 if you have the `sqrtl' function. */
+#undef HAVE_SQRTL
 
 /* Define to 1 if stdbool.h conforms to C99. */
 #undef HAVE_STDBOOL_H

@@ -74,6 +74,7 @@ struct opts_s {
 	bool sync_after_write;         /* set if we sync after every write */
 	bool direct_io;                /* set if O_DIRECT is to be used */
 	bool discard_input;            /* set to write nothing to output */
+	bool show_stats;	       /* set to write statistics at the end */
 	bool width_set_manually;       /* width was set manually, not detected */
 	bool height_set_manually;      /* height was set manually, not detected */
 };

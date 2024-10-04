@@ -290,6 +290,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "height", 1, NULL, (int) 'H' },
 		{ "name", 1, NULL, (int) 'N' },
 		{ "format", 1, NULL, (int) 'F' },
+		{ "stats", 0, NULL, (int) 'v' },
 		{ "rate-limit", 1, NULL, (int) 'L' },
 		{ "buffer-size", 1, NULL, (int) 'B' },
 		{ "no-splice", 0, NULL, (int) 'C' },
@@ -312,7 +313,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fnqcWD:s:l0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:o:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:l0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:o:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -511,6 +512,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'f':
 			opts->force = true;
+			break;
+		case 'v':
+			opts->show_stats = true;
 			break;
 		case 'n':
 			opts->numeric = true;

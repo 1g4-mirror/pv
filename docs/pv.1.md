@@ -34,9 +34,9 @@ the expected size to **pv**:
 A more complicated example using numeric output to feed into the
 **dialog**(1) program for a full-screen progress display:
 
-> **(tar cf - . \\** \
-> **\| pv -n -s \$(du -sb . \| awk \'{print \$1}\') \\** \
-> **\| gzip -9 \> out.tgz) 2\>&1 \\** \
+> **(tar cf - . \\**\
+> ** \| pv -n -s \$(du -sb . \| awk \'{print \$1}\') \\**\
+> ** \| gzip -9 \> out.tgz) 2\>&1 \\**\
 > **\| dialog \--gauge \'Progress\' 7 70**
 
 Taking an image of a disk, skipping errors:
@@ -143,6 +143,12 @@ that are explicitly switched on will be shown.
 :   Ignore the options **-p**, **-t**, **-e**, **-r**, **-a**, **-b**,
     **-T**, and **-A**, and instead use the format string *FORMAT* to
     determine the output format. See the **FORMATTING** section below.
+
+**-v, \--stats**
+
+:   At the end of the transfer, write an additional line showing the
+    transfer rate minimum, maximum, mean, and standard deviation. The
+    values are always in bytes per second (or bits, with **-8**).
 
 **-n, \--numeric**
 
