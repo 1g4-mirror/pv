@@ -4,7 +4,7 @@ pv - monitor the progress of data through a pipe
 
 # SYNOPSIS
 
-**pv** \[*OPTION*\] \[*FILE*\]\...\
+**pv** \[*OPTION*\]\... \[*FILE*\]\...\
 **pv** \[*-h*\|*-V*\]
 
 # DESCRIPTION
