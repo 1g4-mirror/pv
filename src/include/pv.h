@@ -79,6 +79,13 @@ extern unsigned int pv_getnum_count(const char *, bool);
 extern bool pv_getnum_check(const char *, pv_numtype);
 
 /*
+ * Return an integer representing the first amount as a percentage of the
+ * second total, i.e. 100*amount/total.  If the second value, the total, is
+ * zero or less, return 0.
+ */
+extern int pv_percentage(off_t, const off_t);
+
+/*
  * String handling wrappers.
  */
 

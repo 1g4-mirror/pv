@@ -152,21 +152,6 @@ void pv_screensize(unsigned int *width, unsigned int *height)
 
 
 /*
- * Calculate the percentage transferred so far and return it.
- */
-static int pv__calc_percentage(off_t so_far, const off_t total)
-{
-	if (total < 1)
-		return 0;
-
-	so_far *= 100;
-	so_far /= total;
-
-	return (int) so_far;
-}
-
-
-/*
  * Given how many bytes have been transferred, the total byte count to
  * transfer, and the current average transfer rate, return the estimated
  * number of seconds until completion.
@@ -751,7 +736,7 @@ void pv_calculate_transfer_rate(pvstate_t state, bool final)
 		if (state->calc.percentage > 199)
 			state->calc.percentage = 0;
 	} else {
-		state->calc.percentage = pv__calc_percentage(state->transfer.total_written, state->control.size);
+		state->calc.percentage = pv_percentage(state->transfer.total_written, state->control.size);
 	}
 
 	/* Ensure the percentage is never negative or huge. */
@@ -1128,7 +1113,7 @@ bool pv_format(pvstate_t state, bool final)
 		case PV_COMPONENT_BUFPERCENT:
 			/* Transfer buffer percentage utilisation. */
 			if (state->transfer.buffer_size > 0) {
-				int pct_used = pv__calc_percentage((off_t)
+				int pct_used = pv_percentage((off_t)
 								   (state->transfer.read_position -
 								    state->transfer.write_position),
 								   (off_t)
