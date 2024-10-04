@@ -654,7 +654,8 @@ void pv_crs_fini(pvstate_t state)
 	 */
 	if ((!state->cursor.noipc) && (NULL != state->cursor.shared) && state->cursor.shared->tty_tostop_added) {
 		if (0 == state->flag.clear_tty_tostop_on_exit) {
-			debug("%s", "propagating shared tty_tostop_added true value to local clear_tty_tostop_on_exit flag");
+			debug("%s",
+			      "propagating shared tty_tostop_added true value to local clear_tty_tostop_on_exit flag");
 			state->flag.clear_tty_tostop_on_exit = 1;
 		}
 	}
