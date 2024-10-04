@@ -607,8 +607,7 @@ static long bound_long(long x, long min, long max)
  * rate, otherwise calulate the average rate from the difference between the
  * current position + elapsed time pair, and the oldest pair in the buffer.
  */
-static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, long double elapsed_sec,
-					    long double rate)
+static void pv__update_average_rate_history(pvstate_t state, long double rate)
 {
 	size_t first = state->calc.history_first;
 	size_t last = state->calc.history_last;
@@ -624,7 +623,7 @@ static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, 
 	 * elapsed since the previous call yet.
 	 */
 	if ((last_elapsed > 0.0)
-	    && (elapsed_sec < (last_elapsed + state->control.history_interval)))
+	    && (state->transfer.elapsed_seconds < (last_elapsed + state->control.history_interval)))
 		return;
 
 	/*
@@ -641,13 +640,13 @@ static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, 
 		}
 	}
 
-	state->calc.history[last].elapsed_sec = elapsed_sec;
-	state->calc.history[last].total_bytes = total_bytes;
+	state->calc.history[last].elapsed_sec = state->transfer.elapsed_seconds;
+	state->calc.history[last].total_written = state->transfer.total_written;
 
 	if (first == last) {
 		state->calc.current_avg_rate = rate;
 	} else {
-		off_t bytes = (state->calc.history[last].total_bytes - state->calc.history[first].total_bytes);
+		off_t bytes = (state->calc.history[last].total_written - state->calc.history[first].total_written);
 		long double sec = (state->calc.history[last].elapsed_sec - state->calc.history[first].elapsed_sec);
 		state->calc.current_avg_rate = (long double) bytes / sec;
 	}
@@ -655,12 +654,9 @@ static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, 
 
 
 /*
- * Update all calculated transfer state (state->calc), where "elapsed_sec"
- * is the seconds elapsed since the transfer started, "bytes_since_last" is
- * the number of bytes transferred since the last update, and "total_bytes"
- * is the total number of bytes transferred so far.
+ * Update all calculated transfer state (state->calc).
  *
- * If "bytes_since_last" is negative, this is the final update, so
+ * If "final" is true, this is the final update, so
  * state->calc.transfer_rate and state->calc.average_rate are given as an
  * average over the whole transfer; otherwise they are the current transfer
  * rate and current average rate.
@@ -669,15 +665,20 @@ static void pv__update_average_rate_history(pvstate_t state, off_t total_bytes, 
  * completion if state->control.size is greater than zero, otherwise it will
  * increase by 2 each call and wrap at 200.
  */
-void pv_calculate_transfer_rate(pvstate_t state, long double elapsed_sec, off_t bytes_since_last, off_t total_bytes)
+void pv_calculate_transfer_rate(pvstate_t state, bool final)
 {
+	off_t bytes_since_last;
 	long double time_since_last, transfer_rate, average_rate;
 
-	/* Quick sanity check - state must exist, total_bytes must be >= 0. */
+	/* Quick sanity check - state must exist. */
 	if (NULL == state)
 		return;
-	if (total_bytes < 0)
-		return;
+
+	bytes_since_last = 0;
+	if (state->transfer.total_written >= 0) {
+		bytes_since_last = state->transfer.total_written - state->calc.prev_total_written;
+		state->calc.prev_total_written = state->transfer.total_written;
+	}
 
 	/*
 	 * In case the time since the last update is very small, we keep
@@ -685,19 +686,19 @@ void pv_calculate_transfer_rate(pvstate_t state, long double elapsed_sec, off_t 
 	 * adding to that until a reasonable amount of time has passed to
 	 * avoid rate spikes or division by zero.
 	 */
-	time_since_last = elapsed_sec - state->calc.prev_elapsed_sec;
+	time_since_last = state->transfer.elapsed_seconds - state->calc.prev_elapsed_sec;
 	if (time_since_last <= 0.01) {
 		transfer_rate = state->calc.prev_rate;
 		state->calc.prev_trans += bytes_since_last;
 	} else {
 		transfer_rate = ((long double) bytes_since_last + state->calc.prev_trans) / time_since_last;
-		state->calc.prev_elapsed_sec = elapsed_sec;
+		state->calc.prev_elapsed_sec = state->transfer.elapsed_seconds;
 		state->calc.prev_trans = 0;
 	}
 	state->calc.prev_rate = transfer_rate;
 
 	/* Update history and current average rate for ETA. */
-	pv__update_average_rate_history(state, total_bytes, elapsed_sec, transfer_rate);
+	pv__update_average_rate_history(state, transfer_rate);
 	average_rate = state->calc.current_avg_rate;
 
 	/*
@@ -705,13 +706,13 @@ void pv_calculate_transfer_rate(pvstate_t state, long double elapsed_sec, off_t 
 	 * recalculate the rate - and the average rate - across the whole
 	 * period of the transfer.
 	 */
-	if (bytes_since_last < 0) {
+	if (final) {
 		/* Sanity check to avoid division by zero */
-		if (elapsed_sec < 0.000001)
-			elapsed_sec = 0.000001;
+		if (state->transfer.elapsed_seconds < 0.000001)
+			state->transfer.elapsed_seconds = 0.000001;
 		average_rate =
-		    (((long double) total_bytes) -
-		     ((long double) state->display.initial_offset)) / (long double) elapsed_sec;
+		    (((long double) state->transfer.total_written) -
+		     ((long double) state->display.initial_offset)) / (long double) (state->transfer.elapsed_seconds);
 		transfer_rate = average_rate;
 	}
 
@@ -732,7 +733,7 @@ void pv_calculate_transfer_rate(pvstate_t state, long double elapsed_sec, off_t 
 		if (state->calc.percentage > 199)
 			state->calc.percentage = 0;
 	} else {
-		state->calc.percentage = pv__calc_percentage(total_bytes, state->control.size);
+		state->calc.percentage = pv__calc_percentage(state->transfer.total_written, state->control.size);
 	}
 
 	/* Ensure the percentage is never negative or huge. */
@@ -745,28 +746,18 @@ void pv_calculate_transfer_rate(pvstate_t state, long double elapsed_sec, off_t 
 
 /*
  * Update state->display.display_buffer with status information formatted
- * according to the state held within the given structure, where
- * "elapsed_sec" is the seconds elapsed since the transfer started,
- * "bytes_since_last" is the number of bytes transferred since the last
- * update, and "total_bytes" is the total number of bytes transferred so
- * far.
+ * according to the state held within the given structure.
  *
- * If "bytes_since_last" is negative, this is the final update so the rate
- * is given as an an average over the whole transfer; otherwise the current
- * rate is shown.
- *
- * In line mode, "bytes_since_last" and "total_bytes" are in lines, not bytes.
+ * If "final" is true, this is the final update so the rate is given as an
+ * an average over the whole transfer; otherwise the current rate is shown.
  *
  * Returns true if the display buffer can be used, false if not.
  *
  * When returning true, this function will have also set
  * state->display.display_string_len to the length of the string in
  * state->display.display_buffer, in bytes.
- *
- * If "total_bytes" is negative, then free the display buffer and return
- * false.
  */
-bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last, off_t total_bytes)
+bool pv_format(pvstate_t state, bool final)
 {
 	long eta;
 	int static_portion_size;
@@ -778,15 +769,6 @@ bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last,
 	/* Quick sanity check - state must exist. */
 	if (NULL == state)
 		return false;
-
-	/* Negative total transfer - free memory and return false. */
-	if (total_bytes < 0) {
-		if (NULL != state->display.display_buffer)
-			free(state->display.display_buffer);
-		state->display.display_buffer = NULL;
-		state->display.display_buffer_size = 0;
-		return false;
-	}
 
 	/*
 	 * If the display options need reparsing, do so to generate new
@@ -851,17 +833,20 @@ bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last,
 		numericprefix[0] = '\0';
 
 		if (state->display.component[PV_COMPONENT_TIMER].required)
-			(void) pv_snprintf(numericprefix, sizeof(numericprefix), "%.4Lf ", elapsed_sec);
+			(void) pv_snprintf(numericprefix, sizeof(numericprefix), "%.4Lf ",
+					   state->transfer.elapsed_seconds);
 
 		if (state->display.component[PV_COMPONENT_BYTES].required) {
 			if (state->control.bits) {
 				(void) pv_snprintf(state->display.display_buffer,
 						   state->display.display_buffer_size,
-						   "%.99s%lld\n", numericprefix, (long long) (8 * total_bytes));
+						   "%.99s%lld\n", numericprefix,
+						   (long long) (8 * state->transfer.total_written));
 			} else {
 				(void) pv_snprintf(state->display.display_buffer,
 						   state->display.display_buffer_size,
-						   "%.99s%lld\n", numericprefix, (long long) total_bytes);
+						   "%.99s%lld\n", numericprefix,
+						   (long long) (state->transfer.total_written));
 			}
 		} else {
 			(void) pv_snprintf(state->display.display_buffer,
@@ -932,10 +917,10 @@ bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last,
 			/*@-mustfreefresh @ */
 			if (state->control.bits && !state->control.linemode) {
 				pv__sizestr(component_content, component_buf_size, "%s",
-					    (long double) total_bytes * 8, "", _("b"), count_type);
+					    (long double) (state->transfer.total_written * 8), "", _("b"), count_type);
 			} else {
 				pv__sizestr(component_content, component_buf_size, "%s",
-					    (long double) total_bytes, "", _("B"), count_type);
+					    (long double) (state->transfer.total_written), "", _("B"), count_type);
 			}
 			/*@+mustfreefresh @ */
 			/* splint: we trust gettext() not to really leak memory. */
@@ -948,26 +933,28 @@ bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last,
 			 * does mean that the timer will stop at a 100,000 hours,
 			 * but since that's 11 years, it shouldn't be a problem.
 			 */
-			if (elapsed_sec > (long double) 360000000.0L)
-				elapsed_sec = (long double) 360000000.0L;
+			if (state->transfer.elapsed_seconds > (long double) 360000000.0L)
+				state->transfer.elapsed_seconds = (long double) 360000000.0L;
 
 			/*
 			 * If the elapsed time is more than a day, include a day count as
 			 * well as hours, minutes, and seconds.
 			 */
-			if (elapsed_sec > (long double) 86400.0L) {
+			if (state->transfer.elapsed_seconds > (long double) 86400.0L) {
 				(void) pv_snprintf(component_content,
 						   component_buf_size,
 						   "%ld:%02ld:%02ld:%02ld",
-						   ((long) elapsed_sec) / 86400,
-						   (((long) elapsed_sec) / 3600) %
-						   24, (((long) elapsed_sec) / 60) % 60, ((long) elapsed_sec) % 60);
+						   ((long) (state->transfer.elapsed_seconds)) / 86400,
+						   (((long) (state->transfer.elapsed_seconds)) / 3600) %
+						   24, (((long) (state->transfer.elapsed_seconds)) / 60) % 60,
+						   ((long) (state->transfer.elapsed_seconds)) % 60);
 			} else {
 				(void) pv_snprintf(component_content,
 						   component_buf_size,
 						   "%ld:%02ld:%02ld",
-						   ((long) elapsed_sec) / 3600,
-						   (((long) elapsed_sec) / 60) % 60, ((long) elapsed_sec) % 60);
+						   ((long) (state->transfer.elapsed_seconds)) / 3600,
+						   (((long) (state->transfer.elapsed_seconds)) / 60) % 60,
+						   ((long) (state->transfer.elapsed_seconds)) % 60);
 			}
 			break;
 
@@ -1005,7 +992,7 @@ bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last,
 		case PV_COMPONENT_ETA:
 			/* Estimated time remaining until completion - if size is known. */
 			eta =
-			    pv__seconds_remaining(((off_t) total_bytes - state->display.initial_offset),
+			    pv__seconds_remaining((state->transfer.total_written - state->display.initial_offset),
 						  state->control.size - state->display.initial_offset,
 						  state->calc.current_avg_rate);
 
@@ -1037,7 +1024,7 @@ bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last,
 			 * If this is the final update, show a blank space where the
 			 * ETA used to be.
 			 */
-			if (bytes_since_last < 0) {
+			if (final) {
 				size_t erase_idx;
 				for (erase_idx = 0;
 				     erase_idx < component_buf_size && component_content[erase_idx] != '\0';
@@ -1060,7 +1047,7 @@ bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last,
 			 */
 
 			eta =
-			    pv__seconds_remaining((off_t) (total_bytes - state->display.initial_offset),
+			    pv__seconds_remaining(state->transfer.total_written - state->display.initial_offset,
 						  state->control.size - state->display.initial_offset,
 						  state->calc.current_avg_rate);
 
@@ -1364,28 +1351,21 @@ bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last,
 
 
 /*
- * Output status information on standard error, where "elapsed_sec" is the
- * seconds elapsed since the transfer started, "bytes_since_last" is the
- * number of bytes transferred since the last update, and "total_bytes" is
- * the total number of bytes transferred so far.
+ * Output status information on standard error.
  *
- * If "bytes_since_last" is negative, this is the final update so the rate
- * is given as an an average over the whole transfer; otherwise the current
- * rate is shown.
- *
- * In line mode, "bytes_since_last" and "total_bytes" are in lines, not
- * bytes.
+ * If "final" is true, this is the final update, so the rate is given as an
+ * an average over the whole transfer; otherwise the current rate is shown.
  */
-void pv_display(pvstate_t state, long double elapsed_sec, off_t bytes_since_last, off_t total_bytes)
+void pv_display(pvstate_t state, bool final)
 {
 	if (NULL == state)
 		return;
 
 	pv_sig_checkbg();
 
-	pv_calculate_transfer_rate(state, elapsed_sec, bytes_since_last, total_bytes);
+	pv_calculate_transfer_rate(state, final);
 
-	if (!pv_format(state, elapsed_sec, bytes_since_last, total_bytes))
+	if (!pv_format(state, final))
 		return;
 
 	if (NULL == state->display.display_buffer)

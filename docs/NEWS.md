@@ -3,9 +3,11 @@
  * i18n: complete set of German translations supplied by Hartmut Goebel ([#98](https://codeberg.org/a-j-wood/pv/pulls/98))
  * fix: resume stopped pipelines when running in the background (part of [#56](https://codeberg.org/a-j-wood/pv/issues/56))
  * fix: write UTC timestamps in debugging mode to avoid lockups in signal handlers
+ * fix: correct a memory leak in "`--watchfd PID`"
  * cleanup: removed TODO.md, since it's just an outdated copy of the issue tracker
  * cleanup: re-ordered structure members to reduce padding
  * cleanup: improved readability of SIGTTOU handling code
+ * cleanup: refactored to separate display, transfer, and calculation more cleanly
  * cleanup: instead of moving stderr when backgrounded, set a suspend-output flag
 
 ### 1.8.14 - 7 September 2024

@@ -216,17 +216,19 @@ struct pvstate_s {
 
 		long double prev_elapsed_sec;	 /* elapsed sec at which rate last calculated */
 		long double prev_rate;		 /* last calculated instantaneous transfer rate */
-		long double prev_trans;		 /* bytes transferred since last rate calculation */
+		long double prev_trans;		 /* amount transferred since last rate calculation */
 		long double current_avg_rate;    /* current average rate over last history intervals */
 
 		/* Keep track of progress over last intervals to compute current average rate. */
 		/*@null@*/ struct {	 /* state at previous intervals (circular buffer) */
 			long double elapsed_sec;	/* time since start of transfer */
-			off_t total_bytes;		/* amount transferred by that time */
+			off_t total_written;		/* amount transferred by that time */
 		} *history;
 		size_t history_len;		 /* total size of history array */
 		size_t history_first;		 /* index of oldest entry */
 		size_t history_last;		 /* index of newest entry */
+
+		off_t prev_total_written;	 /* total amount transferred when called last time */
 
 		int percentage;			 /* transfer percentage completion */
 	} calc;
@@ -272,12 +274,15 @@ struct pvstate_s {
 	 */
 	struct {
 		/*@only@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
+		long double elapsed_seconds;	 /* how long we have been transferring data for */
 		size_t buffer_size;		 /* size of buffer */
 		size_t read_position;		 /* amount of data in buffer */
 		size_t write_position;		 /* buffered data written */
 
 		ssize_t to_write;		 /* max to write this time around */
 		ssize_t written;		 /* bytes sent to stdout this time */
+
+		off_t total_written;		 /* total bytes or lines transferred */
 
 		/*
 		 * While reading from a file descriptor we keep track of how
@@ -336,9 +341,9 @@ typedef struct pvwatchfd_s *pvwatchfd_t;
 void pv_error(pvstate_t, char *, ...);
 
 int pv_main_loop(pvstate_t);
-void pv_calculate_transfer_rate(pvstate_t, long double, off_t, off_t);
-bool pv_format(pvstate_t, long double, off_t, off_t);
-void pv_display(pvstate_t, long double, off_t, off_t);
+void pv_calculate_transfer_rate(pvstate_t, bool);
+bool pv_format(pvstate_t, bool);
+void pv_display(pvstate_t, bool);
 ssize_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);
 int pv_next_file(pvstate_t, unsigned int, int);
 /*@out@*/ const char *pv_current_file_name(pvstate_t);

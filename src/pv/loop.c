@@ -34,13 +34,12 @@
 int pv_main_loop(pvstate_t state)
 {
 	long lineswritten;
-	off_t total_written, transferred_since_last, cansend;
+	off_t cansend;
 	ssize_t written;
 	long double target;
 	bool eof_in, eof_out, final_update;
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
 	struct timespec init_time, next_remotecheck, transfer_elapsed;
-	long double elapsed_seconds;
 	int fd;
 	unsigned int file_idx;
 
@@ -50,12 +49,9 @@ int pv_main_loop(pvstate_t state)
 	 * "lineswritten" is the lines written by the last transfer,
 	 * but is only updated in line mode.
 	 *
-	 * "total_written" is the total bytes written since the start,
-	 * or in line mode, the total lines written since the start.
-	 *
-	 * "transferred_since_last" is the bytes written since the last
-	 * display, or in line mode, the lines written since the last
-	 * display.
+	 * "state->transfer.total_written" is the total bytes written since
+	 * the start, or in line mode, the total lines written since the
+	 * start.
 	 *
 	 * The remaining variables are all unchanged by linemode.
 	 */
@@ -66,9 +62,8 @@ int pv_main_loop(pvstate_t state)
 
 	eof_in = false;
 	eof_out = false;
-	total_written = 0;
+	state->transfer.total_written = 0;
 	lineswritten = 0;
-	transferred_since_last = 0;
 	state->display.initial_offset = 0;
 
 	memset(&cur_time, 0, sizeof(cur_time));
@@ -187,10 +182,10 @@ int pv_main_loop(pvstate_t state)
 		 * try to write more than we're allowed to.
 		 */
 		if ((0 < state->control.size) && (state->control.stop_at_size)) {
-			if ((state->control.size < (total_written + cansend))
+			if ((state->control.size < (state->transfer.total_written + cansend))
 			    || ((0 == cansend)
 				&& (0 == state->control.rate_limit))) {
-				cansend = state->control.size - total_written;
+				cansend = state->control.size - state->transfer.total_written;
 				if (0 >= cansend) {
 					debug("%s", "write limit reached (size explicitly set) - setting EOF flags");
 					eof_in = true;
@@ -215,13 +210,11 @@ int pv_main_loop(pvstate_t state)
 		}
 
 		if (state->control.linemode) {
-			transferred_since_last += lineswritten;
-			total_written += lineswritten;
+			state->transfer.total_written += lineswritten;
 			if (state->control.rate_limit > 0)
 				target -= lineswritten;
 		} else {
-			transferred_since_last += written;
-			total_written += written;
+			state->transfer.total_written += written;
 			if (state->control.rate_limit > 0)
 				target -= written;
 		}
@@ -320,10 +313,7 @@ int pv_main_loop(pvstate_t state)
 		memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
 		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
 
-		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
-
-		if (final_update)
-			transferred_since_last = -1;
+		state->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 		/* Resize the display, if a resize signal was received. */
 		if (1 == state->flag.terminal_resized) {
@@ -341,9 +331,7 @@ int pv_main_loop(pvstate_t state)
 				state->control.height = new_height;
 		}
 
-		pv_display(state, elapsed_seconds, transferred_since_last, total_written);
-
-		transferred_since_last = 0;
+		pv_display(state, final_update);
 	}
 
 	debug("%s: %s=%s, %s=%s", "loop ended", "eof_in", eof_in ? "true" : "false", "eof_out",
@@ -377,10 +365,9 @@ int pv_main_loop(pvstate_t state)
 int pv_watchfd_loop(pvstate_t state)
 {
 	struct pvwatchfd_s info;
-	off_t position_now, total_written, transferred_since_last;
+	off_t position_now;
 	struct timespec next_update, cur_time;
 	struct timespec init_time, next_remotecheck, transfer_elapsed;
-	long double elapsed_seconds;
 	bool ended, first_check;
 	int rc;
 
@@ -427,8 +414,6 @@ int pv_watchfd_loop(pvstate_t state)
 	pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
 
 	ended = false;
-	total_written = 0;
-	transferred_since_last = 0;
 	first_check = true;
 
 	while (!ended) {
@@ -448,12 +433,11 @@ int pv_watchfd_loop(pvstate_t state)
 		if (position_now < 0) {
 			ended = true;
 		} else {
-			transferred_since_last += position_now - total_written;
-			total_written = position_now;
 			if (first_check) {
 				state->display.initial_offset = position_now;
 				first_check = false;
 			}
+			state->transfer.total_written = position_now;
 		}
 
 		pv_elapsedtime_read(&cur_time);
@@ -490,10 +474,7 @@ int pv_watchfd_loop(pvstate_t state)
 		 */
 		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
 
-		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
-
-		if (ended)
-			transferred_since_last = -1;
+		state->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 		/* Resize the display, if a resize signal was received. */
 		if (1 == state->flag.terminal_resized) {
@@ -511,9 +492,7 @@ int pv_watchfd_loop(pvstate_t state)
 				state->control.height = new_height;
 		}
 
-		pv_display(state, elapsed_seconds, transferred_since_last, total_written);
-
-		transferred_since_last = 0;
+		pv_display(state, ended);
 	}
 
 	if (!state->control.numeric)
@@ -677,9 +656,8 @@ int pv_watchpid_loop(pvstate_t state)
 		displayed_lines = 0;
 
 		for (fd = 0; fd < FD_SETSIZE && NULL != info_array; fd++) {
-			off_t position_now, transferred_since_last;
+			off_t position_now;
 			struct timespec init_time, transfer_elapsed;
-			long double elapsed_seconds;
 
 			if (displayed_lines >= (int) (state->control.height))
 				break;
@@ -697,6 +675,11 @@ int pv_watchpid_loop(pvstate_t state)
 				if (pv_watchfd_changed(&(info_array[idx]))) {
 					fd_to_idx[fd] = -1;
 					info_array[idx].watch_pid = 0;
+					if (NULL != info_array[idx].state)
+						pv_state_free(info_array[idx].state);
+					/*@-mustfreeonly@ *//* not a leak - we've just free()d it. */
+					info_array[idx].state = NULL;
+					/*@+mustfreeonly@ */
 					debug("%s %d: %s", "fd", fd, "removing");
 				}
 				continue;
@@ -716,11 +699,15 @@ int pv_watchpid_loop(pvstate_t state)
 			if (position_now < 0) {
 				fd_to_idx[fd] = -1;
 				info_array[idx].watch_pid = 0;
+				if (NULL != info_array[idx].state)
+					pv_state_free(info_array[idx].state);
+				/*@-mustfreeonly@ *//* not a leak - we've just free()d it. */
+				info_array[idx].state = NULL;
+				/*@+mustfreeonly@ */
 				debug("%s %d: %s", "fd", fd, "removing");
 				continue;
 			}
 
-			transferred_since_last = position_now - info_array[idx].position;
 			info_array[idx].position = position_now;
 
 			memset(&init_time, 0, sizeof(init_time));
@@ -738,18 +725,28 @@ int pv_watchpid_loop(pvstate_t state)
 			 */
 			pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
 
-			elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+			if (NULL != info_array[idx].state) {
+				info_array[idx].state->transfer.elapsed_seconds =
+				    pv_elapsedtime_seconds(&transfer_elapsed);
+			}
 
 			if (displayed_lines > 0) {
 				debug("%s", "adding newline");
 				pv_tty_write(state, "\n", 1);
 			}
 
-			debug("%s %d [%d]: %Lf / %Ld / %Ld", "fd", fd, idx, elapsed_seconds, transferred_since_last,
-			      position_now);
+			if (NULL == info_array[idx].state) {
+				debug("%s %d [%d]: %s / %Ld", "fd", fd, idx, "(null state)", position_now);
+			} else {
+				debug("%s %d [%d]: %Lf / %Ld", "fd", fd, idx,
+				      info_array[idx].state->transfer.elapsed_seconds, position_now);
+			}
 
-			pv_display(info_array[idx].state, elapsed_seconds, transferred_since_last, position_now);
-			displayed_lines++;
+			if (NULL != info_array[idx].state) {
+				info_array[idx].state->transfer.total_written = position_now;
+				pv_display(info_array[idx].state, false);
+				displayed_lines++;
+			}
 		}
 
 		/*
