@@ -1,6 +1,7 @@
 ### UNRELEASED
 
  * feature: new "`--stats`" option to show transfer stats at the end, like "`ping`" ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
+ * feature: "`--rate`" can now be used with "`--numeric`" ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
  * i18n: complete set of German translations supplied by Hartmut Goebel ([#98](https://codeberg.org/a-j-wood/pv/pulls/98))
  * fix: resume stopped pipelines when running in the background (part of [#56](https://codeberg.org/a-j-wood/pv/issues/56))
  * fix: write UTC timestamps in debugging mode to avoid lockups in signal handlers

@@ -98,5 +98,6 @@ is acknowledged and greatly appreciated:
  * [jettero](https://codeberg.org/jettero) - reported double-free coredump when using "`--watchfd`" after 1.8.10 ([#96](https://codeberg.org/a-j-wood/pv/issues/96))
  * Hartmut Goebel - provided a full set of new German translations ([#98](https://codeberg.org/a-j-wood/pv/pulls/98))
  * Venky.N.Iyer - suggested "`--stats`" ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
+ * Roland Kletzing - suggested "`--rate`" with "`--numeric`" ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
 
 ---

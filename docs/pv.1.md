@@ -158,14 +158,15 @@ that are explicitly switched on will be shown.
     **dialog**(1). Note that **-f** is not required if **-n** is being
     used.
 
-:   Note that if **\--numeric** is in use, then adding **\--bytes** will
-    cause the number of bytes processed so far to be output instead of a
+:   If **\--numeric** is in use, then adding **\--bytes** will cause the
+    number of bytes processed so far to be output instead of a
     percentage; if **\--line-mode** is also in use as well as
     **\--bytes** and **\--numeric**, then instead of bytes or a
-    percentage, the number of lines so far is output. And finally, if
-    **\--timer** is added to **\--numeric**, then each output line is
-    prefixed with the elapsed time so far, as a decimal number of
-    seconds.
+    percentage, the number of lines so far is output. If **\--rate** is
+    added, then the transfer rate is also output (if **\--bytes** is in
+    use as well, the rate comes after the byte/line count). If
+    **\--timer** is also added, then each output line is *prefixed* with
+    the elapsed time so far, as a decimal number of seconds.
 
 **-q, \--quiet**
 

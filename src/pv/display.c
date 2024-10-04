@@ -662,39 +662,66 @@ bool pv_format(pvstate_t state, bool final)
 	}
 
 	/*
-	 * In numeric output mode, our output is just a number.
+	 * In numeric output mode, our output is just the percentage
+	 * completion, as a number by itself.
 	 *
-	 * Patch from Sami Liedes:
-	 * With --timer we prefix the output with the elapsed time.
-	 * With --bytes we output the bytes transferred so far instead
-	 * of the percentage. (Or lines, if --lines was given with --bytes).
+	 * With --timer, we prefix the output with the elapsed time.
+	 *
+	 * With --bytes, we output the bytes transferred so far instead of
+	 * the percentage (or we output the number lines transferred, if
+	 * --lines was given with --bytes).
+	 *
+	 * With --rate was given, we output the current transfer rate
+	 * instead of the percentage.  With --bytes as well, the rate is
+	 * given after the bytes/lines.
 	 */
 	if (state->control.numeric) {
-		char numericprefix[128]; /* flawfinder: ignore - only populated by pv_snprintf(). */
+		char msg_timer[128];	 /* flawfinder: ignore */
+		char msg_bytes[128];	 /* flawfinder: ignore */
+		char msg_rate[128];	 /* flawfinder: ignore */
+		char msg_percent[128];	 /* flawfinder: ignore */
+		bool first_item, show_percentage;
 
-		numericprefix[0] = '\0';
+		/* flawfinder: each buffer is kept safe by pv_snprintf(). */
 
-		if (state->display.component[PV_COMPONENT_TIMER].required)
-			(void) pv_snprintf(numericprefix, sizeof(numericprefix), "%.4Lf ",
+		first_item = true;
+		show_percentage = true;
+
+		msg_timer[0] = '\0';
+		if (state->display.component[PV_COMPONENT_TIMER].required) {
+			(void) pv_snprintf(msg_timer, sizeof(msg_timer), "%s%.4Lf", first_item ? "" : " ",
 					   state->transfer.elapsed_seconds);
-
-		if (state->display.component[PV_COMPONENT_BYTES].required) {
-			if (state->control.bits) {
-				(void) pv_snprintf(state->display.display_buffer,
-						   state->display.display_buffer_size,
-						   "%.99s%lld\n", numericprefix,
-						   (long long) (8 * state->transfer.total_written));
-			} else {
-				(void) pv_snprintf(state->display.display_buffer,
-						   state->display.display_buffer_size,
-						   "%.99s%lld\n", numericprefix,
-						   (long long) (state->transfer.total_written));
-			}
-		} else {
-			(void) pv_snprintf(state->display.display_buffer,
-					   state->display.display_buffer_size, "%.99s%ld\n", numericprefix,
-					   (long) (state->calc.percentage));
+			first_item = false;
 		}
+
+		msg_bytes[0] = '\0';
+		if (state->display.component[PV_COMPONENT_BYTES].required) {
+			(void) pv_snprintf(msg_bytes, sizeof(msg_bytes),
+					   "%s%lld", first_item ? "" : " ",
+					   (long long) ((state->control.bits ? 8 : 1) * state->transfer.total_written));
+			first_item = false;
+			show_percentage = false;
+		}
+
+		msg_rate[0] = '\0';
+		if (state->display.component[PV_COMPONENT_RATE].required) {
+			(void) pv_snprintf(msg_rate, sizeof(msg_rate),
+					   "%s%.4Lf", first_item ? "" : " ",
+					   ((state->control.bits ? 8.0 : 1.0) * state->calc.transfer_rate));
+			first_item = false;
+			show_percentage = false;
+		}
+
+		msg_percent[0] = '\0';
+		if (show_percentage) {
+			(void) pv_snprintf(msg_percent, sizeof(msg_percent),
+					   "%s%d", first_item ? "" : " ", state->calc.percentage);
+			first_item = false;
+		}
+
+		(void) pv_snprintf(state->display.display_buffer,
+				   state->display.display_buffer_size, "%.39s%.39s%.39s%.39s\n", msg_timer, msg_bytes,
+				   msg_rate, msg_percent);
 
 		state->display.display_string_len = strlen(state->display.display_buffer);	/* flawfinder: ignore */
 		/* flawfinder: always \0 terminated by pv_snprintf(). */
@@ -953,10 +980,10 @@ bool pv_format(pvstate_t state, bool final)
 			/* Transfer buffer percentage utilisation. */
 			if (state->transfer.buffer_size > 0) {
 				int pct_used = pv_percentage((off_t)
-								   (state->transfer.read_position -
-								    state->transfer.write_position),
-								   (off_t)
-								   (state->transfer.buffer_size));
+							     (state->transfer.read_position -
+							      state->transfer.write_position),
+							     (off_t)
+							     (state->transfer.buffer_size));
 				(void) pv_snprintf(component_content, component_buf_size, "{%3d%%}", pct_used);
 			}
 #ifdef HAVE_SPLICE

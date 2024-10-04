@@ -214,7 +214,7 @@ is not required if
 is being used.
 .TP
 .B ""
-Note that if
+If
 .B \-\-numeric
 is in use, then adding
 .B \-\-bytes
@@ -226,12 +226,16 @@ is also in use as well as
 and
 .BR \-\-numeric ,
 then instead of bytes or a percentage, the number of lines
-so far is output.  And finally, if
+so far is output.  If
+.B \-\-rate
+is added, then the transfer rate is also output (if
+.B \-\-bytes
+is in use as well, the rate comes after the byte/line count).
+If
 .B \-\-timer
-is added to
-.BR \-\-numeric ,
-then each output line is prefixed with the elapsed time 
-so far, as a decimal number of seconds.
+is also added, then each output line is
+.I prefixed
+with the elapsed time so far, as a decimal number of seconds.
 .TP
 .B \-q, \-\-quiet
 No output.  Useful if the
