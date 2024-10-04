@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-03 22:45+0100\n"
+"POT-Creation-Date: 2024-10-04 09:11+0100\n"
 "PO-Revision-Date: 2024-09-29 11:07+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -377,55 +377,55 @@ msgstr "Es besteht KEINE GARANTIE, soweit dies gesetzlich zulässig ist."
 msgid "Project web site"
 msgstr "Projekt-Website"
 
-#: src/pv/cursor.c:99
+#: src/pv/cursor.c:61
 msgid "failed to get terminal name"
 msgstr "konnte Terminalname nicht lesen"
 
-#: src/pv/cursor.c:144
+#: src/pv/cursor.c:106
 msgid "failed to open lock file"
 msgstr "konnte Sperrdatei nicht öffnen"
 
-#: src/pv/cursor.c:177
+#: src/pv/cursor.c:139
 msgid "lock attempt failed"
 msgstr "Sperrversuch fehlgeschlagen"
 
-#: src/pv/cursor.c:438
+#: src/pv/cursor.c:400
 msgid "failed to open terminal"
 msgstr "konnte Terminal nicht öffnen"
 
-#: src/pv/display.c:193
+#: src/pv/display.c:231
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnµm kMGTPEZY"
 
-#: src/pv/display.c:211
+#: src/pv/display.c:249
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:750 src/pv/transfer.c:970
+#: src/pv/display.c:788 src/pv/transfer.c:970
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
-#: src/pv/display.c:856
+#: src/pv/display.c:894
 msgid "b"
 msgstr "b"
 
-#: src/pv/display.c:859 src/pv/transfer.c:602
+#: src/pv/display.c:897 src/pv/transfer.c:602
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:900 src/pv/display.c:916
+#: src/pv/display.c:938 src/pv/display.c:954
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/display.c:905 src/pv/display.c:920
+#: src/pv/display.c:943 src/pv/display.c:958
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:905 src/pv/display.c:920
+#: src/pv/display.c:943 src/pv/display.c:958
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:947 src/pv/display.c:951 src/pv/display.c:1017
+#: src/pv/display.c:985 src/pv/display.c:989 src/pv/display.c:1055
 msgid "ETA"
 msgstr "ETA"
 

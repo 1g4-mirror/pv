@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-03 22:45+0100\n"
+"POT-Creation-Date: 2024-10-04 09:11+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -373,55 +373,55 @@ msgstr "Il n'y a AUCUNE GARANTIE, dans la mesure permise par la loi."
 msgid "Project web site"
 msgstr "Site web du projet"
 
-#: src/pv/cursor.c:99
+#: src/pv/cursor.c:61
 msgid "failed to get terminal name"
 msgstr "échec de lecture du nom du terminal"
 
-#: src/pv/cursor.c:144
+#: src/pv/cursor.c:106
 msgid "failed to open lock file"
 msgstr "échec de l'ouverture du fichier de verrouillage"
 
-#: src/pv/cursor.c:177
+#: src/pv/cursor.c:139
 msgid "lock attempt failed"
 msgstr "échec de la tentative de verrouillage"
 
-#: src/pv/cursor.c:438
+#: src/pv/cursor.c:400
 msgid "failed to open terminal"
 msgstr "échec de l'ouverture du terminal"
 
-#: src/pv/display.c:193
+#: src/pv/display.c:231
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:211
+#: src/pv/display.c:249
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:750 src/pv/transfer.c:970
+#: src/pv/display.c:788 src/pv/transfer.c:970
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 
-#: src/pv/display.c:856
+#: src/pv/display.c:894
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:859 src/pv/transfer.c:602
+#: src/pv/display.c:897 src/pv/transfer.c:602
 msgid "B"
 msgstr "O"
 
-#: src/pv/display.c:900 src/pv/display.c:916
+#: src/pv/display.c:938 src/pv/display.c:954
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:905 src/pv/display.c:920
+#: src/pv/display.c:943 src/pv/display.c:958
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:905 src/pv/display.c:920
+#: src/pv/display.c:943 src/pv/display.c:958
 msgid "B/s"
 msgstr "O/s"
 
-#: src/pv/display.c:947 src/pv/display.c:951 src/pv/display.c:1017
+#: src/pv/display.c:985 src/pv/display.c:989 src/pv/display.c:1055
 msgid "ETA"
 msgstr "ETA"
 
