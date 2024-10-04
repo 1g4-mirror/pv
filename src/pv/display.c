@@ -1364,26 +1364,28 @@ bool pv_format(pvstate_t state, long double elapsed_sec, off_t bytes_since_last,
 
 
 /*
- * Output status information on standard error, where "esec" is the seconds
- * elapsed since the transfer started, "sl" is the number of bytes transferred
- * since the last update, and "tot" is the total number of bytes transferred
- * so far.
+ * Output status information on standard error, where "elapsed_sec" is the
+ * seconds elapsed since the transfer started, "bytes_since_last" is the
+ * number of bytes transferred since the last update, and "total_bytes" is
+ * the total number of bytes transferred so far.
  *
- * If "sl" is negative, this is the final update so the rate is given as an
- * an average over the whole transfer; otherwise the current rate is shown.
+ * If "bytes_since_last" is negative, this is the final update so the rate
+ * is given as an an average over the whole transfer; otherwise the current
+ * rate is shown.
  *
- * In line mode, "sl" and "tot" are in lines, not bytes.
+ * In line mode, "bytes_since_last" and "total_bytes" are in lines, not
+ * bytes.
  */
-void pv_display(pvstate_t state, long double esec, off_t sl, off_t tot)
+void pv_display(pvstate_t state, long double elapsed_sec, off_t bytes_since_last, off_t total_bytes)
 {
 	if (NULL == state)
 		return;
 
 	pv_sig_checkbg();
 
-	pv_calculate_transfer_rate(state, esec, sl, tot);
+	pv_calculate_transfer_rate(state, elapsed_sec, bytes_since_last, total_bytes);
 
-	if (!pv_format(state, esec, sl, tot))
+	if (!pv_format(state, elapsed_sec, bytes_since_last, total_bytes))
 		return;
 
 	if (NULL == state->display.display_buffer)
