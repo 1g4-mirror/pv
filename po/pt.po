@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-04 09:11+0100\n"
+"POT-Creation-Date: 2024-10-04 13:27+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -384,31 +384,31 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:788 src/pv/transfer.c:970
+#: src/pv/display.c:811 src/pv/transfer.c:970
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
-#: src/pv/display.c:894
+#: src/pv/display.c:920
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:897 src/pv/transfer.c:602
+#: src/pv/display.c:923 src/pv/transfer.c:602
 msgid "B"
 msgstr ""
 
-#: src/pv/display.c:938 src/pv/display.c:954
+#: src/pv/display.c:967 src/pv/display.c:982
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:943 src/pv/display.c:958
+#: src/pv/display.c:971 src/pv/display.c:986
 msgid "/s"
 msgstr ""
 
-#: src/pv/display.c:943 src/pv/display.c:958
+#: src/pv/display.c:971 src/pv/display.c:986
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:985 src/pv/display.c:989 src/pv/display.c:1055
+#: src/pv/display.c:1014 src/pv/display.c:1018 src/pv/display.c:1084
 msgid "ETA"
 msgstr "ETA"
 
@@ -440,7 +440,7 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:575 src/pv/loop.c:626 src/pv/loop.c:667 src/pv/watchpid.c:99
+#: src/pv/loop.c:554 src/pv/loop.c:605 src/pv/loop.c:646 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
