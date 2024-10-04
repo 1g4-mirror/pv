@@ -93,6 +93,44 @@ bool pv_in_foreground(void)
 
 
 /*
+ * Write the given buffer to the given file descriptor, retrying until all
+ * bytes have been written or an error has occurred.
+ */
+void pv_write_retry(int fd, const char *buf, size_t count)
+{
+	while (count > 0) {
+		ssize_t nwritten;
+
+		nwritten = write(fd, buf, count);
+
+		if (nwritten < 0) {
+			if ((EINTR == errno) || (EAGAIN == errno)) {
+				continue;
+			}
+			return;
+		}
+		if (nwritten < 1)
+			return;
+
+		count -= nwritten;
+		buf += nwritten;
+	}
+}
+
+
+/*
+ * Write the given buffer to the terminal with pv_write_retry(), unless
+ * stderr is suspended.
+ */
+void pv_tty_write(pvstate_t state, const char *buf, size_t count)
+{
+	if (1 == state->flag.suspend_stderr)
+		return;
+	pv_write_retry(STDERR_FILENO, buf, count);
+}
+
+
+/*
  * Fill in *width and *height with the current terminal size,
  * if possible.
  */
