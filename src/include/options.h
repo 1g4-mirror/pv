@@ -66,6 +66,7 @@ struct opts_s {
 	bool cursor;                   /* whether to use cursor positioning */
 	bool numeric;                  /* numeric output only */
 	bool wait;                     /* wait for transfer before display */
+	bool rate_gauge;               /* if size unknown, show rate vs max rate */
 	bool linemode;                 /* count lines instead of bytes */
 	bool null_terminated_lines;    /* lines are null-terminated */
 	bool no_display;               /* do nothing other than pipe data */

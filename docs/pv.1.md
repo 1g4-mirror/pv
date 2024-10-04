@@ -80,7 +80,8 @@ display types that are explicitly switched on will be shown.
     unreadable, and no size was explicitly given (with the **-s**
     modifier), the progress bar cannot indicate how close to completion
     the transfer is, so it will just move left and right to indicate
-    that data is moving.
+    that data is moving - or, with **\--gauge**, the bar will indicate
+    the current rate as a percentage of the maximum rate seen so far.
 
 **-t, \--timer**
 
@@ -206,6 +207,12 @@ display types that are explicitly switched on will be shown.
 :   Note that **\--size** has no effect if used with **-d ***PID* to
     watch all file descriptors of a process, but will work with **-d
     PID:FD**.
+
+**-g, \--gauge**
+
+:   If the progress bar is shown but the size is not known, then instead
+    of moving the bar left and right to show progress, show the current
+    transfer rate as a percentage of the maximum rate seen so far.
 
 **-l, \--line-mode**
 
@@ -473,6 +480,14 @@ Some suggested common switch combinations:
 
 :   Show a progress bar, elapsed time, estimated completion time, line
     counter, and average rate, counting lines instead of bytes.
+
+**pv -btrpg**
+
+:   Show the amount transferred, elapsed time, current rate, and a gauge
+    showing the current rate as a percentage of the maximum rate seen -
+    useful in a pipeline where the total size is unknown. (If the size
+    *is* known, these options will show the percentage completion
+    instead of the rate gauge).
 
 **pv -t**
 

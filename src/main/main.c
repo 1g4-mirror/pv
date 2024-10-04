@@ -310,6 +310,7 @@ int main(int argc, char **argv)
 	pv_state_numeric_set(state, opts->numeric);
 	pv_state_wait_set(state, opts->wait);
 	pv_state_delay_start_set(state, opts->delay_start);
+	pv_state_rate_gauge_set(state, opts->rate_gauge);
 	pv_state_linemode_set(state, opts->linemode);
 	pv_state_bits_set(state, opts->bits);
 	pv_state_decimal_units_set(state, opts->decimal_units);

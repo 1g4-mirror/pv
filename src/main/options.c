@@ -283,6 +283,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "wait", 0, NULL, (int) 'W' },
 		{ "delay-start", 1, NULL, (int) 'D' },
 		{ "size", 1, NULL, (int) 's' },
+		{ "gauge", 0, NULL, (int) 'g' },
 		{ "line-mode", 0, NULL, (int) 'l' },
 		{ "null", 0, NULL, (int) '0' },
 		{ "interval", 1, NULL, (int) 'i' },
@@ -313,7 +314,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:l0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:o:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:o:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -545,6 +546,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 					return NULL;
 				}
 			}
+			break;
+		case 'g':
+			opts->rate_gauge = true;
 			break;
 		case 'l':
 			opts->linemode = true;

@@ -270,6 +270,11 @@ void pv_state_delay_start_set(pvstate_t state, double val)
 	state->control.delay_start = val;
 }
 
+void pv_state_rate_gauge_set(pvstate_t state, bool val)
+{
+	state->control.rate_gauge = val;
+}
+
 void pv_state_linemode_set(pvstate_t state, bool val)
 {
 	state->control.linemode = val;

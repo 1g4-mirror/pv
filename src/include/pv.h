@@ -183,6 +183,7 @@ extern void pv_state_show_stats_set(pvstate_t, bool);
 extern void pv_state_numeric_set(pvstate_t, bool);
 extern void pv_state_wait_set(pvstate_t, bool);
 extern void pv_state_delay_start_set(pvstate_t, double);
+extern void pv_state_rate_gauge_set(pvstate_t, bool);
 extern void pv_state_linemode_set(pvstate_t, bool);
 extern void pv_state_bits_set(pvstate_t, bool);
 extern void pv_state_decimal_units_set(pvstate_t, bool);

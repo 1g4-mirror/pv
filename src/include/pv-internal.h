@@ -123,6 +123,7 @@ struct pvstate_s {
 		bool cursor;                     /* use cursor positioning */
 		bool numeric;                    /* numeric output only */
 		bool wait;                       /* wait for data before display */
+		bool rate_gauge;                 /* if size unknown, show rate vs max rate */
 		bool linemode;                   /* count lines instead of bytes */
 		bool bits;			 /* report bits instead of bytes */
 		bool decimal_units;		 /* use decimal prefixes */

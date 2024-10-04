@@ -118,7 +118,10 @@ unreadable, and no size was explicitly given (with the
 .B \-s
 modifier), the progress bar cannot indicate how close to completion the
 transfer is, so it will just move left and right to indicate that data is
-moving.
+moving - or, with
+.BR \-\-gauge ,
+the bar will indicate the current rate as a percentage of the maximum rate
+seen so far.
 .TP
 .B \-t, \-\-timer
 Turn the timer on.  This will display the total elapsed time that
@@ -288,6 +291,11 @@ has no effect if used with
 .BI \-d\  PID
 to watch all file descriptors of a process, but will work with
 .BR "-d PID:FD" .
+.TP
+.B \-g, \-\-gauge
+If the progress bar is shown but the size is not known, then instead of
+moving the bar left and right to show progress, show the current transfer
+rate as a percentage of the maximum rate seen so far.
 .TP
 .B \-l, \-\-line\-mode
 Instead of counting bytes, count lines (newline characters). The progress
@@ -634,6 +642,14 @@ average rate, and current rate.
 .B pv -betlap
 Show a progress bar, elapsed time, estimated completion time, line counter,
 and average rate, counting lines instead of bytes.
+.TP
+.B pv -btrpg
+Show the amount transferred, elapsed time, current rate, and a gauge showing
+the current rate as a percentage of the maximum rate seen - useful in a
+pipeline where the total size is unknown.  (If the size
+.I is
+known, these options will show the percentage completion instead of the rate
+gauge).
 .TP
 .B pv -t
 Show only the elapsed time - useful as a simple timer, e.g.

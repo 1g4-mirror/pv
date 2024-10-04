@@ -607,6 +607,7 @@ bool pv_format(pvstate_t state, bool final)
 	size_t segment;
 	size_t new_display_string_len;
 	const char *formatstr;
+	pv__transfercount_t count_type;
 
 	/* Quick safety check - state must exist. */
 	if (NULL == state)
@@ -625,6 +626,13 @@ bool pv_format(pvstate_t state, bool final)
 	formatstr = state->control.format_string ? state->control.format_string : state->control.default_format;
 	if (NULL == formatstr)
 		return false;
+
+	/* Determine the type of thing being counted for transfer, rate, etc. */
+	count_type = PV_TRANSFERCOUNT_BYTES;
+	if (state->control.linemode)
+		count_type = PV_TRANSFERCOUNT_LINES;
+	else if (state->control.decimal_units)
+		count_type = PV_TRANSFERCOUNT_DECBYTES;
 
 	/*
 	 * Reallocate output buffer if width changes.
@@ -745,7 +753,6 @@ bool pv_format(pvstate_t state, bool final)
 		time_t then;
 		struct tm *time_ptr;
 		char *time_format;
-		pv__transfercount_t count_type;
 
 		if (!state->display.component[component_type].required)
 			continue;
@@ -765,12 +772,6 @@ bool pv_format(pvstate_t state, bool final)
 		component_content = state->display.component[component_type].content;
 		component_content[0] = '\0';
 		component_buf_size = PV_SIZEOF_COMPONENT_STR;
-
-		count_type = PV_TRANSFERCOUNT_BYTES;
-		if (state->control.linemode)
-			count_type = PV_TRANSFERCOUNT_LINES;
-		else if (state->control.decimal_units)
-			count_type = PV_TRANSFERCOUNT_DECBYTES;
 
 		switch (component_type) {
 
@@ -1034,27 +1035,54 @@ bool pv_format(pvstate_t state, bool final)
 	if (state->display.component[PV_COMPONENT_PROGRESS].required) {
 		char *component_content;
 		size_t component_buf_size;
-		char pct[16];		 /* flawfinder: ignore - only populated by pv_snprintf(). */
+		char after_bar[32];	 /* flawfinder: ignore - only populated by pv_snprintf(). */
 		int available_width, bar_length, pad_count;
 
 		component_content = state->display.component[PV_COMPONENT_PROGRESS].content;
 		component_content[0] = '\0';
 		component_buf_size = PV_SIZEOF_COMPONENT_STR;
 
-		memset(pct, 0, sizeof(pct));
+		memset(after_bar, 0, sizeof(after_bar));
 
-		/* The opening of the bar area. */
-		(void) pv_snprintf(component_content, component_buf_size, "[");
+		if (state->control.size > 0 || state->control.rate_gauge) {
+			/*
+			 * Known size, or rate gauge mode.  Show a bar, and
+			 * a percentage (size) or max rate (gauge).
+			 */
+			size_t after_bar_width;
+			int bar_percentage;
 
-		if (state->control.size > 0) {
-			/* Known size; show a bar and a percentage. */
-			size_t pct_width;
+			if (state->control.size > 0) {
+				/* Percentage of data transferred. */
+				bar_percentage = state->calc.percentage;
+				(void) pv_snprintf(after_bar, sizeof(after_bar), " %3ld%%", bar_percentage);
+			} else {
+				/* Current rate vs max rate. */
+				bar_percentage = 0;
+				if (state->calc.rate_max > 0) {
+					bar_percentage =
+					    (int) (100.0 * state->calc.transfer_rate / state->calc.rate_max);
+				}
 
-			(void) pv_snprintf(pct, sizeof(pct), "%3ld%%", state->calc.percentage);
-			pct_width = strlen(pct);	/* flawfinder: ignore */
+				/*@-mustfreefresh @ */
+				if (state->control.bits && !state->control.linemode) {
+					/* bits per second */
+					pv__sizestr(after_bar, sizeof(after_bar), "/%s",
+						    8.0 * state->calc.rate_max, "", _("b/s"), count_type);
+				} else {
+					/* bytes or lines per second */
+					pv__sizestr(after_bar, sizeof(after_bar),
+						    "/%s", state->calc.rate_max, _("/s"), _("B/s"), count_type);
+				}
+				/*@+mustfreefresh @ */
+				/* splint: see above about gettext(). */
+			}
+
+			after_bar_width = strlen(after_bar);	/* flawfinder: ignore */
 			/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
 
-			available_width = (int) (state->control.width) - static_portion_size - (int) (pct_width) - 3;
+			available_width =
+			    (int) (state->control.width) - static_portion_size - (int) (after_bar_width) - 2;
 
 			if (available_width < 0)
 				available_width = 0;
@@ -1062,8 +1090,11 @@ bool pv_format(pvstate_t state, bool final)
 			if (available_width > (int) (component_buf_size) - 16)
 				available_width = (int) (component_buf_size - 16);
 
+			/* The opening of the bar area. */
+			(void) pv_snprintf(component_content, component_buf_size, "[");
+
 			/* The bar portion. */
-			bar_length = (int) ((available_width * state->calc.percentage) / 100 - 1);
+			bar_length = (int) ((available_width * bar_percentage) / 100 - 1);
 			for (pad_count = 0; pad_count < bar_length; pad_count++) {
 				if (pad_count < available_width)
 					(void) pv_strlcat(component_content, "=", component_buf_size);
@@ -1081,8 +1112,8 @@ bool pv_format(pvstate_t state, bool final)
 			}
 
 			/* The closure of the bar area, and the percentage. */
-			(void) pv_strlcat(component_content, "] ", component_buf_size);
-			(void) pv_strlcat(component_content, pct, component_buf_size);
+			(void) pv_strlcat(component_content, "]", component_buf_size);
+			(void) pv_strlcat(component_content, after_bar, component_buf_size);
 
 		} else {
 			/* Unknown size; show a moving indicator. */
@@ -1108,6 +1139,9 @@ bool pv_format(pvstate_t state, bool final)
 			 */
 			if (indicator_position > 100)
 				indicator_position = 200 - indicator_position;
+
+			/* The opening of the bar area. */
+			(void) pv_snprintf(component_content, component_buf_size, "[");
 
 			/* The spaces before the indicator. */
 			for (pad_count = 0; pad_count < (available_width * indicator_position) / 100; pad_count++) {
