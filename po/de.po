@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-05 16:38+0100\n"
+"POT-Creation-Date: 2024-10-05 17:04+0100\n"
 "PO-Revision-Date: 2024-09-29 11:07+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -418,7 +418,7 @@ msgstr "yzafpnµm kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:675 src/pv/transfer.c:970
+#: src/pv/display.c:675 src/pv/transfer.c:974
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
@@ -431,7 +431,7 @@ msgid "B"
 msgstr "B"
 
 #: src/pv/display.c:851 src/pv/display.c:866 src/pv/display.c:1085
-#: src/pv/loop.c:495
+#: src/pv/loop.c:500
 msgid "b/s"
 msgstr "b/s"
 
@@ -440,7 +440,7 @@ msgid "/s"
 msgstr "/s"
 
 #: src/pv/display.c:855 src/pv/display.c:870 src/pv/display.c:1089
-#: src/pv/loop.c:495
+#: src/pv/loop.c:500
 msgid "B/s"
 msgstr "B/s"
 
@@ -480,15 +480,15 @@ msgstr "(keine)"
 msgid "(stdin)"
 msgstr "(stdin)"
 
-#: src/pv/loop.c:494
+#: src/pv/loop.c:499
 msgid "rate min/avg/max/mdev"
 msgstr ""
 
-#: src/pv/loop.c:506
+#: src/pv/loop.c:511
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:712 src/pv/loop.c:763 src/pv/loop.c:804 src/pv/watchpid.c:99
+#: src/pv/loop.c:717 src/pv/loop.c:768 src/pv/loop.c:809 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
@@ -524,23 +524,23 @@ msgstr "konnte den Fehler nicht überwinden"
 msgid "skipped past read error"
 msgstr "über den Lesefehler hinaus verschoben"
 
-#: src/pv/transfer.c:641
+#: src/pv/transfer.c:642
 msgid "no transfer buffer allocated"
 msgstr "Speicherzuweisung für den Transferpuffer fehlgeschlagen"
 
-#: src/pv/transfer.c:682
+#: src/pv/transfer.c:684
 msgid "failed to set interval timer"
 msgstr "konnte Intervall-Timer nicht setzen"
 
-#: src/pv/transfer.c:707
+#: src/pv/transfer.c:710
 msgid "failed to clear interval timer"
 msgstr "konnte Intervall-Timer nicht löschen"
 
-#: src/pv/transfer.c:831
+#: src/pv/transfer.c:835
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:1068
+#: src/pv/transfer.c:1072
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 
