@@ -314,9 +314,58 @@ int pv_main_loop(pvstate_t state)
 #endif
 
 		state->transfer.transferred = state->transfer.total_written;
-		/* TODO: work out what to do in line mode. */
 		if (output_is_pipe && !state->control.linemode) {
+			/*
+			 * Writing bytes to a pipe - the amount transferred
+			 * to the receiver is the total amount we've
+			 * written, minus what's sitting in the pipe buffer
+			 * waiting for the receiver to consume it.
+			 */
 			state->transfer.transferred -= state->transfer.written_but_not_consumed;
+
+		} else if (output_is_pipe && state->control.linemode && state->transfer.written_but_not_consumed > 0
+			   && NULL != state->transfer.line_positions) {
+			/*
+			 * Writing lines to a pipe - similar to above, but
+			 * we have to work out how many lines the
+			 * yet-to-be-consumed data in the buffer equates to.
+			 *
+			 * To do this, we walk backwards through our record
+			 * of the line positions in the output we've
+			 * written.
+			 */
+			off_t last_consumed_position =
+			    state->transfer.last_output_position - state->transfer.written_but_not_consumed;
+			size_t lines_not_consumed = 0;
+			size_t line_from_end = 0;
+
+			/*
+			 * positions[head-1] = position of last separator written
+			 * positions[head-2] = position of second last separator written
+			 * etc
+			 *
+			 * We start at [head-1] and go backwards, wrapping
+			 * around as it's a circular buffer, stopping at the
+			 * length (number of positions stored), or when we
+			 * have gone before the last consumed position.
+			 */
+			for (line_from_end = 0; line_from_end < state->transfer.line_positions_length; line_from_end++) {
+				size_t array_index;
+				array_index =
+				    state->transfer.line_positions_head + state->transfer.line_positions_capacity -
+				    line_from_end - 1;
+				while (array_index >= state->transfer.line_positions_capacity)
+					array_index -= state->transfer.line_positions_capacity;
+				if (state->transfer.line_positions[array_index] <= last_consumed_position)
+					break;
+				lines_not_consumed++;
+			}
+
+			debug("%s: %lld -> %lld", "written_but_not_consumed bytes to lines",
+			      (unsigned long long) (state->transfer.written_but_not_consumed),
+			      (unsigned long long) lines_not_consumed);
+
+			state->transfer.transferred -= lines_not_consumed;
 		}
 
 		/*

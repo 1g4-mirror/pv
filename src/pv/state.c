@@ -95,6 +95,10 @@ void pv_state_reset(pvstate_t state)
 #ifdef HAVE_SPLICE
 	state->transfer.splice_failed_fd = -1;
 #endif				/* HAVE_SPLICE */
+
+	state->transfer.line_positions_length = 0;
+	state->transfer.line_positions_head = 0;
+	state->transfer.last_output_position = 0;
 }
 
 
@@ -202,6 +206,10 @@ void pv_state_free(pvstate_t state)
 	state->transfer.transfer_buffer = NULL;
 	/*@+keeptrans@ */
 	/* splint - explicitly freeing this structure, so free() here is OK. */
+
+	if (NULL != state->transfer.line_positions)
+		free(state->transfer.line_positions);
+	state->transfer.line_positions = NULL;
 
 	if (NULL != state->calc.history)
 		free(state->calc.history);

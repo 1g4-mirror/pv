@@ -726,6 +726,21 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			char *ptr;
 			long lines = 0;
 
+			/*
+			 * Line mode - look through what we've just written
+			 * to count how many lines there were.
+			 */
+
+			/* Allocate buffer to remember line positions. */
+			if (NULL == state->transfer.line_positions) {
+				state->transfer.line_positions_capacity = MAX_LINE_POSITIONS;
+				state->transfer.line_positions =
+				    calloc((size_t) (state->transfer.line_positions_capacity), sizeof(off_t));
+				if (NULL == state->transfer.line_positions) {
+					pv_error(state, "%s: alloc failed: %s", _("line positions"), strerror(errno));
+				}
+			}
+
 			if (state->control.null_terminated_lines) {
 				separator = '\0';
 			} else {
@@ -735,9 +750,30 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			ptr = (char *) (state->transfer.transfer_buffer + state->transfer.write_position - 1);
 			for (ptr++;
 			     ptr - (char *) state->transfer.transfer_buffer - state->transfer.write_position <
-			     (size_t) nwritten; ptr++) {
-				if (*ptr == separator)
-					++lines;
+			     (size_t) nwritten; ptr++, state->transfer.last_output_position++) {
+				if (*ptr != separator)
+					continue;
+
+				/* Separator found - increment line count. */
+				++lines;
+
+				if (NULL == state->transfer.line_positions)
+					continue;
+
+				/* Store the position of the separator. */
+				state->transfer.line_positions[state->transfer.line_positions_head] =
+				    state->transfer.last_output_position;
+				state->transfer.line_positions_head++;
+
+				/* Circular buffer - wrap around. */
+				if (state->transfer.line_positions_head >= state->transfer.line_positions_capacity) {
+					state->transfer.line_positions_head = 0;
+				}
+
+				/* Increment count of line positions, if below capacity. */
+				if (state->transfer.line_positions_length < state->transfer.line_positions_capacity) {
+					state->transfer.line_positions_length++;
+				}
 			}
 
 			*lineswritten += lines;

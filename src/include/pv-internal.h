@@ -49,6 +49,7 @@ typedef enum {
 #define MAX_WRITE_AT_ONCE	(size_t) 524288	 /* max to write() in one go */
 #define TRANSFER_READ_TIMEOUT	0.09L		 /* seconds to time reads out at */
 #define TRANSFER_WRITE_TIMEOUT	0.9L		 /* seconds to time writes out at */
+#define MAX_LINE_POSITIONS	100000		 /* number of lines to remember positions of */
 
 #define MAXIMISE_BUFFER_FILL	1
 
@@ -282,8 +283,8 @@ struct pvstate_s {
 	 * will always be less than or equal to read_position.
 	 */
 	struct {
-		/*@only@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
 		long double elapsed_seconds;	 /* how long we have been transferring data for */
+		/*@only@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
 		size_t buffer_size;		 /* size of buffer */
 		size_t read_position;		 /* amount of data in buffer */
 		size_t write_position;		 /* buffered data written */
@@ -295,6 +296,13 @@ struct pvstate_s {
 
 		off_t total_written;		 /* total bytes or lines written */
 		off_t transferred;		 /* amount transferred (written - unconsumed) */
+
+		/* Keep track of line positions to backtrack written_but_not_consumed. */
+		/*@null@*/ off_t *line_positions; /* line separator write positions (circular buffer) */
+		size_t line_positions_capacity;	 /* total size of line position array */
+		size_t line_positions_length;	 /* number of positions stored in array */
+		size_t line_positions_head;	 /* index to use for next position */
+		off_t last_output_position;	 /* write position last sent to output */
 
 		/*
 		 * While reading from a file descriptor we keep track of how

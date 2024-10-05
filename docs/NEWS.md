@@ -6,6 +6,7 @@
  * *feature:* **--gauge** with **--progress** to show rate gauge when size is unknown ([#46](https://codeberg.org/a-j-wood/pv/issues/46))
  * *i18n:* comprehensive German translations update from Hartmut Goebel ([#98](https://codeberg.org/a-j-wood/pv/pulls/98))
  * *fix:* resume stopped pipelines when running in the background (part of [#56](https://codeberg.org/a-j-wood/pv/issues/56))
+ * *fix*: inspect the output pipe buffer to give a more accurate progress indicator of how much the next command has consumed
  * *fix:* prefix completion time (**--fineta**) with *FIN* rather than *ETA* ([#43](https://codeberg.org/a-j-wood/pv/issues/43))
  * *fix:* surround average rate (**--average-rate**) with brackets rather than square brackets
  * *fix:* correct a memory leak in **--watchfd PID**
