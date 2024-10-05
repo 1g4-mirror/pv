@@ -36,6 +36,7 @@ struct opts_s {
 	/*@keep@*/ /*@null@*/ char *name;    /* display name, if any */
 	/*@keep@*/ /*@null@*/ char *format;  /* output format, if any */
 	/*@keep@*/ /*@null@*/ char *pidfile; /* PID file, if any */
+	/*@keep@*/ /*@null@*/ char *store_and_forward_file; /* store and forward file, if any */
 	/*@keep@*/ /*@null@*/ const char **argv;   /* array of non-option arguments */
 	size_t lastwritten;            /* show N bytes last written */
 	off_t rate_limit;              /* rate limit, in bytes per second */

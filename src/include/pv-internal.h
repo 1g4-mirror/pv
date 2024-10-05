@@ -230,13 +230,13 @@ struct pvstate_s {
 		/* Keep track of progress over last intervals to compute current average rate. */
 		/*@null@*/ struct {	 /* state at previous intervals (circular buffer) */
 			long double elapsed_sec;	/* time since start of transfer */
-			off_t total_written;		/* amount transferred by that time */
+			off_t transferred;		/* amount transferred by that time */
 		} *history;
 		size_t history_len;		 /* total size of history array */
 		size_t history_first;		 /* index of oldest entry */
 		size_t history_last;		 /* index of newest entry */
 
-		off_t prev_total_written;	 /* total amount transferred when called last time */
+		off_t prev_transferred;		 /* total amount transferred when called last time */
 
 		int percentage;			 /* transfer percentage completion */
 	} calc;
@@ -290,7 +290,10 @@ struct pvstate_s {
 		ssize_t to_write;		 /* max to write this time around */
 		ssize_t written;		 /* bytes sent to stdout this time */
 
-		off_t total_written;		 /* total bytes or lines transferred */
+		size_t written_but_not_consumed; /* bytes in the output pipe, unread */
+
+		off_t total_written;		 /* total bytes or lines written */
+		off_t transferred;		 /* amount transferred (written - unconsumed) */
 
 		/*
 		 * While reading from a file descriptor we keep track of how

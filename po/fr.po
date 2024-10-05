@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-04 22:08+0100\n"
+"POT-Creation-Date: 2024-10-05 16:04+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -162,7 +162,8 @@ msgstr ""
 msgid "use cursor positioning escape sequences"
 msgstr "utiliser les séquences d'échappements de positionnement de curseur"
 
-#: src/main/help.c:369 src/main/help.c:405 src/main/help.c:420
+#: src/main/help.c:369 src/main/help.c:399 src/main/help.c:408
+#: src/main/help.c:423
 msgid "FILE"
 msgstr "FICHIER"
 
@@ -215,117 +216,125 @@ msgid "discard input instead of writing to output"
 msgstr "rejeter l'entrée au lieu de l'écrire vers la sortie"
 
 #: src/main/help.c:400
+msgid "write all input to FILE before writing to output"
+msgstr ""
+
+#: src/main/help.c:403
 msgid "PID"
 msgstr "PID"
 
-#: src/main/help.c:401
+#: src/main/help.c:404
 msgid "update settings of process PID"
 msgstr "mettre à jour la configuration du processus PID"
 
-#: src/main/help.c:406
+#: src/main/help.c:409
 msgid "save process ID in FILE"
 msgstr "enregistrer l'ID de processus dans FICHIER"
 
-#: src/main/help.c:409
+#: src/main/help.c:412
 msgid "PID[:FD]"
 msgstr "PID[:FD]"
 
-#: src/main/help.c:410
+#: src/main/help.c:413
 msgid "watch file FD opened by process PID"
 msgstr "surveiller le fichier FD ouvert par le processus PID"
 
-#: src/main/help.c:414
+#: src/main/help.c:417
 msgid "show this help and exit"
 msgstr "afficher cette aide puis quitter"
 
-#: src/main/help.c:417
+#: src/main/help.c:420
 msgid "show version information and exit"
 msgstr "afficher la version puis quitter"
 
-#: src/main/help.c:421
+#: src/main/help.c:424
 msgid "write debug logs to FILE"
 msgstr "écrire les journaux de déboggage vers FICHIER"
 
-#: src/main/help.c:446
+#: src/main/help.c:449
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Utilisation : %s [OPTIONS] [FICHIER]..."
 
-#: src/main/help.c:457
+#: src/main/help.c:460
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Concaténer FICHIER(s), ou l'entrée standard, sur la sortie standard avec "
 "monitorage."
 
-#: src/main/help.c:594
+#: src/main/help.c:597
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "SVP rapporter tous bogues à %s"
 
-#: src/main/main.c:71
+#: src/main/main.c:214
+msgid "(input)"
+msgstr ""
+
+#: src/main/main.c:299
 msgid "state allocation failed"
 msgstr "échec de l'allocation de mémoire de condition"
 
-#: src/main/options.c:138 src/pv/file.c:324
+#: src/main/options.c:140 src/pv/file.c:324
 msgid "failed to stat file"
 msgstr "échec à statuer sur le fichier"
 
-#: src/main/options.c:152
+#: src/main/options.c:154
 msgid "is a directory"
 msgstr ""
 
-#: src/main/options.c:181
+#: src/main/options.c:183
 msgid "failed to generate sysfs filename"
 msgstr ""
 
-#: src/main/options.c:203
+#: src/main/options.c:205
 msgid "failed to read sysfs size file"
 msgstr ""
 
-#: src/main/options.c:223
+#: src/main/options.c:225
 msgid "failed to open block device"
 msgstr ""
 
-#: src/main/options.c:233
+#: src/main/options.c:235
 msgid "failed to determine size of block device"
 msgstr ""
 
-#: src/main/options.c:336
+#: src/main/options.c:339
 msgid "option structure allocation failed"
 msgstr "l'allocation pour la structure d'une option a échoué"
 
-#: src/main/options.c:355
+#: src/main/options.c:358
 msgid "option structure argv allocation failed"
 msgstr "l'allocation pour la structure de l'option argv a échoué"
 
-#: src/main/options.c:417
+#: src/main/options.c:420
 msgid "integer argument expected"
 msgstr "Valeur entière attendue"
 
-#: src/main/options.c:428
+#: src/main/options.c:431
 msgid "numeric argument expected"
 msgstr "Valeur numérique attendue"
 
-#: src/main/options.c:439
+#: src/main/options.c:442
 msgid "process ID or pid:fd pair expected"
 msgstr "ID de processus ou paire pid:fd attendue"
 
-#: src/main/options.c:446
+#: src/main/options.c:449
 msgid "invalid process ID"
 msgstr "ID de processus non valide"
 
-#: src/main/options.c:655
+#: src/main/options.c:666
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Essayez `%s --help' pour plus d'informations."
 
-#: src/main/options.c:657
+#: src/main/options.c:668
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Essayez `%s -h' pour plus d'informations."
 
-#: src/main/options.c:688
+#: src/main/options.c:699
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -333,25 +342,25 @@ msgstr ""
 "impossible d'utiliser le mode ligne ou les options de modificateur de "
 "transfert lors de la visualisation des descripteurs de fichiers"
 
-#: src/main/options.c:697
+#: src/main/options.c:708
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "impossible d'utiliser le positionnement du curseur lors de la visualisation "
 "des descripteurs de fichier"
 
-#: src/main/options.c:706
+#: src/main/options.c:717
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "impossible d'utiliser la télécommande lors de la visualisation des "
 "descripteurs de fichiers"
 
-#: src/main/options.c:715
+#: src/main/options.c:726
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "impossible de transférer des fichiers lorsque vous regardez des descripteurs "
 "de fichiers"
 
-#: src/main/options.c:730
+#: src/main/options.c:741
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "non disponible sur les systèmes sans /proc/self/fdinfo"
 
@@ -397,45 +406,45 @@ msgstr "échec de la tentative de verrouillage"
 msgid "failed to open terminal"
 msgstr "échec de l'ouverture du terminal"
 
-#: src/pv/display.c:216
+#: src/pv/display.c:230
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:234
+#: src/pv/display.c:248
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:661 src/pv/transfer.c:970
+#: src/pv/display.c:675 src/pv/transfer.c:970
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 
-#: src/pv/display.c:790
+#: src/pv/display.c:804
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:793 src/pv/transfer.c:602
+#: src/pv/display.c:807 src/pv/transfer.c:602
 msgid "B"
 msgstr "O"
 
-#: src/pv/display.c:837 src/pv/display.c:852 src/pv/display.c:1071
-#: src/pv/loop.c:418
+#: src/pv/display.c:851 src/pv/display.c:866 src/pv/display.c:1085
+#: src/pv/loop.c:494
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:841 src/pv/display.c:856 src/pv/display.c:1075
+#: src/pv/display.c:855 src/pv/display.c:870 src/pv/display.c:1089
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:841 src/pv/display.c:856 src/pv/display.c:1075
-#: src/pv/loop.c:418
+#: src/pv/display.c:855 src/pv/display.c:870 src/pv/display.c:1089
+#: src/pv/loop.c:494
 msgid "B/s"
 msgstr "O/s"
 
-#: src/pv/display.c:884 src/pv/display.c:888
+#: src/pv/display.c:898 src/pv/display.c:902
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/display.c:954
+#: src/pv/display.c:968
 msgid "FIN"
 msgstr ""
 
@@ -467,15 +476,15 @@ msgstr "(aucun)"
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:417
+#: src/pv/loop.c:493
 msgid "rate min/avg/max/mdev"
 msgstr ""
 
-#: src/pv/loop.c:429
+#: src/pv/loop.c:505
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:635 src/pv/loop.c:686 src/pv/loop.c:727 src/pv/watchpid.c:99
+#: src/pv/loop.c:711 src/pv/loop.c:762 src/pv/loop.c:803 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
@@ -487,7 +496,7 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr "l'allocation de la structure de l'historique a échoué"
 
-#: src/pv/state.c:470 src/pv/state.c:481
+#: src/pv/state.c:501 src/pv/state.c:512
 msgid "file list allocation failed"
 msgstr "échec de l'allocation de la liste de fichiers"
 

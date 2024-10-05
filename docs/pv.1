@@ -491,6 +491,30 @@ except that
 is never called.  Implies
 .BR \-C .
 .TP
+.BI \-U\  FILE \fR,\ \fB\-\-store\-and\-forward\  FILE
+Instead of passing data through immediately, do it in two stages - first
+read all input and write it to
+.IR FILE ,
+and then once the input is exhausted, read all of
+.I FILE
+and write it to the output.
+.I FILE
+remains in place afterwards, unless it is
+"\fB-\fR", in which case
+.B pv
+creates a temporary file for this purpose, and automatically removes it
+afterwards.
+.TP
+.B ""
+This can be useful if you have a pipeline which generates data (your
+input) quickly but you don't know the size, and you wish to pass it to some
+slower process, once all of the input has been generated and you know its
+size, so you can see its progress.  Note that when doing this with
+relatively small amounts of data,
+.B \-\-no-splice
+may be preferable so that pipe buffering doesn't affect the progress
+display.
+.TP
 .BI \-d\  PID\fR[\fB:\fR\fIFD\fR],\  \fB\-\-watchfd\  PID\fR[\fB:\fR\fIFD\fR]
 Instead of transferring data, watch file descriptor
 .I FD

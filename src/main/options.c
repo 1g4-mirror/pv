@@ -55,6 +55,8 @@ void opts_free( /*@only@ */ opts_t opts)
 		free(opts->pidfile);
 	if (NULL != opts->output)
 		free(opts->output);
+	if (NULL != opts->store_and_forward_file)
+		free(opts->store_and_forward_file);
 	if (NULL != opts->argv)
 		free(opts->argv);
 	/*@+keeptrans@ */
@@ -301,6 +303,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "sync", 0, NULL, (int) 'Y' },
 		{ "direct-io", 0, NULL, (int) 'K' },
 		{ "discard", 0, NULL, (int) 'X' },
+		{ "store-and-forward", 1, NULL, (int) 'U' },
 		{ "remote", 1, NULL, (int) 'R' },
 		{ "pidfile", 1, NULL, (int) 'P' },
 		{ "watchfd", 1, NULL, (int) 'd' },
@@ -314,7 +317,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:F:L:B:CEZ:SYKXR:P:d:m:o:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:F:L:B:CEZ:SYKXU:R:P:d:m:o:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -604,6 +607,14 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'X':
 			opts->discard_input = true;
 			opts->no_splice = true;
+			break;
+		case 'U':
+			opts->store_and_forward_file = pv_strdup(optarg);
+			if (NULL == opts->store_and_forward_file) {
+				fprintf(stderr, "%s: -U: %s\n", opts->program_name, strerror(errno));
+				opts_free(opts);
+				return NULL;
+			}
 			break;
 		case 'R':
 			opts->remote = pv_getnum_count(optarg, false);

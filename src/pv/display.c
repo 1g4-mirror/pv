@@ -119,14 +119,28 @@ void pv_write_retry(int fd, const char *buf, size_t count)
 
 
 /*
- * Write the given buffer to the terminal with pv_write_retry(), unless
+ * Write the given buffer to the terminal, like pv_write_retry(), unless
  * stderr is suspended.
  */
 void pv_tty_write(pvstate_t state, const char *buf, size_t count)
 {
-	if (1 == state->flag.suspend_stderr)
-		return;
-	pv_write_retry(STDERR_FILENO, buf, count);
+	while (0 == state->flag.suspend_stderr && count > 0) {
+		ssize_t nwritten;
+
+		nwritten = write(STDERR_FILENO, buf, count);
+
+		if (nwritten < 0) {
+			if ((EINTR == errno) || (EAGAIN == errno)) {
+				continue;
+			}
+			return;
+		}
+		if (nwritten < 1)
+			return;
+
+		count -= nwritten;
+		buf += nwritten;
+	}
 }
 
 
@@ -706,7 +720,7 @@ bool pv_format(pvstate_t state, bool final)
 		if (state->display.component[PV_COMPONENT_BYTES].required) {
 			(void) pv_snprintf(msg_bytes, sizeof(msg_bytes),
 					   "%s%lld", first_item ? "" : " ",
-					   (long long) ((state->control.bits ? 8 : 1) * state->transfer.total_written));
+					   (long long) ((state->control.bits ? 8 : 1) * state->transfer.transferred));
 			first_item = false;
 			show_percentage = false;
 		}
@@ -787,10 +801,10 @@ bool pv_format(pvstate_t state, bool final)
 			/*@-mustfreefresh @ */
 			if (state->control.bits && !state->control.linemode) {
 				pv__sizestr(component_content, component_buf_size, "%s",
-					    (long double) (state->transfer.total_written * 8), "", _("b"), count_type);
+					    (long double) (state->transfer.transferred * 8), "", _("b"), count_type);
 			} else {
 				pv__sizestr(component_content, component_buf_size, "%s",
-					    (long double) (state->transfer.total_written), "", _("B"), count_type);
+					    (long double) (state->transfer.transferred), "", _("B"), count_type);
 			}
 			/*@+mustfreefresh @ */
 			/* splint: we trust gettext() not to really leak memory. */
@@ -862,7 +876,7 @@ bool pv_format(pvstate_t state, bool final)
 		case PV_COMPONENT_ETA:
 			/* Estimated time remaining until completion - if size is known. */
 			eta =
-			    pv__seconds_remaining((state->transfer.total_written - state->display.initial_offset),
+			    pv__seconds_remaining((state->transfer.transferred - state->display.initial_offset),
 						  state->control.size - state->display.initial_offset,
 						  state->calc.current_avg_rate);
 
@@ -917,7 +931,7 @@ bool pv_format(pvstate_t state, bool final)
 			 */
 
 			eta =
-			    pv__seconds_remaining(state->transfer.total_written - state->display.initial_offset,
+			    pv__seconds_remaining(state->transfer.transferred - state->display.initial_offset,
 						  state->control.size - state->display.initial_offset,
 						  state->calc.current_avg_rate);
 

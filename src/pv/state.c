@@ -46,6 +46,58 @@ static void pv_alloc_history(pvstate_t state)
 	state->calc.history[0].elapsed_sec = 0.0;	/* to be safe, memset() not recommended for doubles */
 }
 
+
+/*
+ * Clear the calculated parts of a state structure.
+ */
+void pv_state_reset(pvstate_t state)
+{
+	if (NULL == state)
+		return;
+
+	state->flag.reparse_display = 1;
+	state->status.current_input_file = -1;
+
+	state->display.initial_offset = 0;
+	state->display.display_visible = false;
+
+	/*
+	 * Explicitly set important floating point values to 0, as memset()
+	 * is not recommended for this.
+	 */
+	state->calc.transfer_rate = 0.0;
+	state->calc.average_rate = 0.0;
+	state->calc.prev_elapsed_sec = 0.0;
+	state->calc.prev_rate = 0.0;
+	state->calc.prev_trans = 0.0;
+	state->calc.current_avg_rate = 0.0;
+	state->calc.rate_min = 0.0;
+	state->calc.rate_max = 0.0;
+	state->calc.rate_sum = 0.0;
+	state->calc.ratesquared_sum = 0.0;
+	state->calc.measurements_taken = 0;
+	state->calc.prev_transferred = 0;
+	state->calc.percentage = 0;
+	state->calc.history_first = state->calc.history_last = 0;
+	if (NULL != state->calc.history) {
+		state->calc.history[0].elapsed_sec = 0.0;
+	}
+
+	state->transfer.elapsed_seconds = 0.0;
+	state->transfer.read_position = 0;
+	state->transfer.write_position = 0;
+	state->transfer.to_write = 0;
+	state->transfer.written = 0;
+	state->transfer.total_written = 0;
+	state->transfer.written_but_not_consumed = 0;
+	state->transfer.read_errors_in_a_row = 0;
+	state->transfer.last_read_skip_fd = 0;
+#ifdef HAVE_SPLICE
+	state->transfer.splice_failed_fd = -1;
+#endif				/* HAVE_SPLICE */
+}
+
+
 /*
  * Create a new state structure, and return it, or 0 (NULL) on error.
  */
@@ -78,28 +130,7 @@ pvstate_t pv_state_alloc(const char *program_name)
 #endif				/* HAVE_IPC */
 	state->cursor.lock_fd = -1;
 
-	state->flag.reparse_display = 1;
-	state->status.current_input_file = -1;
-#ifdef HAVE_SPLICE
-	state->transfer.splice_failed_fd = -1;
-#endif				/* HAVE_SPLICE */
-	state->display.display_visible = false;
-
-	/*
-	 * Explicitly set important floating point values to 0, as memset()
-	 * is not recommended for this.
-	 */
-	state->calc.transfer_rate = 0.0;
-	state->calc.average_rate = 0.0;
-	state->calc.prev_elapsed_sec = 0.0;
-	state->calc.prev_rate = 0.0;
-	state->calc.prev_trans = 0.0;
-	state->calc.current_avg_rate = 0.0;
-	state->calc.rate_min = 0.0;
-	state->calc.rate_max = 0.0;
-	state->calc.rate_sum = 0.0;
-	state->calc.ratesquared_sum = 0.0;
-	state->transfer.elapsed_seconds = 0.0;
+	pv_state_reset(state);
 
 	/*
 	 * Get the current working directory, if possible, as a base for

@@ -27,6 +27,7 @@ extern "C" {
  * Exit status bitmask values.
  */
 #define PV_ERROREXIT_REMOTE_OR_PID 1
+#define PV_ERROREXIT_SAF	   1	/* store and forward error */
 #define PV_ERROREXIT_ACCESS        2
 #define PV_ERROREXIT_OUROBOROS     4
 #define PV_ERROREXIT_TRANSITION    8
@@ -162,6 +163,11 @@ void pv_nanosleep(long long);
  * Create a new state structure, and return it, or 0 (NULL) on error.
  */
 extern /*@null@*/ /*@only@*/ pvstate_t pv_state_alloc(const char *);
+
+/*
+ * Clear the calculated parts of a state structure.
+ */
+extern void pv_state_reset(pvstate_t state);
 
 /*
  * Set the formatting string, given a set of old-style formatting options.

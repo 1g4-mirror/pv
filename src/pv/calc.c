@@ -51,12 +51,12 @@ static void pv__update_average_rate_history(pvstate_t state, long double rate)
 	}
 
 	state->calc.history[last].elapsed_sec = state->transfer.elapsed_seconds;
-	state->calc.history[last].total_written = state->transfer.total_written;
+	state->calc.history[last].transferred = state->transfer.transferred;
 
 	if (first == last) {
 		state->calc.current_avg_rate = rate;
 	} else {
-		off_t bytes = (state->calc.history[last].total_written - state->calc.history[first].total_written);
+		off_t bytes = (state->calc.history[last].transferred - state->calc.history[first].transferred);
 		long double sec = (state->calc.history[last].elapsed_sec - state->calc.history[first].elapsed_sec);
 		state->calc.current_avg_rate = (long double) bytes / sec;
 	}
@@ -85,9 +85,9 @@ void pv_calculate_transfer_rate(pvstate_t state, bool final)
 		return;
 
 	bytes_since_last = 0;
-	if (state->transfer.total_written >= 0) {
-		bytes_since_last = state->transfer.total_written - state->calc.prev_total_written;
-		state->calc.prev_total_written = state->transfer.total_written;
+	if (state->transfer.transferred >= 0) {
+		bytes_since_last = state->transfer.transferred - state->calc.prev_transferred;
+		state->calc.prev_transferred = state->transfer.transferred;
 	}
 
 	/*
@@ -138,7 +138,7 @@ void pv_calculate_transfer_rate(pvstate_t state, bool final)
 		if (state->transfer.elapsed_seconds < 0.000001)
 			state->transfer.elapsed_seconds = 0.000001;
 		average_rate =
-		    (((long double) state->transfer.total_written) -
+		    (((long double) (state->transfer.transferred)) -
 		     ((long double) state->display.initial_offset)) / (long double) (state->transfer.elapsed_seconds);
 		transfer_rate = average_rate;
 	}
@@ -160,7 +160,7 @@ void pv_calculate_transfer_rate(pvstate_t state, bool final)
 		if (state->calc.percentage > 199)
 			state->calc.percentage = 0;
 	} else {
-		state->calc.percentage = pv_percentage(state->transfer.total_written, state->control.size);
+		state->calc.percentage = pv_percentage(state->transfer.transferred, state->control.size);
 	}
 
 	/* Ensure the percentage is never negative or huge. */

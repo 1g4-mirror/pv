@@ -364,6 +364,23 @@ display types that are explicitly switched on will be shown.
     This is equivalent to redirecting standard output to */dev/null*,
     except that **write**(2) is never called. Implies **-C**.
 
+**-U FILE, \--store-and-forward FILE**
+
+:   Instead of passing data through immediately, do it in two stages -
+    first read all input and write it to *FILE*, and then once the input
+    is exhausted, read all of *FILE* and write it to the output. *FILE*
+    remains in place afterwards, unless it is \"**-**\", in which case
+    **pv** creates a temporary file for this purpose, and automatically
+    removes it afterwards.
+
+:   This can be useful if you have a pipeline which generates data (your
+    input) quickly but you don\'t know the size, and you wish to pass it
+    to some slower process, once all of the input has been generated and
+    you know its size, so you can see its progress. Note that when doing
+    this with relatively small amounts of data, **\--no-splice** may be
+    preferable so that pipe buffering doesn\'t affect the progress
+    display.
+
 **-d PID\[:FD\], \--watchfd PID\[:FD\]**
 
 :   Instead of transferring data, watch file descriptor *FD* of process

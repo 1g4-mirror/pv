@@ -396,6 +396,9 @@ void display_help(void)
 		{ "-X", "--discard", NULL,
 		 N_("discard input instead of writing to output"),
 		 { 0, 0, 0, 0} },
+		{ "-U", "--store-and-forward", N_("FILE"),
+		 N_("write all input to FILE before writing to output"),
+		 { 0, 0, 0, 0} },
 #ifdef SA_SIGINFO
 		{ "-R", "--remote", N_("PID"),
 		 N_("update settings of process PID"),

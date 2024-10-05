@@ -1,5 +1,6 @@
 ### UNRELEASED
 
+ * feature: new "`--store-and-forward`" option to read input to a file first, then write it to the output ([#100](https://codeberg.org/a-j-wood/pv/issues/100))
  * feature: new "`--stats`" option to show transfer stats at the end, like "`ping`" ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
  * feature: "`--rate`" can now be used with "`--numeric`" ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
  * feature: "`--gauge`" with "`--progress`" to show rate gauge when size is unknown ([#46](https://codeberg.org/a-j-wood/pv/issues/46))

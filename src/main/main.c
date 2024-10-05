@@ -25,6 +25,233 @@ int pv_remote_set(opts_t, pvstate_t);
 void pv_remote_init(void);
 void pv_remote_fini(void);
 
+/*
+ * Write a PID file, returning nonzero on error.
+ */
+static int pv__write_pidfile(opts_t opts)
+{
+	char *pidfile_tmp_name;
+	size_t pidfile_tmp_bufsize;
+	int pidfile_tmp_fd;
+	FILE *pidfile_tmp_fptr;
+	mode_t prev_umask;
+
+	if (NULL == opts->pidfile)
+		return 0;
+
+	pidfile_tmp_bufsize = 16 + strlen(opts->pidfile);	/* flawfinder: ignore */
+	/*
+	 * flawfinder rationale: pidfile was supplied as an argument
+	 * so we have to assume it is \0 terminated.
+	 */
+	pidfile_tmp_name = malloc(pidfile_tmp_bufsize);
+	if (NULL == pidfile_tmp_name) {
+		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		return PV_ERROREXIT_REMOTE_OR_PID;
+	}
+	memset(pidfile_tmp_name, 0, pidfile_tmp_bufsize);
+	(void) pv_snprintf(pidfile_tmp_name, pidfile_tmp_bufsize, "%s.XXXXXX", opts->pidfile);
+
+	/*@-type@ *//* splint doesn't like mode_t */
+	prev_umask = umask(0000);	    /* flawfinder: ignore */
+	(void) umask(prev_umask | 0133);    /* flawfinder: ignore */
+
+	/*@-unrecog@ *//* splint doesn't know mkstemp() */
+	pidfile_tmp_fd = mkstemp(pidfile_tmp_name);	/* flawfinder: ignore */
+	/*@+unrecog@ */
+	if (pidfile_tmp_fd < 0) {
+		fprintf(stderr, "%s: %s: %s\n", opts->program_name, pidfile_tmp_name, strerror(errno));
+		(void) umask(prev_umask);   /* flawfinder: ignore */
+		free(pidfile_tmp_name);
+		return PV_ERROREXIT_REMOTE_OR_PID;
+	}
+
+	(void) umask(prev_umask);	    /* flawfinder: ignore */
+
+	/*
+	 * flawfinder rationale (umask, mkstemp) - flawfinder
+	 * recommends setting the most restrictive umask possible
+	 * when calling mkstemp(), so this is what we have done.
+	 *
+	 * We get the original umask and OR it with 0133 to make
+	 * sure new files will be at least chmod 644.  Then we put
+	 * the umask back to what it was, after creating the
+	 * temporary file.
+	 */
+
+	/*@+type@ */
+
+	pidfile_tmp_fptr = fdopen(pidfile_tmp_fd, "w");
+	if (NULL == pidfile_tmp_fptr) {
+		fprintf(stderr, "%s: %s: %s\n", opts->program_name, pidfile_tmp_name, strerror(errno));
+		(void) close(pidfile_tmp_fd);
+		(void) remove(pidfile_tmp_name);
+		free(pidfile_tmp_name);
+		return PV_ERROREXIT_REMOTE_OR_PID;
+	}
+
+	fprintf(pidfile_tmp_fptr, "%d\n", getpid());
+	if (0 != fclose(pidfile_tmp_fptr)) {
+		fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
+	}
+
+	if (rename(pidfile_tmp_name, opts->pidfile) < 0) {
+		fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
+		(void) remove(pidfile_tmp_name);
+	}
+
+	free(pidfile_tmp_name);
+
+	return 0;
+}
+
+
+/*
+ * Set the output file, if applicable.  Returns nonzero on error.
+ */
+static int pv__set_output(pvstate_t state, opts_t opts, /*@null@ */ const char *output_file)
+{
+	int output_fd;
+
+	if ((NULL == state) || (NULL == opts))
+		return 0;
+
+	if (NULL == output_file || 0 == strcmp(output_file, "-")) {
+		pv_state_output_set(state, STDOUT_FILENO, "(stdout)");
+		return 0;
+	}
+
+	output_fd = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0600);	/* flawfinder: ignore */
+	/*
+	 * flawfinder rationale: the output filename has been
+	 * explicitly provided, and in many cases the operator will
+	 * want to write to device files and other special
+	 * destinations, so there is no sense-checking we can do to
+	 * make this safer.
+	 */
+	if (output_fd < 0) {
+		fprintf(stderr, "%s: %s: %s\n", opts->program_name, output_file, strerror(errno));
+		return PV_ERROREXIT_ACCESS;
+	}
+
+	pv_state_output_set(state, output_fd, output_file);
+	return 0;
+}
+
+
+/*
+ * Run in store-and-forward mode: run the main loop once with the output
+ * forced to the store-and-forward file (taking care of creation and removal
+ * of a temporary file if "-" was specified); then run the main loop again
+ * with the input file list forced to be just the store-and-forward file. 
+ * Returns nonzero on error.
+ */
+static int pv__store_and_forward(pvstate_t state, opts_t opts, bool can_have_eta)
+{
+	char tmp_filename[4096];	 /* flawfinder: ignore */
+	bool use_temporary_file;
+	char *real_store_and_forward_file;
+	int retcode;
+
+	/* flawfinder: zeroed with memset and bounded by pv_snprintf. */
+
+	if ((NULL == state) || (NULL == opts) || (NULL == opts->store_and_forward_file))
+		return 0;
+
+	memset(tmp_filename, 0, sizeof(tmp_filename));
+
+	use_temporary_file = false;
+	if (0 == strcmp(opts->store_and_forward_file, "-"))
+		use_temporary_file = true;
+
+	/*
+	 * Create a temporary file if the specified file was "-".
+	 */
+	if (use_temporary_file) {
+		char *tmpdir;
+		int tmp_fd;
+
+		tmpdir = (char *) getenv("TMPDIR");	/* flawfinder: ignore */
+		if ((NULL == tmpdir) || ('\0' == tmpdir[0]))
+			tmpdir = (char *) getenv("TMP");	/* flawfinder: ignore */
+		if ((NULL == tmpdir) || ('\0' == tmpdir[0]))
+			tmpdir = "/tmp";
+
+		/*
+		 * flawfinder rationale: null and zero-size values of $TMPDIR and
+		 * $TMP are rejected, and the destination buffer is bounded.
+		 */
+
+		(void) pv_snprintf(tmp_filename, sizeof(tmp_filename), "%s/pv.XXXXXX", tmpdir);
+		/*@-unrecog@ *//* splint doesn't know mkstemp() */
+		tmp_fd = mkstemp(tmp_filename);	/* flawfinder: ignore */
+		/*@+unrecog@ */
+		if (tmp_fd < 0) {
+			fprintf(stderr, "%s: %s: %s\n", opts->program_name, tmp_filename, strerror(errno));
+			return PV_ERROREXIT_SAF;
+		}
+		(void) close(tmp_fd);
+	}
+
+	/*
+	 * Real store-and-forward file: either the one we were given, or the
+	 * temporary file we created if we were given "-".
+	 */
+	real_store_and_forward_file = use_temporary_file ? tmp_filename : opts->store_and_forward_file;
+
+	/*
+	 * First, set the output file to the store-and-forward file.
+	 */
+	debug("%s: %s", "setting output to store-and-forward file", real_store_and_forward_file);
+	retcode = pv__set_output(state, opts, real_store_and_forward_file);
+	if (0 != retcode)
+		goto end_store_and_forward;
+
+	/* Reset the formatting to set the displayed name to "(input)". */
+	/*@-mustfreefresh@ */
+	pv_state_set_format(state, opts->progress, opts->timer, can_have_eta ? opts->eta : false,
+			    can_have_eta ? opts->fineta : false, opts->rate, opts->average_rate,
+			    opts->bytes, opts->bufpercent, opts->lastwritten, _("(input)"));
+	/*@+mustfreefresh@ *//* see below about gettext _() calls. */
+
+	/* Run the main loop as normal. */
+	debug("%s", "running store-and-forward receiver");
+	retcode = pv_main_loop(state);
+	if (0 != retcode)
+		goto end_store_and_forward;
+
+	/* Set the output file back to what it originally was. */
+	debug("%s: %s", "setting output to original value", NULL == opts->output ? "(null)" : opts->output);
+	retcode = pv__set_output(state, opts, opts->output);
+	if (0 != retcode)
+		goto end_store_and_forward;
+
+	/* Replace the list of input files with the store-and-forward file. */
+	debug("%s", "resetting input file list");
+	pv_state_inputfiles(state, 1, (const char **) &real_store_and_forward_file);
+
+	/* Recalculate the input size. */
+	pv_state_size_set(state, pv_calc_total_size(state));
+
+	/* Reset the format, since we might have been asked to show ETA. */
+	pv_state_set_format(state, opts->progress, opts->timer, opts->eta,
+			    opts->fineta, opts->rate, opts->average_rate,
+			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
+
+	/* Reset calculated values in the state. */
+	pv_state_reset(state);
+
+	/* Run the main loop again. */
+	debug("%s", "running store-and-forward transmitter");
+	retcode = pv_main_loop(state);
+
+      end_store_and_forward:
+	if (use_temporary_file)
+		(void) remove(tmp_filename);
+
+	return retcode;
+}
+
 
 /*
  * Process command-line arguments and set option flags, then call functions
@@ -35,6 +262,7 @@ int main(int argc, char **argv)
 	/*@only@ */ opts_t opts = NULL;
 	/*@only@ */ pvstate_t state = NULL;
 	int retcode = 0;
+	bool can_have_eta = true;
 
 #ifdef ENABLE_NLS
 	/* Initialise language translation. */
@@ -96,80 +324,13 @@ int main(int argc, char **argv)
 	 * Write a PID file if -P was specified.
 	 */
 	if (opts->pidfile != NULL) {
-		char *pidfile_tmp_name;
-		size_t pidfile_tmp_bufsize;
-		int pidfile_tmp_fd;
-		FILE *pidfile_tmp_fptr;
-		mode_t prev_umask;
-
-		pidfile_tmp_bufsize = 16 + strlen(opts->pidfile);	/* flawfinder: ignore */
-		/*
-		 * flawfinder rationale: pidfile was supplied as an argument
-		 * so we have to assume it is \0 terminated.
-		 */
-		pidfile_tmp_name = malloc(pidfile_tmp_bufsize);
-		if (NULL == pidfile_tmp_name) {
-			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		int pidfile_rc;
+		pidfile_rc = pv__write_pidfile(opts);
+		if (0 != pidfile_rc) {
 			pv_state_free(state);
 			opts_free(opts);
-			return PV_ERROREXIT_REMOTE_OR_PID;
+			return pidfile_rc;
 		}
-		memset(pidfile_tmp_name, 0, pidfile_tmp_bufsize);
-		(void) pv_snprintf(pidfile_tmp_name, pidfile_tmp_bufsize, "%s.XXXXXX", opts->pidfile);
-
-		/*@-type@ *//* splint doesn't like mode_t */
-		prev_umask = umask(0000);   /* flawfinder: ignore */
-		(void) umask(prev_umask | 0133);	/* flawfinder: ignore */
-
-		/*@-unrecog@ *//* splint doesn't know mkstemp() */
-		pidfile_tmp_fd = mkstemp(pidfile_tmp_name);	/* flawfinder: ignore */
-		/*@+unrecog@ */
-		if (pidfile_tmp_fd < 0) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, pidfile_tmp_name, strerror(errno));
-			(void) umask(prev_umask);	/* flawfinder: ignore */
-			free(pidfile_tmp_name);
-			pv_state_free(state);
-			opts_free(opts);
-			return PV_ERROREXIT_REMOTE_OR_PID;
-		}
-
-		(void) umask(prev_umask);   /* flawfinder: ignore */
-
-		/*
-		 * flawfinder rationale (umask, mkstemp) - flawfinder
-		 * recommends setting the most restrictive umask possible
-		 * when calling mkstemp(), so this is what we have done.
-		 *
-		 * We get the original umask and OR it with 0133 to make
-		 * sure new files will be at least chmod 644.  Then we put
-		 * the umask back to what it was, after creating the
-		 * temporary file.
-		 */
-
-		/*@+type@ */
-
-		pidfile_tmp_fptr = fdopen(pidfile_tmp_fd, "w");
-		if (NULL == pidfile_tmp_fptr) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, pidfile_tmp_name, strerror(errno));
-			(void) close(pidfile_tmp_fd);
-			(void) remove(pidfile_tmp_name);
-			free(pidfile_tmp_name);
-			pv_state_free(state);
-			opts_free(opts);
-			return PV_ERROREXIT_REMOTE_OR_PID;
-		}
-
-		fprintf(pidfile_tmp_fptr, "%d\n", getpid());
-		if (0 != fclose(pidfile_tmp_fptr)) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
-		}
-
-		if (rename(pidfile_tmp_name, opts->pidfile) < 0) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
-			(void) remove(pidfile_tmp_name);
-		}
-
-		free(pidfile_tmp_name);
 	}
 
 	/*
@@ -246,24 +407,11 @@ int main(int argc, char **argv)
 	 * calculation looks at the output file if the input size can't be
 	 * calculated (issue #91).
 	 */
-	if (NULL == opts->output || 0 == strcmp(opts->output, "-")) {
-		pv_state_output_set(state, STDOUT_FILENO, "(stdout)");
-	} else {
-		int fd = open(opts->output, O_WRONLY | O_CREAT | O_TRUNC, 0600);	/* flawfinder: ignore */
-		/*
-		 * flawfinder rationale: the output filename has been
-		 * explicitly provided, and in many cases the operator will
-		 * want to write to device files and other special
-		 * destinations, so there is no sense-checking we can do to
-		 * make this safer.
-		 */
-		if (fd < 0) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->output, strerror(errno));
-			pv_state_free(state);
-			opts_free(opts);
-			return PV_ERROREXIT_ACCESS;
-		}
-		pv_state_output_set(state, fd, opts->output);
+	retcode = pv__set_output(state, opts, opts->output);
+	if (0 != retcode) {
+		pv_state_free(state);
+		opts_free(opts);
+		return retcode;
 	}
 
 	/*
@@ -290,7 +438,7 @@ int main(int argc, char **argv)
 		 * If the size is unknown, we cannot have an ETA.
 		 */
 		if (opts->size < 1) {
-			opts->eta = false;
+			can_have_eta = false;
 			debug("%s", "size unknown - ETA disabled");
 		}
 	}
@@ -330,18 +478,23 @@ int main(int argc, char **argv)
 	pv_state_watch_fd_set(state, opts->watch_fd);
 	pv_state_average_rate_window_set(state, opts->average_rate_window);
 
-	pv_state_set_format(state, opts->progress, opts->timer, opts->eta,
-			    opts->fineta, opts->rate, opts->average_rate,
+	pv_state_set_format(state, opts->progress, opts->timer, can_have_eta ? opts->eta : false,
+			    can_have_eta ? opts->fineta : false, opts->rate, opts->average_rate,
 			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
 
 	/* Initialise the signal handling. */
 	pv_sig_init(state);
 
 	/* Run the appropriate main loop. */
-	if (0 == opts->watch_pid) {
+	if (0 == opts->watch_pid && NULL == opts->store_and_forward_file) {
 		/* Normal "transfer data" mode. */
 		pv_remote_init();
 		retcode = pv_main_loop(state);
+		pv_remote_fini();
+	} else if (0 == opts->watch_pid && NULL != opts->store_and_forward_file) {
+		/* Store-and-forward transfer mode. */
+		pv_remote_init();
+		retcode = pv__store_and_forward(state, opts, can_have_eta);
 		pv_remote_fini();
 	} else if (0 != opts->watch_pid && -1 == opts->watch_fd) {
 		/* "Watch all file descriptors of another process" mode. */

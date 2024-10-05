@@ -68,6 +68,7 @@ int pv_main_loop(pvstate_t state)
 	struct timespec init_time, next_remotecheck, transfer_elapsed;
 	int input_fd, output_fd;
 	unsigned int file_idx;
+	bool output_is_pipe;
 
 	/*
 	 * "written" is ALWAYS bytes written by the last transfer.
@@ -88,6 +89,35 @@ int pv_main_loop(pvstate_t state)
 	if (output_fd < 0)
 		output_fd = STDOUT_FILENO;
 
+	/* Determine whether the output is a pipe. */
+	output_is_pipe = false;
+	{
+		struct stat sb;
+		memset(&sb, 0, sizeof(sb));
+		if (0 == fstat(output_fd, &sb)) {
+			/*@-type@*/
+			if ((sb.st_mode & S_IFMT) == S_IFIFO) {
+				output_is_pipe = true;
+				debug("%s", "output is a pipe");
+			}
+			/*@+type@*/ /* splint says st_mode is __mode_t, not mode_t */
+		} else {
+			debug("%s(%d): %s", "fstat", output_fd, strerror(errno));
+		}
+	}
+
+	/*
+	 * Note that we could reduce the size of the output pipe buffer like
+	 * this, to avoid the case where we write a load of data and it just
+	 * goes into the buffer so we think we're done, but the consumer
+	 * takes ages to process it:
+	 *
+	 *   fcntl(output_fd, F_SETPIPE_SZ, 4096);
+	 *
+	 * If we can peek at how much has been consumed by the other end, we
+	 * don't need to.
+	 */
+
 	pv_crs_init(state);
 
 	eof_in = false;
@@ -95,6 +125,7 @@ int pv_main_loop(pvstate_t state)
 	state->transfer.total_written = 0;
 	lineswritten = 0;
 	state->display.initial_offset = 0;
+	state->transfer.written_but_not_consumed = 0;
 
 	memset(&cur_time, 0, sizeof(cur_time));
 	memset(&start_time, 0, sizeof(start_time));
@@ -147,8 +178,7 @@ int pv_main_loop(pvstate_t state)
 	/*
 	 * Set or clear O_DIRECT on the output.
 	 */
-	if (0 !=
-	    fcntl(output_fd, F_SETFL, (state->control.direct_io ? O_DIRECT : 0) | fcntl(output_fd, F_GETFL))) {
+	if (0 != fcntl(output_fd, F_SETFL, (state->control.direct_io ? O_DIRECT : 0) | fcntl(output_fd, F_GETFL))) {
 		debug("%s: %s", "fcntl", strerror(errno));
 	}
 	state->control.direct_io_changed = false;
@@ -175,6 +205,11 @@ int pv_main_loop(pvstate_t state)
 
 	if (0 == state->control.target_buffer_size)
 		state->control.target_buffer_size = BUFFER_SIZE;
+
+	/*
+	 * Repeat until eof_in is true, eof_out is true, and final_update is
+	 * true.
+	 */
 
 	while ((!(eof_in && eof_out)) || (!final_update)) {
 
@@ -249,6 +284,36 @@ int pv_main_loop(pvstate_t state)
 				target -= written;
 		}
 
+#ifdef FIONREAD
+		/*
+		 * If writing to a pipe, look at how much is sitting in the
+		 * pipe buffer waiting for the receiver to read.
+		 */
+		if (output_is_pipe) {
+			int nbytes;
+			nbytes = 0;
+			if (0 == ioctl(output_fd, FIONREAD, &nbytes)) {
+				if (nbytes >= 0) {
+					if (((size_t) nbytes) != state->transfer.written_but_not_consumed)
+						debug("%s: %d", "written_but_not_consumed is now", nbytes);
+					state->transfer.written_but_not_consumed = (size_t) nbytes;
+				} else {
+					debug("%s: %d", "FIONREAD gave a negative byte count", nbytes);
+					state->transfer.written_but_not_consumed = 0;
+				}
+			} else {
+				debug("%s(%d,%s): %s", "ioctl", output_fd, "FIONREAD", strerror(errno));
+				state->transfer.written_but_not_consumed = 0;
+			}
+		}
+#endif
+
+		state->transfer.transferred = state->transfer.total_written;
+		/* TODO: work out what to do in line mode. */
+		if (output_is_pipe && !state->control.linemode) {
+			state->transfer.transferred -= state->transfer.written_but_not_consumed;
+		}
+
 		/*
 		 * EOF, and files remain - advance to the next file.
 		 */
@@ -268,8 +333,12 @@ int pv_main_loop(pvstate_t state)
 		/* Now check the current time. */
 		pv_elapsedtime_read(&cur_time);
 
-		/* If full EOF, final update, and force a display updaate. */
-		if (eof_in && eof_out) {
+		/*
+		 * If we've read everything and written everything, and the
+		 * output pipe buffer is empty, then set the final update
+		 * flag, and force a display update.
+		 */
+		if (eof_in && eof_out && 0 == state->transfer.written_but_not_consumed) {
 			final_update = true;
 			if ((state->display.display_visible)
 			    || (state->control.delay_start < 0.001)) {
