@@ -113,6 +113,9 @@ clean-local:
 # Convenience alias for "make check": "make test"
 test: check
 
+dist-hook:
+	test -n "$(MAINTAINER)" && cd "$(top_distdir)" && find -type f -not -name MANIFEST -exec sha512sum '{}' ';' | sort -k 2 | gpg -u "$(MAINTAINER)" --clearsign > MANIFEST || :
+
 # "release" target - requires MAINTAINER variable to select GPG key.
 release: distcheck
 	gpg --list-secret-keys 2>&1 | grep -F 'uid' | grep -Fq "$(MAINTAINER)"
