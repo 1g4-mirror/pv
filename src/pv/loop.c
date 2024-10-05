@@ -258,6 +258,10 @@ int pv_main_loop(pvstate_t state)
 			if (input_fd >= 0) {
 				eof_in = false;
 				eof_out = false;
+#if HAVE_POSIX_FADVISE
+				/* Advise the OS that we will only be reading sequentially. */
+				(void) posix_fadvise(input_fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+#endif
 			}
 		}
 

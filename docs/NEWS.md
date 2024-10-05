@@ -9,6 +9,7 @@
  * fix: surround average rate ("`--average-rate`") with brackets rather than square brackets
  * fix: correct a memory leak in "`--watchfd PID`"
  * fix: make "`--direct-io`" work correctly with "`--output`" instead of assuming stdout
+ * fix: call `posix_fadvise()` on every input, not just the first one
  * fix: write UTC timestamps in debugging mode to avoid lockups in signal handlers
  * cleanup: removed TODO.md, since it's just an outdated copy of the issue tracker
  * cleanup: re-ordered structure members to reduce padding
