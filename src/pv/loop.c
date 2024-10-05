@@ -95,12 +95,12 @@ int pv_main_loop(pvstate_t state)
 		struct stat sb;
 		memset(&sb, 0, sizeof(sb));
 		if (0 == fstat(output_fd, &sb)) {
-			/*@-type@*/
+			/*@-type@ */
 			if ((sb.st_mode & S_IFMT) == S_IFIFO) {
 				output_is_pipe = true;
 				debug("%s", "output is a pipe");
 			}
-			/*@+type@*/ /* splint says st_mode is __mode_t, not mode_t */
+			/*@+type@ *//* splint says st_mode is __mode_t, not mode_t */
 		} else {
 			debug("%s(%d): %s", "fstat", output_fd, strerror(errno));
 		}
@@ -292,7 +292,12 @@ int pv_main_loop(pvstate_t state)
 		if (output_is_pipe) {
 			int nbytes;
 			nbytes = 0;
-			if (0 == ioctl(output_fd, FIONREAD, &nbytes)) {
+			if (0 != state->flag.pipe_closed) {
+				if (0 != state->transfer.written_but_not_consumed)
+					debug("%s",
+					      "clearing written_but_not_consumed because the output pipe was closed");
+				state->transfer.written_but_not_consumed = 0;
+			} else if (0 == ioctl(output_fd, FIONREAD, &nbytes)) {
 				if (nbytes >= 0) {
 					if (((size_t) nbytes) != state->transfer.written_but_not_consumed)
 						debug("%s: %d", "written_but_not_consumed is now", nbytes);

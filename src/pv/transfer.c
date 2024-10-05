@@ -636,6 +636,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long *lineswritten)
 {
 	ssize_t nwritten;
+	int write_errno;
 
 	if (NULL == state->transfer.transfer_buffer) {
 		pv_error(state, "%s", _("no transfer buffer allocated"));
@@ -646,6 +647,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	}
 
 	nwritten = 0;
+	write_errno = 0;
 
 	if (state->control.discard_input) {
 		nwritten = state->transfer.to_write;
@@ -693,6 +695,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 						       (size_t) (state->transfer.to_write),
 						       state->control.sync_after_write);
 		if (nwritten < 0) {
+			write_errno = (int) errno;
 			debug("%s: %ld: %s", "bytes written", (long) nwritten, strerror(errno));
 		} else {
 			debug("%s: %ld", "bytes written", (long) nwritten);
@@ -808,11 +811,11 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	 * blocked on first write such that nwritten == 0, just wait a bit and
 	 * then return zero, since this was a transient error.
 	 */
-	if ((0 == nwritten) || (EINTR == errno) || (EAGAIN == errno)) {
+	if ((0 == nwritten) || (EINTR == write_errno) || (EAGAIN == write_errno)) {
 		if (0 == nwritten) {
 			debug("%s", "attempted write blocked - waiting briefly");
 		} else {
-			debug("%s: %s", "transient write error - waiting briefly", strerror(errno));
+			debug("%s: %s", "transient write error - waiting briefly", strerror(write_errno));
 		}
 		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
 		return 0;
@@ -822,13 +825,14 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	 * SIGPIPE means we've finished. Don't output an error because it's
 	 * not really our error to report.
 	 */
-	if (EPIPE == errno) {
+	if (EPIPE == write_errno) {
 		*eof_in = true;
 		*eof_out = true;
+		state->flag.pipe_closed = 1;
 		return 0;
 	}
 
-	pv_error(state, "%s: %s", _("write failed"), strerror(errno));
+	pv_error(state, "%s: %s", _("write failed"), strerror(write_errno));
 	state->status.exit_status |= PV_ERROREXIT_TRANSFER;
 	*eof_out = true;
 	state->transfer.written = -1;

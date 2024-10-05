@@ -175,6 +175,7 @@ struct pvstate_s {
 		volatile sig_atomic_t clear_tty_tostop_on_exit;	/* whether to clear tty TOSTOP on exit */
 		volatile sig_atomic_t suspend_stderr;	 /* whether writing to stderr is suspended */
 		volatile sig_atomic_t skip_next_sigcont; /* whether to ignore the next SIGCONT */
+		volatile sig_atomic_t pipe_closed;	 /* whether the output pipe was closed */
 	} flag;
 
 	/*****************
