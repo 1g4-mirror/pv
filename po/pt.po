@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-05 16:04+0100\n"
+"POT-Creation-Date: 2024-10-05 16:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -414,7 +414,7 @@ msgid "B"
 msgstr ""
 
 #: src/pv/display.c:851 src/pv/display.c:866 src/pv/display.c:1085
-#: src/pv/loop.c:494
+#: src/pv/loop.c:495
 msgid "b/s"
 msgstr ""
 
@@ -423,7 +423,7 @@ msgid "/s"
 msgstr ""
 
 #: src/pv/display.c:855 src/pv/display.c:870 src/pv/display.c:1089
-#: src/pv/loop.c:494
+#: src/pv/loop.c:495
 msgid "B/s"
 msgstr "B/s"
 
@@ -463,15 +463,15 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:493
+#: src/pv/loop.c:494
 msgid "rate min/avg/max/mdev"
 msgstr ""
 
-#: src/pv/loop.c:505
+#: src/pv/loop.c:506
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:711 src/pv/loop.c:762 src/pv/loop.c:803 src/pv/watchpid.c:99
+#: src/pv/loop.c:712 src/pv/loop.c:763 src/pv/loop.c:804 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
