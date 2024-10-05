@@ -66,7 +66,7 @@ int pv_main_loop(pvstate_t state)
 	bool eof_in, eof_out, final_update;
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
 	struct timespec init_time, next_remotecheck, transfer_elapsed;
-	int fd;
+	int input_fd, output_fd;
 	unsigned int file_idx;
 
 	/*
@@ -82,7 +82,11 @@ int pv_main_loop(pvstate_t state)
 	 * The remaining variables are all unchanged by linemode.
 	 */
 
-	fd = -1;
+	input_fd = -1;
+
+	output_fd = state->control.output_fd;
+	if (output_fd < 0)
+		output_fd = STDOUT_FILENO;
 
 	pv_crs_init(state);
 
@@ -119,24 +123,24 @@ int pv_main_loop(pvstate_t state)
 	/*
 	 * Open the first readable input file.
 	 */
-	fd = -1;
-	while (fd < 0 && file_idx < state->files.file_count) {
-		fd = pv_next_file(state, file_idx, -1);
-		if (fd < 0)
+	input_fd = -1;
+	while (input_fd < 0 && file_idx < state->files.file_count) {
+		input_fd = pv_next_file(state, file_idx, -1);
+		if (input_fd < 0)
 			file_idx++;
 	}
 
 	/*
 	 * Exit early if there was no readable input file.
 	 */
-	if (fd < 0) {
+	if (input_fd < 0) {
 		if (state->control.cursor)
 			pv_crs_fini(state);
 		return state->status.exit_status;
 	}
 #if HAVE_POSIX_FADVISE
 	/* Advise the OS that we will only be reading sequentially. */
-	(void) posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+	(void) posix_fadvise(input_fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif
 
 #ifdef O_DIRECT
@@ -144,7 +148,7 @@ int pv_main_loop(pvstate_t state)
 	 * Set or clear O_DIRECT on the output.
 	 */
 	if (0 !=
-	    fcntl(STDOUT_FILENO, F_SETFL, (state->control.direct_io ? O_DIRECT : 0) | fcntl(STDOUT_FILENO, F_GETFL))) {
+	    fcntl(output_fd, F_SETFL, (state->control.direct_io ? O_DIRECT : 0) | fcntl(output_fd, F_GETFL))) {
 		debug("%s: %s", "fcntl", strerror(errno));
 	}
 	state->control.direct_io_changed = false;
@@ -158,7 +162,7 @@ int pv_main_loop(pvstate_t state)
 	if (0 == state->control.target_buffer_size) {
 		struct stat sb;
 		memset(&sb, 0, sizeof(sb));
-		if (0 == fstat(fd, &sb)) {
+		if (0 == fstat(input_fd, &sb)) {
 			size_t sz;
 			sz = (size_t) (sb.st_blksize * 32);
 			if (sz > BUFFER_SIZE_MAX) {
@@ -224,7 +228,7 @@ int pv_main_loop(pvstate_t state)
 		    && (0 >= cansend) && eof_in && eof_out) {
 			written = 0;
 		} else {
-			written = pv_transfer(state, fd, &eof_in, &eof_out, cansend, &lineswritten);
+			written = pv_transfer(state, input_fd, &eof_in, &eof_out, cansend, &lineswritten);
 		}
 
 		/* End on write error. */
@@ -250,8 +254,8 @@ int pv_main_loop(pvstate_t state)
 		 */
 		while (eof_in && eof_out && file_idx < (state->files.file_count - 1)) {
 			file_idx++;
-			fd = pv_next_file(state, file_idx, fd);
-			if (fd >= 0) {
+			input_fd = pv_next_file(state, file_idx, input_fd);
+			if (input_fd >= 0) {
 				eof_in = false;
 				eof_out = false;
 			}
@@ -383,8 +387,8 @@ int pv_main_loop(pvstate_t state)
 	if (1 == state->flag.trigger_exit)
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
 
-	if (fd >= 0)
-		(void) close(fd);
+	if (input_fd >= 0)
+		(void) close(input_fd);
 
 	/* Calculate and display the transfer statistics. */
 	if (state->control.show_stats && state->calc.measurements_taken > 0) {
