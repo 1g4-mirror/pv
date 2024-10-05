@@ -114,7 +114,12 @@ clean-local:
 test: check
 
 dist-hook:
-	test -n "$(MAINTAINER)" && cd "$(top_distdir)" && find -type f -not -name MANIFEST -exec sha512sum '{}' ';' | sort -k 2 | gpg -u "$(MAINTAINER)" --clearsign > MANIFEST || :
+	if test -n "$(MAINTAINER)"; then \
+	  cd "$(top_distdir)" \
+	  && { printf "%s\n\n" "Check file integrity with 'sha512sum -c MANIFEST && echo OK'."; \
+	       find -type f -not -name MANIFEST -exec sha512sum '{}' ';' | sort -k 2; } \
+	     | gpg -u "$(MAINTAINER)" --clearsign > MANIFEST; \
+	else true; fi
 
 # "release" target - requires MAINTAINER variable to select GPG key.
 release: distcheck
