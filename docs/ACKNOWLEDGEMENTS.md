@@ -101,5 +101,6 @@ is acknowledged and greatly appreciated:
  * [coralpink](https://translate.codeberg.org/user/coralpink/) - provided a comprehensive set of Polish translations ([#102](https://codeberg.org/a-j-wood/pv/pulls/102))
  * Venky.N.Iyer - suggested **--stats** ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
  * Roland Kletzing - suggested **--rate** with **--numeric** ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
+ * [Michael Mior](https://codeberg.org/michaelmior) - suggested **--store-and-forward** ([#100](https://codeberg.org/a-j-wood/pv/issues/100))
 
 ---
