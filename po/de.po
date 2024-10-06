@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-05 17:04+0100\n"
-"PO-Revision-Date: 2024-09-29 11:07+0000\n"
-"Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
+"PO-Revision-Date: 2024-10-06 15:06+0000\n"
+"Last-Translator: Benny <Benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,9 +14,9 @@ msgstr ""
 "From: Andrew Wood <ivarch@ubik>\n"
 "Xgettext-Options: --default-domain=pkgbuild --directory=./.pkgdir --add-"
 "comments --keyword=_ --keyword=N_\n"
-"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/init."
-"c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/guts/"
-"configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
+"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/"
+"init.c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/"
+"guts/configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
 "generate.c src/ui/main.c src/ui/xpm.c src/ui/status.c src/ui/activate.c src/"
 "ui/handlers/main.c src/ui/handlers/package.c src/ui/handlers/prefs.c src/ui/"
 "handlers/dirsel.c src/ui/handlers/popup.c src/ui/handlers/help.c src/ui/"
@@ -94,7 +94,7 @@ msgstr "setze das Ausgabeformat auf FORMAT"
 
 #: src/main/help.c:323
 msgid "output transfer statistics at the end"
-msgstr ""
+msgstr "Übertragungsstatistiken am Ende ausgeben"
 
 #: src/main/help.c:326
 msgid "output percentages, not visual information"
@@ -486,7 +486,7 @@ msgstr ""
 
 #: src/pv/loop.c:511
 msgid "rate not measured"
-msgstr ""
+msgstr "Übertragungsrate nicht gemessen"
 
 #: src/pv/loop.c:717 src/pv/loop.c:768 src/pv/loop.c:809 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
