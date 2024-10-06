@@ -4,7 +4,8 @@
  * *feature:* new **--stats** option to show transfer stats at the end, like "`ping`" ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
  * *feature:* **--rate** can now be used with **--numeric** ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
  * *feature:* **--gauge** with **--progress** to show rate gauge when size is unknown ([#46](https://codeberg.org/a-j-wood/pv/issues/46))
- * *i18n:* comprehensive German translations update from Hartmut Goebel ([#98](https://codeberg.org/a-j-wood/pv/pulls/98))
+ * *i18n:* comprehensive German translations update ([#98](https://codeberg.org/a-j-wood/pv/pulls/98), [#103](https://codeberg.org/a-j-wood/pv/pulls/103))
+ * *i18n:* comprehensive Polish translations update ([#102](https://codeberg.org/a-j-wood/pv/pulls/102))
  * *fix:* resume stopped pipelines when running in the background (part of [#56](https://codeberg.org/a-j-wood/pv/issues/56))
  * *fix*: inspect the output pipe buffer to give a more accurate progress indicator of how much the next command has consumed
  * *fix:* prefix completion time (**--fineta**) with *FIN* rather than *ETA* ([#43](https://codeberg.org/a-j-wood/pv/issues/43))
