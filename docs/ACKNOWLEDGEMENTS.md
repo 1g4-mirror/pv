@@ -12,18 +12,18 @@ is acknowledged and greatly appreciated:
  * Joshua Jensen - reported RPM installation bug
  * Boris Folgmann <http://www.folgmann.com/en/> - reported cursor handling bug
  * Mathias Gumz - reported NLS bug
- * Daniel Roethlisberger - submitted patch to use lockfiles for "`-c`" if terminal locking fails
- * Adam Buchbinder - lots of help with a Cygwin port of "`-c`"
- * Mark Tomich <http://metuchen.dyndns.org> - suggested "`-B`" option
+ * Daniel Roethlisberger - submitted patch to use lockfiles for **-c** if terminal locking fails
+ * Adam Buchbinder - lots of help with a Cygwin port of **-c**
+ * Mark Tomich <http://metuchen.dyndns.org> - suggested **-B** option
  * Gert Menke - reported bug when piping to `dd` with a large input buffer size
  * Ville Herva <Ville.Herva@iki.fi> - informative bug report about rate limiting performance
  * Elias Pipping - patch to compile properly on Darwin 9; potential NULL deref report
  * Patrick Collison - similar patch for OS X
- * Boris Lohner - reported problem that "`-L`" does not complain if given non-numeric value
+ * Boris Lohner - reported problem that **-L** does not complain if given non-numeric value
  * Sebastian Kayser - supplied testing for *SIGPIPE*, demonstrated internationalisation problem
- * Laszlo Ersek <http://phptest11.atw.hu/> - reported shared memory leak on *SIGINT* with "`-c`"
+ * Laszlo Ersek <http://phptest11.atw.hu/> - reported shared memory leak on *SIGINT* with **-c**
  * Phil Rutschman <http://bandgap.rsnsoft.com/> - provided a patch for fully restoring terminal state on exit
- * Henry Precheur <http://henry.precheur.org/> - reporting and suggestions for "`--rate-limit`" bug when rate is under 10
+ * Henry Precheur <http://henry.precheur.org/> - reporting and suggestions for **--rate-limit** bug when rate is under 10
  * E. Rosten <http://mi.eng.cam.ac.uk/~er258/> - supplied patch for block buffering in line mode
  * Kjetil Torgrim Homme - reported compilation error with default *CFLAGS* on non-GCC compilers
  * Alexandre de Verteuil - reported bug in OS X build and supplied test environment to fix in
@@ -31,75 +31,75 @@ is acknowledged and greatly appreciated:
  * Sam Nelson <http://www.siliconfuture.net/> - supplied patch to fix trailing slash on *DESTDIR*
  * Daniel Pape - reported Cygwin installation problem due to *DESTDIR*
  * Philipp Beckers - ported to the Syabas PopcornHour A-100 series
- * Henry Gebhard <hsggebhardt@googlemail.com> - supplied patches to improve SI prefixes and add "`--average-rate`"
+ * Henry Gebhard <hsggebhardt@googlemail.com> - supplied patches to improve SI prefixes and add **--average-rate**
  * Vladimir Kokarev, Alexander Leo - reported that exit status did not reflect file errors
  * Thomas Rachel - submitted patches for IEEE1541 (MiB suffixes), 1+e03 bug
  * Guillaume Marcais - submitted speedup patch for line mode
  * Moritz Barsnick - submitted patch for compile warning in size calculation
  * Pawel Piatek - submitted RPM and patches for AIX
- * Sami Liedes - submitted patch for "`--timer`" and "`--bytes`" with "`--numeric`"
- * Steven Willis - reported problem with "`-R`" killing non-PV remote processes
- * Vladimir Pal, Vladimir Ermakov - submitted patch which led to development of "`--format`" option
+ * Sami Liedes - submitted patch for **--timer** and **--bytes** with **--numeric**
+ * Steven Willis - reported problem with **-R** killing non-PV remote processes
+ * Vladimir Pal, Vladimir Ermakov - submitted patch which led to development of **--format** option
  * Peter Samuelson <peter@p12n.org> - submitted patch to calculate size if stdout is a block device
  * Miguel Diaz - much Cygwin help (and packaging), found narrow-terminal bug
- * Jim Salter <http://ubuntuwiki.net> - commissioned work on the "`--skip-errors`" option
+ * Jim Salter <http://ubuntuwiki.net> - commissioned work on the **--skip-errors** option
  * Wouter Pronk - reported build problem on SCO
  * Bryan Dongray <http://www.dongrays.com> - provided patches for test scripts failing on older Red Hats
  * Zev Weiss <www.bewilderbeest.net> - provided patch to fix `splice()` not using stdin
- * Zing Shishak - provided patch for "`--null`" / "`-0`" (count null terminated lines)
- * Jacek Wielemborek <http://deetah.jogger.pl/kategorie/english> - implemented fdwatch in Python, suggested PV port; reported bug with "`-l`" and ETA / size; many other contributions
+ * Zing Shishak - provided patch for **--null** / **-0** (count null terminated lines)
+ * Jacek Wielemborek <http://deetah.jogger.pl/kategorie/english> - implemented fdwatch in Python, suggested PV port; reported bug with **-l** and ETA / size; many other contributions
  * Kim Krecht - suggested buffer fill status and last bytes output display options
  * Cristian Ciupitu <http://ciupicri.github.io>, Josh Stone - pointed out file descriptor leak with helpful suggestions (Josh Stone initially noticed the missing close)
  * Jan Seda - found issue with `splice()` and *SPLICE_F_NONBLOCK* causing slowdown
- * André Stapf - pointed out formatting problem e.g. 13GB -> 13.1GB which should be shown 13.0GB -> 13.1GB; highlighted on-startup row swapping in "`-c`", and suggested "`--discard`"; suggested making "`--fineta`" have a "FIN" prefix
- * Damon Harper <http://www.usrbin.ca/> - suggested "`-D`" / "`--delay-start`" option
+ * André Stapf - pointed out formatting problem e.g. 13GB -> 13.1GB which should be shown 13.0GB -> 13.1GB; highlighted on-startup row swapping in **-c**, and suggested **--discard**; suggested making **--fineta** have a "FIN" prefix
+ * Damon Harper <http://www.usrbin.ca/> - suggested **-D** / **--delay-start** option
  * Ganaël Laplanche <http://www.martymac.org> - provided patch for `lstat64()` on systems that do not support it
- * Peter Korsgaard <http://www.buildroot.net/> - provided similar patch for `lstat64()`, specifically for uClibc support; provided AIX cross-compilation patch to fix bug in "`-lc128`" check
+ * Peter Korsgaard <http://www.buildroot.net/> - provided similar patch for `lstat64()`, specifically for uClibc support; provided AIX cross-compilation patch to fix bug in **-lc128** check
  * Ralf Ramsauer <https://blog.ramses-pyramidenbau.de/> - reported bug which dropped transfer rate on terminal resize
- * Michiel Van Herwegen - reported and discussed bug with "`-l`" and ETA / size
- * Erkki Seppälä <http://www.inside.org/~flux/> - provided patch implementing "`-I`"
+ * Michiel Van Herwegen - reported and discussed bug with **-l** and ETA / size
+ * Erkki Seppälä <http://www.inside.org/~flux/> - provided patch implementing **-I**
  * Eric A. Borisch - provided details of compatibility fix for "`%Lu`" in watchpid code
  * Jan Venekamp - reported MacOS buffer size interactions with pipes
  * Matt <https://github.com/lemonsqueeze/pv> - provided "rate-window" patches for rate calculation
  * [Filippo Valsorda](https://github.com/FiloSottile) - provided patch for stat64 issue on Apple Silicon
  * Matt Koscica, William Dillon - also reported stat64 issue on Apple Silicon
  * [Demitri Muna](https://github.com/demitri) - assisted with stat64 patch on Apple Silicon
- * Norman Rasmussen - suggested "`-c`" with "`-d PID:FD`", reject "`-N`" with "`-d PID`"
+ * Norman Rasmussen - suggested **-c** with **-d PID:FD**, reject **-N** with **-d PID**
  * Andriy Gapon, Jonathan Elchison - reported bug where "`pv /dev/zero >/dev/null &`" stops immediately
  * Marcelo Chiesa - reported unused-result warnings when compiling PV 1.6.6
- * Jered Floyd - provided patches to improve "`--rate-limit`"
+ * Jered Floyd - provided patches to improve **--rate-limit**
  * Christoph Biedl - provided ETA and dynamic interval patches
  * Richard Fonfara - provided German translations for "`pv --help`"
- * Johannes Gerer <http://johannesgerer.com> - suggested that "`-B`" should enable "`-C`"
+ * Johannes Gerer <http://johannesgerer.com> - suggested that **-B** should enable **-C**
  * Sam James - provided fix for number.c build issue caused by missing stddef.h
  * Jakub Wilk <jwilk@jwilk.net> - corrected README encoding
  * Frederik Eaton - reported issue with `<()` shell constructs
- * [gray](https://github.com/gray) - reported issue with "`--force`" and terminal process groups, and proposed a patch
+ * [gray](https://github.com/gray) - reported issue with **--force** and terminal process groups, and proposed a patch
  * [Luc Gommans](https://github.com/lgommans) / https://lgms.nl/ - provided a "momentary ETA" patch
- * [ikasty](https://github.com/ikasty) - added relative filename display to "`--watchfd`"
+ * [ikasty](https://github.com/ikasty) - added relative filename display to **--watchfd**
  * [Michael Weiß](https://github.com/quitschbo) - corrected behaviour when not attached to a terminal
- * [christoph-zededa](https://github.com/christoph-zededa) - provided OS X support for "`--watchfd`"
- * [Dave Beckett](https://github.com/dajobe) - added "`@filename`" syntax to "`--size`", and corrected an autoconf problem with stat64 on OS X
+ * [christoph-zededa](https://github.com/christoph-zededa) - provided OS X support for **--watchfd**
+ * [Dave Beckett](https://github.com/dajobe) - added "`@filename`" syntax to **--size**, and corrected an autoconf problem with stat64 on OS X
  * [Volodymyr Bychkovyak](https://github.com/vbychkoviak) - provided fix for rate limit behaviour with bursty traffic
- * [Nick Black](https://nick-black.com) - added "`--bits`" option
+ * [Nick Black](https://nick-black.com) - added **--bits** option
  * [Andrew Schulman](https://github.com/andrew-schulman) - provided reproducible example of terminal size detection issue in 1.7.17/1.7.18
- * [fuschia74](https://github.com/fuchsia74) - provided "`--enable-static`"  patch for "`configure`"
+ * [fuschia74](https://github.com/fuchsia74) - provided **--enable-static**  patch for "`configure`"
  * [Wilhelm von Thiele](https://github.com/TurtleWilly) - assisted with OS X cleanups ([#73](https://codeberg.org/a-j-wood/pv/issues/73), [#74](https://codeberg.org/a-j-wood/pv/issues/74))
  * Matějů Miroslav, Ing. - suggested fix for ETA and elapsed time faults when suspending and resuming a machine ([#13](https://codeberg.org/a-j-wood/pv/issues/13))
- * Anthony DeRobertis - suggested the "`--error-skip-block`" option ([#37](https://codeberg.org/a-j-wood/pv/issues/37))
+ * Anthony DeRobertis - suggested the **--error-skip-block** option ([#37](https://codeberg.org/a-j-wood/pv/issues/37))
  * Benoit Pierre - provided patches for compilation without IPC support, without HAVE_STRUCT_STAT_ST_BLKSIZE, and on MacOS
  * [gustav-b](https://codeberg.org/gustav-b) - suggested percentage formatting correction ([#80](https://codeberg.org/a-j-wood/pv/issues/80))
  * [Thomas Bertels](https://codeberg.org/tbertels) - updated French translations ([#83](https://codeberg.org/a-j-wood/pv/pulls/83))
  * [kevinruddy](https://codeberg.org/kevinruddy) - added decimal units option ([#85](https://codeberg.org/a-j-wood/pv/pulls/85))
- * [xmort](https://codeberg.org/xmort) - added "`--output`" option ([#90](https://codeberg.org/a-j-wood/pv/pulls/90))
+ * [xmort](https://codeberg.org/xmort) - added **--output** option ([#90](https://codeberg.org/a-j-wood/pv/pulls/90))
  * [bogiord](https://codeberg.org/bogiord) - reported the loss of output block device size detection in 1.8.10, and suggested the fix ([#91](https://codeberg.org/a-j-wood/pv/issues/91))
  * [eborisch](https://codeberg.org/eborisch) - provided fix for misbehaviour when used with "`zfs send`" due to treating zero sized writes (generally due to timer interruption) as end of file ([#92](https://codeberg.org/a-j-wood/pv/pulls/92), [#93](https://codeberg.org/a-j-wood/pv/pulls/93))
- * [alexanderperlis](https://codeberg.org/alexanderperlis) - provided initial support for block devices with "`--size @FILE`" ([#94](https://codeberg.org/a-j-wood/pv/pulls/94))
- * [jettero](https://codeberg.org/jettero) - reported double-free coredump when using "`--watchfd`" after 1.8.10 ([#96](https://codeberg.org/a-j-wood/pv/issues/96))
+ * [alexanderperlis](https://codeberg.org/alexanderperlis) - provided initial support for block devices with **--size @FILE** ([#94](https://codeberg.org/a-j-wood/pv/pulls/94))
+ * [jettero](https://codeberg.org/jettero) - reported double-free coredump when using **--watchfd** after 1.8.10 ([#96](https://codeberg.org/a-j-wood/pv/issues/96))
  * [Hartmut Goebel](https://translate.codeberg.org/user/htgoebel/) - provided a comprehensive set of German translations ([#98](https://codeberg.org/a-j-wood/pv/pulls/98))
  * [Benny](https://translate.codeberg.org/user/Benny/) - additional German translations ([#103](https://codeberg.org/a-j-wood/pv/pulls/103))
  * [coralpink](https://translate.codeberg.org/user/coralpink/) - provided a comprehensive set of Polish translations ([#102](https://codeberg.org/a-j-wood/pv/pulls/102))
- * Venky.N.Iyer - suggested "`--stats`" ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
- * Roland Kletzing - suggested "`--rate`" with "`--numeric`" ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
+ * Venky.N.Iyer - suggested **--stats** ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
+ * Roland Kletzing - suggested **--rate** with **--numeric** ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
 
 ---
