@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-05 17:04+0100\n"
+"POT-Creation-Date: 2024-10-06 00:14+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -414,7 +414,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:675 src/pv/transfer.c:974
+#: src/pv/display.c:675 src/pv/transfer.c:1010
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 
@@ -427,7 +427,7 @@ msgid "B"
 msgstr "O"
 
 #: src/pv/display.c:851 src/pv/display.c:866 src/pv/display.c:1085
-#: src/pv/loop.c:500
+#: src/pv/loop.c:549
 msgid "b/s"
 msgstr ""
 
@@ -436,7 +436,7 @@ msgid "/s"
 msgstr "/s"
 
 #: src/pv/display.c:855 src/pv/display.c:870 src/pv/display.c:1089
-#: src/pv/loop.c:500
+#: src/pv/loop.c:549
 msgid "B/s"
 msgstr "O/s"
 
@@ -476,15 +476,15 @@ msgstr "(aucun)"
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:499
+#: src/pv/loop.c:548
 msgid "rate min/avg/max/mdev"
 msgstr ""
 
-#: src/pv/loop.c:511
+#: src/pv/loop.c:560
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:717 src/pv/loop.c:768 src/pv/loop.c:809 src/pv/watchpid.c:99
+#: src/pv/loop.c:766 src/pv/loop.c:817 src/pv/loop.c:858 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
@@ -496,7 +496,7 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr "l'allocation de la structure de l'historique a échoué"
 
-#: src/pv/state.c:501 src/pv/state.c:512
+#: src/pv/state.c:509 src/pv/state.c:520
 msgid "file list allocation failed"
 msgstr "échec de l'allocation de la liste de fichiers"
 
@@ -532,11 +532,15 @@ msgstr ""
 msgid "failed to clear interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:835
+#: src/pv/transfer.c:740
+msgid "line positions"
+msgstr ""
+
+#: src/pv/transfer.c:871
 msgid "write failed"
 msgstr "l'écriture a échoué"
 
-#: src/pv/transfer.c:1072
+#: src/pv/transfer.c:1108
 msgid "select call failed"
 msgstr "l'appel de sélection a échoué"
 

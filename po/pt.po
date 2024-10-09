@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-05 17:04+0100\n"
+"POT-Creation-Date: 2024-10-06 00:14+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -401,7 +401,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:675 src/pv/transfer.c:974
+#: src/pv/display.c:675 src/pv/transfer.c:1010
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
@@ -414,7 +414,7 @@ msgid "B"
 msgstr ""
 
 #: src/pv/display.c:851 src/pv/display.c:866 src/pv/display.c:1085
-#: src/pv/loop.c:500
+#: src/pv/loop.c:549
 msgid "b/s"
 msgstr ""
 
@@ -423,7 +423,7 @@ msgid "/s"
 msgstr ""
 
 #: src/pv/display.c:855 src/pv/display.c:870 src/pv/display.c:1089
-#: src/pv/loop.c:500
+#: src/pv/loop.c:549
 msgid "B/s"
 msgstr "B/s"
 
@@ -463,15 +463,15 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/loop.c:499
+#: src/pv/loop.c:548
 msgid "rate min/avg/max/mdev"
 msgstr ""
 
-#: src/pv/loop.c:511
+#: src/pv/loop.c:560
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:717 src/pv/loop.c:768 src/pv/loop.c:809 src/pv/watchpid.c:99
+#: src/pv/loop.c:766 src/pv/loop.c:817 src/pv/loop.c:858 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
@@ -483,7 +483,7 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:501 src/pv/state.c:512
+#: src/pv/state.c:509 src/pv/state.c:520
 msgid "file list allocation failed"
 msgstr ""
 
@@ -519,11 +519,15 @@ msgstr ""
 msgid "failed to clear interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:835
+#: src/pv/transfer.c:740
+msgid "line positions"
+msgstr ""
+
+#: src/pv/transfer.c:871
 msgid "write failed"
 msgstr "erro de gravação"
 
-#: src/pv/transfer.c:1072
+#: src/pv/transfer.c:1108
 msgid "select call failed"
 msgstr "erro na chamada da função select"
 
