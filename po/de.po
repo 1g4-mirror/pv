@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-06 00:14+0100\n"
+"POT-Creation-Date: 2024-10-09 18:54+0100\n"
 "PO-Revision-Date: 2024-10-06 15:06+0000\n"
 "Last-Translator: Benny <Benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -418,7 +418,7 @@ msgstr "yzafpnµm kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:675 src/pv/transfer.c:1010
+#: src/pv/display.c:675 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
@@ -537,14 +537,14 @@ msgid "failed to clear interval timer"
 msgstr "konnte Intervall-Timer nicht löschen"
 
 #: src/pv/transfer.c:740
-msgid "line positions"
+msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:871
+#: src/pv/transfer.c:872
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:1108
+#: src/pv/transfer.c:1109
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 

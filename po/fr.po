@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-06 00:14+0100\n"
+"POT-Creation-Date: 2024-10-09 18:54+0100\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Date: 1999-06-01 15:18:29+0100\n"
@@ -414,7 +414,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:675 src/pv/transfer.c:1010
+#: src/pv/display.c:675 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 
@@ -533,14 +533,14 @@ msgid "failed to clear interval timer"
 msgstr ""
 
 #: src/pv/transfer.c:740
-msgid "line positions"
+msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:871
+#: src/pv/transfer.c:872
 msgid "write failed"
 msgstr "l'écriture a échoué"
 
-#: src/pv/transfer.c:1108
+#: src/pv/transfer.c:1109
 msgid "select call failed"
 msgstr "l'appel de sélection a échoué"
 

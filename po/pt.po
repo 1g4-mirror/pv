@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-06 00:14+0100\n"
+"POT-Creation-Date: 2024-10-09 18:54+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -401,7 +401,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:675 src/pv/transfer.c:1010
+#: src/pv/display.c:675 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
@@ -520,14 +520,14 @@ msgid "failed to clear interval timer"
 msgstr ""
 
 #: src/pv/transfer.c:740
-msgid "line positions"
+msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:871
+#: src/pv/transfer.c:872
 msgid "write failed"
 msgstr "erro de gravação"
 
-#: src/pv/transfer.c:1108
+#: src/pv/transfer.c:1109
 msgid "select call failed"
 msgstr "erro na chamada da função select"
 

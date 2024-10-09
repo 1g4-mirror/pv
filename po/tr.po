@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-06 00:14+0100\n"
+"POT-Creation-Date: 2024-10-09 18:54+0100\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -389,7 +389,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:675 src/pv/transfer.c:1010
+#: src/pv/display.c:675 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
 msgstr ""
 
@@ -508,14 +508,14 @@ msgid "failed to clear interval timer"
 msgstr ""
 
 #: src/pv/transfer.c:740
-msgid "line positions"
+msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:871
+#: src/pv/transfer.c:872
 msgid "write failed"
 msgstr ""
 
-#: src/pv/transfer.c:1108
+#: src/pv/transfer.c:1109
 msgid "select call failed"
 msgstr ""
 

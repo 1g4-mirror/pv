@@ -737,7 +737,8 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				state->transfer.line_positions =
 				    calloc((size_t) (state->transfer.line_positions_capacity), sizeof(off_t));
 				if (NULL == state->transfer.line_positions) {
-					pv_error(state, "%s: alloc failed: %s", _("line positions"), strerror(errno));
+					pv_error(state, "%s: %s", _("line position buffer allocation failed"),
+						 strerror(errno));
 				}
 			}
 
