@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-09 18:54+0100\n"
+"POT-Creation-Date: 2024-10-11 19:47+0100\n"
 "PO-Revision-Date: 2024-10-09 17:57+0000\n"
 "Last-Translator: Benny <Benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -14,9 +14,9 @@ msgstr ""
 "From: Andrew Wood <ivarch@ubik>\n"
 "Xgettext-Options: --default-domain=pkgbuild --directory=./.pkgdir --add-"
 "comments --keyword=_ --keyword=N_\n"
-"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/"
-"init.c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/"
-"guts/configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
+"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/init."
+"c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/guts/"
+"configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
 "generate.c src/ui/main.c src/ui/xpm.c src/ui/status.c src/ui/activate.c src/"
 "ui/handlers/main.c src/ui/handlers/package.c src/ui/handlers/prefs.c src/ui/"
 "handlers/dirsel.c src/ui/handlers/popup.c src/ui/handlers/help.c src/ui/"
@@ -410,45 +410,45 @@ msgstr "Sperrversuch fehlgeschlagen"
 msgid "failed to open terminal"
 msgstr "konnte Terminal nicht öffnen"
 
-#: src/pv/display.c:230
+#: src/pv/display.c:233
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnµm kMGTPEZY"
 
-#: src/pv/display.c:248
+#: src/pv/display.c:251
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:675 src/pv/transfer.c:1011
+#: src/pv/display.c:678 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
-#: src/pv/display.c:804
+#: src/pv/display.c:807
 msgid "b"
 msgstr "b"
 
-#: src/pv/display.c:807 src/pv/transfer.c:602
+#: src/pv/display.c:810 src/pv/transfer.c:602
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:851 src/pv/display.c:866 src/pv/display.c:1085
+#: src/pv/display.c:854 src/pv/display.c:869 src/pv/display.c:1088
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/display.c:855 src/pv/display.c:870 src/pv/display.c:1089
+#: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:855 src/pv/display.c:870 src/pv/display.c:1089
+#: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:898 src/pv/display.c:902
+#: src/pv/display.c:901 src/pv/display.c:905
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/display.c:968
+#: src/pv/display.c:971
 msgid "FIN"
 msgstr ""
 
