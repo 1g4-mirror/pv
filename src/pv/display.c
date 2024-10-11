@@ -23,9 +23,6 @@
 #include <termios.h>
 #endif
 
-/* Use tcsetpgrp() workaround - see issue #100 and comments below. */
-/* #define USE_TCSETPGRP 1 */
-
 /*
  * We need sys/ioctl.h for ioctl() regardless of whether TIOCGWINSZ is
  * defined in termios.h, so we no longer use AC_HEADER_TIOCGWINSZ in
@@ -87,76 +84,12 @@ bool pv_in_foreground(void)
 		debug("true: %s (%d)", "our_process_group == tty_process_group", our_process_group);
 		return true;
 	}
-#if USE_TCSETPGRP
-	/*
-	 * If the terminal process group ID isn't our own process group ID,
-	 * then first check that the terminal process group ID actually
-	 * exists.
-	 */
 
-	if (0 == kill(-tty_process_group, 0)) {
-		/*
-		 * If it does exist, then we're not in the foreground, so
-		 * return false.
-		 */
-		debug("false: our_process_group=%d, tty_process_group=(%d and confirmed to exist)",
-		      our_process_group, tty_process_group);
-	} else if (errno == ESRCH) {
-		/*
-		 * If it doesn't exist (kill(0) gave ESRCH), then try
-		 * setting the terminal process group ID back to our process
-		 * group ID, to forcibly put ourselves into the foreground
-		 * (see issue #100), and try reading it back again.  If we
-		 * successfully set it to our process group ID then we're in
-		 * the foreground, so return true; otherwise we can't be
-		 * sure we're in the foreground, so return false.
-		 *
-		 * This is because the manual says the function tcgetpgrp()
-		 * will return the foreground process group ID of that
-		 * terminal if there is one, and some value larger than 1
-		 * that is not presently a process group ID otherwise.
-		 *
-		 * The assumption we're making is that tcgetpgrp() can
-		 * return a non-pgid value if there's no pgid for this
-		 * terminal right now, implying that maybe we can just set
-		 * it to our own.
-		 */
-		debug("-: our_process_group=%d, tty_process_group=(%d which returned ESRCH)",
-		      our_process_group, tty_process_group);
-		/*@-type@ *//* __pid_t vs pid_t, not significant */
-		if (0 == tcsetpgrp(STDERR_FILENO, our_process_group)) {
-			tty_process_group = tcgetpgrp(STDERR_FILENO);
-			/*@+type@ */
-			if (our_process_group == tty_process_group) {
-				debug
-				    ("true: our_process_group == tty_process_group (after tcsetpgrp to change it to %d)",
-				     our_process_group);
-				return true;
-			}
-			debug("false: our_process_group=%d, tty_process_group=(%d even after tcsetpgrp)",
-			      our_process_group, tty_process_group);
-		} else {
-			debug("false: our_process_group=%d, tty_process_group=(%d and tcsetpgrp returned \"%s\")",
-			      our_process_group, tty_process_group, strerror(errno));
-		}
-	} else {
-		/*
-		 * We can't determine whether the terminal process group ID
-		 * exists, all we know is it doesn't match our own, so
-		 * assume we're in the background, and return false.
-		 */
-		debug("false: our_process_group=%d, tty_process_group=(%d, kill returned \"%s\")",
-		      our_process_group, tty_process_group, strerror(errno));
-	}
-
-#else
 	/*
-	 * Simply assume we're in the background, if the terminal process
-	 * group ID doesn't match our own.
+	 * If the terminal process group ID doesn't match our own, assume
+	 * we're in the background.
 	 */
-	debug("false: our_process_group=%d, tty_process_group=%d, errno is %d",
-	      our_process_group, tty_process_group, (int) errno);
-#endif
+	debug("false: our_process_group=%d, tty_process_group=%d", our_process_group, tty_process_group);
 
 	return false;
 }
