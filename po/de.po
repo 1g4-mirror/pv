@@ -224,7 +224,7 @@ msgstr "verwirf die Eingabe anstatt in die Ausgabe zu schreiben"
 
 #: src/main/help.c:400
 msgid "write all input to FILE before writing to output"
-msgstr "Ausgabe nach FILE schrieben bevor es ausgegeben wird"
+msgstr "Ausgabe nach FILE schrieben bevor sie ausgegeben wird"
 
 #: src/main/help.c:403
 msgid "PID"
@@ -410,45 +410,49 @@ msgstr "Sperrversuch fehlgeschlagen"
 msgid "failed to open terminal"
 msgstr "konnte Terminal nicht öffnen"
 
-#: src/pv/display.c:233
+#: src/pv/display.c:233 src/pv/display.c:230
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnµm kMGTPEZY"
 
-#: src/pv/display.c:251
+#: src/pv/display.c:251 src/pv/display.c:248
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:678 src/pv/transfer.c:1011
+#: src/pv/display.c:678 src/pv/transfer.c:1011 src/pv/display.c:675
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
-#: src/pv/display.c:807
+#: src/pv/display.c:807 src/pv/display.c:804
 msgid "b"
 msgstr "b"
 
-#: src/pv/display.c:810 src/pv/transfer.c:602
+#: src/pv/display.c:810 src/pv/transfer.c:602 src/pv/display.c:807
 msgid "B"
 msgstr "B"
 
 #: src/pv/display.c:854 src/pv/display.c:869 src/pv/display.c:1088
-#: src/pv/loop.c:549
+#: src/pv/loop.c:549 src/pv/display.c:851 src/pv/display.c:866
+#: src/pv/display.c:1085
 msgid "b/s"
 msgstr "b/s"
 
 #: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
+#: src/pv/display.c:855 src/pv/display.c:870 src/pv/display.c:1089
 msgid "/s"
 msgstr "/s"
 
 #: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
-#: src/pv/loop.c:549
+#: src/pv/loop.c:549 src/pv/display.c:855 src/pv/display.c:870
+#: src/pv/display.c:1089
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:901 src/pv/display.c:905
+#: src/pv/display.c:901 src/pv/display.c:905 src/pv/display.c:898
+#: src/pv/display.c:902
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/display.c:971
+#: src/pv/display.c:971 src/pv/display.c:968
 msgid "FIN"
 msgstr ""
 
