@@ -3,7 +3,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
 "PO-Revision-Date: 2024-10-11 22:36+0000\n"
-"Last-Translator: kre <kre@users.noreply.translate.codeberg.org>\n"
+"Last-Translator: Benny <Benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -277,7 +277,7 @@ msgstr "Bitte senden Sie Fehlerberichte an %s"
 
 #: src/main/main.c:214
 msgid "(input)"
-msgstr ""
+msgstr "(eingabe)"
 
 #: src/main/main.c:299
 msgid "state allocation failed"
@@ -450,7 +450,7 @@ msgstr "ETA"
 
 #: src/pv/display.c:971
 msgid "FIN"
-msgstr ""
+msgstr "Endzeit"
 
 #: src/pv/file.c:149
 msgid "failed to seek to start of output"
