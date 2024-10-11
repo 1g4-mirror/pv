@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
-"PO-Revision-Date: 2024-10-09 17:57+0000\n"
+"PO-Revision-Date: 2024-10-11 22:36+0000\n"
 "Last-Translator: Benny <Benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
 "Language: de\n"
@@ -14,9 +14,9 @@ msgstr ""
 "From: Andrew Wood <ivarch@ubik>\n"
 "Xgettext-Options: --default-domain=pkgbuild --directory=./.pkgdir --add-"
 "comments --keyword=_ --keyword=N_\n"
-"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/init."
-"c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/guts/"
-"configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
+"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/"
+"init.c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/"
+"guts/configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
 "generate.c src/ui/main.c src/ui/xpm.c src/ui/status.c src/ui/activate.c src/"
 "ui/handlers/main.c src/ui/handlers/package.c src/ui/handlers/prefs.c src/ui/"
 "handlers/dirsel.c src/ui/handlers/popup.c src/ui/handlers/help.c src/ui/"
@@ -122,7 +122,7 @@ msgstr "setze erwartete Datenlänge auf SIZE Byte"
 
 #: src/main/help.c:342
 msgid "if size unknown, show rate vs max rate"
-msgstr ""
+msgstr "zeige Rate vs maximale Rate, falls die größe unbekannt ist"
 
 #: src/main/help.c:345
 msgid "count lines instead of bytes"
@@ -277,7 +277,7 @@ msgstr "Bitte senden Sie Fehlerberichte an %s"
 
 #: src/main/main.c:214
 msgid "(input)"
-msgstr ""
+msgstr "(eingabe)"
 
 #: src/main/main.c:299
 msgid "state allocation failed"
@@ -450,7 +450,7 @@ msgstr "ETA"
 
 #: src/pv/display.c:971
 msgid "FIN"
-msgstr ""
+msgstr "Endzeit"
 
 #: src/pv/file.c:149
 msgid "failed to seek to start of output"
@@ -538,7 +538,7 @@ msgstr "konnte Intervall-Timer nicht löschen"
 
 #: src/pv/transfer.c:740
 msgid "line position buffer allocation failed"
-msgstr ""
+msgstr "Zuweisung des Zeilenpuffers fehlgeschlagen"
 
 #: src/pv/transfer.c:872
 msgid "write failed"
