@@ -252,6 +252,7 @@ msgstr "Kullanım şekli: %s [AYAR] [DOSYA]..."
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
+"İzleme ile DOSYA(lar)ı veya standart girdiyi standart çıktı ile birleştirin."
 
 #: src/main/help.c:597
 #, c-format
