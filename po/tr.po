@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
-"PO-Revision-Date: 2024-10-12 21:40+0000\n"
+"PO-Revision-Date: 2024-10-12 22:28+0000\n"
 "Last-Translator: omerdduran <omerdduran@users.noreply.translate.codeberg.org>"
 "\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -269,201 +269,204 @@ msgstr "durum tahsisi başarısız oldu"
 
 #: src/main/options.c:140 src/pv/file.c:324
 msgid "failed to stat file"
-msgstr ""
+msgstr "dosya statüsünde başarısız oldu"
 
 #: src/main/options.c:154
 msgid "is a directory"
-msgstr ""
+msgstr "bir dizindir"
 
 #: src/main/options.c:183
 msgid "failed to generate sysfs filename"
-msgstr ""
+msgstr "sysfs dosya adı oluşturulamadı"
 
 #: src/main/options.c:205
 msgid "failed to read sysfs size file"
-msgstr ""
+msgstr "sysfs boyut dosyası okunamadı"
 
 #: src/main/options.c:225
 msgid "failed to open block device"
-msgstr ""
+msgstr "blok aygıtı açılamadı"
 
 #: src/main/options.c:235
 msgid "failed to determine size of block device"
-msgstr ""
+msgstr "blok aygıtının boyutu belirlenemedi"
 
 #: src/main/options.c:339
 msgid "option structure allocation failed"
-msgstr ""
+msgstr "seçenek yapısı tahsisi başarısız oldu"
 
 #: src/main/options.c:358
 msgid "option structure argv allocation failed"
-msgstr ""
+msgstr "seçenek yapısı argv tahsisi başarısız oldu"
 
 #: src/main/options.c:420
 msgid "integer argument expected"
-msgstr ""
+msgstr "tamsayı bağımsız değişkeni bekleniyor"
 
 #: src/main/options.c:431
 msgid "numeric argument expected"
-msgstr ""
+msgstr "sayısal bağımsız değişken bekleniyor"
 
 #: src/main/options.c:442
 msgid "process ID or pid:fd pair expected"
-msgstr ""
+msgstr "süreç kimliği (ID) veya pid:fd çifti bekleniyor"
 
 #: src/main/options.c:449
 msgid "invalid process ID"
-msgstr ""
+msgstr "geçersiz süreç kimliği (ID)"
 
 #: src/main/options.c:666
 #, c-format
 msgid "Try `%s --help' for more information."
-msgstr ""
+msgstr "Daha fazla bilgi için `%s --help' seçeneğini deneyin."
 
 #: src/main/options.c:668
 #, c-format
 msgid "Try `%s -h' for more information."
-msgstr ""
+msgstr "Daha fazla bilgi için `%s -h' seçeneğini deneyin."
 
 #: src/main/options.c:699
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
 msgstr ""
+"dosya tanımlayıcılarını izlerken satır modu veya aktarım değiştirici "
+"seçeneklerini kullanamaz"
 
 #: src/main/options.c:708
 msgid "cannot use cursor positioning when watching file descriptors"
-msgstr ""
+msgstr "dosya tanımlayıcılarını izlerken imleç konumlandırmayı kullanamaz"
 
 #: src/main/options.c:717
 msgid "cannot use remote control when watching file descriptors"
-msgstr ""
+msgstr "dosya tanımlayıcılarını izlerken uzaktan kumandayı kullanamaz"
 
 #: src/main/options.c:726
 msgid "cannot transfer files when watching file descriptors"
-msgstr ""
+msgstr "dosya tanımlayıcıları izlenirken dosya aktarılamıyor"
 
 #: src/main/options.c:741
 msgid "not available on systems without /proc/self/fdinfo"
-msgstr ""
+msgstr "/proc/self/fdinfo olmayan sistemlerde kullanılamaz"
 
 #: src/main/remote.c:302
 msgid "message not received"
-msgstr ""
+msgstr "mesaj alınamadı"
 
 #: src/main/remote.c:429
 msgid "SA_SIGINFO not supported on this system"
-msgstr ""
+msgstr "SA_SIGINFO bu sistemde desteklenmiyor"
 
 #: src/main/version.c:28
 msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
-msgstr ""
+msgstr "Lisans: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
 
 #: src/main/version.c:29
 msgid "This is free software: you are free to change and redistribute it."
 msgstr ""
+"Bu özgür bir yazılımdır: değiştirmekte ve yeniden dağıtmakta özgürsünüz."
 
 #: src/main/version.c:30
 msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr ""
+msgstr "Yasaların izin verdiği ölçüde GARANTİ YOKTUR."
 
 #: src/main/version.c:32
 msgid "Project web site"
-msgstr ""
+msgstr "Proje web sitesi"
 
 #: src/pv/cursor.c:61
 msgid "failed to get terminal name"
-msgstr ""
+msgstr "terminal adı alınamadı"
 
 #: src/pv/cursor.c:106
 msgid "failed to open lock file"
-msgstr ""
+msgstr "lock dosyası açılamadı"
 
 #: src/pv/cursor.c:139
 msgid "lock attempt failed"
-msgstr ""
+msgstr "kilit denemesi başarısız oldu"
 
 #: src/pv/cursor.c:400
 msgid "failed to open terminal"
-msgstr ""
+msgstr "terminal açılamadı"
 
 #: src/pv/display.c:233
 msgid "yzafpnum kMGTPEZY"
-msgstr ""
+msgstr "yzafpnum kMGTPEZY"
 
 #: src/pv/display.c:251
 msgid "yzafpnum KMGTPEZY"
-msgstr ""
+msgstr "yzafpnum kMGTPEZY"
 
 #: src/pv/display.c:678 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
-msgstr ""
+msgstr "arabellek tahsisi başarısız oldu"
 
 #: src/pv/display.c:807
 msgid "b"
-msgstr ""
+msgstr "b"
 
 #: src/pv/display.c:810 src/pv/transfer.c:602
 msgid "B"
-msgstr ""
+msgstr "B"
 
 #: src/pv/display.c:854 src/pv/display.c:869 src/pv/display.c:1088
 #: src/pv/loop.c:549
 msgid "b/s"
-msgstr ""
+msgstr "b/s"
 
 #: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
 msgid "/s"
-msgstr ""
+msgstr "/s"
 
 #: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
 #: src/pv/loop.c:549
 msgid "B/s"
-msgstr ""
+msgstr "B/s"
 
 #: src/pv/display.c:901 src/pv/display.c:905
 msgid "ETA"
-msgstr ""
+msgstr "ETA"
 
 #: src/pv/display.c:971
 msgid "FIN"
-msgstr ""
+msgstr "FIN"
 
 #: src/pv/file.c:149
 msgid "failed to seek to start of output"
-msgstr ""
+msgstr "çıktının başlangıcına ulaşılamadı"
 
 #: src/pv/file.c:294
 msgid "failed to close file"
-msgstr ""
+msgstr "dosya kapatılamadı"
 
 #: src/pv/file.c:317
 msgid "failed to read file"
-msgstr ""
+msgstr "dosya okunamadı"
 
 #: src/pv/file.c:332
 msgid "failed to stat output file"
-msgstr ""
+msgstr "çıktı dosyası stat edilemedi"
 
 #: src/pv/file.c:354
 msgid "input file is output file"
-msgstr ""
+msgstr "girdi dosyası çıktı dosyasıdır"
 
 #: src/pv/file.c:412
 msgid "(none)"
-msgstr ""
+msgstr "(yok)"
 
 #: src/pv/file.c:414
 msgid "(stdin)"
-msgstr ""
+msgstr "(stdin)"
 
 #: src/pv/loop.c:548
 msgid "rate min/avg/max/mdev"
-msgstr ""
+msgstr "oran min/ortalama/maks/standart sapma"
 
 #: src/pv/loop.c:560
 msgid "rate not measured"
-msgstr ""
+msgstr "oran ölçülmedi"
 
 #: src/pv/loop.c:766 src/pv/loop.c:817 src/pv/loop.c:858 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
@@ -471,65 +474,65 @@ msgstr ""
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
 #: src/pv/watchpid.c:377 src/pv/watchpid.c:398
 msgid "pid"
-msgstr ""
+msgstr "pid"
 
 #: src/pv/state.c:40
 msgid "history structure allocation failed"
-msgstr ""
+msgstr "geçmiş yapısı tahsisi başarısız oldu"
 
 #: src/pv/state.c:509 src/pv/state.c:520
 msgid "file list allocation failed"
-msgstr ""
+msgstr "dosya listesi tahsisi başarısız oldu"
 
 #: src/pv/transfer.c:464
 msgid "read failed"
-msgstr ""
+msgstr "okuma başarısız"
 
 #: src/pv/transfer.c:487
 msgid "warning: read errors detected"
-msgstr ""
+msgstr "uyarı: okuma hataları tespit edildi"
 
 #: src/pv/transfer.c:503
 msgid "file is not seekable"
-msgstr ""
+msgstr "dosya aranabilir değil"
 
 #: src/pv/transfer.c:581
 msgid "failed to seek past error"
-msgstr ""
+msgstr "geçmiş hatayı aramakta başarısız oldu"
 
 #: src/pv/transfer.c:601
 msgid "skipped past read error"
-msgstr ""
+msgstr "geçmiş okuma hatası atlandı"
 
 #: src/pv/transfer.c:642
 msgid "no transfer buffer allocated"
-msgstr ""
+msgstr "aktarım arabelleği ayrılmamış"
 
 #: src/pv/transfer.c:684
 msgid "failed to set interval timer"
-msgstr ""
+msgstr "aralık zamanlayıcısı ayarlanamadı"
 
 #: src/pv/transfer.c:710
 msgid "failed to clear interval timer"
-msgstr ""
+msgstr "aralık zamanlayıcısı temizlenemedi"
 
 #: src/pv/transfer.c:740
 msgid "line position buffer allocation failed"
-msgstr ""
+msgstr "satır konumu arabellek tahsisi başarısız oldu"
 
 #: src/pv/transfer.c:872
 msgid "write failed"
-msgstr ""
+msgstr "yazma başarısız"
 
 #: src/pv/transfer.c:1109
 msgid "select call failed"
-msgstr ""
+msgstr "seçme çağrısı başarısız oldu"
 
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:121 src/pv/watchpid.c:130
 #: src/pv/watchpid.c:184 src/pv/watchpid.c:193 src/pv/watchpid.c:204
 msgid "fd"
-msgstr ""
+msgstr "fd"
 
 #: src/pv/watchpid.c:130 src/pv/watchpid.c:204
 msgid "not a regular file or block device"
-msgstr ""
+msgstr "normal bir dosya veya blok aygıtı değil"
