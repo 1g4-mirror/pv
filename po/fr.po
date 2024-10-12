@@ -2,15 +2,20 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
+"PO-Revision-Date: 2024-10-12 11:13+0000\n"
+"Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
+"Language-Team: French <https://translate.codeberg.org/projects/pv/pv/fr/>\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 5.7.2\n"
 "Date: 1999-06-01 15:18:29+0100\n"
 "From: Andrew Wood <ivarch@ubik>\n"
 "Xgettext-Options: --default-domain=pkgbuild --directory=./.pkgdir --add-"
 "comments --keyword=_ --keyword=N_\n"
-"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/init."
-"c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/guts/"
-"configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
+"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/"
+"init.c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/"
+"guts/configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
 "generate.c src/ui/main.c src/ui/xpm.c src/ui/status.c src/ui/activate.c src/"
 "ui/handlers/main.c src/ui/handlers/package.c src/ui/handlers/prefs.c src/ui/"
 "handlers/dirsel.c src/ui/handlers/popup.c src/ui/handlers/help.c src/ui/"
@@ -19,6 +24,7 @@ msgstr ""
 "nls/intl/gettext.c src/nls/intl/loadmsgcat.c src/nls/intl/localealias.c src/"
 "nls/intl/textdomain.c src/nls/intl-cat/cat-compat.c src/nls/intl-gett/intl-"
 "compat.c\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 #: src/main/help.c:284
 msgid "show progress bar"
@@ -63,7 +69,7 @@ msgstr "afficher le nombre de bits transférés"
 
 #: src/main/help.c:311
 msgid "treat suffixes as multiples of 1000 rather than 1024"
-msgstr ""
+msgstr "traiter les suffixes comme des multiples de 1000 au lieu de 1024"
 
 #: src/main/help.c:314
 msgid "show percentage of transfer buffer in use"
@@ -87,7 +93,7 @@ msgstr "définir le format de sortie sur FORMAT"
 
 #: src/main/help.c:323
 msgid "output transfer statistics at the end"
-msgstr ""
+msgstr "afficher les statistiques de transfert à la fin"
 
 #: src/main/help.c:326
 msgid "output percentages, not visual information"
@@ -116,6 +122,8 @@ msgstr "ajuster la taille estimée des données à TAILLE octets"
 #: src/main/help.c:342
 msgid "if size unknown, show rate vs max rate"
 msgstr ""
+"si la taille est inconnue, afficher le taux de transfert par rapport au taux "
+"de transfert max"
 
 #: src/main/help.c:345
 msgid "count lines instead of bytes"
@@ -169,7 +177,7 @@ msgstr "FICHIER"
 
 #: src/main/help.c:370
 msgid "write output to FILE instead of stdout"
-msgstr ""
+msgstr "écrire la sortie dans FICHIER au lieu de la sortie standard"
 
 #: src/main/help.c:372
 msgid "RATE"
@@ -217,7 +225,7 @@ msgstr "rejeter l'entrée au lieu de l'écrire vers la sortie"
 
 #: src/main/help.c:400
 msgid "write all input to FILE before writing to output"
-msgstr ""
+msgstr "écrire toute l'entrée vers FICHIER avant de l'écrire vers la sortie"
 
 #: src/main/help.c:403
 msgid "PID"
@@ -270,7 +278,7 @@ msgstr "SVP rapporter tous bogues à %s"
 
 #: src/main/main.c:214
 msgid "(input)"
-msgstr ""
+msgstr "(entrée)"
 
 #: src/main/main.c:299
 msgid "state allocation failed"
@@ -282,7 +290,7 @@ msgstr "échec à statuer sur le fichier"
 
 #: src/main/options.c:154
 msgid "is a directory"
-msgstr ""
+msgstr "est un répertoire"
 
 #: src/main/options.c:183
 msgid "failed to generate sysfs filename"
