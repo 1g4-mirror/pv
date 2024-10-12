@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
-"PO-Revision-Date: 2024-10-12 21:38+0000\n"
+"PO-Revision-Date: 2024-10-12 21:40+0000\n"
 "Last-Translator: omerdduran <omerdduran@users.noreply.translate.codeberg.org>"
 "\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -257,15 +257,15 @@ msgstr ""
 #: src/main/help.c:597
 #, c-format
 msgid "Please report any bugs to: %s"
-msgstr ""
+msgstr "Lütfen hataları şu adrese bildirin: %s"
 
 #: src/main/main.c:214
 msgid "(input)"
-msgstr ""
+msgstr "(giriş)"
 
 #: src/main/main.c:299
 msgid "state allocation failed"
-msgstr ""
+msgstr "durum tahsisi başarısız oldu"
 
 #: src/main/options.c:140 src/pv/file.c:324
 msgid "failed to stat file"
