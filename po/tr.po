@@ -3,9 +3,8 @@ msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
-"PO-Revision-Date: 2024-10-12 22:28+0000\n"
-"Last-Translator: omerdduran <omerdduran@users.noreply.translate.codeberg.org>"
-"\n"
+"PO-Revision-Date: 2024-10-12 23:51+0000\n"
+"Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -396,7 +395,7 @@ msgstr "yzafpnum kMGTPEZY"
 
 #: src/pv/display.c:251
 msgid "yzafpnum KMGTPEZY"
-msgstr "yzafpnum kMGTPEZY"
+msgstr "yzafpnum KMGTPEZY"
 
 #: src/pv/display.c:678 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
