@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
-"PO-Revision-Date: 2024-10-12 21:20+0000\n"
+"PO-Revision-Date: 2024-10-12 21:38+0000\n"
 "Last-Translator: omerdduran <omerdduran@users.noreply.translate.codeberg.org>"
 "\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -112,141 +112,141 @@ msgstr "boyut bilinmiyorsa, oranı maksimum oranla göster"
 
 #: src/main/help.c:345
 msgid "count lines instead of bytes"
-msgstr ""
+msgstr "bayt yerine satır say"
 
 #: src/main/help.c:348
 msgid "lines are null-terminated"
-msgstr ""
+msgstr "satırlar boş sonlandırılır"
 
 #: src/main/help.c:351
 msgid "update every SEC seconds"
-msgstr ""
+msgstr "her SEC saniyede bir güncelleme"
 
 #: src/main/help.c:353
 msgid "WIDTH"
-msgstr ""
+msgstr "GENİŞLİK"
 
 #: src/main/help.c:354
 msgid "assume terminal is WIDTH characters wide"
-msgstr ""
+msgstr "terminalin GENİŞLİK karakter genişliğinde olduğunu varsayalım"
 
 #: src/main/help.c:356
 msgid "HEIGHT"
-msgstr ""
+msgstr "YÜKSEKLİK"
 
 #: src/main/help.c:357
 msgid "assume terminal is HEIGHT rows high"
-msgstr ""
+msgstr "terminalin YÜKSEKLİK sıraları yüksekliğinde olduğunu varsayalım"
 
 #: src/main/help.c:359
 msgid "NAME"
-msgstr ""
+msgstr "İSİM"
 
 #: src/main/help.c:360
 msgid "prefix visual information with NAME"
-msgstr ""
+msgstr "görsel bilgiyi İSİM ile öne ekle"
 
 #: src/main/help.c:363
 msgid "output even if standard error is not a terminal"
-msgstr ""
+msgstr "standart hata bir terminal olmasa bile çıktı yazdır"
 
 #: src/main/help.c:366
 msgid "use cursor positioning escape sequences"
-msgstr ""
+msgstr "imleç konumlandırma kaçış dizilerini kullan"
 
 #: src/main/help.c:369 src/main/help.c:399 src/main/help.c:408
 #: src/main/help.c:423
 msgid "FILE"
-msgstr ""
+msgstr "DOSYA"
 
 #: src/main/help.c:370
 msgid "write output to FILE instead of stdout"
-msgstr ""
+msgstr "çıktıyı stdout yerine DOSYA'ya yaz"
 
 #: src/main/help.c:372
 msgid "RATE"
-msgstr ""
+msgstr "ORAN"
 
 #: src/main/help.c:373
 msgid "limit transfer to RATE bytes per second"
-msgstr ""
+msgstr "aktarımı saniye başına ORAN bayt ile sınırlandırın"
 
 #: src/main/help.c:375 src/main/help.c:384
 msgid "BYTES"
-msgstr ""
+msgstr "BAYTLAR"
 
 #: src/main/help.c:376
 msgid "use a buffer size of BYTES"
-msgstr ""
+msgstr "BAYTLAR tampon boyutu kullanın"
 
 #: src/main/help.c:379
 msgid "never use splice(), always use read/write"
-msgstr ""
+msgstr "splice() kullanma, her zaman read/write kullan"
 
 #: src/main/help.c:382
 msgid "skip read errors in input"
-msgstr ""
+msgstr "girdideki okuma hatalarını atla"
 
 #: src/main/help.c:385
 msgid "skip errors in BYTES blocks at a time"
-msgstr ""
+msgstr "BAYTLAR blokları halinde hataları atla"
 
 #: src/main/help.c:388
 msgid "stop after --size bytes have been transferred"
-msgstr ""
+msgstr "--size bayt transfer edildikten sonra dur"
 
 #: src/main/help.c:391
 msgid "flush cache to disk after every write"
-msgstr ""
+msgstr "her yazmadan sonra önbelleği diske boşalt"
 
 #: src/main/help.c:394
 msgid "use direct I/O to bypass cache"
-msgstr ""
+msgstr "Önbelleği atlamak için doğrudan I/O kullan"
 
 #: src/main/help.c:397
 msgid "discard input instead of writing to output"
-msgstr ""
+msgstr "Girdiyi çıktıya yazmak yerine yok say"
 
 #: src/main/help.c:400
 msgid "write all input to FILE before writing to output"
-msgstr ""
+msgstr "çıktıya yazmadan önce tüm girdiyi DOSYA'ya yaz"
 
 #: src/main/help.c:403
 msgid "PID"
-msgstr ""
+msgstr "PID"
 
 #: src/main/help.c:404
 msgid "update settings of process PID"
-msgstr ""
+msgstr "süreç PID ayarlarını güncelle"
 
 #: src/main/help.c:409
 msgid "save process ID in FILE"
-msgstr ""
+msgstr "FILE'da işlem kimliğini (ID) kaydet"
 
 #: src/main/help.c:412
 msgid "PID[:FD]"
-msgstr ""
+msgstr "PID[:FD]"
 
 #: src/main/help.c:413
 msgid "watch file FD opened by process PID"
-msgstr ""
+msgstr "FD izleme dosyası PID işlemi tarafından açıldı"
 
 #: src/main/help.c:417
 msgid "show this help and exit"
-msgstr ""
+msgstr "bu yardımı göster ve çık"
 
 #: src/main/help.c:420
 msgid "show version information and exit"
-msgstr ""
+msgstr "sürüm bilgilerini göster ve çık"
 
 #: src/main/help.c:424
 msgid "write debug logs to FILE"
-msgstr ""
+msgstr "Hata ayıklama kayıtlarını DOSYA'ya yaz"
 
 #: src/main/help.c:449
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
-msgstr ""
+msgstr "Kullanım şekli: %s [AYAR] [DOSYA]..."
 
 #: src/main/help.c:460
 msgid ""
