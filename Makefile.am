@@ -113,6 +113,7 @@ clean-local:
 # Convenience alias for "make check": "make test"
 test: check
 
+# Generate a package manifest if MAINTAINER is set.
 dist-hook:
 	if test -n "$(MAINTAINER)"; then \
 	  cd "$(top_distdir)" \
