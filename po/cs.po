@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
-"PO-Revision-Date: 2024-10-13 16:30+0000\n"
+"PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
 "Language: cs\n"
@@ -223,244 +223,247 @@ msgstr "ulož id procesu do SOUBORu"
 
 #: src/main/help.c:412
 msgid "PID[:FD]"
-msgstr ""
+msgstr "PID[:DS]"
 
 #: src/main/help.c:413
 msgid "watch file FD opened by process PID"
-msgstr ""
+msgstr "sleduj soubor DS otevřený procesem PID"
 
 #: src/main/help.c:417
 msgid "show this help and exit"
-msgstr ""
+msgstr "ukaž pomoc a skonči"
 
 #: src/main/help.c:420
 msgid "show version information and exit"
-msgstr ""
+msgstr "ukaž informace o verzi a skonči"
 
 #: src/main/help.c:424
 msgid "write debug logs to FILE"
-msgstr ""
+msgstr "zapiš ladící záznamy do SOUBORu"
 
 #: src/main/help.c:449
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
-msgstr ""
+msgstr "Použití: %s [VOLBY] [SOUBOR]..."
 
 #: src/main/help.c:460
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
+"Spoj SOUBOR(y) nebo standardní vstup na standardního výstup, s monitoringem."
 
 #: src/main/help.c:597
 #, c-format
 msgid "Please report any bugs to: %s"
-msgstr ""
+msgstr "Prosím, hlašte veškeré chyby na: %s"
 
 #: src/main/main.c:214
 msgid "(input)"
-msgstr ""
+msgstr "(vstup)"
 
 #: src/main/main.c:299
 msgid "state allocation failed"
-msgstr ""
+msgstr "selhala alokace stavu"
 
 #: src/main/options.c:140 src/pv/file.c:324
 msgid "failed to stat file"
-msgstr ""
+msgstr "nebylo možné zjistit informace o souboru"
 
 #: src/main/options.c:154
 msgid "is a directory"
-msgstr ""
+msgstr "je adresář"
 
 #: src/main/options.c:183
 msgid "failed to generate sysfs filename"
-msgstr ""
+msgstr "selhalo vytváření jména pro soubor v sysfs"
 
 #: src/main/options.c:205
 msgid "failed to read sysfs size file"
-msgstr ""
+msgstr "selhalo čtení velikosti souboru v sysfs"
 
 #: src/main/options.c:225
 msgid "failed to open block device"
-msgstr ""
+msgstr "selhalo otevření blokového zařízení"
 
 #: src/main/options.c:235
 msgid "failed to determine size of block device"
-msgstr ""
+msgstr "selhalo zjištění velikosti blokového zařízení"
 
 #: src/main/options.c:339
 msgid "option structure allocation failed"
-msgstr ""
+msgstr "selhala alokace struktury pro volby"
 
 #: src/main/options.c:358
 msgid "option structure argv allocation failed"
-msgstr ""
+msgstr "selhala alokace struktury pro argv"
 
 #: src/main/options.c:420
 msgid "integer argument expected"
-msgstr ""
+msgstr "očekáván celočíselný argument"
 
 #: src/main/options.c:431
 msgid "numeric argument expected"
-msgstr ""
+msgstr "očekáván číselný argument"
 
 #: src/main/options.c:442
 msgid "process ID or pid:fd pair expected"
-msgstr ""
+msgstr "očekáváno ID procesu nebo dvojice PID:DS"
 
 #: src/main/options.c:449
 msgid "invalid process ID"
-msgstr ""
+msgstr "neplatné ID procesu"
 
 #: src/main/options.c:666
 #, c-format
 msgid "Try `%s --help' for more information."
-msgstr ""
+msgstr "Zkuste `%s --help' pro více informací."
 
 #: src/main/options.c:668
 #, c-format
 msgid "Try `%s -h' for more information."
-msgstr ""
+msgstr "Zkuste `%s --h' pro více informací."
 
 #: src/main/options.c:699
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
 msgstr ""
+"při sledování deskriptorů souborů nelze použít řádkový mód nebo volby pro "
+"modifikaci přenosu"
 
 #: src/main/options.c:708
 msgid "cannot use cursor positioning when watching file descriptors"
-msgstr ""
+msgstr "při sledování deskriptorů souborů nelze pozicování kurzoru použít"
 
 #: src/main/options.c:717
 msgid "cannot use remote control when watching file descriptors"
-msgstr ""
+msgstr "při sledování deskriptorů souborů nelze použít vzdálené ovládání"
 
 #: src/main/options.c:726
 msgid "cannot transfer files when watching file descriptors"
-msgstr ""
+msgstr "při sledování deskriptorů souborů nelze použít přenos souborů"
 
 #: src/main/options.c:741
 msgid "not available on systems without /proc/self/fdinfo"
-msgstr ""
+msgstr "není dostupné na systémech bez /proc/self/fdinfo"
 
 #: src/main/remote.c:302
 msgid "message not received"
-msgstr ""
+msgstr "zpráva nepřijata"
 
 #: src/main/remote.c:429
 msgid "SA_SIGINFO not supported on this system"
-msgstr ""
+msgstr "SA_SIGINFO není na tomto systému podporováno"
 
 #: src/main/version.c:28
 msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
-msgstr ""
+msgstr "Licence: GPLv3+ <https://jxself.org/translations/gpl-3.cz.shtml>"
 
 #: src/main/version.c:29
 msgid "This is free software: you are free to change and redistribute it."
-msgstr ""
+msgstr "Toto je svobodný software; můžete ho volně měnit a šířit."
 
 #: src/main/version.c:30
 msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr ""
+msgstr "Na program se nevztahuje ŽÁDNÁ ZÁRUKA, v míře povolené zákonem."
 
 #: src/main/version.c:32
 msgid "Project web site"
-msgstr ""
+msgstr "Stránka projektu"
 
 #: src/pv/cursor.c:61
 msgid "failed to get terminal name"
-msgstr ""
+msgstr "selhalo zjištění názvu terminálu"
 
 #: src/pv/cursor.c:106
 msgid "failed to open lock file"
-msgstr ""
+msgstr "selhalo otevření zámkového souboru"
 
 #: src/pv/cursor.c:139
 msgid "lock attempt failed"
-msgstr ""
+msgstr "selhal pokus o uzamčení"
 
 #: src/pv/cursor.c:400
 msgid "failed to open terminal"
-msgstr ""
+msgstr "selhalo otevření terminálu"
 
 #: src/pv/display.c:233
 msgid "yzafpnum kMGTPEZY"
-msgstr ""
+msgstr "yzafpnum kMGTPEZY"
 
 #: src/pv/display.c:251
 msgid "yzafpnum KMGTPEZY"
-msgstr ""
+msgstr "yzafpnum KMGTPEZY"
 
 #: src/pv/display.c:678 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
-msgstr ""
+msgstr "selhala alokace vyrovnávací paměti"
 
 #: src/pv/display.c:807
 msgid "b"
-msgstr ""
+msgstr "b"
 
 #: src/pv/display.c:810 src/pv/transfer.c:602
 msgid "B"
-msgstr ""
+msgstr "B"
 
 #: src/pv/display.c:854 src/pv/display.c:869 src/pv/display.c:1088
 #: src/pv/loop.c:549
 msgid "b/s"
-msgstr ""
+msgstr "b/s"
 
 #: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
 msgid "/s"
-msgstr ""
+msgstr "/s"
 
 #: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
 #: src/pv/loop.c:549
 msgid "B/s"
-msgstr ""
+msgstr "B/s"
 
 #: src/pv/display.c:901 src/pv/display.c:905
 msgid "ETA"
-msgstr ""
+msgstr "ETA"
 
 #: src/pv/display.c:971
 msgid "FIN"
-msgstr ""
+msgstr "FIN"
 
 #: src/pv/file.c:149
 msgid "failed to seek to start of output"
-msgstr ""
+msgstr "selhalo posunutí za začátek výstupu"
 
 #: src/pv/file.c:294
 msgid "failed to close file"
-msgstr ""
+msgstr "selhalo zavření souboru"
 
 #: src/pv/file.c:317
 msgid "failed to read file"
-msgstr ""
+msgstr "selhalo čtení ze souboru"
 
 #: src/pv/file.c:332
 msgid "failed to stat output file"
-msgstr ""
+msgstr "selhalo zjištění informací o výstupním souboru"
 
 #: src/pv/file.c:354
 msgid "input file is output file"
-msgstr ""
+msgstr "vstupní soubor je výstupní soubor"
 
 #: src/pv/file.c:412
 msgid "(none)"
-msgstr ""
+msgstr "(žádný)"
 
 #: src/pv/file.c:414
 msgid "(stdin)"
-msgstr ""
+msgstr "(stdin)"
 
 #: src/pv/loop.c:548
 msgid "rate min/avg/max/mdev"
-msgstr ""
+msgstr "rychlost min/avg/max/std"
 
 #: src/pv/loop.c:560
 msgid "rate not measured"
-msgstr ""
+msgstr "rychlost neměřena"
 
 #: src/pv/loop.c:766 src/pv/loop.c:817 src/pv/loop.c:858 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
@@ -468,65 +471,65 @@ msgstr ""
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
 #: src/pv/watchpid.c:377 src/pv/watchpid.c:398
 msgid "pid"
-msgstr ""
+msgstr "pid"
 
 #: src/pv/state.c:40
 msgid "history structure allocation failed"
-msgstr ""
+msgstr "selhala alokace struktury historie"
 
 #: src/pv/state.c:509 src/pv/state.c:520
 msgid "file list allocation failed"
-msgstr ""
+msgstr "selhala alokace seznamu souborů"
 
 #: src/pv/transfer.c:464
 msgid "read failed"
-msgstr ""
+msgstr "čtení selhalo"
 
 #: src/pv/transfer.c:487
 msgid "warning: read errors detected"
-msgstr ""
+msgstr "varování: detekovány chyby při čtení"
 
 #: src/pv/transfer.c:503
 msgid "file is not seekable"
-msgstr ""
+msgstr "souborem nelze procházet"
 
 #: src/pv/transfer.c:581
 msgid "failed to seek past error"
-msgstr ""
+msgstr "selhal skok za chybu"
 
 #: src/pv/transfer.c:601
 msgid "skipped past read error"
-msgstr ""
+msgstr "chyba přeskočena"
 
 #: src/pv/transfer.c:642
 msgid "no transfer buffer allocated"
-msgstr ""
+msgstr "vyrovnávací paměť není alokována"
 
 #: src/pv/transfer.c:684
 msgid "failed to set interval timer"
-msgstr ""
+msgstr "selhalo nastavení intervalového časovače"
 
 #: src/pv/transfer.c:710
 msgid "failed to clear interval timer"
-msgstr ""
+msgstr "selhalo vynulování intervalového časovače"
 
 #: src/pv/transfer.c:740
 msgid "line position buffer allocation failed"
-msgstr ""
+msgstr "selhala alokace vyrovnávací paměti pro pozici v řádcích"
 
 #: src/pv/transfer.c:872
 msgid "write failed"
-msgstr ""
+msgstr "zápis selhal"
 
 #: src/pv/transfer.c:1109
 msgid "select call failed"
-msgstr ""
+msgstr "selhalo volání select"
 
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:121 src/pv/watchpid.c:130
 #: src/pv/watchpid.c:184 src/pv/watchpid.c:193 src/pv/watchpid.c:204
 msgid "fd"
-msgstr ""
+msgstr "ds"
 
 #: src/pv/watchpid.c:130 src/pv/watchpid.c:204
 msgid "not a regular file or block device"
-msgstr ""
+msgstr "není obyčejný soubor nebo blokové zařízení"
