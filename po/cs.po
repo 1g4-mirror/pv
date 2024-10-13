@@ -2,219 +2,224 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
+"PO-Revision-Date: 2024-10-13 16:30+0000\n"
+"Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
+"Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Weblate 5.7.2\n"
 
 #: src/main/help.c:284
 msgid "show progress bar"
-msgstr ""
+msgstr "ukaž indikátor průběhu"
 
 #: src/main/help.c:287
 msgid "show elapsed time"
-msgstr ""
+msgstr "ukaž uběhlý čas"
 
 #: src/main/help.c:290
 msgid "show estimated time of arrival (completion)"
-msgstr ""
+msgstr "ukaž přibližný zbývající čas"
 
 #: src/main/help.c:293
 msgid "show absolute estimated time of arrival (completion)"
-msgstr ""
+msgstr "ukaž přibližný čas dokončení"
 
 #: src/main/help.c:296
 msgid "show data transfer rate counter"
-msgstr ""
+msgstr "ukaž okamžitou rychlost přenosu dat"
 
 #: src/main/help.c:299
 msgid "show data transfer average rate counter"
-msgstr ""
+msgstr "ukaž průměrnou rychlost přenosu dat"
 
 #: src/main/help.c:301 src/main/help.c:335 src/main/help.c:350
 msgid "SEC"
-msgstr ""
+msgstr "SEK"
 
 #: src/main/help.c:302
 msgid "compute average rate over past SEC seconds (default 30s)"
-msgstr ""
+msgstr "počítej průměrnou rychlost za posledních SEK sekund (výchozí: 30)"
 
 #: src/main/help.c:305
 msgid "show number of bytes transferred"
-msgstr ""
+msgstr "ukaž počet přenesených bajtů"
 
 #: src/main/help.c:308
 msgid "show number of bits transferred"
-msgstr ""
+msgstr "ukaž počet přenesených bitů"
 
 #: src/main/help.c:311
 msgid "treat suffixes as multiples of 1000 rather than 1024"
-msgstr ""
+msgstr "zacházej se suffixy jako s násobky 1000 namísto 1024"
 
 #: src/main/help.c:314
 msgid "show percentage of transfer buffer in use"
-msgstr ""
+msgstr "ukaž procento využité vyrovnávací paměti"
 
 #: src/main/help.c:316
 msgid "NUM"
-msgstr ""
+msgstr "ČÍS"
 
 #: src/main/help.c:317
 msgid "show NUM bytes last written"
-msgstr ""
+msgstr "zobraz ČÍS posledních zapsaných bajtů"
 
 #: src/main/help.c:319
 msgid "FORMAT"
-msgstr ""
+msgstr "FORMÁT"
 
 #: src/main/help.c:320
 msgid "set output format to FORMAT"
-msgstr ""
+msgstr "nastav formát výstupu na FORMÁT"
 
 #: src/main/help.c:323
 msgid "output transfer statistics at the end"
-msgstr ""
+msgstr "po dokončení vypiš údaje o přenosu"
 
 #: src/main/help.c:326
 msgid "output percentages, not visual information"
-msgstr ""
+msgstr "vypisuj procenta, ne vizuální informace"
 
 #: src/main/help.c:329
 msgid "do not output any transfer information at all"
-msgstr ""
+msgstr "nevypisuj žádné informace o přenosu"
 
 #: src/main/help.c:333
 msgid "display nothing until first byte transferred"
-msgstr ""
+msgstr "nic nevypisuj, dokud není přenesen první byte"
 
 #: src/main/help.c:336
 msgid "display nothing until SEC seconds have passed"
-msgstr ""
+msgstr "nic nevypisuj, dokud neuplyne SEK sekund"
 
 #: src/main/help.c:338
 msgid "SIZE"
-msgstr ""
+msgstr "VEL"
 
 #: src/main/help.c:339
 msgid "set estimated data size to SIZE bytes"
-msgstr ""
+msgstr "nastav očekávanou velikost dat na VEL bajtů"
 
 #: src/main/help.c:342
 msgid "if size unknown, show rate vs max rate"
-msgstr ""
+msgstr "pokud je velikost neznámá, ukaž rychlost vs maximální rychlost"
 
 #: src/main/help.c:345
 msgid "count lines instead of bytes"
-msgstr ""
+msgstr "počítej řádky místo bajtů"
 
 #: src/main/help.c:348
 msgid "lines are null-terminated"
-msgstr ""
+msgstr "řádky jsou zakončené nulovým znakem"
 
 #: src/main/help.c:351
 msgid "update every SEC seconds"
-msgstr ""
+msgstr "aktualizuj každých SEK sekund"
 
 #: src/main/help.c:353
 msgid "WIDTH"
-msgstr ""
+msgstr "ŠÍŘ"
 
 #: src/main/help.c:354
 msgid "assume terminal is WIDTH characters wide"
-msgstr ""
+msgstr "předpokládej šířku terminálu ŠÍŘ znaků"
 
 #: src/main/help.c:356
 msgid "HEIGHT"
-msgstr ""
+msgstr "VÝŠ"
 
 #: src/main/help.c:357
 msgid "assume terminal is HEIGHT rows high"
-msgstr ""
+msgstr "předpokládej výšku terminálu VÝŠ znaků"
 
 #: src/main/help.c:359
 msgid "NAME"
-msgstr ""
+msgstr "JMÉNO"
 
 #: src/main/help.c:360
 msgid "prefix visual information with NAME"
-msgstr ""
+msgstr "přidej JMÉNO před vizuální informace"
 
 #: src/main/help.c:363
 msgid "output even if standard error is not a terminal"
-msgstr ""
+msgstr "vypisuj výstup i pokud standardní chybový výstup není terminál"
 
 #: src/main/help.c:366
 msgid "use cursor positioning escape sequences"
-msgstr ""
+msgstr "pozicuj kurzor pomocí řídících znaků"
 
 #: src/main/help.c:369 src/main/help.c:399 src/main/help.c:408
 #: src/main/help.c:423
 msgid "FILE"
-msgstr ""
+msgstr "SOUBOR"
 
 #: src/main/help.c:370
 msgid "write output to FILE instead of stdout"
-msgstr ""
+msgstr "zapiš výstup do SOUBORu namísto standardního výstupu"
 
 #: src/main/help.c:372
 msgid "RATE"
-msgstr ""
+msgstr "RYCH"
 
 #: src/main/help.c:373
 msgid "limit transfer to RATE bytes per second"
-msgstr ""
+msgstr "omez přenosovou rychlost na RYCH bajtů za sekundu"
 
 #: src/main/help.c:375 src/main/help.c:384
 msgid "BYTES"
-msgstr ""
+msgstr "BAJT"
 
 #: src/main/help.c:376
 msgid "use a buffer size of BYTES"
-msgstr ""
+msgstr "použij vyrovnávací pamět BAJT bajtů"
 
 #: src/main/help.c:379
 msgid "never use splice(), always use read/write"
-msgstr ""
+msgstr "nepoužívej splice(), vždy použij read/write"
 
 #: src/main/help.c:382
 msgid "skip read errors in input"
-msgstr ""
+msgstr "ignoruj chyby při čtení vstupu"
 
 #: src/main/help.c:385
 msgid "skip errors in BYTES blocks at a time"
-msgstr ""
+msgstr "přeskakuj chyby v blocích BAJTů naráz"
 
 #: src/main/help.c:388
 msgid "stop after --size bytes have been transferred"
-msgstr ""
+msgstr "zastav po přenosu --size bajtů"
 
 #: src/main/help.c:391
 msgid "flush cache to disk after every write"
-msgstr ""
+msgstr "po každém zápisu vyprázdni cache na disk"
 
 #: src/main/help.c:394
 msgid "use direct I/O to bypass cache"
-msgstr ""
+msgstr "použij přímý V/V k obejítí cache"
 
 #: src/main/help.c:397
 msgid "discard input instead of writing to output"
-msgstr ""
+msgstr "zahoď vstup namísto zápisu na výstup"
 
 #: src/main/help.c:400
 msgid "write all input to FILE before writing to output"
-msgstr ""
+msgstr "zapiš veškerý vstup do SOUBORu před výpisem na výstup"
 
 #: src/main/help.c:403
 msgid "PID"
-msgstr ""
+msgstr "PID"
 
 #: src/main/help.c:404
 msgid "update settings of process PID"
-msgstr ""
+msgstr "aktualizuj nastavení procesu PID"
 
 #: src/main/help.c:409
 msgid "save process ID in FILE"
-msgstr ""
+msgstr "ulož id procesu do SOUBORu"
 
 #: src/main/help.c:412
 msgid "PID[:FD]"
