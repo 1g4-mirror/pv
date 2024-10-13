@@ -21,6 +21,9 @@ Translators can use the Weblate instance hosted by Codeberg:
 
 [![Translation status](https://translate.codeberg.org/widget/pv/multi-auto.svg)](https://translate.codeberg.org/engage/pv/)
 
+If you don't see your language listed, raise an issue on the issue tracker
+(or just email the maintainer) asking for it to be added.
+
 
 # Compilation
 

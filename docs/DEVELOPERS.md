@@ -58,6 +58,12 @@ altered in future.
 Translators can use the Weblate instance hosted by Codeberg:
 [https://translate.codeberg.org/projects/pv/](https://translate.codeberg.org/projects/pv/)
 
+If you don't see your language listed, raise an issue on the issue tracker
+(or just email the maintainer) asking for it to be added.
+
+Alternatively, read on for details of how to maintain the translations
+directly within the source tree.
+
 The message catalogues used to translate program messages into other
 languages are in the "`po/`" directory, named "`xx.po`", where "`xx`"
 is the ISO 639-1 2-letter language code, such as "`fr`" for French.
