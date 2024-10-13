@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-11 19:47+0100\n"
-"PO-Revision-Date: 2024-10-11 22:36+0000\n"
-"Last-Translator: Benny <Benny@users.noreply.translate.codeberg.org>\n"
+"PO-Revision-Date: 2024-10-13 20:43+0000\n"
+"Last-Translator: fnetX <otto@codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -481,8 +481,9 @@ msgid "(stdin)"
 msgstr "(stdin)"
 
 #: src/pv/loop.c:548
+#, fuzzy
 msgid "rate min/avg/max/mdev"
-msgstr ""
+msgstr "Rate min/mittel/max/mdev"
 
 #: src/pv/loop.c:560
 msgid "rate not measured"
