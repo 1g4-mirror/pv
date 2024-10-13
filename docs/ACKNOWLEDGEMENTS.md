@@ -96,11 +96,21 @@ is acknowledged and greatly appreciated:
  * [eborisch](https://codeberg.org/eborisch) - provided fix for misbehaviour when used with "`zfs send`" due to treating zero sized writes (generally due to timer interruption) as end of file ([#92](https://codeberg.org/a-j-wood/pv/pulls/92), [#93](https://codeberg.org/a-j-wood/pv/pulls/93))
  * [alexanderperlis](https://codeberg.org/alexanderperlis) - provided initial support for block devices with **--size @FILE** ([#94](https://codeberg.org/a-j-wood/pv/pulls/94))
  * [jettero](https://codeberg.org/jettero) - reported double-free coredump when using **--watchfd** after 1.8.10 ([#96](https://codeberg.org/a-j-wood/pv/issues/96))
- * [Hartmut Goebel](https://translate.codeberg.org/user/htgoebel/) - provided a comprehensive set of German translations ([#98](https://codeberg.org/a-j-wood/pv/pulls/98))
- * [Benny](https://translate.codeberg.org/user/Benny/) - additional German translations ([#103](https://codeberg.org/a-j-wood/pv/pulls/103))
- * [coralpink](https://translate.codeberg.org/user/coralpink/) - provided a comprehensive set of Polish translations ([#102](https://codeberg.org/a-j-wood/pv/pulls/102))
  * Venky.N.Iyer - suggested **--stats** ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
  * Roland Kletzing - suggested **--rate** with **--numeric** ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
  * [Michael Mior](https://codeberg.org/michaelmior) - suggested **--store-and-forward** ([#100](https://codeberg.org/a-j-wood/pv/issues/100))
+
+Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
+
+ * **French**
+  * anonymous suggestions (7)
+ * **German**
+  * [Hartmut Goebel](https://translate.codeberg.org/user/htgoebel/) (77)
+  * [Benny](https://translate.codeberg.org/user/Benny/) (6)
+  * [kre](https://translate.codeberg.org/user/kre/) (2)
+ * **Polish**
+  * [coralpink](https://translate.codeberg.org/user/coralpink/) (96)
+ * **Turkish**
+  * [omerdduran](https://translate.codeberg.org/user/omerdduran/) (129)
 
 ---
