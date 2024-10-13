@@ -103,14 +103,14 @@ is acknowledged and greatly appreciated:
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
  * **French**
-  * anonymous suggestions (7)
+   * anonymous suggestions (7)
  * **German**
-  * [Hartmut Goebel](https://translate.codeberg.org/user/htgoebel/) (77)
-  * [Benny](https://translate.codeberg.org/user/Benny/) (6)
-  * [kre](https://translate.codeberg.org/user/kre/) (2)
+   * [Hartmut Goebel](https://translate.codeberg.org/user/htgoebel/) (77)
+   * [Benny](https://translate.codeberg.org/user/Benny/) (6)
+   * [kre](https://translate.codeberg.org/user/kre/) (2)
  * **Polish**
-  * [coralpink](https://translate.codeberg.org/user/coralpink/) (96)
+   * [coralpink](https://translate.codeberg.org/user/coralpink/) (96)
  * **Turkish**
-  * [omerdduran](https://translate.codeberg.org/user/omerdduran/) (129)
+   * [omerdduran](https://translate.codeberg.org/user/omerdduran/) (129)
 
 ---
