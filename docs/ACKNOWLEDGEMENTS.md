@@ -102,6 +102,8 @@ is acknowledged and greatly appreciated:
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
+ * **Czech**
+   * [mmatous](https://translate.codeberg.org/user/mmatous/) (69)
  * **French**
    * anonymous suggestions (7)
  * **German**
