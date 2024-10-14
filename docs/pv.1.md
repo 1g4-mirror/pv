@@ -7,8 +7,8 @@ pv - monitor the progress of data through a pipe
 **pv** \[ **-pteIrab8kTvnq** \] \[ **-A** NUM \] \[ **-F** FORMAT \] \[
 **-Wgl0fc** \] \[ **-D** SEC \] \[ **-s** SIZE \] \[ **-i** SEC \] \[
 **-m** SEC \] \[ **-w** WIDTH \] \[ **-H** HEIGHT \] \[ **-N** NAME \]
-\[ **-o** FILE \] \[ **-L** RATE \] \[ **-B** BYTES \] \[ **-CESYKX** \]
-\[ **-Z** BYTES \] \[ **-U** FILE \] \[ **-P** FILE \] \[*FILE* . . .\]
+[ **-o** FILE \] \[ **-L** RATE \] \[ **-B** BYTES \] \[ **-CESYKX** \]
+[ **-Z** BYTES \] \[ **-U** FILE \] \[ **-P** FILE \] \[*FILE* . . .\]
 
 **pv** **-R** *PID* \[ **-pteIrabT** \] \[ **-A** NUM \] \[ **-F**
 FORMAT \] \[ **-s** SIZE \] \[ **-i** SEC \] \[ **-w** WIDTH \] \[
