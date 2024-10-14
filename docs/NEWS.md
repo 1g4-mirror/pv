@@ -7,6 +7,7 @@
  * *i18n:* comprehensive German translations update
  * *i18n:* comprehensive Polish translations update
  * *i18n:* complete Turkish translations added
+ * *i18n:* complete Czech translations added
  * *i18n:* updates to French translations
  * *fix:* resume stopped pipelines when running in the background (part of [#56](https://codeberg.org/a-j-wood/pv/issues/56))
  * *fix*: inspect the output pipe buffer to give a more accurate progress indicator of how much the next command has consumed
