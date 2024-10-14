@@ -88,7 +88,7 @@ EXTRA_DIST += $(TESTS) tests/run-valgrind.sh tests/test-env.sh
 
 docs/pv.1.md: $(srcdir)/docs/pv.1
 	test -d docs || mkdir docs
-	pandoc --from man --to markdown < $< | sed '/\*\*\*\*/{s/\*//g;s/^/**/;s/$$/**/}' | sed '/^```/,/^```/d' > $@
+	pandoc --from man --to markdown < $< | sed '/\*\*\*\*/{s/\*//g;s/^/**/;s/$$/**/}' | sed '/^```/,/^```/d' | sed 's/^\\\[/[/' > $@
 
 SUFFIXES = .c .o .e
 
