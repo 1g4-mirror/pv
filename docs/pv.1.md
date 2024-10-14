@@ -24,32 +24,32 @@ input is copied. This is the same behaviour as **cat**(1).
 A simple example to watch how quickly a file is transferred using
 **nc**(1):
 
-> **pv file \| nc -w 1 somewhere.com 3000**
+    pv file | nc -w 1 somewhere.com 3000
 
 A similar example, transferring a file from another process and passing
 the expected size to **pv**:
 
-> **cat file \| pv -s 12345 \| nc -w 1 somewhere.com 3000**
+    cat file | pv -s 12345 | nc -w 1 somewhere.com 3000
 
 A more complicated example using numeric output to feed into the
 **dialog**(1) program for a full-screen progress display:
 
-> **(tar cf - . \\**\
-> ** \| pv -n -s \$(du -sb . \| awk \'{print \$1}\') \\**\
-> ** \| gzip -9 \> out.tgz) 2\>&1 \\**\
-> **\| dialog \--gauge \'Progress\' 7 70**
+    (tar cf - . \
+    | pv -n -s $(du -sb . | awk '{print $1}') \
+    | gzip -9 > out.tgz) 2>&1 \
+    | dialog --gauge 'Progress' 7 70
 
 Taking an image of a disk, skipping errors:
 
-> **pv -EE /dev/your/disk/device \> disk-image.img**
+    pv -EE /dev/your/disk/device > disk-image.img
 
 Writing an image back to a disk:
 
-> **pv disk-image.img \> /dev/your/disk/device**
+    pv disk-image.img > /dev/your/disk/device
 
 Zeroing a disk:
 
-> **pv \< /dev/zero \> /dev/your/disk/device**
+    pv < /dev/zero > /dev/your/disk/device
 
 Note that if the input size cannot be calculated, and the output is a
 block device, then the size of the block device will be used and **pv**
@@ -57,11 +57,11 @@ will automatically stop at that size as if **-S** had been given.
 
 (Linux only): Watching file descriptor 3 opened by another process 1234:
 
-> **pv -d 1234:3**
+    pv -d 1234:3
 
 (Linux only): Watching all file descriptors used by process 1234:
 
-> **pv -d 1234**
+    pv -d 1234
 
 # OPTIONS
 
@@ -618,8 +618,8 @@ If you find any other problems, please report them.
 
 Please report any bugs to **pv@ivarch.com**.
 
-Alternatively, use the issue tracker linked from the **pv** home page:
-\<https://www.ivarch.com/programs/pv.shtml\>
+Alternatively, use the issue tracker linked from the [pv home
+page](https://www.ivarch.com/programs/pv.shtml).
 
 # SEE ALSO
 

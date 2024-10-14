@@ -34,49 +34,58 @@ as
 A simple example to watch how quickly a file is transferred using
 .BR nc (1):
 
-.RS
-.B pv file | nc -w 1 somewhere.com 3000
-.RE
+.in +4
+.EX
+pv file | nc -w 1 somewhere.com 3000
+.EE
+.in
 
 A similar example, transferring a file from another process and passing the
 expected size to
 .BR pv :
 
-.RS
-.B cat file | pv -s 12345 | nc -w 1 somewhere.com 3000
-.RE
+.in +4
+.EX
+cat file | pv -s 12345 | nc -w 1 somewhere.com 3000
+.EE
+.in
 
 A more complicated example using numeric output to feed into the
 .BR dialog (1)
 program for a full-screen progress display:
  
-.RS
-.B (tar cf - . \e
-.br
-.B " | pv -n -s $(du -sb . | awk '{print $1}') \e"
-.br
-.B " | gzip -9 > out.tgz) 2>&1 \e"
-.br
-.B | dialog --gauge 'Progress' 7 70
-.RE
+.in +4
+.EX
+(tar cf - . \e
+| pv -n -s $(du -sb . | awk '{print $1}') \e
+| gzip -9 > out.tgz) 2>&1 \e
+| dialog --gauge 'Progress' 7 70
+.EE
+.in
 
 Taking an image of a disk, skipping errors:
 
-.RS
-.B pv -EE /dev/your/disk/device > disk-image.img
-.RE
+.in +4
+.EX
+pv -EE /dev/your/disk/device > disk-image.img
+.EE
+.in
 
 Writing an image back to a disk:
 
-.RS
-.B pv disk-image.img > /dev/your/disk/device
-.RE
+.in +4
+.EX
+pv disk-image.img > /dev/your/disk/device
+.EE
+.in
 
 Zeroing a disk:
 
-.RS
-.B pv < /dev/zero > /dev/your/disk/device
-.RE
+.in +4
+.EX
+pv < /dev/zero > /dev/your/disk/device
+.EE
+.in
 
 Note that if the input size cannot be calculated, and the output is a block
 device, then the size of the block device will be used and
@@ -87,15 +96,19 @@ had been given.
 
 (Linux only): Watching file descriptor 3 opened by another process 1234:
 
-.RS
-.B pv -d 1234:3
-.RE
+.in +4
+.EX
+pv -d 1234:3
+.EE
+.in
 
 (Linux only): Watching all file descriptors used by process 1234:
 
-.RS
-.B pv -d 1234
-.RE
+.in +4
+.EX
+pv -d 1234
+.EE
+.in
 
 
 .SH OPTIONS
@@ -840,8 +853,9 @@ Please report any bugs to
 .BR pv@ivarch.com .
 
 Alternatively, use the issue tracker linked from the
-.B pv
-home page: <https://www.ivarch.com/programs/pv.shtml>
+.UR https://www.ivarch.com/programs/pv.shtml
+pv home page
+.UE .
 
 
 .SH "SEE ALSO"
