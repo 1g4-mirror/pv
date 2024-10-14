@@ -4,20 +4,29 @@ pv - monitor the progress of data through a pipe
 
 # SYNOPSIS
 
-**pv** \[ **-pteIrab8kTvnq** \] \[ **-A** NUM \] \[ **-F** FORMAT \] \[
+**pv** \[ **-pteIrab8kTv** \] \[ **-A** NUM \] \[ **-F** FORMAT \] \[
 **-Wgl0fc** \] \[ **-D** SEC \] \[ **-s** SIZE \] \[ **-i** SEC \] \[
 **-m** SEC \] \[ **-w** WIDTH \] \[ **-H** HEIGHT \] \[ **-N** NAME \]
 [ **-o** FILE \] \[ **-L** RATE \] \[ **-B** BYTES \] \[ **-CESYKX** \]
 [ **-Z** BYTES \] \[ **-U** FILE \] \[ **-P** FILE \] \[*FILE* . . .\]
 
+**pv** **-n** \[ **-trbv** \] \[ **-Wl0** \] \[ **-D** SEC \] \[ **-s**
+SIZE \] \[ **-i** SEC \] \[ **-o** FILE \] \[ **-L** RATE \] \[ **-B**
+BYTES \] \[ **-CESYKX** \] \[ **-Z** BYTES \] \[ **-U** FILE \] \[
+**-P** FILE \] \[*FILE* . . .\]
+
+**pv** **-q** \[ **-v** \] \[ **-s** SIZE \] \[ **-o** FILE \] \[ **-L**
+RATE \] \[ **-B** BYTES \] \[ **-CESYKX** \] \[ **-Z** BYTES \] \[
+**-U** FILE \] \[ **-P** FILE \] \[*FILE* . . .\]
+
 **pv** **-R** *PID* \[ **-pteIrabT** \] \[ **-A** NUM \] \[ **-F**
 FORMAT \] \[ **-s** SIZE \] \[ **-i** SEC \] \[ **-w** WIDTH \] \[
 **-H** HEIGHT \] \[ **-N** NAME \] \[ **-L** RATE \] \[ **-B** BYTES \]
 
-**pv** **-d** *PID:FD* \[ **-pteIrab8kTvnq** \] \[ **-F** FORMAT \] \[
+**pv** **-d** *PID:FD* \[ **-pteIrab8kTnq** \] \[ **-F** FORMAT \] \[
 **-i** SEC \] \[ **-w** WIDTH \] \[ **-H** HEIGHT \]
 
-**pv** **-d** *PID* \[ **-pteIrab8kTvnq** \] \[ **-F** FORMAT \] \[
+**pv** **-d** *PID* \[ **-pteIrab8kTnq** \] \[ **-F** FORMAT \] \[
 **-i** SEC \] \[ **-w** WIDTH \] \[ **-H** HEIGHT \]
 
 **pv** **-h**

@@ -4,7 +4,7 @@ pv \- monitor the progress of data through a pipe
 
 .SH SYNOPSIS
 .SY pv
-.OP \-pteIrab8kTvnq
+.OP \-pteIrab8kTv
 .OP \-A NUM
 .OP \-F FORMAT
 .OP \-Wgl0fc
@@ -15,6 +15,37 @@ pv \- monitor the progress of data through a pipe
 .OP \-w WIDTH
 .OP \-H HEIGHT
 .OP \-N NAME
+.OP \-o FILE
+.OP \-L RATE
+.OP \-B BYTES
+.OP \-CESYKX
+.OP \-Z BYTES
+.OP \-U FILE
+.OP \-P FILE
+.RI [ FILE
+\&.\|.\|.\&]
+
+.SY pv
+.B \-n
+.OP \-trbv
+.OP \-Wl0
+.OP \-D SEC
+.OP \-s SIZE
+.OP \-i SEC
+.OP \-o FILE
+.OP \-L RATE
+.OP \-B BYTES
+.OP \-CESYKX
+.OP \-Z BYTES
+.OP \-U FILE
+.OP \-P FILE
+.RI [ FILE
+\&.\|.\|.\&]
+
+.SY pv
+.B \-q
+.OP \-v
+.OP \-s SIZE
 .OP \-o FILE
 .OP \-L RATE
 .OP \-B BYTES
@@ -42,7 +73,7 @@ pv \- monitor the progress of data through a pipe
 .SY pv
 .B \-d
 .I PID:FD
-.OP \-pteIrab8kTvnq
+.OP \-pteIrab8kTnq
 .OP \-F FORMAT
 .OP \-i SEC
 .OP \-w WIDTH
@@ -51,7 +82,7 @@ pv \- monitor the progress of data through a pipe
 .SY pv
 .B \-d
 .I PID
-.OP \-pteIrab8kTvnq
+.OP \-pteIrab8kTnq
 .OP \-F FORMAT
 .OP \-i SEC
 .OP \-w WIDTH
