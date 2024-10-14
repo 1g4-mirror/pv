@@ -589,6 +589,21 @@ The following problems are known to exist in **pv**:
     in a separate process group from the one that owns the terminal. In
     these cases, use **\--force**.
 
+-   If **pv** is used in a pipeline in **zsh** version 5.8, and the last
+    command in the pipeline is based on shell builtins, **zsh** takes
+    control of the terminal away from **pv**, preventing progress from
+    being displayed. For example, this will produce no progress bar:
+
+    pv InputFile | { while read -r line; do sleep 0.001; done; }
+
+:   To work around this, put the last commands of the pipeline in normal
+    brackets to force the use of a subshell:
+
+    pv InputFile | ( while read -r line; do sleep 0.001; done; )
+
+:   Refer to [issue #105](https://codeberg.org/a-j-wood/pv/issues/105)
+    for full details.
+
 -   The **-c** option does not work properly on Cygwin without
     **cygserver** running, if started near the bottom of the screen (IPC
     is needed to handle the terminal scrolling). To fix this, start

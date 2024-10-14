@@ -779,6 +779,42 @@ one that owns the terminal.  In these cases, use
 .BR \-\-force .
 .P
 .IP \(bu 3
+If
+.B pv
+is used in a pipeline in
+.B zsh
+version 5.8, and the last command in the pipeline is based on shell
+builtins,
+.B zsh
+takes control of the terminal away from
+.BR pv ,
+preventing progress from being displayed.  For example, this will produce no
+progress bar:
+
+.in +4n
+.EX
+pv InputFile | { while read -r line; do sleep 0.001; done; }
+.EE
+.in
+.PP
+.IP "" 3
+To work around this, put the last commands of the pipeline in
+normal brackets to force the use of a subshell:
+
+.in +4n
+.EX
+pv InputFile | ( while read -r line; do sleep 0.001; done; )
+.EE
+.in
+.PP
+.IP "" 3
+Refer to
+.UR https://codeberg.org/a-j-wood/pv/issues/105
+issue #105
+.UE
+for full details.
+.P
+.IP \(bu 3
 The
 .B -c
 option does not work properly on Cygwin without
