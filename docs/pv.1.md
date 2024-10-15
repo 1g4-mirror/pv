@@ -256,7 +256,7 @@ display types that are explicitly switched on will be shown.
 
 **-0, \--null**
 
-:   Count lines as terminated with a zero byte instead of with a
+:   Count lines as terminated with a null byte instead of with a
     newline. This option implies \--line-mode.
 
 **-i SEC, \--interval SEC**
