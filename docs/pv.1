@@ -112,7 +112,7 @@ standard output and progress will be shown on standard error.
 will copy each supplied
 .I FILE
 in turn to standard output
-.BR "" "(" -
+.BR "" "(" \-
 means standard input), or if no
 .IR FILE s
 are specified just standard input is copied. This is the same behaviour
@@ -124,7 +124,7 @@ A simple example to watch how quickly a file is transferred using
 
 .in +4
 .EX
-pv file | nc -w 1 somewhere.com 3000
+pv file | nc \-w 1 somewhere.com 3000
 .EE
 .in
 
@@ -134,7 +134,7 @@ expected size to
 
 .in +4
 .EX
-cat file | pv -s 12345 | nc -w 1 somewhere.com 3000
+cat file | pv \-s 12345 | nc \-w 1 somewhere.com 3000
 .EE
 .in
 
@@ -144,10 +144,10 @@ program for a full-screen progress display:
  
 .in +4
 .EX
-(tar cf - . \e
-| pv -n -s $(du -sb . | awk '{print $1}') \e
-| gzip -9 > out.tgz) 2>&1 \e
-| dialog --gauge 'Progress' 7 70
+(tar cf \- . \e
+| pv \-n \-s $(du \-sb . | awk '{print $1}') \e
+| gzip \-9 > out.tgz) 2>&1 \e
+| dialog \-\-gauge 'Progress' 7 70
 .EE
 .in
 
@@ -155,7 +155,7 @@ Taking an image of a disk, skipping errors:
 
 .in +4
 .EX
-pv -EE /dev/your/disk/device > disk-image.img
+pv \-EE /dev/your/disk/device > disk-image.img
 .EE
 .in
 
@@ -186,7 +186,7 @@ had been given.
 
 .in +4
 .EX
-pv -d 1234:3
+pv \-d 1234:3
 .EE
 .in
 
@@ -194,7 +194,7 @@ pv -d 1234:3
 
 .in +4
 .EX
-pv -d 1234
+pv \-d 1234
 .EE
 .in
 
@@ -374,7 +374,7 @@ Assume the total amount of data to be transferred is
 .I SIZE
 bytes when calculating percentages and ETAs.  The same suffixes of "k", "m"
 etc can be used as with
-.BR -L .
+.BR \-L .
 .TP
 .B ""
 If
@@ -648,9 +648,9 @@ that is already running,
 .BI \-R\  PID
 will cause that instance to act as though it had been given
 this instance's command line instead.  For example, if
-.B pv -L 123K
+.B pv \-L 123K
 is running with process ID 9876, then running
-.B pv -R 9876 -L 321K
+.B pv \-R 9876 \-L 321K
 will cause it to start using a rate limit of 321KiB instead of 123KiB.
 Note that some options cannot be changed while running, such as
 .BR \-c ,
@@ -729,7 +729,7 @@ shows the bits transferred so far, not bytes.
 .B %T
 Percentage of the transfer buffer in use.  Equivalent to
 .BR \-T .
-Shows "{----}" if the transfer is being done with
+Shows "{\-\-\-\-}" if the transfer is being done with
 .BR splice (2),
 since splicing to or from pipes does not use the buffer.
 .TP
@@ -745,7 +745,7 @@ since splicing to or from pipes does not use the buffer.
 .TP
 .B %N
 Name prefix given by
-.BR -N .
+.BR \-N .
 Padded to 9 characters with spaces, and suffixed with :.
 .TP
 .B %%
@@ -760,15 +760,15 @@ The format string equivalent of turning on all display switches is
 Some suggested common switch combinations:
 
 .TP
-.B pv -ptebar
+.B pv \-ptebar
 Show a progress bar, elapsed time, estimated completion time, byte counter,
 average rate, and current rate.
 .TP
-.B pv -betlap
+.B pv \-betlap
 Show a progress bar, elapsed time, estimated completion time, line counter,
 and average rate, counting lines instead of bytes.
 .TP
-.B pv -btrpg
+.B pv \-btrpg
 Show the amount transferred, elapsed time, current rate, and a gauge showing
 the current rate as a percentage of the maximum rate seen - useful in a
 pipeline where the total size is unknown.  (If the size
@@ -776,17 +776,17 @@ pipeline where the total size is unknown.  (If the size
 known, these options will show the percentage completion instead of the rate
 gauge).
 .TP
-.B pv -t
+.B pv \-t
 Show only the elapsed time - useful as a simple timer, e.g.
-.BR "sleep 10m | pv -t" .
+.BR "sleep 10m | pv \-t" .
 .TP
-.B pv -pterb
+.B pv \-pterb
 The default behaviour: progress bar, elapsed time, estimated completion
 time, current rate, and byte counter.
 
 .P
 On MacOS, it may be useful to specify
-.B -B 1024
+.B \-B 1024
 in a pipeline, as this may improve performance.
 
 
@@ -894,7 +894,7 @@ progress bar:
 .IP
 .in +4n
 .EX
-pv InputFile | { while read -r line; do sleep 0.001; done; }
+pv InputFile | { while read \-r line; do sleep 0.1; done; }
 .EE
 .in
 .IP
@@ -903,7 +903,7 @@ normal brackets to force the use of a subshell:
 .IP
 .in +4n
 .EX
-pv InputFile | ( while read -r line; do sleep 0.001; done; )
+pv InputFile | ( while read \-r line; do sleep 0.1; done; )
 .EE
 .in
 .IP
@@ -915,18 +915,18 @@ for full details.
 .P
 .IP \(bu 3
 The
-.B -c
+.B \-c
 option does not work properly on Cygwin without
 .B cygserver
 running, if started near the bottom of the screen (IPC is needed to handle
 the terminal scrolling).  To fix this, start
 .B cygserver
 before using
-.BR "pv -c" .
+.BR "pv \-c" .
 .P
 .IP \(bu 3
 The
-.B -R
+.B \-R
 option requires that either
 .B /run/user/<uid>/
 or

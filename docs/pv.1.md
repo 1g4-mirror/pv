@@ -622,12 +622,12 @@ The following problems are known to exist in **pv**:
     control of the terminal away from **pv**, preventing progress from
     being displayed. For example, this will produce no progress bar:
 
-        pv InputFile | { while read -r line; do sleep 0.001; done; }
+        pv InputFile | { while read -r line; do sleep 0.1; done; }
 
     To work around this, put the last commands of the pipeline in normal
     brackets to force the use of a subshell:
 
-        pv InputFile | ( while read -r line; do sleep 0.001; done; )
+        pv InputFile | ( while read -r line; do sleep 0.1; done; )
 
     Refer to [issue #105](https://codeberg.org/a-j-wood/pv/issues/105)
     for full details.
