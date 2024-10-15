@@ -4,6 +4,8 @@ pv - monitor the progress of data through a pipe
 
 # SYNOPSIS
 
+**pv** \[*OPTION*\]\... \[*FILE*\]\...
+
 **pv** \[ **-pteIrab8kTv** \] \[ **-A** NUM \] \[ **-F** FORMAT \] \[
 **-Wgl0fc** \] \[ **-D** SEC \] \[ **-s** SIZE \] \[ **-i** SEC \] \[
 **-m** SEC \] \[ **-w** WIDTH \] \[ **-H** HEIGHT \] \[ **-N** NAME \]
