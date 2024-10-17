@@ -113,6 +113,8 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
    * [fnetX](https://translate.codeberg.org/user/fnetX/) (1)
  * **Polish**
    * [coralpink](https://translate.codeberg.org/user/coralpink/) (96)
+ * **Russian**
+   * [0ko](https://translate.codeberg.org/user/0ko/) (93)
  * **Turkish**
    * [omerdduran](https://translate.codeberg.org/user/omerdduran/) (129)
 

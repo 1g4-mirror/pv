@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *i18n:* Russian translations added
+
 ### 1.9.0 - 15 October 2024
 
  * *feature:* new **--store-and-forward** option to read input to a file first, then write it to the output ([#100](https://codeberg.org/a-j-wood/pv/issues/100))
