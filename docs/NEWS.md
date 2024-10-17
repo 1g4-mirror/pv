@@ -14,7 +14,7 @@
  * *i18n:* complete Czech translations added
  * *i18n:* updates to French translations
  * *fix:* resume stopped pipelines when running in the background (part of [#56](https://codeberg.org/a-j-wood/pv/issues/56))
- * *fix*: inspect the output pipe buffer to give a more accurate progress indicator of how much the next command has consumed
+ * *fix:* inspect the output pipe buffer to give a more accurate progress indicator of how much the next command has consumed
  * *fix:* prefix completion time (**--fineta**) with *FIN* rather than *ETA* ([#43](https://codeberg.org/a-j-wood/pv/issues/43))
  * *fix:* surround average rate (**--average-rate**) with brackets rather than square brackets
  * *fix:* correct a memory leak in **--watchfd PID**
