@@ -26,7 +26,10 @@ void pv_remote_init(void);
 void pv_remote_fini(void);
 
 /*
- * Write a PID file, returning nonzero on error.
+ * Write a PID file, returning nonzero on error.  Write it atomically, such
+ * that the file either exists and contains the PID, or is not updated at
+ * all.  This is done by writing to a temporary file in the same directory
+ * first, and then renaming the temporary file to the target name.
  */
 static int pv__write_pidfile(opts_t opts)
 {
@@ -35,14 +38,27 @@ static int pv__write_pidfile(opts_t opts)
 	int pidfile_tmp_fd;
 	FILE *pidfile_tmp_fptr;
 	mode_t prev_umask;
+	const char *pidfile_template = "%s.XXXXXX";
 
 	if (NULL == opts->pidfile)
 		return 0;
 
-	pidfile_tmp_bufsize = 16 + strlen(opts->pidfile);	/* flawfinder: ignore */
 	/*
-	 * flawfinder rationale: pidfile was supplied as an argument
-	 * so we have to assume it is \0 terminated.
+	 * The buffer needs to be long enough to hold the pidfile with the
+	 * mkstemp template ".XXXXXX" after it.  The "%s" of our
+	 * pidfile_template adds 2 extra bytes to the length, of which we
+	 * need 1 byte for the terminating \0, so we subtract 1 byte more to
+	 * get the exact amount of space we need.
+	 */
+	pidfile_tmp_bufsize = strlen(pidfile_template) + strlen(opts->pidfile) - 1;	/* flawfinder: ignore */
+
+	/*
+	 * flawfinder rationale: flawfinder never likes strlen() in case
+	 * it's called on a string that isn't \0 terminated.  We have to use
+	 * strlen() to find the length of opts->pidfile, so have to trust
+	 * that the arguments in argv[] were \0 terminated.  We can be sure
+	 * that pidfile_template is \0 terminated because we've set it to a
+	 * constant value.  So we tell flawfinder to skip this check here.
 	 */
 	pidfile_tmp_name = malloc(pidfile_tmp_bufsize);
 	if (NULL == pidfile_tmp_name) {
@@ -50,7 +66,7 @@ static int pv__write_pidfile(opts_t opts)
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 	memset(pidfile_tmp_name, 0, pidfile_tmp_bufsize);
-	(void) pv_snprintf(pidfile_tmp_name, pidfile_tmp_bufsize, "%s.XXXXXX", opts->pidfile);
+	(void) pv_snprintf(pidfile_tmp_name, pidfile_tmp_bufsize, pidfile_template, opts->pidfile);
 
 	/*@-type@ *//* splint doesn't like mode_t */
 	prev_umask = umask(0000);	    /* flawfinder: ignore */
