@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2024-10-15 22:01+0100\n"
-"PO-Revision-Date: 2024-10-20 14:07+0000\n"
+"PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
 "Language: ru\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.7.2\n"
+"X-Generator: Weblate 5.8.1\n"
 
 #: src/main/help.c:284
 msgid "show progress bar"
@@ -447,7 +447,7 @@ msgstr "не удалось получить информацию о выход�
 
 #: src/pv/file.c:354
 msgid "input file is output file"
-msgstr ""
+msgstr "пути исходного и выходного файлов одинаковы"
 
 #: src/pv/file.c:412
 msgid "(none)"
@@ -507,11 +507,11 @@ msgstr "не выделена память для буфера передачи"
 
 #: src/pv/transfer.c:684
 msgid "failed to set interval timer"
-msgstr ""
+msgstr "не удалось задать измеритель временного промежутка"
 
 #: src/pv/transfer.c:710
 msgid "failed to clear interval timer"
-msgstr ""
+msgstr "не удалось очистить измеритель временного промежутка"
 
 #: src/pv/transfer.c:740
 msgid "line position buffer allocation failed"
