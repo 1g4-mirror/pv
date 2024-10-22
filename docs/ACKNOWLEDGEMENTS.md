@@ -114,7 +114,7 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
  * **Polish**
    * [coralpink](https://translate.codeberg.org/user/coralpink/) (100)
  * **Russian**
-   * [0ko](https://translate.codeberg.org/user/0ko/) (145)
+   * [0ko](https://translate.codeberg.org/user/0ko/) (151)
  * **Turkish**
    * [omerdduran](https://translate.codeberg.org/user/omerdduran/) (129)
 
