@@ -146,6 +146,7 @@ The package maintainer should run through these steps for a new release:
    * <https://cvsweb.openbsd.org/ports/sysutils/pv/>
    * <https://packages.fedoraproject.org/pkgs/pv/pv/>
  * Run "`make indent; make indent indentclean check`"
+ * Check that `po/POTFILES.in` is up to date
  * Run "`make -C po update-po`"
  * Run "`make analyse`" and see whether remaining warnings can be addressed
  * Version bump and documentation checks:
