@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-15 22:01+0100\n"
+"POT-Creation-Date: 2024-11-03 01:37+0000\n"
 "PO-Revision-Date: 2024-10-20 14:07+0000\n"
 "Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -49,8 +49,8 @@ msgstr "SEKUNDY"
 #: src/main/help.c:302
 msgid "compute average rate over past SEC seconds (default 30s)"
 msgstr ""
-"oblicz średnią prędkość transferu na podstawie poprzednich SEKUNDY sekund ("
-"domyślnie 30 s)"
+"oblicz średnią prędkość transferu na podstawie poprzednich SEKUNDY sekund "
+"(domyślnie 30 s)"
 
 #: src/main/help.c:305
 msgid "show number of bytes transferred"
@@ -270,11 +270,11 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr "Proszę przesyłać zgłoszenia błędów do %s"
 
-#: src/main/main.c:214
+#: src/main/main.c:230
 msgid "(input)"
 msgstr "(wejście)"
 
-#: src/main/main.c:299
+#: src/main/main.c:315
 msgid "state allocation failed"
 msgstr "alokacja stanu programu nie powiodła się"
 

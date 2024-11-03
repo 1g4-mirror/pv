@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-15 22:01+0100\n"
+"POT-Creation-Date: 2024-11-03 01:37+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: fnetX <otto@codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -275,11 +275,11 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr "Bitte senden Sie Fehlerberichte an %s"
 
-#: src/main/main.c:214
+#: src/main/main.c:230
 msgid "(input)"
 msgstr "(eingabe)"
 
-#: src/main/main.c:299
+#: src/main/main.c:315
 msgid "state allocation failed"
 msgstr "Speicherzuweisung für `state' fehlgeschlagen"
 

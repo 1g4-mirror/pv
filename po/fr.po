@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-15 22:01+0100\n"
+"POT-Creation-Date: 2024-11-03 01:37+0000\n"
 "PO-Revision-Date: 2024-10-12 11:13+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: French <https://translate.codeberg.org/projects/pv/pv/fr/>\n"
@@ -276,11 +276,11 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr "SVP rapporter tous bogues à %s"
 
-#: src/main/main.c:214
+#: src/main/main.c:230
 msgid "(input)"
 msgstr "(entrée)"
 
-#: src/main/main.c:299
+#: src/main/main.c:315
 msgid "state allocation failed"
 msgstr "échec de l'allocation de mémoire de condition"
 

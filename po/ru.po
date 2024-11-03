@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-15 22:01+0100\n"
+"POT-Creation-Date: 2024-11-03 01:37+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -151,7 +151,8 @@ msgstr "вевести, даже если стд. ошибка не являет
 
 #: src/main/help.c:366
 msgid "use cursor positioning escape sequences"
-msgstr "использовать символьные последовательности для позиционирования курсора"
+msgstr ""
+"использовать символьные последовательности для позиционирования курсора"
 
 #: src/main/help.c:369 src/main/help.c:399 src/main/help.c:408
 #: src/main/help.c:423
@@ -257,11 +258,11 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr "Сообщайте о проблемах на: %s"
 
-#: src/main/main.c:214
+#: src/main/main.c:230
 msgid "(input)"
 msgstr "(ввод)"
 
-#: src/main/main.c:299
+#: src/main/main.c:315
 msgid "state allocation failed"
 msgstr ""
 

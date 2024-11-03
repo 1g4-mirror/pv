@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-10-15 22:01+0100\n"
+"POT-Creation-Date: 2024-11-03 01:37+0000\n"
 "PO-Revision-Date: 2024-10-12 23:51+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -258,11 +258,11 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr "Lütfen hataları şu adrese bildirin: %s"
 
-#: src/main/main.c:214
+#: src/main/main.c:230
 msgid "(input)"
 msgstr "(giriş)"
 
-#: src/main/main.c:299
+#: src/main/main.c:315
 msgid "state allocation failed"
 msgstr "durum tahsisi başarısız oldu"
 
