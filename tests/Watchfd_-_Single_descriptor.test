@@ -21,6 +21,12 @@ pid=$!
 sleep 0.1
 "${testSubject}" -d "${pid}:0" -f -i 0.5 >/dev/null 2>"${workFile2}"
 
+# Skip the test if "-d" does not work.
+if grep -Fq ' -d: not available' "${workFile2}"; then
+	echo "no \`--watchfd' / \`-d' option on this platform"
+	exit 77
+fi
+
 # There should be at least 2 different numbers starting the output lines. 
 positionsReported="$(tr '\r' '\n' < "${workFile2}" | awk '{print $1}' | sort -n | uniq)"
 differentNumbers="$(printf "%s\n" "${positionsReported}" | grep -Ec .)"
