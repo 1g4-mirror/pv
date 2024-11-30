@@ -83,6 +83,7 @@ tests/Terminal_-_Detect_width.test \
 tests/Transfer_-_--rate-limit.test \
 tests/Transfer_-_--remote.test \
 tests/Transfer_-_--stop-at-size.test \
+tests/Watchfd_-_Multiple_descriptors.test \
 tests/Watchfd_-_Single_descriptor.test
 
 EXTRA_DIST += $(TESTS) tests/run-valgrind.sh tests/test-env.sh
