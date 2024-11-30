@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-11-03 01:37+0000\n"
+"POT-Creation-Date: 2024-11-30 17:45+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -465,11 +465,11 @@ msgstr "rychlost min/avg/max/std"
 msgid "rate not measured"
 msgstr "rychlost neměřena"
 
-#: src/pv/loop.c:766 src/pv/loop.c:817 src/pv/loop.c:858 src/pv/watchpid.c:99
+#: src/pv/loop.c:767 src/pv/loop.c:818 src/pv/loop.c:859 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
-#: src/pv/watchpid.c:202 src/pv/watchpid.c:293 src/pv/watchpid.c:301
-#: src/pv/watchpid.c:377 src/pv/watchpid.c:398
+#: src/pv/watchpid.c:202 src/pv/watchpid.c:300 src/pv/watchpid.c:308
+#: src/pv/watchpid.c:384 src/pv/watchpid.c:405
 msgid "pid"
 msgstr "pid"
 
