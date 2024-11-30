@@ -36,13 +36,15 @@ done
 
 runWithValgrind () {
 
+	true > "${workFile4}"
 	valgrind --tool=memcheck \
-	  --verbose --show-error-list=yes --log-fd=3 \
+	  --verbose --show-error-list=yes \
+	  --log-file="${workFile4}" \
 	  --error-exitcode=125 \
 	  --track-fds=yes \
 	  --leak-check=full \
 	  "${testSubject}" "$@" \
-	  3>"${workFile4}" 4<&-
+	  4<&- 9<&-
 
 	returnValue=$?
 
