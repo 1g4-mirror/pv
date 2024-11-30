@@ -72,6 +72,7 @@ tests/Integrity_-_When_adjusted_remotely.test \
 tests/Memory_safety_-_Basic.test \
 tests/Memory_safety_-_Remote_control_receiver.test \
 tests/Memory_safety_-_Remote_control_sender.test \
+tests/Memory_safety_-_Watchfd.test \
 tests/Modifiers_-_--direct-io.test \
 tests/Modifiers_-_--force.test \
 tests/Modifiers_-_--interval.test \
