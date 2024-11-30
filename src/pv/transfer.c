@@ -1182,5 +1182,3 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 
 	return state->transfer.written;
 }
-
-/* EOF */

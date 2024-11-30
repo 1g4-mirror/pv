@@ -689,5 +689,3 @@ void pv_crs_fini(pvstate_t state)
 		(void) remove(state->cursor.lock_file);
 	}
 }
-
-/* EOF */

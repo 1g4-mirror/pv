@@ -1023,5 +1023,3 @@ int pv_watchpid_loop(pvstate_t state)
 
 	return 0;
 }
-
-/* EOF */

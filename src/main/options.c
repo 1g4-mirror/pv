@@ -773,5 +773,3 @@ opts_t opts_parse(unsigned int argc, char **argv)
 
 	return opts;
 }
-
-/* EOF */

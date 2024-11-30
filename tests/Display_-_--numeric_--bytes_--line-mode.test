@@ -33,5 +33,3 @@ if ! test "${finalStdoutLine}" = "100"; then
 fi
 
 exit 0
-
-# EOF

@@ -28,5 +28,3 @@ if ! test "${lineCount}" -gt 3; then
 fi
 
 exit 0
-
-# EOF

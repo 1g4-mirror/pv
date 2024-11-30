@@ -645,5 +645,3 @@ void pv_watchpid_setname(pvstate_t state, pvwatchfd_t info)
 
 	debug("%s: %d: [%s]", "set name for fd", info->watch_fd, info->display_name);
 }
-
-/* EOF */

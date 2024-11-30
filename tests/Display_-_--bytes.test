@@ -13,5 +13,3 @@ test "${counterValue}" = "100B" && exit 0
 
 echo "unexpected byte counter value: ${counterValue}"
 exit 1
-
-# EOF

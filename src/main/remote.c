@@ -432,5 +432,3 @@ int pv_remote_set(			 /*@unused@ */
 }
 
 #endif				/* SA_SIGINFO */
-
-/* EOF */

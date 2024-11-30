@@ -295,5 +295,3 @@ int pv_percentage(off_t amount, const off_t total)
 
 	return (int) amount;
 }
-
-/* EOF */

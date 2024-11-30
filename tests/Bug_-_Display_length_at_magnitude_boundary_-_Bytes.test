@@ -28,5 +28,3 @@ test "${lineLengthCount}" = "1" && exit 0
 echo "variable line lengths detected"
 tr '\r' '\n' < "${workFile1}"
 exit 1
-
-# EOF

@@ -23,5 +23,3 @@ if ! test "${inputChecksum}" = "${outputChecksum}"; then
 fi
 
 exit 0
-
-# EOF

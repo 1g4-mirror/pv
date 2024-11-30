@@ -20,5 +20,3 @@ checkSizeArgument 1M 1048576
 checkSizeArgument 8G 8589934592
 
 exit 0
-
-# EOF

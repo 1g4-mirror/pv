@@ -28,5 +28,3 @@ if ! test "${differentBarLengthsCount}" -gt 5; then
 fi
 
 exit 0
-
-# EOF

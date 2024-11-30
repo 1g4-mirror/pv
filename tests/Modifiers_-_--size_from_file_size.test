@@ -45,5 +45,3 @@ sizeCheck 200 50
 sizeCheck 50 200
 
 exit 0
-
-# EOF

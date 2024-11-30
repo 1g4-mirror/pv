@@ -35,5 +35,3 @@ runWithValgrind -R "$(cat "${workFile3}")" -L 10M 4>&1    || exit 1
 wait
 
 exit 0
-
-# EOF

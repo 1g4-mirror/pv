@@ -23,5 +23,3 @@ if ! test "${inputString}" = "${outputString}"; then
 fi
 
 exit 0
-
-# EOF

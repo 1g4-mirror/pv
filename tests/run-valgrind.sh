@@ -62,5 +62,3 @@ runWithValgrind () {
 
 	return "${returnValue}"
 }
-
-# EOF

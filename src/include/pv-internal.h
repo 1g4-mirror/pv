@@ -398,5 +398,3 @@ void pv_watchpid_setname(pvstate_t, pvwatchfd_t);
 #endif
 
 #endif /* _PV_INTERNAL_H */
-
-/* EOF */

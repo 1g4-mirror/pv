@@ -118,5 +118,3 @@ void debugging_output( __attribute__((unused))
 }
 
 #endif				/* ENABLE_DEBUGGING */
-
-/* EOF */

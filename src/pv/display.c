@@ -1308,5 +1308,3 @@ void pv_display(pvstate_t state, bool final)
 
 	debug("%s: [%s]", "display", state->display.display_buffer);
 }
-
-/* EOF */

@@ -169,5 +169,3 @@ void pv_calculate_transfer_rate(pvstate_t state, bool final)
 	if (state->calc.percentage > 100000)
 		state->calc.percentage = 100000;
 }
-
-/* EOF */

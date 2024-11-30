@@ -527,5 +527,3 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 
 /*@+nullstate@*/
 /* splint: see unqualifiedtrans note by free() above. */
-
-/* EOF */

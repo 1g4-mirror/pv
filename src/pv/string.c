@@ -179,5 +179,3 @@ void *pv_memrchr(const void *buffer, int match, size_t length)
 	return NULL;
 #endif
 }
-
-/* EOF */

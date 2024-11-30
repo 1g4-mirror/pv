@@ -15,5 +15,3 @@ if test -s "${workFile1}"; then
 fi
 
 exit 0
-
-# EOF

@@ -447,5 +447,3 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	/*@+onlytrans@ */
 	/*@+observertrans@ */
 }
-
-/* EOF */

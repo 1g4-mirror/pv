@@ -17,5 +17,3 @@ if test "${startTime}" = "${endTime}"; then
 fi
 
 exit 0
-
-# EOF

@@ -607,5 +607,3 @@ void display_help(void)
 
 	printf("\n");
 }
-
-/* EOF */

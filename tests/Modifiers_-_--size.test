@@ -52,5 +52,3 @@ if ! test "${finalLine}" = "200"; then
 fi
 
 exit 0
-
-# EOF

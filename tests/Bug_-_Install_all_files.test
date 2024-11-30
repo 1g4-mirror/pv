@@ -39,5 +39,3 @@ fi
 
 rm -rf "${testInstallDir}"
 exit "${exitStatus}"
-
-# EOF

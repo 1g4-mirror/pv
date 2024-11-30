@@ -33,5 +33,3 @@ if ! test "${differentNumbers}" -gt 1; then
 fi
 
 exit 0
-
-# EOF

@@ -27,5 +27,3 @@ test "${lineCount}" -lt 2 && exit 0
 echo "average rate varied more than expected"
 tr '\r' '\n' < "${workFile1}"
 exit 1
-
-# EOF

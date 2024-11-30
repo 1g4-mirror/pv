@@ -299,5 +299,3 @@ void debugging_output(const char *, const char *, int, const char *, ...);
 #endif
 
 #endif /* _PV_H */
-
-/* EOF */

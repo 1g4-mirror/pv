@@ -35,5 +35,3 @@ for ((buffer=100; buffer<=1000; buffer+=100)); do
 		echo -e "${buffer}\t${rate}\t${rdata}\t${wdata}"
 	done
 done
-
-# EOF

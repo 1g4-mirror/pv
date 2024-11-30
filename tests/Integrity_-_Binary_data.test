@@ -19,5 +19,3 @@ outputChecksum=$(cksum "${workFile2}" | awk '{print $1}')
 test "${inputChecksum}" = "${outputChecksum}" || exit 1
 
 exit 0
-
-# EOF

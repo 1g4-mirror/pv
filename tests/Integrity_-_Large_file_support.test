@@ -76,5 +76,3 @@ if ! test "${bytesReported}" -eq "${fileSize}"; then
 fi
 
 exit 0
-
-# EOF

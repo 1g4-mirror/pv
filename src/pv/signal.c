@@ -551,5 +551,3 @@ void pv_sig_checkbg(void)
 	pv_crs_needreinit(pv_sig_state);
 #endif
 }
-
-/* EOF */

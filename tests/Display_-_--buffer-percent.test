@@ -17,5 +17,3 @@ test "${differentLines}" -gt 1 && exit 0
 echo "expected output changes not seen"
 tr '\r' '\n' < "${workFile1}" | sed 's/^ *$/d' | sort | uniq
 exit 1
-
-# EOF

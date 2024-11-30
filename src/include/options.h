@@ -93,5 +93,3 @@ extern bool opts_add_file(opts_t, const char *);
 #endif
 
 #endif /* _OPTIONS_H */
-
-/* EOF */

@@ -39,5 +39,3 @@ done
 { runWithValgrind -L 100k -i 0.1 -f -P "${workFile3}" "${workFile1}" > "${workFile2}" 2>/dev/null; } 4>&1 || exit 1
 
 exit 0
-
-# EOF

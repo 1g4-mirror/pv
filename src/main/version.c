@@ -31,5 +31,3 @@ void display_version(void)
 	/* Project web site link */
 	printf("\n%s: <%s>\n", _("Project web site"), PACKAGE_URL);
 }
-
-/* EOF */

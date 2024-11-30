@@ -251,5 +251,3 @@ void pv_nanosleep(long long nanoseconds)
 	/*@+null@ *//* splint doesn't know about select() */
 #endif
 }
-
-/* EOF */
