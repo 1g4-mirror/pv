@@ -3,6 +3,7 @@
  * *fix:* correct failure to report file positions in **--watchfd** ([#118](https://codeberg.org/a-j-wood/pv/issues/118))
  * *i18n:* Russian translations added
  * *cleanup:* test added for **--watchfd PID:FD**
+ * *cleanup:* worked around file descriptor leak false positives in valgrind 3.23 ([#97](https://codeberg.org/a-j-wood/pv/issues/97))
 
 ### 1.9.0 - 15 October 2024
 
