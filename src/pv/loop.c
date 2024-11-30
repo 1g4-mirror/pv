@@ -649,6 +649,7 @@ int pv_watchfd_loop(pvstate_t state)
 				state->display.initial_offset = position_now;
 				first_check = false;
 			}
+			state->transfer.transferred = position_now;
 			state->transfer.total_written = position_now;
 		}
 
@@ -955,6 +956,7 @@ int pv_watchpid_loop(pvstate_t state)
 			}
 
 			if (NULL != info_array[idx].state) {
+				info_array[idx].state->transfer.transferred = position_now;
 				info_array[idx].state->transfer.total_written = position_now;
 				pv_display(info_array[idx].state, false);
 				displayed_lines++;

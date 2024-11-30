@@ -281,6 +281,13 @@ off_t pv_watchfd_position(pvwatchfd_t info)
 	(void) fclose(fptr);
 #endif
 
+	/*
+	 * This debugging line can be quite noisy - turned off for now,
+	 * uncomment if needed.
+	 *
+	 * debug("pid:%d fd:%d position:%lld", (int) (info->watch_pid), info->watch_fd, position);
+	 */
+
 	return position;
 }
 

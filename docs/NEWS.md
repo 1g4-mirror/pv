@@ -1,6 +1,8 @@
 ### UNRELEASED
 
+ * *fix:* correct failure to report file positions in **--watchfd** ([#118](https://codeberg.org/a-j-wood/pv/issues/118))
  * *i18n:* Russian translations added
+ * *cleanup:* test added for **--watchfd PID:FD**
 
 ### 1.9.0 - 15 October 2024
 
