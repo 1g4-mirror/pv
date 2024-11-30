@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Check that watching a single file descriptor works as expected.
+
+# Dummy assignments for "shellcheck".
+testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"; workFile2="${workFile1:-.tmp2}"
+
+# Skip the test if "-d" is not available.
+if ! "${testSubject}" -h | grep -Fq ' -d'; then
+	echo "no \`--watchfd' / \`-d' option on this platform"
+	exit 77
+fi
+
+seq 1 100 > "${workFile1}"
+
+# Run a background process to perform a few reads from a file.
+# NB we just export line to make shellcheck think it's used.
+(export line; sleep 1; read -r line; sleep 1; read -r line; sleep 1) <"${workFile1}" &
+pid=$!
+
+"${testSubject}" -d "${pid}:0" -f -i 0.5 >/dev/null 2>"${workFile2}"
+
+# There should be at least 2 different numbers starting the output lines. 
+positionsReported="$(tr '\r' '\n' < "${workFile2}" | awk '{print $1}' | sort -n | uniq)"
+differentNumbers="$(printf "%s\n" "${positionsReported}" | grep -Ec .)"
+if ! test "${differentNumbers}" -gt 1; then
+	printf "%s\n" "Expected at least 2 different numbers to be output"
+	printf "%s:\n%s\n" "Positions reported" "${positionsReported}"
+	printf "%s: %s\n" "Number of different values seen" "${differentNumbers}"
+	printf "%s\n" "Raw output:"
+	tr '\r' '\n' < "${workFile2}"
+	exit 1
+fi
+
+exit 0
+
+# EOF
