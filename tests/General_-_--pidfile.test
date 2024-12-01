@@ -3,8 +3,8 @@
 # Check that the process ID can be written to a file as described in the
 # manual.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
 
 # Check we can run "kill -s 0".
 if ! kill -s 0 $$ >/dev/null 2>&1; then

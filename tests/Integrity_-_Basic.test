@@ -2,8 +2,7 @@
 #
 # Check that data can be just passed straight through.
 
-# Dummy assignment for "shellcheck".
-testSubject="${testSubject:-false}"
+true "${testSubject:?not set - call this from 'make check'}"
 
 inputString="TESTING"
 outputString=$(printf "%s" "${inputString}" | "${testSubject}" 2>/dev/null) || { echo "unexpected failure code"; exit 1; }

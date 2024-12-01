@@ -2,8 +2,8 @@
 #
 # Check that the estimated time counter counts.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
 
 dd if=/dev/zero bs=100 count=1 2>/dev/null \
 | "${testSubject}" -f -e -s 100 -i 0.1 -L 25 >/dev/null 2>"${workFile1}"

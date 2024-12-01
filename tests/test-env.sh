@@ -6,6 +6,8 @@
 # Tests must exit with 0 for success, 1 for failure, 77 to skip the test, or
 # 99 for a fatal error with the test framework.
 
+true "${srcdir:?not set - call this from 'make check'}"
+
 # Parameters.
 testSubject="./pv"
 sourcePath="${srcdir}"

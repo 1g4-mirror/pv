@@ -2,8 +2,9 @@
 #
 # Check that the terminal width is detected on startup.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"; workFile2="${workFile2:-.tmp2}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
+true "${workFile2:?not set - call this from 'make check'}"
 
 # Skip the test if `tmux' is not available.
 if ! command -v tmux >/dev/null 2>&1; then

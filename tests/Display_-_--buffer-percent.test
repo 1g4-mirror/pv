@@ -2,8 +2,8 @@
 #
 # Check that "--buffer-percent" displays correctly.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
 
 # The output should show 100% and 0% as the buffer initially fills up due to
 # there being nowhere to write it to, and then empties.

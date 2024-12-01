@@ -2,8 +2,10 @@
 #
 # Check that watching a process's file descriptors works as expected.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"; workFile2="${workFile2:-.tmp2}"; workFile3="${workFile3:-.tmp3}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
+true "${workFile2:?not set - call this from 'make check'}"
+true "${workFile3:?not set - call this from 'make check'}"
 
 # Skip the test if "-d" is not available.
 if ! "${testSubject}" -h | grep -Fq ' -d'; then

@@ -3,8 +3,12 @@
 # Run valgrind's memory checker while using remote control to control
 # another process.
 
-# Dummy assignments for "shellcheck".
-sourcePath="${sourcePath:-.}"; testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"; workFile2="${workFile2:-.tmp2}"; workFile3="${workFile3:-.tmp3}"; workFile4="${workFile4:-.tmp4}"
+true "${sourcePath:?not set - call this from 'make check'}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
+true "${workFile2:?not set - call this from 'make check'}"
+true "${workFile3:?not set - call this from 'make check'}"
+true "${workFile4:?not set - call this from 'make check'}"
 
 # Do nothing if it is not supported.
 if ! "${testSubject}" -h 2>/dev/null | grep -Eq "^  -R,"; then

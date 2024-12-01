@@ -2,8 +2,8 @@
 #
 # Check that "--last-written" works.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
 
 # Slowly write a sequence of numbers (rate-limited by another `pv' instance)
 # and watch the "--last-written" output of a second `pv' instance to make

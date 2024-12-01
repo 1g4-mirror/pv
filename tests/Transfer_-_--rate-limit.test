@@ -2,8 +2,7 @@
 #
 # A simple test of rate limiting.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"
+true "${testSubject:?not set - call this from 'make check'}"
 
 # Transfer 102 bytes at 100 bytes/sec. It should take at least 1 second.
 #

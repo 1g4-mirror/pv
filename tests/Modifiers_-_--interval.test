@@ -2,8 +2,8 @@
 #
 # Check that the update interval can be set.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
 
 sleep 1 | "${testSubject}" -f -i 0.1 >/dev/null 2>"${workFile1}"
 

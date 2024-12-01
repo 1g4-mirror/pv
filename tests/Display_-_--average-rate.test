@@ -3,8 +3,8 @@
 # Check that the average transfer rate counter changes, but not more than it
 # should.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
 
 # Transfer 210 bytes as 100 bytes, a 1 second gap, 110 bytes, and another 1
 # second gap.

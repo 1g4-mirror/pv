@@ -3,8 +3,12 @@
 # Run valgrind's memory checker against a process using the --watchfd
 # option.
 
-# Dummy assignments for "shellcheck".
-sourcePath="${sourcePath:-.}"; testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"; workFile2="${workFile2:-.tmp2}"; workFile3="${workFile3:-.tmp3}"; workFile4="${workFile4:-.tmp4}"
+true "${sourcePath:?not set - call this from 'make check'}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
+true "${workFile2:?not set - call this from 'make check'}"
+true "${workFile3:?not set - call this from 'make check'}"
+true "${workFile4:?not set - call this from 'make check'}"
 
 # Load the valgrind function.
 . "${sourcePath}/tests/run-valgrind.sh"
@@ -27,7 +31,8 @@ fi
 # Check "--watchfd PID:FD".
 # See the "Watchfd" tests for more detail.
 seq 1 100 > "${workFile1}"
-(export line; sleep 1; read -r line; sleep 1; read -r line; sleep 1) <"${workFile1}" &
+# shellcheck disable=SC2030
+(sleep 1; read -r line; sleep 1; read -r line; sleep 1) <"${workFile1}" &
 pid=$!
 sleep 0.1
 { runWithValgrind -d "${pid}:0" -f -i 0.5 >/dev/null 2>&1; } 4>&1 || exit 1
@@ -35,8 +40,8 @@ sleep 0.1
 # Check "--watchfd PID".
 seq 1 100 > "${workFile1}"
 seq 1 300 > "${workFile2}"
+# shellcheck disable=SC2030
 (
-export line
 sleep 1
 read -r line
 exec 9<"${workFile2}"
@@ -45,6 +50,7 @@ exec 8<"${workFile1}"
 exec 7</dev/null
 sleep 1
 exec 9<&-
+# shellcheck disable=SC2034
 read -r line
 sleep 1
 ) <"${workFile1}" &

@@ -2,8 +2,7 @@
 #
 # Check that there is no SIGPIPE or dropped data on bigger data transfers.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"
+true "${testSubject:?not set - call this from 'make check'}"
 
 # We nead GNU head. On some platforms it is named ghead instead of head.
 HEAD="head"

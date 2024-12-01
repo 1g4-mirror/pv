@@ -21,8 +21,8 @@
 # Output file for failures.
 valgrindOutputFile="valgrind.out"
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile4="${workFile4:-.tmp4}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile4:?not set - call this from 'make check'}"
 
 if ! command -v valgrind >/dev/null 2>&1; then
 	echo "test requires \`valgrind'"

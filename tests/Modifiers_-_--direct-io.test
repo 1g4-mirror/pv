@@ -5,8 +5,9 @@
 # doesn't check that O_DIRECT is actually being used, it just checks that
 # data is not being corrupted.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"; workFile2="${workFile2:-.tmp2}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
+true "${workFile2:?not set - call this from 'make check'}"
 
 # generate some data
 dd if=/dev/urandom of="${workFile1}" bs=1024 count=2560 2>/dev/null

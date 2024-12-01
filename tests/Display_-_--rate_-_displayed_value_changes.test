@@ -2,8 +2,8 @@
 #
 # Check that the transfer rate counter changes.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
 
 # Transfer 200 bytes as two 100-byte blocks with a 2-second gap between.
 #

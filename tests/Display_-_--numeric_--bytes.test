@@ -3,8 +3,8 @@
 # Check that numeric output gives a byte count instead of a percentage when
 # used with -b.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"; workFile1="${workFile1:-.tmp1}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
 
 # Process 500 bytes at 500 bytes per second, updating every 0.1 seconds for
 # around 10 output lines.

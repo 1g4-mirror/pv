@@ -2,8 +2,7 @@
 #
 # Check that size arguments are processed correctly.
 
-# Dummy assignments for "shellcheck".
-testSubject="${testSubject:-false}"
+true "${testSubject:?not set - call this from 'make check'}"
 
 # Pass size argument $1 and check that the last reported number is $2.
 checkSizeArgument () {
