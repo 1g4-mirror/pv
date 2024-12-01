@@ -101,7 +101,7 @@ void debugging_output(const char *function, const char *file, int line, const ch
 /*
  * Stub debugging destination function.
  */
-void debugging_output_destination( __attribute__((unused))
+void debugging_output_destination( /*@unused@ */  __attribute__((unused))
 				  const char *filename)
 {
 }
@@ -109,10 +109,10 @@ void debugging_output_destination( __attribute__((unused))
 /*
  * Stub debugging output function.
  */
-void debugging_output( __attribute__((unused))
-		      const char *function, __attribute__((unused))
-		      const char *file, __attribute__((unused))
-		      int line, __attribute__((unused))
+void debugging_output( /*@unused@ */  __attribute__((unused))
+		      const char *function, /*@unused@ */  __attribute__((unused))
+		      const char *file, /*@unused@ */  __attribute__((unused))
+		      int line, /*@unused@ */  __attribute__((unused))
 		      const char *format, ...)
 {
 }

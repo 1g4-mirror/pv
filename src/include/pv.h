@@ -280,7 +280,7 @@ extern void pv_state_free(/*@only@*/ pvstate_t);
 # endif
 # define debug(x,...) debugging_output(__func__, __FILE__, __LINE__, x, __VA_ARGS__)
 #else
-# define debug(x,...) do { } while (0)
+# define debug(x,...) /*@-noeffect@*/ do { } while (0) /*@+noeffect@*/
 #endif
 
 /*
