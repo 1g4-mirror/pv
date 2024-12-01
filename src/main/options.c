@@ -59,6 +59,8 @@ void opts_free( /*@only@ */ opts_t opts)
 		free(opts->output);
 	if (NULL != opts->store_and_forward_file)
 		free(opts->store_and_forward_file);
+	if (NULL != opts->extra_display)
+		free(opts->extra_display);
 	if (NULL != opts->argv)
 		free(opts->argv);
 	/*@+keeptrans@ */
@@ -295,6 +297,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "height", 1, NULL, (int) 'H' },
 		{ "name", 1, NULL, (int) 'N' },
 		{ "format", 1, NULL, (int) 'F' },
+		{ "extra-display", 1, NULL, (int) 'x' },
 		{ "stats", 0, NULL, (int) 'v' },
 		{ "rate-limit", 1, NULL, (int) 'L' },
 		{ "buffer-size", 1, NULL, (int) 'B' },
@@ -319,7 +322,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:F:L:B:CEZ:SYKXU:R:P:d:m:o:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:F:x:L:B:CEZ:SYKXU:R:P:d:m:o:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -633,6 +636,14 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->format = pv_strdup(optarg);
 			if (NULL == opts->format) {
 				fprintf(stderr, "%s: -F: %s\n", opts->program_name, strerror(errno));
+				opts_free(opts);
+				return NULL;
+			}
+			break;
+		case 'x':
+			opts->extra_display = pv_strdup(optarg);
+			if (NULL == opts->extra_display) {
+				fprintf(stderr, "%s: -x: %s\n", opts->program_name, strerror(errno));
 				opts_free(opts);
 				return NULL;
 			}

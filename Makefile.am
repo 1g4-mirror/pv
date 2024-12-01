@@ -24,6 +24,7 @@ src/pv/elapsedtime.c \
 src/pv/file.c \
 src/pv/loop.c \
 src/pv/number.c \
+src/pv/proctitle.c \
 src/pv/signal.c \
 src/pv/state.c \
 src/pv/string.c \
@@ -70,6 +71,7 @@ tests/Integrity_-_Large_file_support.test \
 tests/Integrity_-_On_output_pipe_close.test \
 tests/Integrity_-_When_adjusted_remotely.test \
 tests/Memory_safety_-_Basic.test \
+tests/Memory_safety_-_Process_title.test \
 tests/Memory_safety_-_Remote_control_receiver.test \
 tests/Memory_safety_-_Remote_control_sender.test \
 tests/Memory_safety_-_Watchfd.test \

@@ -1,5 +1,6 @@
 ### UNRELEASED
 
+ * *feature:* new **--extra-display** option to update window and process titles ([#3](https://codeberg.org/a-j-wood/pv/issues/3), [#4](https://codeberg.org/a-j-wood/pv/issues/4))
  * *fix:* correct failure to report file positions in **--watchfd** ([#118](https://codeberg.org/a-j-wood/pv/issues/118))
  * *i18n:* Russian translations added
  * *cleanup:* tests added for **--watchfd** ([#10](https://codeberg.org/a-j-wood/pv/issues/10))

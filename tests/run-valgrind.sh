@@ -23,6 +23,7 @@ valgrindOutputFile="valgrind.out"
 
 true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile4:?not set - call this from 'make check'}"
+true "${workFile5:?not set - call this from 'make check'}"
 
 if ! command -v valgrind >/dev/null 2>&1; then
 	echo "test requires \`valgrind'"
@@ -36,9 +37,21 @@ done
 
 runWithValgrind () {
 
+	cat > "${workFile5}" <<EOF
+{
+   ignore-initproctitle-leak
+   Memcheck:Leak
+   fun:malloc
+   fun:initproctitle
+   fun:main
+}
+EOF
+
 	true > "${workFile4}"
 	valgrind --tool=memcheck \
-	  --verbose --show-error-list=yes \
+	  --verbose \
+	  --show-error-list=yes \
+	  --suppressions="${workFile5}" \
 	  --log-file="${workFile4}" \
 	  --error-exitcode=125 \
 	  --track-fds=yes \

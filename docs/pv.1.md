@@ -7,10 +7,11 @@ pv - monitor the progress of data through a pipe
 **pv** \[*OPTION*\]\... \[*FILE*\]\...
 
 **pv** \[ **-pteIrab8kTv** \] \[ **-A** NUM \] \[ **-F** FORMAT \] \[
-**-Wgl0fc** \] \[ **-D** SEC \] \[ **-s** SIZE \] \[ **-i** SEC \] \[
-**-m** SEC \] \[ **-w** WIDTH \] \[ **-H** HEIGHT \] \[ **-N** NAME \]
-[ **-o** FILE \] \[ **-L** RATE \] \[ **-B** BYTES \] \[ **-CESYKX** \]
-[ **-Z** BYTES \] \[ **-U** FILE \] \[ **-P** FILE \] \[*FILE* . . .\]
+**-x** SPEC \] \[ **-Wgl0fc** \] \[ **-D** SEC \] \[ **-s** SIZE \] \[
+**-i** SEC \] \[ **-m** SEC \] \[ **-w** WIDTH \] \[ **-H** HEIGHT \] \[
+**-N** NAME \] \[ **-o** FILE \] \[ **-L** RATE \] \[ **-B** BYTES \] \[
+**-CESYKX** \] \[ **-Z** BYTES \] \[ **-U** FILE \] \[ **-P** FILE \]
+[*FILE* . . .\]
 
 **pv** **-n** \[ **-trbv** \] \[ **-Wl0** \] \[ **-D** SEC \] \[ **-s**
 SIZE \] \[ **-i** SEC \] \[ **-o** FILE \] \[ **-L** RATE \] \[ **-B**
@@ -176,6 +177,20 @@ display types that are explicitly switched on will be shown.
 :   Ignore the options **-p**, **-t**, **-e**, **-r**, **-a**, **-b**,
     **-T**, and **-A**, and instead use the format string *FORMAT* to
     determine the output format. See the **FORMATTING** section below.
+
+**-x SPEC, \--extra-display SPEC**
+
+:   As well as displaying progress to the terminal, also write it to
+    *SPEC*. The *SPEC* must start with a comma-separated list of
+    destinations, and can optionally be followed by a colon and a format
+    string. The destinations can be **windowtitle** or **window** for
+    the xterm window title, and **processtitle**, **proctitle**,
+    **process**, or **proc** for the process title displayed by
+    **ps**(1). If a format string is not supplied, the same format is
+    used as for the terminal. For example,
+    "**-x \'window,process:%t %b %r\'**" will show the elapsed time,
+    bytes transferred, and rate, in both the window title and the
+    process title.
 
 **-v, \--stats**
 

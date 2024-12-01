@@ -280,6 +280,10 @@ int main(int argc, char **argv)
 	int retcode = 0;
 	bool can_have_eta = true;
 
+#if ! HAVE_SETPROCTITLE
+	initproctitle(argc, argv);
+#endif
+
 #ifdef ENABLE_NLS
 	/* Initialise language translation. */
 	(void) setlocale(LC_ALL, "");
@@ -490,6 +494,7 @@ int main(int argc, char **argv)
 	pv_state_size_set(state, opts->size);
 	pv_state_name_set(state, opts->name);
 	pv_state_format_string_set(state, opts->format);
+	pv_state_extra_display_set(state, opts->extra_display);
 	pv_state_watch_pid_set(state, opts->watch_pid);
 	pv_state_watch_fd_set(state, opts->watch_fd);
 	pv_state_average_rate_window_set(state, opts->average_rate_window);

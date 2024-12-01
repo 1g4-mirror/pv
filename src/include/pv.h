@@ -210,6 +210,7 @@ extern void pv_state_width_set(pvstate_t, unsigned int, bool);
 extern void pv_state_height_set(pvstate_t, unsigned int, bool);
 extern void pv_state_name_set(pvstate_t, /*@null@*/ const char *);
 extern void pv_state_format_string_set(pvstate_t, /*@null@*/ const char *);
+extern void pv_state_extra_display_set(pvstate_t, /*@null@*/ const char *);
 extern void pv_state_watch_pid_set(pvstate_t, pid_t);
 extern void pv_state_watch_fd_set(pvstate_t, int);
 extern void pv_state_output_set(pvstate_t, int, const char *);
@@ -269,6 +270,10 @@ extern void pv_sig_fini(pvstate_t);
  */
 extern void pv_state_free(/*@only@*/ pvstate_t);
 
+#if ! HAVE_SETPROCTITLE
+void initproctitle(int, char **);
+void setproctitle(const char *, ...);
+#endif
 
 #ifdef ENABLE_DEBUGGING
 # if __STDC_VERSION__ < 199901L && !defined(__func__)

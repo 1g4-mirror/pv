@@ -61,6 +61,9 @@ void pv_state_reset(pvstate_t state)
 	state->display.initial_offset = 0;
 	state->display.display_visible = false;
 
+	state->extra_display.initial_offset = 0;
+	state->extra_display.display_visible = false;
+
 	/*
 	 * Explicitly set important floating point values to 0, as memset()
 	 * is not recommended for this.
@@ -190,6 +193,10 @@ void pv_state_free(pvstate_t state)
 		free(state->display.display_buffer);
 	state->display.display_buffer = NULL;
 
+	if (NULL != state->extra_display.display_buffer)
+		free(state->extra_display.display_buffer);
+	state->extra_display.display_buffer = NULL;
+
 	if (NULL != state->control.name) {
 		free(state->control.name);
 		state->control.name = NULL;
@@ -198,6 +205,11 @@ void pv_state_free(pvstate_t state)
 	if (NULL != state->control.format_string) {
 		free(state->control.format_string);
 		state->control.format_string = NULL;
+	}
+
+	if (NULL != state->control.extra_format_string) {
+		free(state->control.extra_format_string);
+		state->control.extra_format_string = NULL;
 	}
 
 	/*@-keeptrans@ */
@@ -425,6 +437,57 @@ void pv_state_format_string_set(pvstate_t state, /*@null@ */ const char *val)
 	}
 	if (NULL != val)
 		state->control.format_string = pv_strdup(val);
+}
+
+void pv_state_extra_display_set(pvstate_t state, /*@null@ */ const char *val)
+{
+	const char *word_start;
+	size_t offset;
+
+	if (NULL != state->control.extra_format_string) {
+		free(state->control.extra_format_string);
+		state->control.extra_format_string = NULL;
+	}
+
+	state->control.extra_displays = 0;
+	if (NULL == val)
+		return;
+
+	word_start = val;
+	while (NULL != word_start && '\0' != word_start[0]) {
+		offset = 0;
+		while ('\0' != word_start[offset] && ',' != word_start[offset] && ':' != word_start[offset])
+			offset++;
+		if (((11 == offset) && (0 == strncmp(word_start, "windowtitle", 11)))
+		    || ((6 == offset) && (0 == strncmp(word_start, "window", 6)))
+		    ) {
+			debug("%s", "enabling windowtitle");
+			state->control.extra_displays |= PV_DISPLAY_WINDOWTITLE;
+		} else if (((12 == offset) && (0 == strncmp(word_start, "processtitle", 12)))
+			   || ((9 == offset) && (0 == strncmp(word_start, "proctitle", 9)))
+			   || ((7 == offset) && (0 == strncmp(word_start, "process", 7)))
+			   || ((4 == offset) && (0 == strncmp(word_start, "proc", 4)))
+		    ) {
+			debug("%s", "enabling processtitle");
+			state->control.extra_displays |= PV_DISPLAY_PROCESSTITLE;
+		}
+		switch (word_start[offset]) {
+		case ',':
+			offset++;
+			break;
+		case ':':
+			offset++;
+			debug("%s: [%s]", "setting extra_format_string", word_start + offset);
+			state->control.extra_format_string = pv_strdup(word_start + offset);
+			word_start = NULL;
+			break;
+		default:
+			word_start = NULL;
+			break;
+		}
+		if (NULL != word_start)
+			word_start += offset;
+	}
 }
 
 void pv_state_watch_pid_set(pvstate_t state, pid_t val)

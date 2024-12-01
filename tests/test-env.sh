@@ -22,9 +22,10 @@ workFile1=$(mktemp 2>/dev/null) || workFile1="./.tmp1"
 workFile2=$(mktemp 2>/dev/null) || workFile2="./.tmp2"
 workFile3=$(mktemp 2>/dev/null) || workFile3="./.tmp3"
 workFile4=$(mktemp 2>/dev/null) || workFile4="./.tmp4"
+workFile5=$(mktemp 2>/dev/null) || workFile4="./.tmp5"
 
 # Clean up the temporary files on exit, in case we are interrupted.
-trap 'rm -f "${workFile1}" "${workFile2}" "${workFile3}" "${workFile4}"' EXIT
+trap 'rm -f "${workFile1}" "${workFile2}" "${workFile3}" "${workFile4}" "${workFile5}"' EXIT
 
 # Variables used by the test scripts.
-export testSubject sourcePath workFile1 workFile2 workFile3 workFile4
+export testSubject sourcePath workFile1 workFile2 workFile3 workFile4 workFile5

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-01 16:08+0000\n"
+"POT-Creation-Date: 2024-12-01 19:09+0000\n"
 "PO-Revision-Date: 2024-10-20 14:07+0000\n"
 "Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -42,7 +42,7 @@ msgstr "pokaż licznik prędkości przesyłania"
 msgid "show data transfer average rate counter"
 msgstr "pokaż licznik uśrednionej prędkości przesyłania"
 
-#: src/main/help.c:301 src/main/help.c:335 src/main/help.c:350
+#: src/main/help.c:301 src/main/help.c:338 src/main/help.c:353
 msgid "SEC"
 msgstr "SEKUNDY"
 
@@ -84,188 +84,196 @@ msgstr "FORMAT"
 msgid "set output format to FORMAT"
 msgstr "ustaw FORMAT jako format wyjściowy"
 
+#: src/main/help.c:322
+msgid "SPEC"
+msgstr ""
+
 #: src/main/help.c:323
+msgid "also send progress to SPEC"
+msgstr ""
+
+#: src/main/help.c:326
 msgid "output transfer statistics at the end"
 msgstr "wyświetl na końcu statystyki transferu"
 
-#: src/main/help.c:326
+#: src/main/help.c:329
 msgid "output percentages, not visual information"
 msgstr "wyświetl wyjście procentowo, bez graficznej prezentacji"
 
-#: src/main/help.c:329
+#: src/main/help.c:332
 msgid "do not output any transfer information at all"
 msgstr "nie wyświetlaj żadnych informacji o przesyłaniu"
 
-#: src/main/help.c:333
+#: src/main/help.c:336
 msgid "display nothing until first byte transferred"
 msgstr "nie wyświetlaj nic aż do pierwszego przesłanego bajtu"
 
-#: src/main/help.c:336
+#: src/main/help.c:339
 msgid "display nothing until SEC seconds have passed"
 msgstr "nie wyświetlaj nic do momentu upłynięcia SEKUNDY sekund"
 
-#: src/main/help.c:338
+#: src/main/help.c:341
 msgid "SIZE"
 msgstr "ROZMIAR"
 
-#: src/main/help.c:339
+#: src/main/help.c:342
 msgid "set estimated data size to SIZE bytes"
 msgstr "ustaw oczekiwany rozmiar danych na ROZMIAR bajtów"
 
-#: src/main/help.c:342
+#: src/main/help.c:345
 msgid "if size unknown, show rate vs max rate"
 msgstr ""
 "jeśli rozmiar nie jest znany, wyświetl zestawienie prędkości do maksymalnej "
 "prędkości"
 
-#: src/main/help.c:345
+#: src/main/help.c:348
 msgid "count lines instead of bytes"
 msgstr "zliczaj linie zamiast bajty"
 
-#: src/main/help.c:348
+#: src/main/help.c:351
 msgid "lines are null-terminated"
 msgstr "linie są zakończone znakiem NUL"
 
-#: src/main/help.c:351
+#: src/main/help.c:354
 msgid "update every SEC seconds"
 msgstr "aktualizuj co każde SEKUNDY sekund"
 
-#: src/main/help.c:353
+#: src/main/help.c:356
 msgid "WIDTH"
 msgstr "SZEROKOŚĆ"
 
-#: src/main/help.c:354
+#: src/main/help.c:357
 msgid "assume terminal is WIDTH characters wide"
 msgstr "przyjmij, że terminal ma szerokość SZEROKOŚĆ znaków"
 
-#: src/main/help.c:356
+#: src/main/help.c:359
 msgid "HEIGHT"
 msgstr "WYSOKOŚĆ"
 
-#: src/main/help.c:357
+#: src/main/help.c:360
 msgid "assume terminal is HEIGHT rows high"
 msgstr "przyjmij, że terminal ma wysokość WYSOKOŚĆ linii"
 
-#: src/main/help.c:359
+#: src/main/help.c:362
 msgid "NAME"
 msgstr "NAZWA"
 
-#: src/main/help.c:360
+#: src/main/help.c:363
 msgid "prefix visual information with NAME"
 msgstr "poprzedź informacje prefiksem NAZWA"
 
-#: src/main/help.c:363
+#: src/main/help.c:366
 msgid "output even if standard error is not a terminal"
 msgstr "pokaż wyjście nawet standardowe wyjście błędu nie jest terminalem"
 
-#: src/main/help.c:366
+#: src/main/help.c:369
 msgid "use cursor positioning escape sequences"
 msgstr "używaj znaków ucieczki do pozycjonowania kursora"
 
-#: src/main/help.c:369 src/main/help.c:399 src/main/help.c:408
-#: src/main/help.c:423
+#: src/main/help.c:372 src/main/help.c:402 src/main/help.c:411
+#: src/main/help.c:426
 msgid "FILE"
 msgstr "PLIK"
 
-#: src/main/help.c:370
+#: src/main/help.c:373
 msgid "write output to FILE instead of stdout"
 msgstr "zapisz wyjście do PLIK zamiast do wyjścia standardowego"
 
-#: src/main/help.c:372
+#: src/main/help.c:375
 msgid "RATE"
 msgstr "PRĘDKOŚĆ"
 
-#: src/main/help.c:373
+#: src/main/help.c:376
 msgid "limit transfer to RATE bytes per second"
 msgstr "ogranicz przesyłane dane do PRĘDKOŚĆ bajtów na sekundę"
 
-#: src/main/help.c:375 src/main/help.c:384
+#: src/main/help.c:378 src/main/help.c:387
 msgid "BYTES"
 msgstr "BAJTY"
 
-#: src/main/help.c:376
+#: src/main/help.c:379
 msgid "use a buffer size of BYTES"
 msgstr "użyj bufora o rozmiarze BAJTY"
 
-#: src/main/help.c:379
+#: src/main/help.c:382
 msgid "never use splice(), always use read/write"
 msgstr "nigdy nie używaj splice(), zawsze używaj read/write"
 
-#: src/main/help.c:382
+#: src/main/help.c:385
 msgid "skip read errors in input"
 msgstr "pomijaj błędy odczytu wejścia"
 
-#: src/main/help.c:385
+#: src/main/help.c:388
 msgid "skip errors in BYTES blocks at a time"
 msgstr "pomijaj błędy w blokach po BAJTY bajtów na raz"
 
-#: src/main/help.c:388
+#: src/main/help.c:391
 msgid "stop after --size bytes have been transferred"
 msgstr "zakończ po przesłaniu --size bajtów"
 
-#: src/main/help.c:391
+#: src/main/help.c:394
 msgid "flush cache to disk after every write"
 msgstr "wymuś zapis pamięci podręcznej na dysk po każdym zapisie"
 
-#: src/main/help.c:394
+#: src/main/help.c:397
 msgid "use direct I/O to bypass cache"
 msgstr ""
 "użyj bezpośredniego wejścia/wyjścia celem pominięcia pamięci podręcznej"
 
-#: src/main/help.c:397
+#: src/main/help.c:400
 msgid "discard input instead of writing to output"
 msgstr "zignoruj dane wejściowe zamiast wyświetlić je na wyjściu standardowym"
 
-#: src/main/help.c:400
+#: src/main/help.c:403
 msgid "write all input to FILE before writing to output"
 msgstr ""
 "zapisz wszystkie dane wejściowe do PLIK przed wyświetleniem ich na wyjściu"
 
-#: src/main/help.c:403
+#: src/main/help.c:406
 msgid "PID"
 msgstr "PID"
 
-#: src/main/help.c:404
+#: src/main/help.c:407
 msgid "update settings of process PID"
 msgstr "zaktualizuj ustawienia procesu PID"
 
-#: src/main/help.c:409
+#: src/main/help.c:412
 msgid "save process ID in FILE"
 msgstr "zapisz ID procesu do PLIK"
 
-#: src/main/help.c:412
+#: src/main/help.c:415
 msgid "PID[:FD]"
 msgstr "PID[:FD]"
 
-#: src/main/help.c:413
+#: src/main/help.c:416
 msgid "watch file FD opened by process PID"
 msgstr "obserwuj plik FD otworzony przez proces PID"
 
-#: src/main/help.c:417
+#: src/main/help.c:420
 msgid "show this help and exit"
 msgstr "wyświetl te informacje z pomocą i wyjdź"
 
-#: src/main/help.c:420
+#: src/main/help.c:423
 msgid "show version information and exit"
 msgstr "wyświetl informacje o wersji i wyjdź"
 
-#: src/main/help.c:424
+#: src/main/help.c:427
 msgid "write debug logs to FILE"
 msgstr "zapisz logi debugujące do PLIK"
 
-#: src/main/help.c:449
+#: src/main/help.c:452
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Sposób użycia: %s [OPCJA] [PLIK]..."
 
-#: src/main/help.c:460
+#: src/main/help.c:463
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Łączenie PLIK(ów) lub wejścia standardowego, do wyjścia standardowego z "
 "monitoringiem."
 
-#: src/main/help.c:597
+#: src/main/help.c:600
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Proszę przesyłać zgłoszenia błędów do %s"
@@ -274,69 +282,69 @@ msgstr "Proszę przesyłać zgłoszenia błędów do %s"
 msgid "(input)"
 msgstr "(wejście)"
 
-#: src/main/main.c:315
+#: src/main/main.c:319
 msgid "state allocation failed"
 msgstr "alokacja stanu programu nie powiodła się"
 
-#: src/main/options.c:142 src/pv/file.c:324
+#: src/main/options.c:144 src/pv/file.c:324
 msgid "failed to stat file"
 msgstr "nie udało się wykonać operacji stat na pliku"
 
-#: src/main/options.c:156
+#: src/main/options.c:158
 msgid "is a directory"
 msgstr "jest katalogiem"
 
-#: src/main/options.c:185
+#: src/main/options.c:187
 msgid "failed to generate sysfs filename"
 msgstr "nie udało się wygenerować nazwy pliku dla sysfs"
 
-#: src/main/options.c:207
+#: src/main/options.c:209
 msgid "failed to read sysfs size file"
 msgstr "nie udało się odczytać rozmiaru pliku sysfs"
 
-#: src/main/options.c:227
+#: src/main/options.c:229
 msgid "failed to open block device"
 msgstr "nie udało się otworzyć urządzenia blokowego"
 
-#: src/main/options.c:237
+#: src/main/options.c:239
 msgid "failed to determine size of block device"
 msgstr "nie udało się ustalić rozmiaru urządzenia blokowego"
 
-#: src/main/options.c:341
+#: src/main/options.c:344
 msgid "option structure allocation failed"
 msgstr "nie udało się zaalokować struktur opcji"
 
-#: src/main/options.c:360
+#: src/main/options.c:363
 msgid "option structure argv allocation failed"
 msgstr "nie udało się zaalokować struktur opcji argv"
 
-#: src/main/options.c:422
+#: src/main/options.c:425
 msgid "integer argument expected"
 msgstr "oczekiwany argument typu liczby całkowitej"
 
-#: src/main/options.c:433
+#: src/main/options.c:436
 msgid "numeric argument expected"
 msgstr "oczekiwany argument liczbowy"
 
-#: src/main/options.c:444
+#: src/main/options.c:447
 msgid "process ID or pid:fd pair expected"
 msgstr "oczekiwany proces ID lub para PID:FD"
 
-#: src/main/options.c:451
+#: src/main/options.c:454
 msgid "invalid process ID"
 msgstr "niepoprawne ID procesu"
 
-#: src/main/options.c:668
+#: src/main/options.c:679
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Spróbuj `%s --help' by uzyskać więcej informacji."
 
-#: src/main/options.c:670
+#: src/main/options.c:681
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Spróbuj `%s -h' by uzyskać więcej informacji."
 
-#: src/main/options.c:701
+#: src/main/options.c:712
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -344,23 +352,23 @@ msgstr ""
 "nie można użyć trybu zliczania linii lub opcji modyfikujących przesył "
 "łącznie z opcją obserwowania deskryptorów plików"
 
-#: src/main/options.c:710
+#: src/main/options.c:721
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "nie można użyć pozycjonowania kursora łącznie z opcją obserwowania "
 "deskryptorów plików"
 
-#: src/main/options.c:719
+#: src/main/options.c:730
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "nie można użyć opcji zaktualizowania ustawień procesu łącznie z opcją "
 "obserwowania deskryptorów plików"
 
-#: src/main/options.c:728
+#: src/main/options.c:739
 msgid "cannot transfer files when watching file descriptors"
 msgstr "nie można przesyłać plików z opcją obserwowania deskryptorów plików"
 
-#: src/main/options.c:743
+#: src/main/options.c:754
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "niedostępne na systemach bez /proc/self/fdinfo"
 
@@ -413,37 +421,37 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:678 src/pv/transfer.c:1011
+#: src/pv/display.c:681 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 
-#: src/pv/display.c:807
+#: src/pv/display.c:810
 msgid "b"
 msgstr "b"
 
-#: src/pv/display.c:810 src/pv/transfer.c:602
+#: src/pv/display.c:813 src/pv/transfer.c:602
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:854 src/pv/display.c:869 src/pv/display.c:1088
+#: src/pv/display.c:857 src/pv/display.c:872 src/pv/display.c:1091
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
+#: src/pv/display.c:861 src/pv/display.c:876 src/pv/display.c:1095
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:858 src/pv/display.c:873 src/pv/display.c:1092
+#: src/pv/display.c:861 src/pv/display.c:876 src/pv/display.c:1095
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:901 src/pv/display.c:905
+#: src/pv/display.c:904 src/pv/display.c:908
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/display.c:971
+#: src/pv/display.c:974
 msgid "FIN"
 msgstr "FIN"
 
@@ -496,7 +504,7 @@ msgstr "pid"
 msgid "history structure allocation failed"
 msgstr "nie udało się zaalokować struktury historii"
 
-#: src/pv/state.c:509 src/pv/state.c:520
+#: src/pv/state.c:572 src/pv/state.c:583
 msgid "file list allocation failed"
 msgstr "nie udało się zaalokować listy plików"
 

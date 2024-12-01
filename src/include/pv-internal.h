@@ -64,6 +64,9 @@ typedef enum {
 #define PV_SIZEOF_FILE_FDPATH		4096
 #define PV_SIZEOF_DISPLAY_NAME		512
 
+#define PV_DISPLAY_WINDOWTITLE		1
+#define PV_DISPLAY_PROCESSTITLE		2
+
 
 /*
  * Structure for data shared between multiple "pv -c" instances.
@@ -107,6 +110,7 @@ struct pvstate_s {
 		double delay_start;              /* delay before first display */
 		/*@only@*/ /*@null@*/ char *name;		 /* display name */
 		/*@only@*/ /*@null@*/ char *format_string;	 /* output format string */
+		/*@only@*/ /*@null@*/ char *extra_format_string; /* extra format string */
 		/*@null@*/ char *output_name;    /* name of the output, for diagnostics */
 		off_t error_skip_block;          /* skip block size, 0 for adaptive */
 		off_t rate_limit;                /* rate limit, in bytes per second */
@@ -120,6 +124,7 @@ struct pvstate_s {
 		unsigned int history_interval;	 /* seconds between each average rate calc history entry */
 		unsigned int width;              /* screen width */
 		unsigned int height;             /* screen height */
+		unsigned int extra_displays;	 /* bitmask of extra display destinations */
 		bool force;                      /* display even if not on terminal */
 		bool cursor;                     /* use cursor positioning */
 		bool numeric;                    /* numeric output only */
@@ -182,7 +187,7 @@ struct pvstate_s {
 	/*****************
 	 * Display state *
 	 *****************/
-	struct {
+	struct pvdisplay_s {
 
 		struct {	/* format string broken into display components */
 			size_t str_start;		/* for strings: start offset */
@@ -210,6 +215,9 @@ struct pvstate_s {
 		bool display_visible;		 /* set once anything written to terminal */
 
 	} display;
+
+	/* Extra display for alternate outputs like a window title. */
+	struct pvdisplay_s extra_display;
 
 	/************************************
 	 * Calculated state of the transfer *
@@ -358,11 +366,13 @@ struct pvwatchfd_s {
 };
 typedef struct pvwatchfd_s *pvwatchfd_t;
 
+typedef struct pvdisplay_s *pvdisplay_t;
+
 void pv_error(pvstate_t, char *, ...);
 
 int pv_main_loop(pvstate_t);
 void pv_calculate_transfer_rate(pvstate_t, bool);
-bool pv_format(pvstate_t, bool);
+bool pv_format(pvstate_t, /*@null@*/ const char *, pvdisplay_t, bool, bool);
 void pv_display(pvstate_t, bool);
 ssize_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);
 int pv_next_file(pvstate_t, unsigned int, int);

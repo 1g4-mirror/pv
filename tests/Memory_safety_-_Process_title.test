@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Run valgrind's memory checker against a process that sets is process
+# title.
+
+true "${sourcePath:?not set - call this from 'make check'}"
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
+true "${workFile2:?not set - call this from 'make check'}"
+true "${workFile3:?not set - call this from 'make check'}"
+true "${workFile4:?not set - call this from 'make check'}"
+
+# Load the valgrind function.
+. "${sourcePath}/tests/run-valgrind.sh"
+
+# Without an extra format string.
+(dd if=/dev/zero bs=100 count=1 2>/dev/null;
+ sleep 1;
+ dd if=/dev/zero bs=110 count=1 2>/dev/null;
+ sleep 1;
+) | { runWithValgrind -f -i 0.5 -a -x processtitle >/dev/null 2>"${workFile1}"; } 4>&1 || exit 1
+
+# With an extra format string.
+(dd if=/dev/zero bs=100 count=1 2>/dev/null;
+ sleep 1;
+ dd if=/dev/zero bs=110 count=1 2>/dev/null;
+ sleep 1;
+) | { runWithValgrind -f -i 0.5 -a -x 'processtitle:%t %b' >/dev/null 2>"${workFile1}"; } 4>&1 || exit 1
+
+exit 0
