@@ -83,7 +83,7 @@ void initproctitle(int argc, char **argv)
  */
 void setproctitle(const char *format, ...)
 {
-	char title[1024];	/* flawfinder: ignore */
+	char title[1024];		 /* flawfinder: ignore */
 	size_t length;
 	va_list ap;
 
@@ -95,7 +95,7 @@ void setproctitle(const char *format, ...)
 	memset(title, 0, sizeof(title));
 
 	va_start(ap, format);
-	(void) vsnprintf(title, sizeof(title)-1, format, ap);	/* flawfinder: ignore */
+	(void) vsnprintf(title, sizeof(title) - 1, format, ap);	/* flawfinder: ignore */
 	va_end(ap);
 
 	/*
@@ -104,7 +104,7 @@ void setproctitle(const char *format, ...)
 	 * user-supplied formats.
 	 */
 
-	length = strlen(title);		/* flawfinder: ignore */
+	length = strlen(title);		    /* flawfinder: ignore */
 	/* flawfinder - we left a byte at the end to force null-termination. */
 
 	if (length > space_available - 2)
