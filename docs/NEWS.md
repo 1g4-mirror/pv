@@ -5,6 +5,7 @@
  * *cleanup:* tests added for **--watchfd** ([#10](https://codeberg.org/a-j-wood/pv/issues/10))
  * *cleanup:* worked around file descriptor leak false positives in valgrind 3.23 ([#97](https://codeberg.org/a-j-wood/pv/issues/97))
  * *cleanup:* cleared all *shellcheck* warnings in the test scripts
+ * *cleanup:* check at compile-time whether **--remote** is going to be usable ([#119](https://codeberg.org/a-j-wood/pv/issues/119))
 
 ### 1.9.0 - 15 October 2024
 
