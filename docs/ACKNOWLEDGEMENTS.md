@@ -99,6 +99,7 @@ is acknowledged and greatly appreciated:
  * Venky.N.Iyer - suggested **--stats** ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
  * Roland Kletzing - suggested **--rate** with **--numeric** ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
  * [Michael Mior](https://codeberg.org/michaelmior) - suggested **--store-and-forward** ([#100](https://codeberg.org/a-j-wood/pv/issues/100))
+ * [dbungert](https://codeberg.org/dbungert) - reported issue with *valgrind* 3.23 misreporting leaking file descriptors ([#97](https://codeberg.org/a-j-wood/pv/issues/97))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
