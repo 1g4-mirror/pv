@@ -100,6 +100,8 @@ is acknowledged and greatly appreciated:
  * Roland Kletzing - suggested **--rate** with **--numeric** ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
  * [Michael Mior](https://codeberg.org/michaelmior) - suggested **--store-and-forward** ([#100](https://codeberg.org/a-j-wood/pv/issues/100))
  * [dbungert](https://codeberg.org/dbungert) - reported issue with *valgrind* 3.23 misreporting leaking file descriptors ([#97](https://codeberg.org/a-j-wood/pv/issues/97))
+ * Joachim Haga - suggested showing progress in the window title ([#3](https://codeberg.org/a-j-wood/pv/issues/3))
+ * [Martin Sarsale](https://github.com/runa) - suggested showing progress in the process title ([#4](https://codeberg.org/a-j-wood/pv/issues/4))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
