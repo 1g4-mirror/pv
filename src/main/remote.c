@@ -331,7 +331,7 @@ void pv_remote_check(pvstate_t state)
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv__control_file(control_filename, sizeof(control_filename), signal_sender, false);
 	if (NULL == control_fptr) {
-		pv_error(state, "%s", strerror(errno));
+		pv_error(state, "%s: %s", control_filename, strerror(errno));
 		return;
 	}
 
