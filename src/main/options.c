@@ -19,7 +19,9 @@
 #include <sys/sysmacros.h>
 #ifdef major
 #ifdef minor
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 #define CAN_BUILD_SYSFS_FILENAME 1
+#endif
 #endif
 #endif
 #endif

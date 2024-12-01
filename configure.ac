@@ -48,7 +48,7 @@ dnl Libraries that may contain key functions.
 AC_SEARCH_LIBS([clock_gettime],[rt])
 
 dnl Items we can't do without.
-AC_CHECK_FUNCS([alarm basename clock_gettime dup2 getcwd memcpy memmove memset select setlocale strchr strerror strrchr strstr], [], [AC_MSG_ERROR([required function is missing])])
+AC_CHECK_FUNCS([alarm basename clock_gettime dup2 getcwd memcpy memmove memset mkdir select setlocale strchr strerror strrchr strstr], [], [AC_MSG_ERROR([required function is missing])])
 AC_CHECK_HEADERS([fcntl.h sys/file.h sys/time.h unistd.h], [], [AC_MSG_ERROR([required header file is missing])])
 
 dnl Make sure all the types we use are defined.
@@ -60,7 +60,9 @@ AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_TYPE_UID_T
 
-dnl Check that a signal handler can't see the PID of the sender.
+AC_CHECK_MEMBERS([struct stat.st_rdev])
+
+dnl Check whether a signal handler can see the PID of the sender.
 AC_MSG_CHECKING([siginfo_t provides a signal sender's PID])
 AC_RUN_IFELSE(
 [AC_LANG_PROGRAM([[
