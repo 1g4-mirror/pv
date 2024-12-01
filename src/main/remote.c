@@ -57,10 +57,12 @@ struct remote_msg {
  * file associated with a particular process ID; it will be opened for
  * writing if "sender" is true.  Returns NULL on error.
  */
+/*@null@ */
+/*@dependent@ */
 static FILE *pv__control_file(char *filename, size_t bufsize, pid_t control_pid, bool sender)
 {
 	int open_flags, open_mode, control_fd;
-	FILE *control_fptr;
+	/*@dependent@ */ FILE *control_fptr = NULL;
 
 	open_flags = O_RDONLY;
 #ifdef O_NOFOLLOW
@@ -216,7 +218,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	 * Get the filename and file stream to use for remote control.
 	 */
 	memset(control_filename, 0, sizeof(control_filename));
-	control_fptr = pv__control_file(control_filename, sizeof(control_filename), getpid(), true);
+	control_fptr = pv__control_file(control_filename, sizeof(control_filename), (pid_t) getpid(), true);
 	if (NULL == control_fptr) {
 		pv_error(state, "%s", strerror(errno));
 		return PV_ERROREXIT_REMOTE_OR_PID;

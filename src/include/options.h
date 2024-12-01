@@ -43,7 +43,7 @@ struct opts_s {
 	size_t buffer_size;            /* buffer size, in bytes (0=default) */
 	off_t size;                    /* total size of data */
 	off_t error_skip_block;        /* skip block size, 0 for adaptive */
-	unsigned int remote;           /* PID of pv to update settings of */
+	pid_t remote;                  /* PID of pv to update settings of */
 	unsigned int skip_errors;      /* skip read errors counter */
 	pid_t watch_pid;	       /* process to watch fds of */
 	int watch_fd;		       /* fd to watch */

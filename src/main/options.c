@@ -619,7 +619,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'R':
-			opts->remote = pv_getnum_count(optarg, false);
+			opts->remote = (pid_t) pv_getnum_count(optarg, false);
 			break;
 		case 'P':
 			opts->pidfile = pv_strdup(optarg);
