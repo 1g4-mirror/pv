@@ -239,8 +239,8 @@ static void pv_sig_usr2( /*@unused@ */  __attribute__((unused))
 		return;
 	if (NULL == info)
 		return;
-	pv_sig_state->signal.rxusr2 = 1;
 	pv_sig_state->signal.sender = info->si_pid;
+	pv_sig_state->signal.rxusr2 = 1;
 }
 
 
