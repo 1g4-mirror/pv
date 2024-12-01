@@ -21,7 +21,7 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#ifdef SA_SIGINFO
+#ifdef SIGINFO_PROVIDES_PID
 void pv_error(pvstate_t, char *, ...);
 
 struct remote_msg {
@@ -405,10 +405,10 @@ void pv_remote_fini(void)
 {
 }
 
-#else				/* !SA_SIGINFO */
+#else				/* !SIGINFO_PROVIDES_PID */
 
 /*
- * Dummy stubs for remote control when we don't have SA_SIGINFO.
+ * Dummy stubs for remote control when we don't have SIGINFO_PROVIDES_PID.
  */
 void pv_remote_init(void)
 {

@@ -60,6 +60,43 @@ AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_TYPE_UID_T
 
+dnl Check that a signal handler can't see the PID of the sender.
+AC_MSG_CHECKING([siginfo_t provides a signal sender's PID])
+AC_RUN_IFELSE(
+[AC_LANG_PROGRAM([[
+#include <string.h>
+#include <signal.h>
+#include <unistd.h>
+
+static pid_t signalSender = 0;
+
+#ifdef SA_SIGINFO
+static void receiveUSR2( __attribute__((unused))
+			int sig, siginfo_t * info, __attribute__((unused))
+			void *ucontext)
+{
+	if (NULL != info)
+		signalSender = info->si_pid;
+}
+#endif
+]], [[
+	struct sigaction sa;
+	memset(&sa, 0, sizeof(sa));
+#ifdef SA_SIGINFO
+	sa.sa_sigaction = receiveUSR2;
+	(void) sigemptyset(&(sa.sa_mask));
+	sa.sa_flags = SA_SIGINFO;
+	(void) sigaction(SIGUSR2, &sa, NULL);
+	raise(SIGUSR2);
+#endif
+	return signalSender == 0 ? 1 : 0;
+]])], [
+AC_MSG_RESULT([yes])
+AC_DEFINE([SIGINFO_PROVIDES_PID], [1], [Signal handlers can determine the sending PID])
+], [
+AC_MSG_RESULT([no])
+])
+
 AH_BOTTOM([#include "config-aux.h"])
 
 AC_ARG_ENABLE([debugging],

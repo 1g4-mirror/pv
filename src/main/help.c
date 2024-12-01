@@ -399,11 +399,11 @@ void display_help(void)
 		{ "-U", "--store-and-forward", N_("FILE"),
 		 N_("write all input to FILE before writing to output"),
 		 { 0, 0, 0, 0} },
-#ifdef SA_SIGINFO
+#ifdef SIGINFO_PROVIDES_PID
 		{ "-R", "--remote", N_("PID"),
 		 N_("update settings of process PID"),
 		 { 0, 0, 0, 0} },
-#endif				/* SA_SIGINFO */
+#endif				/* SIGINFO_PROVIDES_PID */
 		{ "", NULL, NULL, NULL, { 0, 0, 0, 0} },
 		{ "-P", "--pidfile", N_("FILE"),
 		 N_("save process ID in FILE"),
