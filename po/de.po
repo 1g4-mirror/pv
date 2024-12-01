@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-11-30 17:45+0000\n"
+"POT-Creation-Date: 2024-12-01 16:08+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: fnetX <otto@codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -283,65 +283,65 @@ msgstr "(eingabe)"
 msgid "state allocation failed"
 msgstr "Speicherzuweisung für `state' fehlgeschlagen"
 
-#: src/main/options.c:140 src/pv/file.c:324
+#: src/main/options.c:142 src/pv/file.c:324
 msgid "failed to stat file"
 msgstr "konnte Dateiinformationen nicht lesen"
 
-#: src/main/options.c:154
+#: src/main/options.c:156
 msgid "is a directory"
 msgstr "ist ein Verzeichnis"
 
-#: src/main/options.c:183
+#: src/main/options.c:185
 msgid "failed to generate sysfs filename"
 msgstr "konnte Sysfs-Dateinamen nicht erzeugen"
 
-#: src/main/options.c:205
+#: src/main/options.c:207
 msgid "failed to read sysfs size file"
 msgstr "konnte Größe der Sysfs-Datei nicht lesen"
 
-#: src/main/options.c:225
+#: src/main/options.c:227
 msgid "failed to open block device"
 msgstr "konnte Blockgerät nicht öffnen"
 
-#: src/main/options.c:235
+#: src/main/options.c:237
 msgid "failed to determine size of block device"
 msgstr "konnte Größe des Blockgeräts nicht ermitteln"
 
-#: src/main/options.c:339
+#: src/main/options.c:341
 msgid "option structure allocation failed"
 msgstr "Speicherzuweisung für `option' fehlgeschlagen"
 
-#: src/main/options.c:358
+#: src/main/options.c:360
 msgid "option structure argv allocation failed"
 msgstr "Speicherzuweisung für `argv' der Option fehlgeschlagen"
 
-#: src/main/options.c:420
+#: src/main/options.c:422
 msgid "integer argument expected"
 msgstr "Ganzzahliges Argument erwartet"
 
-#: src/main/options.c:431
+#: src/main/options.c:433
 msgid "numeric argument expected"
 msgstr "numerisches Argument erwartet"
 
-#: src/main/options.c:442
+#: src/main/options.c:444
 msgid "process ID or pid:fd pair expected"
 msgstr "Prozess-ID oder PID:FD-Paar erwartet"
 
-#: src/main/options.c:449
+#: src/main/options.c:451
 msgid "invalid process ID"
 msgstr "ungültige Prozess-ID"
 
-#: src/main/options.c:666
+#: src/main/options.c:668
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "`%s --help' zeigt weitere Informationen an."
 
-#: src/main/options.c:668
+#: src/main/options.c:670
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "`%s -h' zeigt weitere Informationen an."
 
-#: src/main/options.c:699
+#: src/main/options.c:701
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -349,32 +349,32 @@ msgstr ""
 "Beim Beobachten von Dateideskriptoren können keine Optionen für den "
 "Zeilenmodus oder den Übertragungsmodifikator verwendet werden"
 
-#: src/main/options.c:708
+#: src/main/options.c:710
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "Beim Beobachten von Dateideskriptoren kann Cursor-Positionierung nicht "
 "verwendet werden"
 
-#: src/main/options.c:717
+#: src/main/options.c:719
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "Beim Beobachten von Dateideskriptoren kann die Fernbedienung nicht verwenden "
 "werden"
 
-#: src/main/options.c:726
+#: src/main/options.c:728
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "Beim Beobachten von Dateideskriptoren können Dateien nicht übertragen werden"
 
-#: src/main/options.c:741
+#: src/main/options.c:743
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "Nicht verfügbar auf Systemen ohne /proc/self/fdinfo"
 
-#: src/main/remote.c:302
+#: src/main/remote.c:304
 msgid "message not received"
 msgstr "Nachricht nicht empfangen"
 
-#: src/main/remote.c:429
+#: src/main/remote.c:431
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO wird auf diesem System nicht unterstützt"
 

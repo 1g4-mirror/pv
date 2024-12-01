@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-11-30 17:45+0000\n"
+"POT-Creation-Date: 2024-12-01 16:08+0000\n"
 "PO-Revision-Date: 2024-10-12 11:13+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: French <https://translate.codeberg.org/projects/pv/pv/fr/>\n"
@@ -284,65 +284,65 @@ msgstr "(entrée)"
 msgid "state allocation failed"
 msgstr "échec de l'allocation de mémoire de condition"
 
-#: src/main/options.c:140 src/pv/file.c:324
+#: src/main/options.c:142 src/pv/file.c:324
 msgid "failed to stat file"
 msgstr "échec à statuer sur le fichier"
 
-#: src/main/options.c:154
+#: src/main/options.c:156
 msgid "is a directory"
 msgstr "est un répertoire"
 
-#: src/main/options.c:183
+#: src/main/options.c:185
 msgid "failed to generate sysfs filename"
 msgstr ""
 
-#: src/main/options.c:205
+#: src/main/options.c:207
 msgid "failed to read sysfs size file"
 msgstr ""
 
-#: src/main/options.c:225
+#: src/main/options.c:227
 msgid "failed to open block device"
 msgstr ""
 
-#: src/main/options.c:235
+#: src/main/options.c:237
 msgid "failed to determine size of block device"
 msgstr ""
 
-#: src/main/options.c:339
+#: src/main/options.c:341
 msgid "option structure allocation failed"
 msgstr "l'allocation pour la structure d'une option a échoué"
 
-#: src/main/options.c:358
+#: src/main/options.c:360
 msgid "option structure argv allocation failed"
 msgstr "l'allocation pour la structure de l'option argv a échoué"
 
-#: src/main/options.c:420
+#: src/main/options.c:422
 msgid "integer argument expected"
 msgstr "Valeur entière attendue"
 
-#: src/main/options.c:431
+#: src/main/options.c:433
 msgid "numeric argument expected"
 msgstr "Valeur numérique attendue"
 
-#: src/main/options.c:442
+#: src/main/options.c:444
 msgid "process ID or pid:fd pair expected"
 msgstr "ID de processus ou paire pid:fd attendue"
 
-#: src/main/options.c:449
+#: src/main/options.c:451
 msgid "invalid process ID"
 msgstr "ID de processus non valide"
 
-#: src/main/options.c:666
+#: src/main/options.c:668
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Essayez `%s --help' pour plus d'informations."
 
-#: src/main/options.c:668
+#: src/main/options.c:670
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Essayez `%s -h' pour plus d'informations."
 
-#: src/main/options.c:699
+#: src/main/options.c:701
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -350,33 +350,33 @@ msgstr ""
 "impossible d'utiliser le mode ligne ou les options de modificateur de "
 "transfert lors de la visualisation des descripteurs de fichiers"
 
-#: src/main/options.c:708
+#: src/main/options.c:710
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "impossible d'utiliser le positionnement du curseur lors de la visualisation "
 "des descripteurs de fichier"
 
-#: src/main/options.c:717
+#: src/main/options.c:719
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "impossible d'utiliser la télécommande lors de la visualisation des "
 "descripteurs de fichiers"
 
-#: src/main/options.c:726
+#: src/main/options.c:728
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "impossible de transférer des fichiers lorsque vous regardez des descripteurs "
 "de fichiers"
 
-#: src/main/options.c:741
+#: src/main/options.c:743
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "non disponible sur les systèmes sans /proc/self/fdinfo"
 
-#: src/main/remote.c:302
+#: src/main/remote.c:304
 msgid "message not received"
 msgstr "message non reçu"
 
-#: src/main/remote.c:429
+#: src/main/remote.c:431
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO non pris en charge sur ce système"
 
