@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-01 19:09+0000\n"
+"POT-Creation-Date: 2024-12-02 17:56+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -36,121 +36,121 @@ msgstr "ukaž okamžitou rychlost přenosu dat"
 msgid "show data transfer average rate counter"
 msgstr "ukaž průměrnou rychlost přenosu dat"
 
-#: src/main/help.c:301 src/main/help.c:338 src/main/help.c:353
-msgid "SEC"
-msgstr "SEK"
-
 #: src/main/help.c:302
-msgid "compute average rate over past SEC seconds (default 30s)"
-msgstr "počítej průměrnou rychlost za posledních SEK sekund (výchozí: 30)"
-
-#: src/main/help.c:305
 msgid "show number of bytes transferred"
 msgstr "ukaž počet přenesených bajtů"
 
-#: src/main/help.c:308
-msgid "show number of bits transferred"
-msgstr "ukaž počet přenesených bitů"
-
-#: src/main/help.c:311
-msgid "treat suffixes as multiples of 1000 rather than 1024"
-msgstr "zacházej se suffixy jako s násobky 1000 namísto 1024"
-
-#: src/main/help.c:314
+#: src/main/help.c:305
 msgid "show percentage of transfer buffer in use"
 msgstr "ukaž procento využité vyrovnávací paměti"
 
-#: src/main/help.c:316
+#: src/main/help.c:307
 msgid "NUM"
 msgstr "ČÍS"
 
-#: src/main/help.c:317
+#: src/main/help.c:308
 msgid "show NUM bytes last written"
 msgstr "zobraz ČÍS posledních zapsaných bajtů"
 
-#: src/main/help.c:319
+#: src/main/help.c:310
 msgid "FORMAT"
 msgstr "FORMÁT"
 
-#: src/main/help.c:320
+#: src/main/help.c:311
 msgid "set output format to FORMAT"
 msgstr "nastav formát výstupu na FORMÁT"
 
-#: src/main/help.c:322
-msgid "SPEC"
-msgstr ""
-
-#: src/main/help.c:323
-msgid "also send progress to SPEC"
-msgstr ""
-
-#: src/main/help.c:326
-msgid "output transfer statistics at the end"
-msgstr "po dokončení vypiš údaje o přenosu"
-
-#: src/main/help.c:329
+#: src/main/help.c:314
 msgid "output percentages, not visual information"
 msgstr "vypisuj procenta, ne vizuální informace"
 
-#: src/main/help.c:332
+#: src/main/help.c:317
 msgid "do not output any transfer information at all"
 msgstr "nevypisuj žádné informace o přenosu"
 
-#: src/main/help.c:336
+#: src/main/help.c:321
+msgid "show number of bits transferred"
+msgstr "ukaž počet přenesených bitů"
+
+#: src/main/help.c:324
+msgid "treat suffixes as multiples of 1000 rather than 1024"
+msgstr "zacházej se suffixy jako s násobky 1000 namísto 1024"
+
+#: src/main/help.c:327
 msgid "display nothing until first byte transferred"
 msgstr "nic nevypisuj, dokud není přenesen první byte"
 
-#: src/main/help.c:339
+#: src/main/help.c:329 src/main/help.c:344 src/main/help.c:347
+msgid "SEC"
+msgstr "SEK"
+
+#: src/main/help.c:330
 msgid "display nothing until SEC seconds have passed"
 msgstr "nic nevypisuj, dokud neuplyne SEK sekund"
 
-#: src/main/help.c:341
+#: src/main/help.c:332
 msgid "SIZE"
 msgstr "VEL"
 
-#: src/main/help.c:342
+#: src/main/help.c:333
 msgid "set estimated data size to SIZE bytes"
 msgstr "nastav očekávanou velikost dat na VEL bajtů"
 
-#: src/main/help.c:345
+#: src/main/help.c:336
 msgid "if size unknown, show rate vs max rate"
 msgstr "pokud je velikost neznámá, ukaž rychlost vs maximální rychlost"
 
-#: src/main/help.c:348
+#: src/main/help.c:339
 msgid "count lines instead of bytes"
 msgstr "počítej řádky místo bajtů"
 
-#: src/main/help.c:351
+#: src/main/help.c:342
 msgid "lines are null-terminated"
 msgstr "řádky jsou zakončené nulovým znakem"
 
-#: src/main/help.c:354
+#: src/main/help.c:345
 msgid "update every SEC seconds"
 msgstr "aktualizuj každých SEK sekund"
 
-#: src/main/help.c:356
+#: src/main/help.c:348
+msgid "compute average rate over past SEC seconds (default 30s)"
+msgstr "počítej průměrnou rychlost za posledních SEK sekund (výchozí: 30)"
+
+#: src/main/help.c:350
 msgid "WIDTH"
 msgstr "ŠÍŘ"
 
-#: src/main/help.c:357
+#: src/main/help.c:351
 msgid "assume terminal is WIDTH characters wide"
 msgstr "předpokládej šířku terminálu ŠÍŘ znaků"
 
-#: src/main/help.c:359
+#: src/main/help.c:353
 msgid "HEIGHT"
 msgstr "VÝŠ"
 
-#: src/main/help.c:360
+#: src/main/help.c:354
 msgid "assume terminal is HEIGHT rows high"
 msgstr "předpokládej výšku terminálu VÝŠ znaků"
 
-#: src/main/help.c:362
+#: src/main/help.c:356
 msgid "NAME"
 msgstr "JMÉNO"
 
-#: src/main/help.c:363
+#: src/main/help.c:357
 msgid "prefix visual information with NAME"
 msgstr "přidej JMÉNO před vizuální informace"
+
+#: src/main/help.c:359
+msgid "SPEC"
+msgstr ""
+
+#: src/main/help.c:360
+msgid "also send progress to SPEC"
+msgstr ""
+
+#: src/main/help.c:363
+msgid "output transfer statistics at the end"
+msgstr "po dokončení vypiš údaje o přenosu"
 
 #: src/main/help.c:366
 msgid "output even if standard error is not a terminal"
@@ -160,8 +160,8 @@ msgstr "vypisuj výstup i pokud standardní chybový výstup není terminál"
 msgid "use cursor positioning escape sequences"
 msgstr "pozicuj kurzor pomocí řídících znaků"
 
-#: src/main/help.c:372 src/main/help.c:402 src/main/help.c:411
-#: src/main/help.c:426
+#: src/main/help.c:372 src/main/help.c:402 src/main/help.c:414
+#: src/main/help.c:424
 msgid "FILE"
 msgstr "SOUBOR"
 
@@ -217,50 +217,50 @@ msgstr "zahoď vstup namísto zápisu na výstup"
 msgid "write all input to FILE before writing to output"
 msgstr "zapiš veškerý vstup do SOUBORu před výpisem na výstup"
 
-#: src/main/help.c:406
-msgid "PID"
-msgstr "PID"
-
-#: src/main/help.c:407
-msgid "update settings of process PID"
-msgstr "aktualizuj nastavení procesu PID"
-
-#: src/main/help.c:412
-msgid "save process ID in FILE"
-msgstr "ulož id procesu do SOUBORu"
-
-#: src/main/help.c:415
+#: src/main/help.c:405
 msgid "PID[:FD]"
 msgstr "PID[:DS]"
 
-#: src/main/help.c:416
+#: src/main/help.c:406
 msgid "watch file FD opened by process PID"
 msgstr "sleduj soubor DS otevřený procesem PID"
 
-#: src/main/help.c:420
+#: src/main/help.c:409
+msgid "PID"
+msgstr "PID"
+
+#: src/main/help.c:410
+msgid "update settings of process PID"
+msgstr "aktualizuj nastavení procesu PID"
+
+#: src/main/help.c:415
+msgid "save process ID in FILE"
+msgstr "ulož id procesu do SOUBORu"
+
+#: src/main/help.c:418
 msgid "show this help and exit"
 msgstr "ukaž pomoc a skonči"
 
-#: src/main/help.c:423
+#: src/main/help.c:421
 msgid "show version information and exit"
 msgstr "ukaž informace o verzi a skonči"
 
-#: src/main/help.c:427
+#: src/main/help.c:425
 msgid "write debug logs to FILE"
 msgstr "zapiš ladící záznamy do SOUBORu"
 
-#: src/main/help.c:452
+#: src/main/help.c:450
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Použití: %s [VOLBY] [SOUBOR]..."
 
-#: src/main/help.c:463
+#: src/main/help.c:461
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Spoj SOUBOR(y) nebo standardní vstup na standardního výstup, s monitoringem."
 
-#: src/main/help.c:600
+#: src/main/help.c:598
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Prosím, hlašte veškeré chyby na: %s"

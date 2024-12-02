@@ -11,6 +11,7 @@ src/pv/elapsedtime.c
 src/pv/file.c
 src/pv/loop.c
 src/pv/number.c
+src/pv/proctitle.c
 src/pv/signal.c
 src/pv/state.c
 src/pv/string.c

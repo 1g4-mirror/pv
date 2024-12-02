@@ -1,4 +1,4 @@
-### UNRELEASED
+### 1.9.7 - 2 December 2024
 
  * *feature:* new **--extra-display** option to update window and process titles ([#3](https://codeberg.org/a-j-wood/pv/issues/3), [#4](https://codeberg.org/a-j-wood/pv/issues/4))
  * *fix:* correct failure to report file positions in **--watchfd** ([#118](https://codeberg.org/a-j-wood/pv/issues/118))
