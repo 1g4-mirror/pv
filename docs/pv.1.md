@@ -417,7 +417,7 @@ are explicitly switched on will be shown.
 
 # FORMATTING
 
-The format string used by "**\--format**" and "**\--extra-display**" can
+Format strings used by "**\--format**" and "**\--extra-display**" can
 contain the following sequences:
 
 **%p**
