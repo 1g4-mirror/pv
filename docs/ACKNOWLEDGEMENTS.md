@@ -102,6 +102,7 @@ is acknowledged and greatly appreciated:
  * [dbungert](https://codeberg.org/dbungert) - reported issue with *valgrind* 3.23 misreporting leaking file descriptors ([#97](https://codeberg.org/a-j-wood/pv/issues/97))
  * Joachim Haga - suggested showing progress in the window title ([#3](https://codeberg.org/a-j-wood/pv/issues/3))
  * [Martin Sarsale](https://github.com/runa) - suggested showing progress in the process title ([#4](https://codeberg.org/a-j-wood/pv/issues/4))
+ * [2bits](https://github.com/2bits) - reported position sensing fault with **--watchfd** in 1.9.0 ([#118](https://codeberg.org/a-j-wood/pv/issues/118))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
