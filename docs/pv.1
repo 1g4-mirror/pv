@@ -179,25 +179,6 @@ Ignore all of the above options and instead use the format string
 \fIFORMAT\fR to determine the output format.
 See the \fBFORMATTING\fR section below.
 .TP
-.BI \-x\  SPEC \fR,\ \fB\-\-extra\-display\  SPEC
-As well as displaying progress to the terminal, also write it to \fISPEC\fR.
-The \fISPEC\fR must start with a comma-separated list of destinations, and
-can optionally be followed by a colon and a format string.
-The destinations can be \fBwindowtitle\fR or \fBwindow\fR for the xterm
-window title, and \fBprocesstitle\fR, \fBproctitle\fR, \fBprocess\fR, or
-\fBproc\fR for the process title displayed by \fBps\fR(1).
-If a format string is not supplied, the same format is used as for the
-terminal.
-For example, \*(lq\fB\-x\~'window,process:%t\~%b\~%r'\fR\*(rq will show the
-elapsed time, bytes transferred, and rate, in both the window title and the
-process title.
-.TP
-.B \-v, \-\-stats
-At the end of the transfer, write an additional line showing the transfer
-rate minimum, maximum, mean, and standard deviation.
-The values are always in bytes per second (or bits, with
-\*(lq\fB\-\-bits\fR\*(rq).
-.TP
 .B \-n, \-\-numeric
 Numeric output.
 Instead of giving a visual indication of progress, write an integer
@@ -311,6 +292,25 @@ Prefix the output information with \fINAME\fR.
 Useful in conjunction with \*(lq\fB\-\-cursor\fR\*(rq if you have a
 complicated pipeline and you want to be able to tell different parts of it
 apart.
+.TP
+.BI \-x\  SPEC \fR,\ \fB\-\-extra\-display\  SPEC
+As well as displaying progress to the terminal, also write it to \fISPEC\fR.
+The \fISPEC\fR must start with a comma-separated list of destinations, and
+can optionally be followed by a colon and a format string.
+The destinations can be \fBwindowtitle\fR or \fBwindow\fR for the xterm
+window title, and \fBprocesstitle\fR, \fBproctitle\fR, \fBprocess\fR, or
+\fBproc\fR for the process title displayed by \fBps\fR(1).
+If a format string is not supplied, the same format is used as for the
+terminal.
+For example, \*(lq\fB\-x\~'window,process:%t\~%b\~%r'\fR\*(rq will show the
+elapsed time, bytes transferred, and rate, in both the window title and the
+process title.
+.TP
+.B \-v, \-\-stats
+At the end of the transfer, write an additional line showing the transfer
+rate minimum, maximum, mean, and standard deviation.
+The values are always in bytes per second (or bits, with
+\*(lq\fB\-\-bits\fR\*(rq).
 .TP
 .B \-f, \-\-force
 Force output.

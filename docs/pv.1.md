@@ -119,26 +119,6 @@ are explicitly switched on will be shown.
     *FORMAT* to determine the output format. See the **FORMATTING**
     section below.
 
-**-x SPEC, \--extra-display SPEC**
-
-:   As well as displaying progress to the terminal, also write it to
-    *SPEC*. The *SPEC* must start with a comma-separated list of
-    destinations, and can optionally be followed by a colon and a format
-    string. The destinations can be **windowtitle** or **window** for
-    the xterm window title, and **processtitle**, **proctitle**,
-    **process**, or **proc** for the process title displayed by
-    **ps**(1). If a format string is not supplied, the same format is
-    used as for the terminal. For example,
-    "**-x \'window,process:%t %b %r\'**" will show the elapsed time,
-    bytes transferred, and rate, in both the window title and the
-    process title.
-
-**-v, \--stats**
-
-:   At the end of the transfer, write an additional line showing the
-    transfer rate minimum, maximum, mean, and standard deviation. The
-    values are always in bytes per second (or bits, with "**\--bits**").
-
 **-n, \--numeric**
 
 :   Numeric output. Instead of giving a visual indication of progress,
@@ -254,6 +234,26 @@ are explicitly switched on will be shown.
 :   Prefix the output information with *NAME*. Useful in conjunction
     with "**\--cursor**" if you have a complicated pipeline and you want
     to be able to tell different parts of it apart.
+
+**-x SPEC, \--extra-display SPEC**
+
+:   As well as displaying progress to the terminal, also write it to
+    *SPEC*. The *SPEC* must start with a comma-separated list of
+    destinations, and can optionally be followed by a colon and a format
+    string. The destinations can be **windowtitle** or **window** for
+    the xterm window title, and **processtitle**, **proctitle**,
+    **process**, or **proc** for the process title displayed by
+    **ps**(1). If a format string is not supplied, the same format is
+    used as for the terminal. For example,
+    "**-x \'window,process:%t %b %r\'**" will show the elapsed time,
+    bytes transferred, and rate, in both the window title and the
+    process title.
+
+**-v, \--stats**
+
+:   At the end of the transfer, write an additional line showing the
+    transfer rate minimum, maximum, mean, and standard deviation. The
+    values are always in bytes per second (or bits, with "**\--bits**").
 
 **-f, \--force**
 
