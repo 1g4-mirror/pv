@@ -31,7 +31,7 @@ See "[docs/INSTALL](./docs/INSTALL)" for more about the _configure_ script.
 
 The typical process for a system-wide install is:
 
-    sh ./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc
+    sh ./configure --prefix=/usr
     make
     sudo make install
 
