@@ -27,16 +27,23 @@ If you don't see your language listed, raise an issue on the issue tracker
 
 # Compilation
 
-To compile the package, type "`sh ./configure`", which should generate a
-Makefile for your system.  You may then type "`make`" to build everything,
-and "`make install`" to install it.
+See "[docs/INSTALL](./docs/INSTALL)" for more about the _configure_ script.
 
-See the file "[docs/INSTALL](./docs/INSTALL)" for more about the _configure_ script.
+The typical process for a system-wide install is:
 
-If this is not a packaged release, you will need the GNU build system tools
-(`autoconf`, `aclocal`, `autopoint`, `automake`) and the `gettext`
-development tools.  You can then run "`autoreconf -is`" to generate the
-"`configure`" script.
+    sh ./configure --prefix=/usr --localstatedir=/var --sysconfdir=/etc
+    make
+    sudo make install
+
+This requires the build toolchain ("`sudo apt install build-essential`" on
+Debian or Ubuntu systems).
+
+If this is not a packaged release, the _configure_ script is not included.
+It is generated with the GNU build system tools (_autoconf_, _aclocal_,
+_autopoint_, _automake_); _gettext_ is also needed.  On Debian or Ubuntu,
+run "`sudo apt install automake autopoint gettext`".  Once those tools are
+in place, call "`autoreconf -is`" to generate the _configure_ script, and
+run it as described above.
 
 
 # Copyright, bug reporting, and acknowledgements
