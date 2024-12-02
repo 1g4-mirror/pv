@@ -25,7 +25,7 @@ If you don't see your language listed, raise an issue on the issue tracker
 (or just email the maintainer) asking for it to be added.
 
 
-# Compilation
+# Installation
 
 See "[docs/INSTALL](./docs/INSTALL)" for more about the _configure_ script.
 
