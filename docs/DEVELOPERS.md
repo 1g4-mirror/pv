@@ -161,6 +161,7 @@ The package maintainer should run through these steps for a new release:
    * Wipe the build directory, and run "`configure`" there
    * Run "`make distcheck`"
    * Run "`./configure && make check`" on all test systems including Cygwin, using the `tar.gz` that was just created
+   * Run a cross-compilation check
  * Run "`make release MAINTAINER=<signing-user>`"
  * Update the project web site:
    * Copy the release `.tar.gz`, `.txt`, and `.asc` files to the web site
