@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-02 17:56+0000\n"
+"POT-Creation-Date: 2024-12-03 23:46+0000\n"
 "PO-Revision-Date: 2024-10-20 14:07+0000\n"
 "Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -372,11 +372,11 @@ msgstr "nie można przesyłać plików z opcją obserwowania deskryptorów plik�
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "niedostępne na systemach bez /proc/self/fdinfo"
 
-#: src/main/remote.c:304
+#: src/main/remote.c:309
 msgid "message not received"
 msgstr "wiadomość nieodebrana"
 
-#: src/main/remote.c:431
+#: src/main/remote.c:440
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO nie jest wspierane na tym systemie"
 

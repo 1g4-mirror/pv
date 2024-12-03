@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-02 17:56+0000\n"
+"POT-Creation-Date: 2024-12-03 23:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -361,11 +361,11 @@ msgstr "não pode transferir arquivos ao assistir descritores de arquivo"
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "não disponível em sistemas sem /proc/self/fdinfo"
 
-#: src/main/remote.c:304
+#: src/main/remote.c:309
 msgid "message not received"
 msgstr "mensagem não recebida"
 
-#: src/main/remote.c:431
+#: src/main/remote.c:440
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO não suportado neste sistema"
 

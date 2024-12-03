@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-02 17:56+0000\n"
+"POT-Creation-Date: 2024-12-03 23:46+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -355,11 +355,11 @@ msgstr "při sledování deskriptorů souborů nelze použít přenos souborů"
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "není dostupné na systémech bez /proc/self/fdinfo"
 
-#: src/main/remote.c:304
+#: src/main/remote.c:309
 msgid "message not received"
 msgstr "zpráva nepřijata"
 
-#: src/main/remote.c:431
+#: src/main/remote.c:440
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO není na tomto systému podporováno"
 
