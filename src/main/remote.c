@@ -44,11 +44,13 @@ struct remote_msg {
 	bool height_set_manually;	 /* height was set manually, not detected */
 	char name[256];			 /* flawfinder: ignore */
 	char format[256];		 /* flawfinder: ignore */
+	char extra_display[256];	 /* flawfinder: ignore */
 };
 
 /*
- * flawfinder rationale: name and format are always explicitly zeroed and
- * bounded to one less than their size so they are always \0 terminated.
+ * flawfinder rationale: name, format, and extra_display are always
+ * explicitly zeroed and bounded to one less than their size so they are
+ * always \0 terminated.
  */
 
 
@@ -207,11 +209,14 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	if (opts->format != NULL) {
 		strncpy(msgbuf.format, opts->format, sizeof(msgbuf.format) - 1);	/* flawfinder: ignore */
 	}
+	if (opts->extra_display != NULL) {
+		strncpy(msgbuf.extra_display, opts->extra_display, sizeof(msgbuf.extra_display) - 1);	/* flawfinder: ignore */
+	}
 
 	/*
-	 * flawfinder rationale: both name and format are explicitly bounded
-	 * to 1 less than the size of their buffer and the buffer is \0
-	 * terminated by memset() earlier.
+	 * flawfinder rationale: name, format, and extra_display are
+	 * explicitly bounded to 1 less than the size of their buffer and
+	 * the buffer is \0 terminated by memset() earlier.
 	 */
 
 	/*
@@ -364,9 +369,11 @@ void pv_remote_check(pvstate_t state)
 
 	pv_state_format_string_set(state, NULL);
 	pv_state_name_set(state, NULL);
+	pv_state_extra_display_set(state, NULL);
 
 	msgbuf.name[sizeof(msgbuf.name) - 1] = '\0';
 	msgbuf.format[sizeof(msgbuf.format) - 1] = '\0';
+	msgbuf.extra_display[sizeof(msgbuf.extra_display) - 1] = '\0';
 
 	pv_state_set_format(state, msgbuf.progress, msgbuf.timer,
 			    msgbuf.eta, msgbuf.fineta, msgbuf.rate,
@@ -389,6 +396,8 @@ void pv_remote_check(pvstate_t state)
 		pv_state_height_set(state, msgbuf.height, msgbuf.height_set_manually);
 	if (msgbuf.format[0] != '\0')
 		pv_state_format_string_set(state, msgbuf.format);
+	if (msgbuf.extra_display[0] != '\0')
+		pv_state_extra_display_set(state, msgbuf.extra_display);
 }
 
 

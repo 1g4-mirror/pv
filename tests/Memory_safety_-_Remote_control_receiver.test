@@ -34,6 +34,8 @@ for loopCount in 1 2 3; do
 	(usleep 200000 || sleep 1) 2>/dev/null
 	"${testSubject}" -R "$(cat "${workFile3}")" -F "%e"	|| exit 1
 	(usleep 200000 || sleep 1) 2>/dev/null
+	"${testSubject}" -R "$(cat "${workFile4}")" -x "window:%b" || exit 1
+	(usleep 200000 || sleep 1) 2>/dev/null
 	"${testSubject}" -R "$(cat "${workFile3}")" -N "."	|| exit 1
 	(usleep 200000 || sleep 1) 2>/dev/null
 	echo "${loopCount}" >/dev/null	# dummy for shellcheck
