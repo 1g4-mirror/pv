@@ -43,3 +43,11 @@ typedef bool _Bool;
 # define true 1
 # define __bool_true_false_are_defined 1
 #endif
+
+/* Whether "--remote" should be available. */
+#undef PV_REMOTE_CONTROL
+#if HAVE_DECL_SA_SIGINFO
+# if SIGINFO_PROVIDES_PID
+#define PV_REMOTE_CONTROL 1
+# endif
+#endif

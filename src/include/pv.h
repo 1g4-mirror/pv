@@ -238,7 +238,7 @@ extern off_t pv_calc_total_size(pvstate_t);
  */
 extern void pv_sig_init(pvstate_t);
 
-#ifdef SIGINFO_PROVIDES_PID
+#ifdef PV_REMOTE_CONTROL
 /*
  * Return true if SIGUSR2 has been received, and indicate the sender.
  */

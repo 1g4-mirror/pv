@@ -405,11 +405,11 @@ void display_help(void)
 		{ "-d", "--watchfd", N_("PID[:FD]"),
 		 N_("watch file FD opened by process PID"),
 		 { 0, 0, 0, 0} },
-#ifdef SIGINFO_PROVIDES_PID
+#ifdef PV_REMOTE_CONTROL
 		{ "-R", "--remote", N_("PID"),
 		 N_("update settings of process PID"),
 		 { 0, 0, 0, 0} },
-#endif				/* SIGINFO_PROVIDES_PID */
+#endif				/* PV_REMOTE_CONTROL */
 		{ "", NULL, NULL, NULL, { 0, 0, 0, 0} },
 		{ "-P", "--pidfile", N_("FILE"),
 		 N_("save process ID in FILE"),

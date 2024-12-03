@@ -226,7 +226,7 @@ static void pv_sig_term( /*@unused@ */  __attribute__((unused))
 }
 
 
-#ifdef SIGINFO_PROVIDES_PID
+#ifdef PV_REMOTE_CONTROL
 /*
  * Handle a SIGUSR2 by setting a flag to say we received it, after recording
  * the sending PID.
@@ -375,7 +375,7 @@ void pv_sig_init(pvstate_t state)
 	sa.sa_flags = 0;
 	(void) sigaction(SIGTERM, &sa, &(pv_sig_state->signal.old_sigterm));
 
-#ifdef SIGINFO_PROVIDES_PID
+#ifdef PV_REMOTE_CONTROL
 	/*
 	 * Handle SIGUSR2 by setting a flag to say the signal has been
 	 * received, and storing the sending process's PID.
@@ -431,7 +431,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 	(void) sigaction(SIGINT, &(pv_sig_state->signal.old_sigint), NULL);
 	(void) sigaction(SIGHUP, &(pv_sig_state->signal.old_sighup), NULL);
 	(void) sigaction(SIGTERM, &(pv_sig_state->signal.old_sigterm), NULL);
-#ifdef SIGINFO_PROVIDES_PID
+#ifdef PV_REMOTE_CONTROL
 	(void) sigaction(SIGUSR2, &(pv_sig_state->signal.old_sigusr2), NULL);
 #endif
 	(void) sigaction(SIGALRM, &(pv_sig_state->signal.old_sigalrm), NULL);

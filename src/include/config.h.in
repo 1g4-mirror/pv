@@ -28,6 +28,10 @@
    */
 #undef HAVE_DCGETTEXT
 
+/* Define to 1 if you have the declaration of `SA_SIGINFO', and to 0 if you
+   don't. */
+#undef HAVE_DECL_SA_SIGINFO
+
 /* Define to 1 if you have the `dup2' function. */
 #undef HAVE_DUP2
 

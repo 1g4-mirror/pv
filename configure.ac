@@ -40,6 +40,7 @@ AC_CHECK_HEADERS([sys/ioctl.h])
 AC_CHECK_HEADERS([libintl.h locale.h])
 AC_CHECK_HEADERS([sys/sysmacros.h])
 AC_CHECK_MEMBERS([struct stat.st_blksize])
+AC_CHECK_DECLS([SA_SIGINFO], [], [], [[#include <signal.h>]])
 
 AC_SEARCH_LIBS([sqrtl],[m])
 AC_CHECK_HEADERS([math.h])
@@ -98,7 +99,11 @@ AC_MSG_RESULT([yes])
 AC_DEFINE([SIGINFO_PROVIDES_PID], [1], [Signal handlers can determine the sending PID])
 ], [
 AC_MSG_RESULT([no])
-])
+], [
+AC_MSG_RESULT([cannot check, assuming yes])
+AC_DEFINE([SIGINFO_PROVIDES_PID], [1], [Signal handlers can determine the sending PID])
+]
+)
 
 AH_BOTTOM([#include "config-aux.h"])
 
