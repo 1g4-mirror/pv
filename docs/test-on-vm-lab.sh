@@ -5,6 +5,8 @@
 # ~/.config/lab-hosts.  They need to be reachable over SSH with no password.
 #
 # Displays progress to the terminal and produces a tarball of results.
+#
+# Requires "scw" (https://www.ivarch.com/programs/scw.shtml).
 
 labHosts="$(cat ~/.config/lab-hosts)"
 
@@ -78,7 +80,7 @@ for remoteHost in ${hostList}; do
 	printf '%s %s\n' 'ok' 'build completed' >&3
 
 	printf '%s %s\n' 'notice' 'testing' >&3
-	ssh "${remoteHost}" "cd \"${remoteBuildDir}/BUILD\" && make checkcc" || exit \$?
+	ssh "${remoteHost}" "cd \"${remoteBuildDir}/BUILD\" && make check" || exit \$?
 	printf '%s %s\n' 'ok' 'testing completed' >&3
 
 	exit 0
