@@ -1,10 +1,26 @@
 #!/bin/sh
 #
-# Run "make check" from a source tarball, on a whole lab of VMs.  Hostnames
-# need to be listed on the command line after the tarball, or in
+# Run "make check" from a source tarball, on a whole lab of VMs.
+#
+# The source tarball should contain a directory; this directory must contain
+# a "configure" script.  After running "configure", this script calls "make"
+# and then "make check", from a build subdirectory.
+#
+# Hostnames need to be listed on the command line after the tarball, or in
 # ~/.config/lab-hosts.  They need to be reachable over SSH with no password.
 #
-# Displays progress to the terminal and produces a tarball of results.
+# Cross-compilation is performed if the hostname is of the form "x:y", where
+# "x" is a target like "arm-linux-gnueabi", and "y" is the name of a host of
+# that architecture.  The package is built locally with "--host=x" and the
+# result is copied to "y" and "make check" is run.
+# TODO: the above paragraph's functionality isn't done yet
+#
+# Displays progress to the terminal and produces a tarball of results.  In
+# the results, the file "latest-status.txt" contains the last status
+# display, and there is a directory for each host.  The directories contain
+# SCW metrics files plus "output.log" (timestamped), "raw-output.log"
+# (without timestamps), "framework-output.log" (messages from this script),
+# and the "config.log", "test-suite.log", and "tests/" from the build area.
 #
 # Requires "scw" (https://www.ivarch.com/programs/scw.shtml).
 
@@ -49,62 +65,137 @@ recordCommand () {
 	  -s CheckLockFile="${targetDir}/.widelock" \
 	  -s OutputMap= \
 	  -s OutputMap="OES stamped ${targetDir}/output.log" \
+	  -s OutputMap="OES raw ${targetDir}/raw-output.log" \
 	  -s Command="$*" \
 	  run item
 }
 
-for remoteHost in ${hostList}; do
-	mkdir "${workDir}/${remoteHost}"
+# TODO: maybe make this a function and we call ourselves
+cat > "${workDir}/run.sh" <<'EOF'
+#!/bin/sh
+
+# sourceArchive = local source tarball path
+# buildHost = where to build, or "" for local
+# checkHost = where to test, or "" for local
+# remoteBuildDir = temp directory for remote build or check
+# localBuildDir = temp directory for local build
+# configureArguments = extra "configure" script arguments
+
+printf '%s %s\n' 'notice' 'creating build area' >&3
+if test -n "${buildHost}"; then
+	ssh "${buildHost}" mkdir "${remoteBuildDir}" || exit 1
+else
+	mkdir "${localBuildDir}" || exit 1
+fi
+printf '%s %s\n' 'ok' 'created build area' >&3
+
+if test -n "${checkHost}"; then
+	printf '%s %s\n' 'notice' 'creating check area' >&3
+	ssh "${checkHost}" mkdir "${remoteBuildDir}" || exit 1
+	printf '%s %s\n' 'ok' 'created check area' >&3
+fi
+
+if test -n "${buildHost}"; then
+	printf '%s %s\n' 'notice' 'copying source archive' >&3
+	scp "${sourceArchive}" "${buildHost}:${remoteBuildDir}/" || exit 1
+	printf '%s %s\n' 'ok' 'source archive copied' >&3
+fi
+
+printf '%s %s\n' 'notice' 'extracting source archive' >&3
+if test -n "${buildHost}"; then
+	ssh "${buildHost}" tar xzf "${remoteBuildDir}/${sourceArchive##*/}" -C "${remoteBuildDir}" || exit $?
+else
+	tar xzf "${sourceArchive}" -C "${localBuildDir}" || exit $?
+fi
+printf '%s %s\n' 'ok' 'source archive extracted' >&3
+
+printf '%s %s\n' 'notice' 'configuring' >&3
+if test -n "${buildHost}"; then
+	ssh "${buildHost}" "cd \"${remoteBuildDir}\" && mkdir BUILD && cd BUILD && ../*/configure ${configureArguments}" || exit $?
+else
+	( cd "${localBuildDir}" && mkdir BUILD && cd BUILD && ../*/configure ${configureArguments} ) || exit $?
+fi
+printf '%s %s\n' 'ok' 'configuration completed' >&3
+
+printf '%s %s\n' 'notice' 'building' >&3
+if test -n "${buildHost}"; then
+	ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make" || exit $?
+else
+	make -C "${localBuildDir}/BUILD" || exit $?
+fi
+printf '%s %s\n' 'ok' 'build completed' >&3
+
+if test -n "${buildHost}"; then
+	printf '%s %s\n' 'notice' 'testing' >&3
+	ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make check" || exit $?
+	printf '%s %s\n' 'ok' 'testing completed' >&3
+fi
+
+if test -n "${checkHost}"; then
+# TODO: extract source on check host
+# TODO: run configure on check host
+# TODO: copy local build directory to check host
+# TODO: run check on check host
+exit 1
+fi
+
+exit 0
+EOF
+chmod 700 "${workDir}/run.sh"
+
+for hostSpec in ${hostList}; do
+	localTestDir="${workDir}/${hostSpec}"
+	buildHost="${hostSpec}"
+	checkHost=""
+	configureArguments=""
+
+	xcFor="${hostSpec%:*}"
+	xcRunOn="${hostSpec#*:}"
+
+	if ! test "${xcFor}" = "${xcRunOn}"; then
+		localTestDir="${workDir}/${xcFor}-${xcRunOn}"
+		buildHost=""
+		checkHost="${xcRunOn}"
+		configureArguments="--host ${xcFor}"
+	fi
+
+	mkdir "${localTestDir}"
+
+	localBuildDir="${localTestDir}/XC"
+
 	(
 	flock -x 3
+
 	(
-	cat > "${workDir}/${remoteHost}/run.sh" <<-EOF
-	printf '%s %s\n' 'notice' 'creating build area' >&3
-	ssh "${remoteHost}" mkdir "${remoteBuildDir}" || exit 1
-	printf '%s %s\n' 'ok' 'created build area' >&3
-
-	printf '%s %s\n' 'notice' 'copying source archive' >&3
-	scp "${sourceArchive}" "${remoteHost}:${remoteBuildDir}/" || exit 1
-	printf '%s %s\n' 'ok' 'source archive copied' >&3
-
-	printf '%s %s\n' 'notice' 'extracting source archive' >&3
-	ssh "${remoteHost}" tar xzf "${remoteBuildDir}/${sourceArchive##*/}" -C "${remoteBuildDir}" --strip-components=1 || exit \$?
-	printf '%s %s\n' 'ok' 'source archive extracted' >&3
-
-	printf '%s %s\n' 'notice' 'configuring' >&3
-	ssh "${remoteHost}" "cd \"${remoteBuildDir}\" && mkdir BUILD && cd BUILD && ../configure" || exit \$?
-	printf '%s %s\n' 'ok' 'configuration completed' >&3
-
-	printf '%s %s\n' 'notice' 'building' >&3
-	ssh "${remoteHost}" "cd \"${remoteBuildDir}/BUILD\" && make" || exit \$?
-	printf '%s %s\n' 'ok' 'build completed' >&3
-
-	printf '%s %s\n' 'notice' 'testing' >&3
-	ssh "${remoteHost}" "cd \"${remoteBuildDir}/BUILD\" && make check" || exit \$?
-	printf '%s %s\n' 'ok' 'testing completed' >&3
-
-	exit 0
-EOF
-	chmod 700 "${workDir}/${remoteHost}/run.sh"
-
-	recordCommand "${workDir}/${remoteHost}" "${workDir}/${remoteHost}/run.sh"
+	export sourceArchive buildHost checkHost remoteBuildDir localBuildDir configureArguments
+	recordCommand "${localTestDir}" "${workDir}/run.sh"
 	) 3<&-
 
-	exec >>"${workDir}/${remoteHost}/output.log" 2>&1
+	exec >>"${localTestDir}/output.log" 2>&1
 
 	printf '*** %s\n' 'retrieving build and test artefacts'
-	scp "${remoteHost}:${remoteBuildDir}/BUILD/config.log" "${workDir}/${remoteHost}/"
-	scp "${remoteHost}:${remoteBuildDir}/BUILD/test-suite.log" "${workDir}/${remoteHost}/"
-	rsync -a "${remoteHost}:${remoteBuildDir}/BUILD/tests/" "${workDir}/${remoteHost}/tests/"
+	mkdir "${localTestDir}/tests"
+	if test -n "${buildHost}"; then
+		scp "${buildHost}:${remoteBuildDir}/BUILD/config.log" "${localTestDir}/"
+		scp "${buildHost}:${remoteBuildDir}/BUILD/test-suite.log" "${localTestDir}/"
+		scp "${buildHost}:${remoteBuildDir}/BUILD/tests/*" "${localTestDir}/tests/"
+	elif test -n "${checkHost}"; then
+		scp "${checkHost}:${remoteBuildDir}/BUILD/config.log" "${localTestDir}/"
+		scp "${checkHost}:${remoteBuildDir}/BUILD/test-suite.log" "${localTestDir}/"
+		scp "${checkHost}:${remoteBuildDir}/BUILD/tests/*" "${localTestDir}/tests/"
+	fi
 
 	printf '*** %s\n' 'removing build area'
-	ssh "${remoteHost}" rm -rf "${remoteBuildDir}" || exit 1
+	rm -rf "${localBuildDir}"
+	if test -n "${buildHost}"; then
+		ssh "${buildHost}" rm -rf "${remoteBuildDir}"
+	elif test -n "${checkHost}"; then
+		ssh "${checkHost}" rm -rf "${remoteBuildDir}"
+	fi
 
 	flock -u 3
-	) > "${workDir}/${remoteHost}/framework-output.log" 2>&1 3>>"${workDir}/${remoteHost}/active" &
+	) > "${localTestDir}/framework-output.log" 2>&1 3>>"${localTestDir}/active" &
 done
-
-# TODO: spawn a cross-compilation check as well
 
 sleep 0.1
 
