@@ -212,6 +212,8 @@ for hostSpec in ${hostList}; do
 		ssh "${checkHost}" rm -rf "${remoteBuildDir}"
 	fi
 
+	printf '\n'
+
 	flock -u 3
 	) > "${localTestDir}/framework-output.log" 2>&1 3>>"${localTestDir}/active" &
 done
@@ -270,7 +272,7 @@ while test "${exitedCount}" -lt "${hostCount}"; do
 		{ read -r lastStatusWord lastStatusMessage < "${workDir}/${testHostDir}/last-status"; } 2>/dev/null
 
 		lastLine="-"
-		test -s "${workDir}/${testHostDir}/output.log" && lastLine="$(tail -n 1 "${workDir}/${testHostDir}/output.log" 2>/dev/null)"
+		test -s "${workDir}/${testHostDir}/output.log" && lastLine="$(tail -n 1 "${workDir}/${testHostDir}/output.log" 2>/dev/null | expand)"
 
 		testResult="----"
 		test -e "${workDir}/${testHostDir}/failed" && testResult="FAIL"
