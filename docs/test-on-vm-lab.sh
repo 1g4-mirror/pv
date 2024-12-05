@@ -13,7 +13,6 @@
 # "x" is a target like "arm-linux-gnueabi", and "y" is the name of a host of
 # that architecture.  The package is built locally with "--host=x" and the
 # result is copied to "y" and "make check" is run.
-# TODO: the above paragraph's functionality isn't done yet
 #
 # Displays progress to the terminal and produces a tarball of results.  In
 # the results, the file "latest-status.txt" contains the last status
@@ -24,7 +23,116 @@
 #
 # Requires "scw" (https://www.ivarch.com/programs/scw.shtml).
 
-labHosts="$(cat ~/.config/lab-hosts)"
+# Run a build and check, according to these environment variables:
+#
+#  sourceArchive       local source tarball path
+#  buildHost           where to build, or "" for local
+#  checkHost           where to test, or "" for local
+#  remoteBuildDir      temp directory for remote build or check
+#  localBuildDir       temp directory for local build
+#  configureArguments  extra "configure" script arguments
+#
+# Does not return - always exits.
+#
+# Expects to be run under SCW, so writes status to fd 3.
+#
+testRunner () {
+	printf '%s %s\n' 'notice' 'creating build area' >&3
+	if test -n "${buildHost}"; then
+		ssh "${buildHost}" mkdir "${remoteBuildDir}" || exit 1
+	else
+		mkdir "${localBuildDir}" || exit 1
+	fi
+	printf '%s %s\n' 'ok' 'created build area' >&3
+
+	if test -n "${checkHost}"; then
+		printf '%s %s\n' 'notice' 'creating check area' >&3
+		ssh "${checkHost}" mkdir "${remoteBuildDir}" || exit 1
+		printf '%s %s\n' 'ok' 'created check area' >&3
+	fi
+
+	printf '%s %s\n' 'notice' 'copying source archive' >&3
+	if test -n "${buildHost}"; then
+		scp "${sourceArchive}" "${buildHost}:${remoteBuildDir}/" || exit 1
+	elif test -n "${checkHost}"; then
+		scp "${sourceArchive}" "${checkHost}:${remoteBuildDir}/" || exit 1
+	fi
+	printf '%s %s\n' 'ok' 'source archive copied' >&3
+
+	printf '%s %s\n' 'notice' 'extracting source archive' >&3
+	if test -n "${buildHost}"; then
+		ssh "${buildHost}" tar xzf "${remoteBuildDir}/${sourceArchive##*/}" -C "${remoteBuildDir}" || exit $?
+	else
+		tar xzf "${sourceArchive}" -C "${localBuildDir}" || exit $?
+		ssh "${checkHost}" tar xzf "${remoteBuildDir}/${sourceArchive##*/}" -C "${remoteBuildDir}" || exit $?
+	fi
+	printf '%s %s\n' 'ok' 'source archive extracted' >&3
+
+	stepResult="ok"
+	if test -n "${buildHost}"; then
+		printf '%s %s\n' 'notice' 'configuring' >&3
+		ssh "${buildHost}" "cd \"${remoteBuildDir}\" && mkdir BUILD && cd BUILD && ../*/configure ${configureArguments}" || exit $?
+	else
+		printf '%s %s\n' 'notice' 'configuring locally' >&3
+		( cd "${localBuildDir}" && mkdir BUILD && cd BUILD && ../*/configure ${configureArguments} ) || exit $?
+		printf '%s %s\n' 'notice' "configuring on ${checkHost}" >&3
+		ssh "${checkHost}" "cd \"${remoteBuildDir}\" && mkdir BUILD && cd BUILD && ../*/configure" \
+		|| { stepResult="warning"; printf '%s %s\n' 'warning' "configuration failed on ${checkHost}" >&3; }
+	fi
+	printf '%s %s\n' "${stepResult}" 'configuration completed' >&3
+
+	printf '%s %s\n' 'notice' 'building' >&3
+	if test -n "${buildHost}"; then
+		ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make" || exit $?
+	else
+		make -C "${localBuildDir}/BUILD" || exit $?
+	fi
+	printf '%s %s\n' 'ok' 'build completed' >&3
+
+	if test -n "${buildHost}"; then
+		printf '%s %s\n' 'notice' 'testing' >&3
+		ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make check" || exit $?
+		printf '%s %s\n' 'ok' 'testing completed' >&3
+	elif test -n "${checkHost}"; then
+		printf '%s %s\n' 'notice' "transferring build to ${checkHost}" >&3
+		tar cvf "${localBuildDir}/build.tar" -C "${localBuildDir}" BUILD || exit $?
+		scp "${localBuildDir}/build.tar" "${checkHost}:${remoteBuildDir}/build.tar" || exit $?
+		ssh "${checkHost}" "tar xf \"${remoteBuildDir}/build.tar\" -C \"${remoteBuildDir}\"" || exit $?
+		printf '%s %s\n' 'ok' "transferred build to ${checkHost}" >&3
+		printf '%s %s\n' 'notice' "testing on ${checkHost}" >&3
+		ssh "${checkHost}" "cd \"${remoteBuildDir}/BUILD\" && make check-TESTS XCTEST=1" || exit $?
+		printf '%s %s\n' 'ok' 'testing completed' >&3
+	fi
+
+	exit 0
+}
+
+
+# Using directory $1 for metrics and output, run the remaining arguments as
+# a command using "scw" to capture metrics and record logs.
+#
+recordCommand () {
+	targetDir="$1"
+	shift
+	mkdir -p "${targetDir}"
+	scw -c /dev/null \
+	  -s UserConfigFile=/dev/null \
+	  -s ItemsDir=/dev/null \
+	  -s MetricsDir="${targetDir}" \
+	  -s CheckLockFile="${targetDir}/.widelock" \
+	  -s OutputMap= \
+	  -s OutputMap="OES stamped ${targetDir}/output.log" \
+	  -s OutputMap="OES raw ${targetDir}/raw-output.log" \
+	  -s Command="$*" \
+	  run item
+}
+
+if test "$1" = "--testRunner"; then
+	testRunner
+	exit 1
+fi
+
+labHosts="$(cat ~/.config/lab-hosts 2>/dev/null)"
 
 workDir=$(mktemp -d) || exit 1
 trap 'rm -rf "${workDir}"' EXIT
@@ -49,102 +157,14 @@ attrWhite="$(tput setaf 7 2>/dev/null)"
 attrNone="$(tput sgr0 2>/dev/null)"
 
 dateStamp="$(date +%Y%m%d-%H%M)"
-remoteBuildDir="test-${dateStamp}"
 resultsArchive="result-${dateStamp}.tar.gz"
 
 startEpoch="$(date +%s)"
 
-recordCommand () {
-	targetDir="$1"
-	shift
-	mkdir -p "${targetDir}"
-	scw -c /dev/null \
-	  -s UserConfigFile=/dev/null \
-	  -s ItemsDir=/dev/null \
-	  -s MetricsDir="${targetDir}" \
-	  -s CheckLockFile="${targetDir}/.widelock" \
-	  -s OutputMap= \
-	  -s OutputMap="OES stamped ${targetDir}/output.log" \
-	  -s OutputMap="OES raw ${targetDir}/raw-output.log" \
-	  -s Command="$*" \
-	  run item
-}
-
-# TODO: maybe make this a function and we call ourselves
-cat > "${workDir}/run.sh" <<'EOF'
-#!/bin/sh
-
-# sourceArchive = local source tarball path
-# buildHost = where to build, or "" for local
-# checkHost = where to test, or "" for local
-# remoteBuildDir = temp directory for remote build or check
-# localBuildDir = temp directory for local build
-# configureArguments = extra "configure" script arguments
-
-printf '%s %s\n' 'notice' 'creating build area' >&3
-if test -n "${buildHost}"; then
-	ssh "${buildHost}" mkdir "${remoteBuildDir}" || exit 1
-else
-	mkdir "${localBuildDir}" || exit 1
-fi
-printf '%s %s\n' 'ok' 'created build area' >&3
-
-if test -n "${checkHost}"; then
-	printf '%s %s\n' 'notice' 'creating check area' >&3
-	ssh "${checkHost}" mkdir "${remoteBuildDir}" || exit 1
-	printf '%s %s\n' 'ok' 'created check area' >&3
-fi
-
-if test -n "${buildHost}"; then
-	printf '%s %s\n' 'notice' 'copying source archive' >&3
-	scp "${sourceArchive}" "${buildHost}:${remoteBuildDir}/" || exit 1
-	printf '%s %s\n' 'ok' 'source archive copied' >&3
-fi
-
-printf '%s %s\n' 'notice' 'extracting source archive' >&3
-if test -n "${buildHost}"; then
-	ssh "${buildHost}" tar xzf "${remoteBuildDir}/${sourceArchive##*/}" -C "${remoteBuildDir}" || exit $?
-else
-	tar xzf "${sourceArchive}" -C "${localBuildDir}" || exit $?
-fi
-printf '%s %s\n' 'ok' 'source archive extracted' >&3
-
-printf '%s %s\n' 'notice' 'configuring' >&3
-if test -n "${buildHost}"; then
-	ssh "${buildHost}" "cd \"${remoteBuildDir}\" && mkdir BUILD && cd BUILD && ../*/configure ${configureArguments}" || exit $?
-else
-	( cd "${localBuildDir}" && mkdir BUILD && cd BUILD && ../*/configure ${configureArguments} ) || exit $?
-fi
-printf '%s %s\n' 'ok' 'configuration completed' >&3
-
-printf '%s %s\n' 'notice' 'building' >&3
-if test -n "${buildHost}"; then
-	ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make" || exit $?
-else
-	make -C "${localBuildDir}/BUILD" || exit $?
-fi
-printf '%s %s\n' 'ok' 'build completed' >&3
-
-if test -n "${buildHost}"; then
-	printf '%s %s\n' 'notice' 'testing' >&3
-	ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make check" || exit $?
-	printf '%s %s\n' 'ok' 'testing completed' >&3
-fi
-
-if test -n "${checkHost}"; then
-# TODO: extract source on check host
-# TODO: run configure on check host
-# TODO: copy local build directory to check host
-# TODO: run check on check host
-exit 1
-fi
-
-exit 0
-EOF
-chmod 700 "${workDir}/run.sh"
 
 for hostSpec in ${hostList}; do
 	localTestDir="${workDir}/${hostSpec}"
+	remoteBuildDir="test-${dateStamp}.$(date +%s).$$"
 	buildHost="${hostSpec}"
 	checkHost=""
 	configureArguments=""
@@ -160,16 +180,15 @@ for hostSpec in ${hostList}; do
 	fi
 
 	mkdir "${localTestDir}"
+	printf "%s\n" "${hostSpec}" > "${localTestDir}/hostSpec"
 
 	localBuildDir="${localTestDir}/XC"
 
 	(
 	flock -x 3
 
-	(
 	export sourceArchive buildHost checkHost remoteBuildDir localBuildDir configureArguments
-	recordCommand "${localTestDir}" "${workDir}/run.sh"
-	) 3<&-
+	recordCommand "${localTestDir}" "sh \"$0\" --testRunner" 3<&-
 
 	exec >>"${localTestDir}/output.log" 2>&1
 
@@ -199,10 +218,10 @@ done
 
 sleep 0.1
 
-allTestHosts="$(find "${workDir}" -mindepth 1 -maxdepth 1 -name "[0-9A-Za-z_]*" -type d -printf "%f\n" | sort)"
+allTestHostDirs="$(find "${workDir}" -mindepth 1 -maxdepth 1 -name "[0-9A-Za-z_]*" -type d -printf "%f\n" | sort)"
 
 hostCount=0
-for testHost in ${allTestHosts}; do hostCount=$((1+hostCount)); done
+for testHostDir in ${allTestHostDirs}; do hostCount=$((1+hostCount)); done
 exitedCount=0
 overallStatus=""
 
@@ -220,18 +239,20 @@ while test "${exitedCount}" -lt "${hostCount}"; do
 	passedCount=0
 	exitedCount=0
 	overallStatus=""
-	for testHost in ${allTestHosts}; do
-		test "${#testHost}" -gt "${nameWidth}" && nameWidth="${#testHost}"
+	for testHostDir in ${allTestHostDirs}; do
+		hostSpec="${testHostDir}"
+		{ read -r hostSpec < "${workDir}/${testHostDir}/hostSpec"; } 2>/dev/null
+		test "${#hostSpec}" -gt "${nameWidth}" && nameWidth="${#hostSpec}"
 
-		exec 3>>"${workDir}/${testHost}/active"
+		exec 3>>"${workDir}/${testHostDir}/active"
 		flock -x -n 3 && exitedCount=$((1+exitedCount))
 		exec 3<&-
 
-		test -e "${workDir}/${testHost}/ended" || runningCount=$((1+runningCount))
-		if test -e "${workDir}/${testHost}/failed"; then
+		test -e "${workDir}/${testHostDir}/ended" || runningCount=$((1+runningCount))
+		if test -e "${workDir}/${testHostDir}/failed"; then
 			overallStatus="FAIL"
 			failedCount=$((1+failedCount))
-		elif test -e "${workDir}/${testHost}/succeeded"; then
+		elif test -e "${workDir}/${testHostDir}/succeeded"; then
 			test -z "${overallStatus}" && overallStatus="PASS"
 			passedCount=$((1+passedCount))
 		fi
@@ -240,21 +261,27 @@ while test "${exitedCount}" -lt "${hostCount}"; do
 
 	printf "%sT+%04d - %s%s\n\n" "${attrUnderline}" "${elapsedSeconds}" "$(date '+%Y-%m-%d %H:%M:%S')" "${attrNone}"
 
-	for testHost in ${allTestHosts}; do
+	for testHostDir in ${allTestHostDirs}; do
+		hostSpec="${testHostDir}"
+		{ read -r hostSpec < "${workDir}/${testHostDir}/hostSpec"; } 2>/dev/null
+
 		lastStatusWord="-"
 		lastStatusMessage="-"
-		test -s "${workDir}/${testHost}/last-status" && read -r lastStatusWord lastStatusMessage < "${workDir}/${testHost}/last-status"
+		{ read -r lastStatusWord lastStatusMessage < "${workDir}/${testHostDir}/last-status"; } 2>/dev/null
+
 		lastLine="-"
-		test -s "${workDir}/${testHost}/output.log" && lastLine="$(tail -n 1 "${workDir}/${testHost}/output.log")"
+		test -s "${workDir}/${testHostDir}/output.log" && lastLine="$(tail -n 1 "${workDir}/${testHostDir}/output.log" 2>/dev/null)"
+
 		testResult="----"
-		test -e "${workDir}/${testHost}/failed" && testResult="FAIL"
-		test -e "${workDir}/${testHost}/succeeded" && testResult="PASS"
+		test -e "${workDir}/${testHostDir}/failed" && testResult="FAIL"
+		test -e "${workDir}/${testHostDir}/succeeded" && testResult="PASS"
+
 		remainingWidth=$((width-nameWidth-20))
 		statusWidth=$((remainingWidth*2/3))
 		test "${statusWidth}" -gt 40 && statusWidth=40
 		lastLineWidth=$((remainingWidth-statusWidth))
 
-		printf " %s%${nameWidth}s%s " "${attrBold}${attrCyan}" "${testHost}" "${attrNone}"
+		printf " %s%${nameWidth}s%s " "${attrBold}${attrYellow}" "${hostSpec}" "${attrNone}"
 		case "${testResult}" in
 		"PASS") printf "%s%s%s" "${attrBold}${attrGreen}" "PASS" "${attrNone}" ;;
 		"FAIL") printf "%s%s%s" "${attrBold}${attrRed}" "FAIL" "${attrNone}" ;;
@@ -282,10 +309,10 @@ while test "${exitedCount}" -lt "${hostCount}"; do
 	*) printf "%s" "----"
 	esac
 
-	printf "    %s%s%s " "${attrBold}" "Running+Passed+Failed:" "${attrNone}"
-	printf "%s%d%s" "${attrBold}${attrMagenta}" "${runningCount}" "${attrNone}"
-	printf "+%s%d%s" "${attrBold}${attrGreen}" "${passedCount}" "${attrNone}"
-	printf "+%s%d%s" "${attrBold}${attrRed}" "${failedCount}" "${attrNone}"
+	printf "    %s%s%s " "${attrBold}" "Running,Passed,Failed:" "${attrNone}"
+	printf "%sR%d%s" "${attrBold}${attrMagenta}" "${runningCount}" "${attrNone}"
+	printf ",%sP%d%s" "${attrBold}${attrGreen}" "${passedCount}" "${attrNone}"
+	printf ",%sF%d%s" "${attrBold}${attrRed}" "${failedCount}" "${attrNone}"
 	printf " = %d" "${hostCount}"
 	printf "\n\n"
 	} > "${workDir}/latest-status.txt"
