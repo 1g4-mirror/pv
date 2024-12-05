@@ -5,6 +5,11 @@
 true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile1:?not set - call this from 'make check'}"
 
+if test "${XCTEST}" = "1"; then
+	echo "cross-compile flag set - skipping as local make will not run"
+	exit 77
+fi
+
 makeDir="${testSubject%/*}"
 if ! test -d "${makeDir}"; then
 	echo "could not find the directory to run \`make' in"
