@@ -113,7 +113,7 @@ static int is_data_ready(int fd_in, /*@null@ */ bool *fd_in_ready, int fd_out, /
  * We stop retrying if the time elapsed since this function was entered
  * reaches TRANSFER_READ_TIMEOUT seconds.
  */
-static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
+static ssize_t pv__transfer_read_repeated(int fd, char *buf, size_t count)
 {
 	struct timespec start_time;
 	ssize_t total_read;
@@ -193,7 +193,7 @@ static ssize_t pv__transfer_read_repeated(int fd, void *buf, size_t count)
  * We stop retrying if the time elapsed since this function was entered
  * reaches TRANSFER_WRITE_TIMEOUT seconds.
  */
-static ssize_t pv__transfer_write_repeated(int fd, void *buf, size_t count, bool sync_after_write)
+static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool sync_after_write)
 {
 	struct timespec start_time;
 	ssize_t total_written;
