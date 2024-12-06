@@ -1331,9 +1331,9 @@ void pv_display(pvstate_t state, bool final)
 	    && (state->control.force || pv_in_foreground())
 	    && (NULL != state->extra_display.display_buffer)
 	    ) {
-		pv_tty_write(state, "\e]2;", 4);
+		pv_tty_write(state, "\033]2;", 4);
 		pv_tty_write(state, state->extra_display.display_buffer, state->extra_display.display_string_len);
-		pv_tty_write(state, "\e\\", 2);
+		pv_tty_write(state, "\033\\", 2);
 		state->extra_display.display_visible = true;
 		debug("%s: [%s]", "windowtitle display", state->extra_display.display_buffer);
 	}
