@@ -1,4 +1,4 @@
-.TH PV 1 2024-12-02 pv-1.9.7 "User Commands"
+.TH PV 1 2024-12-07 pv-1.9.7 "User Commands"
 .\"
 .SH NAME
 pv \- monitor the progress of data through a pipe
@@ -515,6 +515,12 @@ the last 16 bytes).
 Shows only dots if the transfer is being done with \fBsplice\fR(2), since
 splicing to or from pipes does not use the buffer.
 .TP
+.B %nL
+Show the first \fIn\fR bytes of the most recently written line (for example,
+\*(lq\fB%40L\fR\*(rq shows the first 40 bytes).
+If no \fIn\fR is given, then this expands to fill the available space.
+Shows only spaces if the transfer is being done with \fBsplice\fR(2).
+.TP
 .B %N
 Show the name prefix given by \*(lq\fB\-\-name\fR\*(rq.
 Padded to 9 characters with spaces, and suffixed with \*(lq:\*(rq.
@@ -629,6 +635,15 @@ pv \-d 1234:3
 pv \-d 1234
 .EE
 .in
+.PP
+Sending logs to a processing script, showing the most recent line as part of
+the progress display:
+.PP
+.in +4
+.EX
+pv \-F '%a %p : %L' big.log | processing-script
+.EE
+.in
 .\"
 .SH EXIT STATUS
 An exit status of 1 indicates a problem with the \*(lq\fB\-\-remote\fR\*(rq
@@ -721,6 +736,10 @@ If the input size cannot be calculated, and the output is a block device,
 then \fBpv\fR will read the output device's size, use that as if it had been
 passed to \*(lq\fB\-\-size\fR\*(rq, and activate
 \*(lq\fB\-\-stop\-at\-size\fR\*(rq.
+.PP
+The \*(lq\fB%nA\fR\*(rq and \*(lq\fB%nL\fR\*(rq format sequences may not be
+effective with small input files, and \*(lq\fB%nL\fR\*(rq may be a few lines
+out due to buffering within the pipeline itself.
 .\"
 .SH REPORTING BUGS
 Please report any bugs to \fBpv@ivarch.com\fR.

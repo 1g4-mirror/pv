@@ -491,7 +491,8 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 			/*
 			 * Check for a numeric prefix between the % and the
-			 * format character - currently only used with "%A".
+			 * format character - currently only used with "%A"
+			 * and "%L".
 			 */
 #if HAVE_STRTOUL
 			number_end_ptr = NULL;
@@ -534,6 +535,12 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 				chosen_size = (size_t) number_prefix;
 				if (display->lastoutput_bytes < chosen_size)
 					display->lastoutput_bytes = chosen_size;
+				break;
+			case 'L':
+				seg_type = PV_COMPONENT_PREVLINE;
+				if (number_prefix > PV_SIZEOF_PREVLINE_BUFFER)
+					number_prefix = PV_SIZEOF_PREVLINE_BUFFER;
+				chosen_size = (size_t) number_prefix;
 				break;
 			case 'r':
 				seg_type = PV_COMPONENT_RATE;
@@ -631,7 +638,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	       bool final)
 {
 	long eta;
-	int static_portion_size, dynamic_segment_count;
+	int static_portion_size, dynamic_segment_count, dynamic_segment_width;
 	pv_display_component component_type;
 	size_t segment;
 	size_t new_display_string_len;
@@ -1028,6 +1035,18 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			component_content[buf_idx] = '\0';
 			break;
 
+		case PV_COMPONENT_PREVLINE:
+			/* Most recent line. */
+			for (buf_idx = 0;
+			     buf_idx < PV_SIZEOF_PREVLINE_BUFFER - 1 && buf_idx < PV_SIZEOF_COMPONENT_STR - 1;
+			     buf_idx++) {
+				int display_char;
+				display_char = (int) (display->previous_line[buf_idx]);
+				component_content[buf_idx] = isprint(display_char) ? (char) display_char : ' ';
+			}
+			component_content[buf_idx] = '\0';
+			break;
+
 		default:
 			break;
 		}
@@ -1054,6 +1073,10 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		} else if (display->format[segment].type == PV_COMPONENT_PROGRESS) {
 			dynamic_segment_count++;
 			debug("segment[%d] type:%d dynamic", segment, display->format[segment].type);
+		} else if (display->format[segment].type == PV_COMPONENT_PREVLINE
+			   && 0 == display->format[segment].chosen_size) {
+			dynamic_segment_count++;
+			debug("segment[%d] type:%d dynamic", segment, display->format[segment].type);
 		} else {
 			size_t segment_width = display->format[segment].chosen_size;
 			if (0 == segment_width)
@@ -1066,6 +1089,14 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	debug("static_portion_size: %d", static_portion_size);
 	debug("dynamic_segment_count: %d", dynamic_segment_count);
 
+	dynamic_segment_width = (int) (state->control.width) - static_portion_size;
+	/*
+	 * Divide the total remaining screen space by the number of dynamic
+	 * segments, so that multiple dynamic segments will share the space.
+	 */
+	if (dynamic_segment_count > 1)
+		dynamic_segment_width /= dynamic_segment_count;
+
 	/*
 	 * Assemble the progress bar now we know how big it should be.
 	 */
@@ -1073,20 +1104,13 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		char *component_content;
 		size_t component_buf_size;
 		char after_bar[32];	 /* flawfinder: ignore - only populated by pv_snprintf(). */
-		int component_width, bar_area_width, filled_bar_width, pad_count;
+		int bar_area_width, filled_bar_width, pad_count;
 
 		component_content = display->component[PV_COMPONENT_PROGRESS].content;
 		component_content[0] = '\0';
 		component_buf_size = PV_SIZEOF_COMPONENT_STR;
 
 		memset(after_bar, 0, sizeof(after_bar));
-
-		component_width = (int) (state->control.width) - static_portion_size;
-		/*
-		 * Divide the total remaining screen space by the number of dynamic segments.
-		 */
-		if (dynamic_segment_count > 1)
-			component_width /= dynamic_segment_count;
 
 		if (state->control.size > 0 || state->control.rate_gauge) {
 			/*
@@ -1125,7 +1149,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			after_bar_width = strlen(after_bar);	/* flawfinder: ignore */
 			/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
 
-			bar_area_width = component_width - (int) (after_bar_width) - 2;
+			bar_area_width = dynamic_segment_width - (int) (after_bar_width) - 2;
 
 			if (bar_area_width < 0)
 				bar_area_width = 0;
@@ -1163,7 +1187,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 			int indicator_position = state->calc.percentage;
 
-			bar_area_width = component_width - 5;
+			bar_area_width = dynamic_segment_width - 5;
 
 			if (bar_area_width < 0)
 				bar_area_width = 0;
@@ -1237,16 +1261,26 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			segment_content = display->component[display->format[segment].type].content;
 			segment_bytes = display->component[display->format[segment].type].bytes;
 
+			/* A chosen_size of 0 for PV_COMPONENT_PREVLINE means dynamic. */
+			if (0 == chosen_size && PV_COMPONENT_PREVLINE == display->format[segment].type)
+				chosen_size = (size_t) dynamic_segment_width;
+
 			/*
 			 * If the segment's chosen size is smaller than the
-			 * component, show only the last part of it.  For
+			 * component, show only the first or last part of
+			 * it, depending on the component type.  For
 			 * instance with "show N last output bytes" (%nA),
 			 * if one "n" was 16 and the other 8, then for the 8
 			 * one, we show the last 8 bytes of the 16-byte
-			 * buffer (issue #122).
+			 * buffer (issue #122).  With "show previous line",
+			 * we show the first bytes.
 			 */
 			if (0 != chosen_size && chosen_size < segment_bytes) {
-				segment_content += (segment_bytes - chosen_size);
+				if (PV_COMPONENT_PREVLINE == display->format[segment].type) {
+					/* No need to move the segment content. */
+				} else {
+					segment_content += (segment_bytes - chosen_size);
+				}
 				segment_bytes = chosen_size;
 			}
 		}

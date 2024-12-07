@@ -718,28 +718,42 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	}
 
 	if (nwritten > 0) {
+		bool tracking_lines = false;
+
+		if ((state->control.linemode) && (lineswritten != NULL))
+			tracking_lines = true;
+		else if (state->display.component[PV_COMPONENT_PREVLINE].required)
+			tracking_lines = true;
+
 		/*
 		 * Write returned >0 - data successfully written.
 		 */
-		if ((state->control.linemode) && (lineswritten != NULL)) {
+		if (tracking_lines) {
 			char separator;
 			char *ptr;
 			long lines = 0;
 
 			/*
-			 * Line mode - look through what we've just written
-			 * to count how many lines there were.
+			 * Tracking lines - either line mode, or we're
+			 * showing the last line in the display, or both.
+			 * So we need to look through what we've just
+			 * written to either count how many lines there
+			 * were, or get the content of the most recent
+			 * complete line, or both.
 			 */
 
 			/* Allocate buffer to remember line positions. */
-			if (NULL == state->transfer.line_positions) {
+			if (NULL == state->transfer.line_positions && NULL != lineswritten) {
 				state->transfer.line_positions_capacity = MAX_LINE_POSITIONS;
+				/*@-mustfreeonly@ */
 				state->transfer.line_positions =
 				    calloc((size_t) (state->transfer.line_positions_capacity), sizeof(off_t));
 				if (NULL == state->transfer.line_positions) {
 					pv_error(state, "%s: %s", _("line position buffer allocation failed"),
 						 strerror(errno));
 				}
+				/*@+mustfreeonly@ */
+				/* splint doesn't see we only call calloc() when line_positions is NULL. */
 			}
 
 			if (state->control.null_terminated_lines) {
@@ -752,11 +766,49 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			for (ptr++;
 			     ptr - (char *) state->transfer.transfer_buffer - state->transfer.write_position <
 			     (size_t) nwritten; ptr++, state->transfer.last_output_position++) {
-				if (*ptr != separator)
+				if (*ptr != separator) {
+					/*
+					 * If we're displaying the previous
+					 * line ("%L"), add to our line
+					 * buffer.
+					 */
+					if (state->display.component[PV_COMPONENT_PREVLINE].required
+					    && state->display.next_line_len < PV_SIZEOF_PREVLINE_BUFFER - 1) {
+						state->display.next_line[state->display.next_line_len] = *ptr;
+						state->display.next_line_len++;
+					}
 					continue;
+				}
 
 				/* Separator found - increment line count. */
 				++lines;
+
+				/*
+				 * If we're displaying the previous line
+				 * ("%L"), update the previous-line buffer
+				 * with the line we just completed, and
+				 * start a new one.
+				 */
+				if (state->display.component[PV_COMPONENT_PREVLINE].required) {
+					memset(state->display.previous_line, 0, PV_SIZEOF_PREVLINE_BUFFER);
+					if (state->display.next_line_len > PV_SIZEOF_PREVLINE_BUFFER - 1)
+						state->display.next_line_len = PV_SIZEOF_PREVLINE_BUFFER - 1;
+					if (state->display.next_line_len > 0) {
+						memcpy(state->display.previous_line, state->display.next_line,	/* flawfinder: ignore */
+						       state->display.next_line_len);
+						debug("%s: [%s]", "updated previous_line",
+						      state->display.previous_line);
+					}
+					state->display.next_line_len = 0;
+					/*
+					 * flawfinder - next_line_len is
+					 * guaranteed to be less than the
+					 * size of the previous_line buffer
+					 * since we check it just before
+					 * memcpy(), and we ensure that the
+					 * last byte in the buffer is \0.
+					 */
+				}
 
 				if (NULL == state->transfer.line_positions)
 					continue;
@@ -777,7 +829,8 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				}
 			}
 
-			*lineswritten += lines;
+			if (NULL != lineswritten)
+				*lineswritten += lines;
 		}
 
 		state->transfer.write_position += nwritten;

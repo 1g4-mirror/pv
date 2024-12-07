@@ -466,6 +466,13 @@ contain the following sequences:
     **splice**(2), since splicing to or from pipes does not use the
     buffer.
 
+**%nL**
+
+:   Show the first *n* bytes of the most recently written line (for
+    example, "**%40L**" shows the first 40 bytes). If no *n* is given,
+    then this expands to fill the available space. Shows only spaces if
+    the transfer is being done with **splice**(2).
+
 **%N**
 
 :   Show the name prefix given by "**\--name**". Padded to 9 characters
@@ -557,6 +564,11 @@ been given.
 
     pv -d 1234
 
+Sending logs to a processing script, showing the most recent line as
+part of the progress display:
+
+    pv -F '%a %p : %L' big.log | processing-script
+
 # EXIT STATUS
 
 An exit status of 1 indicates a problem with the "**\--remote**" or
@@ -643,6 +655,10 @@ descriptor.
 If the input size cannot be calculated, and the output is a block
 device, then **pv** will read the output device\'s size, use that as if
 it had been passed to "**\--size**", and activate "**\--stop-at-size**".
+
+The "**%nA**" and "**%nL**" format sequences may not be effective with
+small input files, and "**%nL**" may be a few lines out due to buffering
+within the pipeline itself.
 
 # REPORTING BUGS
 

@@ -1,6 +1,7 @@
 ### UNRELEASED
 
- * *fix:* allow **--format** to include "%nA" more than once, with different "n" valeus (#122)
+ * *feature:* new **--format** sequence "**%nL**", showing the most recent line written (#121)
+ * *fix:* allow **--format** to include "%nA" more than once, with different "n" values (#122)
  * *fix:* allow **--format** to include "%p" more than once
  * *fix:* add _configure_ script fallback for **--remote** check when cross-compiling (#120)
  * *fix:* allow **extra-display** to be changed by **--remote** (#123)

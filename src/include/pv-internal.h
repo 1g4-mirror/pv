@@ -35,6 +35,7 @@ typedef enum {
   PV_COMPONENT_NAME,		/* name prefix */
   PV_COMPONENT_BUFPERCENT,	/* percentage of buffer used */
   PV_COMPONENT_OUTPUTBUF,	/* recent bytes in output buffer */
+  PV_COMPONENT_PREVLINE,	/* most recent complete line */
   PV_COMPONENT__MAX
 } pv_display_component;
 
@@ -56,6 +57,7 @@ typedef enum {
 #define PV_SIZEOF_DEFAULT_FORMAT	512
 #define PV_SIZEOF_CWD			4096
 #define PV_SIZEOF_LASTOUTPUT_BUFFER	256
+#define PV_SIZEOF_PREVLINE_BUFFER	1024
 #define PV_FORMAT_ARRAY_MAX		100
 #define PV_SIZEOF_CRS_LOCK_FILE		1024
 
@@ -202,13 +204,20 @@ struct pvstate_s {
 			bool required;				/* true if included in format */
 		} component[PV_COMPONENT__MAX];
 
+		/* The last-output "n" bytes. */
 		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
+
+		/* The most recently output complete line. */
+		char previous_line[PV_SIZEOF_PREVLINE_BUFFER];
+		/* The line being received now. */
+		char next_line[PV_SIZEOF_PREVLINE_BUFFER];
 
 		/*@only@*/ /*@null@*/ char *display_buffer;	/* buffer for display string */
 		size_t display_buffer_size;	 /* size allocated to display buffer */
 		size_t display_string_len;	 /* length of string in display buffer */
 		off_t initial_offset;		 /* offset when first opened (when watching fds) */
 		size_t lastoutput_bytes;	 /* largest number of last-output bytes to show */
+		size_t next_line_len;		 /* length of currently receiving line so far */
 
 		size_t format_segment_count;	 /* number of format string segments */
 
@@ -307,7 +316,7 @@ struct pvstate_s {
 		off_t transferred;		 /* amount transferred (written - unconsumed) */
 
 		/* Keep track of line positions to backtrack written_but_not_consumed. */
-		/*@null@*/ off_t *line_positions; /* line separator write positions (circular buffer) */
+		/*@only@*/ /*@null@*/ off_t *line_positions; /* line separator write positions (circular buffer) */
 		size_t line_positions_capacity;	 /* total size of line position array */
 		size_t line_positions_length;	 /* number of positions stored in array */
 		size_t line_positions_head;	 /* index to use for next position */

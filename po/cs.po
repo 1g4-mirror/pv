@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-07 20:21+0000\n"
+"POT-Creation-Date: 2024-12-07 23:06+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -403,37 +403,37 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:686 src/pv/transfer.c:1011
+#: src/pv/display.c:693 src/pv/transfer.c:1064
 msgid "buffer allocation failed"
 msgstr "selhala alokace vyrovnávací paměti"
 
-#: src/pv/display.c:815
+#: src/pv/display.c:822
 msgid "b"
 msgstr "b"
 
-#: src/pv/display.c:818 src/pv/transfer.c:602
+#: src/pv/display.c:825 src/pv/transfer.c:602
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1115
+#: src/pv/display.c:869 src/pv/display.c:884 src/pv/display.c:1139
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
+#: src/pv/display.c:873 src/pv/display.c:888 src/pv/display.c:1143
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
+#: src/pv/display.c:873 src/pv/display.c:888 src/pv/display.c:1143
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:909 src/pv/display.c:913
+#: src/pv/display.c:916 src/pv/display.c:920
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/display.c:979
+#: src/pv/display.c:986
 msgid "FIN"
 msgstr "FIN"
 
@@ -521,15 +521,15 @@ msgstr "selhalo nastavení intervalového časovače"
 msgid "failed to clear interval timer"
 msgstr "selhalo vynulování intervalového časovače"
 
-#: src/pv/transfer.c:740
+#: src/pv/transfer.c:752
 msgid "line position buffer allocation failed"
 msgstr "selhala alokace vyrovnávací paměti pro pozici v řádcích"
 
-#: src/pv/transfer.c:872
+#: src/pv/transfer.c:925
 msgid "write failed"
 msgstr "zápis selhal"
 
-#: src/pv/transfer.c:1109
+#: src/pv/transfer.c:1162
 msgid "select call failed"
 msgstr "selhalo volání select"
 
