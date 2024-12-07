@@ -192,6 +192,7 @@ struct pvstate_s {
 		struct {	/* format string broken into display components */
 			size_t str_start;		/* for strings: start offset */
 			size_t str_bytes;		/* for strings: length in bytes */
+			size_t chosen_size;		/* "n" from %<n>A, or 0 */
 			pv_display_component type;	/* type of display component */
 		} format[PV_FORMAT_ARRAY_MAX];
 
@@ -207,7 +208,7 @@ struct pvstate_s {
 		size_t display_buffer_size;	 /* size allocated to display buffer */
 		size_t display_string_len;	 /* length of string in display buffer */
 		off_t initial_offset;		 /* offset when first opened (when watching fds) */
-		size_t lastoutput_bytes;	 /* number of last-output bytes to show */
+		size_t lastoutput_bytes;	 /* largest number of last-output bytes to show */
 
 		size_t format_segment_count;	 /* number of format string segments */
 

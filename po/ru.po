@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-07 02:08+0000\n"
+"POT-Creation-Date: 2024-12-07 19:37+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -404,37 +404,37 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:681 src/pv/transfer.c:1011
+#: src/pv/display.c:686 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 
-#: src/pv/display.c:810
+#: src/pv/display.c:815
 msgid "b"
 msgstr "бит"
 
-#: src/pv/display.c:813 src/pv/transfer.c:602
+#: src/pv/display.c:818 src/pv/transfer.c:602
 msgid "B"
 msgstr "байт"
 
-#: src/pv/display.c:857 src/pv/display.c:872 src/pv/display.c:1091
+#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1099
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr "бит/с"
 
-#: src/pv/display.c:861 src/pv/display.c:876 src/pv/display.c:1095
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
 msgid "/s"
 msgstr "/с"
 
-#: src/pv/display.c:861 src/pv/display.c:876 src/pv/display.c:1095
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr "байт/с"
 
-#: src/pv/display.c:904 src/pv/display.c:908
+#: src/pv/display.c:909 src/pv/display.c:913
 msgid "ETA"
 msgstr "ОЖИД"
 
-#: src/pv/display.c:974
+#: src/pv/display.c:979
 msgid "FIN"
 msgstr "ЗАВЕРШ"
 

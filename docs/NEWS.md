@@ -1,5 +1,6 @@
 ### UNRELEASED
 
+ * *feature:* allow **--format** to include "%nA" more than once, with different "n" valeus (#122)
  * *fix:* add _configure_ script fallback for **--remote** check when cross-compiling (#120)
  * *fix:* allow **extra-display** to be changed by **--remote** (#123)
 

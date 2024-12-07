@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-07 02:08+0000\n"
+"POT-Creation-Date: 2024-12-07 19:37+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: fnetX <otto@codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -426,37 +426,37 @@ msgstr "yzafpnµm kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:681 src/pv/transfer.c:1011
+#: src/pv/display.c:686 src/pv/transfer.c:1011
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
-#: src/pv/display.c:810
+#: src/pv/display.c:815
 msgid "b"
 msgstr "b"
 
-#: src/pv/display.c:813 src/pv/transfer.c:602
+#: src/pv/display.c:818 src/pv/transfer.c:602
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:857 src/pv/display.c:872 src/pv/display.c:1091
+#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1099
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/display.c:861 src/pv/display.c:876 src/pv/display.c:1095
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:861 src/pv/display.c:876 src/pv/display.c:1095
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:904 src/pv/display.c:908
+#: src/pv/display.c:909 src/pv/display.c:913
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/display.c:974
+#: src/pv/display.c:979
 msgid "FIN"
 msgstr "Endzeit"
 

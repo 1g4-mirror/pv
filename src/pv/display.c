@@ -477,7 +477,9 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 	segment = 0;
 	for (strpos = 0; format_used[strpos] != '\0' && segment < PV_FORMAT_ARRAY_MAX; strpos++, segment++) {
 		pv_display_component seg_type;
-		size_t str_start, str_bytes;
+		size_t str_start, str_bytes, chosen_size;
+
+		chosen_size = 0;
 
 		if ('%' == format_used[strpos]) {
 			unsigned long number_prefix;
@@ -529,7 +531,9 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 					number_prefix = PV_SIZEOF_LASTOUTPUT_BUFFER;
 				if (number_prefix < 1)
 					number_prefix = 1;
-				display->lastoutput_bytes = (size_t) number_prefix;
+				chosen_size = (size_t) number_prefix;
+				if (display->lastoutput_bytes < chosen_size)
+					display->lastoutput_bytes = chosen_size;
 				break;
 			case 'r':
 				seg_type = PV_COMPONENT_RATE;
@@ -590,6 +594,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 		display->format[segment].type = seg_type;
 		display->format[segment].str_start = str_start;
 		display->format[segment].str_bytes = str_bytes;
+		display->format[segment].chosen_size = chosen_size;
 		display->format_segment_count++;
 	}
 }
@@ -1043,7 +1048,10 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		if (display->format[segment].type == PV_COMPONENT_STRING) {
 			static_portion_size += display->format[segment].str_bytes;
 		} else if (display->format[segment].type != PV_COMPONENT_PROGRESS) {
-			static_portion_size += display->component[display->format[segment].type].bytes;
+			size_t segment_width = display->format[segment].chosen_size;
+			if (0 == segment_width)
+				segment_width = display->component[display->format[segment].type].bytes;
+			static_portion_size += segment_width;
 		}
 	}
 
@@ -1203,7 +1211,9 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	new_display_string_len = 0;
 	for (segment = 0; segment < display->format_segment_count; segment++) {
 		const char *segment_content;
-		size_t segment_bytes;
+		size_t segment_bytes, chosen_size;
+
+		chosen_size = display->format[segment].chosen_size;
 
 		if (display->format[segment].type == PV_COMPONENT_STRING) {
 			segment_content = &(format_used[display->format[segment].str_start]);
@@ -1211,6 +1221,19 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		} else {
 			segment_content = display->component[display->format[segment].type].content;
 			segment_bytes = display->component[display->format[segment].type].bytes;
+
+			/*
+			 * If the segment's chosen size is smaller than the
+			 * component, show only the last part of it.  For
+			 * instance with "show N last output bytes" (%nA),
+			 * if one "n" was 16 and the other 8, then for the 8
+			 * one, we show the last 8 bytes of the 16-byte
+			 * buffer (issue #122).
+			 */
+			if (0 != chosen_size && chosen_size < segment_bytes) {
+				segment_content += (segment_bytes - chosen_size);
+				segment_bytes = chosen_size;
+			}
 		}
 
 		/* Skip empty segments. */
