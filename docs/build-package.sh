@@ -137,7 +137,7 @@ ${packageName} (${version}-1) UNRELEASED; urgency=low
 EOF
 
 	if test -n "${MAINTAINER}"; then
-		(cd "${workDir}/build" && dpkg-buildpackage --build=binary --force-sign --sign-keyid="${MAINTAINER}") || exit 1
+		(cd "${workDir}/build" && dpkg-buildpackage --build=binary --force-sign --sign-key="${MAINTAINER}") || exit 1
 	else
 		(cd "${workDir}/build" && dpkg-buildpackage --build=binary) || exit 1
 	fi
