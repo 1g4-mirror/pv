@@ -788,34 +788,34 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		 * last few bytes we've written.
 		 */
 		if (state->display.component[PV_COMPONENT_OUTPUTBUF].required && (nwritten > 0)) {
-			size_t new_portion_length, old_portion_length;
+			size_t new_portion_size, old_portion_size;
 
-			new_portion_length = (size_t) nwritten;
-			if (new_portion_length > state->display.lastoutput_length)
-				new_portion_length = state->display.lastoutput_length;
+			new_portion_size = (size_t) nwritten;
+			if (new_portion_size > state->display.lastoutput_bytes)
+				new_portion_size = state->display.lastoutput_bytes;
 
-			old_portion_length = state->display.lastoutput_length - new_portion_length;
+			old_portion_size = state->display.lastoutput_bytes - new_portion_size;
 
 			/*
 			 * Make room for the new portion.
 			 */
-			if (old_portion_length > 0) {
+			if (old_portion_size > 0) {
 				memmove(state->display.lastoutput_buffer,
-					state->display.lastoutput_buffer + new_portion_length, old_portion_length);
+					state->display.lastoutput_buffer + new_portion_size, old_portion_size);
 			}
 
 			/*
 			 * Copy the new data in.
 			 */
 			memcpy(state->display.lastoutput_buffer +	/* flawfinder: ignore */
-			       old_portion_length,
-			       state->transfer.transfer_buffer + state->transfer.write_position - new_portion_length,
-			       new_portion_length);
+			       old_portion_size,
+			       state->transfer.transfer_buffer + state->transfer.write_position - new_portion_size,
+			       new_portion_size);
 			/*
 			 * flawfinder rationale: calculations above ensure
-			 * that old_portion_length + new_portion_length is
-			 * always <= lastoutput_length, and
-			 * lastoutput_length is guaranteed by
+			 * that old_portion_size + new_portion_size is
+			 * always <= lastoutput_bytes, and
+			 * lastoutput_bytes is guaranteed by
 			 * pv__format_init() to be no more than
 			 * PV_SIZEOF_LASTOUTPUT_BUFFER, which is the size of
 			 * lastoutput_buffer, so the memcpy() will always

@@ -446,7 +446,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 	if (state->control.name) {
 		(void) pv_snprintf(display->component[PV_COMPONENT_NAME].content, PV_SIZEOF_COMPONENT_STR,
 				   "%9.500s:", state->control.name);
-		display->component[PV_COMPONENT_NAME].length = strlen(display->component[PV_COMPONENT_NAME].content);	/* flawfinder: ignore */
+		display->component[PV_COMPONENT_NAME].bytes = strlen(display->component[PV_COMPONENT_NAME].content);	/* flawfinder: ignore */
 		/* flawfinder: content always bounded thanks to pv_snprintf(). */
 	}
 
@@ -477,7 +477,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 	segment = 0;
 	for (strpos = 0; format_used[strpos] != '\0' && segment < PV_FORMAT_ARRAY_MAX; strpos++, segment++) {
 		pv_display_component seg_type;
-		size_t str_start, str_length;
+		size_t str_start, str_bytes;
 
 		if ('%' == format_used[strpos]) {
 			unsigned long number_prefix;
@@ -508,7 +508,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 			seg_type = PV_COMPONENT_STRING;
 			str_start = 0;
-			str_length = 0;
+			str_bytes = 0;
 
 			switch (format_used[strpos]) {
 			case 'p':
@@ -529,7 +529,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 					number_prefix = PV_SIZEOF_LASTOUTPUT_BUFFER;
 				if (number_prefix < 1)
 					number_prefix = 1;
-				display->lastoutput_length = (size_t) number_prefix;
+				display->lastoutput_bytes = (size_t) number_prefix;
 				break;
 			case 'r':
 				seg_type = PV_COMPONENT_RATE;
@@ -550,19 +550,19 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 				/* %% => % */
 				seg_type = PV_COMPONENT_STRING;
 				str_start = strpos;
-				str_length = 1;
+				str_bytes = 1;
 				break;
 			case '\0':
 				/* % at end => just % */
 				seg_type = PV_COMPONENT_STRING;
 				str_start = strpos - 1;
-				str_length = 1;
+				str_bytes = 1;
 				break;
 			default:
 				/* %z (unknown) => %z */
 				seg_type = PV_COMPONENT_STRING;
 				str_start = strpos - 1;
-				str_length = 2;
+				str_bytes = 2;
 				break;
 			}
 		} else {
@@ -579,7 +579,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 			seg_type = PV_COMPONENT_STRING;
 			str_start = strpos;
-			str_length = (size_t) foundlength;
+			str_bytes = (size_t) foundlength;
 
 			strpos += foundlength - 1;
 		}
@@ -589,7 +589,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 		display->format[segment].type = seg_type;
 		display->format[segment].str_start = str_start;
-		display->format[segment].str_length = str_length;
+		display->format[segment].str_bytes = str_bytes;
 		display->format_segment_count++;
 	}
 }
@@ -785,7 +785,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		if (state->control.size < 1
 		    && ((component_type == PV_COMPONENT_ETA) || (component_type == PV_COMPONENT_FINETA))) {
 			display->component[component_type].content[0] = '\0';
-			display->component[component_type].length = 0;
+			display->component[component_type].bytes = 0;
 			continue;
 		}
 
@@ -968,15 +968,15 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 				 * functions.
 				 */
 				struct tm time = *time_ptr;
-				size_t component_content_length;
+				size_t component_content_bytes;
 
 				/*@-mustfreefresh @ */
 				(void) pv_snprintf(component_content, component_buf_size, "%.16s ", _("FIN"));
 				/*@+mustfreefresh @ *//* splint: see above. */
-				component_content_length = strlen(component_content);	/* flawfinder: ignore */
+				component_content_bytes = strlen(component_content);	/* flawfinder: ignore */
 				/* flawfinder: always bounded with \0 by pv_snprintf(). */
-				(void) strftime(component_content + component_content_length,
-						component_buf_size - 1 - component_content_length, time_format, &time);
+				(void) strftime(component_content + component_content_bytes,
+						component_buf_size - 1 - component_content_bytes, time_format, &time);
 			}
 
 			if (!show_fineta) {
@@ -1015,7 +1015,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 		case PV_COMPONENT_OUTPUTBUF:
 			/* Recently transferred bytes. */
-			for (buf_idx = 0; buf_idx < display->lastoutput_length; buf_idx++) {
+			for (buf_idx = 0; buf_idx < display->lastoutput_bytes; buf_idx++) {
 				int display_char;
 				display_char = (int) (display->lastoutput_buffer[buf_idx]);
 				component_content[buf_idx] = isprint(display_char) ? (char) display_char : '.';
@@ -1028,7 +1028,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		}
 
 		/* Record the string length for this component. */
-		display->component[component_type].length = strlen(component_content);	/* flawfinder: ignore */
+		display->component[component_type].bytes = strlen(component_content);	/* flawfinder: ignore */
 		/* flawfinder: always bounded by \0 either explicitly or by pv_snprintf(). */
 	}
 
@@ -1041,9 +1041,9 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	static_portion_size = 0;
 	for (segment = 0; segment < display->format_segment_count; segment++) {
 		if (display->format[segment].type == PV_COMPONENT_STRING) {
-			static_portion_size += display->format[segment].str_length;
+			static_portion_size += display->format[segment].str_bytes;
 		} else if (display->format[segment].type != PV_COMPONENT_PROGRESS) {
-			static_portion_size += display->component[display->format[segment].type].length;
+			static_portion_size += display->component[display->format[segment].type].bytes;
 		}
 	}
 
@@ -1056,7 +1056,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		char *component_content;
 		size_t component_buf_size;
 		char after_bar[32];	 /* flawfinder: ignore - only populated by pv_snprintf(). */
-		int available_width, bar_length, pad_count;
+		int available_width, bar_width, pad_count;
 
 		component_content = display->component[PV_COMPONENT_PROGRESS].content;
 		component_content[0] = '\0';
@@ -1114,8 +1114,8 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			(void) pv_snprintf(component_content, component_buf_size, "[");
 
 			/* The bar portion. */
-			bar_length = (int) ((available_width * bar_percentage) / 100 - 1);
-			for (pad_count = 0; pad_count < bar_length; pad_count++) {
+			bar_width = (int) ((available_width * bar_percentage) / 100 - 1);
+			for (pad_count = 0; pad_count < bar_width; pad_count++) {
 				if (pad_count < available_width)
 					(void) pv_strlcat(component_content, "=", component_buf_size);
 			}
@@ -1182,16 +1182,16 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		}
 
 		/* Record the string length for this component. */
-		display->component[PV_COMPONENT_PROGRESS].length = strlen(component_content);	/* flawfinder: ignore */
+		display->component[PV_COMPONENT_PROGRESS].bytes = strlen(component_content);	/* flawfinder: ignore */
 		/* flawfinder: always bounded with \0 by pv_strlcat(). */
 
 		/*
 		 * If the progress bar won't fit, drop it.
 		 */
-		if ((unsigned int) (display->component[PV_COMPONENT_PROGRESS].length + static_portion_size) >
+		if ((unsigned int) (display->component[PV_COMPONENT_PROGRESS].bytes + static_portion_size) >
 		    state->control.width) {
 			component_content[0] = '\0';
-			display->component[PV_COMPONENT_PROGRESS].length = 0;
+			display->component[PV_COMPONENT_PROGRESS].bytes = 0;
 		}
 	}
 
@@ -1203,38 +1203,38 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	new_display_string_len = 0;
 	for (segment = 0; segment < display->format_segment_count; segment++) {
 		const char *segment_content;
-		size_t segment_length;
+		size_t segment_bytes;
 
 		if (display->format[segment].type == PV_COMPONENT_STRING) {
 			segment_content = &(format_used[display->format[segment].str_start]);
-			segment_length = display->format[segment].str_length;
+			segment_bytes = display->format[segment].str_bytes;
 		} else {
 			segment_content = display->component[display->format[segment].type].content;
-			segment_length = display->component[display->format[segment].type].length;
+			segment_bytes = display->component[display->format[segment].type].bytes;
 		}
 
 		/* Skip empty segments. */
-		if (segment_length == 0)
+		if (segment_bytes == 0)
 			continue;
 
 		/*
 		 * Truncate the segment if it would make the display string
 		 * overflow the buffer.
 		 */
-		if (segment_length + new_display_string_len > display->display_buffer_size - 2)
-			segment_length = display->display_buffer_size - new_display_string_len - 2;
-		if (segment_length < 1)
+		if (segment_bytes + new_display_string_len > display->display_buffer_size - 2)
+			segment_bytes = display->display_buffer_size - new_display_string_len - 2;
+		if (segment_bytes < 1)
 			break;
 
 		/* Skip the segment if it would make the display too wide. */
-		if ((unsigned int) (segment_length + new_display_string_len) > state->control.width)
+		if ((unsigned int) (segment_bytes + new_display_string_len) > state->control.width)
 			break;
 
 		/* Append the segment to the output string. */
-		strncat(display->display_buffer, segment_content, segment_length);	/* flawfinder: ignore */
+		strncat(display->display_buffer, segment_content, segment_bytes);	/* flawfinder: ignore */
 		/* flawfinder: length is checked above, and buffer is \0 terminated already. */
 
-		new_display_string_len += segment_length;
+		new_display_string_len += segment_bytes;
 	}
 
 	debug("%s: %d", "display string length counted by format segments", (int) new_display_string_len);
