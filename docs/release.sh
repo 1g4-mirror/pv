@@ -123,7 +123,8 @@ for buildHost in ${packagingHosts}; do
 	ssh "${buildHost}" "rm -rf \"${remoteWorkDir}\""
 done
 
-chmod 644 "RELEASE-${versionInNews}/"*
+find "RELEASE-${versionInNews}/" -type f -exec chmod 644 '{}' ';'
+find "RELEASE-${versionInNews}/" -type d -exec chmod 755 '{}' ';'
 
 cat <<EOF
 
