@@ -30,6 +30,11 @@ if ! command -v valgrind >/dev/null 2>&1; then
 	exit 77
 fi
 
+if test "${SKIP_VALGRIND_TESTS}" = "1"; then
+	echo "SKIP_VALGRIND_TESTS is set"
+	exit 77
+fi
+
 valgrindHelp="$(valgrind --help 2>&1)"
 for valgrindOption in "verbose" "show-error-list" "error-exitcode" "track-fds" "leak-check"; do
 	echo "${valgrindHelp}" | grep -Fq "${valgrindOption}" || { echo "test requires \`valgrind --${valgrindOption}'"; exit 77; }
