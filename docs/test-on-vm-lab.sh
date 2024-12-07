@@ -23,6 +23,9 @@
 #
 # Requires "scw" (https://www.ivarch.com/programs/scw.shtml).
 
+# Number of tests to run in parallel on each host.
+concurrency="1"
+
 # Run a build and check, according to these environment variables:
 #
 #  sourceArchive       local source tarball path
@@ -83,15 +86,15 @@ testRunner () {
 
 	printf '%s %s\n' 'notice' 'building' >&3
 	if test -n "${buildHost}"; then
-		ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make -j4" || exit $?
+		ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make -j${concurrency}" || exit $?
 	else
-		make -j4 -C "${localBuildDir}/BUILD" || exit $?
+		make -j${concurrency} -C "${localBuildDir}/BUILD" || exit $?
 	fi
 	printf '%s %s\n' 'ok' 'build completed' >&3
 
 	if test -n "${buildHost}"; then
 		printf '%s %s\n' 'notice' 'testing' >&3
-		ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make -j4 check" || exit $?
+		ssh "${buildHost}" "cd \"${remoteBuildDir}/BUILD\" && make -j${concurrency} check" || exit $?
 		printf '%s %s\n' 'ok' 'testing completed' >&3
 	elif test -n "${checkHost}"; then
 		printf '%s %s\n' 'notice' "transferring build to ${checkHost}" >&3
@@ -100,7 +103,7 @@ testRunner () {
 		ssh "${checkHost}" "tar xf \"${remoteBuildDir}/build.tar\" -C \"${remoteBuildDir}\"" || exit $?
 		printf '%s %s\n' 'ok' "transferred build to ${checkHost}" >&3
 		printf '%s %s\n' 'notice' "testing on ${checkHost}" >&3
-		ssh "${checkHost}" "cd \"${remoteBuildDir}/BUILD\" && make -j4 check-TESTS XCTEST=1" || exit $?
+		ssh "${checkHost}" "cd \"${remoteBuildDir}/BUILD\" && make -j${concurrency} check-TESTS XCTEST=1" || exit $?
 		printf '%s %s\n' 'ok' 'testing completed' >&3
 	fi
 
