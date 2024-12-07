@@ -104,6 +104,7 @@ is acknowledged and greatly appreciated:
  * [Martin Sarsale](https://github.com/runa) - suggested showing progress in the process title ([#4](https://codeberg.org/a-j-wood/pv/issues/4))
  * [2bits](https://github.com/2bits) - reported position sensing fault with **--watchfd** in 1.9.0 ([#118](https://codeberg.org/a-j-wood/pv/issues/118))
  * [heitbaum](https://codeberg.org/heitbaum) - assisted with cross-compilation fault introduced in 1.9.7 ([#120](https://codeberg.org/a-j-wood/pv/issues/120))
+ * [meego](https://codeberg.org/meego) - suggested "**%nL**", the last line preview ([#121](https://codeberg.org/a-j-wood/pv/issues/121))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
