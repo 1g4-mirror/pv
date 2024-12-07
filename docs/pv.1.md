@@ -422,8 +422,8 @@ contain the following sequences:
 
 **%p**
 
-:   Progress bar. Expands to fill the remaining space. Should only be
-    specified once. Equivalent to "**\--progress**".
+:   Progress bar. Expands to fill the remaining space. Equivalent to
+    "**\--progress**".
 
 **%t**
 
