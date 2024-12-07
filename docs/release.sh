@@ -3,6 +3,12 @@
 # Automate a portion of the release checklist.  Expects to be run from a
 # build directory, such as one in which "configure" has been run, i.e. 
 # there should be a Makefile present.
+#
+# If ~/.config/packaging-hosts exists, then build-package.sh is run on each
+# one and the resultant packages (RPMs, DEBs, etc) are copied back.
+#
+# All of the release artefacts are placed in a "RELEASE-x" directory, where
+# "x" is the version.
 
 srcdir="$(awk '/^VPATH/{print $NF}' < Makefile | sed -n 1p)"
 
@@ -101,6 +107,21 @@ cp "${sourceArchive}" "${sourceArchive}.asc" "${sourceArchive}.txt" "RELEASE-${v
 
 pandoc --from markdown --to html --shift-heading-level-by=1 < "${srcdir}/docs/pv.1.md" > "RELEASE-${versionInNews}/manual.html"
 pandoc --from markdown --to html < "${srcdir}/docs/NEWS.md" > "RELEASE-${versionInNews}/news.html"
+
+# Build OS packages.
+packagingHosts="$(cat ~/.config/packaging-hosts 2>/dev/null)"
+for buildHost in ${packagingHosts}; do
+	remoteWorkDir="$(ssh "${buildHost}" "mktemp -d")" || continue
+	test -n "${remoteWorkDir}" || continue
+	buildOK=true
+	scp "${srcdir}/docs/build-package.sh" "${buildHost}:${remoteWorkDir}/" || buildOK=false
+	${buildOK} && scp "${sourceArchive}" "${buildHost}:${remoteWorkDir}/" || buildOK=false
+	${buildOK} && ssh -t "${buildHost}" "cd \"${remoteWorkDir}\" && MAINTAINER=\"${MAINTAINER}\" sh ./build-package.sh ./*gz" || buildOK=false
+	${buildOK} && ssh "${buildHost}" "rm \"${remoteWorkDir}\"/${sourceArchive##*/} \"${remoteWorkDir}/build-package.sh\""
+	${buildOK} && mkdir -p "RELEASE-${versionInNews}/${buildHost}"
+	${buildOK} && scp "${buildHost}:${remoteWorkDir}/*" "RELEASE-${versionInNews}/${buildHost}/"
+	ssh "${buildHost}" "rm -rf \"${remoteWorkDir}\""
+done
 
 chmod 644 "RELEASE-${versionInNews}/"*
 
