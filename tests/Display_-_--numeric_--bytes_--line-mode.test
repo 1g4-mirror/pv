@@ -3,6 +3,9 @@
 # Check that numeric output shows line counts instead of percentages, when
 # used in line mode together with bytes mode.
 
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
 true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile1:?not set - call this from 'make check'}"
 true "${workFile2:?not set - call this from 'make check'}"

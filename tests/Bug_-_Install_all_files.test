@@ -2,6 +2,9 @@
 #
 # Test that "make install" installs the expected minimum set of files.
 
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
 true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile1:?not set - call this from 'make check'}"
 

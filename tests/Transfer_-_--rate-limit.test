@@ -2,6 +2,9 @@
 #
 # A simple test of rate limiting.
 
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
 true "${testSubject:?not set - call this from 'make check'}"
 
 # Transfer 102 bytes at 100 bytes/sec. It should take at least 1 second.

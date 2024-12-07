@@ -3,6 +3,9 @@
 # This is the same as the other display length at magnitude boundary check,
 # but for rate, not bytes transferred.
 
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
 # Dummy assignments for "shellcheck".
 true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile1:?not set - call this from 'make check'}"

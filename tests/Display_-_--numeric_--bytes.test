@@ -3,6 +3,9 @@
 # Check that numeric output gives a byte count instead of a percentage when
 # used with -b.
 
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
 true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile1:?not set - call this from 'make check'}"
 

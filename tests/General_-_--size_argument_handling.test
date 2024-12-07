@@ -2,6 +2,9 @@
 #
 # Check that size arguments are processed correctly.
 
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
 true "${testSubject:?not set - call this from 'make check'}"
 
 # Pass size argument $1 and check that the last reported number is $2.

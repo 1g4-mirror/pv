@@ -3,6 +3,9 @@
 # Run valgrind's memory checker while using remote control to control
 # another process.
 
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
 true "${sourcePath:?not set - call this from 'make check'}"
 true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile1:?not set - call this from 'make check'}"

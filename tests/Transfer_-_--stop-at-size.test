@@ -2,6 +2,9 @@
 #
 # Make sure -S stops at the given size.
 
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
 true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile1:?not set - call this from 'make check'}"
 true "${workFile2:?not set - call this from 'make check'}"
