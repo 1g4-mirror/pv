@@ -78,7 +78,6 @@ test -z "${gitStatus}" || possiblyDie "not everything is committed - 'git status
 workDir="$(mktemp -d)" || possiblyDie "mktemp failed"
 trap 'chmod -R u+w "${workDir}"; rm -rf "${workDir}"' EXIT
 (
-trap '' EXIT
 cd "${workDir}" || exit 1
 sh "${srcdir}/configure" || exit 1
 export SKIP_VALGRIND_TESTS=1
