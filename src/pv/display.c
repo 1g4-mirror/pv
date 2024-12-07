@@ -631,7 +631,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	       bool final)
 {
 	long eta;
-	int static_portion_size;
+	int static_portion_size, dynamic_segment_count;
 	pv_display_component component_type;
 	size_t segment;
 	size_t new_display_string_len;
@@ -1039,23 +1039,32 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 
 	/*
-	 * Now go through all the static portions of the format to work
-	 * out how much space will be left for any dynamic portions
-	 * (i.e. the progress bar).
+	 * Now go through all the static portions of the format to work out
+	 * how much space will be left for any dynamic segments (i.e. the
+	 * progress bar), and count how many dynamic segments there are.
 	 */
 	static_portion_size = 0;
+	dynamic_segment_count = 0;
 	for (segment = 0; segment < display->format_segment_count; segment++) {
 		if (display->format[segment].type == PV_COMPONENT_STRING) {
 			static_portion_size += display->format[segment].str_bytes;
-		} else if (display->format[segment].type != PV_COMPONENT_PROGRESS) {
+			debug("segment[%d] type:%d width:%d [%.*s]", segment, display->format[segment].type,
+			      display->format[segment].str_bytes, display->format[segment].str_bytes,
+			      &(format_used[display->format[segment].str_start]));
+		} else if (display->format[segment].type == PV_COMPONENT_PROGRESS) {
+			dynamic_segment_count++;
+			debug("segment[%d] type:%d dynamic", segment, display->format[segment].type);
+		} else {
 			size_t segment_width = display->format[segment].chosen_size;
 			if (0 == segment_width)
 				segment_width = display->component[display->format[segment].type].bytes;
 			static_portion_size += segment_width;
+			debug("segment[%d] type:%d width:%d", segment, display->format[segment].type, segment_width);
 		}
 	}
 
 	debug("static_portion_size: %d", static_portion_size);
+	debug("dynamic_segment_count: %d", dynamic_segment_count);
 
 	/*
 	 * Assemble the progress bar now we know how big it should be.
@@ -1064,13 +1073,20 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		char *component_content;
 		size_t component_buf_size;
 		char after_bar[32];	 /* flawfinder: ignore - only populated by pv_snprintf(). */
-		int available_width, bar_width, pad_count;
+		int component_width, bar_area_width, filled_bar_width, pad_count;
 
 		component_content = display->component[PV_COMPONENT_PROGRESS].content;
 		component_content[0] = '\0';
 		component_buf_size = PV_SIZEOF_COMPONENT_STR;
 
 		memset(after_bar, 0, sizeof(after_bar));
+
+		component_width = (int) (state->control.width) - static_portion_size;
+		/*
+		 * Divide the total remaining screen space by the number of dynamic segments.
+		 */
+		if (dynamic_segment_count > 1)
+			component_width /= dynamic_segment_count;
 
 		if (state->control.size > 0 || state->control.rate_gauge) {
 			/*
@@ -1109,33 +1125,32 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			after_bar_width = strlen(after_bar);	/* flawfinder: ignore */
 			/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
 
-			available_width =
-			    (int) (state->control.width) - static_portion_size - (int) (after_bar_width) - 2;
+			bar_area_width = component_width - (int) (after_bar_width) - 2;
 
-			if (available_width < 0)
-				available_width = 0;
+			if (bar_area_width < 0)
+				bar_area_width = 0;
 
-			if (available_width > (int) (component_buf_size) - 16)
-				available_width = (int) (component_buf_size - 16);
+			if (bar_area_width > (int) (component_buf_size) - 16)
+				bar_area_width = (int) (component_buf_size - 16);
 
 			/* The opening of the bar area. */
 			(void) pv_snprintf(component_content, component_buf_size, "[");
 
 			/* The bar portion. */
-			bar_width = (int) ((available_width * bar_percentage) / 100 - 1);
-			for (pad_count = 0; pad_count < bar_width; pad_count++) {
-				if (pad_count < available_width)
+			filled_bar_width = (int) ((bar_area_width * bar_percentage) / 100 - 1);
+			for (pad_count = 0; pad_count < filled_bar_width; pad_count++) {
+				if (pad_count < bar_area_width)
 					(void) pv_strlcat(component_content, "=", component_buf_size);
 			}
 
 			/* The tip of the bar, if not at 100%. */
-			if (pad_count < available_width) {
+			if (pad_count < bar_area_width) {
 				(void) pv_strlcat(component_content, ">", component_buf_size);
 				pad_count++;
 			}
 
 			/* The spaces after the bar. */
-			for (; pad_count < available_width; pad_count++) {
+			for (; pad_count < bar_area_width; pad_count++) {
 				(void) pv_strlcat(component_content, " ", component_buf_size);
 			}
 
@@ -1148,15 +1163,15 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 			int indicator_position = state->calc.percentage;
 
-			available_width = (int) (state->control.width) - static_portion_size - 5;
+			bar_area_width = component_width - 5;
 
-			if (available_width < 0)
-				available_width = 0;
+			if (bar_area_width < 0)
+				bar_area_width = 0;
 
-			if (available_width > (int) (component_buf_size) - 16)
-				available_width = (int) (component_buf_size) - 16;
+			if (bar_area_width > (int) (component_buf_size) - 16)
+				bar_area_width = (int) (component_buf_size) - 16;
 
-			debug("available_width: %d", available_width);
+			debug("bar_area_width: %d", bar_area_width);
 
 			/*
 			 * Note that pv_calculate_transfer_rate() sets the
@@ -1172,8 +1187,8 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			(void) pv_snprintf(component_content, component_buf_size, "[");
 
 			/* The spaces before the indicator. */
-			for (pad_count = 0; pad_count < (available_width * indicator_position) / 100; pad_count++) {
-				if (pad_count < available_width)
+			for (pad_count = 0; pad_count < (bar_area_width * indicator_position) / 100; pad_count++) {
+				if (pad_count < bar_area_width)
 					(void) pv_strlcat(component_content, " ", component_buf_size);
 			}
 
@@ -1181,7 +1196,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			(void) pv_strlcat(component_content, "<=>", component_buf_size);
 
 			/* The spaces after the indicator. */
-			for (; pad_count < available_width; pad_count++) {
+			for (; pad_count < bar_area_width; pad_count++) {
 				(void) pv_strlcat(component_content, " ", component_buf_size);
 			}
 

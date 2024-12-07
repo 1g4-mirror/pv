@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-07 19:37+0000\n"
+"POT-Creation-Date: 2024-12-07 20:21+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -416,16 +416,16 @@ msgstr "бит"
 msgid "B"
 msgstr "байт"
 
-#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1099
+#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1115
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr "бит/с"
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
 msgid "/s"
 msgstr "/с"
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr "байт/с"

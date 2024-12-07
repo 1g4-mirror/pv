@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-07 19:37+0000\n"
+"POT-Creation-Date: 2024-12-07 20:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -421,16 +421,16 @@ msgstr ""
 msgid "B"
 msgstr ""
 
-#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1099
+#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1115
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
 msgid "/s"
 msgstr ""
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr "B/s"

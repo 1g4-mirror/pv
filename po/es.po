@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-07 19:37+0000\n"
+"POT-Creation-Date: 2024-12-07 20:21+0000\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -407,16 +407,16 @@ msgstr ""
 msgid "B"
 msgstr ""
 
-#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1099
+#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1115
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr ""
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
 msgid "/s"
 msgstr ""
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr ""

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-07 19:37+0000\n"
+"POT-Creation-Date: 2024-12-07 20:21+0000\n"
 "PO-Revision-Date: 2024-10-20 14:07+0000\n"
 "Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -433,16 +433,16 @@ msgstr "b"
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1099
+#: src/pv/display.c:862 src/pv/display.c:877 src/pv/display.c:1115
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1103
+#: src/pv/display.c:866 src/pv/display.c:881 src/pv/display.c:1119
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr "B/s"
