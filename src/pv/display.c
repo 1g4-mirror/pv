@@ -1197,16 +1197,28 @@ static struct pvdisplay_component_s {
 	bool dynamic;			 /* whether it can scale with screen size */
 } format_component[] = {
 	{ "p", &pv__format_progress, true },
+	{ "{progress}", &pv__format_progress, true },
 	{ "t", &pv__format_timer, false },
+	{ "{timer}", &pv__format_timer, false },
 	{ "e", &pv__format_eta, false },
+	{ "{eta}", &pv__format_eta, false },
 	{ "I", &pv__format_fineta, false },
+	{ "{fineta}", &pv__format_fineta, false },
 	{ "r", &pv__format_rate, false },
+	{ "{rate}", &pv__format_rate, false },
 	{ "a", &pv__format_average_rate, false },
+	{ "{average-rate}", &pv__format_average_rate, false },
 	{ "b", &pv__format_bytes, false },
+	{ "{bytes}", &pv__format_bytes, false },
+	{ "{transferred}", &pv__format_bytes, false },
 	{ "T", &pv__format_buffer_percent, false },
+	{ "{buffer-percent}", &pv__format_buffer_percent, false },
 	{ "A", &pv__format_last_written, false },
+	{ "{last-written}", &pv__format_last_written, false },
 	{ "L", &pv__format_previous_line, true },
+	{ "{previous-line}", &pv__format_previous_line, true },
 	{ "N", &pv__format_name, false },
+	{ "{name}", &pv__format_name, false },
 	{ NULL, NULL, false }
 };
 

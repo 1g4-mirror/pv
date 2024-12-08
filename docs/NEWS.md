@@ -1,6 +1,7 @@
 ### UNRELEASED
 
  * *feature:* new **--format** sequence "**%nL**", showing the most recent line written (#121)
+ * *feature:* each **--format** sequence now has a more readable equivalent name, for example "**%r**" can be written as "**%{rate}**"
  * *fix:* allow **--format** to include "%nA" more than once, with different "n" values (#122)
  * *fix:* allow **--format** to include "%p" more than once
  * *fix:* add _configure_ script fallback for **--remote** check when cross-compiling (#120)

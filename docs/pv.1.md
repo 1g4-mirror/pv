@@ -420,60 +420,62 @@ are explicitly switched on will be shown.
 Format strings used by "**\--format**" and "**\--extra-display**" can
 contain the following sequences:
 
-**%p**
+**%p**, **%{progress}**
 
-:   Progress bar. Expands to fill the remaining space. Equivalent to
-    "**\--progress**".
+:   Progress bar (suffixed with a percentage if the size is known).
+    Equivalent to "**\--progress**". Expands to fill the remaining space
+    unless prefixed by a number to set the width, such as "**%20p**" or
+    "**%20{progress}**".
 
-**%t**
+**%t**, **%{timer}**
 
 :   Elapsed time. Equivalent to "**\--timer**".
 
-**%e**
+**%e**, **%{eta}**
 
 :   ETA as time remaining. Equivalent to "**\--eta**".
 
-**%I**
+**%I**, **%{fineta}**
 
 :   ETA as local time at which the transfer will finish. Equivalent to
     "**\--fineta**".
 
-**%r**
+**%r**, **%{rate}**
 
 :   Current data transfer rate. Equivalent to "**\--rate**".
 
-**%a**
+**%a**, **%{average-rate}**
 
 :   Average data transfer rate. Equivalent to "**\--average-rate**".
 
-**%b**
+**%b**, **%{bytes}**, **%{transferred}**
 
 :   Bytes transferred so far (or lines if "**\--line-mode**" was
     specified). Equivalent to "**\--bytes**". If "**\--bits**" was
     specified, "**%b**" shows the bits transferred so far, not bytes.
 
-**%T**
+**%T**, **%{buffer-percent}**
 
 :   Percentage of the transfer buffer in use. Equivalent to
     "**\--buffer-percent**". Displays "{\-\-\--}" if the transfer is
     being done with **splice**(2), since splicing to or from pipes does
     not use the buffer.
 
-**%nA**
+**%nA**, **%n{last-written}**
 
 :   Show the last *n* bytes written (for example, "**%16A**" shows the
     last 16 bytes). Shows only dots if the transfer is being done with
     **splice**(2), since splicing to or from pipes does not use the
     buffer.
 
-**%nL**
+**%nL**, **%n{previous-line}**
 
 :   Show the first *n* bytes of the most recently written line (for
     example, "**%40L**" shows the first 40 bytes). If no *n* is given,
     then this expands to fill the available space. Shows only spaces if
     the transfer is being done with **splice**(2).
 
-**%N**
+**%N**, **%{name}**
 
 :   Show the name prefix given by "**\--name**". Padded to 9 characters
     with spaces, and suffixed with ":".
@@ -484,8 +486,8 @@ contain the following sequences:
 
 Any other contents are reproduced in the progress display as-is.
 
-The format string equivalent of turning on all display switches is
-"**%N %b %T %t %r %a %p %e %I %8A**".
+The format string equivalent of the default display switches is
+"**%b %t %r %p %e**".
 
 # EXAMPLES
 

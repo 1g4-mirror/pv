@@ -471,56 +471,57 @@ Print version information on standard output and exit successfully.
 Format strings used by \*(lq\fB\-\-format\fR\*(rq and
 \*(lq\fB\-\-extra\-display\fR\*(rq can contain the following sequences:
 .TP
-.B %p
-Progress bar.
-Expands to fill the remaining space.
+.BR %p ", " %{progress}
+Progress bar (suffixed with a percentage if the size is known).
 Equivalent to \*(lq\fB\-\-progress\fR\*(rq.
+Expands to fill the remaining space unless prefixed by a number to set the
+width, such as \*(lq\fB%20p\fR\*(rq or \*(lq\fB%20{progress}\fR\*(rq.
 .TP
-.B %t
+.BR %t ", " %{timer}
 Elapsed time.
 Equivalent to \*(lq\fB\-\-timer\fR\*(rq.
 .TP
-.B %e
+.BR %e ", " %{eta}
 ETA as time remaining.
 Equivalent to \*(lq\fB\-\-eta\fR\*(rq.
 .TP
-.B %I
+.BR %I ", " %{fineta}
 ETA as local time at which the transfer will finish.
 Equivalent to \*(lq\fB\-\-fineta\fR\*(rq.
 .TP
-.B %r
+.BR %r ", " %{rate}
 Current data transfer rate.
 Equivalent to \*(lq\fB\-\-rate\fR\*(rq.
 .TP
-.B %a
+.BR %a ", " %{average-rate}
 Average data transfer rate.
 Equivalent to \*(lq\fB\-\-average\-rate\fR\*(rq.
 .TP
-.B %b
+.BR %b ", " %{bytes} ", " %{transferred}
 Bytes transferred so far (or lines if \*(lq\fB\-\-line\-mode\fR\*(rq was specified).
 Equivalent to \*(lq\fB\-\-bytes\fR\*(rq.
 If \*(lq\fB\-\-bits\fR\*(rq was specified, \*(lq\fB%b\fR\*(rq shows the bits
 transferred so far, not bytes.
 .TP
-.B %T
+.BR %T ", " %{buffer-percent}
 Percentage of the transfer buffer in use.
 Equivalent to \*(lq\fB\-\-buffer\-percent\fR\*(rq.
 Displays \*(lq{\-\-\-\-}\*(rq if the transfer is being done with
 \fBsplice\fR(2), since splicing to or from pipes does not use the buffer.
 .TP
-.B %nA
+.BR %nA ", " %n{last-written}
 Show the last \fIn\fR bytes written (for example, \*(lq\fB%16A\fR\*(rq shows
 the last 16 bytes).
 Shows only dots if the transfer is being done with \fBsplice\fR(2), since
 splicing to or from pipes does not use the buffer.
 .TP
-.B %nL
+.BR %nL ", " %n{previous-line}
 Show the first \fIn\fR bytes of the most recently written line (for example,
 \*(lq\fB%40L\fR\*(rq shows the first 40 bytes).
 If no \fIn\fR is given, then this expands to fill the available space.
 Shows only spaces if the transfer is being done with \fBsplice\fR(2).
 .TP
-.B %N
+.BR %N ", " %{name}
 Show the name prefix given by \*(lq\fB\-\-name\fR\*(rq.
 Padded to 9 characters with spaces, and suffixed with \*(lq:\*(rq.
 .TP
@@ -529,8 +530,8 @@ A single \*(lq%\*(rq.
 .PP
 Any other contents are reproduced in the progress display as-is.
 .PP
-The format string equivalent of turning on all display switches is
-\*(lq\fB%N\~%b\~%T\~%t\~%r\~%a\~%p\~%e\~%I\~%8A\fR\*(rq.
+The format string equivalent of the default display switches is
+\*(lq\fB%b\~%t\~%r\~%p\~%e\fR\*(rq.
 .\"
 .SH EXAMPLES
 Some suggested common switch combinations:

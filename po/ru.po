@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 16:17+0000\n"
+"POT-Creation-Date: 2024-12-08 17:13+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -434,7 +434,7 @@ msgstr "бит"
 msgid "B"
 msgstr "байт"
 
-#: src/pv/display.c:1485 src/pv/transfer.c:1064
+#: src/pv/display.c:1497 src/pv/transfer.c:1064
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 
