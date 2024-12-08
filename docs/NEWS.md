@@ -1,10 +1,10 @@
-### UNRELEASED
+### 1.9.15 - 8 December 2024
 
  * *feature:* new **--format** sequence "**%nL**", showing the most recent line written (#121)
  * *feature:* each **--format** sequence now has a more readable equivalent name, for example "**%r**" can be written as "**%{rate}**"
  * *feature:* new **--format** sequences "**%{progress-bar-only}**" and "**%{progress-amount-only}**"
  * *fix:* allow **--format** to include "%nA" more than once, with different "n" values (#122)
- * *fix:* allow **--format** to include "%p" more than once
+ * *fix:* allow **--format** to include "%p" more than once, with optional width prefix
  * *fix:* calculate width correctly when wide characters are in **--format** strings
  * *fix:* add _configure_ script fallback for **--remote** check when cross-compiling (#120)
  * *fix:* allow **extra-display** to be changed by **--remote** (#123)
