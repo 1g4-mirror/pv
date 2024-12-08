@@ -105,7 +105,7 @@ indent:
 	cd $(srcdir) && indent -npro -kr -i8 -cd42 -c45 -l120 src/*/*.c
 
 indentclean:
-	rm -f $(srcdir)/*/*.c~
+	rm -f $(srcdir)/src/*/*.c~
 
 analyse: $(pv_SOURCES:.c=.e) FORCE
 	grep -E -e '^Finished checking --' -e 'Hits = ' $+ 2>/dev/null || true
