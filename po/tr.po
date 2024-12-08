@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 10:22+0000\n"
+"POT-Creation-Date: 2024-12-08 15:56+0000\n"
 "PO-Revision-Date: 2024-10-12 23:51+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -405,39 +405,39 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:698 src/pv/transfer.c:1064
-msgid "buffer allocation failed"
-msgstr "arabellek tahsisi başarısız oldu"
-
-#: src/pv/display.c:827
-msgid "b"
-msgstr "b"
-
-#: src/pv/display.c:830 src/pv/transfer.c:602
-msgid "B"
-msgstr "B"
-
-#: src/pv/display.c:874 src/pv/display.c:889 src/pv/display.c:1144
+#: src/pv/display.c:515 src/pv/display.c:894 src/pv/display.c:923
 #: src/pv/loop.c:549
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/display.c:878 src/pv/display.c:893 src/pv/display.c:1148
+#: src/pv/display.c:519 src/pv/display.c:898 src/pv/display.c:927
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/display.c:878 src/pv/display.c:893 src/pv/display.c:1148
+#: src/pv/display.c:519 src/pv/display.c:898 src/pv/display.c:927
 #: src/pv/loop.c:549
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/display.c:921 src/pv/display.c:925
+#: src/pv/display.c:771 src/pv/display.c:775
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/display.c:991
+#: src/pv/display.c:857
 msgid "FIN"
 msgstr "FIN"
+
+#: src/pv/display.c:953
+msgid "b"
+msgstr "b"
+
+#: src/pv/display.c:956 src/pv/transfer.c:602
+msgid "B"
+msgstr "B"
+
+#: src/pv/display.c:1467 src/pv/transfer.c:1064
+msgid "buffer allocation failed"
+msgstr "arabellek tahsisi başarısız oldu"
 
 #: src/pv/file.c:149
 msgid "failed to seek to start of output"

@@ -33,7 +33,6 @@
 #include <sys/ioctl.h>
 #endif
 
-
 /*
  * Output an error message.  If we've displayed anything to the terminal
  * already, then put a newline before our error so we don't write over what
@@ -169,6 +168,16 @@ void pv_screensize(unsigned int *width, unsigned int *height)
 
 
 /*
+ * Return the original value x so that it has been clamped between
+ * [min..max]
+ */
+static long bound_long(long x, long min, long max)
+{
+	return x < min ? min : x > max ? max : x;
+}
+
+
+/*
  * Given how many bytes have been transferred, the total byte count to
  * transfer, and the current average transfer rate, return the estimated
  * number of seconds until completion.
@@ -186,15 +195,6 @@ static long pv__seconds_remaining(const off_t so_far, const off_t total, const l
 }
 
 /*
- * Types of transfer count - bytes, decimal bytes or lines.
- */
-typedef enum {
-	PV_TRANSFERCOUNT_BYTES,
-	PV_TRANSFERCOUNT_DECBYTES,
-	PV_TRANSFERCOUNT_LINES
-} pv__transfercount_t;
-
-/*
  * Given a long double value, it is divided or multiplied by the ratio until
  * a value in the range 1.0 to 999.999... is found.  The string "prefix" to
  * is updated to the corresponding SI prefix.
@@ -203,7 +203,7 @@ typedef enum {
  * "prefix" is set to "i" to denote MiB etc (IEEE1541).  Thus "prefix"
  * should be at least 3 bytes long (to include the terminating null).
  */
-static void pv__si_prefix(long double *value, char *prefix, const long double ratio, pv__transfercount_t count_type)
+static void pv__si_prefix(long double *value, char *prefix, const long double ratio, pvtransfercount_t count_type)
 {
 	static char *pfx_000 = NULL;	 /* kilo, mega, etc */
 	static char *pfx_024 = NULL;	 /* kibi, mibi, etc */
@@ -363,7 +363,7 @@ static void pv__si_prefix(long double *value, char *prefix, const long double ra
  * parameter (a %s) which will expand to the string described above.
  */
 static void pv__sizestr(char *buffer, size_t bufsize, char *format,
-			long double amount, char *suffix_basic, char *suffix_bytes, pv__transfercount_t count_type)
+			long double amount, char *suffix_basic, char *suffix_bytes, pvtransfercount_t count_type)
 {
 	char sizestr_buffer[256];	 /* flawfinder: ignore */
 	char si_prefix[8];		 /* flawfinder: ignore */
@@ -426,11 +426,797 @@ static void pv__sizestr(char *buffer, size_t bufsize, char *format,
 
 
 /*
+ * Formatting functions.
+ *
+ * Each formatting function takes a state, the current display, and the
+ * segment it's for; it also takes a buffer, with a particular size, and an
+ * offset at which to start writing to the buffer.
+ *
+ * If the component is dynamically sized (such as a progress bar with no
+ * chosen_size constraint), the segment's "width" is expected to have
+ * already been populated by the caller, with the target width.
+ *
+ * The function writes the appropriate string to the buffer at the offset,
+ * and updates the segment's "offset" and "bytes".  The number of bytes
+ * written ("bytes") is also returned; it will be 0 if the string would not
+ * fit into the buffer.
+ *
+ * The caller is expected to update the segment's "width".
+ *
+ * If called with a buffer size of 0, only the side effects occur (such as
+ * setting flags like display->showing_timer).
+ */
+
+/*
+ * Add a null-terminated string to the buffer if there is room for it,
+ * updating the segment's offset and bytes values and returning the bytes,
+ * or treating the byte count as zero if there's insufficient space.
+ */
+static size_t pv__format_segmentcontent(char *content, pvdisplay_segment_t segment, char *buffer, size_t buffer_size,
+					size_t offset)
+{
+	size_t bytes;
+
+	bytes = strlen(content);	    /* flawfinder: ignore */
+	/* flawfinder - caller is required to null-terminate the string. */
+
+	if (offset >= buffer_size)
+		bytes = 0;
+	if ((offset + bytes) >= buffer_size)
+		bytes = 0;
+
+	segment->offset = offset;
+	segment->bytes = bytes;
+
+	if (0 == bytes)
+		return 0;
+
+	memmove(buffer + offset, content, bytes);
+
+	return bytes;
+}
+
+
+/*
+ * Write a progress bar to a buffer, in known-size or rate-gauge mode - a
+ * bar, and a percentage (size) or max rate (gauge).  The total width of the
+ * content is bounded to the given width.  Returns the number of bytes
+ * written to the buffer.
+ *
+ * This is only called by pv__format_progress().
+ */
+static size_t pv__format_progress_knownsize(pvstate_t state, pvdisplay_t display, char *buffer, size_t buffer_size,
+					    size_t width)
+{
+	char after_bar[32];		 /* flawfinder: ignore - only populated by pv_snprintf(). */
+	size_t after_bar_bytes, after_bar_width;
+	size_t bar_area_width, filled_bar_width, buffer_offset, pad_count;
+	int bar_percentage;
+
+	buffer[0] = '\0';
+
+	memset(after_bar, 0, sizeof(after_bar));
+
+	if (state->control.size > 0) {
+		/* Percentage of data transferred. */
+		bar_percentage = state->calc.percentage;
+		(void) pv_snprintf(after_bar, sizeof(after_bar), " %3ld%%", bar_percentage);
+	} else {
+		/* Current rate vs max rate. */
+		bar_percentage = 0;
+		if (state->calc.rate_max > 0) {
+			bar_percentage = (int) (100.0 * state->calc.transfer_rate / state->calc.rate_max);
+		}
+
+		/*@-mustfreefresh@ */
+		if (state->control.bits && !state->control.linemode) {
+			/* bits per second */
+			pv__sizestr(after_bar, sizeof(after_bar), "/%s",
+				    8.0 * state->calc.rate_max, "", _("b/s"), display->count_type);
+		} else {
+			/* bytes or lines per second */
+			pv__sizestr(after_bar, sizeof(after_bar),
+				    "/%s", state->calc.rate_max, _("/s"), _("B/s"), display->count_type);
+		}
+		/*@+mustfreefresh@ *//* splint: see above about gettext(). */
+	}
+
+	after_bar_bytes = strlen(after_bar);	/* flawfinder: ignore */
+	/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
+	/* TODO: calculate display width rather than just bytes */
+	after_bar_width = after_bar_bytes;
+
+	if (width < (after_bar_width + 2))
+		return 0;
+
+	bar_area_width = width - after_bar_width - 2;
+
+	if (bar_area_width > buffer_size - 16)
+		bar_area_width = buffer_size - 16;
+
+	filled_bar_width = (size_t) (bar_area_width * bar_percentage) / 100;
+	/* Leave room for the tip of the bar. */
+	if (filled_bar_width > 0)
+		filled_bar_width--;
+
+	debug("width=%d bar_area_width=%d filled_bar_width=%d", width, bar_area_width, filled_bar_width);
+
+	buffer_offset = 0;
+
+	/* The opening of the bar area. */
+	buffer[buffer_offset++] = '[';
+
+	/* The bar portion. */
+	for (pad_count = 0; pad_count < filled_bar_width && buffer_offset < buffer_size - 1; pad_count++) {
+		if (pad_count < bar_area_width)
+			buffer[buffer_offset++] = '=';
+	}
+
+	/* The tip of the bar, if not at 100%. */
+	if (pad_count < bar_area_width) {
+		if (buffer_offset < buffer_size - 1)
+			buffer[buffer_offset++] = '>';
+		pad_count++;
+	}
+
+	/* The spaces after the bar. */
+	for (; pad_count < bar_area_width; pad_count++) {
+		if (buffer_offset < buffer_size - 1)
+			buffer[buffer_offset++] = ' ';
+	}
+
+	/* The closure of the bar area. */
+	if (buffer_offset < buffer_size - 1)
+		buffer[buffer_offset++] = ']';
+
+	/* The percentage. */
+	if (after_bar_bytes < (buffer_size - 1 - buffer_offset)) {
+		memmove(buffer + buffer_offset, after_bar, after_bar_bytes);
+		buffer_offset += after_bar_bytes;
+	}
+
+	buffer[buffer_offset] = '\0';
+
+	return buffer_offset;
+}
+
+
+/*
+ * Write a progress bar to a buffer, in unknown-size mode - just a moving
+ * indicator.  The total width of the content is bounded to the given width. 
+ * Returns the number of bytes written to the buffer.
+ *
+ * This is only called by pv__format_progress().
+ */
+static size_t pv__format_progress_unknownsize(pvstate_t state,	/*@unused@ */
+					      __attribute__((unused)) pvdisplay_t display, char *buffer,
+					      size_t buffer_size, size_t width)
+{
+	size_t bar_area_width, buffer_offset, pad_count;
+	size_t indicator_position;
+
+	buffer[0] = '\0';
+
+	if (width < 6)
+		return 0;
+
+	bar_area_width = width - 5;
+
+	if (bar_area_width > buffer_size - 16)
+		bar_area_width = buffer_size - 16;
+
+	debug("bar_area_width: %d", bar_area_width);
+
+	/*
+	 * Note that pv_calculate_transfer_rate() sets the percentage when
+	 * the size is unknown to a value that goes 0 - 200 and resets, so
+	 * here we make values above 100 send the indicator back down again,
+	 * so it moves back and forth.
+	 */
+	indicator_position = (size_t) (state->calc.percentage);
+	if (indicator_position > 200)
+		indicator_position = indicator_position % 200;
+	if (indicator_position > 100 && indicator_position <= 200)
+		indicator_position = 200 - indicator_position;
+
+	buffer_offset = 0;
+
+	/* The opening of the bar area. */
+	buffer[buffer_offset++] = '[';
+
+	/* The spaces before the indicator. */
+	for (pad_count = 0; pad_count < (bar_area_width * indicator_position) / 100; pad_count++) {
+		if (pad_count < bar_area_width && buffer_offset < buffer_size - 1)
+			buffer[buffer_offset++] = ' ';
+	}
+
+	/* The indicator. */
+	if (buffer_offset < buffer_size - 4) {
+		buffer[buffer_offset++] = '<';
+		buffer[buffer_offset++] = '=';
+		buffer[buffer_offset++] = '>';
+	}
+
+	/* The spaces after the indicator. */
+	for (; pad_count < bar_area_width; pad_count++) {
+		if (pad_count < bar_area_width && buffer_offset < buffer_size - 1)
+			buffer[buffer_offset++] = ' ';
+	}
+
+	/* The closure of the bar area. */
+	if (buffer_offset < buffer_size - 1)
+		buffer[buffer_offset++] = ']';
+
+	buffer[buffer_offset] = '\0';
+
+	return buffer_offset;
+}
+
+
+/*
+ * Progress bar.
+ */
+static size_t pv__format_progress(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment, char *buffer,
+				  size_t buffer_size, size_t offset)
+{
+	char content[1024];		 /* flawfinder: ignore - always bounded */
+	size_t bytes;
+
+	content[0] = '\0';
+
+	if (0 == buffer_size)
+		return 0;
+
+	if (state->control.size > 0 || state->control.rate_gauge) {
+		/* Known size or rate gauge - bar with percentage. */
+		bytes = pv__format_progress_knownsize(state, display, content, sizeof(content), segment->width);
+	} else {
+		/* Unknown size - back-and-forth moving indicator. */
+		bytes = pv__format_progress_unknownsize(state, display, content, sizeof(content), segment->width);
+	}
+
+	content[bytes] = '\0';
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Elapsed time.
+ */
+static size_t pv__format_timer(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment, char *buffer,
+			       size_t buffer_size, size_t offset)
+{
+	char content[128];		 /* flawfinder: ignore - always bounded */
+
+	display->showing_timer = true;
+
+	content[0] = '\0';
+
+	if (0 == buffer_size)
+		return 0;
+
+	/*
+	 * Bounds check, so we don't overrun the prefix buffer.  This does
+	 * mean that the timer will stop at a 100,000 hours, but since
+	 * that's 11 years, it shouldn't be a problem.
+	 */
+	if (state->transfer.elapsed_seconds > (long double) 360000000.0L)
+		state->transfer.elapsed_seconds = (long double) 360000000.0L;
+
+	/*
+	 * If the elapsed time is more than a day, include a day count as
+	 * well as hours, minutes, and seconds.
+	 */
+	if (state->transfer.elapsed_seconds > (long double) 86400.0L) {
+		(void) pv_snprintf(content,
+				   sizeof(content),
+				   "%ld:%02ld:%02ld:%02ld",
+				   ((long) (state->transfer.elapsed_seconds)) / 86400,
+				   (((long) (state->transfer.elapsed_seconds)) / 3600) %
+				   24, (((long) (state->transfer.elapsed_seconds)) / 60) % 60,
+				   ((long) (state->transfer.elapsed_seconds)) % 60);
+	} else {
+		(void) pv_snprintf(content,
+				   sizeof(content),
+				   "%ld:%02ld:%02ld",
+				   ((long) (state->transfer.elapsed_seconds)) / 3600,
+				   (((long) (state->transfer.elapsed_seconds)) / 60) % 60,
+				   ((long) (state->transfer.elapsed_seconds)) % 60);
+	}
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Estimated time until completion.
+ */
+static size_t pv__format_eta(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment, char *buffer,
+			     size_t buffer_size, size_t offset)
+{
+	char content[128];		 /* flawfinder: ignore - always bounded */
+	long eta;
+
+	content[0] = '\0';
+
+	/*
+	 * Don't try to calculate this if the size is not known.
+	 */
+	if (state->control.size < 1)
+		return 0;
+
+	if (0 == buffer_size)
+		return 0;
+
+	eta =
+	    pv__seconds_remaining((state->transfer.transferred - display->initial_offset),
+				  state->control.size - display->initial_offset, state->calc.current_avg_rate);
+
+	/*
+	 * Bounds check, so we don't overrun the suffix buffer.  This means
+	 * the ETA will always be less than 100,000 hours.
+	 */
+	eta = bound_long(eta, 0, (long) 360000000L);
+
+	/*
+	 * If the ETA is more than a day, include a day count as well as
+	 * hours, minutes, and seconds.
+	 */
+	/*@-mustfreefresh@ */
+	if (eta > 86400L) {
+		(void) pv_snprintf(content,
+				   sizeof(content),
+				   "%.16s %ld:%02ld:%02ld:%02ld",
+				   _("ETA"), eta / 86400, (eta / 3600) % 24, (eta / 60) % 60, eta % 60);
+	} else {
+		(void) pv_snprintf(content,
+				   sizeof(content),
+				   "%.16s %ld:%02ld:%02ld", _("ETA"), eta / 3600, (eta / 60) % 60, eta % 60);
+	}
+	/*@+mustfreefresh@ *//* splint: see above. */
+
+	/*
+	 * If this is the final update, show a blank space where the ETA
+	 * used to be.
+	 */
+	if (display->final_update) {
+		size_t erase_idx;
+		for (erase_idx = 0; erase_idx < sizeof(content) && content[erase_idx] != '\0'; erase_idx++) {
+			content[erase_idx] = ' ';
+		}
+	}
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Estimated local time of completion.
+ */
+static size_t pv__format_fineta(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment, char *buffer,
+				size_t buffer_size, size_t offset)
+{
+	char content[128];		 /* flawfinder: ignore - always bounded */
+	time_t now, then;
+	struct tm *time_ptr;
+	long eta;
+	const char *time_format;
+	bool show_fineta;
+
+	content[0] = '\0';
+
+	/*
+	 * Don't try to calculate this if the size is not known.
+	 */
+	if (state->control.size < 1)
+		return 0;
+
+	if (0 == buffer_size)
+		return 0;
+
+	now = time(NULL);
+	show_fineta = true;
+	time_format = NULL;
+
+	/*
+	 * The completion clock time may be hidden by a failed localtime
+	 * lookup.
+	 */
+
+	eta = pv__seconds_remaining(state->transfer.transferred - display->initial_offset,
+				    state->control.size - display->initial_offset, state->calc.current_avg_rate);
+
+	/* Bounds check - see pv__format_eta(). */
+	eta = bound_long(eta, 0, (long) 360000000L);
+
+	/*
+	 * Only include the date if the ETA is more than 6 hours
+	 * away.
+	 */
+	if (eta > (long) (6 * 3600)) {
+		time_format = "%Y-%m-%d %H:%M:%S";
+	} else {
+		time_format = "%H:%M:%S";
+	}
+
+	then = now + eta;
+	time_ptr = localtime(&then);
+
+	if (NULL == time_ptr) {
+		show_fineta = false;
+	} else {
+		/*
+		 * The localtime() function keeps data stored in a static
+		 * buffer that gets overwritten by time functions.
+		 */
+		struct tm time = *time_ptr;
+		size_t content_bytes;
+
+		/*@-mustfreefresh@ */
+		(void) pv_snprintf(content, sizeof(content), "%.16s ", _("FIN"));
+		/*@+mustfreefresh@ *//* splint: see above. */
+		content_bytes = strlen(content);	/* flawfinder: ignore */
+		/* flawfinder: always bounded with \0 by pv_snprintf(). */
+		(void) strftime(content + content_bytes, sizeof(content) - 1 - content_bytes, time_format, &time);
+	}
+
+	if (!show_fineta) {
+		size_t erase_idx;
+		for (erase_idx = 0; erase_idx < sizeof(content) && content[erase_idx] != '\0'; erase_idx++) {
+			content[erase_idx] = ' ';
+		}
+	}
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Transfer rate.
+ */
+static size_t pv__format_rate(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment, char *buffer,
+			      size_t buffer_size, size_t offset)
+{
+	char content[128];		 /* flawfinder: ignore - always bounded */
+
+	display->showing_rate = true;
+
+	content[0] = '\0';
+
+	if (0 == buffer_size)
+		return 0;
+
+	/*@-mustfreefresh@ */
+	if (state->control.bits && !state->control.linemode) {
+		/* bits per second */
+		pv__sizestr(content, sizeof(content), "[%s]",
+			    8 * state->calc.transfer_rate, "", _("b/s"), display->count_type);
+	} else {
+		/* bytes or lines per second */
+		pv__sizestr(content, sizeof(content),
+			    "[%s]", state->calc.transfer_rate, _("/s"), _("B/s"), display->count_type);
+	}
+	/*@+mustfreefresh@ *//* splint: see above. */
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Average transfer rate.
+ */
+static size_t pv__format_average_rate(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment, char *buffer,
+				      size_t buffer_size, size_t offset)
+{
+	char content[128];		 /* flawfinder: ignore - always bounded */
+
+	content[0] = '\0';
+
+	if (0 == buffer_size)
+		return 0;
+
+	/*@-mustfreefresh@ */
+	if (state->control.bits && !state->control.linemode) {
+		/* bits per second */
+		pv__sizestr(content, sizeof(content),
+			    "(%s)", 8 * state->calc.average_rate, "", _("b/s"), display->count_type);
+	} else {
+		/* bytes or lines per second */
+		pv__sizestr(content,
+			    sizeof(content), "(%s)", state->calc.average_rate, _("/s"), _("B/s"), display->count_type);
+	}
+	/*@+mustfreefresh@ *//* splint: see above. */
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Number of bytes or lines transferred.
+ */
+static size_t pv__format_bytes(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment, char *buffer,
+			       size_t buffer_size, size_t offset)
+{
+	char content[128];		 /* flawfinder: ignore - always bounded */
+
+	display->showing_bytes = true;
+
+	content[0] = '\0';
+
+	if (0 == buffer_size)
+		return 0;
+
+	/*@-mustfreefresh@ */
+	if (state->control.bits && !state->control.linemode) {
+		pv__sizestr(content, sizeof(content), "%s",
+			    (long double) (state->transfer.transferred * 8), "", _("b"), display->count_type);
+	} else {
+		pv__sizestr(content, sizeof(content), "%s",
+			    (long double) (state->transfer.transferred), "", _("B"), display->count_type);
+	}
+	/*@+mustfreefresh@ *//* splint - false positive from gettext(). */
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Percentage transfer buffer utilisation.
+ */
+static size_t pv__format_buffer_percent(pvstate_t state, /*@unused@ */  __attribute__((unused)) pvdisplay_t display,
+					pvdisplay_segment_t segment, char *buffer, size_t buffer_size, size_t offset)
+{
+	char content[16];		 /* flawfinder: ignore - always bounded */
+
+	content[0] = '\0';
+
+	if (0 == buffer_size)
+		return 0;
+
+	if (state->transfer.buffer_size > 0) {
+		int pct_used = pv_percentage((off_t)
+					     (state->transfer.read_position - state->transfer.write_position),
+					     (off_t)
+					     (state->transfer.buffer_size));
+		(void) pv_snprintf(content, sizeof(content), "{%3d%%}", pct_used);
+	}
+#ifdef HAVE_SPLICE
+	if (state->transfer.splice_used)
+		(void) pv_snprintf(content, sizeof(content), "{%s}", "----");
+#endif
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Display the last few bytes written.
+ *
+ * As a side effect, this sets display->lastwritten_bytes to the segment's
+ * chosen_size, if it was previously smaller than that.
+ */
+static size_t pv__format_last_written(	 /*@unused@ */
+					     __attribute__((unused)) pvstate_t state, pvdisplay_t display,
+					     pvdisplay_segment_t segment, char *buffer, size_t buffer_size,
+					     size_t offset)
+{
+	size_t bytes_to_show, read_offset, remaining;
+
+	display->showing_last_written = true;
+
+	bytes_to_show = segment->chosen_size;
+	if (0 == bytes_to_show)
+		bytes_to_show = segment->width;
+	if (0 == bytes_to_show)
+		return 0;
+
+	if (bytes_to_show > PV_SIZEOF_LASTWRITTEN_BUFFER)
+		bytes_to_show = PV_SIZEOF_LASTWRITTEN_BUFFER;
+	if (bytes_to_show > display->lastwritten_bytes)
+		display->lastwritten_bytes = bytes_to_show;
+
+	if (0 == buffer_size)
+		return 0;
+
+	if (offset + bytes_to_show >= buffer_size)
+		return 0;
+
+	segment->offset = offset;
+	segment->bytes = bytes_to_show;
+
+	read_offset = display->lastwritten_bytes - bytes_to_show;
+	for (remaining = bytes_to_show; remaining > 0; remaining--) {
+		int display_char = (int) (display->lastwritten_buffer[read_offset++]);
+		buffer[offset++] = isprint(display_char) ? (char) display_char : '.';
+	}
+
+	return bytes_to_show;
+}
+
+
+/*
+ * Display the previously written line.
+ */
+static size_t pv__format_previous_line(	 /*@unused@ */
+					      __attribute__((unused)) pvstate_t state, pvdisplay_t display,
+					      pvdisplay_segment_t segment, char *buffer, size_t buffer_size,
+					      size_t offset)
+{
+	size_t bytes_to_show, read_offset, remaining;
+
+	display->showing_previous_line = true;
+
+	if (0 == buffer_size)
+		return 0;
+
+	bytes_to_show = segment->chosen_size;
+	if (0 == bytes_to_show)
+		bytes_to_show = segment->width;
+	if (0 == bytes_to_show)
+		return 0;
+
+	if (bytes_to_show > PV_SIZEOF_PREVLINE_BUFFER)
+		bytes_to_show = PV_SIZEOF_PREVLINE_BUFFER;
+
+	if (offset + bytes_to_show >= buffer_size)
+		return 0;
+
+	segment->offset = offset;
+	segment->bytes = bytes_to_show;
+
+	read_offset = 0;
+	for (remaining = bytes_to_show; remaining > 0; remaining--) {
+		int display_char = (int) (display->previous_line[read_offset++]);
+		buffer[offset++] = isprint(display_char) ? (char) display_char : ' ';
+	}
+
+	return bytes_to_show;
+}
+
+
+/*
+ * Display the transfer's name.
+ */
+static size_t pv__format_name(pvstate_t state, /*@unused@ */  __attribute__((unused)) pvdisplay_t display,
+			      pvdisplay_segment_t segment, char *buffer, size_t buffer_size, size_t offset)
+{
+	char string_format[32];		 /* flawfinder: ignore - always bounded */
+	char content[512];		 /* flawfinder: ignore - always bounded */
+	size_t field_width;
+
+	if (0 == buffer_size)
+		return 0;
+
+	field_width = segment->chosen_size;
+	if (field_width < 1)
+		field_width = 9;
+	if (field_width > 500)
+		field_width = 500;
+
+	memset(string_format, 0, sizeof(string_format));
+	(void) pv_snprintf(string_format, sizeof(string_format), "%%%d.500s:", field_width);
+
+	content[0] = '\0';
+	if (state->control.name) {
+		(void) pv_snprintf(content, sizeof(content), string_format, state->control.name);
+	}
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Populate the display buffer for numeric-output mode.
+ *
+ * Called by pv_format() and has the same semantics.
+ *
+ * In numeric output mode, our output is just the percentage completion, as
+ * a number by itself.
+ *
+ * With --timer, we prefix the output with the elapsed time.
+ *
+ * With --bytes, we output the bytes transferred so far instead of the
+ * percentage (or we output the number lines transferred, if --lines was
+ * given with --bytes).
+ *
+ * If --rate was given, we output the current transfer rate instead of the
+ * percentage.  With --bytes as well, the rate is given after the
+ * bytes/lines.
+ */
+static bool pv__format_numeric(pvstate_t state, pvdisplay_t display)
+{
+	char msg_timer[128];		 /* flawfinder: ignore */
+	char msg_bytes[128];		 /* flawfinder: ignore */
+	char msg_rate[128];		 /* flawfinder: ignore */
+	char msg_percent[128];		 /* flawfinder: ignore */
+	bool first_item, show_percentage;
+
+	/* flawfinder: each buffer is kept safe by pv_snprintf(). */
+
+	if (NULL == display->display_buffer)
+		return false;
+
+	first_item = true;
+	show_percentage = true;
+
+	msg_timer[0] = '\0';
+	if (display->showing_timer) {
+		(void) pv_snprintf(msg_timer, sizeof(msg_timer), "%s%.4Lf", first_item ? "" : " ",
+				   state->transfer.elapsed_seconds);
+		first_item = false;
+	}
+
+	msg_bytes[0] = '\0';
+	if (display->showing_bytes) {
+		(void) pv_snprintf(msg_bytes, sizeof(msg_bytes),
+				   "%s%lld", first_item ? "" : " ",
+				   (long long) ((state->control.bits ? 8 : 1) * state->transfer.transferred));
+		first_item = false;
+		show_percentage = false;
+	}
+
+	msg_rate[0] = '\0';
+	if (display->showing_rate) {
+		(void) pv_snprintf(msg_rate, sizeof(msg_rate),
+				   "%s%.4Lf", first_item ? "" : " ",
+				   ((state->control.bits ? 8.0 : 1.0) * state->calc.transfer_rate));
+		first_item = false;
+		show_percentage = false;
+	}
+
+	msg_percent[0] = '\0';
+	if (show_percentage) {
+		(void) pv_snprintf(msg_percent, sizeof(msg_percent),
+				   "%s%d", first_item ? "" : " ", state->calc.percentage);
+		first_item = false;
+	}
+
+	(void) pv_snprintf(display->display_buffer,
+			   display->display_buffer_size, "%.39s%.39s%.39s%.39s\n", msg_timer, msg_bytes,
+			   msg_rate, msg_percent);
+
+	display->display_string_bytes = strlen(display->display_buffer);	/* flawfinder: ignore */
+	/* flawfinder: always \0 terminated by pv_snprintf(). */
+	display->display_string_width = display->display_string_bytes;
+
+	return true;
+}
+
+
+
+/*
+ * Format sequence lookup table.
+ */
+typedef size_t (*pvdisplay_function_t)(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+static struct pvdisplay_component_s {
+	/*@null@ */ const char *match;
+	/* string to match */
+	/*@null@ */ pvdisplay_function_t function;
+	/* function to call */
+	bool dynamic;			 /* whether it can scale with screen size */
+} format_component[] = {
+	{ "p", &pv__format_progress, true },
+	{ "t", &pv__format_timer, false },
+	{ "e", &pv__format_eta, false },
+	{ "I", &pv__format_fineta, false },
+	{ "r", &pv__format_rate, false },
+	{ "a", &pv__format_average_rate, false },
+	{ "b", &pv__format_bytes, false },
+	{ "T", &pv__format_buffer_percent, false },
+	{ "A", &pv__format_last_written, false },
+	{ "L", &pv__format_previous_line, true },
+	{ "N", &pv__format_name, false },
+	{ NULL, NULL, false }
+};
+
+
+/*
  * Initialise the output format structure, based on the current options.
  */
 static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supplied, pvdisplay_t display)
 {
-	const char *format_used;
+	const char *display_format;
 	size_t strpos;
 	size_t segment;
 
@@ -441,51 +1227,51 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 	display->format_segment_count = 0;
 	memset(display->format, 0, PV_FORMAT_ARRAY_MAX * sizeof(display->format[0]));
-	memset(display->component, 0, PV_COMPONENT__MAX * sizeof(display->component[0]));
 
-	display->tracking_last_output = false;
-	display->tracking_previous_line = false;
+	display->showing_timer = false;
+	display->showing_bytes = false;
+	display->showing_rate = false;
+	display->showing_last_written = false;
+	display->showing_previous_line = false;
 
-	if (state->control.name) {
-		(void) pv_snprintf(display->component[PV_COMPONENT_NAME].content, PV_SIZEOF_COMPONENT_STR,
-				   "%9.500s:", state->control.name);
-		display->component[PV_COMPONENT_NAME].bytes = strlen(display->component[PV_COMPONENT_NAME].content);	/* flawfinder: ignore */
-		/* flawfinder: content always bounded thanks to pv_snprintf(). */
-	}
+	display_format = NULL == format_supplied ? state->control.default_format : format_supplied;
 
-	format_used = NULL == format_supplied ? state->control.default_format : format_supplied;
-
-	if (NULL == format_used)
+	if (NULL == display_format)
 		return;
 
 	/*
-	 * Split the format string into segments.  Each segment consists
-	 * of a type and some string information.
+	 * Split the format string into static strings and calculated
+	 * components - a calculated component is is what replaces a
+	 * placeholder sequence like "%b".
 	 *
-	 * A type of PV_COMPONENT_STRING indicates that the segment is a
-	 * constant string starting at a position in the format string and
-	 * with a particular length.
+	 * A "static string" is part of the original format string that is
+	 * copied to the display verbatim.  Its width is calculated here.
 	 *
-	 * A type other than PV_COMPONENT_STRING indicates that the segment
-	 * is a string updated by pv_format(), whose contents will be in
-	 * component[type].
+	 * Each segment's contents are stored in either the format string
+	 * (if a static string) or an internal temporary buffer, starting at
+	 * "offset" and extending for "bytes" bytes.
 	 *
-	 * In pv_format(), the content of a PV_COMPONENT_PROGRESS component
-	 * is calculated after first populating all the other components
-	 * referenced by the format segments.
+	 * Later, in pv_format(), segments whose components are dynamic and
+	 * which aren't constrained to a fixed size are calculated after
+	 * first populating all the other components referenced by the
+	 * format segments.
 	 *
 	 * Then, that function generates the output string by sticking all
 	 * of these segments together.
 	 */
 	segment = 0;
-	for (strpos = 0; format_used[strpos] != '\0' && segment < PV_FORMAT_ARRAY_MAX; strpos++, segment++) {
-		pv_display_component seg_type;
+	for (strpos = 0; display_format[strpos] != '\0' && segment < PV_FORMAT_ARRAY_MAX; strpos++, segment++) {
+		int component_type, component_idx;
 		size_t str_start, str_bytes, chosen_size;
+
+		str_start = strpos;
+		str_bytes = 0;
 
 		chosen_size = 0;
 
-		if ('%' == format_used[strpos]) {
+		if ('%' == display_format[strpos]) {
 			unsigned long number_prefix;
+			size_t sequence_start, sequence_length;
 #if HAVE_STRTOUL
 			char *number_end_ptr;
 #endif
@@ -499,126 +1285,104 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			 */
 #if HAVE_STRTOUL
 			number_end_ptr = NULL;
-			number_prefix = strtoul(&(format_used[strpos]), &number_end_ptr, 10);
+			number_prefix = strtoul(&(display_format[strpos]), &number_end_ptr, 10);
 			if ((NULL == number_end_ptr) || (number_end_ptr[0] == '\0'))
 				break;
-			if (number_end_ptr > &(format_used[strpos]))
-				strpos += (number_end_ptr - &(format_used[strpos]));
+			if (number_end_ptr > &(display_format[strpos]))
+				strpos += (number_end_ptr - &(display_format[strpos]));
 #else				/* !HAVE_STRTOUL */
-			while (isdigit((int) (format_used[strpos]))) {
+			while (isdigit((int) (display_format[strpos]))) {
 				number_prefix = number_prefix * 10;
-				number_prefix += format_used[strpos] - '0';
+				number_prefix += display_format[strpos] - '0';
 				strpos++;
 			}
 #endif				/* !HAVE_STRTOUL */
 
-			seg_type = PV_COMPONENT_STRING;
-			str_start = 0;
-			str_bytes = 0;
+			sequence_start = strpos;
+			sequence_length = 1;
+			if ('{' == display_format[strpos]) {
+				while ('\0' != display_format[strpos] && '}' != display_format[strpos]) {
+					strpos++;
+					sequence_length++;
+				}
+			}
 
-			switch (format_used[strpos]) {
-			case 'p':
-				seg_type = PV_COMPONENT_PROGRESS;
-				break;
-			case 't':
-				seg_type = PV_COMPONENT_TIMER;
-				break;
-			case 'e':
-				seg_type = PV_COMPONENT_ETA;
-				break;
-			case 'I':
-				seg_type = PV_COMPONENT_FINETA;
-				break;
-			case 'A':
-				seg_type = PV_COMPONENT_OUTPUTBUF;
-				if (number_prefix > PV_SIZEOF_LASTOUTPUT_BUFFER)
-					number_prefix = PV_SIZEOF_LASTOUTPUT_BUFFER;
-				if (number_prefix < 1)
-					number_prefix = 1;
-				chosen_size = (size_t) number_prefix;
-				if (display->lastoutput_bytes < chosen_size)
-					display->lastoutput_bytes = chosen_size;
-				display->tracking_last_output = true;
-				break;
-			case 'L':
-				seg_type = PV_COMPONENT_PREVLINE;
-				if (number_prefix > PV_SIZEOF_PREVLINE_BUFFER)
-					number_prefix = PV_SIZEOF_PREVLINE_BUFFER;
-				chosen_size = (size_t) number_prefix;
-				display->tracking_previous_line = true;
-				break;
-			case 'r':
-				seg_type = PV_COMPONENT_RATE;
-				break;
-			case 'a':
-				seg_type = PV_COMPONENT_AVERAGERATE;
-				break;
-			case 'b':
-				seg_type = PV_COMPONENT_BYTES;
-				break;
-			case 'T':
-				seg_type = PV_COMPONENT_BUFPERCENT;
-				break;
-			case 'N':
-				seg_type = PV_COMPONENT_NAME;
-				break;
-			case '%':
-				/* %% => % */
-				seg_type = PV_COMPONENT_STRING;
-				str_start = strpos;
-				str_bytes = 1;
-				break;
-			case '\0':
-				/* % at end => just % */
-				seg_type = PV_COMPONENT_STRING;
-				str_start = strpos - 1;
-				str_bytes = 1;
-				break;
-			default:
-				/* %z (unknown) => %z */
-				seg_type = PV_COMPONENT_STRING;
-				str_start = strpos - 1;
-				str_bytes = 2;
+			component_type = -1;
+			for (component_idx = 0; NULL != format_component[component_idx].match; component_idx++) {
+				size_t component_sequence_length = strlen(format_component[component_idx].match);	/* flawfinder: ignore */
+				/* flawfinder - static strings, guaranteed null-terminated. */
+				if (component_sequence_length != sequence_length)
+					continue;
+				if (0 !=
+				    strncmp(format_component[component_idx].match, &(display_format[sequence_start]),
+					    sequence_length))
+					continue;
+				component_type = component_idx;
 				break;
 			}
+
+			if (-1 == component_type) {
+				str_start = sequence_start;
+				str_bytes = sequence_length;
+			} else {
+				chosen_size = (size_t) number_prefix;
+			}
+
 		} else {
 			const char *searchptr;
 			int foundlength;
 
-			searchptr = strchr(&(format_used[strpos]), '%');
+			searchptr = strchr(&(display_format[strpos]), '%');
 			if (NULL == searchptr) {
-				foundlength = (int) strlen(&(format_used[strpos]));	/* flawfinder: ignore */
-				/* flawfinder: format_used is explicitly \0-terminated. */
+				foundlength = (int) strlen(&(display_format[strpos]));	/* flawfinder: ignore */
+				/* flawfinder: display_format is explicitly \0-terminated. */
 			} else {
-				foundlength = searchptr - &(format_used[strpos]);
+				foundlength = searchptr - &(display_format[strpos]);
 			}
 
-			seg_type = PV_COMPONENT_STRING;
+			component_type = -1;
 			str_start = strpos;
 			str_bytes = (size_t) foundlength;
 
 			strpos += foundlength - 1;
 		}
 
-		if (seg_type != PV_COMPONENT_STRING)
-			display->component[seg_type].required = true;
-
-		display->format[segment].type = seg_type;
-		display->format[segment].str_start = str_start;
-		display->format[segment].str_bytes = str_bytes;
+		display->format[segment].type = component_type;
 		display->format[segment].chosen_size = chosen_size;
+
+		if (-1 == component_type) {
+			if (0 == str_bytes)
+				continue;
+
+			display->format[segment].offset = str_start;
+			display->format[segment].bytes = str_bytes;
+
+			/* TODO: calculate display width rather than just bytes */
+			display->format[segment].width = str_bytes;
+		} else {
+			char dummy_buffer[4];	/* flawfinder: ignore - unused. */
+
+			display->format[segment].offset = 0;
+			display->format[segment].bytes = 0;
+
+			/*
+			 * Run the formatter function with a zero-sized
+			 * buffer, to invoke its side effects such as
+			 * setting display->showing_timer.
+			 *
+			 * These side effects are required for other parts
+			 * of the program to understand what is required,
+			 * such as the transfer functions knowning to track
+			 * the previous line, or numeric mode knowing which
+			 * additional display options are enabled.
+			 */
+			dummy_buffer[0] = '\0';
+			(void) format_component[component_type].function(state, display, &(display->format[segment]),
+									 dummy_buffer, 0, 0);
+		}
+
 		display->format_segment_count++;
 	}
-}
-
-
-/*
- * Return the original value x so that it has been clamped between
- * [min..max]
- */
-static long bound_long(long x, long min, long max)
-{
-	return x < min ? min : x > max ? max : x;
 }
 
 
@@ -642,13 +1406,15 @@ static long bound_long(long x, long min, long max)
 bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdisplay_t display, bool reinitialise,
 	       bool final)
 {
-	long eta;
-	int static_portion_size, dynamic_segment_count, dynamic_segment_width;
-	pv_display_component component_type;
-	size_t segment;
-	size_t new_display_string_len;
-	const char *format_used;
-	pv__transfercount_t count_type;
+	char display_segments[1024];	 /* flawfinder: ignore - always bounded */
+	size_t display_segment_offset;
+	size_t segment_idx, dynamic_segment_count;
+	const char *display_format;
+	size_t static_portion_width, dynamic_segment_width;
+	size_t display_buffer_offset, display_buffer_remaining;
+	size_t new_display_string_bytes, new_display_string_width;
+
+	display_segments[0] = '\0';
 
 	/* Quick safety check - state and display must exist. */
 	if (NULL == state)
@@ -656,24 +1422,27 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	if (NULL == display)
 		return false;
 
+	/* Populate the display's "final" flag, for formatters. */
+	display->final_update = final;
+
 	/* Reinitialise if we were asked to. */
 	if (reinitialise)
 		pv__format_init(state, format_supplied, display);
 
 	/* The format string is needed for the static segments. */
-	format_used = NULL == format_supplied ? state->control.default_format : format_supplied;
-	if (NULL == format_used)
+	display_format = NULL == format_supplied ? state->control.default_format : format_supplied;
+	if (NULL == display_format)
 		return false;
 
 	/* Determine the type of thing being counted for transfer, rate, etc. */
-	count_type = PV_TRANSFERCOUNT_BYTES;
+	display->count_type = PV_TRANSFERCOUNT_BYTES;
 	if (state->control.linemode)
-		count_type = PV_TRANSFERCOUNT_LINES;
+		display->count_type = PV_TRANSFERCOUNT_LINES;
 	else if (state->control.decimal_units)
-		count_type = PV_TRANSFERCOUNT_DECBYTES;
+		display->count_type = PV_TRANSFERCOUNT_DECBYTES;
 
 	/*
-	 * Reallocate output buffer if width changes.
+	 * Reallocate the output buffer if the display width changes.
 	 */
 	if (display->display_buffer != NULL && display->display_buffer_size < (size_t) ((state->control.width * 2))) {
 		free(display->display_buffer);
@@ -707,394 +1476,69 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	}
 
 	/*
-	 * In numeric output mode, our output is just the percentage
-	 * completion, as a number by itself.
-	 *
-	 * With --timer, we prefix the output with the elapsed time.
-	 *
-	 * With --bytes, we output the bytes transferred so far instead of
-	 * the percentage (or we output the number lines transferred, if
-	 * --lines was given with --bytes).
-	 *
-	 * With --rate was given, we output the current transfer rate
-	 * instead of the percentage.  With --bytes as well, the rate is
-	 * given after the bytes/lines.
+	 * Use the numeric mode function if we're in numeric mode.
 	 */
 	if (state->control.numeric) {
-		char msg_timer[128];	 /* flawfinder: ignore */
-		char msg_bytes[128];	 /* flawfinder: ignore */
-		char msg_rate[128];	 /* flawfinder: ignore */
-		char msg_percent[128];	 /* flawfinder: ignore */
-		bool first_item, show_percentage;
-
-		/* flawfinder: each buffer is kept safe by pv_snprintf(). */
-
-		first_item = true;
-		show_percentage = true;
-
-		msg_timer[0] = '\0';
-		if (display->component[PV_COMPONENT_TIMER].required) {
-			(void) pv_snprintf(msg_timer, sizeof(msg_timer), "%s%.4Lf", first_item ? "" : " ",
-					   state->transfer.elapsed_seconds);
-			first_item = false;
-		}
-
-		msg_bytes[0] = '\0';
-		if (display->component[PV_COMPONENT_BYTES].required) {
-			(void) pv_snprintf(msg_bytes, sizeof(msg_bytes),
-					   "%s%lld", first_item ? "" : " ",
-					   (long long) ((state->control.bits ? 8 : 1) * state->transfer.transferred));
-			first_item = false;
-			show_percentage = false;
-		}
-
-		msg_rate[0] = '\0';
-		if (display->component[PV_COMPONENT_RATE].required) {
-			(void) pv_snprintf(msg_rate, sizeof(msg_rate),
-					   "%s%.4Lf", first_item ? "" : " ",
-					   ((state->control.bits ? 8.0 : 1.0) * state->calc.transfer_rate));
-			first_item = false;
-			show_percentage = false;
-		}
-
-		msg_percent[0] = '\0';
-		if (show_percentage) {
-			(void) pv_snprintf(msg_percent, sizeof(msg_percent),
-					   "%s%d", first_item ? "" : " ", state->calc.percentage);
-			first_item = false;
-		}
-
-		(void) pv_snprintf(display->display_buffer,
-				   display->display_buffer_size, "%.39s%.39s%.39s%.39s\n", msg_timer, msg_bytes,
-				   msg_rate, msg_percent);
-
-		display->display_string_len = strlen(display->display_buffer);	/* flawfinder: ignore */
-		/* flawfinder: always \0 terminated by pv_snprintf(). */
-
-		return true;
+		return pv__format_numeric(state, display);
 	}
 
 	/*
-	 * First, work out what components we will be putting in the output
-	 * buffer, and for those that don't depend on the total width
-	 * available (i.e. all but the progress bar), prepare their strings
-	 * to be placed in the output buffer.
+	 * Populate the internal segments buffer with each component's
+	 * output, in two passes.
 	 */
 
-	for (component_type = 0; component_type < PV_COMPONENT__MAX; component_type++) {
-		char *component_content;
-		size_t component_buf_size;
-		size_t buf_idx;
-		bool show_fineta;
-		time_t now;
-		time_t then;
-		struct tm *time_ptr;
-		char *time_format;
+	display_segment_offset = 0;
 
-		if (!display->component[component_type].required)
-			continue;
+	/* First pass - all components with a fixed width. */
 
-		/*
-		 * Don't try to calculate ETA if the size is not known.  We
-		 * check here to avoid big indented blocks if we check
-		 * later.
-		 */
-		if (state->control.size < 1
-		    && ((component_type == PV_COMPONENT_ETA) || (component_type == PV_COMPONENT_FINETA))) {
-			display->component[component_type].content[0] = '\0';
-			display->component[component_type].bytes = 0;
-			continue;
-		}
-
-		component_content = display->component[component_type].content;
-		component_content[0] = '\0';
-		component_buf_size = PV_SIZEOF_COMPONENT_STR;
-
-		switch (component_type) {
-
-		case PV_COMPONENT_STRING:
-			break;
-
-		case PV_COMPONENT_PROGRESS:
-			/* Progress bar - variable width, so do this later. */
-			break;
-
-		case PV_COMPONENT_BYTES:
-			/* Bytes / bits / lines transferred. */
-			/*@-mustfreefresh @ */
-			if (state->control.bits && !state->control.linemode) {
-				pv__sizestr(component_content, component_buf_size, "%s",
-					    (long double) (state->transfer.transferred * 8), "", _("b"), count_type);
-			} else {
-				pv__sizestr(component_content, component_buf_size, "%s",
-					    (long double) (state->transfer.transferred), "", _("B"), count_type);
-			}
-			/*@+mustfreefresh @ */
-			/* splint: we trust gettext() not to really leak memory. */
-			break;
-
-		case PV_COMPONENT_TIMER:
-			/* Elapsed time. */
-			/*
-			 * Bounds check, so we don't overrun the prefix buffer. This
-			 * does mean that the timer will stop at a 100,000 hours,
-			 * but since that's 11 years, it shouldn't be a problem.
-			 */
-			if (state->transfer.elapsed_seconds > (long double) 360000000.0L)
-				state->transfer.elapsed_seconds = (long double) 360000000.0L;
-
-			/*
-			 * If the elapsed time is more than a day, include a day count as
-			 * well as hours, minutes, and seconds.
-			 */
-			if (state->transfer.elapsed_seconds > (long double) 86400.0L) {
-				(void) pv_snprintf(component_content,
-						   component_buf_size,
-						   "%ld:%02ld:%02ld:%02ld",
-						   ((long) (state->transfer.elapsed_seconds)) / 86400,
-						   (((long) (state->transfer.elapsed_seconds)) / 3600) %
-						   24, (((long) (state->transfer.elapsed_seconds)) / 60) % 60,
-						   ((long) (state->transfer.elapsed_seconds)) % 60);
-			} else {
-				(void) pv_snprintf(component_content,
-						   component_buf_size,
-						   "%ld:%02ld:%02ld",
-						   ((long) (state->transfer.elapsed_seconds)) / 3600,
-						   (((long) (state->transfer.elapsed_seconds)) / 60) % 60,
-						   ((long) (state->transfer.elapsed_seconds)) % 60);
-			}
-			break;
-
-		case PV_COMPONENT_RATE:
-			/* Current transfer rate. */
-			/*@-mustfreefresh @ */
-			if (state->control.bits && !state->control.linemode) {
-				/* bits per second */
-				pv__sizestr(component_content, component_buf_size, "[%s]",
-					    8 * state->calc.transfer_rate, "", _("b/s"), count_type);
-			} else {
-				/* bytes or lines per second */
-				pv__sizestr(component_content, component_buf_size,
-					    "[%s]", state->calc.transfer_rate, _("/s"), _("B/s"), count_type);
-			}
-			/*@+mustfreefresh @ *//* splint: see above. */
-			break;
-
-		case PV_COMPONENT_AVERAGERATE:
-			/* Average transfer rate. */
-			/*@-mustfreefresh @ */
-			if (state->control.bits && !state->control.linemode) {
-				/* bits per second */
-				pv__sizestr(component_content, component_buf_size,
-					    "(%s)", 8 * state->calc.average_rate, "", _("b/s"), count_type);
-			} else {
-				/* bytes or lines per second */
-				pv__sizestr(component_content,
-					    component_buf_size, "(%s)", state->calc.average_rate, _("/s"), _("B/s"),
-					    count_type);
-			}
-			/*@+mustfreefresh @ *//* splint: see above. */
-			break;
-
-		case PV_COMPONENT_ETA:
-			/* Estimated time remaining until completion - if size is known. */
-			eta =
-			    pv__seconds_remaining((state->transfer.transferred - display->initial_offset),
-						  state->control.size - display->initial_offset,
-						  state->calc.current_avg_rate);
-
-			/*
-			 * Bounds check, so we don't overrun the suffix buffer. This
-			 * means the ETA will always be less than 100,000 hours.
-			 */
-			eta = bound_long(eta, 0, (long) 360000000L);
-
-			/*
-			 * If the ETA is more than a day, include a day count as
-			 * well as hours, minutes, and seconds.
-			 */
-			/*@-mustfreefresh @ */
-			if (eta > 86400L) {
-				(void) pv_snprintf(component_content,
-						   component_buf_size,
-						   "%.16s %ld:%02ld:%02ld:%02ld",
-						   _("ETA"), eta / 86400, (eta / 3600) % 24, (eta / 60) % 60, eta % 60);
-			} else {
-				(void) pv_snprintf(component_content,
-						   component_buf_size,
-						   "%.16s %ld:%02ld:%02ld", _("ETA"), eta / 3600, (eta / 60) % 60,
-						   eta % 60);
-			}
-			/*@+mustfreefresh @ *//* splint: see above. */
-
-			/*
-			 * If this is the final update, show a blank space where the
-			 * ETA used to be.
-			 */
-			if (final) {
-				size_t erase_idx;
-				for (erase_idx = 0;
-				     erase_idx < component_buf_size && component_content[erase_idx] != '\0';
-				     erase_idx++) {
-					component_content[erase_idx] = ' ';
-				}
-			}
-			break;
-
-		case PV_COMPONENT_FINETA:
-			/* Estimated time of completion - if size is known. */
-
-			now = time(NULL);
-			show_fineta = true;
-			time_format = NULL;
-
-			/*
-			 * The completion clock time may be hidden by a
-			 * failed localtime lookup.
-			 */
-
-			eta =
-			    pv__seconds_remaining(state->transfer.transferred - display->initial_offset,
-						  state->control.size - display->initial_offset,
-						  state->calc.current_avg_rate);
-
-			/*
-			 * Bounds check, so we don't overrun the suffix buffer. This
-			 * means the ETA will always be less than 100,000 hours.
-			 */
-			eta = bound_long(eta, 0, (long) 360000000L);
-
-			/*
-			 * Only include the date if the ETA is more than 6 hours
-			 * away.
-			 */
-			if (eta > (long) (6 * 3600)) {
-				time_format = "%Y-%m-%d %H:%M:%S";
-			} else {
-				time_format = "%H:%M:%S";
-			}
-
-			then = now + eta;
-			time_ptr = localtime(&then);
-
-			if (NULL == time_ptr) {
-				show_fineta = false;
-			} else {
-				/* Localtime keeps data stored in a static
-				 * buffer that gets overwritten by time
-				 * functions.
-				 */
-				struct tm time = *time_ptr;
-				size_t component_content_bytes;
-
-				/*@-mustfreefresh @ */
-				(void) pv_snprintf(component_content, component_buf_size, "%.16s ", _("FIN"));
-				/*@+mustfreefresh @ *//* splint: see above. */
-				component_content_bytes = strlen(component_content);	/* flawfinder: ignore */
-				/* flawfinder: always bounded with \0 by pv_snprintf(). */
-				(void) strftime(component_content + component_content_bytes,
-						component_buf_size - 1 - component_content_bytes, time_format, &time);
-			}
-
-			if (!show_fineta) {
-				size_t erase_idx;
-				for (erase_idx = 0;
-				     erase_idx < component_buf_size && component_content[erase_idx] != '\0';
-				     erase_idx++) {
-					component_content[erase_idx] = ' ';
-				}
-			}
-			break;
-
-		case PV_COMPONENT_NAME:
-			/* Name prefix. */
-			if (state->control.name) {
-				(void) pv_snprintf(component_content, component_buf_size, "%9.500s:",
-						   state->control.name);
-			}
-			break;
-
-		case PV_COMPONENT_BUFPERCENT:
-			/* Transfer buffer percentage utilisation. */
-			if (state->transfer.buffer_size > 0) {
-				int pct_used = pv_percentage((off_t)
-							     (state->transfer.read_position -
-							      state->transfer.write_position),
-							     (off_t)
-							     (state->transfer.buffer_size));
-				(void) pv_snprintf(component_content, component_buf_size, "{%3d%%}", pct_used);
-			}
-#ifdef HAVE_SPLICE
-			if (state->transfer.splice_used)
-				(void) pv_snprintf(component_content, component_buf_size, "{%s}", "----");
-#endif
-			break;
-
-		case PV_COMPONENT_OUTPUTBUF:
-			/* Recently transferred bytes. */
-			for (buf_idx = 0; buf_idx < display->lastoutput_bytes; buf_idx++) {
-				int display_char;
-				display_char = (int) (display->lastoutput_buffer[buf_idx]);
-				component_content[buf_idx] = isprint(display_char) ? (char) display_char : '.';
-			}
-			component_content[buf_idx] = '\0';
-			break;
-
-		case PV_COMPONENT_PREVLINE:
-			/* Most recent line. */
-			for (buf_idx = 0;
-			     buf_idx < PV_SIZEOF_PREVLINE_BUFFER - 1 && buf_idx < PV_SIZEOF_COMPONENT_STR - 1;
-			     buf_idx++) {
-				int display_char;
-				display_char = (int) (display->previous_line[buf_idx]);
-				component_content[buf_idx] = isprint(display_char) ? (char) display_char : ' ';
-			}
-			component_content[buf_idx] = '\0';
-			break;
-
-		default:
-			break;
-		}
-
-		/* Record the string length for this component. */
-		display->component[component_type].bytes = strlen(component_content);	/* flawfinder: ignore */
-		/* flawfinder: always bounded by \0 either explicitly or by pv_snprintf(). */
-	}
-
-
-	/*
-	 * Now go through all the static portions of the format to work out
-	 * how much space will be left for any dynamic segments (i.e. the
-	 * progress bar), and count how many dynamic segments there are.
-	 */
-	static_portion_size = 0;
+	static_portion_width = 0;
 	dynamic_segment_count = 0;
-	for (segment = 0; segment < display->format_segment_count; segment++) {
-		if (display->format[segment].type == PV_COMPONENT_STRING) {
-			static_portion_size += display->format[segment].str_bytes;
-			debug("segment[%d] type:%d width:%d [%.*s]", segment, display->format[segment].type,
-			      display->format[segment].str_bytes, display->format[segment].str_bytes,
-			      &(format_used[display->format[segment].str_start]));
-		} else if (display->format[segment].type == PV_COMPONENT_PROGRESS) {
-			dynamic_segment_count++;
-			debug("segment[%d] type:%d dynamic", segment, display->format[segment].type);
-		} else if (display->format[segment].type == PV_COMPONENT_PREVLINE
-			   && 0 == display->format[segment].chosen_size) {
-			dynamic_segment_count++;
-			debug("segment[%d] type:%d dynamic", segment, display->format[segment].type);
-		} else {
-			size_t segment_width = display->format[segment].chosen_size;
-			if (0 == segment_width)
-				segment_width = display->component[display->format[segment].type].bytes;
-			static_portion_size += segment_width;
-			debug("segment[%d] type:%d width:%d", segment, display->format[segment].type, segment_width);
+
+	for (segment_idx = 0; segment_idx < display->format_segment_count; segment_idx++) {
+		pvdisplay_segment_t segment;
+		struct pvdisplay_component_s *component;
+		size_t bytes_added;
+		bool fixed_width;
+
+		segment = &(display->format[segment_idx]);
+		if (-1 == segment->type) {
+			static_portion_width += segment->width;
+			continue;
 		}
+		component = &(format_component[segment->type]);
+
+		fixed_width = true;
+		if (component->dynamic && 0 == segment->chosen_size)
+			fixed_width = false;
+
+		if (!fixed_width) {
+			dynamic_segment_count++;
+			continue;
+		}
+
+		segment->width = segment->chosen_size;
+
+		bytes_added =
+		    component->function(state, display, segment, display_segments, sizeof(display_segments),
+					display_segment_offset);
+
+		segment->width = 0;
+		if (bytes_added > 0) {
+			/* TODO: calculate display width rather than just bytes */
+			segment->width = bytes_added;
+		}
+
+		display_segment_offset += bytes_added;
+		static_portion_width += segment->width;
 	}
 
-	debug("static_portion_size: %d", static_portion_size);
-	debug("dynamic_segment_count: %d", dynamic_segment_count);
+	/*
+	 * Second pass, now the remaining width is known - all components
+	 * with a dynamic width.
+	 */
 
-	dynamic_segment_width = (int) (state->control.width) - static_portion_size;
+	dynamic_segment_width = state->control.width - static_portion_width;
+
 	/*
 	 * Divide the total remaining screen space by the number of dynamic
 	 * segments, so that multiple dynamic segments will share the space.
@@ -1102,240 +1546,88 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	if (dynamic_segment_count > 1)
 		dynamic_segment_width /= dynamic_segment_count;
 
-	/*
-	 * Assemble the progress bar now we know how big it should be.
-	 */
-	if (display->component[PV_COMPONENT_PROGRESS].required) {
-		char *component_content;
-		size_t component_buf_size;
-		char after_bar[32];	 /* flawfinder: ignore - only populated by pv_snprintf(). */
-		int bar_area_width, filled_bar_width, pad_count;
+	for (segment_idx = 0; segment_idx < display->format_segment_count; segment_idx++) {
+		pvdisplay_segment_t segment;
+		struct pvdisplay_component_s *component;
+		size_t bytes_added;
+		bool fixed_width;
 
-		component_content = display->component[PV_COMPONENT_PROGRESS].content;
-		component_content[0] = '\0';
-		component_buf_size = PV_SIZEOF_COMPONENT_STR;
-
-		memset(after_bar, 0, sizeof(after_bar));
-
-		if (state->control.size > 0 || state->control.rate_gauge) {
-			/*
-			 * Known size, or rate gauge mode.  Show a bar, and
-			 * a percentage (size) or max rate (gauge).
-			 */
-			size_t after_bar_width;
-			int bar_percentage;
-
-			if (state->control.size > 0) {
-				/* Percentage of data transferred. */
-				bar_percentage = state->calc.percentage;
-				(void) pv_snprintf(after_bar, sizeof(after_bar), " %3ld%%", bar_percentage);
-			} else {
-				/* Current rate vs max rate. */
-				bar_percentage = 0;
-				if (state->calc.rate_max > 0) {
-					bar_percentage =
-					    (int) (100.0 * state->calc.transfer_rate / state->calc.rate_max);
-				}
-
-				/*@-mustfreefresh @ */
-				if (state->control.bits && !state->control.linemode) {
-					/* bits per second */
-					pv__sizestr(after_bar, sizeof(after_bar), "/%s",
-						    8.0 * state->calc.rate_max, "", _("b/s"), count_type);
-				} else {
-					/* bytes or lines per second */
-					pv__sizestr(after_bar, sizeof(after_bar),
-						    "/%s", state->calc.rate_max, _("/s"), _("B/s"), count_type);
-				}
-				/*@+mustfreefresh @ */
-				/* splint: see above about gettext(). */
-			}
-
-			after_bar_width = strlen(after_bar);	/* flawfinder: ignore */
-			/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
-
-			bar_area_width = dynamic_segment_width - (int) (after_bar_width) - 2;
-
-			if (bar_area_width < 0)
-				bar_area_width = 0;
-
-			if (bar_area_width > (int) (component_buf_size) - 16)
-				bar_area_width = (int) (component_buf_size - 16);
-
-			/* The opening of the bar area. */
-			(void) pv_snprintf(component_content, component_buf_size, "[");
-
-			/* The bar portion. */
-			filled_bar_width = (int) ((bar_area_width * bar_percentage) / 100 - 1);
-			for (pad_count = 0; pad_count < filled_bar_width; pad_count++) {
-				if (pad_count < bar_area_width)
-					(void) pv_strlcat(component_content, "=", component_buf_size);
-			}
-
-			/* The tip of the bar, if not at 100%. */
-			if (pad_count < bar_area_width) {
-				(void) pv_strlcat(component_content, ">", component_buf_size);
-				pad_count++;
-			}
-
-			/* The spaces after the bar. */
-			for (; pad_count < bar_area_width; pad_count++) {
-				(void) pv_strlcat(component_content, " ", component_buf_size);
-			}
-
-			/* The closure of the bar area, and the percentage. */
-			(void) pv_strlcat(component_content, "]", component_buf_size);
-			(void) pv_strlcat(component_content, after_bar, component_buf_size);
-
-		} else {
-			/* Unknown size; show a moving indicator. */
-
-			int indicator_position = state->calc.percentage;
-
-			bar_area_width = dynamic_segment_width - 5;
-
-			if (bar_area_width < 0)
-				bar_area_width = 0;
-
-			if (bar_area_width > (int) (component_buf_size) - 16)
-				bar_area_width = (int) (component_buf_size) - 16;
-
-			debug("bar_area_width: %d", bar_area_width);
-
-			/*
-			 * Note that pv_calculate_transfer_rate() sets the
-			 * percentage when the size is unknown to a value
-			 * that goes 0 - 200 and resets, so here we make
-			 * values above 100 send the indicator back down
-			 * again, so it moves back and forth.
-			 */
-			if (indicator_position > 100)
-				indicator_position = 200 - indicator_position;
-
-			/* The opening of the bar area. */
-			(void) pv_snprintf(component_content, component_buf_size, "[");
-
-			/* The spaces before the indicator. */
-			for (pad_count = 0; pad_count < (bar_area_width * indicator_position) / 100; pad_count++) {
-				if (pad_count < bar_area_width)
-					(void) pv_strlcat(component_content, " ", component_buf_size);
-			}
-
-			/* The indicator. */
-			(void) pv_strlcat(component_content, "<=>", component_buf_size);
-
-			/* The spaces after the indicator. */
-			for (; pad_count < bar_area_width; pad_count++) {
-				(void) pv_strlcat(component_content, " ", component_buf_size);
-			}
-
-			/* The closure of the bar area. */
-			(void) pv_strlcat(component_content, "]", component_buf_size);
+		segment = &(display->format[segment_idx]);
+		if (-1 == segment->type) {
+			static_portion_width += segment->width;
+			continue;
 		}
+		component = &(format_component[segment->type]);
 
-		/* Record the string length for this component. */
-		display->component[PV_COMPONENT_PROGRESS].bytes = strlen(component_content);	/* flawfinder: ignore */
-		/* flawfinder: always bounded with \0 by pv_strlcat(). */
+		fixed_width = true;
+		if (component->dynamic && 0 == segment->chosen_size)
+			fixed_width = false;
 
-		/*
-		 * If the progress bar won't fit, drop it.
-		 */
-		if ((unsigned int) (display->component[PV_COMPONENT_PROGRESS].bytes + static_portion_size) >
-		    state->control.width) {
-			component_content[0] = '\0';
-			display->component[PV_COMPONENT_PROGRESS].bytes = 0;
-		}
+		if (fixed_width)
+			continue;
+
+		segment->width = dynamic_segment_width;
+		bytes_added =
+		    component->function(state, display, segment, display_segments, sizeof(display_segments),
+					display_segment_offset);
+
+		display_segment_offset += bytes_added;
 	}
 
 	/*
-	 * We can now build the output string using the format structure.
+	 * Populate the display buffer from the segments.
 	 */
 
 	memset(display->display_buffer, 0, display->display_buffer_size);
-	new_display_string_len = 0;
-	for (segment = 0; segment < display->format_segment_count; segment++) {
-		const char *segment_content;
-		size_t segment_bytes, chosen_size;
+	display_buffer_offset = 0;
+	display_buffer_remaining = display->display_buffer_size - 1;
+	new_display_string_bytes = 0;
+	new_display_string_width = 0;
 
-		chosen_size = display->format[segment].chosen_size;
+	for (segment_idx = 0; segment_idx < display->format_segment_count; segment_idx++) {
+		pvdisplay_segment_t segment;
+		const char *content_buffer = display_format;
 
-		if (display->format[segment].type == PV_COMPONENT_STRING) {
-			segment_content = &(format_used[display->format[segment].str_start]);
-			segment_bytes = display->format[segment].str_bytes;
-		} else {
-			segment_content = display->component[display->format[segment].type].content;
-			segment_bytes = display->component[display->format[segment].type].bytes;
-
-			/* A chosen_size of 0 for PV_COMPONENT_PREVLINE means dynamic. */
-			if (0 == chosen_size && PV_COMPONENT_PREVLINE == display->format[segment].type)
-				chosen_size = (size_t) dynamic_segment_width;
-
-			/*
-			 * If the segment's chosen size is smaller than the
-			 * component, show only the first or last part of
-			 * it, depending on the component type.  For
-			 * instance with "show N last output bytes" (%nA),
-			 * if one "n" was 16 and the other 8, then for the 8
-			 * one, we show the last 8 bytes of the 16-byte
-			 * buffer (issue #122).  With "show previous line",
-			 * we show the first bytes.
-			 */
-			if (0 != chosen_size && chosen_size < segment_bytes) {
-				if (PV_COMPONENT_PREVLINE == display->format[segment].type) {
-					/* No need to move the segment content. */
-				} else {
-					segment_content += (segment_bytes - chosen_size);
-				}
-				segment_bytes = chosen_size;
-			}
-		}
-
-		/* Skip empty segments. */
-		if (segment_bytes == 0)
+		segment = &(display->format[segment_idx]);
+		if (0 == segment->bytes)
+			continue;
+		if (segment->bytes > display_buffer_remaining)
 			continue;
 
-		/*
-		 * Truncate the segment if it would make the display string
-		 * overflow the buffer.
-		 */
-		if (segment_bytes + new_display_string_len > display->display_buffer_size - 2)
-			segment_bytes = display->display_buffer_size - new_display_string_len - 2;
-		if (segment_bytes < 1)
-			break;
+		if (-1 == segment->type) {
+			content_buffer = display_format;
+		} else {
+			content_buffer = display_segments;
+		}
 
-		/* Skip the segment if it would make the display too wide. */
-		if ((unsigned int) (segment_bytes + new_display_string_len) > state->control.width)
-			break;
+		memmove(display->display_buffer + display_buffer_offset, content_buffer + segment->offset,
+			segment->bytes);
+		display_buffer_offset += segment->bytes;
+		display_buffer_remaining -= segment->bytes;
 
-		/* Append the segment to the output string. */
-		strncat(display->display_buffer, segment_content, segment_bytes);	/* flawfinder: ignore */
-		/* flawfinder: length is checked above, and buffer is \0 terminated already. */
-
-		new_display_string_len += segment_bytes;
+		new_display_string_bytes += segment->bytes;
+		new_display_string_width += segment->width;
 	}
 
-	debug("%s: %d", "display string length counted by format segments", (int) new_display_string_len);
-
-	/* Recalculate display string length with strlen() in case of miscounting. */
-	new_display_string_len = strlen(display->display_buffer);	/* flawfinder: ignore */
-	/* flawfinder: \0 terminated by memset() above and then by segment bounds checking. */
-	debug("%s: %d", "display string length from strlen()", (int) new_display_string_len);
+	debug("%s: %d", "new display string length in bytes", (int) new_display_string_bytes);
+	debug("%s: %d", "new display string width", (int) new_display_string_width);
 
 	/*
-	 * If the size of our output shrinks, we need to keep appending
+	 * If the width of our output shrinks, we need to keep appending
 	 * spaces at the end, so that we don't leave dangling bits behind.
 	 */
-	if ((new_display_string_len < display->display_string_len)
+	if ((new_display_string_width < display->display_string_width)
 	    && (state->control.width >= display->prev_screen_width)) {
 		char spaces[32];	 /* flawfinder: ignore - terminated, bounded */
 		int spaces_to_add;
 
-		spaces_to_add = (int) (display->display_string_len - new_display_string_len);
+		spaces_to_add = (int) (display->display_string_width - new_display_string_width);
 		/* Upper boundary on number of spaces */
 		if (spaces_to_add > 15) {
 			spaces_to_add = 15;
 		}
-		new_display_string_len += spaces_to_add;
+		new_display_string_bytes += spaces_to_add;
+		new_display_string_width += spaces_to_add;
 		spaces[spaces_to_add] = '\0';
 		while (--spaces_to_add >= 0) {
 			spaces[spaces_to_add] = ' ';
@@ -1343,7 +1635,8 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		(void) pv_strlcat(display->display_buffer, spaces, display->display_buffer_size);
 	}
 
-	display->display_string_len = new_display_string_len;
+	display->display_string_bytes = new_display_string_bytes;
+	display->display_string_width = new_display_string_width;
 	display->prev_screen_width = state->control.width;
 
 	return true;
@@ -1388,7 +1681,7 @@ void pv_display(pvstate_t state, bool final)
 		return;
 
 	if (state->control.numeric) {
-		pv_tty_write(state, state->display.display_buffer, state->display.display_string_len);
+		pv_tty_write(state, state->display.display_buffer, state->display.display_string_bytes);
 	} else if (state->control.cursor) {
 		if (state->control.force || pv_in_foreground()) {
 			pv_crs_update(state, state->display.display_buffer);
@@ -1396,7 +1689,7 @@ void pv_display(pvstate_t state, bool final)
 		}
 	} else {
 		if (state->control.force || pv_in_foreground()) {
-			pv_tty_write(state, state->display.display_buffer, state->display.display_string_len);
+			pv_tty_write(state, state->display.display_buffer, state->display.display_string_bytes);
 			pv_tty_write(state, "\r", 1);
 			state->display.display_visible = true;
 		}
@@ -1409,7 +1702,7 @@ void pv_display(pvstate_t state, bool final)
 	    && (NULL != state->extra_display.display_buffer)
 	    ) {
 		pv_tty_write(state, "\033]2;", 4);
-		pv_tty_write(state, state->extra_display.display_buffer, state->extra_display.display_string_len);
+		pv_tty_write(state, state->extra_display.display_buffer, state->extra_display.display_string_bytes);
 		pv_tty_write(state, "\033\\", 2);
 		state->extra_display.display_visible = true;
 		debug("%s: [%s]", "windowtitle display", state->extra_display.display_buffer);

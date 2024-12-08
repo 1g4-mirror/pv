@@ -20,27 +20,6 @@
 extern "C" {
 #endif
 
-/*
- * Types of display component that make up an output string.
- */
-typedef enum {
-  PV_COMPONENT_STRING,		/* fixed string */
-  PV_COMPONENT_PROGRESS,	/* progress bar, with percentage if known */
-  PV_COMPONENT_BYTES,		/* number of bytes transferred */
-  PV_COMPONENT_TIMER,		/* elapsed time */
-  PV_COMPONENT_RATE,		/* current transfer rate */
-  PV_COMPONENT_AVERAGERATE,	/* average transfer rate */
-  PV_COMPONENT_ETA,		/* estimated time remaining until completion */
-  PV_COMPONENT_FINETA,		/* estimated time of completion */
-  PV_COMPONENT_NAME,		/* name prefix */
-  PV_COMPONENT_BUFPERCENT,	/* percentage of buffer used */
-  PV_COMPONENT_OUTPUTBUF,	/* recent bytes in output buffer */
-  PV_COMPONENT_PREVLINE,	/* most recent complete line */
-  PV_COMPONENT__MAX
-} pv_display_component;
-
-#define PV_SIZEOF_COMPONENT_STR	1024	/* size of buffer for each component */
-
 #define RATE_GRANULARITY	100000000	 /* nsec between -L rate chunks */
 #define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
 #define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R */
@@ -56,7 +35,7 @@ typedef enum {
 
 #define PV_SIZEOF_DEFAULT_FORMAT	512
 #define PV_SIZEOF_CWD			4096
-#define PV_SIZEOF_LASTOUTPUT_BUFFER	256
+#define PV_SIZEOF_LASTWRITTEN_BUFFER	256
 #define PV_SIZEOF_PREVLINE_BUFFER	1024
 #define PV_FORMAT_ARRAY_MAX		100
 #define PV_SIZEOF_CRS_LOCK_FILE		1024
@@ -77,6 +56,15 @@ struct pvcursorstate_s {
 	int y_topmost;		/* terminal row of topmost "pv" instance */
 	bool tty_tostop_added;	/* whether any instance had to set TOSTOP on the terminal */
 };
+
+/*
+ * Types of transfer count - bytes, decimal bytes or lines.
+ */
+typedef enum {
+	PV_TRANSFERCOUNT_BYTES,
+	PV_TRANSFERCOUNT_DECBYTES,
+	PV_TRANSFERCOUNT_LINES
+} pvtransfercount_t;
 
 
 /*
@@ -191,21 +179,17 @@ struct pvstate_s {
 	 *****************/
 	struct pvdisplay_s {
 
-		struct {	/* format string broken into display components */
-			size_t str_start;		/* for strings: start offset */
-			size_t str_bytes;		/* for strings: length in bytes */
+		struct pvdisplay_segment_s {	/* format string broken into segments */
+			/* See pv__format_init() for more details. */
+			int type;			/* component type, -1 for static string */
 			size_t chosen_size;		/* "n" from %<n>A, or 0 */
-			pv_display_component type;	/* type of display component */
+			size_t offset;			/* start offset of this segment */
+			size_t bytes;			/* length of segment in bytes */
+			size_t width;			/* displayed width of segment */
 		} format[PV_FORMAT_ARRAY_MAX];
 
-		struct {	/* display components */
-			char content[PV_SIZEOF_COMPONENT_STR];	/* string to display */
-			size_t bytes;				/* number of bytes in string */
-			bool required;				/* true if included in format */
-		} component[PV_COMPONENT__MAX];
-
-		/* The last-output "n" bytes. */
-		char lastoutput_buffer[PV_SIZEOF_LASTOUTPUT_BUFFER];
+		/* The last-written "n" bytes. */
+		char lastwritten_buffer[PV_SIZEOF_LASTWRITTEN_BUFFER];
 
 		/* The most recently output complete line. */
 		char previous_line[PV_SIZEOF_PREVLINE_BUFFER];
@@ -214,16 +198,25 @@ struct pvstate_s {
 
 		/*@only@*/ /*@null@*/ char *display_buffer;	/* buffer for display string */
 		size_t display_buffer_size;	 /* size allocated to display buffer */
-		size_t display_string_len;	 /* length of string in display buffer */
+		size_t display_string_bytes;	 /* byte length of string in display buffer */
+		size_t display_string_width;	 /* displayed width of string in display buffer */
 		off_t initial_offset;		 /* offset when first opened (when watching fds) */
-		size_t lastoutput_bytes;	 /* largest number of last-output bytes to show */
+		size_t lastwritten_bytes;	 /* largest number of last-written bytes to show */
 		size_t next_line_len;		 /* length of currently receiving line so far */
 
 		size_t format_segment_count;	 /* number of format string segments */
 
+		pvtransfercount_t count_type;	 /* type of count for transfer, rate, etc */
+
 		unsigned int prev_screen_width;	 /* screen width last time we were called */
-		bool tracking_last_output;	 /* set if displaying the last few bytes output */
-		bool tracking_previous_line;	 /* set if displaying the previously output line */
+
+		bool showing_timer;		 /* set if showing timer */
+		bool showing_bytes;		 /* set if showing byte/line count */
+		bool showing_rate;		 /* set if showing transfer rate */
+		bool showing_last_written;	 /* set if displaying the last few bytes written */
+		bool showing_previous_line;	 /* set if displaying the previously output line */
+
+		bool final_update;		 /* set internally on the final update */
 		bool display_visible;		 /* set once anything written to terminal */
 
 	} display;
@@ -379,6 +372,7 @@ struct pvwatchfd_s {
 typedef struct pvwatchfd_s *pvwatchfd_t;
 
 typedef struct pvdisplay_s *pvdisplay_t;
+typedef struct pvdisplay_segment_s *pvdisplay_segment_t;
 
 void pv_error(pvstate_t, char *, ...);
 

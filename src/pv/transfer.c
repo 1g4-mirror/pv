@@ -722,7 +722,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 
 		if ((state->control.linemode) && (lineswritten != NULL))
 			tracking_lines = true;
-		else if (state->display.tracking_previous_line)
+		else if (state->display.showing_previous_line)
 			tracking_lines = true;
 
 		/*
@@ -772,7 +772,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 					 * line ("%L"), add to our line
 					 * buffer.
 					 */
-					if (state->display.tracking_previous_line
+					if (state->display.showing_previous_line
 					    && state->display.next_line_len < PV_SIZEOF_PREVLINE_BUFFER - 1) {
 						state->display.next_line[state->display.next_line_len] = *ptr;
 						state->display.next_line_len++;
@@ -789,7 +789,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				 * with the line we just completed, and
 				 * start a new one.
 				 */
-				if (state->display.tracking_previous_line) {
+				if (state->display.showing_previous_line) {
 					memset(state->display.previous_line, 0, PV_SIZEOF_PREVLINE_BUFFER);
 					if (state->display.next_line_len > PV_SIZEOF_PREVLINE_BUFFER - 1)
 						state->display.next_line_len = PV_SIZEOF_PREVLINE_BUFFER - 1;
@@ -840,39 +840,39 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		 * If we're monitoring the output, update our copy of the
 		 * last few bytes we've written.
 		 */
-		if (state->display.tracking_last_output && (nwritten > 0)) {
+		if (state->display.showing_last_written && (nwritten > 0)) {
 			size_t new_portion_size, old_portion_size;
 
 			new_portion_size = (size_t) nwritten;
-			if (new_portion_size > state->display.lastoutput_bytes)
-				new_portion_size = state->display.lastoutput_bytes;
+			if (new_portion_size > state->display.lastwritten_bytes)
+				new_portion_size = state->display.lastwritten_bytes;
 
-			old_portion_size = state->display.lastoutput_bytes - new_portion_size;
+			old_portion_size = state->display.lastwritten_bytes - new_portion_size;
 
 			/*
 			 * Make room for the new portion.
 			 */
 			if (old_portion_size > 0) {
-				memmove(state->display.lastoutput_buffer,
-					state->display.lastoutput_buffer + new_portion_size, old_portion_size);
+				memmove(state->display.lastwritten_buffer,
+					state->display.lastwritten_buffer + new_portion_size, old_portion_size);
 			}
 
 			/*
 			 * Copy the new data in.
 			 */
-			memcpy(state->display.lastoutput_buffer +	/* flawfinder: ignore */
+			memcpy(state->display.lastwritten_buffer +	/* flawfinder: ignore */
 			       old_portion_size,
 			       state->transfer.transfer_buffer + state->transfer.write_position - new_portion_size,
 			       new_portion_size);
 			/*
 			 * flawfinder rationale: calculations above ensure
 			 * that old_portion_size + new_portion_size is
-			 * always <= lastoutput_bytes, and
-			 * lastoutput_bytes is guaranteed by
+			 * always <= lastwritten_bytes, and
+			 * lastwritten_bytes is guaranteed by
 			 * pv__format_init() to be no more than
-			 * PV_SIZEOF_LASTOUTPUT_BUFFER, which is the size of
-			 * lastoutput_buffer, so the memcpy() will always
-			 * fit into the buffer.
+			 * PV_SIZEOF_LASTWRITTEN_BUFFER, which is the size
+			 * of lastwritten_buffer, so the memcpy() will
+			 * always fit into the buffer.
 			 */
 		}
 
