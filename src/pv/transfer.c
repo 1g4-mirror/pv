@@ -460,15 +460,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 * reached the end of this file.
 	 */
 	if (do_not_skip_errors) {
-		/*@-compdef@ */
 		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("read failed"), strerror(errno));
-		/*@+compdef@ */
-		/*
-		 * splint says the storage pointed to by the result of
-		 * pv_current_file_name() is not fully defined.
-		 *
-		 * TODO: investigate and fix the reason for this.
-		 */
 		*eof_in = true;
 		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;

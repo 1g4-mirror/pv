@@ -382,7 +382,7 @@ bool pv_format(pvstate_t, /*@null@*/ const char *, pvdisplay_t, bool, bool);
 void pv_display(pvstate_t, bool);
 ssize_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);
 int pv_next_file(pvstate_t, unsigned int, int);
-/*@out@*/ const char *pv_current_file_name(pvstate_t);
+/*@keep@*/ const char *pv_current_file_name(pvstate_t);
 
 void pv_write_retry(int, const char *, size_t);
 void pv_tty_write(pvstate_t, const char *, size_t);

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 17:13+0000\n"
+"POT-Creation-Date: 2024-12-08 17:31+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -430,11 +430,11 @@ msgstr "ЗАВЕРШ"
 msgid "b"
 msgstr "бит"
 
-#: src/pv/display.c:956 src/pv/transfer.c:602
+#: src/pv/display.c:956 src/pv/transfer.c:594
 msgid "B"
 msgstr "байт"
 
-#: src/pv/display.c:1497 src/pv/transfer.c:1064
+#: src/pv/display.c:1497 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 
@@ -490,47 +490,47 @@ msgstr "не удалось выделить память для структу�
 msgid "file list allocation failed"
 msgstr "не удалось выделить память для списка файлов"
 
-#: src/pv/transfer.c:464
+#: src/pv/transfer.c:463
 msgid "read failed"
 msgstr "чтение не удалось"
 
-#: src/pv/transfer.c:487
+#: src/pv/transfer.c:479
 msgid "warning: read errors detected"
 msgstr "внимание: замечены ошибки чтения"
 
-#: src/pv/transfer.c:503
+#: src/pv/transfer.c:495
 msgid "file is not seekable"
 msgstr ""
 
-#: src/pv/transfer.c:581
+#: src/pv/transfer.c:573
 msgid "failed to seek past error"
 msgstr ""
 
-#: src/pv/transfer.c:601
+#: src/pv/transfer.c:593
 msgid "skipped past read error"
 msgstr ""
 
-#: src/pv/transfer.c:642
+#: src/pv/transfer.c:634
 msgid "no transfer buffer allocated"
 msgstr "не выделена память для буфера передачи"
 
-#: src/pv/transfer.c:684
+#: src/pv/transfer.c:676
 msgid "failed to set interval timer"
 msgstr "не удалось задать измеритель временного промежутка"
 
-#: src/pv/transfer.c:710
+#: src/pv/transfer.c:702
 msgid "failed to clear interval timer"
 msgstr "не удалось очистить измеритель временного промежутка"
 
-#: src/pv/transfer.c:752
+#: src/pv/transfer.c:744
 msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:925
+#: src/pv/transfer.c:917
 msgid "write failed"
 msgstr "запись не удалась"
 
-#: src/pv/transfer.c:1162
+#: src/pv/transfer.c:1154
 msgid "select call failed"
 msgstr "запрос выборки не удался"
 

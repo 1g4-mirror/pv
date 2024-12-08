@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 17:13+0000\n"
+"POT-Creation-Date: 2024-12-08 17:31+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -429,11 +429,11 @@ msgstr "FIN"
 msgid "b"
 msgstr "b"
 
-#: src/pv/display.c:956 src/pv/transfer.c:602
+#: src/pv/display.c:956 src/pv/transfer.c:594
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:1497 src/pv/transfer.c:1064
+#: src/pv/display.c:1497 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "selhala alokace vyrovnávací paměti"
 
@@ -489,47 +489,47 @@ msgstr "selhala alokace struktury historie"
 msgid "file list allocation failed"
 msgstr "selhala alokace seznamu souborů"
 
-#: src/pv/transfer.c:464
+#: src/pv/transfer.c:463
 msgid "read failed"
 msgstr "čtení selhalo"
 
-#: src/pv/transfer.c:487
+#: src/pv/transfer.c:479
 msgid "warning: read errors detected"
 msgstr "varování: detekovány chyby při čtení"
 
-#: src/pv/transfer.c:503
+#: src/pv/transfer.c:495
 msgid "file is not seekable"
 msgstr "souborem nelze procházet"
 
-#: src/pv/transfer.c:581
+#: src/pv/transfer.c:573
 msgid "failed to seek past error"
 msgstr "selhal skok za chybu"
 
-#: src/pv/transfer.c:601
+#: src/pv/transfer.c:593
 msgid "skipped past read error"
 msgstr "chyba přeskočena"
 
-#: src/pv/transfer.c:642
+#: src/pv/transfer.c:634
 msgid "no transfer buffer allocated"
 msgstr "vyrovnávací paměť není alokována"
 
-#: src/pv/transfer.c:684
+#: src/pv/transfer.c:676
 msgid "failed to set interval timer"
 msgstr "selhalo nastavení intervalového časovače"
 
-#: src/pv/transfer.c:710
+#: src/pv/transfer.c:702
 msgid "failed to clear interval timer"
 msgstr "selhalo vynulování intervalového časovače"
 
-#: src/pv/transfer.c:752
+#: src/pv/transfer.c:744
 msgid "line position buffer allocation failed"
 msgstr "selhala alokace vyrovnávací paměti pro pozici v řádcích"
 
-#: src/pv/transfer.c:925
+#: src/pv/transfer.c:917
 msgid "write failed"
 msgstr "zápis selhal"
 
-#: src/pv/transfer.c:1162
+#: src/pv/transfer.c:1154
 msgid "select call failed"
 msgstr "selhalo volání select"
 

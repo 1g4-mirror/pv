@@ -390,7 +390,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
  * internal state and must not be passed to free() or used after "state" is
  * freed.
  */
-/*@out@*/ const char *pv_current_file_name(pvstate_t state)
+/*@keep@*/ const char *pv_current_file_name(pvstate_t state)
 {
 	static char *str_none = NULL;
 	static char *str_stdin = NULL;

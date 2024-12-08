@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 17:13+0000\n"
+"POT-Creation-Date: 2024-12-08 17:31+0000\n"
 "PO-Revision-Date: 2024-10-20 14:07+0000\n"
 "Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -447,11 +447,11 @@ msgstr "FIN"
 msgid "b"
 msgstr "b"
 
-#: src/pv/display.c:956 src/pv/transfer.c:602
+#: src/pv/display.c:956 src/pv/transfer.c:594
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:1497 src/pv/transfer.c:1064
+#: src/pv/display.c:1497 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 
@@ -508,48 +508,48 @@ msgstr "nie udało się zaalokować struktury historii"
 msgid "file list allocation failed"
 msgstr "nie udało się zaalokować listy plików"
 
-#: src/pv/transfer.c:464
+#: src/pv/transfer.c:463
 msgid "read failed"
 msgstr "błąd odczytu"
 
-#: src/pv/transfer.c:487
+#: src/pv/transfer.c:479
 msgid "warning: read errors detected"
 msgstr "ostrzeżenie: błędy odczytu wykryte"
 
-#: src/pv/transfer.c:503
+#: src/pv/transfer.c:495
 msgid "file is not seekable"
 msgstr "pliku nie da się przewijać"
 
-#: src/pv/transfer.c:581
+#: src/pv/transfer.c:573
 msgid "failed to seek past error"
 msgstr "nie udało się przewinąć za błąd"
 
-#: src/pv/transfer.c:601
+#: src/pv/transfer.c:593
 msgid "skipped past read error"
 msgstr "pominięto błąd odczytu"
 
-#: src/pv/transfer.c:642
+#: src/pv/transfer.c:634
 msgid "no transfer buffer allocated"
 msgstr "brak zaalokowanego bufora transferu"
 
-#: src/pv/transfer.c:684
+#: src/pv/transfer.c:676
 msgid "failed to set interval timer"
 msgstr "nie udało się ustawić interwału czasowego"
 
 # "Przewidywany czas ukończenia" for ETA is too long
-#: src/pv/transfer.c:710
+#: src/pv/transfer.c:702
 msgid "failed to clear interval timer"
 msgstr "nie udało się wyczyścić interwału czasowego"
 
-#: src/pv/transfer.c:752
+#: src/pv/transfer.c:744
 msgid "line position buffer allocation failed"
 msgstr "alokacja buforu pozycji linii nie powiodła się"
 
-#: src/pv/transfer.c:925
+#: src/pv/transfer.c:917
 msgid "write failed"
 msgstr "błąd zapisu"
 
-#: src/pv/transfer.c:1162
+#: src/pv/transfer.c:1154
 msgid "select call failed"
 msgstr "nie udało się wywołać funkcji select"
 

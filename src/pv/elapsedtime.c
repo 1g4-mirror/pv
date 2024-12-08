@@ -136,9 +136,6 @@ void pv_elapsedtime_add(struct timespec *return_time, const struct timespec *fir
 	 * large enough and are relying on the compiler to do the casting
 	 * correctly, since the manual for timespec(3) states the types are
 	 * implementation-defined.
-	 *
-	 * TODO: review this to make sure that this isn't just an elaborate
-	 * excuse for "it's hard to fix and I don't know how".
 	 */
 }
 

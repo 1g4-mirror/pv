@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 17:13+0000\n"
+"POT-Creation-Date: 2024-12-08 17:31+0000\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -421,11 +421,11 @@ msgstr ""
 msgid "b"
 msgstr ""
 
-#: src/pv/display.c:956 src/pv/transfer.c:602
+#: src/pv/display.c:956 src/pv/transfer.c:594
 msgid "B"
 msgstr ""
 
-#: src/pv/display.c:1497 src/pv/transfer.c:1064
+#: src/pv/display.c:1497 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr ""
 
@@ -481,47 +481,47 @@ msgstr ""
 msgid "file list allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:464
+#: src/pv/transfer.c:463
 msgid "read failed"
 msgstr ""
 
-#: src/pv/transfer.c:487
+#: src/pv/transfer.c:479
 msgid "warning: read errors detected"
 msgstr ""
 
-#: src/pv/transfer.c:503
+#: src/pv/transfer.c:495
 msgid "file is not seekable"
 msgstr ""
 
-#: src/pv/transfer.c:581
+#: src/pv/transfer.c:573
 msgid "failed to seek past error"
 msgstr ""
 
-#: src/pv/transfer.c:601
+#: src/pv/transfer.c:593
 msgid "skipped past read error"
 msgstr ""
 
-#: src/pv/transfer.c:642
+#: src/pv/transfer.c:634
 msgid "no transfer buffer allocated"
 msgstr ""
 
-#: src/pv/transfer.c:684
+#: src/pv/transfer.c:676
 msgid "failed to set interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:710
+#: src/pv/transfer.c:702
 msgid "failed to clear interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:752
+#: src/pv/transfer.c:744
 msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:925
+#: src/pv/transfer.c:917
 msgid "write failed"
 msgstr ""
 
-#: src/pv/transfer.c:1162
+#: src/pv/transfer.c:1154
 msgid "select call failed"
 msgstr ""
 
