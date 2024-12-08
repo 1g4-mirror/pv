@@ -6,6 +6,7 @@
  * *fix:* add _configure_ script fallback for **--remote** check when cross-compiling (#120)
  * *fix:* allow **extra-display** to be changed by **--remote** (#123)
  * *cleanup:* refactored display formatters into separate functions
+ * *cleanup:* improve format parser handling of dangling or invalid "%" sequences
 
 ### 1.9.7 - 2 December 2024
 

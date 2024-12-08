@@ -1271,11 +1271,12 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 		if ('%' == display_format[strpos]) {
 			unsigned long number_prefix;
-			size_t sequence_start, sequence_length;
+			size_t percent_sign_offset, sequence_start, sequence_length;
 #if HAVE_STRTOUL
 			char *number_end_ptr;
 #endif
 
+			percent_sign_offset = strpos;
 			strpos++;
 
 			/*
@@ -1286,10 +1287,11 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 #if HAVE_STRTOUL
 			number_end_ptr = NULL;
 			number_prefix = strtoul(&(display_format[strpos]), &number_end_ptr, 10);
-			if ((NULL == number_end_ptr) || (number_end_ptr[0] == '\0'))
-				break;
-			if (number_end_ptr > &(display_format[strpos]))
+			if ((NULL == number_end_ptr) || (number_end_ptr[0] == '\0')) {
+				number_prefix = 0;
+			} else if (number_end_ptr > &(display_format[strpos])) {
 				strpos += (number_end_ptr - &(display_format[strpos]));
+			}
 #else				/* !HAVE_STRTOUL */
 			while (isdigit((int) (display_format[strpos]))) {
 				number_prefix = number_prefix * 10;
@@ -1299,9 +1301,12 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 #endif				/* !HAVE_STRTOUL */
 
 			sequence_start = strpos;
-			sequence_length = 1;
+			sequence_length = 0;
+			if ('\0' != display_format[strpos])
+				sequence_length = 1;
 			if ('{' == display_format[strpos]) {
-				while ('\0' != display_format[strpos] && '}' != display_format[strpos]) {
+				while ('\0' != display_format[strpos] && '}' != display_format[strpos]
+				       && '%' != display_format[strpos]) {
 					strpos++;
 					sequence_length++;
 				}
@@ -1322,8 +1327,21 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			}
 
 			if (-1 == component_type) {
-				str_start = sequence_start;
-				str_bytes = sequence_length;
+				/* Unknown sequence - pass it through verbatim. */
+				str_start = percent_sign_offset;
+				str_bytes = sequence_length + sequence_start - percent_sign_offset;
+
+				if (2 == str_bytes && '%' == display_format[percent_sign_offset + 1]) {
+					/* Special case: "%%" => "%". */
+					str_bytes = 1;
+				} else if (str_bytes > 1 && '%' == display_format[strpos]) {
+					/* Special case: "%{foo%p" => "%{foo" and go back one. */
+					str_bytes--;
+					strpos--;
+				} else if (str_bytes == 0 && '\0' == display_format[strpos]) {
+					/* Special case: "%" at end of string = "%". */
+					str_bytes = 1;
+				}
 			} else {
 				chosen_size = (size_t) number_prefix;
 			}
