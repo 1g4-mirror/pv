@@ -477,6 +477,15 @@ Equivalent to \*(lq\fB\-\-progress\fR\*(rq.
 Expands to fill the remaining space unless prefixed by a number to set the
 width, such as \*(lq\fB%20p\fR\*(rq or \*(lq\fB%20{progress}\fR\*(rq.
 .TP
+.B %{progress-bar-only}
+Progress bar, without any sides, and without any percentage displayed
+afterwards.
+Expands to fill the remaining space unless prefixed by a number.
+.TP
+.B %{progress-amount-only}
+The percentage completion (or maximum rate, with \*(lq\fB\-\-gauge\fR\*(rq
+when the size is unknown).
+.TP
 .BR %t ", " %{timer}
 Elapsed time.
 Equivalent to \*(lq\fB\-\-timer\fR\*(rq.

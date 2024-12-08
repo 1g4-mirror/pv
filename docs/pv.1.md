@@ -427,6 +427,17 @@ contain the following sequences:
     unless prefixed by a number to set the width, such as "**%20p**" or
     "**%20{progress}**".
 
+**%{progress-bar-only}**
+
+:   Progress bar, without any sides, and without any percentage
+    displayed afterwards. Expands to fill the remaining space unless
+    prefixed by a number.
+
+**%{progress-amount-only}**
+
+:   The percentage completion (or maximum rate, with "**\--gauge**" when
+    the size is unknown).
+
 **%t**, **%{timer}**
 
 :   Elapsed time. Equivalent to "**\--timer**".

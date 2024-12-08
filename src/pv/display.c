@@ -449,8 +449,8 @@ static void pv__sizestr(char *buffer, size_t bufsize, char *format,
 
 /*
  * Add a null-terminated string to the buffer if there is room for it,
- * updating the segment's offset and bytes values and returning the bytes,
- * or treating the byte count as zero if there's insufficient space.
+ * updating the segment's offset and bytes values and returning the bytes
+ * value, or treating the byte count as zero if there's insufficient space.
  */
 static size_t pv__format_segmentcontent(char *content, pvdisplay_segment_t segment, char *buffer, size_t buffer_size,
 					size_t offset)
@@ -483,10 +483,18 @@ static size_t pv__format_segmentcontent(char *content, pvdisplay_segment_t segme
  * content is bounded to the given width.  Returns the number of bytes
  * written to the buffer.
  *
+ * If "bar_sides" is false, only the bar itself is rendered, not the opening
+ * and closing characters.
+ *
+ * If "include_bar" is false, the bar is omitted entirely.
+ *
+ * If "include_amount" is false, the percentage or rate after the bar is
+ * omitted.
+ *
  * This is only called by pv__format_progress().
  */
 static size_t pv__format_progress_knownsize(pvstate_t state, pvdisplay_t display, char *buffer, size_t buffer_size,
-					    size_t width)
+					    size_t width, bool bar_sides, bool include_bar, bool include_amount)
 {
 	char after_bar[32];		 /* flawfinder: ignore - only populated by pv_snprintf(). */
 	size_t after_bar_bytes, after_bar_width;
@@ -521,14 +529,34 @@ static size_t pv__format_progress_knownsize(pvstate_t state, pvdisplay_t display
 		/*@+mustfreefresh@ *//* splint: see above about gettext(). */
 	}
 
+	if (!include_amount)
+		after_bar[0] = '\0';
+
 	after_bar_bytes = strlen(after_bar);	/* flawfinder: ignore */
 	/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
 	after_bar_width = pv_strwidth(after_bar, after_bar_bytes);
 
-	if (width < (after_bar_width + 2))
+	if (!include_bar) {
+		if (buffer_size < after_bar_bytes)
+			return 0;
+		if (after_bar_bytes > 1) {
+			/* NB we skip the leading space. */
+			memmove(buffer, after_bar + 1, after_bar_bytes - 1);
+			buffer[after_bar_bytes - 1] = '\0';
+			return after_bar_bytes - 1;
+		}
 		return 0;
+	}
 
-	bar_area_width = width - after_bar_width - 2;
+	if (bar_sides) {
+		if (width < (after_bar_width + 2))
+			return 0;
+		bar_area_width = width - after_bar_width - 2;
+	} else {
+		if (width < after_bar_width)
+			return 0;
+		bar_area_width = width - after_bar_width;
+	}
 
 	if (bar_area_width > buffer_size - 16)
 		bar_area_width = buffer_size - 16;
@@ -542,8 +570,10 @@ static size_t pv__format_progress_knownsize(pvstate_t state, pvdisplay_t display
 
 	buffer_offset = 0;
 
-	/* The opening of the bar area. */
-	buffer[buffer_offset++] = '[';
+	if (bar_sides) {
+		/* The opening of the bar area. */
+		buffer[buffer_offset++] = '[';
+	}
 
 	/* The bar portion. */
 	for (pad_count = 0; pad_count < filled_bar_width && buffer_offset < buffer_size - 1; pad_count++) {
@@ -564,12 +594,14 @@ static size_t pv__format_progress_knownsize(pvstate_t state, pvdisplay_t display
 			buffer[buffer_offset++] = ' ';
 	}
 
-	/* The closure of the bar area. */
-	if (buffer_offset < buffer_size - 1)
-		buffer[buffer_offset++] = ']';
+	if (bar_sides) {
+		/* The closure of the bar area. */
+		if (buffer_offset < buffer_size - 1)
+			buffer[buffer_offset++] = ']';
+	}
 
 	/* The percentage. */
-	if (after_bar_bytes < (buffer_size - 1 - buffer_offset)) {
+	if (after_bar_bytes > 0 && after_bar_bytes < (buffer_size - 1 - buffer_offset)) {
 		memmove(buffer + buffer_offset, after_bar, after_bar_bytes);
 		buffer_offset += after_bar_bytes;
 	}
@@ -585,26 +617,32 @@ static size_t pv__format_progress_knownsize(pvstate_t state, pvdisplay_t display
  * indicator.  The total width of the content is bounded to the given width. 
  * Returns the number of bytes written to the buffer.
  *
+ * If "bar_sides" is false, only the bar itself is rendered, not the opening
+ * and closing characters.
+ *
  * This is only called by pv__format_progress().
  */
 static size_t pv__format_progress_unknownsize(pvstate_t state,	/*@unused@ */
 					      __attribute__((unused)) pvdisplay_t display, char *buffer,
-					      size_t buffer_size, size_t width)
+					      size_t buffer_size, size_t width, bool bar_sides)
 {
 	size_t bar_area_width, buffer_offset, pad_count;
 	size_t indicator_position;
 
 	buffer[0] = '\0';
 
-	if (width < 6)
-		return 0;
-
-	bar_area_width = width - 5;
+	if (bar_sides) {
+		if (width < 6)
+			return 0;
+		bar_area_width = width - 5;
+	} else {
+		if (width < 5)
+			return 0;
+		bar_area_width = width - 3;
+	}
 
 	if (bar_area_width > buffer_size - 16)
 		bar_area_width = buffer_size - 16;
-
-	debug("bar_area_width: %d", bar_area_width);
 
 	/*
 	 * Note that pv_calculate_transfer_rate() sets the percentage when
@@ -620,8 +658,10 @@ static size_t pv__format_progress_unknownsize(pvstate_t state,	/*@unused@ */
 
 	buffer_offset = 0;
 
-	/* The opening of the bar area. */
-	buffer[buffer_offset++] = '[';
+	if (bar_sides) {
+		/* The opening of the bar area. */
+		buffer[buffer_offset++] = '[';
+	}
 
 	/* The spaces before the indicator. */
 	for (pad_count = 0; pad_count < (bar_area_width * indicator_position) / 100; pad_count++) {
@@ -642,9 +682,11 @@ static size_t pv__format_progress_unknownsize(pvstate_t state,	/*@unused@ */
 			buffer[buffer_offset++] = ' ';
 	}
 
-	/* The closure of the bar area. */
-	if (buffer_offset < buffer_size - 1)
-		buffer[buffer_offset++] = ']';
+	if (bar_sides) {
+		/* The closure of the bar area. */
+		if (buffer_offset < buffer_size - 1)
+			buffer[buffer_offset++] = ']';
+	}
 
 	buffer[buffer_offset] = '\0';
 
@@ -668,10 +710,73 @@ static size_t pv__format_progress(pvstate_t state, pvdisplay_t display, pvdispla
 
 	if (state->control.size > 0 || state->control.rate_gauge) {
 		/* Known size or rate gauge - bar with percentage. */
-		bytes = pv__format_progress_knownsize(state, display, content, sizeof(content), segment->width);
+		bytes =
+		    pv__format_progress_knownsize(state, display, content, sizeof(content), segment->width, true, true,
+						  true);
 	} else {
 		/* Unknown size - back-and-forth moving indicator. */
-		bytes = pv__format_progress_unknownsize(state, display, content, sizeof(content), segment->width);
+		bytes = pv__format_progress_unknownsize(state, display, content, sizeof(content), segment->width, true);
+	}
+
+	content[bytes] = '\0';
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * Progress bar, without sides and without a number afterwards.
+ */
+static size_t pv__format_progress_bar_only(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment,
+					   char *buffer, size_t buffer_size, size_t offset)
+{
+	char content[1024];		 /* flawfinder: ignore - always bounded */
+	size_t bytes;
+
+	content[0] = '\0';
+
+	if (0 == buffer_size)
+		return 0;
+
+	if (state->control.size > 0 || state->control.rate_gauge) {
+		/* Known size or rate gauge - bar with percentage. */
+		bytes =
+		    pv__format_progress_knownsize(state, display, content, sizeof(content), segment->width, false, true,
+						  false);
+	} else {
+		/* Unknown size - back-and-forth moving indicator. */
+		bytes =
+		    pv__format_progress_unknownsize(state, display, content, sizeof(content), segment->width, false);
+	}
+
+	content[bytes] = '\0';
+
+	return pv__format_segmentcontent(content, segment, buffer, buffer_size, offset);
+}
+
+
+/*
+ * The number after the progress bar.
+ */
+static size_t pv__format_progress_amount_only(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment,
+					      char *buffer, size_t buffer_size, size_t offset)
+{
+	char content[256];		 /* flawfinder: ignore - always bounded */
+	size_t bytes;
+
+	content[0] = '\0';
+
+	if (0 == buffer_size)
+		return 0;
+
+	if (state->control.size > 0 || state->control.rate_gauge) {
+		/* Known size or rate gauge - percentage or rate. */
+		bytes =
+		    pv__format_progress_knownsize(state, display, content, sizeof(content), segment->width, false,
+						  false, true);
+	} else {
+		/* Unknown size - no number. */
+		return 0;
 	}
 
 	content[bytes] = '\0';
@@ -1197,6 +1302,8 @@ static struct pvdisplay_component_s {
 } format_component[] = {
 	{ "p", &pv__format_progress, true },
 	{ "{progress}", &pv__format_progress, true },
+	{ "{progress-bar-only}", &pv__format_progress_bar_only, true },
+	{ "{progress-amount-only}", &pv__format_progress_amount_only, false },
 	{ "t", &pv__format_timer, false },
 	{ "{timer}", &pv__format_timer, false },
 	{ "e", &pv__format_eta, false },
