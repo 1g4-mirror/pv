@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 20:11+0000\n"
+"POT-Creation-Date: 2024-12-08 20:38+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -249,18 +249,22 @@ msgstr "ukaž informace o verzi a skonči"
 msgid "write debug logs to FILE"
 msgstr "zapiš ladící záznamy do SOUBORu"
 
-#: src/main/help.c:450
+#: src/main/help.c:451
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Použití: %s [VOLBY] [SOUBOR]..."
 
-#: src/main/help.c:461
+#: src/main/help.c:462
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Spoj SOUBOR(y) nebo standardní vstup na standardního výstup, s monitoringem."
 
-#: src/main/help.c:598
+#: src/main/help.c:600
+msgid "Supported format sequences:"
+msgstr ""
+
+#: src/main/help.c:614
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Prosím, hlašte veškeré chyby na: %s"
@@ -433,7 +437,7 @@ msgstr "b"
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:1602 src/pv/transfer.c:1056
+#: src/pv/display.c:1638 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "selhala alokace vyrovnávací paměti"
 

@@ -275,6 +275,11 @@ extern void pv_sig_fini(pvstate_t);
  */
 extern void pv_state_free(/*@only@*/ pvstate_t);
 
+/*
+ * Return a string listing all supported format sequences.
+ */
+/*@null@*/ char *pv_format_sequences(void);
+
 #if ! HAVE_SETPROCTITLE
 void initproctitle(int, char **);
 void setproctitle(const char *, ...);

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 20:11+0000\n"
+"POT-Creation-Date: 2024-12-08 20:38+0000\n"
 "PO-Revision-Date: 2024-10-12 11:13+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: French <https://translate.codeberg.org/projects/pv/pv/fr/>\n"
@@ -267,19 +267,23 @@ msgstr "afficher la version puis quitter"
 msgid "write debug logs to FILE"
 msgstr "écrire les journaux de déboggage vers FICHIER"
 
-#: src/main/help.c:450
+#: src/main/help.c:451
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Utilisation : %s [OPTIONS] [FICHIER]..."
 
-#: src/main/help.c:461
+#: src/main/help.c:462
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Concaténer FICHIER(s), ou l'entrée standard, sur la sortie standard avec "
 "monitorage."
 
-#: src/main/help.c:598
+#: src/main/help.c:600
+msgid "Supported format sequences:"
+msgstr ""
+
+#: src/main/help.c:614
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "SVP rapporter tous bogues à %s"
@@ -460,7 +464,7 @@ msgstr ""
 msgid "B"
 msgstr "O"
 
-#: src/pv/display.c:1602 src/pv/transfer.c:1056
+#: src/pv/display.c:1638 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 

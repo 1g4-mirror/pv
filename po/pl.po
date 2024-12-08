@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 20:11+0000\n"
+"POT-Creation-Date: 2024-12-08 20:38+0000\n"
 "PO-Revision-Date: 2024-10-20 14:07+0000\n"
 "Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -261,19 +261,23 @@ msgstr "wyświetl informacje o wersji i wyjdź"
 msgid "write debug logs to FILE"
 msgstr "zapisz logi debugujące do PLIK"
 
-#: src/main/help.c:450
+#: src/main/help.c:451
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Sposób użycia: %s [OPCJA] [PLIK]..."
 
-#: src/main/help.c:461
+#: src/main/help.c:462
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Łączenie PLIK(ów) lub wejścia standardowego, do wyjścia standardowego z "
 "monitoringiem."
 
-#: src/main/help.c:598
+#: src/main/help.c:600
+msgid "Supported format sequences:"
+msgstr ""
+
+#: src/main/help.c:614
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Proszę przesyłać zgłoszenia błędów do %s"
@@ -451,7 +455,7 @@ msgstr "b"
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:1602 src/pv/transfer.c:1056
+#: src/pv/display.c:1638 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 20:11+0000\n"
+"POT-Creation-Date: 2024-12-08 20:38+0000\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -244,17 +244,21 @@ msgstr ""
 msgid "write debug logs to FILE"
 msgstr ""
 
-#: src/main/help.c:450
+#: src/main/help.c:451
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr ""
 
-#: src/main/help.c:461
+#: src/main/help.c:462
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 
-#: src/main/help.c:598
+#: src/main/help.c:600
+msgid "Supported format sequences:"
+msgstr ""
+
+#: src/main/help.c:614
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr ""
@@ -425,7 +429,7 @@ msgstr ""
 msgid "B"
 msgstr ""
 
-#: src/pv/display.c:1602 src/pv/transfer.c:1056
+#: src/pv/display.c:1638 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr ""
 

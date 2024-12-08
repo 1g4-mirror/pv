@@ -434,6 +434,7 @@ void display_help(void)
 	size_t right_margin = 77;
 	const char *program_description;
 	const char *bug_report_note;
+	char *format_sequences = NULL;
 	unsigned int terminal_width = 0, terminal_height = 0;
 
 	pv_screensize(&terminal_width, &terminal_height);
@@ -590,6 +591,21 @@ void display_help(void)
 		display_word_wrap(definition->opt_description, right_margin - description_left_margin,
 				  description_left_margin);
 
+		printf("\n");
+	}
+
+	format_sequences = pv_format_sequences();
+	if (NULL != format_sequences) {
+		const char *format_sequence_header;
+		format_sequence_header = _("Supported format sequences:");
+		if (NULL != format_sequence_header) {
+			printf("\n");
+			display_word_wrap(format_sequence_header, right_margin, 0);
+			printf("\n");
+		}
+		printf("\n  ");
+		display_word_wrap(format_sequences, right_margin, 2);
+		free(format_sequences);
 		printf("\n");
 	}
 

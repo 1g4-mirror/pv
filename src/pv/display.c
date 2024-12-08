@@ -1330,6 +1330,42 @@ static struct pvdisplay_component_s {
 
 
 /*
+ * Return a pointer to a malloc()ed string containing a space-separated list
+ * of all supported format sequences.  The caller should free() it.
+ */
+/*@null@ */
+char *pv_format_sequences(void)
+{
+	size_t component_idx, buffer_size, offset;
+	char *buffer;
+
+	buffer_size = 0;
+	for (component_idx = 0; NULL != format_component[component_idx].match; component_idx++) {
+		size_t component_sequence_length = strlen(format_component[component_idx].match);	/* flawfinder: ignore */
+		/* flawfinder - static strings, guaranteed null-terminated. */
+		buffer_size += 2 + component_sequence_length;	/* 2 for '%' + ' ' */
+	}
+
+	buffer = malloc(buffer_size + 1);
+	if (NULL == buffer)
+		return NULL;
+
+	offset = 0;
+	for (component_idx = 0; NULL != format_component[component_idx].match; component_idx++) {
+		size_t component_sequence_length = strlen(format_component[component_idx].match);	/* flawfinder: ignore - as above */
+		if (0 != offset)
+			buffer[offset++] = ' ';
+		buffer[offset++] = '%';
+		memmove(buffer + offset, format_component[component_idx].match, component_sequence_length);
+		offset += component_sequence_length;
+	}
+
+	buffer[offset] = '\0';
+	return buffer;
+}
+
+
+/*
  * Initialise the output format structure, based on the current options.
  */
 static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supplied, pvdisplay_t display)

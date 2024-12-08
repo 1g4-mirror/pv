@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 20:11+0000\n"
+"POT-Creation-Date: 2024-12-08 20:38+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: fnetX <otto@codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -266,19 +266,23 @@ msgstr "zeige Versionsinformationen und beende"
 msgid "write debug logs to FILE"
 msgstr "schreibe Debug-Protokolle in DATEI"
 
-#: src/main/help.c:450
+#: src/main/help.c:451
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Aufruf: %s [OPTION] [DATEI]..."
 
-#: src/main/help.c:461
+#: src/main/help.c:462
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Verbindet DATEI(en) oder den Standard-Eingabe-Kanal mit dem Standard-Ausgabe-"
 "Kanal und misst den Datenstrom."
 
-#: src/main/help.c:598
+#: src/main/help.c:600
+msgid "Supported format sequences:"
+msgstr ""
+
+#: src/main/help.c:614
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Bitte senden Sie Fehlerberichte an %s"
@@ -456,7 +460,7 @@ msgstr "b"
 msgid "B"
 msgstr "B"
 
-#: src/pv/display.c:1602 src/pv/transfer.c:1056
+#: src/pv/display.c:1638 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 

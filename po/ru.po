@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 20:11+0000\n"
+"POT-Creation-Date: 2024-12-08 20:38+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -251,17 +251,21 @@ msgstr "показать версию программы и завершить �
 msgid "write debug logs to FILE"
 msgstr "вести запись отладочного журнала в ФАЙЛ"
 
-#: src/main/help.c:450
+#: src/main/help.c:451
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Использование: %s [ОПЦИИ] [ФАЙЛ]..."
 
-#: src/main/help.c:461
+#: src/main/help.c:462
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 
-#: src/main/help.c:598
+#: src/main/help.c:600
+msgid "Supported format sequences:"
+msgstr ""
+
+#: src/main/help.c:614
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Сообщайте о проблемах на: %s"
@@ -434,7 +438,7 @@ msgstr "бит"
 msgid "B"
 msgstr "байт"
 
-#: src/pv/display.c:1602 src/pv/transfer.c:1056
+#: src/pv/display.c:1638 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 
