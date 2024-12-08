@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 20:38+0000\n"
+"POT-Creation-Date: 2024-12-08 21:35+0000\n"
 "PO-Revision-Date: 2024-10-12 11:13+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: French <https://translate.codeberg.org/projects/pv/pv/fr/>\n"
@@ -26,264 +26,264 @@ msgstr ""
 "nls/intl/textdomain.c src/nls/intl-cat/cat-compat.c src/nls/intl-gett/intl-"
 "compat.c\n"
 
-#: src/main/help.c:284
+#: src/main/help.c:236
 msgid "show progress bar"
 msgstr "afficher la barre de progression"
 
-#: src/main/help.c:287
+#: src/main/help.c:239
 msgid "show elapsed time"
 msgstr "afficher le temps écoulé"
 
-#: src/main/help.c:290
+#: src/main/help.c:242
 msgid "show estimated time of arrival (completion)"
 msgstr "afficher l'heure approximative de l'achèvement de la tâche"
 
-#: src/main/help.c:293
+#: src/main/help.c:245
 msgid "show absolute estimated time of arrival (completion)"
 msgstr "afficher l'heure absolute de l'achèvement de la tâche"
 
-#: src/main/help.c:296
+#: src/main/help.c:248
 msgid "show data transfer rate counter"
 msgstr "afficher le taux de tranfert des données"
 
-#: src/main/help.c:299
+#: src/main/help.c:251
 msgid "show data transfer average rate counter"
 msgstr "afficher le compteur de taux moyen de transfert de données"
 
-#: src/main/help.c:302
+#: src/main/help.c:254
 msgid "show number of bytes transferred"
 msgstr "afficher le nombre d'octets transférés"
 
-#: src/main/help.c:305
+#: src/main/help.c:257
 msgid "show percentage of transfer buffer in use"
 msgstr "afficher le pourcentage de tampon de transfert utilisé"
 
-#: src/main/help.c:307
+#: src/main/help.c:259
 msgid "NUM"
 msgstr "NUM"
 
-#: src/main/help.c:308
+#: src/main/help.c:260
 msgid "show NUM bytes last written"
 msgstr "afficher les derniers NUM octets écrits"
 
-#: src/main/help.c:310
+#: src/main/help.c:262
 msgid "FORMAT"
 msgstr "FORMAT"
 
-#: src/main/help.c:311
+#: src/main/help.c:263
 msgid "set output format to FORMAT"
 msgstr "définir le format de sortie sur FORMAT"
 
-#: src/main/help.c:314
+#: src/main/help.c:266
 msgid "output percentages, not visual information"
 msgstr "imprimer en pourcentage plutôt que des informations visuelles"
 
-#: src/main/help.c:317
+#: src/main/help.c:269
 msgid "do not output any transfer information at all"
 msgstr "n'afficher aucune information de transfert"
 
-#: src/main/help.c:321
+#: src/main/help.c:273
 msgid "show number of bits transferred"
 msgstr "afficher le nombre de bits transférés"
 
-#: src/main/help.c:324
+#: src/main/help.c:276
 msgid "treat suffixes as multiples of 1000 rather than 1024"
 msgstr "traiter les suffixes comme des multiples de 1000 au lieu de 1024"
 
-#: src/main/help.c:327
+#: src/main/help.c:279
 msgid "display nothing until first byte transferred"
 msgstr "ne rien afficher avant qu'au moins un octet soit tranféré"
 
-#: src/main/help.c:329 src/main/help.c:344 src/main/help.c:347
+#: src/main/help.c:281 src/main/help.c:296 src/main/help.c:299
 msgid "SEC"
 msgstr "SEC"
 
-#: src/main/help.c:330
+#: src/main/help.c:282
 msgid "display nothing until SEC seconds have passed"
 msgstr "ne rien afficher jusqu'à ce que SEC secondes se soient écoulées"
 
-#: src/main/help.c:332
+#: src/main/help.c:284
 msgid "SIZE"
 msgstr "TAILLE"
 
-#: src/main/help.c:333
+#: src/main/help.c:285
 msgid "set estimated data size to SIZE bytes"
 msgstr "ajuster la taille estimée des données à TAILLE octets"
 
-#: src/main/help.c:336
+#: src/main/help.c:288
 msgid "if size unknown, show rate vs max rate"
 msgstr ""
 "si la taille est inconnue, afficher le taux de transfert par rapport au taux "
 "de transfert max"
 
-#: src/main/help.c:339
+#: src/main/help.c:291
 msgid "count lines instead of bytes"
 msgstr "compter les lignes au lieu des octets"
 
-#: src/main/help.c:342
+#: src/main/help.c:294
 msgid "lines are null-terminated"
 msgstr "les lignes sont terminées par un caractère nul"
 
-#: src/main/help.c:345
+#: src/main/help.c:297
 msgid "update every SEC seconds"
 msgstr "mettre à jour toutes les SEC secondes"
 
-#: src/main/help.c:348
+#: src/main/help.c:300
 msgid "compute average rate over past SEC seconds (default 30s)"
 msgstr ""
 "calculer le taux moyen d'après les SEC dernières secondes (30s par défaut)"
 
-#: src/main/help.c:350
+#: src/main/help.c:302
 msgid "WIDTH"
 msgstr "LARGEUR"
 
-#: src/main/help.c:351
+#: src/main/help.c:303
 msgid "assume terminal is WIDTH characters wide"
 msgstr "présumer la largeur du terminal à LARGEUR caractères"
 
-#: src/main/help.c:353
+#: src/main/help.c:305
 msgid "HEIGHT"
 msgstr "HAUTEUR"
 
-#: src/main/help.c:354
+#: src/main/help.c:306
 msgid "assume terminal is HEIGHT rows high"
 msgstr "présumer la hauteur du terminal à HAUTEUR lignes"
 
-#: src/main/help.c:356
+#: src/main/help.c:308
 msgid "NAME"
 msgstr "NOM"
 
-#: src/main/help.c:357
+#: src/main/help.c:309
 msgid "prefix visual information with NAME"
 msgstr "préfixer les informations visuelles avec NOM"
 
-#: src/main/help.c:359
+#: src/main/help.c:311
 msgid "SPEC"
 msgstr ""
 
-#: src/main/help.c:360
+#: src/main/help.c:312
 msgid "also send progress to SPEC"
 msgstr ""
 
-#: src/main/help.c:363
+#: src/main/help.c:315
 msgid "output transfer statistics at the end"
 msgstr "afficher les statistiques de transfert à la fin"
 
-#: src/main/help.c:366
+#: src/main/help.c:318
 msgid "output even if standard error is not a terminal"
 msgstr ""
 "imprimer vers la sortie d'erreur standard même si ce n'est pas un terminal"
 
-#: src/main/help.c:369
+#: src/main/help.c:321
 msgid "use cursor positioning escape sequences"
 msgstr "utiliser les séquences d'échappements de positionnement de curseur"
 
-#: src/main/help.c:372 src/main/help.c:402 src/main/help.c:414
-#: src/main/help.c:424
+#: src/main/help.c:324 src/main/help.c:354 src/main/help.c:366
+#: src/main/help.c:376
 msgid "FILE"
 msgstr "FICHIER"
 
-#: src/main/help.c:373
+#: src/main/help.c:325
 msgid "write output to FILE instead of stdout"
 msgstr "écrire la sortie dans FICHIER au lieu de la sortie standard"
 
-#: src/main/help.c:375
+#: src/main/help.c:327
 msgid "RATE"
 msgstr "TAUX"
 
-#: src/main/help.c:376
+#: src/main/help.c:328
 msgid "limit transfer to RATE bytes per second"
 msgstr "limite le taux de transfert à TAUX octets par seconde"
 
-#: src/main/help.c:378 src/main/help.c:387
+#: src/main/help.c:330 src/main/help.c:339
 msgid "BYTES"
 msgstr "OCTETS"
 
-#: src/main/help.c:379
+#: src/main/help.c:331
 msgid "use a buffer size of BYTES"
 msgstr "Utiliser une mémoire tampon de OCTETS octets"
 
-#: src/main/help.c:382
+#: src/main/help.c:334
 msgid "never use splice(), always use read/write"
 msgstr "ne jamais utiliser splice(), toujours utiliser read/write"
 
-#: src/main/help.c:385
+#: src/main/help.c:337
 msgid "skip read errors in input"
 msgstr "ignorer les erreurs de lecture dans l'entrée"
 
-#: src/main/help.c:388
+#: src/main/help.c:340
 msgid "skip errors in BYTES blocks at a time"
 msgstr "ignorer les erreurs dans OCTETS blocs à la fois"
 
-#: src/main/help.c:391
+#: src/main/help.c:343
 msgid "stop after --size bytes have been transferred"
 msgstr "arrêter après le transfert de --size octets"
 
-#: src/main/help.c:394
+#: src/main/help.c:346
 msgid "flush cache to disk after every write"
 msgstr "vider le cache sur le disque après chaque écriture"
 
-#: src/main/help.c:397
+#: src/main/help.c:349
 msgid "use direct I/O to bypass cache"
 msgstr "utiliser les E/S directes pour contourner le cache"
 
-#: src/main/help.c:400
+#: src/main/help.c:352
 msgid "discard input instead of writing to output"
 msgstr "rejeter l'entrée au lieu de l'écrire vers la sortie"
 
-#: src/main/help.c:403
+#: src/main/help.c:355
 msgid "write all input to FILE before writing to output"
 msgstr "écrire toute l'entrée vers FICHIER avant de l'écrire vers la sortie"
 
-#: src/main/help.c:405
+#: src/main/help.c:357
 msgid "PID[:FD]"
 msgstr "PID[:FD]"
 
-#: src/main/help.c:406
+#: src/main/help.c:358
 msgid "watch file FD opened by process PID"
 msgstr "surveiller le fichier FD ouvert par le processus PID"
 
-#: src/main/help.c:409
+#: src/main/help.c:361
 msgid "PID"
 msgstr "PID"
 
-#: src/main/help.c:410
+#: src/main/help.c:362
 msgid "update settings of process PID"
 msgstr "mettre à jour la configuration du processus PID"
 
-#: src/main/help.c:415
+#: src/main/help.c:367
 msgid "save process ID in FILE"
 msgstr "enregistrer l'ID de processus dans FICHIER"
 
-#: src/main/help.c:418
+#: src/main/help.c:370
 msgid "show this help and exit"
 msgstr "afficher cette aide puis quitter"
 
-#: src/main/help.c:421
+#: src/main/help.c:373
 msgid "show version information and exit"
 msgstr "afficher la version puis quitter"
 
-#: src/main/help.c:425
+#: src/main/help.c:377
 msgid "write debug logs to FILE"
 msgstr "écrire les journaux de déboggage vers FICHIER"
 
-#: src/main/help.c:451
+#: src/main/help.c:403
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Utilisation : %s [OPTIONS] [FICHIER]..."
 
-#: src/main/help.c:462
+#: src/main/help.c:414
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Concaténer FICHIER(s), ou l'entrée standard, sur la sortie standard avec "
 "monitorage."
 
-#: src/main/help.c:600
+#: src/main/help.c:552
 msgid "Supported format sequences:"
 msgstr ""
 
-#: src/main/help.c:614
+#: src/main/help.c:566
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "SVP rapporter tous bogues à %s"
@@ -464,7 +464,7 @@ msgstr ""
 msgid "B"
 msgstr "O"
 
-#: src/pv/display.c:1638 src/pv/transfer.c:1056
+#: src/pv/display.c:1641 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 

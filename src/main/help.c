@@ -22,77 +22,27 @@
 
 
 /*
- * Return the number of display columns needed to show the given string.
- *
- * To do this, we convert it to a wide character string, and use the wide
- * character display width function "wcswidth()" on it.
+ * Return the number of display columns needed to show the given
+ * null-terminated string.
  *
  * If NLS is disabled, or the string cannot be converted, this is just the
  * same as "strlen()".
  */
 static size_t display_width(const char *string)
 {
-	size_t width;
-
-#if defined(ENABLE_NLS) && defined(HAVE_WCHAR_H)
-	size_t wide_char_count;
-	size_t wide_string_buffer_size;
-	wchar_t *wide_string;
+	size_t bytes;
 
 	if (NULL == string)
 		return 0;
 
-	/*@-nullpass@ */
+	bytes = strlen(string);		    /* flawfinder: ignore */
 	/*
-	 * splint note: mbstowcs() manual page on Linux explicitly says it
-	 * takes NULL.
+	 * flawfinder rationale: we have already checked for NULL, and it is
+	 * explicitly required of the caller to provide a null-terminated
+	 * string.
 	 */
-	wide_char_count = mbstowcs(NULL, string, 0);
-	/*@+nullpass@ */
-	if (wide_char_count == (size_t) -1) {
-		debug("%s: %s: %s", "mbstowcs", string, strerror(errno));
-		return strlen(string);	    /* flawfinder: ignore */
-		/*
-		 * flawfinder rationale: we have already checked for NULL,
-		 * and we don't know the size of the originating buffer so
-		 * can't use strnlen(); it is up to the caller to provide a
-		 * terminated string.
-		 */
-	}
 
-	wide_string_buffer_size = sizeof(*wide_string) * (1 + wide_char_count);
-	wide_string = malloc(wide_string_buffer_size);
-	if (NULL == wide_string) {
-		perror("malloc");
-		return strlen(string);	    /* flawfinder: ignore */
-		/* flawfinder rationale: see above. */
-	}
-	memset(wide_string, 0, wide_string_buffer_size);
-
-	if (mbstowcs(wide_string, string, 1 + wide_char_count) == (size_t) -1) {
-		debug("%s: %s: %s", "mbstowcs", string, strerror(errno));
-		width = strlen(string);	    /* flawfinder: ignore */
-		/* flawfinder rationale: see above. */
-	} else if (NULL != wide_string) {
-		/*@-unrecog @ */
-		/* splint seems unable to see the prototype. */
-		width = wcswidth(wide_string, wide_char_count);
-		/*@+unrecog @ */
-	} else {
-		width = 0;
-	}
-
-	free(wide_string);
-
-#else				/* ! defined(ENABLE_NLS) && defined(HAVE_WCHAR_H) */
-	if (NULL == string)
-		return 0;
-
-	width = strlen(string);		    /* flawfinder: ignore */
-	/* flawfinder rationale: see above. */
-#endif				/* defined(ENABLE_NLS) && defined(HAVE_WCHAR_H) */
-
-	return width;
+	return pv_strwidth(string, bytes);
 }
 
 
@@ -134,9 +84,9 @@ static void display_word_wrap_7bit(const char *string, size_t display_width, siz
 
 
 /*
- * Output a string to standard output, word wrapping to "display_width"
- * display character positions, and left-padding any new lines after the
- * first one with "left_margin" spaces.
+ * Output a null-terminated string to standard output, word wrapping to
+ * "display_width" display character positions, and left-padding any new
+ * lines after the first one with "left_margin" spaces.
  *
  * Wide characters are handled if NLS is enabled, but if they can't be, this
  * falls back to a version which just counts bytes as characters.
@@ -153,7 +103,7 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 		return;
 
 	/*@-nullpass@ */
-	/* splint note: see earlier mbstowcs() call. */
+	/* splint note: see mbstowcs() call in pv_strwidth(). */
 	wide_char_count = mbstowcs(NULL, string, 0);
 	/*@+nullpass@ */
 	if (wide_char_count == (size_t) -1) {
@@ -181,7 +131,9 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 	start_idx = 0;
 	chars_remaining = wide_char_count;
 
+	/*@-unrecog@ *//* splint seems unable to see the prototype for wcswidth(). */
 	while (chars_remaining > 0 && wcswidth(&(wide_string[start_idx]), chars_remaining) > display_width) {
+		/*@+unrecog@ */
 		size_t next_idx;
 
 		end_idx = start_idx + display_width;

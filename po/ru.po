@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 20:38+0000\n"
+"POT-Creation-Date: 2024-12-08 21:35+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -13,259 +13,259 @@ msgstr ""
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Weblate 5.8.1\n"
 
-#: src/main/help.c:284
+#: src/main/help.c:236
 msgid "show progress bar"
 msgstr "показать полосу прогресса"
 
-#: src/main/help.c:287
+#: src/main/help.c:239
 msgid "show elapsed time"
 msgstr "показать прошедшее время"
 
-#: src/main/help.c:290
+#: src/main/help.c:242
 msgid "show estimated time of arrival (completion)"
 msgstr "показать примерное время завершения"
 
-#: src/main/help.c:293
+#: src/main/help.c:245
 msgid "show absolute estimated time of arrival (completion)"
 msgstr "показать примерное абсолютное время завершения"
 
-#: src/main/help.c:296
+#: src/main/help.c:248
 msgid "show data transfer rate counter"
 msgstr "показать скорость передачи данных"
 
-#: src/main/help.c:299
+#: src/main/help.c:251
 msgid "show data transfer average rate counter"
 msgstr "показать среднюю скорость передачи данных"
 
-#: src/main/help.c:302
+#: src/main/help.c:254
 msgid "show number of bytes transferred"
 msgstr "показать объём переданных данных в байтах"
 
-#: src/main/help.c:305
+#: src/main/help.c:257
 msgid "show percentage of transfer buffer in use"
 msgstr "показать использование буфера передачи в процентах"
 
-#: src/main/help.c:307
+#: src/main/help.c:259
 msgid "NUM"
 msgstr "КОЛ"
 
-#: src/main/help.c:308
+#: src/main/help.c:260
 msgid "show NUM bytes last written"
 msgstr "показать КОЛ байт, переданных в последний раз"
 
-#: src/main/help.c:310
+#: src/main/help.c:262
 msgid "FORMAT"
 msgstr "ФОРМАТ"
 
-#: src/main/help.c:311
+#: src/main/help.c:263
 msgid "set output format to FORMAT"
 msgstr "указать формат вывода как ФОРМАТ"
 
-#: src/main/help.c:314
+#: src/main/help.c:266
 msgid "output percentages, not visual information"
 msgstr "показать проценты вместо визуальной информации"
 
-#: src/main/help.c:317
+#: src/main/help.c:269
 msgid "do not output any transfer information at all"
 msgstr "не отображать никакую информацию о передаче"
 
-#: src/main/help.c:321
+#: src/main/help.c:273
 msgid "show number of bits transferred"
 msgstr "показать объём переданных данных в битах"
 
-#: src/main/help.c:324
+#: src/main/help.c:276
 msgid "treat suffixes as multiples of 1000 rather than 1024"
 msgstr "считать суффиксы как умножители на 1000, а не на 1024"
 
-#: src/main/help.c:327
+#: src/main/help.c:279
 msgid "display nothing until first byte transferred"
 msgstr "ничего не показывать, пока не будет передан первый байт"
 
-#: src/main/help.c:329 src/main/help.c:344 src/main/help.c:347
+#: src/main/help.c:281 src/main/help.c:296 src/main/help.c:299
 msgid "SEC"
 msgstr "СЕК"
 
-#: src/main/help.c:330
+#: src/main/help.c:282
 msgid "display nothing until SEC seconds have passed"
 msgstr "ничего не показывать, пока не пройдёт СЕК секунд"
 
-#: src/main/help.c:332
+#: src/main/help.c:284
 msgid "SIZE"
 msgstr "РАЗМ"
 
-#: src/main/help.c:333
+#: src/main/help.c:285
 msgid "set estimated data size to SIZE bytes"
 msgstr "указать ожидаемый объём данных как РАЗМ байт"
 
-#: src/main/help.c:336
+#: src/main/help.c:288
 msgid "if size unknown, show rate vs max rate"
 msgstr "если объём неизвестен, показать скорость и макс. скорость"
 
-#: src/main/help.c:339
+#: src/main/help.c:291
 msgid "count lines instead of bytes"
 msgstr "считать линии вместо байт"
 
-#: src/main/help.c:342
+#: src/main/help.c:294
 msgid "lines are null-terminated"
 msgstr "строки прерываются нулями"
 
-#: src/main/help.c:345
+#: src/main/help.c:297
 msgid "update every SEC seconds"
 msgstr "обновлять каждые СЕК секунд"
 
-#: src/main/help.c:348
+#: src/main/help.c:300
 msgid "compute average rate over past SEC seconds (default 30s)"
 msgstr "вычислять среднюю скорость за последние СЕК секунд (по умолчанию 30)"
 
-#: src/main/help.c:350
+#: src/main/help.c:302
 msgid "WIDTH"
 msgstr "ШИРИНА"
 
-#: src/main/help.c:351
+#: src/main/help.c:303
 msgid "assume terminal is WIDTH characters wide"
 msgstr "считать, что в одной строке помещается ШИРИНА символов"
 
-#: src/main/help.c:353
+#: src/main/help.c:305
 msgid "HEIGHT"
 msgstr "ВЫСОТА"
 
-#: src/main/help.c:354
+#: src/main/help.c:306
 msgid "assume terminal is HEIGHT rows high"
 msgstr "считать, что на экране помещается ВЫСОТА строк"
 
-#: src/main/help.c:356
+#: src/main/help.c:308
 msgid "NAME"
 msgstr "ИМЯ"
 
-#: src/main/help.c:357
+#: src/main/help.c:309
 msgid "prefix visual information with NAME"
 msgstr "писать ИМЯ до визуальной информации"
 
-#: src/main/help.c:359
+#: src/main/help.c:311
 msgid "SPEC"
 msgstr ""
 
-#: src/main/help.c:360
+#: src/main/help.c:312
 msgid "also send progress to SPEC"
 msgstr ""
 
-#: src/main/help.c:363
+#: src/main/help.c:315
 msgid "output transfer statistics at the end"
 msgstr "после завершения показать статистику"
 
-#: src/main/help.c:366
+#: src/main/help.c:318
 msgid "output even if standard error is not a terminal"
 msgstr "вевести, даже если стд. ошибка не является терминалом"
 
-#: src/main/help.c:369
+#: src/main/help.c:321
 msgid "use cursor positioning escape sequences"
 msgstr ""
 "использовать символьные последовательности для позиционирования курсора"
 
-#: src/main/help.c:372 src/main/help.c:402 src/main/help.c:414
-#: src/main/help.c:424
+#: src/main/help.c:324 src/main/help.c:354 src/main/help.c:366
+#: src/main/help.c:376
 msgid "FILE"
 msgstr "ФАЙЛ"
 
-#: src/main/help.c:373
+#: src/main/help.c:325
 msgid "write output to FILE instead of stdout"
 msgstr "направить вывод в ФАЙЛ вместо стд. вывода"
 
-#: src/main/help.c:375
+#: src/main/help.c:327
 msgid "RATE"
 msgstr "СКОР"
 
-#: src/main/help.c:376
+#: src/main/help.c:328
 msgid "limit transfer to RATE bytes per second"
 msgstr "ограничить скорость передачи до СКОР байт/сек"
 
-#: src/main/help.c:378 src/main/help.c:387
+#: src/main/help.c:330 src/main/help.c:339
 msgid "BYTES"
 msgstr "БАЙТ"
 
-#: src/main/help.c:379
+#: src/main/help.c:331
 msgid "use a buffer size of BYTES"
 msgstr "использовать буфер размера БАЙТ"
 
-#: src/main/help.c:382
+#: src/main/help.c:334
 msgid "never use splice(), always use read/write"
 msgstr "использовать чтение/запись вместо splice()"
 
-#: src/main/help.c:385
+#: src/main/help.c:337
 msgid "skip read errors in input"
 msgstr "пропустить ошибки чтения во вводе"
 
-#: src/main/help.c:388
+#: src/main/help.c:340
 msgid "skip errors in BYTES blocks at a time"
 msgstr "пропускать ошибки в <БАЙТ> блоках за раз"
 
-#: src/main/help.c:391
+#: src/main/help.c:343
 msgid "stop after --size bytes have been transferred"
 msgstr "остановить после передачи --size байт"
 
-#: src/main/help.c:394
+#: src/main/help.c:346
 msgid "flush cache to disk after every write"
 msgstr "сбрасывать кеш на диск каждый раз"
 
-#: src/main/help.c:397
+#: src/main/help.c:349
 msgid "use direct I/O to bypass cache"
 msgstr "использовать прямой ввод/вывод для обхода кеша"
 
-#: src/main/help.c:400
+#: src/main/help.c:352
 msgid "discard input instead of writing to output"
 msgstr "отбрасывать ввод вместо записи в вывод"
 
-#: src/main/help.c:403
+#: src/main/help.c:355
 msgid "write all input to FILE before writing to output"
 msgstr "записывать весь ввод в ФАЙЛ прежде, чем отправлять на вывод"
 
-#: src/main/help.c:405
+#: src/main/help.c:357
 msgid "PID[:FD]"
 msgstr "ИДпр[:FD]"
 
-#: src/main/help.c:406
+#: src/main/help.c:358
 msgid "watch file FD opened by process PID"
 msgstr "следить за FD файла, открытого процессом ИДпр"
 
-#: src/main/help.c:409
+#: src/main/help.c:361
 msgid "PID"
 msgstr "ИДпр"
 
-#: src/main/help.c:410
+#: src/main/help.c:362
 msgid "update settings of process PID"
 msgstr "обновить настройки ИДпр процесса"
 
-#: src/main/help.c:415
+#: src/main/help.c:367
 msgid "save process ID in FILE"
 msgstr "сохранить ИД процесса в ФАЙЛ"
 
-#: src/main/help.c:418
+#: src/main/help.c:370
 msgid "show this help and exit"
 msgstr "показать справку и завершить работу"
 
-#: src/main/help.c:421
+#: src/main/help.c:373
 msgid "show version information and exit"
 msgstr "показать версию программы и завершить работу"
 
-#: src/main/help.c:425
+#: src/main/help.c:377
 msgid "write debug logs to FILE"
 msgstr "вести запись отладочного журнала в ФАЙЛ"
 
-#: src/main/help.c:451
+#: src/main/help.c:403
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Использование: %s [ОПЦИИ] [ФАЙЛ]..."
 
-#: src/main/help.c:462
+#: src/main/help.c:414
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 
-#: src/main/help.c:600
+#: src/main/help.c:552
 msgid "Supported format sequences:"
 msgstr ""
 
-#: src/main/help.c:614
+#: src/main/help.c:566
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Сообщайте о проблемах на: %s"
@@ -438,7 +438,7 @@ msgstr "бит"
 msgid "B"
 msgstr "байт"
 
-#: src/pv/display.c:1638 src/pv/transfer.c:1056
+#: src/pv/display.c:1641 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 

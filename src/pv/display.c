@@ -1530,6 +1530,9 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			display->format[segment].bytes = str_bytes;
 			display->format[segment].width = pv_strwidth(&(display_format[str_start]), str_bytes);
 
+			debug("format[%d]:[%.*s], length=%d, width=%d", segment, str_bytes, display_format + str_start,
+			      str_bytes, display->format[segment].width);
+
 		} else {
 			char dummy_buffer[4];	/* flawfinder: ignore - unused. */
 
@@ -1777,6 +1780,9 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 		new_display_string_bytes += segment->bytes;
 		new_display_string_width += segment->width;
+
+		debug("segment[%d]: bytes=%d, width=%d: [%.*s]", segment_idx, segment->bytes, segment->width,
+		      segment->bytes, display->display_buffer + display_buffer_offset - segment->bytes);
 	}
 
 	debug("%s: %d", "new display string length in bytes", (int) new_display_string_bytes);
