@@ -722,7 +722,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 
 		if ((state->control.linemode) && (lineswritten != NULL))
 			tracking_lines = true;
-		else if (state->display.component[PV_COMPONENT_PREVLINE].required)
+		else if (state->display.tracking_previous_line)
 			tracking_lines = true;
 
 		/*
@@ -772,7 +772,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 					 * line ("%L"), add to our line
 					 * buffer.
 					 */
-					if (state->display.component[PV_COMPONENT_PREVLINE].required
+					if (state->display.tracking_previous_line
 					    && state->display.next_line_len < PV_SIZEOF_PREVLINE_BUFFER - 1) {
 						state->display.next_line[state->display.next_line_len] = *ptr;
 						state->display.next_line_len++;
@@ -789,7 +789,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				 * with the line we just completed, and
 				 * start a new one.
 				 */
-				if (state->display.component[PV_COMPONENT_PREVLINE].required) {
+				if (state->display.tracking_previous_line) {
 					memset(state->display.previous_line, 0, PV_SIZEOF_PREVLINE_BUFFER);
 					if (state->display.next_line_len > PV_SIZEOF_PREVLINE_BUFFER - 1)
 						state->display.next_line_len = PV_SIZEOF_PREVLINE_BUFFER - 1;
@@ -840,7 +840,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		 * If we're monitoring the output, update our copy of the
 		 * last few bytes we've written.
 		 */
-		if (state->display.component[PV_COMPONENT_OUTPUTBUF].required && (nwritten > 0)) {
+		if (state->display.tracking_last_output && (nwritten > 0)) {
 			size_t new_portion_size, old_portion_size;
 
 			new_portion_size = (size_t) nwritten;

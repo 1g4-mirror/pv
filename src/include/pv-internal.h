@@ -222,6 +222,8 @@ struct pvstate_s {
 		size_t format_segment_count;	 /* number of format string segments */
 
 		unsigned int prev_screen_width;	 /* screen width last time we were called */
+		bool tracking_last_output;	 /* set if displaying the last few bytes output */
+		bool tracking_previous_line;	 /* set if displaying the previously output line */
 		bool display_visible;		 /* set once anything written to terminal */
 
 	} display;

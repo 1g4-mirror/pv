@@ -443,6 +443,9 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 	memset(display->format, 0, PV_FORMAT_ARRAY_MAX * sizeof(display->format[0]));
 	memset(display->component, 0, PV_COMPONENT__MAX * sizeof(display->component[0]));
 
+	display->tracking_last_output = false;
+	display->tracking_previous_line = false;
+
 	if (state->control.name) {
 		(void) pv_snprintf(display->component[PV_COMPONENT_NAME].content, PV_SIZEOF_COMPONENT_STR,
 				   "%9.500s:", state->control.name);
@@ -535,12 +538,14 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 				chosen_size = (size_t) number_prefix;
 				if (display->lastoutput_bytes < chosen_size)
 					display->lastoutput_bytes = chosen_size;
+				display->tracking_last_output = true;
 				break;
 			case 'L':
 				seg_type = PV_COMPONENT_PREVLINE;
 				if (number_prefix > PV_SIZEOF_PREVLINE_BUFFER)
 					number_prefix = PV_SIZEOF_PREVLINE_BUFFER;
 				chosen_size = (size_t) number_prefix;
+				display->tracking_previous_line = true;
 				break;
 			case 'r':
 				seg_type = PV_COMPONENT_RATE;
