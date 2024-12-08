@@ -116,6 +116,11 @@ extern size_t pv_strlcat(char *, const char *, size_t);
 /*@null@ */ /*@temp@ */ extern void *pv_memrchr(const void *, int, size_t);
 
 /*
+ * Return the displayed width of a string.
+ */
+extern size_t pv_strwidth(const char *, size_t);
+
+/*
  * Functions relating to elapsed time.
  */
 

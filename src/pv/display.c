@@ -523,8 +523,7 @@ static size_t pv__format_progress_knownsize(pvstate_t state, pvdisplay_t display
 
 	after_bar_bytes = strlen(after_bar);	/* flawfinder: ignore */
 	/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
-	/* TODO: calculate display width rather than just bytes */
-	after_bar_width = after_bar_bytes;
+	after_bar_width = pv_strwidth(after_bar, after_bar_bytes);
 
 	if (width < (after_bar_width + 2))
 		return 0;
@@ -1386,9 +1385,8 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 			display->format[segment].offset = str_start;
 			display->format[segment].bytes = str_bytes;
+			display->format[segment].width = pv_strwidth(&(display_format[str_start]), str_bytes);
 
-			/* TODO: calculate display width rather than just bytes */
-			display->format[segment].width = str_bytes;
 		} else {
 			char dummy_buffer[4];	/* flawfinder: ignore - unused. */
 
@@ -1554,8 +1552,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 		segment->width = 0;
 		if (bytes_added > 0) {
-			/* TODO: calculate display width rather than just bytes */
-			segment->width = bytes_added;
+			segment->width = pv_strwidth(&(display_segments[display_segment_offset]), bytes_added);
 		}
 
 		display_segment_offset += bytes_added;

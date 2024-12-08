@@ -151,6 +151,7 @@ char *pv_strdup(const char *original)
 	return duplicate;
 }
 
+
 /*
  * Return a pointer to the last matching character in the buffer, or NULL if
  * not found.
@@ -178,4 +179,18 @@ void *pv_memrchr(const void *buffer, int match, size_t length)
 
 	return NULL;
 #endif
+}
+
+
+/*
+ * Return the displayed width of a string.
+ */
+size_t pv_strwidth(const char *string, size_t bytes)
+{
+	if (NULL == string)
+		return 0;
+	if (0 == bytes)
+		return 0;
+	/* TODO: actually calculate displayed width rather than assuming. */
+	return bytes;
 }
