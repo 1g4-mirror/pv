@@ -116,7 +116,7 @@ for buildHost in ${packagingHosts}; do
 	buildOK=true
 	scp "${srcdir}/docs/build-package.sh" "${buildHost}:${remoteWorkDir}/" || buildOK=false
 	${buildOK} && scp "${sourceArchive}" "${buildHost}:${remoteWorkDir}/" || buildOK=false
-	${buildOK} && ssh -t "${buildHost}" "cd \"${remoteWorkDir}\" && MAINTAINER=\"${MAINTAINER}\" sh ./build-package.sh ./*gz" || buildOK=false
+	${buildOK} && ssh -t "${buildHost}" "cd \"${remoteWorkDir}\" && SKIP_VALGRIND_TESTS=\"${SKIP_VALGRIND_TESTS}\" MAINTAINER=\"${MAINTAINER}\" sh ./build-package.sh ./*gz" || buildOK=false
 	${buildOK} && ssh "${buildHost}" "rm \"${remoteWorkDir}\"/${sourceArchive##*/} \"${remoteWorkDir}/build-package.sh\""
 	${buildOK} && mkdir -p "RELEASE-${versionInNews}/${buildHost}"
 	${buildOK} && scp "${buildHost}:${remoteWorkDir}/*" "RELEASE-${versionInNews}/${buildHost}/"
