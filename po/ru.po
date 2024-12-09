@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-08 22:22+0000\n"
+"POT-Creation-Date: 2024-12-09 21:44+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -400,45 +400,15 @@ msgstr "попытка блокировки не удалась"
 msgid "failed to open terminal"
 msgstr "не удалось открыть терминал"
 
-#: src/pv/display.c:233
+#: src/pv/display.c:232
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:251
+#: src/pv/display.c:250
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:523 src/pv/display.c:998 src/pv/display.c:1027
-#: src/pv/loop.c:549
-msgid "b/s"
-msgstr "бит/с"
-
-#: src/pv/display.c:527 src/pv/display.c:1002 src/pv/display.c:1031
-msgid "/s"
-msgstr "/с"
-
-#: src/pv/display.c:527 src/pv/display.c:1002 src/pv/display.c:1031
-#: src/pv/loop.c:549
-msgid "B/s"
-msgstr "байт/с"
-
-#: src/pv/display.c:875 src/pv/display.c:879
-msgid "ETA"
-msgstr "ОЖИД"
-
-#: src/pv/display.c:961
-msgid "FIN"
-msgstr "ЗАВЕРШ"
-
-#: src/pv/display.c:1057
-msgid "b"
-msgstr "бит"
-
-#: src/pv/display.c:1060 src/pv/transfer.c:594
-msgid "B"
-msgstr "байт"
-
-#: src/pv/display.c:1641 src/pv/transfer.c:1056
+#: src/pv/display.c:890 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 
@@ -469,6 +439,37 @@ msgstr "(нет)"
 #: src/pv/file.c:414
 msgid "(stdin)"
 msgstr "(стд. ввод)"
+
+#: src/pv/format/averagerate.c:31 src/pv/format/progressbar.c:59
+#: src/pv/format/rate.c:33 src/pv/loop.c:549
+msgid "b/s"
+msgstr "бит/с"
+
+#: src/pv/format/averagerate.c:35 src/pv/format/progressbar.c:63
+#: src/pv/format/rate.c:37
+msgid "/s"
+msgstr "/с"
+
+#: src/pv/format/averagerate.c:35 src/pv/format/progressbar.c:63
+#: src/pv/format/rate.c:37 src/pv/loop.c:549
+msgid "B/s"
+msgstr "байт/с"
+
+#: src/pv/format/bytes.c:32
+msgid "b"
+msgstr "бит"
+
+#: src/pv/format/bytes.c:35 src/pv/transfer.c:594
+msgid "B"
+msgstr "байт"
+
+#: src/pv/format/eta.c:53 src/pv/format/eta.c:57
+msgid "ETA"
+msgstr "ОЖИД"
+
+#: src/pv/format/fineta.c:81
+msgid "FIN"
+msgstr "ЗАВЕРШ"
 
 #: src/pv/loop.c:548
 msgid "rate min/avg/max/mdev"

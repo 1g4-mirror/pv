@@ -9,6 +9,17 @@ src/pv/cursor.c
 src/pv/display.c
 src/pv/elapsedtime.c
 src/pv/file.c
+src/pv/format/averagerate.c
+src/pv/format/bufferpercent.c
+src/pv/format/bytes.c
+src/pv/format/eta.c
+src/pv/format/fineta.c
+src/pv/format/lastwritten.c
+src/pv/format/name.c
+src/pv/format/previousline.c
+src/pv/format/progressbar.c
+src/pv/format/rate.c
+src/pv/format/timer.c
 src/pv/loop.c
 src/pv/number.c
 src/pv/proctitle.c
