@@ -535,9 +535,9 @@ static bool pv__format_numeric(pvstate_t state, pvdisplay_t display)
 /*
  * Format sequence lookup table.
  */
-/*@keep@ */ static struct pvdisplay_component_s *pv_format_components(void)
+/*@keep@ */ static struct pvdisplay_component_s *pv__format_components(void)
 {
-	/*@keep@ */ static struct pvdisplay_component_s format_components[] = {
+	/*@keep@ */ static struct pvdisplay_component_s format_component_array[] = {
 		{ "p", &pv_formatter_progress, true },
 		{ "{progress}", &pv_formatter_progress, true },
 		{ "{progress-bar-only}", &pv_formatter_progress_bar_only, true },
@@ -565,7 +565,7 @@ static bool pv__format_numeric(pvstate_t state, pvdisplay_t display)
 		{ "{name}", &pv_formatter_name, false },
 		{ NULL, NULL, false }
 	};
-	return format_components;
+	return format_component_array;
 }
 
 
@@ -577,14 +577,14 @@ static bool pv__format_numeric(pvstate_t state, pvdisplay_t display)
 char *pv_format_sequences(void)
 {
 	size_t component_idx, buffer_size, offset;
-	struct pvdisplay_component_s *format_component;
+	struct pvdisplay_component_s *format_component_array;
 	char *buffer;
 
-	format_component = pv_format_components();
+	format_component_array = pv__format_components();
 
 	buffer_size = 0;
-	for (component_idx = 0; NULL != format_component[component_idx].match; component_idx++) {
-		size_t component_sequence_length = strlen(format_component[component_idx].match);	/* flawfinder: ignore */
+	for (component_idx = 0; NULL != format_component_array[component_idx].match; component_idx++) {
+		size_t component_sequence_length = strlen(format_component_array[component_idx].match);	/* flawfinder: ignore */
 		/* flawfinder - static strings, guaranteed null-terminated. */
 		buffer_size += 2 + component_sequence_length;	/* 2 for '%' + ' ' */
 	}
@@ -594,12 +594,12 @@ char *pv_format_sequences(void)
 		return NULL;
 
 	offset = 0;
-	for (component_idx = 0; NULL != format_component[component_idx].match; component_idx++) {
-		size_t component_sequence_length = strlen(format_component[component_idx].match);	/* flawfinder: ignore - as above */
+	for (component_idx = 0; NULL != format_component_array[component_idx].match; component_idx++) {
+		size_t component_sequence_length = strlen(format_component_array[component_idx].match);	/* flawfinder: ignore - as above */
 		if (0 != offset)
 			buffer[offset++] = ' ';
 		buffer[offset++] = '%';
-		memmove(buffer + offset, format_component[component_idx].match, component_sequence_length);
+		memmove(buffer + offset, format_component_array[component_idx].match, component_sequence_length);
 		offset += component_sequence_length;
 	}
 
@@ -613,7 +613,7 @@ char *pv_format_sequences(void)
  */
 static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supplied, pvdisplay_t display)
 {
-	struct pvdisplay_component_s *format_component;
+	struct pvdisplay_component_s *format_component_array;
 	const char *display_format;
 	size_t strpos;
 	size_t segment;
@@ -623,7 +623,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 	if (NULL == display)
 		return;
 
-	format_component = pv_format_components();
+	format_component_array = pv__format_components();
 
 	display->format_segment_count = 0;
 	memset(display->format, 0, PV_FORMAT_ARRAY_MAX * sizeof(display->format[0]));
@@ -713,14 +713,14 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			}
 
 			component_type = -1;
-			for (component_idx = 0; NULL != format_component[component_idx].match; component_idx++) {
-				size_t component_sequence_length = strlen(format_component[component_idx].match);	/* flawfinder: ignore */
+			for (component_idx = 0; NULL != format_component_array[component_idx].match; component_idx++) {
+				size_t component_sequence_length = strlen(format_component_array[component_idx].match);	/* flawfinder: ignore */
 				/* flawfinder - static strings, guaranteed null-terminated. */
 				if (component_sequence_length != sequence_length)
 					continue;
 				if (0 !=
-				    strncmp(format_component[component_idx].match, &(display_format[sequence_start]),
-					    sequence_length))
+				    strncmp(format_component_array[component_idx].match,
+					    &(display_format[sequence_start]), sequence_length))
 					continue;
 				component_type = component_idx;
 				break;
@@ -797,8 +797,9 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			 * additional display options are enabled.
 			 */
 			dummy_buffer[0] = '\0';
-			(void) format_component[component_type].function(state, display, &(display->format[segment]),
-									 dummy_buffer, 0, 0);
+			(void) format_component_array[component_type].function(state, display,
+									       &(display->format[segment]),
+									       dummy_buffer, 0, 0);
 		}
 
 		display->format_segment_count++;
@@ -826,7 +827,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdisplay_t display, bool reinitialise,
 	       bool final)
 {
-	struct pvdisplay_component_s *format_component;
+	struct pvdisplay_component_s *format_component_array;
 	char display_segments[1024];	 /* flawfinder: ignore - always bounded */
 	size_t display_segment_offset;
 	size_t segment_idx, dynamic_segment_count;
@@ -843,7 +844,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	if (NULL == display)
 		return false;
 
-	format_component = pv_format_components();
+	format_component_array = pv__format_components();
 
 	/* Populate the display's "final" flag, for formatters. */
 	display->final_update = final;
@@ -928,7 +929,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			static_portion_width += segment->width;
 			continue;
 		}
-		component = &(format_component[segment->type]);
+		component = &(format_component_array[segment->type]);
 
 		fixed_width = true;
 		if (component->dynamic && 0 == segment->chosen_size)
@@ -979,7 +980,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			static_portion_width += segment->width;
 			continue;
 		}
-		component = &(format_component[segment->type]);
+		component = &(format_component_array[segment->type]);
 
 		fixed_width = true;
 		if (component->dynamic && 0 == segment->chosen_size)
