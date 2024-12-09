@@ -351,6 +351,23 @@ struct pvstate_s {
 	} transfer;
 };
 
+typedef struct pvdisplay_s *pvdisplay_t;
+typedef struct pvdisplay_segment_s *pvdisplay_segment_t;
+
+
+/* Pointer to a formatter function. */
+typedef size_t (*pvdisplay_formatter_t)(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+
+
+/*
+ * Structure defining a format string sequence following a %.
+ */
+struct pvdisplay_component_s {
+	/*@null@ */ const char *match;			/* string to match */
+	/*@null@ */ pvdisplay_formatter_t function;	/* function to call */
+	bool dynamic;			 /* whether it can scale with screen size */
+};
+
 
 struct pvwatchfd_s {
 #ifdef __APPLE__
@@ -371,13 +388,53 @@ struct pvwatchfd_s {
 };
 typedef struct pvwatchfd_s *pvwatchfd_t;
 
-typedef struct pvdisplay_s *pvdisplay_t;
-typedef struct pvdisplay_segment_s *pvdisplay_segment_t;
-
 void pv_error(pvstate_t, char *, ...);
 
 int pv_main_loop(pvstate_t);
 void pv_calculate_transfer_rate(pvstate_t, bool);
+
+long pv_bound_long(long, long, long);
+long pv_seconds_remaining(const off_t, const off_t, const long double);
+void pv_si_prefix(long double *, char *, const long double, pvtransfercount_t);
+void pv_describe_amount(char *, size_t, char *, long double, char *, char *, pvtransfercount_t);
+
+size_t pv_formatter_segmentcontent(char *, pvdisplay_segment_t, char *, size_t, size_t);
+
+/*
+ * Formatting functions.
+ *
+ * Each formatting function takes a state, the current display, and the
+ * segment it's for; it also takes a buffer, with a particular size, and an
+ * offset at which to start writing to the buffer.
+ *
+ * If the component is dynamically sized (such as a progress bar with no
+ * chosen_size constraint), the segment's "width" is expected to have
+ * already been populated by the caller, with the target width.
+ *
+ * The function writes the appropriate string to the buffer at the offset,
+ * and updates the segment's "offset" and "bytes".  The number of bytes
+ * written ("bytes") is also returned; it will be 0 if the string would not
+ * fit into the buffer.
+ *
+ * The caller is expected to update the segment's "width".
+ *
+ * If called with a buffer size of 0, only the side effects occur (such as
+ * setting flags like display->showing_timer).
+ */
+size_t pv_formatter_progress(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_progress_bar_only(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_progress_amount_only(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_timer(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_eta(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_fineta(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_rate(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_average_rate(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_bytes(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_buffer_percent(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_last_written(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_previous_line(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_name(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+
 bool pv_format(pvstate_t, /*@null@*/ const char *, pvdisplay_t, bool, bool);
 void pv_display(pvstate_t, bool);
 ssize_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);

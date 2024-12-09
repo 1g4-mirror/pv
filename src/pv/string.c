@@ -304,3 +304,14 @@ size_t pv_strwidth(const char *string, size_t bytes)
 
 	return width;
 }
+
+
+/*
+ * Return true if the character is printable.  This function is used instead
+ * of the macro from <ctype.h> to avoid causing versioned glibc dependencies
+ * on some systems.
+ */
+bool pv_isprint(char c)
+{
+	return ((c >= (char) 32) && (c <= (char) 126)) ? true : false;
+}

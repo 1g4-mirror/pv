@@ -17,7 +17,7 @@
  * including <ctype.h> causes weird versioned glibc dependencies on certain
  * Red Hat systems, complicating package management.
  */
-static bool pv__isdigit(char c)
+bool pv_isdigit(char c)
 {
 	return ((c >= '0') && (c <= '9')) ? true : false;
 }
@@ -42,14 +42,14 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 		return (off_t) 0;
 
 	/* Skip any non-numeric leading characters. */
-	while (str[0] != '\0' && (!pv__isdigit(str[0])))
+	while (str[0] != '\0' && (!pv_isdigit(str[0])))
 		str++;
 
 	/*
 	 * Parse the integral part of the number - the digits before the
 	 * decimal mark or units.
 	 */
-	for (; pv__isdigit(str[0]); str++) {
+	for (; pv_isdigit(str[0]); str++) {
 		integral_part = integral_part * 10;
 		integral_part += (off_t) (str[0] - '0');
 	}
@@ -64,7 +64,7 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	 */
 	if (('.' == str[0]) || (',' == str[0])) {
 		str++;
-		for (; pv__isdigit(str[0]); str++) {
+		for (; pv_isdigit(str[0]); str++) {
 			/* Stop counting below 0.0001. */
 			if (fractional_divisor < 10000) {
 				fractional_part = fractional_part * 10;
@@ -176,11 +176,11 @@ double pv_getnum_interval(const char *str)
 		return 0.0;
 
 	/* Skip any non-digit characters at the start. */
-	while (str[0] != '\0' && (!pv__isdigit(str[0])))
+	while (str[0] != '\0' && (!pv_isdigit(str[0])))
 		str++;
 
 	/* Parse the digits before the decimal mark. */
-	for (; pv__isdigit(str[0]); str++) {
+	for (; pv_isdigit(str[0]); str++) {
 		result = result * 10;
 		result += (double) (str[0] - '0');
 	}
@@ -193,7 +193,7 @@ double pv_getnum_interval(const char *str)
 	str++;
 
 	/* Parse the digits after the decimal mark, up to 0.0000001. */
-	for (; pv__isdigit(str[0]) && step < 1000000; str++) {
+	for (; pv_isdigit(str[0]) && step < 1000000; str++) {
 		step = step * 10;
 		result += ((double) (str[0] - '0')) / step;
 	}
@@ -226,11 +226,11 @@ bool pv_getnum_check(const char *str, pv_numtype type)
 		str++;
 
 	/* If the next character isn't a digit, this isn't a number. */
-	if (!pv__isdigit(str[0]))
+	if (!pv_isdigit(str[0]))
 		return false;
 
 	/* Skip over the digits. */
-	for (; pv__isdigit(str[0]); str++);
+	for (; pv_isdigit(str[0]); str++);
 
 	/*
 	 * If there's a decimal mark (see note in pv_getnum_size() above),
@@ -242,7 +242,7 @@ bool pv_getnum_check(const char *str, pv_numtype type)
 			return false;
 		/* Skip the decimal mark, then all digits. */
 		str++;
-		for (; pv__isdigit(str[0]); str++);
+		for (; pv_isdigit(str[0]); str++);
 	}
 
 	/* If the string ends here, this is a valid number. */

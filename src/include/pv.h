@@ -55,6 +55,11 @@ typedef enum {
  */
 
 /*
+ * Return true if the character is an ASCII digit.
+ */
+extern bool pv_isdigit(char);
+
+/*
  * Return the given string converted to a double, for use as a time
  * interval.
  */
@@ -119,6 +124,11 @@ extern size_t pv_strlcat(char *, const char *, size_t);
  * Return the displayed width of a string.
  */
 extern size_t pv_strwidth(const char *, size_t);
+
+/*
+ * Return true if the character is printable.
+ */
+extern bool pv_isprint(char);
 
 /*
  * Functions relating to elapsed time.
