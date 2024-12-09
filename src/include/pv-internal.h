@@ -132,6 +132,7 @@ struct pvstate_s {
 		bool no_splice;                  /* never use splice() */
 		bool discard_input;              /* write nothing to stdout */
 		bool show_stats;		 /* show statistics on exit */
+		bool can_display_utf8;		 /* whether UTF-8 output is permitted */
 		bool width_set_manually;	 /* width was set manually, not detected */
 		bool height_set_manually;	 /* height was set manually, not detected */
 	} control;

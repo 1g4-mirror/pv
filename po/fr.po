@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-09 21:44+0000\n"
+"POT-Creation-Date: 2024-12-09 23:15+0000\n"
 "PO-Revision-Date: 2024-10-12 11:13+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: French <https://translate.codeberg.org/projects/pv/pv/fr/>\n"
@@ -288,11 +288,11 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr "SVP rapporter tous bogues à %s"
 
-#: src/main/main.c:230
+#: src/main/main.c:232
 msgid "(input)"
 msgstr "(entrée)"
 
-#: src/main/main.c:319
+#: src/main/main.c:328
 msgid "state allocation failed"
 msgstr "échec de l'allocation de mémoire de condition"
 
@@ -434,7 +434,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:890 src/pv/transfer.c:1056
+#: src/pv/display.c:891 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 
@@ -517,7 +517,7 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr "l'allocation de la structure de l'historique a échoué"
 
-#: src/pv/state.c:572 src/pv/state.c:583
+#: src/pv/state.c:576 src/pv/state.c:587
 msgid "file list allocation failed"
 msgstr "échec de l'allocation de la liste de fichiers"
 

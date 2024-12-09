@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-09 21:44+0000\n"
+"POT-Creation-Date: 2024-12-09 23:15+0000\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -263,11 +263,11 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr ""
 
-#: src/main/main.c:230
+#: src/main/main.c:232
 msgid "(input)"
 msgstr ""
 
-#: src/main/main.c:319
+#: src/main/main.c:328
 msgid "state allocation failed"
 msgstr ""
 
@@ -399,7 +399,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:890 src/pv/transfer.c:1056
+#: src/pv/display.c:891 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr ""
 
@@ -482,7 +482,7 @@ msgstr ""
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:572 src/pv/state.c:583
+#: src/pv/state.c:576 src/pv/state.c:587
 msgid "file list allocation failed"
 msgstr ""
 

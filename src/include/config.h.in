@@ -65,6 +65,9 @@
 /* IPC support enabled */
 #undef HAVE_IPC
 
+/* Define to 1 if you have the <langinfo.h> header file. */
+#undef HAVE_LANGINFO_H
+
 /* Define to 1 if you have the <libgen.h> header file. */
 #undef HAVE_LIBGEN_H
 

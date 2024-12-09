@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-09 21:44+0000\n"
+"POT-Creation-Date: 2024-12-09 23:15+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: fnetX <otto@codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -287,11 +287,11 @@ msgstr ""
 msgid "Please report any bugs to: %s"
 msgstr "Bitte senden Sie Fehlerberichte an %s"
 
-#: src/main/main.c:230
+#: src/main/main.c:232
 msgid "(input)"
 msgstr "(eingabe)"
 
-#: src/main/main.c:319
+#: src/main/main.c:328
 msgid "state allocation failed"
 msgstr "Speicherzuweisung für `state' fehlgeschlagen"
 
@@ -430,7 +430,7 @@ msgstr "yzafpnµm kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:890 src/pv/transfer.c:1056
+#: src/pv/display.c:891 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
@@ -514,7 +514,7 @@ msgstr "pid"
 msgid "history structure allocation failed"
 msgstr "Speicherzuweisung für `history' fehlgeschlagen"
 
-#: src/pv/state.c:572 src/pv/state.c:583
+#: src/pv/state.c:576 src/pv/state.c:587
 msgid "file list allocation failed"
 msgstr "Speicherzuweisung für die Dateiliste fehlgeschlagen"
 

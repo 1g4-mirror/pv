@@ -19,7 +19,9 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-
+#ifdef HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif
 
 int pv_remote_set(opts_t, pvstate_t);
 void pv_remote_init(void);
@@ -279,6 +281,7 @@ int main(int argc, char **argv)
 	/*@only@ */ pvstate_t state = NULL;
 	int retcode = 0;
 	bool can_have_eta = true;
+	bool can_display_utf8 = false;
 
 #if ! HAVE_SETPROCTITLE
 	initproctitle(argc, argv);
@@ -289,6 +292,12 @@ int main(int argc, char **argv)
 	(void) setlocale(LC_ALL, "");
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 	(void) textdomain(PACKAGE);
+#ifdef HAVE_LANGINFO_H
+	/*@-mustfreefresh@ *//* splint thinks nl_langinfo() leaks memory */
+	if (0 == strcmp(nl_langinfo(CODESET), "UTF-8"))
+		can_display_utf8 = true;
+	/*@+mustfreefresh@ */
+#endif
 #endif
 
 	/* Parse the command line arguments. */
@@ -502,6 +511,9 @@ int main(int argc, char **argv)
 	pv_state_set_format(state, opts->progress, opts->timer, can_have_eta ? opts->eta : false,
 			    can_have_eta ? opts->fineta : false, opts->rate, opts->average_rate,
 			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
+
+	debug("%s: %s", "can_display_utf8", can_display_utf8 ? "true" : "false");
+	pv_state_set_can_display_utf8(state, can_display_utf8);
 
 	/* Initialise the signal handling. */
 	pv_sig_init(state);
