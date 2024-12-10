@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-09 23:15+0000\n"
+"POT-Creation-Date: 2024-12-10 22:03+0000\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -303,51 +303,55 @@ msgstr ""
 msgid "option structure argv allocation failed"
 msgstr ""
 
-#: src/main/options.c:425
+#: src/main/options.c:416
+msgid "numeric value not understood"
+msgstr ""
+
+#: src/main/options.c:435
 msgid "integer argument expected"
 msgstr ""
 
-#: src/main/options.c:436
+#: src/main/options.c:447
 msgid "numeric argument expected"
 msgstr ""
 
-#: src/main/options.c:447
+#: src/main/options.c:458
 msgid "process ID or pid:fd pair expected"
 msgstr ""
 
-#: src/main/options.c:454
+#: src/main/options.c:465
 msgid "invalid process ID"
 msgstr ""
 
-#: src/main/options.c:679
+#: src/main/options.c:690
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr ""
 
-#: src/main/options.c:681
+#: src/main/options.c:692
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr ""
 
-#: src/main/options.c:712
+#: src/main/options.c:723
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
 msgstr ""
 
-#: src/main/options.c:721
+#: src/main/options.c:732
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:730
+#: src/main/options.c:741
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:739
+#: src/main/options.c:750
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:754
+#: src/main/options.c:765
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr ""
 

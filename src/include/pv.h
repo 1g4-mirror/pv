@@ -45,8 +45,9 @@ typedef struct pvstate_s *pvstate_t;
  * Valid number types for pv_getnum_check().
  */
 typedef enum {
-  PV_NUMTYPE_INTEGER,
-  PV_NUMTYPE_DOUBLE
+  PV_NUMTYPE_ANY_WITH_SUFFIX,
+  PV_NUMTYPE_BARE_INTEGER,
+  PV_NUMTYPE_BARE_DOUBLE
 } pv_numtype;
 
 

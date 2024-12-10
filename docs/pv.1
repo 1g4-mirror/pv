@@ -663,6 +663,21 @@ passed to \*(lq\fB\-\-size\fR\*(rq, and activate
 The \*(lq\fB%nA\fR\*(rq and \*(lq\fB%nL\fR\*(rq format sequences may not be
 effective with small input files, and \*(lq\fB%nL\fR\*(rq may be a few lines
 out due to buffering within the pipeline itself.
+.PP
+Numbers passed to \*(lq\fB\-\-size\fR\*(rq, \*(lq\fB\-\-rate\-limit\fR\*(rq,
+\*(lq\fB\-\-buffer\-size\fR\*(rq, and \*(lq\fB\-\-error\-skip\-block\fR\*(rq
+may all be expressed as decimals if followed by a suffix, so for example
+\*(lq\fI\-\-size\~1.5G\fR\*(rq is equivalent to
+\*(lq\fI\-\-size\~1536M\fR\*(rq.
+.PP
+Numbers passed to \*(lq\fB\-\-interval\fR\*(rq and
+\*(lq\fB\-\-delay\-start\fR\*(rq may be integers or decimals, but may not
+have a suffix.
+.PP
+Numbers passed to \*(lq\fB\-\-last\-written\fR\*(rq,
+\*(lq\fB\-\-width\fR\*(rq, \*(lq\fB\-\-height\fR\*(rq,
+\*(lq\fB\-\-average\-rate\-window\fR\*(rq, and \*(lq\fB\-\-remote\fR\*(rq
+must be integers with no suffix.
 .\"
 .SH REPORTING BUGS
 Please report any bugs to \fBpv@ivarch.com\fR.

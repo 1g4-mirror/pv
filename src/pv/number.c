@@ -37,21 +37,22 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	unsigned int fractional_divisor = 1;
 	unsigned int binary_shift = 0;
 	off_t decimal_multiplier = 0;
+	size_t readpos = 0;
 
 	if (NULL == str)
 		return (off_t) 0;
 
 	/* Skip any non-numeric leading characters. */
-	while (str[0] != '\0' && (!pv_isdigit(str[0])))
-		str++;
+	while (str[readpos] != '\0' && (!pv_isdigit(str[readpos])))
+		readpos++;
 
 	/*
 	 * Parse the integral part of the number - the digits before the
 	 * decimal mark or units.
 	 */
-	for (; pv_isdigit(str[0]); str++) {
+	for (; pv_isdigit(str[readpos]); readpos++) {
 		integral_part = integral_part * 10;
-		integral_part += (off_t) (str[0] - '0');
+		integral_part += (off_t) (str[readpos] - '0');
 	}
 
 	/*
@@ -62,13 +63,13 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	 * will fail if there are any locales whose decimal mark is not one
 	 * of those two characters.
 	 */
-	if (('.' == str[0]) || (',' == str[0])) {
-		str++;
-		for (; pv_isdigit(str[0]); str++) {
+	if (('.' == str[readpos]) || (',' == str[readpos])) {
+		readpos++;
+		for (; pv_isdigit(str[readpos]); readpos++) {
 			/* Stop counting below 0.0001. */
 			if (fractional_divisor < 10000) {
 				fractional_part = fractional_part * 10;
-				fractional_part += (off_t) (str[0] - '0');
+				fractional_part += (off_t) (str[readpos] - '0');
 				fractional_divisor = fractional_divisor * 10;
 			}
 		}
@@ -78,11 +79,11 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	 * Parse any units given (K=KiB=*1024, M=MiB=1024KiB, G=GiB=1024MiB,
 	 * T=TiB=1024GiB; replace 1024 with 1000 if decimal_units is true).
 	 */
-	if (str[0] != '\0') {
+	if (str[readpos] != '\0') {
 		/* Skip any spaces or tabs after the digits. */
-		while ((' ' == str[0]) || ('\t' == str[0]))
-			str++;
-		switch (str[0]) {
+		while ((' ' == str[readpos]) || ('\t' == str[readpos]))
+			readpos++;
+		switch (str[readpos]) {
 		case 'k':
 		case 'K':
 			binary_shift = 10;
@@ -158,6 +159,8 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	 */
 	fractional_part = fractional_part / fractional_divisor;
 	integral_part += fractional_part;
+
+	debug("%s [%s] = %ld", str, decimal_units ? "decimal" : "binary", integral_part);
 
 	return integral_part;
 }
@@ -237,8 +240,8 @@ bool pv_getnum_check(const char *str, pv_numtype type)
 	 * check that too.
 	 */
 	if (('.' == str[0]) || (',' == str[0])) {
-		/* Integers should have no decimal mark. */
-		if (type == PV_NUMTYPE_INTEGER)
+		/* Bare integers should have no decimal mark. */
+		if (type == PV_NUMTYPE_BARE_INTEGER)
 			return false;
 		/* Skip the decimal mark, then all digits. */
 		str++;
@@ -249,8 +252,8 @@ bool pv_getnum_check(const char *str, pv_numtype type)
 	if ('\0' == str[0])
 		return true;
 
-	/* A units suffix is not allowed for doubles, only for integers. */
-	if (type == PV_NUMTYPE_DOUBLE)
+	/* A units suffix is only allowed for ANY_WITH_SUFFIX. */
+	if (type != PV_NUMTYPE_ANY_WITH_SUFFIX)
 		return false;
 
 	/* Skip trailing spaces or tabs. */

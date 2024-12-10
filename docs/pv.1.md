@@ -651,6 +651,18 @@ The "**%nA**" and "**%nL**" format sequences may not be effective with
 small input files, and "**%nL**" may be a few lines out due to buffering
 within the pipeline itself.
 
+Numbers passed to "**\--size**", "**\--rate-limit**",
+"**\--buffer-size**", and "**\--error-skip-block**" may all be expressed
+as decimals if followed by a suffix, so for example "*\--size 1.5G*" is
+equivalent to "*\--size 1536M*".
+
+Numbers passed to "**\--interval**" and "**\--delay-start**" may be
+integers or decimals, but may not have a suffix.
+
+Numbers passed to "**\--last-written**", "**\--width**",
+"**\--height**", "**\--average-rate-window**", and "**\--remote**" must
+be integers with no suffix.
+
 # REPORTING BUGS
 
 Please report any bugs to **pv@ivarch.com**.

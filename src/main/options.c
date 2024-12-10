@@ -405,24 +405,34 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				break;
 			/* falls through */
 			/*@fallthrough@ */
+		case 'L':
+			/*@fallthrough@ */
+		case 'B':
+			/*@fallthrough@ */
+		case 'Z':
+			if (!pv_getnum_check(optarg, PV_NUMTYPE_ANY_WITH_SUFFIX)) {
+				/*@-mustfreefresh@ *//* see above */
+				fprintf(stderr, "%s: -%c: %s: %s\n", opts->program_name, c, optarg,
+					_("numeric value not understood"));
+				opts_free(opts);
+				return NULL;
+				/*@+mustfreefresh@ */
+			}
+			break;
 		case 'A':
 			/*@fallthrough@ */
 		case 'w':
 			/*@fallthrough@ */
 		case 'H':
 			/*@fallthrough@ */
-		case 'L':
-			/*@fallthrough@ */
-		case 'B':
-			/*@fallthrough@ */
 		case 'R':
 			/*@fallthrough@ */
 		case 'm':
 			/*@fallthrough@ */
-		case 'Z':
-			if (!pv_getnum_check(optarg, PV_NUMTYPE_INTEGER)) {
+			if (!pv_getnum_check(optarg, PV_NUMTYPE_BARE_INTEGER)) {
 				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -%c: %s\n", opts->program_name, c, _("integer argument expected"));
+				fprintf(stderr, "%s: -%c: %s: %s\n", opts->program_name, c, optarg,
+					_("integer argument expected"));
 				opts_free(opts);
 				return NULL;
 				/*@+mustfreefresh@ */
@@ -431,9 +441,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'i':
 			/*@fallthrough@ */
 		case 'D':
-			if (!pv_getnum_check(optarg, PV_NUMTYPE_DOUBLE)) {
+			if (!pv_getnum_check(optarg, PV_NUMTYPE_BARE_DOUBLE)) {
 				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -%c: %s\n", opts->program_name, c, _("numeric argument expected"));
+				fprintf(stderr, "%s: -%c: %s: %s\n", opts->program_name, c, optarg,
+					_("numeric argument expected"));
 				opts_free(opts);
 				return NULL;
 				/*@+mustfreefresh@ */
