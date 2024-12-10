@@ -502,15 +502,14 @@ cat file | pv \-\-size 12345 | nc \-w 1 somewhere.com 3000
 .EE
 .in
 .PP
-A more complicated example using numeric output to feed into the
-\fBdialog\fR(1) program for a full-screen progress display:
+To watch the progress of creating a tar.gz archive:
 .PP
 .in +4
 .EX
-(tar cf \- . \e
-| pv \-\-numeric \-\-size $(du \-sb . | awk '{print $1}') \e
-| gzip \-9 > out.tgz) 2>&1 \e
-| dialog \-\-gauge 'Progress' 7 70
+tar cf \- directory/ \e
+| pv \-\-size $(du \-sb directory/ | awk '{print $1}') \e
+| gzip \-9 \e
+> out.tar.gz
 .EE
 .in
 .PP
@@ -689,7 +688,6 @@ Alternatively, use the issue tracker linked from the
 .\"
 .SH "SEE ALSO"
 .BR cat (1),
-.BR dialog (1),
 .BR splice (2),
 .BR fdatasync (2),
 .BR open (2)

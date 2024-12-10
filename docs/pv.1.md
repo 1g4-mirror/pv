@@ -520,13 +520,12 @@ the expected size to **pv**:
 
     cat file | pv --size 12345 | nc -w 1 somewhere.com 3000
 
-A more complicated example using numeric output to feed into the
-**dialog**(1) program for a full-screen progress display:
+To watch the progress of creating a tar.gz archive:
 
-    (tar cf - . \
-    | pv --numeric --size $(du -sb . | awk '{print $1}') \
-    | gzip -9 > out.tgz) 2>&1 \
-    | dialog --gauge 'Progress' 7 70
+    tar cf - directory/ \
+    | pv --size $(du -sb directory/ | awk '{print $1}') \
+    | gzip -9 \
+    > out.tar.gz
 
 Taking an image of a disk, skipping errors:
 
@@ -672,8 +671,8 @@ page](https://www.ivarch.com/programs/pv.shtml).
 
 # SEE ALSO
 
-**cat**(1), **dialog**(1), **splice**(2), **fdatasync**(2), **open**(2)
-(for **O_DIRECT**)
+**cat**(1), **splice**(2), **fdatasync**(2), **open**(2) (for
+**O_DIRECT**)
 
 # COPYRIGHT
 
