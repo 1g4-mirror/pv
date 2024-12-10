@@ -1,4 +1,4 @@
-.TH PV 1 2024-12-08 pv-1.9.15 "User Commands"
+.TH PV 1 2024-12-10 pv-1.9.15 "User Commands"
 .\"
 .SH NAME
 pv \- monitor the progress of data through a pipe
@@ -7,98 +7,9 @@ pv \- monitor the progress of data through a pipe
 .B pv
 [\fIOPTION\fR]... [\fIFILE\fR]...
 .PP
-.SY pv
-.OP \-pteIrab8kTv
-.OP \-A NUM
-.OP \-F FORMAT
-.OP \-x SPEC
-.OP \-Wgl0fc
-.OP \-D SEC
-.OP \-s SIZE
-.OP \-i SEC
-.OP \-m SEC
-.OP \-w WIDTH
-.OP \-H HEIGHT
-.OP \-N NAME
-.OP \-o FILE
-.OP \-L RATE
-.OP \-B BYTES
-.OP \-CESYKX
-.OP \-Z BYTES
-.OP \-U FILE
-.OP \-P FILE
-.RI [ FILE
-\&.\|.\|.\&]
+\fBpv\fR \fB\-d\fR|\fB\-\-watchfd\fR \fIPID\fR[:\fIFD\fR] [\fIOPTION\fR]...
 .PP
-.SY pv
-.B \-n
-.OP \-trbv
-.OP \-Wl0
-.OP \-D SEC
-.OP \-s SIZE
-.OP \-i SEC
-.OP \-o FILE
-.OP \-L RATE
-.OP \-B BYTES
-.OP \-CESYKX
-.OP \-Z BYTES
-.OP \-U FILE
-.OP \-P FILE
-.RI [ FILE
-\&.\|.\|.\&]
-.PP
-.SY pv
-.B \-q
-.OP \-v
-.OP \-s SIZE
-.OP \-o FILE
-.OP \-L RATE
-.OP \-B BYTES
-.OP \-CESYKX
-.OP \-Z BYTES
-.OP \-U FILE
-.OP \-P FILE
-.RI [ FILE
-\&.\|.\|.\&]
-.PP
-.SY pv
-.B \-R
-.I PID
-.OP \-pteIrabT
-.OP \-A NUM
-.OP \-F FORMAT
-.OP \-s SIZE
-.OP \-i SEC
-.OP \-w WIDTH
-.OP \-H HEIGHT
-.OP \-N NAME
-.OP \-L RATE
-.OP \-B BYTES
-.PP
-.SY pv
-.B \-d
-.I PID:FD
-.OP \-pteIrab8kTnq
-.OP \-F FORMAT
-.OP \-i SEC
-.OP \-w WIDTH
-.OP \-H HEIGHT
-.PP
-.SY pv
-.B \-d
-.I PID
-.OP \-pteIrab8kTnq
-.OP \-F FORMAT
-.OP \-i SEC
-.OP \-w WIDTH
-.OP \-H HEIGHT
-.PP
-.SY pv
-.B \-h
-.PP
-.SY pv
-.B \-V
-.YS
+\fBpv\fR \fB\-R\fR|\fB\-\-remote\fR \fIPID\fR [\fIOPTION\fR]...
 .\"
 .SH DESCRIPTION
 Show the progress of data through a pipeline by giving information such as

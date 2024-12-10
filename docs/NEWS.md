@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *docs:* simplified the synopsis section of the manual
+
 ### 1.9.15 - 8 December 2024
 
  * *feature:* new **--format** sequence "**%nL**", showing the most recent line written ([#121](https://codeberg.org/a-j-wood/pv/issues/121))
