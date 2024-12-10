@@ -347,6 +347,8 @@ are explicitly switched on will be shown.
     be preferable so that pipe buffering doesn\'t affect the progress
     display.
 
+## Alternative operating modes
+
 **-d PID\[:FD\], \--watchfd PID\[:FD\]**
 
 :   Instead of transferring data, watch file descriptor *FD* of process
@@ -372,7 +374,7 @@ are explicitly switched on will be shown.
     "**\--delay-start**", "**\--skip-errors**", and
     "**\--stop-at-size**".
 
-## General options
+## Other options
 
 **-P FILE, \--pidfile FILE**
 

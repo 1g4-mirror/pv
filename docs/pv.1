@@ -338,6 +338,9 @@ size, so you can see its progress.
 Note that when doing this with relatively small amounts of data,
 \*(lq\fB\-\-no-splice\fR\*(rq may be preferable so that pipe buffering
 doesn't affect the progress display.
+.\"
+.\"
+.SS "Alternative operating modes"
 .TP
 .BI \-d\  PID\fR[\fB:\fR\fIFD\fR],\  \fB\-\-watchfd\  PID\fR[\fB:\fR\fIFD\fR]
 Instead of transferring data, watch file descriptor \fIFD\fR of process
@@ -363,7 +366,7 @@ Note that some options cannot be changed while running, such as
 \*(lq\fB\-\-force\fR\*(rq, \*(lq\fB\-\-delay\-start\fR\*(rq,
 \*(lq\fB\-\-skip\-errors\fR\*(rq, and \*(lq\fB\-\-stop\-at\-size\fR\*(rq.
 .\"
-.SS "General options"
+.SS "Other options"
 .TP
 .BI \-P\  FILE \fR,\ \fB\-\-pidfile\  FILE
 Save the process ID of \fBpv\fR in \fIFILE\fR.
