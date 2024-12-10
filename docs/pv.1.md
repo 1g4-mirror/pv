@@ -516,13 +516,13 @@ To watch how quickly a file is transferred using **nc**(1):
 A similar example, transferring a file from another process and passing
 the expected size to **pv**:
 
-    cat file | pv -s 12345 | nc -w 1 somewhere.com 3000
+    cat file | pv --size 12345 | nc -w 1 somewhere.com 3000
 
 A more complicated example using numeric output to feed into the
 **dialog**(1) program for a full-screen progress display:
 
     (tar cf - . \
-    | pv -n -s $(du -sb . | awk '{print $1}') \
+    | pv --numeric --size $(du -sb . | awk '{print $1}') \
     | gzip -9 > out.tgz) 2>&1 \
     | dialog --gauge 'Progress' 7 70
 
@@ -546,17 +546,17 @@ been given.
 (Linux and macOS only): Watching file descriptor 3 opened by another
 process 1234:
 
-    pv -d 1234:3
+    pv --watchfd 1234:3
 
 (Linux and macOS only): Watching all file descriptors used by process
 1234:
 
-    pv -d 1234
+    pv --watchfd 1234
 
 Sending logs to a processing script, showing the most recent line as
 part of the progress display:
 
-    pv -F '%a %p : %L' big.log | processing-script
+    pv --format '%a %p : %L' big.log | processing-script
 
 # EXIT STATUS
 
