@@ -258,7 +258,7 @@ are explicitly switched on will be shown.
     "**\--size**" can be used. The default buffer size is the block size
     of the input file\'s filesystem multiplied by 32 (512KiB max), or
     400KiB if the block size cannot be determined. This can be useful on
-    platforms like MacOS with pipelines that perform better with
+    platforms like macOS with pipelines that perform better with
     specific buffer sizes such as 1024. Implies "**\--no-splice**".
 
 **-C, \--no-splice**
@@ -506,7 +506,7 @@ Some suggested common switch combinations:
 :   The default behaviour: progress bar, elapsed time, estimated
     completion time, current rate, and byte counter.
 
-On MacOS, it may be useful to specify "**\--buffer-size 1024**" in a
+On macOS, it may be useful to specify "**\--buffer-size 1024**" in a
 pipeline, as this may improve performance.
 
 To watch how quickly a file is transferred using **nc**(1):
@@ -543,11 +543,13 @@ block device, then the size of the block device will be used and **pv**
 will automatically stop at that size as if "**\--stop-at-size**" had
 been given.
 
-(Linux only): Watching file descriptor 3 opened by another process 1234:
+(Linux and macOS only): Watching file descriptor 3 opened by another
+process 1234:
 
     pv -d 1234:3
 
-(Linux only): Watching all file descriptors used by process 1234:
+(Linux and macOS only): Watching all file descriptors used by process
+1234:
 
     pv -d 1234
 

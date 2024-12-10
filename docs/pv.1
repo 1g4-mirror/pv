@@ -251,7 +251,7 @@ The same suffixes as \*(lq\fB\-\-size\fR\*(rq can be used.
 The default buffer size is the block size of the input file's filesystem
 multiplied by 32 (512KiB max), or 400KiB if the block size cannot be
 determined.
-This can be useful on platforms like MacOS with pipelines that perform
+This can be useful on platforms like macOS with pipelines that perform
 better with specific buffer sizes such as 1024.
 Implies \*(lq\fB\-\-no\-splice\fR\*(rq.
 .TP
@@ -479,7 +479,7 @@ Show only the elapsed time - useful as a simple timer, such as
 The default behaviour: progress bar, elapsed time, estimated completion
 time, current rate, and byte counter.
 .PP
-On MacOS, it may be useful to specify \*(lq\fB\-\-buffer\-size\~1024\fR\*(rq
+On macOS, it may be useful to specify \*(lq\fB\-\-buffer\-size\~1024\fR\*(rq
 in a pipeline, as this may improve performance.
 .PP
 To watch how quickly a file is transferred using \fBnc\fR(1):
@@ -540,7 +540,7 @@ device, then the size of the block device will be used and \fBpv\fR will
 automatically stop at that size as if \*(lq\fB\-\-stop\-at\-size\fR\*(rq had
 been given.
 .PP
-(Linux only): Watching file descriptor 3 opened by another process 1234:
+(Linux and macOS only): Watching file descriptor 3 opened by another process 1234:
 .PP
 .in +4
 .EX
@@ -548,7 +548,7 @@ pv \-d 1234:3
 .EE
 .in
 .PP
-(Linux only): Watching all file descriptors used by process 1234:
+(Linux and macOS only): Watching all file descriptors used by process 1234:
 .PP
 .in +4
 .EX
