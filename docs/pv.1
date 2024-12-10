@@ -571,22 +571,22 @@ or \*(lq\fB\-\-pidfile\fR\*(rq options.
 .PP
 Any other exit status is a bitmask of the following:
 .TP 5
-.B 2
+.B \~2
 One or more files could not be accessed, \fBstat\fR(2)ed, or opened.
 .TP
-.B 4
+.B \~4
 An input file was the same as the output file.
 .TP
-.B 8
+.B \~8
 Internal error with closing a file or moving to the next file.
 .TP
-.B 16
+.B \~16
 There was an error while transferring data from one or more input files.
 .TP
-.B 32
+.B \~32
 A signal was caught that caused an early exit.
 .TP
-.B 64
+.B \~64
 Memory allocation failed.
 .PP
 A zero exit status indicates no problems.
