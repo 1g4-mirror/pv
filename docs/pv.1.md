@@ -566,28 +566,28 @@ An exit status of 1 indicates a problem with the "**\--remote**" or
 
 Any other exit status is a bitmask of the following:
 
-** 2**
+ **2**
 
 :   One or more files could not be accessed, **stat**(2)ed, or opened.
 
-** 4**
+ **4**
 
 :   An input file was the same as the output file.
 
-** 8**
+ **8**
 
 :   Internal error with closing a file or moving to the next file.
 
-** 16**
+ **16**
 
 :   There was an error while transferring data from one or more input
     files.
 
-** 32**
+ **32**
 
 :   A signal was caught that caused an early exit.
 
-** 64**
+ **64**
 
 :   Memory allocation failed.
 
