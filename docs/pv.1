@@ -558,6 +558,15 @@ pv \-\-watchfd 1234
 .EE
 .in
 .PP
+Rate-limiting the transfer between two processes in a pipeline, with no
+display:
+.PP
+.in +4
+.EX
+producer | pv \-\-quiet \-\-rate\-limit 1M | consumer
+.EE
+.in
+.PP
 Sending logs to a processing script, showing the most recent line as part of
 the progress display:
 .PP

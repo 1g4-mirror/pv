@@ -554,6 +554,11 @@ process 1234:
 
     pv --watchfd 1234
 
+Rate-limiting the transfer between two processes in a pipeline, with no
+display:
+
+    producer | pv --quiet --rate-limit 1M | consumer
+
 Sending logs to a processing script, showing the most recent line as
 part of the progress display:
 
