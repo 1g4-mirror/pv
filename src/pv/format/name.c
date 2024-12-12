@@ -16,17 +16,16 @@
 /*
  * Display the transfer's name.
  */
-size_t pv_formatter_name(pvstate_t state, /*@unused@ */  __attribute__((unused)) pvdisplay_t display,
-			      pvdisplay_segment_t segment, char *buffer, size_t buffer_size, size_t offset)
+size_t pv_formatter_name(pvformatter_args_t args)
 {
 	char string_format[32];		 /* flawfinder: ignore - always bounded */
 	char content[512];		 /* flawfinder: ignore - always bounded */
 	size_t field_width;
 
-	if (0 == buffer_size)
+	if (0 == args->buffer_size)
 		return 0;
 
-	field_width = segment->chosen_size;
+	field_width = args->segment->chosen_size;
 	if (field_width < 1)
 		field_width = 9;
 	if (field_width > 500)
@@ -36,9 +35,9 @@ size_t pv_formatter_name(pvstate_t state, /*@unused@ */  __attribute__((unused))
 	(void) pv_snprintf(string_format, sizeof(string_format), "%%%d.500s:", field_width);
 
 	content[0] = '\0';
-	if (state->control.name) {
-		(void) pv_snprintf(content, sizeof(content), string_format, state->control.name);
+	if (args->state->control.name) {
+		(void) pv_snprintf(content, sizeof(content), string_format, args->state->control.name);
 	}
 
-	return pv_formatter_segmentcontent(content, segment, buffer, buffer_size, offset);
+	return pv_formatter_segmentcontent(content, args);
 }

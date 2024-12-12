@@ -429,26 +429,25 @@ void pv_describe_amount(char *buffer, size_t bufsize, char *format,
  * updating the segment's offset and bytes values and returning the bytes
  * value, or treating the byte count as zero if there's insufficient space.
  */
-size_t pv_formatter_segmentcontent(char *content, pvdisplay_segment_t segment, char *buffer, size_t buffer_size,
-				   size_t offset)
+size_t pv_formatter_segmentcontent(char *content, pvformatter_args_t formatter_info)
 {
 	size_t bytes;
 
 	bytes = strlen(content);	    /* flawfinder: ignore */
 	/* flawfinder - caller is required to null-terminate the string. */
 
-	if (offset >= buffer_size)
+	if (formatter_info->offset >= formatter_info->buffer_size)
 		bytes = 0;
-	if ((offset + bytes) >= buffer_size)
+	if ((formatter_info->offset + bytes) >= formatter_info->buffer_size)
 		bytes = 0;
 
-	segment->offset = offset;
-	segment->bytes = bytes;
+	formatter_info->segment->offset = formatter_info->offset;
+	formatter_info->segment->bytes = bytes;
 
 	if (0 == bytes)
 		return 0;
 
-	memmove(buffer + offset, content, bytes);
+	memmove(formatter_info->buffer + formatter_info->offset, content, bytes);
 
 	return bytes;
 }
@@ -781,6 +780,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 		} else {
 			char dummy_buffer[4];	/* flawfinder: ignore - unused. */
+			struct pvformatter_args_s formatter_info;
 
 			display->format[segment].offset = 0;
 			display->format[segment].bytes = 0;
@@ -796,10 +796,26 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			 * the previous line, or numeric mode knowing which
 			 * additional display options are enabled.
 			 */
+			memset(&formatter_info, 0, sizeof(formatter_info));
 			dummy_buffer[0] = '\0';
-			(void) format_component_array[component_type].function(state, display,
-									       &(display->format[segment]),
-									       dummy_buffer, 0, 0);
+
+			formatter_info.state = state;
+			formatter_info.display = display;
+			formatter_info.segment = &(display->format[segment]);
+			formatter_info.buffer = dummy_buffer;
+			formatter_info.buffer_size = 0;
+			formatter_info.offset = 0;
+
+			/*@-compmempass@ */
+			(void) format_component_array[component_type].function(&formatter_info);
+			/*@+compmempass@ */
+			/*
+			 * splint - the buffer we point formatter_info to is
+			 * on the stack so doesn't match the "dependent"
+			 * annotation, but there's no other appropriate
+			 * annotation that doesn't make splint think there's
+			 * a leak here.
+			 */
 		}
 
 		display->format_segment_count++;
@@ -829,13 +845,14 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 {
 	struct pvdisplay_component_s *format_component_array;
 	char display_segments[1024];	 /* flawfinder: ignore - always bounded */
-	size_t display_segment_offset;
 	size_t segment_idx, dynamic_segment_count;
 	const char *display_format;
 	size_t static_portion_width, dynamic_segment_width;
 	size_t display_buffer_offset, display_buffer_remaining;
 	size_t new_display_string_bytes, new_display_string_width;
+	struct pvformatter_args_s formatter_info;
 
+	memset(&formatter_info, 0, sizeof(formatter_info));
 	display_segments[0] = '\0';
 
 	/* Quick safety check - state and display must exist. */
@@ -843,6 +860,12 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		return false;
 	if (NULL == display)
 		return false;
+
+	formatter_info.state = state;
+	formatter_info.display = display;
+	formatter_info.buffer = display_segments;
+	formatter_info.buffer_size = sizeof(display_segments);
+	formatter_info.offset = 0;
 
 	format_component_array = pv__format_components();
 
@@ -911,8 +934,6 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	 * output, in two passes.
 	 */
 
-	display_segment_offset = 0;
-
 	/* First pass - all components with a fixed width. */
 
 	static_portion_width = 0;
@@ -942,16 +963,17 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 		segment->width = segment->chosen_size;
 
-		bytes_added =
-		    component->function(state, display, segment, display_segments, sizeof(display_segments),
-					display_segment_offset);
+		formatter_info.segment = segment;
+		/*@-compmempass@ */
+		bytes_added = component->function(&formatter_info);
+		/*@+compmempass@ *//* see previous ->function() note. */
 
 		segment->width = 0;
 		if (bytes_added > 0) {
-			segment->width = pv_strwidth(&(display_segments[display_segment_offset]), bytes_added);
+			segment->width = pv_strwidth(&(display_segments[formatter_info.offset]), bytes_added);
 		}
 
-		display_segment_offset += bytes_added;
+		formatter_info.offset += bytes_added;
 		static_portion_width += segment->width;
 	}
 
@@ -990,11 +1012,13 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 			continue;
 
 		segment->width = dynamic_segment_width;
-		bytes_added =
-		    component->function(state, display, segment, display_segments, sizeof(display_segments),
-					display_segment_offset);
 
-		display_segment_offset += bytes_added;
+		formatter_info.segment = segment;
+		/*@-compmempass@ */
+		bytes_added = component->function(&formatter_info);
+		/*@+compmempass@ *//* see earlier ->function() note. */
+
+		formatter_info.offset += bytes_added;
 	}
 
 	/*

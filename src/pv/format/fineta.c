@@ -18,8 +18,7 @@
 /*
  * Estimated local time of completion.
  */
-size_t pv_formatter_fineta(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment, char *buffer,
-				size_t buffer_size, size_t offset)
+size_t pv_formatter_fineta(pvformatter_args_t args)
 {
 	char content[128];		 /* flawfinder: ignore - always bounded */
 	time_t now, then;
@@ -33,10 +32,10 @@ size_t pv_formatter_fineta(pvstate_t state, pvdisplay_t display, pvdisplay_segme
 	/*
 	 * Don't try to calculate this if the size is not known.
 	 */
-	if (state->control.size < 1)
+	if (args->state->control.size < 1)
 		return 0;
 
-	if (0 == buffer_size)
+	if (0 == args->buffer_size)
 		return 0;
 
 	now = time(NULL);
@@ -48,8 +47,8 @@ size_t pv_formatter_fineta(pvstate_t state, pvdisplay_t display, pvdisplay_segme
 	 * lookup.
 	 */
 
-	eta = pv_seconds_remaining(state->transfer.transferred - display->initial_offset,
-				    state->control.size - display->initial_offset, state->calc.current_avg_rate);
+	eta = pv_seconds_remaining(args->state->transfer.transferred - args->display->initial_offset,
+				    args->state->control.size - args->display->initial_offset, args->state->calc.current_avg_rate);
 
 	/* Bounds check - see pv_formatter_eta(). */
 	eta = pv_bound_long(eta, 0, (long) 360000000L);
@@ -92,5 +91,5 @@ size_t pv_formatter_fineta(pvstate_t state, pvdisplay_t display, pvdisplay_segme
 		}
 	}
 
-	return pv_formatter_segmentcontent(content, segment, buffer, buffer_size, offset);
+	return pv_formatter_segmentcontent(content, args);
 }

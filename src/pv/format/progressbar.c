@@ -233,82 +233,79 @@ static size_t pv_formatter_progress_unknownsize(pvstate_t state,	/*@unused@ */
 /*
  * Progress bar.
  */
-size_t pv_formatter_progress(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment, char *buffer,
-				  size_t buffer_size, size_t offset)
+size_t pv_formatter_progress(pvformatter_args_t args)
 {
 	char content[1024];		 /* flawfinder: ignore - always bounded */
 	size_t bytes;
 
 	content[0] = '\0';
 
-	if (0 == buffer_size)
+	if (0 == args->buffer_size)
 		return 0;
 
-	if (state->control.size > 0 || state->control.rate_gauge) {
+	if (args->state->control.size > 0 || args->state->control.rate_gauge) {
 		/* Known size or rate gauge - bar with percentage. */
 		bytes =
-		    pv_formatter_progress_knownsize(state, display, content, sizeof(content), segment->width, true, true,
+		    pv_formatter_progress_knownsize(args->state, args->display, content, sizeof(content), args->segment->width, true, true,
 						  true);
 	} else {
 		/* Unknown size - back-and-forth moving indicator. */
-		bytes = pv_formatter_progress_unknownsize(state, display, content, sizeof(content), segment->width, true);
+		bytes = pv_formatter_progress_unknownsize(args->state, args->display, content, sizeof(content), args->segment->width, true);
 	}
 
 	content[bytes] = '\0';
 
-	return pv_formatter_segmentcontent(content, segment, buffer, buffer_size, offset);
+	return pv_formatter_segmentcontent(content, args);
 }
 
 
 /*
  * Progress bar, without sides and without a number afterwards.
  */
-size_t pv_formatter_progress_bar_only(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment,
-					   char *buffer, size_t buffer_size, size_t offset)
+size_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 {
 	char content[1024];		 /* flawfinder: ignore - always bounded */
 	size_t bytes;
 
 	content[0] = '\0';
 
-	if (0 == buffer_size)
+	if (0 == args->buffer_size)
 		return 0;
 
-	if (state->control.size > 0 || state->control.rate_gauge) {
+	if (args->state->control.size > 0 || args->state->control.rate_gauge) {
 		/* Known size or rate gauge - bar with percentage. */
 		bytes =
-		    pv_formatter_progress_knownsize(state, display, content, sizeof(content), segment->width, false, true,
+		    pv_formatter_progress_knownsize(args->state, args->display, content, sizeof(content), args->segment->width, false, true,
 						  false);
 	} else {
 		/* Unknown size - back-and-forth moving indicator. */
 		bytes =
-		    pv_formatter_progress_unknownsize(state, display, content, sizeof(content), segment->width, false);
+		    pv_formatter_progress_unknownsize(args->state, args->display, content, sizeof(content), args->segment->width, false);
 	}
 
 	content[bytes] = '\0';
 
-	return pv_formatter_segmentcontent(content, segment, buffer, buffer_size, offset);
+	return pv_formatter_segmentcontent(content, args);
 }
 
 
 /*
  * The number after the progress bar.
  */
-size_t pv_formatter_progress_amount_only(pvstate_t state, pvdisplay_t display, pvdisplay_segment_t segment,
-					      char *buffer, size_t buffer_size, size_t offset)
+size_t pv_formatter_progress_amount_only(pvformatter_args_t args)
 {
 	char content[256];		 /* flawfinder: ignore - always bounded */
 	size_t bytes;
 
 	content[0] = '\0';
 
-	if (0 == buffer_size)
+	if (0 == args->buffer_size)
 		return 0;
 
-	if (state->control.size > 0 || state->control.rate_gauge) {
+	if (args->state->control.size > 0 || args->state->control.rate_gauge) {
 		/* Known size or rate gauge - percentage or rate. */
 		bytes =
-		    pv_formatter_progress_knownsize(state, display, content, sizeof(content), segment->width, false,
+		    pv_formatter_progress_knownsize(args->state, args->display, content, sizeof(content), args->segment->width, false,
 						  false, true);
 	} else {
 		/* Unknown size - no number. */
@@ -317,5 +314,5 @@ size_t pv_formatter_progress_amount_only(pvstate_t state, pvdisplay_t display, p
 
 	content[bytes] = '\0';
 
-	return pv_formatter_segmentcontent(content, segment, buffer, buffer_size, offset);
+	return pv_formatter_segmentcontent(content, args);
 }

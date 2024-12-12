@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-10 22:03+0000\n"
+"POT-Creation-Date: 2024-12-12 22:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -417,7 +417,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:891 src/pv/transfer.c:1056
+#: src/pv/display.c:914 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
@@ -449,34 +449,34 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/format/averagerate.c:31 src/pv/format/progressbar.c:59
-#: src/pv/format/rate.c:33 src/pv/loop.c:549
+#: src/pv/format/averagerate.c:30 src/pv/format/progressbar.c:59
+#: src/pv/format/rate.c:32 src/pv/loop.c:549
 msgid "b/s"
 msgstr ""
 
-#: src/pv/format/averagerate.c:35 src/pv/format/progressbar.c:63
-#: src/pv/format/rate.c:37
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:63
+#: src/pv/format/rate.c:36
 msgid "/s"
 msgstr ""
 
-#: src/pv/format/averagerate.c:35 src/pv/format/progressbar.c:63
-#: src/pv/format/rate.c:37 src/pv/loop.c:549
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:63
+#: src/pv/format/rate.c:36 src/pv/loop.c:549
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/format/bytes.c:32
+#: src/pv/format/bytes.c:31
 msgid "b"
 msgstr ""
 
-#: src/pv/format/bytes.c:35 src/pv/transfer.c:594
+#: src/pv/format/bytes.c:34 src/pv/transfer.c:594
 msgid "B"
 msgstr ""
 
-#: src/pv/format/eta.c:53 src/pv/format/eta.c:57
+#: src/pv/format/eta.c:52 src/pv/format/eta.c:56
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/format/fineta.c:81
+#: src/pv/format/fineta.c:80
 msgid "FIN"
 msgstr ""
 

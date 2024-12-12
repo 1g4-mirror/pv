@@ -355,9 +355,22 @@ struct pvstate_s {
 typedef struct pvdisplay_s *pvdisplay_t;
 typedef struct pvdisplay_segment_s *pvdisplay_segment_t;
 
+/*
+ * Structure containing the parameters used by formatters.
+ */
+struct pvformatter_args_s {
+	/*@dependent@*/ pvstate_t state;		/* overall state */
+	/*@dependent@*/ pvdisplay_t display;		/* the display being updated */
+	/*@dependent@*/ pvdisplay_segment_t segment;	/* the segment of the display */
+	/*@dependent@*/ char *buffer;			/* buffer to write formatted segments into */
+	size_t buffer_size;		/* size of the buffer */
+	size_t offset;			/* current write position in the buffer */
+};
+typedef struct pvformatter_args_s *pvformatter_args_t;
+
 
 /* Pointer to a formatter function. */
-typedef size_t (*pvdisplay_formatter_t)(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+typedef size_t (*pvdisplay_formatter_t)(pvformatter_args_t);
 
 
 /*
@@ -399,7 +412,7 @@ long pv_seconds_remaining(const off_t, const off_t, const long double);
 void pv_si_prefix(long double *, char *, const long double, pvtransfercount_t);
 void pv_describe_amount(char *, size_t, char *, long double, char *, char *, pvtransfercount_t);
 
-size_t pv_formatter_segmentcontent(char *, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_segmentcontent(char *, pvformatter_args_t);
 
 /*
  * Formatting functions.
@@ -422,19 +435,19 @@ size_t pv_formatter_segmentcontent(char *, pvdisplay_segment_t, char *, size_t, 
  * If called with a buffer size of 0, only the side effects occur (such as
  * setting flags like display->showing_timer).
  */
-size_t pv_formatter_progress(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_progress_bar_only(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_progress_amount_only(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_timer(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_eta(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_fineta(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_rate(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_average_rate(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_bytes(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_buffer_percent(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_last_written(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_previous_line(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
-size_t pv_formatter_name(pvstate_t, pvdisplay_t, pvdisplay_segment_t, char *, size_t, size_t);
+size_t pv_formatter_progress(pvformatter_args_t);
+size_t pv_formatter_progress_bar_only(pvformatter_args_t);
+size_t pv_formatter_progress_amount_only(pvformatter_args_t);
+size_t pv_formatter_timer(pvformatter_args_t);
+size_t pv_formatter_eta(pvformatter_args_t);
+size_t pv_formatter_fineta(pvformatter_args_t);
+size_t pv_formatter_rate(pvformatter_args_t);
+size_t pv_formatter_average_rate(pvformatter_args_t);
+size_t pv_formatter_bytes(pvformatter_args_t);
+size_t pv_formatter_buffer_percent(pvformatter_args_t);
+size_t pv_formatter_last_written(pvformatter_args_t);
+size_t pv_formatter_previous_line(pvformatter_args_t);
+size_t pv_formatter_name(pvformatter_args_t);
 
 bool pv_format(pvstate_t, /*@null@*/ const char *, pvdisplay_t, bool, bool);
 void pv_display(pvstate_t, bool);
