@@ -292,7 +292,7 @@ static size_t pv_formatter_progress_unknownsize(pvformatter_args_t args, char *b
  */
 size_t pv_formatter_progress(pvformatter_args_t args)
 {
-	char content[1024];		 /* flawfinder: ignore - always bounded */
+	char content[4096];		 /* flawfinder: ignore - always bounded */
 	size_t bytes;
 
 	content[0] = '\0';
@@ -322,7 +322,7 @@ size_t pv_formatter_progress(pvformatter_args_t args)
  */
 size_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 {
-	char content[1024];		 /* flawfinder: ignore - always bounded */
+	char content[4096];		 /* flawfinder: ignore - always bounded */
 	size_t bytes;
 
 	content[0] = '\0';
