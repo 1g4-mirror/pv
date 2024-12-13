@@ -299,7 +299,7 @@ size_t pv_formatter_progress(pvformatter_args_t args)
 	content[0] = '\0';
 
 	if (0 == args->segment->parameter)
-		args->segment->parameter = 1 + pv_display_barstyle_index(args->display, "default");
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, "default");
 
 	if (0 == args->buffer_size)
 		return 0;
@@ -329,7 +329,7 @@ size_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 	content[0] = '\0';
 
 	if (0 == args->segment->parameter)
-		args->segment->parameter = 1 + pv_display_barstyle_index(args->display, "default");
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, "default");
 
 	if (0 == args->buffer_size)
 		return 0;

@@ -29,7 +29,7 @@
  * data types and their associated alignment padding tend to outweigh the
  * memory savings from using pointers and shared strings.
  */
-bool pv_barstyle(pvbarstyle_t style, const char *name)
+static bool pv_barstyle(pvformatter_args_t args, pvbarstyle_t style, const char *name)
 {
 #define populate_string(item, str, w) { \
   item.width = w; \
@@ -44,7 +44,7 @@ bool pv_barstyle(pvbarstyle_t style, const char *name)
 
 	memset(style, 0, sizeof(*style));
 
-	if (0 == strcmp(name, "block")) {
+	if (args->state->control.can_display_utf8 && 0 == strcmp(name, "block")) {
 
 		style->style_id = 2;
 
@@ -58,7 +58,7 @@ bool pv_barstyle(pvbarstyle_t style, const char *name)
 
 		return true;
 
-	} else if (0 == strcmp(name, "granular")) {
+	} else if (args->state->control.can_display_utf8 && 0 == strcmp(name, "granular")) {
 
 		style->style_id = 3;
 
@@ -79,7 +79,7 @@ bool pv_barstyle(pvbarstyle_t style, const char *name)
 
 		return true;
 
-	} else if (0 == strcmp(name, "shaded")) {
+	} else if (args->state->control.can_display_utf8 && 0 == strcmp(name, "shaded")) {
 
 		style->style_id = 4;
 
@@ -116,13 +116,13 @@ bool pv_barstyle(pvbarstyle_t style, const char *name)
 
 
 /*
- * Return the index into display->barstyle for the style with the given
- * name, adding that style to the array if it's not there already and
+ * Return the index into args->display->barstyle for the style with the
+ * given name, adding that style to the array if it's not there already and
  * there's room.
  *
  * If there is no room, returns zero, so the first style is re-used.
  */
-int pv_display_barstyle_index(pvdisplay_t display, const char *name)
+int pv_display_barstyle_index(pvformatter_args_t args, const char *name)
 {
 	struct pvbarstyle_s style;
 	int barstyle_index;
@@ -132,16 +132,17 @@ int pv_display_barstyle_index(pvdisplay_t display, const char *name)
 
 	memset(&style, 0, sizeof(style));
 #ifdef ENABLE_DEBUGGING
-	found = pv_barstyle(&style, name);
+	found = pv_barstyle(args, &style, name);
 	if (!found)
 		debug("%s: %s", name, "bar style not found, using default");
 #else
-	(void) pv_barstyle(&style, name);
+	(void) pv_barstyle(args, &style, name);
 #endif
 
-	for (barstyle_index = 0; barstyle_index < PV_BARSTYLE_MAX && display->barstyle[barstyle_index].style_id > 0;
+	for (barstyle_index = 0;
+	     barstyle_index < PV_BARSTYLE_MAX && args->display->barstyle[barstyle_index].style_id > 0;
 	     barstyle_index++) {
-		if (display->barstyle[barstyle_index].style_id == style.style_id) {
+		if (args->display->barstyle[barstyle_index].style_id == style.style_id) {
 			debug("%s: %s: %d", name, "found in bar style array", barstyle_index);
 			return barstyle_index;
 		}
@@ -152,7 +153,7 @@ int pv_display_barstyle_index(pvdisplay_t display, const char *name)
 		return 0;
 	}
 
-	memcpy(&(display->barstyle[barstyle_index]), &style, sizeof(style));	/* flawfinder: ignore */
+	memcpy(&(args->display->barstyle[barstyle_index]), &style, sizeof(style));	/* flawfinder: ignore */
 	/* flawfinder - the destination is an array element of the right size. */
 	debug("%s: %s: %d", name, "added to bar style array", barstyle_index);
 	return barstyle_index;
@@ -162,27 +163,27 @@ int pv_display_barstyle_index(pvdisplay_t display, const char *name)
 size_t pv_formatter_bar_default(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter)
-		args->segment->parameter = 1 + pv_display_barstyle_index(args->display, "default");
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, "default");
 	return pv_formatter_progress_bar_only(args);
 }
 
 size_t pv_formatter_bar_block(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter)
-		args->segment->parameter = 1 + pv_display_barstyle_index(args->display, "block");
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, "block");
 	return pv_formatter_progress_bar_only(args);
 }
 
 size_t pv_formatter_bar_granular(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter)
-		args->segment->parameter = 1 + pv_display_barstyle_index(args->display, "granular");
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, "granular");
 	return pv_formatter_progress_bar_only(args);
 }
 
 size_t pv_formatter_bar_shaded(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter)
-		args->segment->parameter = 1 + pv_display_barstyle_index(args->display, "shaded");
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, "shaded");
 	return pv_formatter_progress_bar_only(args);
 }
