@@ -849,7 +849,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	       bool final)
 {
 	struct pvdisplay_component_s *format_component_array;
-	char display_segments[1024];	 /* flawfinder: ignore - always bounded */
+	char display_segments[PV_SIZEOF_FORMAT_SEGMENTS_BUF];	/* flawfinder: ignore - always bounded */
 	size_t segment_idx, dynamic_segment_count;
 	const char *display_format;
 	size_t static_portion_width, dynamic_segment_width;
@@ -896,7 +896,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	/*
 	 * Reallocate the output buffer if the display width changes.
 	 */
-	if (display->display_buffer != NULL && display->display_buffer_size < (size_t) ((state->control.width * 2))) {
+	if (display->display_buffer != NULL && display->display_buffer_size < (size_t) ((state->control.width * 4))) {
 		free(display->display_buffer);
 		display->display_buffer = NULL;
 		display->display_buffer_size = 0;
@@ -909,7 +909,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		char *new_buffer;
 		size_t new_size;
 
-		new_size = (size_t) ((2 * state->control.width) + 80);
+		new_size = (size_t) ((4 * state->control.width) + 80);
 		if (NULL != state->control.name)
 			new_size += strlen(state->control.name);	/* flawfinder: ignore */
 		/* flawfinder: name is always set by pv_strdup(), which bounds with a \0. */
@@ -995,6 +995,9 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	 */
 	if (dynamic_segment_count > 1)
 		dynamic_segment_width /= dynamic_segment_count;
+
+	debug("control.width=%d static_portion_width=%d dynamic_segment_width=%d dynamic_segment_count=%d",
+	      state->control.width, static_portion_width, dynamic_segment_width, dynamic_segment_count);
 
 	for (segment_idx = 0; segment_idx < display->format_segment_count; segment_idx++) {
 		pvdisplay_segment_t segment;
