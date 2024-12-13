@@ -23,6 +23,7 @@ src/pv/display.c \
 src/pv/elapsedtime.c \
 src/pv/file.c \
 src/pv/format/averagerate.c \
+src/pv/format/barstyle.c \
 src/pv/format/bufferpercent.c \
 src/pv/format/bytes.c \
 src/pv/format/eta.c \
@@ -113,10 +114,10 @@ SUFFIXES = .c .o .e
 	-flawfinder $< >> $@ 2>&1
 
 indent:
-	cd $(srcdir) && indent -npro -kr -i8 -cd42 -c45 -l120 src/*/*.c
+	cd $(srcdir) && indent -npro -kr -i8 -cd42 -c45 -l120 src/*/*.c src/*/*/*.c
 
 indentclean:
-	rm -f $(srcdir)/src/*/*.c~
+	rm -f $(srcdir)/src/*/*.c~ $(srcdir)/src/*/*/*.c~
 
 analyse: $(pv_SOURCES:.c=.e) FORCE
 	grep -E -e '^Finished checking --' -e 'Hits = ' $+ 2>/dev/null || true
@@ -124,7 +125,7 @@ analyse: $(pv_SOURCES:.c=.e) FORCE
 FORCE:
 
 clean-local:
-	rm -f src/*/*.e
+	rm -f src/*/*.e src/*/*/*.e
 
 # Convenience alias for "make check": "make test"
 test: check
