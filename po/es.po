@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-12 22:09+0000\n"
+"POT-Creation-Date: 2024-12-13 19:54+0000\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -403,7 +403,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:914 src/pv/transfer.c:1056
+#: src/pv/display.c:919 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr ""
 
@@ -435,17 +435,17 @@ msgstr ""
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/format/averagerate.c:30 src/pv/format/progressbar.c:59
+#: src/pv/format/averagerate.c:30 src/pv/format/progressbar.c:87
 #: src/pv/format/rate.c:32 src/pv/loop.c:549
 msgid "b/s"
 msgstr ""
 
-#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:63
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:91
 #: src/pv/format/rate.c:36
 msgid "/s"
 msgstr ""
 
-#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:63
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:91
 #: src/pv/format/rate.c:36 src/pv/loop.c:549
 msgid "B/s"
 msgstr ""
@@ -454,15 +454,15 @@ msgstr ""
 msgid "b"
 msgstr ""
 
-#: src/pv/format/bytes.c:34 src/pv/transfer.c:594
+#: src/pv/format/bytes.c:35 src/pv/transfer.c:594
 msgid "B"
 msgstr ""
 
-#: src/pv/format/eta.c:52 src/pv/format/eta.c:56
+#: src/pv/format/eta.c:53 src/pv/format/eta.c:57
 msgid "ETA"
 msgstr ""
 
-#: src/pv/format/fineta.c:80
+#: src/pv/format/fineta.c:81
 msgid "FIN"
 msgstr ""
 

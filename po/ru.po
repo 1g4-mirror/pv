@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-12 22:09+0000\n"
+"POT-Creation-Date: 2024-12-13 19:54+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -412,7 +412,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:914 src/pv/transfer.c:1056
+#: src/pv/display.c:919 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 
@@ -444,17 +444,17 @@ msgstr "(нет)"
 msgid "(stdin)"
 msgstr "(стд. ввод)"
 
-#: src/pv/format/averagerate.c:30 src/pv/format/progressbar.c:59
+#: src/pv/format/averagerate.c:30 src/pv/format/progressbar.c:87
 #: src/pv/format/rate.c:32 src/pv/loop.c:549
 msgid "b/s"
 msgstr "бит/с"
 
-#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:63
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:91
 #: src/pv/format/rate.c:36
 msgid "/s"
 msgstr "/с"
 
-#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:63
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:91
 #: src/pv/format/rate.c:36 src/pv/loop.c:549
 msgid "B/s"
 msgstr "байт/с"
@@ -463,15 +463,15 @@ msgstr "байт/с"
 msgid "b"
 msgstr "бит"
 
-#: src/pv/format/bytes.c:34 src/pv/transfer.c:594
+#: src/pv/format/bytes.c:35 src/pv/transfer.c:594
 msgid "B"
 msgstr "байт"
 
-#: src/pv/format/eta.c:52 src/pv/format/eta.c:56
+#: src/pv/format/eta.c:53 src/pv/format/eta.c:57
 msgid "ETA"
 msgstr "ОЖИД"
 
-#: src/pv/format/fineta.c:80
+#: src/pv/format/fineta.c:81
 msgid "FIN"
 msgstr "ЗАВЕРШ"
 

@@ -9,6 +9,9 @@
 #ifndef _PV_INTERNAL_H
 #define _PV_INTERNAL_H 1
 
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
 #include <stdlib.h>
 #include <signal.h>
 #include <time.h>
@@ -45,6 +48,10 @@ extern "C" {
 #define PV_SIZEOF_FILE_FDPATH		4096
 #define PV_SIZEOF_DISPLAY_NAME		512
 
+#define PV_BARSTYLE_MAX			4	/* number of different styles allowed in a format */
+#define PV_BARSTYLE_SIZEOF_STRING	10	/* max length of a bar constituent component in bytes */
+#define PV_BARSTYLE_MAX_FILLERS		10	/* max number of bar filler strings */
+
 #define PV_DISPLAY_WINDOWTITLE		1
 #define PV_DISPLAY_PROCESSTITLE		2
 
@@ -65,6 +72,50 @@ typedef enum {
 	PV_TRANSFERCOUNT_DECBYTES,
 	PV_TRANSFERCOUNT_LINES
 } pvtransfercount_t;
+
+
+/*
+ * Structure describing a short string used as part of a progress bar, whose
+ * width in display characters may not be the same as its length in bytes.
+ */
+struct pvbarstring_spec_s {
+	char string[PV_BARSTYLE_SIZEOF_STRING];
+	uint8_t width;
+	uint8_t bytes;
+};
+
+/*
+ * Structure describing a style of progress bar.
+ *
+ * The part that moves back and forth when the size isn't known, such as
+ * "<=>", is "indicator".
+ *
+ * The string used to populate the rest of the bar is one of "filler", which
+ * contains "filler_entries" array items.  The first item "filler[0]" is
+ * used for an empty part such as " ".  The last item
+ * "filler[filler_entries-1]" is used for a 100% full part, such as "=".
+ *
+ * If there are more than the minimum of 2 entries, then the intervening
+ * entries are used for partial fills.
+ *
+ * When there are only 2 entries and the bar isn't completely empty or full,
+ * the last filled portion of the bar is filled with "tip" instead of the
+ * last filler item to indicate the tip of the bar, such as ">".
+ *
+ * Note that only the indicator is expected to ever be wider than 1 display
+ * character.  All other items are expected to have a width of 0 or 1.
+ *
+ * The "style_id" is an opaque identifier that should only be used to
+ * determine whether two styles are the same.  It is always nonzero.
+ */
+struct pvbarstyle_s {
+	uint8_t style_id;
+	uint8_t filler_entries;
+	struct pvbarstring_spec_s indicator;
+	struct pvbarstring_spec_s tip;
+	struct pvbarstring_spec_s filler[PV_BARSTYLE_MAX_FILLERS];
+};
+typedef struct pvbarstyle_s *pvbarstyle_t;
 
 
 /*
@@ -183,11 +234,14 @@ struct pvstate_s {
 		struct pvdisplay_segment_s {	/* format string broken into segments */
 			/* See pv__format_init() for more details. */
 			int type;			/* component type, -1 for static string */
+			int parameter;			/* component parameter, such as bar style index */
 			size_t chosen_size;		/* "n" from %<n>A, or 0 */
 			size_t offset;			/* start offset of this segment */
 			size_t bytes;			/* length of segment in bytes */
 			size_t width;			/* displayed width of segment */
 		} format[PV_FORMAT_ARRAY_MAX];
+
+		struct pvbarstyle_s barstyle[PV_BARSTYLE_MAX];
 
 		/* The last-written "n" bytes. */
 		char lastwritten_buffer[PV_SIZEOF_LASTWRITTEN_BUFFER];
@@ -412,6 +466,9 @@ long pv_seconds_remaining(const off_t, const off_t, const long double);
 void pv_si_prefix(long double *, char *, const long double, pvtransfercount_t);
 void pv_describe_amount(char *, size_t, char *, long double, char *, char *, pvtransfercount_t);
 
+bool pv_barstyle(pvbarstyle_t, const char *);
+int pv_display_barstyle_index(pvdisplay_t, const char *);
+
 size_t pv_formatter_segmentcontent(char *, pvformatter_args_t);
 
 /*
@@ -438,6 +495,10 @@ size_t pv_formatter_segmentcontent(char *, pvformatter_args_t);
 size_t pv_formatter_progress(pvformatter_args_t);
 size_t pv_formatter_progress_bar_only(pvformatter_args_t);
 size_t pv_formatter_progress_amount_only(pvformatter_args_t);
+size_t pv_formatter_bar_default(pvformatter_args_t);
+size_t pv_formatter_bar_block(pvformatter_args_t);
+size_t pv_formatter_bar_granular(pvformatter_args_t);
+size_t pv_formatter_bar_shaded(pvformatter_args_t);
 size_t pv_formatter_timer(pvformatter_args_t);
 size_t pv_formatter_eta(pvformatter_args_t);
 size_t pv_formatter_fineta(pvformatter_args_t);
