@@ -1,4 +1,4 @@
-.TH PV 1 2024-12-10 pv-1.9.15 "User Commands"
+.TH PV 1 2024-12-13 pv-1.9.15 "User Commands"
 .\"
 .SH NAME
 pv \- monitor the progress of data through a pipe
@@ -391,7 +391,7 @@ Equivalent to \*(lq\fB\-\-progress\fR\*(rq.
 Expands to fill the remaining space unless prefixed by a number to set the
 width, such as \*(lq\fB%20p\fR\*(rq or \*(lq\fB%20{progress}\fR\*(rq.
 .TP
-.B %{progress-bar-only}
+.BR %{progress-bar-only} ", " %{bar} ", " %{bar-default}
 Progress bar, without any sides, and without any percentage displayed
 afterwards.
 Expands to fill the remaining space unless prefixed by a number.
@@ -399,6 +399,29 @@ Expands to fill the remaining space unless prefixed by a number.
 .B %{progress-amount-only}
 The percentage completion (or maximum rate, with \*(lq\fB\-\-gauge\fR\*(rq
 when the size is unknown).
+.TP
+.B %{bar-block}
+Progress bar using Unicode full blocks, without any sides, and without any
+percentage displayed afterwards.
+Expands to fill the remaining space unless prefixed by a number.
+If UTF-8 output is not available, the default format is used.
+.TP
+.B %{bar-granular}
+Progress bar using Unicode full blocks, and 1/8th blocks for partial fills,
+providing a more granular display.
+Like the other \*(lq%{bar}\*(rq strings this shows the bar without any
+sides, and without any percentage displayed afterwards, and expands to fill
+the remaining space unless prefixed by a number.
+If UTF-8 output is not available, the default format is used.
+.TP
+.B %{bar-shaded}
+Progress bar using Unicode full blocks and shade characters - dark and
+medium shade are used for partial fills, and the light shade is used for the
+background.
+Like the other \*(lq%{bar}\*(rq strings this shows the bar without any
+sides, and without any percentage displayed afterwards, and expands to fill
+the remaining space unless prefixed by a number.
+If UTF-8 output is not available, the default format is used.
 .TP
 .BR %t ", " %{timer}
 Elapsed time.

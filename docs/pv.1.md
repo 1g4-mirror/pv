@@ -403,7 +403,7 @@ contain the following sequences:
     unless prefixed by a number to set the width, such as "**%20p**" or
     "**%20{progress}**".
 
-**%{progress-bar-only}**
+**%{progress-bar-only}**, **%{bar}**, **%{bar-default}**
 
 :   Progress bar, without any sides, and without any percentage
     displayed afterwards. Expands to fill the remaining space unless
@@ -413,6 +413,32 @@ contain the following sequences:
 
 :   The percentage completion (or maximum rate, with "**\--gauge**" when
     the size is unknown).
+
+**%{bar-block}**
+
+:   Progress bar using Unicode full blocks, without any sides, and
+    without any percentage displayed afterwards. Expands to fill the
+    remaining space unless prefixed by a number. If UTF-8 output is not
+    available, the default format is used.
+
+**%{bar-granular}**
+
+:   Progress bar using Unicode full blocks, and 1/8th blocks for partial
+    fills, providing a more granular display. Like the other "%{bar}"
+    strings this shows the bar without any sides, and without any
+    percentage displayed afterwards, and expands to fill the remaining
+    space unless prefixed by a number. If UTF-8 output is not available,
+    the default format is used.
+
+**%{bar-shaded}**
+
+:   Progress bar using Unicode full blocks and shade characters - dark
+    and medium shade are used for partial fills, and the light shade is
+    used for the background. Like the other "%{bar}" strings this shows
+    the bar without any sides, and without any percentage displayed
+    afterwards, and expands to fill the remaining space unless prefixed
+    by a number. If UTF-8 output is not available, the default format is
+    used.
 
 **%t**, **%{timer}**
 
