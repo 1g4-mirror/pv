@@ -127,19 +127,13 @@ static size_t pv_formatter_progress_knownsize(pvformatter_args_t args, char *buf
 		bar_area_width = args->segment->width - after_bar_width;
 	}
 
-	/*
-	 * Make sure there is enough room in the buffer, even if all of the
-	 * bar characters are very wide.
-	 */
-	if (4 * bar_area_width > buffer_size - 16)
-		bar_area_width = (buffer_size - 16) / 4;
-
 	filled_bar_width = (size_t) ((bar_area_width * bar_percentage) / 100);
 	/* Leave room for the tip of the bar. */
 	if (has_tip && filled_bar_width > 0)
-		filled_bar_width--;
+		filled_bar_width -= style->tip.width;
 
-	debug("width=%d bar_area_width=%d filled_bar_width=%d", args->segment->width, bar_area_width, filled_bar_width);
+	debug("width=%d bar_area_width=%d filled_bar_width=%d after_bar_width=%d", args->segment->width, bar_area_width,
+	      filled_bar_width, after_bar_width);
 
 	buffer_offset = 0;
 
@@ -149,16 +143,18 @@ static size_t pv_formatter_progress_knownsize(pvformatter_args_t args, char *buf
 	}
 
 	/* The bar portion. */
-	for (pad_count = 0; pad_count < filled_bar_width && buffer_offset < buffer_size - 4; pad_count++) {
-		if (pad_count < bar_area_width) {
-			append_to_buffer(style->filler[full_cell_index]);
-		}
+	pad_count = 0;
+	while (pad_count < filled_bar_width && pad_count < bar_area_width) {
+		append_to_buffer(style->filler[full_cell_index]);
+		pad_count += style->filler[full_cell_index].width;
+		if (0 == style->filler[full_cell_index].width)
+			pad_count++;
 	}
 
 	/* The tip of the bar, if not at 100%. */
 	if (has_tip && pad_count < bar_area_width) {
 		append_to_buffer(style->tip);
-		pad_count++;
+		pad_count += style->tip.width;
 	}
 
 	/* A partial cell, if there are intermediates and we're not at 100%. */
@@ -172,12 +168,17 @@ static size_t pv_formatter_progress_knownsize(pvformatter_args_t args, char *buf
 			cell_index = full_cell_index;
 
 		append_to_buffer(style->filler[cell_index]);
-		pad_count++;
+		pad_count += style->filler[cell_index].width;
+		if (0 == style->filler[cell_index].width)
+			pad_count++;
 	}
 
 	/* The spaces after the bar. */
-	for (; pad_count < bar_area_width; pad_count++) {
+	while (pad_count < bar_area_width) {
 		append_to_buffer(style->filler[0]);
+		pad_count += style->filler[0].width;
+		if (0 == style->filler[0].width)
+			pad_count++;
 	}
 
 	if (bar_sides) {
@@ -234,13 +235,6 @@ static size_t pv_formatter_progress_unknownsize(pvformatter_args_t args, char *b
 	}
 
 	/*
-	 * Make sure there is enough room in the buffer, even if all of the
-	 * bar characters are very wide.
-	 */
-	if (4 * bar_area_width > buffer_size - 16)
-		bar_area_width = (buffer_size - 16) / 4;
-
-	/*
 	 * Note that pv_calculate_transfer_rate() sets the percentage when
 	 * the size is unknown to a value that goes 0 - 200 and resets, so
 	 * here we make values above 100 send the indicator back down again,
@@ -260,10 +254,12 @@ static size_t pv_formatter_progress_unknownsize(pvformatter_args_t args, char *b
 	}
 
 	/* The spaces before the indicator. */
-	for (pad_count = 0; pad_count < (bar_area_width * indicator_position) / 100; pad_count++) {
-		if (pad_count < bar_area_width) {
-			append_to_buffer(style->filler[0]);
-		}
+	pad_count = 0;
+	while (pad_count < bar_area_width && pad_count < ((bar_area_width * indicator_position) / 100)) {
+		append_to_buffer(style->filler[0]);
+		pad_count += style->filler[0].width;
+		if (0 == style->filler[0].width)
+			pad_count++;
 	}
 
 	/* The indicator. */
@@ -272,8 +268,11 @@ static size_t pv_formatter_progress_unknownsize(pvformatter_args_t args, char *b
 	}
 
 	/* The spaces after the indicator. */
-	for (; pad_count < bar_area_width; pad_count++) {
+	while (pad_count < bar_area_width) {
 		append_to_buffer(style->filler[0]);
+		pad_count += style->filler[0].width;
+		if (0 == style->filler[0].width)
+			pad_count++;
 	}
 
 	if (bar_sides) {
