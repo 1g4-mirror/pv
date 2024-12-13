@@ -48,7 +48,8 @@ size_t pv_formatter_fineta(pvformatter_args_t args)
 	 */
 
 	eta = pv_seconds_remaining(args->state->transfer.transferred - args->display->initial_offset,
-				    args->state->control.size - args->display->initial_offset, args->state->calc.current_avg_rate);
+				   args->state->control.size - args->display->initial_offset,
+				   args->state->calc.current_avg_rate);
 
 	/* Bounds check - see pv_formatter_eta(). */
 	eta = pv_bound_long(eta, 0, (long) 360000000L);

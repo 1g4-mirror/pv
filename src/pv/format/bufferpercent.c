@@ -25,7 +25,8 @@ size_t pv_formatter_buffer_percent(pvformatter_args_t args)
 
 	if (args->state->transfer.buffer_size > 0) {
 		int pct_used = pv_percentage((off_t)
-					     (args->state->transfer.read_position - args->state->transfer.write_position),
+					     (args->state->transfer.read_position -
+					      args->state->transfer.write_position),
 					     (off_t)
 					     (args->state->transfer.buffer_size));
 		(void) pv_snprintf(content, sizeof(content), "{%3d%%}", pct_used);

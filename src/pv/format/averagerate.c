@@ -27,11 +27,12 @@ size_t pv_formatter_average_rate(pvformatter_args_t args)
 	if (args->state->control.bits && !args->state->control.linemode) {
 		/* bits per second */
 		pv_describe_amount(content, sizeof(content),
-			    "(%s)", 8 * args->state->calc.average_rate, "", _("b/s"), args->display->count_type);
+				   "(%s)", 8 * args->state->calc.average_rate, "", _("b/s"), args->display->count_type);
 	} else {
 		/* bytes or lines per second */
 		pv_describe_amount(content,
-			    sizeof(content), "(%s)", args->state->calc.average_rate, _("/s"), _("B/s"), args->display->count_type);
+				   sizeof(content), "(%s)", args->state->calc.average_rate, _("/s"), _("B/s"),
+				   args->display->count_type);
 	}
 	/*@+mustfreefresh@ *//* splint: see above. */
 

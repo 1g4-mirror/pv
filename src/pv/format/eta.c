@@ -32,7 +32,8 @@ size_t pv_formatter_eta(pvformatter_args_t args)
 
 	eta =
 	    pv_seconds_remaining((args->state->transfer.transferred - args->display->initial_offset),
-				  args->state->control.size - args->display->initial_offset, args->state->calc.current_avg_rate);
+				 args->state->control.size - args->display->initial_offset,
+				 args->state->calc.current_avg_rate);
 
 	/*
 	 * Bounds check, so we don't overrun the suffix buffer.  This means

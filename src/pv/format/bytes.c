@@ -28,10 +28,12 @@ size_t pv_formatter_bytes(pvformatter_args_t args)
 	/*@-mustfreefresh@ */
 	if (args->state->control.bits && !args->state->control.linemode) {
 		pv_describe_amount(content, sizeof(content), "%s",
-			    (long double) (args->state->transfer.transferred * 8), "", _("b"), args->display->count_type);
+				   (long double) (args->state->transfer.transferred * 8), "", _("b"),
+				   args->display->count_type);
 	} else {
 		pv_describe_amount(content, sizeof(content), "%s",
-			    (long double) (args->state->transfer.transferred), "", _("B"), args->display->count_type);
+				   (long double) (args->state->transfer.transferred), "", _("B"),
+				   args->display->count_type);
 	}
 	/*@+mustfreefresh@ *//* splint - false positive from gettext(). */
 
