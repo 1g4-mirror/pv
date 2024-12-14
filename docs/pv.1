@@ -204,6 +204,14 @@ Useful in conjunction with \*(lq\fB\-\-cursor\fR\*(rq if you have a
 complicated pipeline and you want to be able to tell different parts of it
 apart.
 .TP
+.BI \-u\  STYLE \fR,\ \fB\-\-bar\-style\  STYLE
+Change the default progress bar style shown by \*(lq\fB\-\-progress\fR\*(rq,
+or by the \*(lq\fB\-\-format\fR\*(rq sequences \*(lq\fB%{progress}\fR\*(rq
+or \*(lq\fB%{progress\-bar\-only}\fR\*(rq, to \fISTYLE\fR.
+The \fISTYLE\fR can be one of \fBplain\fR (the default), \fBblock\fR,
+\fBgranular\fR, or \fBshaded\fR.
+These styles are described in the \fBFORMATTING\fR section below.
+.TP
 .BI \-x\  SPEC \fR,\ \fB\-\-extra\-display\  SPEC
 As well as displaying progress to the terminal, also write it to \fISPEC\fR.
 The \fISPEC\fR must start with a comma-separated list of destinations, and
@@ -391,37 +399,42 @@ Equivalent to \*(lq\fB\-\-progress\fR\*(rq.
 Expands to fill the remaining space unless prefixed by a number to set the
 width, such as \*(lq\fB%20p\fR\*(rq or \*(lq\fB%20{progress}\fR\*(rq.
 .TP
-.BR %{progress-bar-only} ", " %{bar} ", " %{bar-default}
+.BR %{progress\-bar\-only}
 Progress bar, without any sides, and without any percentage displayed
 afterwards.
 Expands to fill the remaining space unless prefixed by a number.
 .TP
-.B %{progress-amount-only}
+.B %{progress\-amount\-only}
 The percentage completion (or maximum rate, with \*(lq\fB\-\-gauge\fR\*(rq
 when the size is unknown).
 .TP
-.B %{bar-block}
+.B %{bar\-plain}
+Progress bar in the standard plain format, without any sides, and without
+any percentage displayed afterwards.
+Expands to fill the remaining space unless prefixed by a number.
+.TP
+.B %{bar\-block}
 Progress bar using Unicode full blocks, without any sides, and without any
 percentage displayed afterwards.
 Expands to fill the remaining space unless prefixed by a number.
-If UTF-8 output is not available, the default format is used.
+If UTF-8 output is not available, the plain format is used.
 .TP
-.B %{bar-granular}
+.B %{bar\-granular}
 Progress bar using Unicode full blocks, and 1/8th blocks for partial fills,
 providing a more granular display.
 Like the other \*(lq%{bar}\*(rq strings this shows the bar without any
 sides, and without any percentage displayed afterwards, and expands to fill
 the remaining space unless prefixed by a number.
-If UTF-8 output is not available, the default format is used.
+If UTF-8 output is not available, the plain format is used.
 .TP
-.B %{bar-shaded}
+.B %{bar\-shaded}
 Progress bar using Unicode full blocks and shade characters - dark and
 medium shade are used for partial fills, and the light shade is used for the
 background.
 Like the other \*(lq%{bar}\*(rq strings this shows the bar without any
 sides, and without any percentage displayed afterwards, and expands to fill
 the remaining space unless prefixed by a number.
-If UTF-8 output is not available, the default format is used.
+If UTF-8 output is not available, the plain format is used.
 .TP
 .BR %t ", " %{timer}
 Elapsed time.
@@ -439,7 +452,7 @@ Equivalent to \*(lq\fB\-\-fineta\fR\*(rq.
 Current data transfer rate.
 Equivalent to \*(lq\fB\-\-rate\fR\*(rq.
 .TP
-.BR %a ", " %{average-rate}
+.BR %a ", " %{average\-rate}
 Average data transfer rate.
 Equivalent to \*(lq\fB\-\-average\-rate\fR\*(rq.
 .TP
@@ -449,19 +462,19 @@ Equivalent to \*(lq\fB\-\-bytes\fR\*(rq.
 If \*(lq\fB\-\-bits\fR\*(rq was specified, \*(lq\fB%b\fR\*(rq shows the bits
 transferred so far, not bytes.
 .TP
-.BR %T ", " %{buffer-percent}
+.BR %T ", " %{buffer\-percent}
 Percentage of the transfer buffer in use.
 Equivalent to \*(lq\fB\-\-buffer\-percent\fR\*(rq.
 Displays \*(lq{\-\-\-\-}\*(rq if the transfer is being done with
 \fBsplice\fR(2), since splicing to or from pipes does not use the buffer.
 .TP
-.BR %nA ", " %n{last-written}
+.BR %nA ", " %n{last\-written}
 Show the last \fIn\fR bytes written (for example, \*(lq\fB%16A\fR\*(rq shows
 the last 16 bytes).
 Shows only dots if the transfer is being done with \fBsplice\fR(2), since
 splicing to or from pipes does not use the buffer.
 .TP
-.BR %nL ", " %n{previous-line}
+.BR %nL ", " %n{previous\-line}
 Show the first \fIn\fR bytes of the most recently written line (for example,
 \*(lq\fB%40L\fR\*(rq shows the first 40 bytes).
 If no \fIn\fR is given, then this expands to fill the available space.

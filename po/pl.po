@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-13 19:54+0000\n"
+"POT-Creation-Date: 2024-12-14 00:00+0000\n"
 "PO-Revision-Date: 2024-10-20 14:07+0000\n"
 "Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -151,133 +151,141 @@ msgid "prefix visual information with NAME"
 msgstr "poprzedź informacje prefiksem NAZWA"
 
 #: src/main/help.c:311
-msgid "SPEC"
+msgid "STYLE"
 msgstr ""
 
 #: src/main/help.c:312
-msgid "also send progress to SPEC"
+msgid "set default bar style to NAME"
+msgstr ""
+
+#: src/main/help.c:314
+msgid "SPEC"
 msgstr ""
 
 #: src/main/help.c:315
+msgid "also send progress to SPEC"
+msgstr ""
+
+#: src/main/help.c:318
 msgid "output transfer statistics at the end"
 msgstr "wyświetl na końcu statystyki transferu"
 
-#: src/main/help.c:318
+#: src/main/help.c:321
 msgid "output even if standard error is not a terminal"
 msgstr "pokaż wyjście nawet standardowe wyjście błędu nie jest terminalem"
 
-#: src/main/help.c:321
+#: src/main/help.c:324
 msgid "use cursor positioning escape sequences"
 msgstr "używaj znaków ucieczki do pozycjonowania kursora"
 
-#: src/main/help.c:324 src/main/help.c:354 src/main/help.c:366
-#: src/main/help.c:376
+#: src/main/help.c:327 src/main/help.c:357 src/main/help.c:369
+#: src/main/help.c:379
 msgid "FILE"
 msgstr "PLIK"
 
-#: src/main/help.c:325
+#: src/main/help.c:328
 msgid "write output to FILE instead of stdout"
 msgstr "zapisz wyjście do PLIK zamiast do wyjścia standardowego"
 
-#: src/main/help.c:327
+#: src/main/help.c:330
 msgid "RATE"
 msgstr "PRĘDKOŚĆ"
 
-#: src/main/help.c:328
+#: src/main/help.c:331
 msgid "limit transfer to RATE bytes per second"
 msgstr "ogranicz przesyłane dane do PRĘDKOŚĆ bajtów na sekundę"
 
-#: src/main/help.c:330 src/main/help.c:339
+#: src/main/help.c:333 src/main/help.c:342
 msgid "BYTES"
 msgstr "BAJTY"
 
-#: src/main/help.c:331
+#: src/main/help.c:334
 msgid "use a buffer size of BYTES"
 msgstr "użyj bufora o rozmiarze BAJTY"
 
-#: src/main/help.c:334
+#: src/main/help.c:337
 msgid "never use splice(), always use read/write"
 msgstr "nigdy nie używaj splice(), zawsze używaj read/write"
 
-#: src/main/help.c:337
+#: src/main/help.c:340
 msgid "skip read errors in input"
 msgstr "pomijaj błędy odczytu wejścia"
 
-#: src/main/help.c:340
+#: src/main/help.c:343
 msgid "skip errors in BYTES blocks at a time"
 msgstr "pomijaj błędy w blokach po BAJTY bajtów na raz"
 
-#: src/main/help.c:343
+#: src/main/help.c:346
 msgid "stop after --size bytes have been transferred"
 msgstr "zakończ po przesłaniu --size bajtów"
 
-#: src/main/help.c:346
+#: src/main/help.c:349
 msgid "flush cache to disk after every write"
 msgstr "wymuś zapis pamięci podręcznej na dysk po każdym zapisie"
 
-#: src/main/help.c:349
+#: src/main/help.c:352
 msgid "use direct I/O to bypass cache"
 msgstr ""
 "użyj bezpośredniego wejścia/wyjścia celem pominięcia pamięci podręcznej"
 
-#: src/main/help.c:352
+#: src/main/help.c:355
 msgid "discard input instead of writing to output"
 msgstr "zignoruj dane wejściowe zamiast wyświetlić je na wyjściu standardowym"
 
-#: src/main/help.c:355
+#: src/main/help.c:358
 msgid "write all input to FILE before writing to output"
 msgstr ""
 "zapisz wszystkie dane wejściowe do PLIK przed wyświetleniem ich na wyjściu"
 
-#: src/main/help.c:357
+#: src/main/help.c:360
 msgid "PID[:FD]"
 msgstr "PID[:FD]"
 
-#: src/main/help.c:358
+#: src/main/help.c:361
 msgid "watch file FD opened by process PID"
 msgstr "obserwuj plik FD otworzony przez proces PID"
 
-#: src/main/help.c:361
+#: src/main/help.c:364
 msgid "PID"
 msgstr "PID"
 
-#: src/main/help.c:362
+#: src/main/help.c:365
 msgid "update settings of process PID"
 msgstr "zaktualizuj ustawienia procesu PID"
 
-#: src/main/help.c:367
+#: src/main/help.c:370
 msgid "save process ID in FILE"
 msgstr "zapisz ID procesu do PLIK"
 
-#: src/main/help.c:370
+#: src/main/help.c:373
 msgid "show this help and exit"
 msgstr "wyświetl te informacje z pomocą i wyjdź"
 
-#: src/main/help.c:373
+#: src/main/help.c:376
 msgid "show version information and exit"
 msgstr "wyświetl informacje o wersji i wyjdź"
 
-#: src/main/help.c:377
+#: src/main/help.c:380
 msgid "write debug logs to FILE"
 msgstr "zapisz logi debugujące do PLIK"
 
-#: src/main/help.c:403
+#: src/main/help.c:406
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Sposób użycia: %s [OPCJA] [PLIK]..."
 
-#: src/main/help.c:414
+#: src/main/help.c:417
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Łączenie PLIK(ów) lub wejścia standardowego, do wyjścia standardowego z "
 "monitoringiem."
 
-#: src/main/help.c:552
+#: src/main/help.c:555
 msgid "Supported format sequences:"
 msgstr ""
 
-#: src/main/help.c:566
+#: src/main/help.c:569
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Proszę przesyłać zgłoszenia błędów do %s"
@@ -314,45 +322,45 @@ msgstr "nie udało się otworzyć urządzenia blokowego"
 msgid "failed to determine size of block device"
 msgstr "nie udało się ustalić rozmiaru urządzenia blokowego"
 
-#: src/main/options.c:344
+#: src/main/options.c:345
 msgid "option structure allocation failed"
 msgstr "nie udało się zaalokować struktur opcji"
 
-#: src/main/options.c:363
+#: src/main/options.c:364
 msgid "option structure argv allocation failed"
 msgstr "nie udało się zaalokować struktur opcji argv"
 
-#: src/main/options.c:416
+#: src/main/options.c:417
 msgid "numeric value not understood"
 msgstr ""
 
-#: src/main/options.c:435
+#: src/main/options.c:436
 msgid "integer argument expected"
 msgstr "oczekiwany argument typu liczby całkowitej"
 
-#: src/main/options.c:447
+#: src/main/options.c:448
 msgid "numeric argument expected"
 msgstr "oczekiwany argument liczbowy"
 
-#: src/main/options.c:458
+#: src/main/options.c:459
 msgid "process ID or pid:fd pair expected"
 msgstr "oczekiwany proces ID lub para PID:FD"
 
-#: src/main/options.c:465
+#: src/main/options.c:466
 msgid "invalid process ID"
 msgstr "niepoprawne ID procesu"
 
-#: src/main/options.c:690
+#: src/main/options.c:699
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Spróbuj `%s --help' by uzyskać więcej informacji."
 
-#: src/main/options.c:692
+#: src/main/options.c:701
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Spróbuj `%s -h' by uzyskać więcej informacji."
 
-#: src/main/options.c:723
+#: src/main/options.c:732
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -360,23 +368,23 @@ msgstr ""
 "nie można użyć trybu zliczania linii lub opcji modyfikujących przesył "
 "łącznie z opcją obserwowania deskryptorów plików"
 
-#: src/main/options.c:732
+#: src/main/options.c:741
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "nie można użyć pozycjonowania kursora łącznie z opcją obserwowania "
 "deskryptorów plików"
 
-#: src/main/options.c:741
+#: src/main/options.c:750
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "nie można użyć opcji zaktualizowania ustawień procesu łącznie z opcją "
 "obserwowania deskryptorów plików"
 
-#: src/main/options.c:750
+#: src/main/options.c:759
 msgid "cannot transfer files when watching file descriptors"
 msgstr "nie można przesyłać plików z opcją obserwowania deskryptorów plików"
 
-#: src/main/options.c:765
+#: src/main/options.c:774
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "niedostępne na systemach bez /proc/self/fdinfo"
 
@@ -429,7 +437,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:919 src/pv/transfer.c:1056
+#: src/pv/display.c:918 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 
@@ -513,7 +521,7 @@ msgstr "pid"
 msgid "history structure allocation failed"
 msgstr "nie udało się zaalokować struktury historii"
 
-#: src/pv/state.c:576 src/pv/state.c:587
+#: src/pv/state.c:591 src/pv/state.c:602
 msgid "file list allocation failed"
 msgstr "nie udało się zaalokować listy plików"
 

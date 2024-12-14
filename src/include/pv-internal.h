@@ -154,6 +154,7 @@ struct pvstate_s {
 		/*@only@*/ /*@null@*/ char *format_string;	 /* output format string */
 		/*@only@*/ /*@null@*/ char *extra_format_string; /* extra format string */
 		/*@null@*/ char *output_name;    /* name of the output, for diagnostics */
+		/*@null@*/ char *default_bar_style; /* which bar style to use by default */
 		off_t error_skip_block;          /* skip block size, 0 for adaptive */
 		off_t rate_limit;                /* rate limit, in bytes per second */
 		size_t target_buffer_size;       /* buffer size (0=default) */
@@ -496,6 +497,7 @@ size_t pv_formatter_progress(pvformatter_args_t);
 size_t pv_formatter_progress_bar_only(pvformatter_args_t);
 size_t pv_formatter_progress_amount_only(pvformatter_args_t);
 size_t pv_formatter_bar_default(pvformatter_args_t);
+size_t pv_formatter_bar_plain(pvformatter_args_t);
 size_t pv_formatter_bar_block(pvformatter_args_t);
 size_t pv_formatter_bar_granular(pvformatter_args_t);
 size_t pv_formatter_bar_shaded(pvformatter_args_t);

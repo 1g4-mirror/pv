@@ -296,6 +296,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "width", 1, NULL, (int) 'w' },
 		{ "height", 1, NULL, (int) 'H' },
 		{ "name", 1, NULL, (int) 'N' },
+		{ "bar-style", 1, NULL, (int) 'u' },
 		{ "format", 1, NULL, (int) 'F' },
 		{ "extra-display", 1, NULL, (int) 'x' },
 		{ "stats", 0, NULL, (int) 'v' },
@@ -322,7 +323,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:F:x:L:B:CEZ:SYKXU:R:P:d:m:o:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKXU:R:P:d:m:o:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -591,6 +592,14 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->name = pv_strdup(optarg);
 			if (NULL == opts->name) {
 				fprintf(stderr, "%s: -N: %s\n", opts->program_name, strerror(errno));
+				opts_free(opts);
+				return NULL;
+			}
+			break;
+		case 'u':
+			opts->default_bar_style = pv_strdup(optarg);
+			if (NULL == opts->default_bar_style) {
+				fprintf(stderr, "%s: -u: %s\n", opts->program_name, strerror(errno));
 				opts_free(opts);
 				return NULL;
 			}

@@ -502,6 +502,7 @@ int main(int argc, char **argv)
 	pv_state_no_splice_set(state, opts->no_splice);
 	pv_state_size_set(state, opts->size);
 	pv_state_name_set(state, opts->name);
+	pv_state_default_bar_style_set(state, opts->default_bar_style);
 	pv_state_format_string_set(state, opts->format);
 	pv_state_extra_display_set(state, opts->extra_display);
 	pv_state_watch_pid_set(state, opts->watch_pid);

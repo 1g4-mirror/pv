@@ -20,8 +20,8 @@
 
 
 /*
- * Populate "style" with the named bar style, falling back to the default if
- * the name was not recognised.  Returns true if the named style was found.
+ * Populate "style" with the named bar style, falling back to plain if the
+ * name was not recognised.  Returns true if the named style was found.
  *
  * Note that strings are copied into the structure, rather than just
  * updating pointers, to maintain separation of concern between different
@@ -96,7 +96,7 @@ static bool pv_barstyle(pvformatter_args_t args, pvbarstyle_t style, const char 
 		return true;
 	}
 
-	/* Default style. */
+	/* Default plain style. */
 
 	style->style_id = 1;
 
@@ -108,7 +108,7 @@ static bool pv_barstyle(pvformatter_args_t args, pvbarstyle_t style, const char 
 
 	style->filler_entries = 2;
 
-	if (0 == strcmp(name, "default"))
+	if (0 == strcmp(name, "plain"))
 		return true;
 
 	return false;
@@ -134,7 +134,7 @@ int pv_display_barstyle_index(pvformatter_args_t args, const char *name)
 #ifdef ENABLE_DEBUGGING
 	found = pv_barstyle(args, &style, name);
 	if (!found)
-		debug("%s: %s", name, "bar style not found, using default");
+		debug("%s: %s", name, "bar style not found, using plain");
 #else
 	(void) pv_barstyle(args, &style, name);
 #endif
@@ -162,8 +162,23 @@ int pv_display_barstyle_index(pvformatter_args_t args, const char *name)
 
 size_t pv_formatter_bar_default(pvformatter_args_t args)
 {
+	if (0 == args->segment->parameter) {
+		const char *default_name;
+		default_name = args->state->control.default_bar_style;
+		/*@-branchstate@ */
+		if (NULL == default_name)
+			default_name = "plain";
+		/*@+branchstate@ */
+		/* splint - it doesn't matter that default_name may be static */
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, default_name);
+	}
+	return pv_formatter_progress_bar_only(args);
+}
+
+size_t pv_formatter_bar_plain(pvformatter_args_t args)
+{
 	if (0 == args->segment->parameter)
-		args->segment->parameter = 1 + pv_display_barstyle_index(args, "default");
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, "plain");
 	return pv_formatter_progress_bar_only(args);
 }
 

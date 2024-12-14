@@ -225,6 +225,7 @@ extern void pv_state_interval_set(pvstate_t, double);
 extern void pv_state_width_set(pvstate_t, unsigned int, bool);
 extern void pv_state_height_set(pvstate_t, unsigned int, bool);
 extern void pv_state_name_set(pvstate_t, /*@null@*/ const char *);
+extern void pv_state_default_bar_style_set(pvstate_t, /*@null@ */ const char *);
 extern void pv_state_format_string_set(pvstate_t, /*@null@*/ const char *);
 extern void pv_state_extra_display_set(pvstate_t, /*@null@*/ const char *);
 extern void pv_state_watch_pid_set(pvstate_t, pid_t);

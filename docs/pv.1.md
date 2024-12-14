@@ -209,6 +209,14 @@ are explicitly switched on will be shown.
     with "**\--cursor**" if you have a complicated pipeline and you want
     to be able to tell different parts of it apart.
 
+**-u STYLE, \--bar-style STYLE**
+
+:   Change the default progress bar style shown by "**\--progress**", or
+    by the "**\--format**" sequences "**%{progress}**" or
+    "**%{progress-bar-only}**", to *STYLE*. The *STYLE* can be one of
+    **plain** (the default), **block**, **granular**, or **shaded**.
+    These styles are described in the **FORMATTING** section below.
+
 **-x SPEC, \--extra-display SPEC**
 
 :   As well as displaying progress to the terminal, also write it to
@@ -403,7 +411,7 @@ contain the following sequences:
     unless prefixed by a number to set the width, such as "**%20p**" or
     "**%20{progress}**".
 
-**%{progress-bar-only}**, **%{bar}**, **%{bar-default}**
+**%{progress-bar-only}**
 
 :   Progress bar, without any sides, and without any percentage
     displayed afterwards. Expands to fill the remaining space unless
@@ -414,12 +422,18 @@ contain the following sequences:
 :   The percentage completion (or maximum rate, with "**\--gauge**" when
     the size is unknown).
 
+**%{bar-plain}**
+
+:   Progress bar in the standard plain format, without any sides, and
+    without any percentage displayed afterwards. Expands to fill the
+    remaining space unless prefixed by a number.
+
 **%{bar-block}**
 
 :   Progress bar using Unicode full blocks, without any sides, and
     without any percentage displayed afterwards. Expands to fill the
     remaining space unless prefixed by a number. If UTF-8 output is not
-    available, the default format is used.
+    available, the plain format is used.
 
 **%{bar-granular}**
 
@@ -428,7 +442,7 @@ contain the following sequences:
     strings this shows the bar without any sides, and without any
     percentage displayed afterwards, and expands to fill the remaining
     space unless prefixed by a number. If UTF-8 output is not available,
-    the default format is used.
+    the plain format is used.
 
 **%{bar-shaded}**
 
@@ -437,7 +451,7 @@ contain the following sequences:
     used for the background. Like the other "%{bar}" strings this shows
     the bar without any sides, and without any percentage displayed
     afterwards, and expands to fill the remaining space unless prefixed
-    by a number. If UTF-8 output is not available, the default format is
+    by a number. If UTF-8 output is not available, the plain format is
     used.
 
 **%t**, **%{timer}**

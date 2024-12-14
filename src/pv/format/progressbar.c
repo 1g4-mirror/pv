@@ -297,8 +297,16 @@ size_t pv_formatter_progress(pvformatter_args_t args)
 
 	content[0] = '\0';
 
-	if (0 == args->segment->parameter)
-		args->segment->parameter = 1 + pv_display_barstyle_index(args, "default");
+	if (0 == args->segment->parameter) {
+		const char *default_name;
+		default_name = args->state->control.default_bar_style;
+		/*@-branchstate@ */
+		if (NULL == default_name)
+			default_name = "plain";
+		/*@+branchstate@ */
+		/* splint - it doesn't matter that default_name may be static */
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, default_name);
+	}
 
 	if (0 == args->buffer_size)
 		return 0;
@@ -327,8 +335,16 @@ size_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 
 	content[0] = '\0';
 
-	if (0 == args->segment->parameter)
-		args->segment->parameter = 1 + pv_display_barstyle_index(args, "default");
+	if (0 == args->segment->parameter) {
+		const char *default_name;
+		default_name = args->state->control.default_bar_style;
+		/*@-branchstate@ */
+		if (NULL == default_name)
+			default_name = "plain";
+		/*@+branchstate@ */
+		/* splint - it doesn't matter that default_name may be static */
+		args->segment->parameter = 1 + pv_display_barstyle_index(args, default_name);
+	}
 
 	if (0 == args->buffer_size)
 		return 0;

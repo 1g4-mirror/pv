@@ -202,6 +202,11 @@ void pv_state_free(pvstate_t state)
 		state->control.name = NULL;
 	}
 
+	if (NULL != state->control.default_bar_style) {
+		free(state->control.default_bar_style);
+		state->control.default_bar_style = NULL;
+	}
+
 	if (NULL != state->control.format_string) {
 		free(state->control.format_string);
 		state->control.format_string = NULL;
@@ -427,6 +432,16 @@ void pv_state_name_set(pvstate_t state, /*@null@ */ const char *val)
 	}
 	if (NULL != val)
 		state->control.name = pv_strdup(val);
+}
+
+void pv_state_default_bar_style_set(pvstate_t state, /*@null@ */ const char *val)
+{
+	if (NULL != state->control.default_bar_style) {
+		free(state->control.default_bar_style);
+		state->control.default_bar_style = NULL;
+	}
+	if (NULL != val)
+		state->control.default_bar_style = pv_strdup(val);
 }
 
 void pv_state_format_string_set(pvstate_t state, /*@null@ */ const char *val)
