@@ -285,16 +285,20 @@ bool pv_getnum_check(const char *str, pv_numtype type)
 
 
 /*
- * Return an integer representing "amount" as a percentage of "total", i.e.
+ * Return a value representing "amount" as a percentage of "total", i.e.
  * 100*amount/total.  If "total" is zero or less, return 0.
  */
-int pv_percentage(off_t amount, const off_t total)
+double pv_percentage(off_t amount, const off_t total)
 {
+	double amount_as_double;
+
 	if (total < 1)
-		return 0;
+		return 0.0;
 
-	amount *= 100;
-	amount /= total;
+	amount_as_double = (double) amount;
 
-	return (int) amount;
+	amount_as_double *= 100.0;
+	amount_as_double /= (double) total;
+
+	return amount_as_double;
 }

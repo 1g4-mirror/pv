@@ -164,8 +164,8 @@ void pv_calculate_transfer_rate(pvstate_t state, bool final)
 	}
 
 	/* Ensure the percentage is never negative or huge. */
-	if (state->calc.percentage < 0)
-		state->calc.percentage = 0;
-	if (state->calc.percentage > 100000)
-		state->calc.percentage = 100000;
+	if (state->calc.percentage < 0.0)
+		state->calc.percentage = 0.0;
+	if (state->calc.percentage > 100000.0)
+		state->calc.percentage = 100000.0;
 }

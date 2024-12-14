@@ -132,8 +132,8 @@ static size_t pv_formatter_progress_knownsize(pvformatter_args_t args, char *buf
 	if (has_tip && filled_bar_width > 0)
 		filled_bar_width -= style->tip.width;
 
-	debug("width=%d bar_area_width=%d filled_bar_width=%d after_bar_width=%d", args->segment->width, bar_area_width,
-	      filled_bar_width, after_bar_width);
+	debug("percentage=%.2f width=%d bar_area_width=%d filled_bar_width=%d after_bar_width=%d", bar_percentage,
+	      args->segment->width, bar_area_width, filled_bar_width, after_bar_width);
 
 	buffer_offset = 0;
 

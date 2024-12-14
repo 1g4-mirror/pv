@@ -80,7 +80,7 @@ void pv_state_reset(pvstate_t state)
 	state->calc.ratesquared_sum = 0.0;
 	state->calc.measurements_taken = 0;
 	state->calc.prev_transferred = 0;
-	state->calc.percentage = 0;
+	state->calc.percentage = 0.0;
 	state->calc.history_first = state->calc.history_last = 0;
 	if (NULL != state->calc.history) {
 		state->calc.history[0].elapsed_sec = 0.0;

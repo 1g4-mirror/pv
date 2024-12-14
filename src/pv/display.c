@@ -515,7 +515,7 @@ static bool pv__format_numeric(pvstate_t state, pvdisplay_t display)
 	msg_percent[0] = '\0';
 	if (show_percentage) {
 		(void) pv_snprintf(msg_percent, sizeof(msg_percent),
-				   "%s%d", first_item ? "" : " ", state->calc.percentage);
+				   "%s%.0f", first_item ? "" : " ", state->calc.percentage);
 		first_item = false;
 	}
 

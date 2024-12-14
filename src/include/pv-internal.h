@@ -310,7 +310,7 @@ struct pvstate_s {
 
 		off_t prev_transferred;		 /* total amount transferred when called last time */
 
-		int percentage;			 /* transfer percentage completion */
+		double percentage;		 /* transfer percentage completion */
 	} calc;
 
 	/********************
