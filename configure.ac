@@ -94,7 +94,7 @@ static void receiveUSR2( __attribute__((unused))
 	(void) sigaction(SIGUSR2, &sa, NULL);
 	raise(SIGUSR2);
 #endif
-	return signalSender == 0 ? 1 : 0;
+	return signalSender < 1 ? 1 : 0;
 ]])], [
 AC_MSG_RESULT([yes])
 AC_DEFINE([SIGINFO_PROVIDES_PID], [1], [Signal handlers can determine the sending PID])
