@@ -105,6 +105,7 @@ is acknowledged and greatly appreciated:
  * [2bits](https://github.com/2bits) - reported position sensing fault with **--watchfd** in 1.9.0 ([#118](https://codeberg.org/a-j-wood/pv/issues/118))
  * [heitbaum](https://codeberg.org/heitbaum) - assisted with cross-compilation fault introduced in 1.9.7 ([#120](https://codeberg.org/a-j-wood/pv/issues/120))
  * [meego](https://codeberg.org/meego) - suggested "**%nL**", the last line preview ([#121](https://codeberg.org/a-j-wood/pv/issues/121))
+ * [Alexander Petrossian](https://github.com/neopaf) - suggested using Unicode output for a more granular progress bar, and provided the codepoints to use ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
