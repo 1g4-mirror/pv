@@ -429,7 +429,6 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'R':
 			/*@fallthrough@ */
 		case 'm':
-			/*@fallthrough@ */
 			if (!pv_getnum_check(optarg, PV_NUMTYPE_BARE_INTEGER)) {
 				/*@-mustfreefresh@ *//* see above */
 				fprintf(stderr, "%s: -%c: %s: %s\n", opts->program_name, c, optarg,
