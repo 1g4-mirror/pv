@@ -27,7 +27,7 @@ dd if=/dev/urandom of="${workFile1}" bs=1024 count=10240 2>/dev/null
 true > "${workFile3}"
 (
 set +e
-while ! test -s "${workFile3}"; do usleep 200000 2>/dev/null || sleep 1; done
+while test -e "${workFile3}" && ! test -s "${workFile3}"; do usleep 200000 2>/dev/null || sleep 1; done
 for loopCount in 1 2 3; do
 	"${testSubject}" -R "$(cat "${workFile3}")" -apterb	|| exit 1
 	(usleep 200000 || sleep 1) 2>/dev/null

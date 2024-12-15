@@ -27,7 +27,7 @@ seq 1 300 > "${workFile2}"
 # NB we just export line to make shellcheck think it's used.
 true > "${workFile3}"
 (
-while ! test -s "${workFile3}"; do sleep 0.1; done
+while test -e "${workFile3}" && ! test -s "${workFile3}"; do sleep 0.1; done
 export line
 sleep 1
 read -r line

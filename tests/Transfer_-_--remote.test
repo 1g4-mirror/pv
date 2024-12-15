@@ -23,7 +23,7 @@ dd if=/dev/zero of="${workFile1}" bs=1024 count=10240 2>/dev/null
 true > "${workFile4}"
 (
 # Don't start doing anything until the main transfer process, started below, has begun.
-while ! test -s "${workFile4}"; do sleep 0.1; done
+while test -e "${workFile4}" && ! test -s "${workFile4}"; do sleep 0.1; done
 sleep 1
 "${testSubject}" -R "$(cat "${workFile4}")" -a
 sleep 2
