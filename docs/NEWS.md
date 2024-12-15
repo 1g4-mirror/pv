@@ -2,6 +2,7 @@
 
  * *feature:* new **--bar-style** option to change the default bar style ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
  * *feature:* new bar formats "**%{bar-plain}**", "**%{bar-block}**", "**%{bar-granular}**", "**%{bar-shaded}**" ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
+ * *feature:* new bar format "**%{sgr:colour,...}**" to use ECMA-48 Select Graphic Rendition codes to add colours
  * *feature:* allow decimal values such as "1.5G" with "**--size**", "**--rate-limit**", "**--buffer-size**", and "**error-skip-block**" ([#35](https://codeberg.org/a-j-wood/pv/issues/35))
  * *cleanup:* track transfer percentage as a floating point value for better precision (and rounding)
  * *cleanup:* correct detection of **--remote** usability on GNU Hurd

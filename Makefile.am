@@ -33,6 +33,7 @@ src/pv/format/name.c \
 src/pv/format/previousline.c \
 src/pv/format/progressbar.c \
 src/pv/format/rate.c \
+src/pv/format/sgr.c \
 src/pv/format/timer.c \
 src/pv/loop.c \
 src/pv/number.c \

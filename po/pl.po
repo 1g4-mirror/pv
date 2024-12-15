@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-14 00:00+0000\n"
+"POT-Creation-Date: 2024-12-15 23:05+0000\n"
 "PO-Revision-Date: 2024-10-20 14:07+0000\n"
 "Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -334,33 +334,33 @@ msgstr "nie udało się zaalokować struktur opcji argv"
 msgid "numeric value not understood"
 msgstr ""
 
-#: src/main/options.c:436
+#: src/main/options.c:435
 msgid "integer argument expected"
 msgstr "oczekiwany argument typu liczby całkowitej"
 
-#: src/main/options.c:448
+#: src/main/options.c:447
 msgid "numeric argument expected"
 msgstr "oczekiwany argument liczbowy"
 
-#: src/main/options.c:459
+#: src/main/options.c:458
 msgid "process ID or pid:fd pair expected"
 msgstr "oczekiwany proces ID lub para PID:FD"
 
-#: src/main/options.c:466
+#: src/main/options.c:465
 msgid "invalid process ID"
 msgstr "niepoprawne ID procesu"
 
-#: src/main/options.c:699
+#: src/main/options.c:698
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Spróbuj `%s --help' by uzyskać więcej informacji."
 
-#: src/main/options.c:701
+#: src/main/options.c:700
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Spróbuj `%s -h' by uzyskać więcej informacji."
 
-#: src/main/options.c:732
+#: src/main/options.c:731
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -368,23 +368,23 @@ msgstr ""
 "nie można użyć trybu zliczania linii lub opcji modyfikujących przesył "
 "łącznie z opcją obserwowania deskryptorów plików"
 
-#: src/main/options.c:741
+#: src/main/options.c:740
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "nie można użyć pozycjonowania kursora łącznie z opcją obserwowania "
 "deskryptorów plików"
 
-#: src/main/options.c:750
+#: src/main/options.c:749
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "nie można użyć opcji zaktualizowania ustawień procesu łącznie z opcją "
 "obserwowania deskryptorów plików"
 
-#: src/main/options.c:759
+#: src/main/options.c:758
 msgid "cannot transfer files when watching file descriptors"
 msgstr "nie można przesyłać plików z opcją obserwowania deskryptorów plików"
 
-#: src/main/options.c:774
+#: src/main/options.c:773
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "niedostępne na systemach bez /proc/self/fdinfo"
 
@@ -429,15 +429,15 @@ msgstr "blokada zasobów nie powiodła się"
 msgid "failed to open terminal"
 msgstr "nie udało się otworzyć terminala"
 
-#: src/pv/display.c:232
+#: src/pv/display.c:239
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnum kMGTPEZY"
 
-#: src/pv/display.c:250
+#: src/pv/display.c:257
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:918 src/pv/transfer.c:1056
+#: src/pv/display.c:1004 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 

@@ -507,6 +507,31 @@ contain the following sequences:
 :   Show the name prefix given by "**\--name**". Padded to 9 characters
     with spaces, and suffixed with ":".
 
+**%{sgr:colour,\...}**
+
+:   Emit ECMA-48 SGR (Select Graphic Rendition) codes if the terminal
+    supports colours, where *colour,\...* is a comma-separated list of
+    any of the keywords below, or the numeric values from
+    **console_codes**(4). If colour support is not available, nothing is
+    emitted.
+
+:   Supported keywords are: **reset** or **none**, **black**, **red**,
+    **green**, **brown** or **yellow**, **blue**, **magenta**, **cyan**,
+    **white**, **fg-black**, **fg-red**, **fg-green**, **fg-brown** or
+    **fg-yellow**, **fg-blue**, **fg-magenta**, **fg-cyan**,
+    **fg-white**, **fg-default**, **bg-black**, **bg-red**,
+    **bg-green**, **bg-brown** or **bg-yellow**, **bg-blue**,
+    **bg-magenta**, **bg-cyan**, **bg-white**, **bg-default**, **bold**,
+    **dim**, **italic**, **underscore** or **underline**, **blink**,
+    **reverse**, **no-bold** or **no-dim**, **no-italic**,
+    **no-underscore** or **no-underline**, **no-blink**, **no-reverse**.
+
+:   With colours, the optional \"fg-\" prefix indicates foreground; a
+    prefix of \"bg-\" indicates background.
+
+:   For example, "**%{sgr:green,bold}TEXT%{sgr:reset}**" will make
+    *TEXT* bold green on supported terminals.
+
 **%%**
 
 :   A single "%".
@@ -717,7 +742,7 @@ page](https://www.ivarch.com/programs/pv.shtml).
 # SEE ALSO
 
 **cat**(1), **splice**(2), **fdatasync**(2), **open**(2) (for
-**O_DIRECT**)
+**O_DIRECT**), **console_codes**(4)
 
 # COPYRIGHT
 

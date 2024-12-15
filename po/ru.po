@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-14 00:00+0000\n"
+"POT-Creation-Date: 2024-12-15 23:05+0000\n"
 "PO-Revision-Date: 2024-10-22 18:07+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -322,51 +322,51 @@ msgstr "не удалось выделить память для структу�
 msgid "numeric value not understood"
 msgstr ""
 
-#: src/main/options.c:436
+#: src/main/options.c:435
 msgid "integer argument expected"
 msgstr "ожидалось целое число"
 
-#: src/main/options.c:448
+#: src/main/options.c:447
 msgid "numeric argument expected"
 msgstr "ожидалось число"
 
-#: src/main/options.c:459
+#: src/main/options.c:458
 msgid "process ID or pid:fd pair expected"
 msgstr "ожидался ИД процесса или пара ИДпр:ДФ"
 
-#: src/main/options.c:466
+#: src/main/options.c:465
 msgid "invalid process ID"
 msgstr "неправильный ИД процесса"
 
-#: src/main/options.c:699
+#: src/main/options.c:698
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Выполните `%s --help' для получения подробностей."
 
-#: src/main/options.c:701
+#: src/main/options.c:700
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Выполните `%s -h' для получения подробностей."
 
-#: src/main/options.c:732
+#: src/main/options.c:731
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
 msgstr ""
 
-#: src/main/options.c:741
+#: src/main/options.c:740
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:750
+#: src/main/options.c:749
 msgid "cannot use remote control when watching file descriptors"
 msgstr "удалённое управление невозможно при отслеживании дескрипторов файлов"
 
-#: src/main/options.c:759
+#: src/main/options.c:758
 msgid "cannot transfer files when watching file descriptors"
 msgstr "передача файлов невозможна при отслеживании дескрипторов файлов"
 
-#: src/main/options.c:774
+#: src/main/options.c:773
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "невозможно на системах без /proc/self/fdinfo"
 
@@ -412,15 +412,15 @@ msgstr "попытка блокировки не удалась"
 msgid "failed to open terminal"
 msgstr "не удалось открыть терминал"
 
-#: src/pv/display.c:232
+#: src/pv/display.c:239
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:250
+#: src/pv/display.c:257
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:918 src/pv/transfer.c:1056
+#: src/pv/display.c:1004 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 

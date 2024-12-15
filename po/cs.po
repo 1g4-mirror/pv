@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-14 00:00+0000\n"
+"POT-Creation-Date: 2024-12-15 23:05+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -321,33 +321,33 @@ msgstr "selhala alokace struktury pro argv"
 msgid "numeric value not understood"
 msgstr ""
 
-#: src/main/options.c:436
+#: src/main/options.c:435
 msgid "integer argument expected"
 msgstr "očekáván celočíselný argument"
 
-#: src/main/options.c:448
+#: src/main/options.c:447
 msgid "numeric argument expected"
 msgstr "očekáván číselný argument"
 
-#: src/main/options.c:459
+#: src/main/options.c:458
 msgid "process ID or pid:fd pair expected"
 msgstr "očekáváno ID procesu nebo dvojice PID:DS"
 
-#: src/main/options.c:466
+#: src/main/options.c:465
 msgid "invalid process ID"
 msgstr "neplatné ID procesu"
 
-#: src/main/options.c:699
+#: src/main/options.c:698
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Zkuste `%s --help' pro více informací."
 
-#: src/main/options.c:701
+#: src/main/options.c:700
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Zkuste `%s --h' pro více informací."
 
-#: src/main/options.c:732
+#: src/main/options.c:731
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -355,19 +355,19 @@ msgstr ""
 "při sledování deskriptorů souborů nelze použít řádkový mód nebo volby pro "
 "modifikaci přenosu"
 
-#: src/main/options.c:741
+#: src/main/options.c:740
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr "při sledování deskriptorů souborů nelze pozicování kurzoru použít"
 
-#: src/main/options.c:750
+#: src/main/options.c:749
 msgid "cannot use remote control when watching file descriptors"
 msgstr "při sledování deskriptorů souborů nelze použít vzdálené ovládání"
 
-#: src/main/options.c:759
+#: src/main/options.c:758
 msgid "cannot transfer files when watching file descriptors"
 msgstr "při sledování deskriptorů souborů nelze použít přenos souborů"
 
-#: src/main/options.c:774
+#: src/main/options.c:773
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "není dostupné na systémech bez /proc/self/fdinfo"
 
@@ -411,15 +411,15 @@ msgstr "selhal pokus o uzamčení"
 msgid "failed to open terminal"
 msgstr "selhalo otevření terminálu"
 
-#: src/pv/display.c:232
+#: src/pv/display.c:239
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnum kMGTPEZY"
 
-#: src/pv/display.c:250
+#: src/pv/display.c:257
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:918 src/pv/transfer.c:1056
+#: src/pv/display.c:1004 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "selhala alokace vyrovnávací paměti"
 

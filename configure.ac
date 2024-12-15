@@ -139,6 +139,20 @@ AC_ARG_ENABLE([ipc], [  --disable-ipc           turn off IPC messaging],
   IPC_SUPPORT="yes"
 )
 
+AC_ARG_WITH([ncurses],
+  [AS_HELP_STRING([--without-ncurses], [disable the use of ncurses for terminal info])],
+  [],
+  [with_curses=yes])
+AS_IF([test "x$with_ncurses" != xno],
+[
+    AC_SEARCH_LIBS([tigetnum],[tinfo ncurses], [
+      AC_CHECK_HEADERS([term.h],[
+        AC_DEFINE([ENABLE_NCURSES], [1], [Build with ncurses support])
+      ])
+    ], [])
+],
+[])
+
 AC_ARG_ENABLE([static],
   [AS_HELP_STRING([--enable-static], [enable static linking])],
   [

@@ -484,6 +484,61 @@ Shows only spaces if the transfer is being done with \fBsplice\fR(2).
 Show the name prefix given by \*(lq\fB\-\-name\fR\*(rq.
 Padded to 9 characters with spaces, and suffixed with \*(lq:\*(rq.
 .TP
+.B %{sgr:colour,...}
+Emit ECMA-48 SGR (Select Graphic Rendition) codes if the terminal supports
+colours, where \fIcolour,...\fR is a comma-separated list of any of the
+keywords below, or the numeric values from \fBconsole_codes\fR(4).  If
+colour support is not available, nothing is emitted.
+.TP
+.B ""
+Supported keywords are:
+\fBreset\fR or \fBnone\fR,
+\fBblack\fR,
+\fBred\fR,
+\fBgreen\fR,
+\fBbrown\fR or \fByellow\fR,
+\fBblue\fR,
+\fBmagenta\fR,
+\fBcyan\fR,
+\fBwhite\fR,
+\fBfg\-black\fR,
+\fBfg\-red\fR,
+\fBfg\-green\fR,
+\fBfg\-brown\fR or \fBfg\-yellow\fR,
+\fBfg\-blue\fR,
+\fBfg\-magenta\fR,
+\fBfg\-cyan\fR,
+\fBfg\-white\fR,
+\fBfg\-default\fR,
+\fBbg\-black\fR,
+\fBbg\-red\fR,
+\fBbg\-green\fR,
+\fBbg\-brown\fR or \fBbg\-yellow\fR,
+\fBbg\-blue\fR,
+\fBbg\-magenta\fR,
+\fBbg\-cyan\fR,
+\fBbg\-white\fR,
+\fBbg\-default\fR,
+\fBbold\fR,
+\fBdim\fR,
+\fBitalic\fR,
+\fBunderscore\fR or \fBunderline\fR,
+\fBblink\fR,
+\fBreverse\fR,
+\fBno\-bold\fR or \fBno\-dim\fR,
+\fBno\-italic\fR,
+\fBno\-underscore\fR or \fBno\-underline\fR,
+\fBno\-blink\fR,
+\fBno\-reverse\fR.
+.TP
+.B ""
+With colours, the optional "fg-" prefix indicates foreground; a prefix of
+"bg-" indicates background.
+.TP
+.B ""
+For example, \*(lq\fB%{sgr:green,bold}TEXT%{sgr:reset}\fR\*(lq will make
+\fITEXT\fR bold green on supported terminals.
+.TP
 .B %%
 A single \*(lq%\*(rq.
 .PP
@@ -736,7 +791,8 @@ Alternatively, use the issue tracker linked from the
 .BR splice (2),
 .BR fdatasync (2),
 .BR open (2)
-(for \fBO_DIRECT\fR)
+(for \fBO_DIRECT\fR),
+.BR console_codes (4)
 .\"
 .SH COPYRIGHT
 Copyright \(co 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood.

@@ -22,6 +22,13 @@
 #include <termios.h>
 #endif
 
+#ifdef ENABLE_NCURSES
+#ifdef HAVE_TERM_H
+#include <term.h>
+#endif
+#endif
+
+
 /*
  * We need sys/ioctl.h for ioctl() regardless of whether TIOCGWINSZ is
  * defined in termios.h, so we no longer use AC_HEADER_TIOCGWINSZ in
@@ -566,6 +573,7 @@ static bool pv__format_numeric(pvstate_t state, pvdisplay_t display)
 		{ "{previous-line}", &pv_formatter_previous_line, true },
 		{ "N", &pv_formatter_name, false },
 		{ "{name}", &pv_formatter_name, false },
+		{ "{sgr:colour,...}", &pv_formatter_sgr, false },
 		{ NULL, NULL, false }
 	};
 	return format_component_array;
@@ -636,6 +644,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 	display->showing_rate = false;
 	display->showing_last_written = false;
 	display->showing_previous_line = false;
+	display->format_uses_colour = false;
 
 	display_format = NULL == format_supplied ? state->control.default_format : format_supplied;
 
@@ -666,6 +675,8 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 	for (strpos = 0; display_format[strpos] != '\0' && segment < PV_FORMAT_ARRAY_MAX; strpos++, segment++) {
 		int component_type, component_idx;
 		size_t str_start, str_bytes, chosen_size;
+		const char *string_parameter = NULL;
+		size_t string_parameter_bytes = 0;
 
 		str_start = strpos;
 		str_bytes = 0;
@@ -674,7 +685,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 		if ('%' == display_format[strpos]) {
 			unsigned long number_prefix;
-			size_t percent_sign_offset, sequence_start, sequence_length;
+			size_t percent_sign_offset, sequence_start, sequence_length, sequence_colon_offset;
 #if HAVE_STRTOUL
 			char *number_end_ptr;
 #endif
@@ -705,11 +716,14 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 			sequence_start = strpos;
 			sequence_length = 0;
+			sequence_colon_offset = 0;
 			if ('\0' != display_format[strpos])
 				sequence_length = 1;
 			if ('{' == display_format[strpos]) {
 				while ('\0' != display_format[strpos] && '}' != display_format[strpos]
 				       && '%' != display_format[strpos]) {
+					if (':' == display_format[strpos])
+						sequence_colon_offset = sequence_length;
 					strpos++;
 					sequence_length++;
 				}
@@ -718,15 +732,40 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			component_type = -1;
 			for (component_idx = 0; NULL != format_component_array[component_idx].match; component_idx++) {
 				size_t component_sequence_length = strlen(format_component_array[component_idx].match);	/* flawfinder: ignore */
+				char *component_colon_pointer =
+				    strchr(format_component_array[component_idx].match, (int) ':');
+
 				/* flawfinder - static strings, guaranteed null-terminated. */
-				if (component_sequence_length != sequence_length)
-					continue;
-				if (0 !=
-				    strncmp(format_component_array[component_idx].match,
-					    &(display_format[sequence_start]), sequence_length))
-					continue;
-				component_type = component_idx;
-				break;
+
+				if ((component_sequence_length == sequence_length)
+				    && (0 ==
+					strncmp(format_component_array[component_idx].match,
+						&(display_format[sequence_start]), sequence_length))
+				    ) {
+					component_type = component_idx;
+					break;
+				}
+
+				if (sequence_colon_offset > 0 && NULL != component_colon_pointer) {
+					size_t component_colon_offset =
+					    (size_t) (1 + component_colon_pointer -
+						      format_component_array[component_idx].match);
+					if ((component_colon_offset == sequence_colon_offset)
+					    && (0 ==
+						strncmp(format_component_array[component_idx].match,
+							&(display_format[sequence_start]), sequence_colon_offset))
+					    ) {
+						component_type = component_idx;
+						string_parameter =
+						    &(display_format[sequence_start + sequence_colon_offset]);
+						string_parameter_bytes = sequence_length - sequence_colon_offset;
+						if (string_parameter_bytes > 0)
+							string_parameter_bytes--;	/* the closing '}' */
+						if (string_parameter_bytes > 255)
+							string_parameter_bytes = 255;
+						break;
+					}
+				}
 			}
 
 			if (-1 == component_type) {
@@ -770,6 +809,8 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 		display->format[segment].type = component_type;
 		display->format[segment].chosen_size = chosen_size;
+		display->format[segment].string_parameter = string_parameter;
+		display->format[segment].string_parameter_bytes = string_parameter_bytes;
 
 		if (-1 == component_type) {
 			if (0 == str_bytes)
@@ -823,6 +864,51 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 		}
 
 		display->format_segment_count++;
+	}
+
+	if (display->format_uses_colour && !state->control.checked_colour_support) {
+		state->control.checked_colour_support = true;
+#ifdef ENABLE_NCURSES
+		/*
+		 * If we have terminal info support, check whether the
+		 * current terminal supports colour - or just assume it's
+		 * supported if we're forcing output.
+		 */
+		if (true == state->control.force) {
+			state->control.can_display_colour = true;
+			debug("%s", "force mode - assuming terminal supports colour");
+		} else {
+			char *term_env = NULL;
+
+			term_env = getenv("TERM");	/* flawfinder: ignore */
+			/*
+			 * flawfinder - here we pass responsibility to the
+			 * ncurses library to behave OK with $TERM.
+			 */
+			state->control.can_display_colour = false;
+			if (NULL != term_env) {
+				int setup_err = 0;
+
+				if ((0 == setupterm(term_env, STDERR_FILENO, &setup_err))
+				    && (tigetnum("colors") > 1)
+				    ) {
+					state->control.can_display_colour = true;
+					debug("%s: %s", term_env, "terminal supports colour");
+				}
+			} else {
+				/* If TERM is unset, disable colour. */
+				state->control.can_display_colour = false;
+			}
+		}
+#else				/* ! ENABLE_NCURSES */
+		/*
+		 * Without terminal info support, always assume colour is
+		 * supported.
+		 */
+		/* TODO: call "tput colors" with popen() instead. */
+		state->control.can_display_colour = true;
+		debug("%s", "no terminal info support - assuming terminal supports colour");
+#endif				/* ENABLE_NCURSES */
 	}
 }
 
@@ -932,6 +1018,9 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	if (state->control.numeric) {
 		return pv__format_numeric(state, display);
 	}
+
+	/* Clear the SGR active codes flag, for the SGR formatter. */
+	display->sgr_code_active = false;
 
 	/*
 	 * Populate the internal segments buffer with each component's
@@ -1066,6 +1155,16 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		      segment->bytes, display->display_buffer + display_buffer_offset - segment->bytes);
 	}
 
+	/* If the SGR active codes flag is set, we need to emit an SGR reset. */
+	if (display->sgr_code_active) {
+		debug("%s", "SGR codes still active - adding reset");
+		(void) pv_strlcat(display->display_buffer, "\033[m", display->display_buffer_size);
+		new_display_string_bytes += 3;
+		if (new_display_string_bytes > display->display_buffer_size)
+			new_display_string_bytes = display->display_buffer_size;
+		display->sgr_code_active = false;
+	}
+
 	debug("%s: %d", "new display string length in bytes", (int) new_display_string_bytes);
 	debug("%s: %d", "new display string width", (int) new_display_string_width);
 
@@ -1116,6 +1215,13 @@ void pv_display(pvstate_t state, bool final)
 	pv_sig_checkbg();
 
 	pv_calculate_transfer_rate(state, final);
+
+	/*
+	 * Enable colour on the main display, and disable it on the extra
+	 * display (process title, window title).
+	 */
+	state->display.colour_permitted = true;
+	state->extra_display.colour_permitted = false;
 
 	/*
 	 * If the display options need reparsing, do so to generate new

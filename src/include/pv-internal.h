@@ -186,6 +186,8 @@ struct pvstate_s {
 		bool discard_input;              /* write nothing to stdout */
 		bool show_stats;		 /* show statistics on exit */
 		bool can_display_utf8;		 /* whether UTF-8 output is permitted */
+		bool can_display_colour;	 /* whether the terminal supports colour */
+		bool checked_colour_support;	 /* whether we have checked colour support yet */
 		bool width_set_manually;	 /* width was set manually, not detected */
 		bool height_set_manually;	 /* height was set manually, not detected */
 	} control;
@@ -237,10 +239,12 @@ struct pvstate_s {
 			/* See pv__format_init() for more details. */
 			int type;			/* component type, -1 for static string */
 			int parameter;			/* component parameter, such as bar style index */
+			uint8_t string_parameter_bytes;	/* number of bytes in string_parameter */
 			size_t chosen_size;		/* "n" from %<n>A, or 0 */
-			size_t offset;			/* start offset of this segment */
-			size_t bytes;			/* length of segment in bytes */
+			size_t offset;			/* start offset of this segment in the build buffer */
+			size_t bytes;			/* length of segment in bytes in the build buffer */
 			size_t width;			/* displayed width of segment */
+			/*@dependent@*/ /*@null@*/ const char *string_parameter; /* parameter after colon in %{x:} */
 		} format[PV_FORMAT_ARRAY_MAX];
 
 		struct pvbarstyle_s barstyle[PV_BARSTYLE_MAX];
@@ -273,6 +277,9 @@ struct pvstate_s {
 		bool showing_last_written;	 /* set if displaying the last few bytes written */
 		bool showing_previous_line;	 /* set if displaying the previously output line */
 
+		bool format_uses_colour;	 /* set if the format string uses colours */
+		bool colour_permitted;		 /* whether colour is permitted for this display */
+		bool sgr_code_active;		 /* set while SGR code is active in a display line */
 		bool final_update;		 /* set internally on the final update */
 		bool display_visible;		 /* set once anything written to terminal */
 
@@ -511,6 +518,7 @@ size_t pv_formatter_buffer_percent(pvformatter_args_t);
 size_t pv_formatter_last_written(pvformatter_args_t);
 size_t pv_formatter_previous_line(pvformatter_args_t);
 size_t pv_formatter_name(pvformatter_args_t);
+size_t pv_formatter_sgr(pvformatter_args_t);
 
 bool pv_format(pvstate_t, /*@null@*/ const char *, pvdisplay_t, bool, bool);
 void pv_display(pvstate_t, bool);
