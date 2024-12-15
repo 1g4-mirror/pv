@@ -18,14 +18,17 @@ if ! "${testSubject}" -h 2>/dev/null | grep -Eq "^  -R,"; then
 	exit 77
 fi
 
-# Generate some data.
+# Generate 10MiB of data.
 dd if=/dev/urandom of="${workFile1}" bs=1024 count=10240 2>/dev/null
 
 # Run a few remote control commands in the background.
 #
 echo FAIL > "${workFile3}"
+true > "${workFile4}"
 (
 set +e
+# Don't start doing anything until the main transfer process, started below, has begun.
+while ! test -s "${workFile4}"; do sleep 0.1; done
 sleep 2
 for loopCount in 1 2 3; do
 	"${testSubject}" -R "$(cat "${workFile4}")" -apterb	|| exit 1

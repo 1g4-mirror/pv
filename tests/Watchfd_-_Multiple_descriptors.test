@@ -9,6 +9,7 @@ true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile1:?not set - call this from 'make check'}"
 true "${workFile2:?not set - call this from 'make check'}"
 true "${workFile3:?not set - call this from 'make check'}"
+true "${workFile4:?not set - call this from 'make check'}"
 
 # Skip the test if "-d" is not available.
 if ! "${testSubject}" -h | grep -Fq ' -d'; then
@@ -21,8 +22,12 @@ seq 1 300 > "${workFile2}"
 
 # Run a background process to perform a few reads from a file, opening a
 # second file after a moment.
+# We only start doing anything once the PV process below has started (the
+# workFile3 check).
 # NB we just export line to make shellcheck think it's used.
+true > "${workFile3}"
 (
+while ! test -s "${workFile3}"; do sleep 0.1; done
 export line
 sleep 1
 read -r line
@@ -34,17 +39,17 @@ sleep 1
 pid=$!
 
 sleep 0.1
-"${testSubject}" -d "${pid}" -f -i 0.5 >/dev/null 2>"${workFile3}"
+"${testSubject}" -P "${workFile3}" -d "${pid}" -f -i 0.5 >/dev/null 2>"${workFile4}"
 
 # Skip the test if "-d" does not work.
-if grep -Fq ' -d: not available' "${workFile3}"; then
+if grep -Fq ' -d: not available' "${workFile4}"; then
 	echo "no \`--watchfd' / \`-d' option on this platform"
 	exit 77
 fi
 
 # Process the output to make it easier to handle.
 # NB "ESC [ A" is "cursor up", we turn that into "-" and a newline.
-tr '\r' '\n' < "${workFile3}" | sed 's/.\[A/-!/g' | tr '!' '\n' > "${workFile1}"
+tr '\r' '\n' < "${workFile4}" | sed 's/.\[A/-!/g' | tr '!' '\n' > "${workFile1}"
 
 # We should see at least 2 file positions for fd 0.
 positionsReported="$(awk '/^ *0:/ {print $2}' < "${workFile1}" | sort -n | uniq)"

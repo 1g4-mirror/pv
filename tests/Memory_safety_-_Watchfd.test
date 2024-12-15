@@ -24,6 +24,7 @@ fi
 
 # Skip the test if "-d" does not work.
 sleep 2 &
+pid=$!
 sleep 0.1
 "${testSubject}" -d "${pid}" -f -i 0.5 >/dev/null 2>"${workFile1}"
 if grep -Fq ' -d: not available' "${workFile1}"; then
@@ -34,17 +35,20 @@ fi
 # Check "--watchfd PID:FD".
 # See the "Watchfd" tests for more detail.
 seq 1 100 > "${workFile1}"
+true > "${workFile3}"
 # shellcheck disable=SC2030
-(sleep 1; read -r line; sleep 1; read -r line; sleep 1) <"${workFile1}" &
+(while ! test -s "${workFile3}"; do sleep 0.1; done; sleep 1; read -r line; sleep 1; read -r line; sleep 1) <"${workFile1}" &
 pid=$!
 sleep 0.1
-{ runWithValgrind -d "${pid}:0" -f -i 0.5 >/dev/null 2>&1; } 4>&1 || exit 1
+{ runWithValgrind -P "${workFile3}" -d "${pid}:0" -f -i 0.5 >/dev/null 2>&1; } 4>&1 || exit 1
 
 # Check "--watchfd PID".
 seq 1 100 > "${workFile1}"
 seq 1 300 > "${workFile2}"
+true > "${workFile3}"
 # shellcheck disable=SC2030
 (
+while ! test -s "${workFile3}"; do sleep 0.1; done
 sleep 1
 read -r line
 exec 9<"${workFile2}"
@@ -59,6 +63,6 @@ sleep 1
 ) <"${workFile1}" &
 pid=$!
 sleep 0.1
-{ runWithValgrind -d "${pid}" -f -i 0.5 >/dev/null 2>&1; } 4>&1 || exit 1
+{ runWithValgrind -P "${workFile3}" -d "${pid}" -f -i 0.5 >/dev/null 2>&1; } 4>&1 || exit 1
 
 exit 0

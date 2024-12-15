@@ -8,6 +8,7 @@ test "${SKIP_ALL_TESTS}" = "1" && exit 77
 true "${testSubject:?not set - call this from 'make check'}"
 true "${workFile1:?not set - call this from 'make check'}"
 true "${workFile2:?not set - call this from 'make check'}"
+true "${workFile3:?not set - call this from 'make check'}"
 
 # Skip the test if "-d" is not available.
 if ! "${testSubject}" -h | grep -Fq ' -d'; then
@@ -18,12 +19,18 @@ fi
 seq 1 100 > "${workFile1}"
 
 # Run a background process to perform a few reads from a file.
+# We only start doing anything once the PV process below has started (the
+# workFile3 check).
 # NB we just export line to make shellcheck think it's used.
-(export line; sleep 1; read -r line; sleep 1; read -r line; sleep 1) <"${workFile1}" &
+true > "${workFile3}"
+(
+while ! test -s "${workFile3}"; do sleep 0.1; done
+export line; sleep 1; read -r line; sleep 1; read -r line; sleep 1
+) <"${workFile1}" &
 pid=$!
 
 sleep 0.1
-"${testSubject}" -d "${pid}:0" -f -i 0.5 >/dev/null 2>"${workFile2}"
+"${testSubject}" -P "${workFile3}" -d "${pid}:0" -f -i 0.5 >/dev/null 2>"${workFile2}"
 
 # Skip the test if "-d" does not work.
 if grep -Fq ' -d: not available' "${workFile2}"; then
