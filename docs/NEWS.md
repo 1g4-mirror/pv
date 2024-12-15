@@ -5,6 +5,7 @@
  * *feature:* allow decimal values such as "1.5G" with "**--size**", "**--rate-limit**", "**--buffer-size**", and "**error-skip-block**" ([#35](https://codeberg.org/a-j-wood/pv/issues/35))
  * *cleanup:* track transfer percentage as a floating point value for better precision (and rounding)
  * *cleanup:* correct detection of **--remote** usability on GNU Hurd
+ * *cleanup:* reduce likelihood of race conditions in tests when running on slow systems
  * *docs:* simplified the synopsis section of the manual
 
 ### 1.9.15 - 8 December 2024
