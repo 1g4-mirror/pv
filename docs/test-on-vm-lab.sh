@@ -22,6 +22,8 @@
 # and the "config.log", "test-suite.log", and "tests/" from the build area.
 #
 # Requires "scw" (https://www.ivarch.com/programs/scw.shtml).
+#
+# Version: 0.0.1 / 16 Dec 2024
 
 # Number of tests to run in parallel on each host.
 concurrency="1"
