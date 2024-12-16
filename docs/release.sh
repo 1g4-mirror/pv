@@ -9,8 +9,25 @@
 #
 # All of the release artefacts are placed in a "RELEASE-x" directory, where
 # "x" is the version.
+#
+# Version: 0.0.2 / 16 Dec 2024
 
 srcdir="$(awk '/^VPATH/{print $NF}' < Makefile | sed -n 1p)"
+manuals="$(find "${srcdir}/docs" -mindepth 1 -maxdepth 1 -type f -name "*.[0-9]" -printf "%f\n")"
+mainProgram="$(awk '/^[a-z]+_PROGRAMS/{print $3}' Makefile |cut -d '$' -f 1 | sed -n 1p)"
+labTestScript="${srcdir}/docs/test-on-vm-lab.sh"
+packageBuildScript="${srcdir}/docs/build-package.sh"
+
+status () {
+	test -n "$*" && printf "\n"
+	printf '\e]0;%s\007\r' "$*" >&2
+	if test -n "$*"; then
+		tput rev >&2
+		printf " -- %s -- " "$*" >&2
+		tput sgr0 >&2
+		printf "\n\n"
+	fi
+}
 
 possiblyDie () {
 	printf "\n" >&2
@@ -19,112 +36,159 @@ possiblyDie () {
 	tput sgr0 >&2
 	printf "\n%s\n" "Type 'y' and hit Enter to continue anyway."
 	read -r line
-	test "${line}" = "y" || exit 1
+	test "${line}" = "y" || { status ""; exit 1; }
 }
+
+test -e "${labTestScript}" || labTestScript=""
+test -e "${packageBuildScript}" || packageBuildScript=""
 
 # The checklist is re-ordered a little so that we defer making changes (like
 # "make indent") until as late as possible, in case any checks fail.
 
+status "Initial checks"
+
 # Check MAINTAINER is provided.
 test -n "${MAINTAINER}" || possiblyDie "environment variable MAINTAINER is empty"
 
-# * Check that `po/POTFILES.in` is up to date
-inFile="$(sort < "${srcdir}/po/POTFILES.in")"
-realList="$(find "${srcdir}" -name "*.c" -printf "%P\n" | sort)"
-test "${inFile}" = "${realList}" || possiblyDie "po/POTFILES.in is incorrect"
+# * Check that _po/POTFILES.in_ is up to date
+if test -d "${srcdir}/po"; then
+	inFile="$(sort < "${srcdir}/po/POTFILES.in")"
+	realList="$(find "${srcdir}" -name "*.c" -printf "%P\n" | sort)"
+	test "${inFile}" = "${realList}" || possiblyDie "po/POTFILES.in is incorrect"
+fi
 
-# * Run "`make analyse`" and see whether remaining warnings can be addressed
+status "Initial build"
+make || possiblyDie "failed 'make'"
+
+# * Run "_make analyse_" and see whether remaining warnings can be addressed
+status "Source analysis"
 make analyse || possiblyDie "failed 'make analyse'"
 
 # * Version bump and documentation checks:
-#   * Check that `docs/NEWS.md` is up to date
+
+status "Version checks"
+
+#   * Check that _docs/NEWS.md_ is up to date
 versionInNews="$(awk 'FNR==1{print $2}' "${srcdir}/docs/NEWS.md")"
 printf "%s\n" "${versionInNews}" | grep -Eq '^[0-9]' || possiblyDie "version in NEWS.md (${versionInNews}) is not numeric"
 
-#   * Check the version in `configure.ac` and `docs/NEWS.md` were updated
+#   * Check the version in both _configure.ac_ and _docs/NEWS.md_ was updated
 versionInConfig="$(grep ^AC_INIT "${srcdir}/configure.ac" | cut -d '[' -f 3 | cut -d ']' -f 1)"
 test "${versionInConfig}" = "${versionInNews}" || possiblyDie "version in configure.ac (${versionInConfig}) mismatches NEWS.md (${versionInNews})"
 
-#   * Check that the manual `docs/pv.1` is up to date
-versionInManual="$(awk 'FNR==1 {print $5}' "${srcdir}/docs/pv.1" | cut -d - -f 2)"
-test "${versionInManual}" = "${versionInNews}" || possiblyDie "version in pv.1 (${versionInManual}) mismatches NEWS.md (${versionInNews})"
+#   * Check that the manuals are up to date
+for manPage in ${manuals}; do
+	versionInManual="$(awk 'FNR==1 {print $5}' "${srcdir}/docs/${manPage}" | cut -d - -f 2)"
+	test "${versionInManual}" = "${versionInNews}" || possiblyDie "version in ${manPage} (${versionInManual}) mismatches NEWS.md (${versionInNews})"
+done
 
-#   * Check that the year displayed by src/main/version.c is correct
-yearInSource="$(grep -F 'printf("Copyright' "${srcdir}/src/main/version.c" | cut -d '"' -f 4)"
+#   * Check that the program version is correct
+versionInVersionOutput="$(./"${mainProgram}" --version | awk 'FNR==1{print $NF}')"
+test "${versionInVersionOutput}" = "${versionInNews}" || possiblyDie "version in '${mainProgram} --version' (${versionInVersionOutput}) mismatches NEWS.md (${versionInNews})"
+
+#   * Check that the year displayed by --version is correct
+yearInVersion="$(./"${mainProgram}" --version | awk '/^Copyright/{print $2}')"
 yearNow="$(date '+%Y')"
-test "${yearInSource}" = "${yearNow}" || possiblyDie "the year in src/main/version.c (${yearInSource}) is not this year (${yearNow})"
+test "${yearInVersion}" = "${yearNow}" || possiblyDie "the year in '--version' (${yearInVersion}) is not this year (${yearNow})"
 
-#   * Run "`make docs/pv.1.md`" and, if using VPATH, copy the result to the source directory
+#   * Make the Markdown version of the manuals and, if using VPATH, copy the result to the source directory
 # We also wipe everything in "docs" so we don't accidentally package
 # leftover working files.
-rm -f docs/*
-make docs/pv.1.md
-cp docs/pv.1.md "${srcdir}/docs/pv.1.md"
 
-# * Run "`make indent; make indent indentclean check`"
+status "Markdown manual"
+
+rm -f docs/*
+for manPage in ${manuals}; do
+	make "docs/${manPage}.md"
+	cp "docs/${manPage}.md" "${srcdir}/docs/${manPage}.md"
+done
+
+# * Run "_make indent; make indent indentclean check_"
+status "Reformat source"
 make indent
 make indent indentclean
 # The check will run later as part of "make distcheck".
 
-# * Run "`make -C po update-po`"
-make -C po update-po || possiblyDie "update-po failed"
+# * Run "_make -C po update-po_"
+status "Update po files"
+if test -d "${srcdir}/po"; then
+	make -C po update-po || possiblyDie "update-po failed"
+fi
 
-# * Run "`autoreconf`" in the source directory
+# * Run "_autoreconf_" in the source directory
+status "Run autoreconf"
 (cd "${srcdir}" && autoreconf -is) || possiblyDie "autoreconf failed"
 
 # * Ensure everything has been committed to the repository
+status "Commit check"
 gitStatus="$(cd "${srcdir}" && git status --porcelain=v1)" || possiblyDie "failed to run 'git status'"
 test -z "${gitStatus}" || possiblyDie "not everything is committed - 'git status' is not empty"
 
 # * Consistency and build checks:
-#   * Wipe the build directory, and run "`configure`" there
-#   * Run "`make distcheck`"
-# * Run "`make release MAINTAINER=<signing-user>`"
+#   * Wipe the build directory, and run "_configure_" there
+#   * Run "_make distcheck_"
+# * Run "_make release MAINTAINER=<signing-user>_"
 # NB "make release" implies "make distcheck".
+# We set SKIP_VALGRIND_TESTS=1 because the full tests will run in the lab
+# check.
+status "Release archive"
 workDir="$(mktemp -d)" || possiblyDie "mktemp failed"
 trap 'chmod -R u+w "${workDir}"; rm -rf "${workDir}"' EXIT
 (
 cd "${workDir}" || exit 1
 sh "${srcdir}/configure" || exit 1
-export SKIP_VALGRIND_TESTS=1
-make -j8 release || exit 1
+make -j8 release SKIP_VALGRIND_TESTS=1 || exit 1
 exit 0
 ) || possiblyDie "failed on 'make release'"
 
 sourceArchive="$(find "${workDir}" -mindepth 1 -maxdepth 1 -type f -name "*.tar.gz")"
 test -e "${sourceArchive}.asc" || possiblyDie "release was not signed"
 
-#   * Run "`./configure && make check`" on all test systems including Cygwin, using the `tar.gz` that was just created
+#   * Run "_./configure && make check_" on all test systems, using the _tar.gz_ that was just created
 #   * Run a cross-compilation check
-sh "${srcdir}/docs/test-on-vm-lab.sh" "${sourceArchive}" || possiblyDie "lab test failed"
+if test -n "${labTestScript}"; then
+	status "Lab test"
+	sh "${labTestScript}" "${sourceArchive}" || possiblyDie "lab test failed"
+fi
 
 # * Update the project web site:
-#   * Copy the release `.tar.gz`, `.txt`, and `.asc` files to the web site
-#   * Use "`pandoc --from markdown --to html`" to convert the news and manual to HTML
+#   * Copy the release _.tar.gz_, _.txt_, and _.asc_ files to the web site
+#   * Use "_pandoc --from markdown --to html_" to convert the news and manual to HTML
+status "Release dir"
 rm -rf "RELEASE-${versionInNews}"
 mkdir "RELEASE-${versionInNews}"
 cp "${sourceArchive}" "${sourceArchive}.asc" "${sourceArchive}.txt" "RELEASE-${versionInNews}/" || possiblyDie "failed to copy release files"
 
-pandoc --from markdown --to html --shift-heading-level-by=1 < "${srcdir}/docs/pv.1.md" > "RELEASE-${versionInNews}/manual.html"
+status "HTML docs"
+for manPage in ${manuals}; do
+	pandoc --from markdown --to html --shift-heading-level-by=1 < "${srcdir}/docs/${manPage}.md" > "RELEASE-${versionInNews}/${manPage}.html"
+done
 pandoc --from markdown --to html < "${srcdir}/docs/NEWS.md" > "RELEASE-${versionInNews}/news.html"
 
 # Build OS packages.
 packagingHosts="$(cat ~/.config/packaging-hosts 2>/dev/null)"
+test -n "${packageBuildScript}" || packagingHosts=""
 for buildHost in ${packagingHosts}; do
 	remoteWorkDir="$(ssh "${buildHost}" "mktemp -d")" || continue
 	test -n "${remoteWorkDir}" || continue
+	status "Package: ${buildHost}"
 	buildOK=true
-	scp "${srcdir}/docs/build-package.sh" "${buildHost}:${remoteWorkDir}/" || buildOK=false
+	scp "${packageBuildScript}" "${buildHost}:${remoteWorkDir}/build-package.sh" || buildOK=false
 	${buildOK} && scp "${sourceArchive}" "${buildHost}:${remoteWorkDir}/" || buildOK=false
+	# shellcheck disable=SC2029
 	${buildOK} && ssh -t "${buildHost}" "cd \"${remoteWorkDir}\" && SKIP_VALGRIND_TESTS=\"${SKIP_VALGRIND_TESTS}\" MAINTAINER=\"${MAINTAINER}\" sh ./build-package.sh ./*gz" || buildOK=false
+	# shellcheck disable=SC2029
 	${buildOK} && ssh "${buildHost}" "rm \"${remoteWorkDir}\"/${sourceArchive##*/} \"${remoteWorkDir}/build-package.sh\""
 	${buildOK} && mkdir -p "RELEASE-${versionInNews}/${buildHost}"
 	${buildOK} && scp "${buildHost}:${remoteWorkDir}/*" "RELEASE-${versionInNews}/${buildHost}/"
+	# shellcheck disable=SC2029
 	ssh "${buildHost}" "rm -rf \"${remoteWorkDir}\""
 done
 
 find "RELEASE-${versionInNews}/" -type f -exec chmod 644 '{}' ';'
 find "RELEASE-${versionInNews}/" -type d -exec chmod 755 '{}' ';'
+
+status "Done"
 
 cat <<EOF
 
