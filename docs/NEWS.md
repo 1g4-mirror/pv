@@ -7,6 +7,7 @@
  * *cleanup:* track transfer percentage as a floating point value for better precision (and rounding)
  * *cleanup:* correct detection of **--remote** usability on GNU Hurd
  * *cleanup:* reduce likelihood of race conditions in tests when running on slow systems
+ * *cleanup:* reduce memory footprint
  * *docs:* simplified the synopsis section of the manual
 
 ### 1.9.15 - 8 December 2024
