@@ -16,11 +16,11 @@
 /*
  * Display the transfer's name.
  */
-size_t pv_formatter_name(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_name(pvformatter_args_t args)
 {
 	char string_format[32];		 /* flawfinder: ignore - always bounded */
 	char content[512];		 /* flawfinder: ignore - always bounded */
-	size_t field_width;
+	pvdisplay_bytecount_t field_width;
 
 	if (0 == args->buffer_size)
 		return 0;

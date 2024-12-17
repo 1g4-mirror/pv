@@ -14,9 +14,9 @@
 /*
  * Display the previously written line.
  */
-size_t pv_formatter_previous_line(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_previous_line(pvformatter_args_t args)
 {
-	size_t bytes_to_show, read_offset, write_offset, remaining;
+	pvdisplay_bytecount_t bytes_to_show, read_offset, write_offset, remaining;
 
 	args->display->showing_previous_line = true;
 

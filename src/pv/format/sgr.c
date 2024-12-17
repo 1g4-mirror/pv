@@ -95,11 +95,11 @@ struct sgr_keyword_map_s {
 /*
  * Display SGR codes if colour output is supported.
  */
-size_t pv_formatter_sgr(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_sgr(pvformatter_args_t args)
 {
 	/*@keep@ */ static struct sgr_keyword_map_s *keywords;
 	char content[1024];		 /* flawfinder: ignore */
-	size_t write_position, read_position, keyword_start, keyword_length;
+	pvdisplay_bytecount_t write_position, read_position, keyword_start, keyword_length;
 	int numeric_value, code_count, most_recent_code;
 
 	/* flawfinder - null-terminated and bounded with pv_snprintf(). */

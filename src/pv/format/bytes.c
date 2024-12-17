@@ -14,7 +14,7 @@
 /*
  * Number of bytes or lines transferred.
  */
-size_t pv_formatter_bytes(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_bytes(pvformatter_args_t args)
 {
 	char content[128];		 /* flawfinder: ignore - always bounded */
 

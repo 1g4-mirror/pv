@@ -17,9 +17,9 @@
  * As a side effect, this sets args->display->lastwritten_bytes to
  * the segment's chosen_size, if it was previously smaller than that.
  */
-size_t pv_formatter_last_written(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_last_written(pvformatter_args_t args)
 {
-	size_t bytes_to_show, read_offset, write_offset, remaining;
+	pvdisplay_bytecount_t bytes_to_show, read_offset, write_offset, remaining;
 
 	args->display->showing_last_written = true;
 

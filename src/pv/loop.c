@@ -481,12 +481,14 @@ int pv_main_loop(pvstate_t state)
 
 			state->flag.terminal_resized = 0;
 
-			new_width = state->control.width;
+			new_width = (unsigned int) (state->control.width);
 			new_height = state->control.height;
 			pv_screensize(&new_width, &new_height);
 
+			if (new_width > PVDISPLAY_WIDTH_MAX)
+				new_width = PVDISPLAY_WIDTH_MAX;
 			if (!state->control.width_set_manually)
-				state->control.width = new_width;
+				state->control.width = (pvdisplay_width_t) new_width;
 			if (!state->control.height_set_manually)
 				state->control.height = new_height;
 		}
@@ -695,12 +697,15 @@ int pv_watchfd_loop(pvstate_t state)
 
 			state->flag.terminal_resized = 0;
 
-			new_width = state->control.width;
+			new_width = (unsigned int) (state->control.width);
 			new_height = state->control.height;
 			pv_screensize(&new_width, &new_height);
 
+			if (new_width > PVDISPLAY_WIDTH_MAX)
+				new_width = PVDISPLAY_WIDTH_MAX;
+
 			if (!state->control.width_set_manually)
-				state->control.width = new_width;
+				state->control.width = (pvdisplay_width_t) new_width;
 			if (!state->control.height_set_manually)
 				state->control.height = new_height;
 		}
@@ -841,8 +846,20 @@ int pv_watchpid_loop(pvstate_t state)
 
 		/* Resize the display, if a resize signal was received. */
 		if (1 == state->flag.terminal_resized) {
+			unsigned int new_width, new_height;
+
 			state->flag.terminal_resized = 0;
-			pv_screensize(&(state->control.width), &(state->control.height));
+
+			new_width = (unsigned int) (state->control.width);
+			new_height = state->control.height;
+			pv_screensize(&new_width, &new_height);
+
+			if (new_width > PVDISPLAY_WIDTH_MAX)
+				new_width = PVDISPLAY_WIDTH_MAX;
+
+			state->control.width = (pvdisplay_width_t) new_width;
+			state->control.height = new_height;
+
 			for (idx = 0; NULL != info_array && idx < array_length; idx++) {
 				if (NULL == info_array[idx].state)
 					continue;
@@ -974,10 +991,10 @@ int pv_watchpid_loop(pvstate_t state)
 			debug("%s: %d", "adding blank lines", blank_lines);
 
 		while (blank_lines > 0) {
-			unsigned int x;
+			pvdisplay_width_t blank_count;
 			if (displayed_lines > 0)
 				pv_tty_write(state, "\n", 1);
-			for (x = 0; x < state->control.width; x++)
+			for (blank_count = 0; blank_count < state->control.width; blank_count++)
 				pv_tty_write(state, " ", 1);
 			pv_tty_write(state, "\r", 1);
 			blank_lines--;
@@ -997,8 +1014,8 @@ int pv_watchpid_loop(pvstate_t state)
 	 */
 	blank_lines = prev_displayed_lines;
 	while (blank_lines > 0) {
-		unsigned int x;
-		for (x = 0; x < state->control.width; x++)
+		pvdisplay_width_t blank_count;
+		for (blank_count = 0; blank_count < state->control.width; blank_count++)
 			pv_tty_write(state, " ", 1);
 		pv_tty_write(state, "\r", 1);
 		blank_lines--;

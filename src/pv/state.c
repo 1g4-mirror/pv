@@ -414,7 +414,9 @@ void pv_state_interval_set(pvstate_t state, double val)
 
 void pv_state_width_set(pvstate_t state, unsigned int val, bool was_set_manually)
 {
-	state->control.width = val;
+	if (val > PVDISPLAY_WIDTH_MAX)
+		val = PVDISPLAY_WIDTH_MAX;
+	state->control.width = (pvdisplay_width_t) val;
 	state->control.width_set_manually = was_set_manually;
 }
 

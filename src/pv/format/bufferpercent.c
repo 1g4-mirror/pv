@@ -14,7 +14,7 @@
 /*
  * Percentage transfer buffer utilisation.
  */
-size_t pv_formatter_buffer_percent(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_buffer_percent(pvformatter_args_t args)
 {
 	char content[16];		 /* flawfinder: ignore - always bounded */
 

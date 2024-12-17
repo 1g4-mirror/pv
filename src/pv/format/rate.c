@@ -14,7 +14,7 @@
 /*
  * Transfer rate.
  */
-size_t pv_formatter_rate(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_rate(pvformatter_args_t args)
 {
 	char content[128];		 /* flawfinder: ignore - always bounded */
 

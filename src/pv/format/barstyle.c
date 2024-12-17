@@ -122,10 +122,10 @@ static bool pv_barstyle(pvformatter_args_t args, pvbarstyle_t style, const char 
  *
  * If there is no room, returns zero, so the first style is re-used.
  */
-int pv_display_barstyle_index(pvformatter_args_t args, const char *name)
+int8_t pv_display_barstyle_index(pvformatter_args_t args, const char *name)
 {
 	struct pvbarstyle_s style;
-	int barstyle_index;
+	int8_t barstyle_index;
 #ifdef ENABLE_DEBUGGING
 	bool found;
 #endif
@@ -160,7 +160,7 @@ int pv_display_barstyle_index(pvformatter_args_t args, const char *name)
 }
 
 
-size_t pv_formatter_bar_default(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_bar_default(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter) {
 		const char *default_name;
@@ -175,28 +175,28 @@ size_t pv_formatter_bar_default(pvformatter_args_t args)
 	return pv_formatter_progress_bar_only(args);
 }
 
-size_t pv_formatter_bar_plain(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_bar_plain(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter)
 		args->segment->parameter = 1 + pv_display_barstyle_index(args, "plain");
 	return pv_formatter_progress_bar_only(args);
 }
 
-size_t pv_formatter_bar_block(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_bar_block(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter)
 		args->segment->parameter = 1 + pv_display_barstyle_index(args, "block");
 	return pv_formatter_progress_bar_only(args);
 }
 
-size_t pv_formatter_bar_granular(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_bar_granular(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter)
 		args->segment->parameter = 1 + pv_display_barstyle_index(args, "granular");
 	return pv_formatter_progress_bar_only(args);
 }
 
-size_t pv_formatter_bar_shaded(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_bar_shaded(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter)
 		args->segment->parameter = 1 + pv_display_barstyle_index(args, "shaded");

@@ -119,6 +119,19 @@ struct pvbarstyle_s {
 typedef struct pvbarstyle_s *pvbarstyle_t;
 
 
+/* Display format component type, -1 for static string. */
+typedef int8_t pvdisplay_component_t;
+#define PVDISPLAY_COMPONENT_MAX (127)	/* INT8_MAX */
+
+/* Byte count of a part of the display. */
+typedef uint16_t pvdisplay_bytecount_t;
+#define PVDISPLAY_BYTECOUNT_MAX (65535)	/* UINT16_MAX */
+
+/* Width of a part of the display. */
+typedef uint16_t pvdisplay_width_t;
+#define PVDISPLAY_WIDTH_MAX (65535)	/* UINT16_MAX */
+
+
 /*
  * Structure for holding PV internal state. Opaque outside the PV library.
  *
@@ -165,7 +178,7 @@ struct pvstate_s {
 		int output_fd;                   /* fd to write output to */
 		unsigned int average_rate_window; /* time window in seconds for average rate calculations */
 		unsigned int history_interval;	 /* seconds between each average rate calc history entry */
-		unsigned int width;              /* screen width */
+		pvdisplay_width_t width;         /* screen width */
 		unsigned int height;             /* screen height */
 		unsigned int extra_displays;	 /* bitmask of extra display destinations */
 		bool force;                      /* display even if not on terminal */
@@ -237,14 +250,14 @@ struct pvstate_s {
 
 		struct pvdisplay_segment_s {	/* format string broken into segments */
 			/* See pv__format_init() for more details. */
-			int type;			/* component type, -1 for static string */
-			int parameter;			/* component parameter, such as bar style index */
-			uint8_t string_parameter_bytes;	/* number of bytes in string_parameter */
-			size_t chosen_size;		/* "n" from %<n>A, or 0 */
-			size_t offset;			/* start offset of this segment in the build buffer */
-			size_t bytes;			/* length of segment in bytes in the build buffer */
-			size_t width;			/* displayed width of segment */
 			/*@dependent@*/ /*@null@*/ const char *string_parameter; /* parameter after colon in %{x:} */
+			pvdisplay_bytecount_t string_parameter_bytes;	/* number of bytes in string_parameter */
+			pvdisplay_component_t type;	/* component type, -1 for static string */
+			int8_t parameter;		/* component parameter, such as bar style index */
+			pvdisplay_width_t chosen_size;	/* "n" from %<n>A, or 0 */
+			pvdisplay_bytecount_t offset;	/* start offset of this segment in the build buffer */
+			pvdisplay_bytecount_t bytes;	/* length of segment in bytes in the build buffer */
+			pvdisplay_width_t width;	/* displayed width of segment */
 		} format[PV_FORMAT_ARRAY_MAX];
 
 		struct pvbarstyle_s barstyle[PV_BARSTYLE_MAX];
@@ -258,18 +271,19 @@ struct pvstate_s {
 		char next_line[PV_SIZEOF_PREVLINE_BUFFER];
 
 		/*@only@*/ /*@null@*/ char *display_buffer;	/* buffer for display string */
-		size_t display_buffer_size;	 /* size allocated to display buffer */
-		size_t display_string_bytes;	 /* byte length of string in display buffer */
-		size_t display_string_width;	 /* displayed width of string in display buffer */
-		off_t initial_offset;		 /* offset when first opened (when watching fds) */
-		size_t lastwritten_bytes;	 /* largest number of last-written bytes to show */
-		size_t next_line_len;		 /* length of currently receiving line so far */
+		off_t initial_offset;			 /* offset when first opened (when watching fds) */
+		size_t next_line_len;				 /* length of currently receiving line so far */
 
 		size_t format_segment_count;	 /* number of format string segments */
 
 		pvtransfercount_t count_type;	 /* type of count for transfer, rate, etc */
 
-		unsigned int prev_screen_width;	 /* screen width last time we were called */
+		pvdisplay_width_t prev_screen_width;	 /* screen width last time we were called */
+
+		pvdisplay_bytecount_t display_buffer_size;	/* size allocated to display buffer */
+		pvdisplay_bytecount_t display_string_bytes;	/* byte length of string in display buffer */
+		pvdisplay_width_t display_string_width;		/* displayed width of string in display buffer */
+		pvdisplay_bytecount_t lastwritten_bytes;	 /* largest number of last-written bytes to show */
 
 		bool showing_timer;		 /* set if showing timer */
 		bool showing_bytes;		 /* set if showing byte/line count */
@@ -426,14 +440,14 @@ struct pvformatter_args_s {
 	/*@dependent@*/ pvdisplay_t display;		/* the display being updated */
 	/*@dependent@*/ pvdisplay_segment_t segment;	/* the segment of the display */
 	/*@dependent@*/ char *buffer;			/* buffer to write formatted segments into */
-	size_t buffer_size;		/* size of the buffer */
-	size_t offset;			/* current write position in the buffer */
+	pvdisplay_bytecount_t buffer_size;		/* size of the buffer */
+	pvdisplay_bytecount_t offset;			/* current write position in the buffer */
 };
 typedef struct pvformatter_args_s *pvformatter_args_t;
 
 
 /* Pointer to a formatter function. */
-typedef size_t (*pvdisplay_formatter_t)(pvformatter_args_t);
+typedef pvdisplay_bytecount_t (*pvdisplay_formatter_t)(pvformatter_args_t);
 
 
 /*
@@ -475,9 +489,9 @@ long pv_seconds_remaining(const off_t, const off_t, const long double);
 void pv_si_prefix(long double *, char *, const long double, pvtransfercount_t);
 void pv_describe_amount(char *, size_t, char *, long double, char *, char *, pvtransfercount_t);
 
-int pv_display_barstyle_index(pvformatter_args_t, const char *);
+int8_t pv_display_barstyle_index(pvformatter_args_t, const char *);
 
-size_t pv_formatter_segmentcontent(char *, pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_segmentcontent(char *, pvformatter_args_t);
 
 /*
  * Formatting functions.
@@ -500,25 +514,25 @@ size_t pv_formatter_segmentcontent(char *, pvformatter_args_t);
  * If called with a buffer size of 0, only the side effects occur (such as
  * setting flags like display->showing_timer).
  */
-size_t pv_formatter_progress(pvformatter_args_t);
-size_t pv_formatter_progress_bar_only(pvformatter_args_t);
-size_t pv_formatter_progress_amount_only(pvformatter_args_t);
-size_t pv_formatter_bar_default(pvformatter_args_t);
-size_t pv_formatter_bar_plain(pvformatter_args_t);
-size_t pv_formatter_bar_block(pvformatter_args_t);
-size_t pv_formatter_bar_granular(pvformatter_args_t);
-size_t pv_formatter_bar_shaded(pvformatter_args_t);
-size_t pv_formatter_timer(pvformatter_args_t);
-size_t pv_formatter_eta(pvformatter_args_t);
-size_t pv_formatter_fineta(pvformatter_args_t);
-size_t pv_formatter_rate(pvformatter_args_t);
-size_t pv_formatter_average_rate(pvformatter_args_t);
-size_t pv_formatter_bytes(pvformatter_args_t);
-size_t pv_formatter_buffer_percent(pvformatter_args_t);
-size_t pv_formatter_last_written(pvformatter_args_t);
-size_t pv_formatter_previous_line(pvformatter_args_t);
-size_t pv_formatter_name(pvformatter_args_t);
-size_t pv_formatter_sgr(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_progress(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_progress_bar_only(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_progress_amount_only(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_bar_default(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_bar_plain(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_bar_block(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_bar_granular(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_bar_shaded(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_timer(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_fineta(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_rate(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_average_rate(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_bytes(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_buffer_percent(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_last_written(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_previous_line(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_name(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_sgr(pvformatter_args_t);
 
 bool pv_format(pvstate_t, /*@null@*/ const char *, pvdisplay_t, bool, bool);
 void pv_display(pvstate_t, bool);

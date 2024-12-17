@@ -14,7 +14,7 @@
 /*
  * Estimated time until completion.
  */
-size_t pv_formatter_eta(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t args)
 {
 	char content[128];		 /* flawfinder: ignore - always bounded */
 	long eta;

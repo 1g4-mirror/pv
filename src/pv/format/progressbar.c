@@ -41,15 +41,17 @@
  *
  * This is only called by pv_formatter_progress().
  */
-static size_t pv_formatter_progress_knownsize(pvformatter_args_t args, char *buffer, size_t buffer_size, bool bar_sides,
-					      bool include_bar, bool include_amount)
+static pvdisplay_bytecount_t pv_formatter_progress_knownsize(pvformatter_args_t args, char *buffer,
+							     pvdisplay_bytecount_t buffer_size, bool bar_sides,
+							     bool include_bar, bool include_amount)
 {
 	char after_bar[32];		 /* flawfinder: ignore - only populated by pv_snprintf(). */
-	size_t after_bar_bytes, after_bar_width;
-	size_t bar_area_width, filled_bar_width, buffer_offset, pad_count;
+	pvdisplay_bytecount_t after_bar_bytes, buffer_offset;
+	pvdisplay_width_t after_bar_width;
+	pvdisplay_width_t bar_area_width, filled_bar_width, pad_count;
 	double bar_percentage;
 	pvbarstyle_t style;
-	size_t full_cell_index;
+	pvdisplay_bytecount_t full_cell_index;
 	bool has_tip = false;
 
 	buffer[0] = '\0';
@@ -127,7 +129,7 @@ static size_t pv_formatter_progress_knownsize(pvformatter_args_t args, char *buf
 		bar_area_width = args->segment->width - after_bar_width;
 	}
 
-	filled_bar_width = (size_t) ((bar_area_width * bar_percentage) / 100);
+	filled_bar_width = (pvdisplay_width_t) ((bar_area_width * bar_percentage) / 100);
 	/* Leave room for the tip of the bar. */
 	if (has_tip && filled_bar_width > 0)
 		filled_bar_width -= style->tip.width;
@@ -209,11 +211,11 @@ static size_t pv_formatter_progress_knownsize(pvformatter_args_t args, char *buf
  *
  * This is only called by pv_formatter_progress().
  */
-static size_t pv_formatter_progress_unknownsize(pvformatter_args_t args, char *buffer,
-						size_t buffer_size, bool bar_sides)
+static pvdisplay_bytecount_t pv_formatter_progress_unknownsize(pvformatter_args_t args, char *buffer,
+							       pvdisplay_bytecount_t buffer_size, bool bar_sides)
 {
-	size_t bar_area_width, buffer_offset, pad_count;
-	size_t indicator_position;
+	pvdisplay_bytecount_t buffer_offset;
+	pvdisplay_width_t bar_area_width, pad_count, indicator_position;
 	pvbarstyle_t style;
 
 	buffer[0] = '\0';
@@ -240,7 +242,7 @@ static size_t pv_formatter_progress_unknownsize(pvformatter_args_t args, char *b
 	 * here we make values above 100 send the indicator back down again,
 	 * so it moves back and forth.
 	 */
-	indicator_position = (size_t) (args->state->calc.percentage);
+	indicator_position = (pvdisplay_width_t) (args->state->calc.percentage);
 	if (indicator_position > 200)
 		indicator_position = indicator_position % 200;
 	if (indicator_position > 100 && indicator_position <= 200)
@@ -290,10 +292,10 @@ static size_t pv_formatter_progress_unknownsize(pvformatter_args_t args, char *b
 /*
  * Progress bar.
  */
-size_t pv_formatter_progress(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_progress(pvformatter_args_t args)
 {
 	char content[4096];		 /* flawfinder: ignore - always bounded */
-	size_t bytes;
+	pvdisplay_bytecount_t bytes;
 
 	content[0] = '\0';
 
@@ -328,10 +330,10 @@ size_t pv_formatter_progress(pvformatter_args_t args)
 /*
  * Progress bar, without sides and without a number afterwards.
  */
-size_t pv_formatter_progress_bar_only(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 {
 	char content[4096];		 /* flawfinder: ignore - always bounded */
-	size_t bytes;
+	pvdisplay_bytecount_t bytes;
 
 	content[0] = '\0';
 
@@ -366,10 +368,10 @@ size_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 /*
  * The number after the progress bar.
  */
-size_t pv_formatter_progress_amount_only(pvformatter_args_t args)
+pvdisplay_bytecount_t pv_formatter_progress_amount_only(pvformatter_args_t args)
 {
 	char content[256];		 /* flawfinder: ignore - always bounded */
-	size_t bytes;
+	pvdisplay_bytecount_t bytes;
 
 	content[0] = '\0';
 

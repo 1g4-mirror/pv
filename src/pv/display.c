@@ -446,9 +446,9 @@ void pv_describe_amount(char *buffer, size_t bufsize, char *format,
  * updating the segment's offset and bytes values and returning the bytes
  * value, or treating the byte count as zero if there's insufficient space.
  */
-size_t pv_formatter_segmentcontent(char *content, pvformatter_args_t formatter_info)
+pvdisplay_bytecount_t pv_formatter_segmentcontent(char *content, pvformatter_args_t formatter_info)
 {
-	size_t bytes;
+	pvdisplay_bytecount_t bytes;
 
 	bytes = strlen(content);	    /* flawfinder: ignore */
 	/* flawfinder - caller is required to null-terminate the string. */
@@ -683,7 +683,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 	 */
 	segment = 0;
 	for (strpos = 0; display_format[strpos] != '\0' && segment < PV_FORMAT_ARRAY_MAX; strpos++, segment++) {
-		int component_type, component_idx;
+		pvdisplay_component_t component_type, component_idx;
 		size_t str_start, str_bytes, chosen_size;
 		const char *string_parameter = NULL;
 		size_t string_parameter_bytes = 0;
@@ -915,7 +915,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			}
 		}
 #else				/* ! ENABLE_NCURSES */
-# ifdef USE_POPEN_TPUTS		/* (! ENABLE_NCURSES) && (USE_POPEN_TPUTS) */
+#ifdef USE_POPEN_TPUTS			    /* (! ENABLE_NCURSES) && (USE_POPEN_TPUTS) */
 		/*
 		 * Without terminal info support, try running "tput colors"
 		 * to determine whether colour is available, unless --force
@@ -960,14 +960,14 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 				/*@+unrecog@ */
 			}
 		}
-# else				/* (! ENABLE_NCURSES) && (! USE_POPEN_TPUTS) */
+#else				/* (! ENABLE_NCURSES) && (! USE_POPEN_TPUTS) */
 		/*
 		 * Without terminal info support, just assume colour is
 		 * available.
 		 */
 		state->control.can_display_colour = true;
 		debug("%s", "terminal info support not compiled in - assuming colour support");
-# endif				/* (! ENABLE_NCURSES) && (! USE_POPEN_TPUTS) */
+#endif				/* (! ENABLE_NCURSES) && (! USE_POPEN_TPUTS) */
 #endif				/* ! ENABLE_NCURSES */
 	}
 }
