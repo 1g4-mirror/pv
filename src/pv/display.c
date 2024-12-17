@@ -28,6 +28,16 @@
 #endif
 #endif
 
+/*
+ * If USE_POPEN_TPUTS is defined, then we call popen("tputs") if ncurses is
+ * unavailable, when we need to know whether colours are supported.
+ *
+ * Since popen() is risky to call (in case $PATH has been altered), it is
+ * safer to just assume colour is available if we can't check, so
+ * USE_POPEN_TPUTS is undefined here by default.
+ */
+#undef USE_POPEN_TPUTS
+
 
 /*
  * We need sys/ioctl.h for ioctl() regardless of whether TIOCGWINSZ is
@@ -894,21 +904,71 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 				    ) {
 					state->control.can_display_colour = true;
 					debug("%s: %s", term_env, "terminal supports colour");
+				} else {
+					state->control.can_display_colour = false;
+					debug("%s: %s", term_env, "terminal does not support colour");
 				}
 			} else {
 				/* If TERM is unset, disable colour. */
 				state->control.can_display_colour = false;
+				debug("%s", "no TERM variable - disabling colour support");
 			}
 		}
 #else				/* ! ENABLE_NCURSES */
+# ifdef USE_POPEN_TPUTS		/* (! ENABLE_NCURSES) && (USE_POPEN_TPUTS) */
 		/*
-		 * Without terminal info support, always assume colour is
-		 * supported.
+		 * Without terminal info support, try running "tput colors"
+		 * to determine whether colour is available, unless --force
+		 * was supplied, in which case colour support is assumed.
 		 */
-		/* TODO: call "tput colors" with popen() instead. */
+		if (true == state->control.force) {
+			state->control.can_display_colour = true;
+			debug("%s", "force mode - assuming terminal supports colour");
+		} else {
+			FILE *command_fptr;
+
+			/*@-unrecog@ *//* splint doesn't know popen(). */
+			command_fptr = popen("tput colors 2>/dev/null", "r");	/* flawfinder: ignore */
+			/*@+unrecog@ */
+
+			/*
+			 * flawfinder - we acknowledge that popen() is risky
+			 * to call, though we have the mitigation that we're
+			 * calling it with a static string.
+			 */
+
+			if (NULL == command_fptr) {
+				state->control.can_display_colour = false;
+				debug("%s (%s)", "popen failed - disabling colour support", strerror(errno));
+			} else {
+				int colour_count;
+				if (1 == fscanf(command_fptr, "%d", &colour_count)) {
+					if (colour_count > 1) {
+						state->control.can_display_colour = true;
+						debug("%s (%d)", "terminal supports colour", colour_count);
+					} else {
+						state->control.can_display_colour = false;
+						debug("%s (%d)",
+						      "fewer than 2 colours available - disabling colour support");
+					}
+				} else {
+					state->control.can_display_colour = false;
+					debug("%s", "tput did not produce a number - disabling colour support");
+				}
+				/*@-unrecog@ *//* splint doesn't know pclose(). */
+				(void) pclose(command_fptr);
+				/*@+unrecog@ */
+			}
+		}
+# else				/* (! ENABLE_NCURSES) && (! USE_POPEN_TPUTS) */
+		/*
+		 * Without terminal info support, just assume colour is
+		 * available.
+		 */
 		state->control.can_display_colour = true;
-		debug("%s", "no terminal info support - assuming terminal supports colour");
-#endif				/* ENABLE_NCURSES */
+		debug("%s", "terminal info support not compiled in - assuming colour support");
+# endif				/* (! ENABLE_NCURSES) && (! USE_POPEN_TPUTS) */
+#endif				/* ! ENABLE_NCURSES */
 	}
 }
 
