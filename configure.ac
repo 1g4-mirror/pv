@@ -109,7 +109,7 @@ AC_DEFINE([SIGINFO_PROVIDES_PID], [1], [Signal handlers can determine the sendin
 AH_BOTTOM([#include "config-aux.h"])
 
 AC_ARG_ENABLE([debugging],
-  [  --enable-debugging      compile with debugging support],
+  [AS_HELP_STRING([--enable-debugging], [compile with debugging support])],
   if test "$enable_debugging" = "yes"; then
   	CFLAGS="$CFLAGS -g -Wall"
 	AC_DEFINE([ENABLE_DEBUGGING], [1], [Debugging support enabled])
@@ -117,14 +117,15 @@ AC_ARG_ENABLE([debugging],
 )
 
 AC_ARG_ENABLE([profiling],
-  [  --enable-profiling      compile with profiling support],
+  [AS_HELP_STRING([--enable-profiling], [compile with profiling support])],
   if test "$enable_profiling" = "yes"; then
   	CFLAGS="-pg $CFLAGS"
   fi
 )
 
 SPLICE_SUPPORT="no"
-AC_ARG_ENABLE([splice], [  --disable-splice        do not use splice system call],
+AC_ARG_ENABLE([splice],
+  [AS_HELP_STRING([--disable-splice], [do not use splice system call])],
   if test "$enable_splice" = "yes"; then
     SPLICE_SUPPORT="yes"
   fi,
@@ -132,7 +133,8 @@ AC_ARG_ENABLE([splice], [  --disable-splice        do not use splice system call
 )
 
 IPC_SUPPORT="no"
-AC_ARG_ENABLE([ipc], [  --disable-ipc           turn off IPC messaging],
+AC_ARG_ENABLE([ipc],
+  [AS_HELP_STRING([--disable-ipc], [turn off IPC messaging])],
   if test "$enable_ipc" = "yes"; then
     IPC_SUPPORT="yes"
   fi,
