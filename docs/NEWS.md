@@ -1,4 +1,4 @@
-### 1.9.23 - UNRELEASED
+### 1.9.24 - UNRELEASED
 
  * *feature:* new **--bar-style** option to change the default bar style ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
  * *feature:* new bar formats "**%{bar-plain}**", "**%{bar-block}**", "**%{bar-granular}**", "**%{bar-shaded}**" ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
