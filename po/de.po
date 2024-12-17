@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-17 22:49+0000\n"
+"POT-Creation-Date: 2024-12-17 23:56+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: fnetX <otto@codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -474,18 +474,18 @@ msgstr "(keine)"
 msgid "(stdin)"
 msgstr "(stdin)"
 
-#: src/pv/format/averagerate.c:30 src/pv/format/progressbar.c:87
-#: src/pv/format/rate.c:32 src/pv/loop.c:549
+#: src/pv/format/averagerate.c:30 src/pv/format/progressbar.c:89
+#: src/pv/format/rate.c:32 src/pv/loop.c:551
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:91
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:93
 #: src/pv/format/rate.c:36
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:91
-#: src/pv/format/rate.c:36 src/pv/loop.c:549
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:93
+#: src/pv/format/rate.c:36 src/pv/loop.c:551
 msgid "B/s"
 msgstr "B/s"
 
@@ -505,16 +505,16 @@ msgstr "ETA"
 msgid "FIN"
 msgstr "Endzeit"
 
-#: src/pv/loop.c:548
+#: src/pv/loop.c:550
 #, fuzzy
 msgid "rate min/avg/max/mdev"
 msgstr "Rate min/mittel/max/mdev"
 
-#: src/pv/loop.c:560
+#: src/pv/loop.c:562
 msgid "rate not measured"
 msgstr "Übertragungsrate nicht gemessen"
 
-#: src/pv/loop.c:767 src/pv/loop.c:818 src/pv/loop.c:859 src/pv/watchpid.c:99
+#: src/pv/loop.c:772 src/pv/loop.c:823 src/pv/loop.c:876 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:300 src/pv/watchpid.c:308
@@ -526,7 +526,7 @@ msgstr "pid"
 msgid "history structure allocation failed"
 msgstr "Speicherzuweisung für `history' fehlgeschlagen"
 
-#: src/pv/state.c:591 src/pv/state.c:602
+#: src/pv/state.c:593 src/pv/state.c:604
 msgid "file list allocation failed"
 msgstr "Speicherzuweisung für die Dateiliste fehlgeschlagen"
 
