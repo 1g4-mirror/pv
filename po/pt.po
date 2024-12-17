@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-15 23:05+0000\n"
+"POT-Creation-Date: 2024-12-17 22:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -417,15 +417,15 @@ msgstr "tentativa de bloqueio falhou"
 msgid "failed to open terminal"
 msgstr "erro abrindo o terminal"
 
-#: src/pv/display.c:239
+#: src/pv/display.c:249
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:257
+#: src/pv/display.c:267
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:1004 src/pv/transfer.c:1056
+#: src/pv/display.c:1064 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 

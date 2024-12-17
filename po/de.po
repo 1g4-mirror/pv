@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-15 23:05+0000\n"
+"POT-Creation-Date: 2024-12-17 22:49+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: fnetX <otto@codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -434,15 +434,15 @@ msgstr "Sperrversuch fehlgeschlagen"
 msgid "failed to open terminal"
 msgstr "konnte Terminal nicht öffnen"
 
-#: src/pv/display.c:239
+#: src/pv/display.c:249
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnµm kMGTPEZY"
 
-#: src/pv/display.c:257
+#: src/pv/display.c:267
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:1004 src/pv/transfer.c:1056
+#: src/pv/display.c:1064 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
