@@ -692,6 +692,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 		str_bytes = 0;
 
 		chosen_size = 0;
+/* TODO: check values fit inside the types */
 
 		if ('%' == display_format[strpos]) {
 			unsigned long number_prefix;
