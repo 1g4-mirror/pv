@@ -44,6 +44,9 @@
 /* Define to 1 if you have the `fdatasync' function. */
 #undef HAVE_FDATASYNC
 
+/* Define to 1 if you have the `fmod' function. */
+#undef HAVE_FMOD
+
 /* Define to 1 if you have the `fpathconf' function. */
 #undef HAVE_FPATHCONF
 

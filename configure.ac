@@ -44,8 +44,10 @@ AC_CHECK_MEMBERS([struct stat.st_blksize])
 AC_CHECK_DECLS([SA_SIGINFO], [], [], [[#include <signal.h>]])
 
 AC_SEARCH_LIBS([sqrtl],[m])
+AC_SEARCH_LIBS([fmod],[m])
 AC_CHECK_HEADERS([math.h])
 AC_CHECK_FUNCS([sqrtl])
+AC_CHECK_FUNCS([fmod])
 
 dnl Libraries that may contain key functions.
 AC_SEARCH_LIBS([clock_gettime],[rt])

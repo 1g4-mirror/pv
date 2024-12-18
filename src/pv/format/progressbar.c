@@ -12,6 +12,10 @@
 
 #include <string.h>
 
+#if HAVE_MATH_H
+#include <math.h>
+#endif
+
 /* Convenience macro for appending a string to the buffer. */
 #define append_to_buffer(x) { \
   if (buffer_offset < (buffer_size - x.bytes)) { \
@@ -215,7 +219,8 @@ static pvdisplay_bytecount_t pv_formatter_progress_unknownsize(pvformatter_args_
 							       pvdisplay_bytecount_t buffer_size, bool bar_sides)
 {
 	pvdisplay_bytecount_t buffer_offset;
-	pvdisplay_width_t bar_area_width, pad_count, indicator_position;
+	pvdisplay_width_t bar_area_width, pad_count;
+	double indicator_position, padding_width;
 	pvbarstyle_t style;
 
 	buffer[0] = '\0';
@@ -242,11 +247,20 @@ static pvdisplay_bytecount_t pv_formatter_progress_unknownsize(pvformatter_args_
 	 * here we make values above 100 send the indicator back down again,
 	 * so it moves back and forth.
 	 */
-	indicator_position = (pvdisplay_width_t) (args->state->calc.percentage);
-	if (indicator_position > 200)
-		indicator_position = indicator_position % 200;
-	if (indicator_position > 100 && indicator_position <= 200)
-		indicator_position = 200 - indicator_position;
+	indicator_position = args->state->calc.percentage;
+	if (indicator_position > 200.0)
+#if HAVE_FMOD
+		indicator_position = fmod(indicator_position, 200.0);
+#else
+	{
+		while (indicator_position > 200.0)
+			indicator_position -= 200.0;
+	}
+#endif
+	if (indicator_position > 100.0)
+		indicator_position = 200.0 - indicator_position;
+	if (indicator_position < 0.0)
+		indicator_position = 0.0;
 
 	buffer_offset = 0;
 
@@ -257,7 +271,8 @@ static pvdisplay_bytecount_t pv_formatter_progress_unknownsize(pvformatter_args_
 
 	/* The spaces before the indicator. */
 	pad_count = 0;
-	while (pad_count < bar_area_width && pad_count < ((bar_area_width * indicator_position) / 100)) {
+	padding_width = (((double) bar_area_width) * indicator_position) / 100.0;
+	while (pad_count < bar_area_width && pad_count < (pvdisplay_width_t) padding_width) {
 		append_to_buffer(style->filler[0]);
 		pad_count += style->filler[0].width;
 		if (0 == style->filler[0].width)
