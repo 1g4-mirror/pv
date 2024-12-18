@@ -692,7 +692,6 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 		str_bytes = 0;
 
 		chosen_size = 0;
-/* TODO: check values fit inside the types */
 
 		if ('%' == display_format[strpos]) {
 			unsigned long number_prefix;
@@ -772,8 +771,8 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 						string_parameter_bytes = sequence_length - sequence_colon_offset;
 						if (string_parameter_bytes > 0)
 							string_parameter_bytes--;	/* the closing '}' */
-						if (string_parameter_bytes > 255)
-							string_parameter_bytes = 255;
+						if (string_parameter_bytes > PVDISPLAY_BYTECOUNT_MAX)
+							string_parameter_bytes = PVDISPLAY_BYTECOUNT_MAX;
 						break;
 					}
 				}
@@ -817,6 +816,9 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 			strpos += foundlength - 1;
 		}
+
+		if (chosen_size > PVDISPLAY_WIDTH_MAX)
+			chosen_size = PVDISPLAY_WIDTH_MAX;
 
 		display->format[segment].type = component_type;
 		display->format[segment].chosen_size = chosen_size;
