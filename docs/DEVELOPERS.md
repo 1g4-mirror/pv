@@ -6,7 +6,7 @@ translators:
  * **--enable-debugging** - build in debugging support
  * **--enable-profiling** - build in support for profiling
 
-These "`make`" targets are available:
+These targets are available when running _make_:
 
  * "`make analyse`" - run _splint_ and _flawfinder_ on all C source files
 
@@ -78,7 +78,7 @@ The comment line, starting _"#"_, shows the source filename and line number
 at which this message can be found.  The _"msgid"_ is the original message
 in the program, in English.  The _"msgstr"_ is the translated text.
 
-It is the "`msgstr`" lines which need to be updated by translators.
+It is the _"msgstr"_ lines which need to be updated by translators.
 
 Message catalogue files should all be encoded as UTF-8.
 
