@@ -60,12 +60,12 @@ make %{?_smp_mflags}
 
 %install
 test -n "\${RPM_BUILD_ROOT}" && test "\${RPM_BUILD_ROOT}" != '/' && rm -rf "\${RPM_BUILD_ROOT}"
-make install DESTDIR="\${RPM_BUILD_ROOT}" SKIP_VALGRIND_TESTS=1
+make install DESTDIR="\${RPM_BUILD_ROOT}"
 rm -rf "\${RPM_BUILD_ROOT}/usr/share/doc"
 %find_lang %{name}
 
 %check
-make check
+make check SKIP_VALGRIND_TESTS=1
 
 %clean
 test -n "\${RPM_BUILD_ROOT}" && test "\${RPM_BUILD_ROOT}" != '/' && rm -rf "\${RPM_BUILD_ROOT}"
