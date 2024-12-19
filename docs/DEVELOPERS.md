@@ -1,30 +1,30 @@
 # Notes for developers and translators
 
-The following "`configure`" options will be of interest to developers and
+The following _configure_ options will be of interest to developers and
 translators:
 
- * `--enable-debugging` - build in debugging support
- * `--enable-profiling` - build in support for profiling
+ * **--enable-debugging** - build in debugging support
+ * **--enable-profiling** - build in support for profiling
 
 These "`make`" targets are available:
 
- * `make analyse` - run _splint_ and _flawfinder_ on all C source files
+ * "`make analyse`" - run _splint_ and _flawfinder_ on all C source files
 
 
 ## Debugging and profiling support
 
-When "`./configure --enable-debugging`" is used, the "`pv`" produced by
-"`make`" will support an extra option, "`--debug FILE`", which will cause
-debugging output to be written to *FILE*.  This is not recommended for
-production builds due to the extra processing it introduces, and the
-potential size of the output.
+When "`./configure --enable-debugging`" is used, the _pv_ produced by _make_
+will support an extra option, "**--debug FILE**", which will cause debugging
+output to be written to *FILE*.  This is not recommended for production
+builds due to the extra processing it introduces, and the potential size of
+the output.
 
-Within the code, "`debug()`" is used in a similar way to "`printf()`".  It
-will automatically include the calling function, source file, and line
+Within the code, "**debug()**" is used in a similar way to "**printf()**". 
+It will automatically include the calling function, source file, and line
 number, so they don't need to be included in the parameters.  When debugging
 support is not enabled, it evaluates to a null statement.
 
-This does mean that if you call "`debug()`", make sure it has no side
+This does mean that if you call "**debug()**", make sure it has no side
 effects, as they won't be present in builds without debugging support.
 
 Builds produced after "`./configure --enable-profiling`" will write profile
@@ -35,11 +35,11 @@ Please note that the memory safety checks will fail with profiling enabled.
 ## Source code analysis
 
 Running "`make analyse`" runs _splint_ and _flawfinder_ on all C sources,
-writing the output of both programs to files named "`*.e`" for each "`*.c`".
+writing the output of both programs to files named _"*.e"_ for each _"*.c"_.
 
-There are no dependency rules set up for these "`.e`" files, so if a header
-file is altered, manually remove the relevant "`.e`" files, or update the
-timestamp of the relevant "`.c`" files, before running "`make analyse`"
+There are no dependency rules set up for these _".e"_ files, so if a header
+file is altered, manually remove the relevant _".e"_ files, or update the
+timestamp of the relevant _".c"_ files, before running "`make analyse`"
 again.
 
 The goal is for all C source files to generate zero warnings from either
@@ -65,8 +65,8 @@ Alternatively, read on for details of how to maintain the translations
 directly within the source tree.
 
 The message catalogues used to translate program messages into other
-languages are in the "`po/`" directory, named "`xx.po`", where "`xx`"
-is the ISO 639-1 2-letter language code, such as "`fr`" for French.
+languages are in the _"po/"_ directory, named _"xx.po"_, where _"xx"_
+is the ISO 639-1 2-letter language code, such as "**fr**" for French.
 
 Each of these files contains lines like this:
 
@@ -74,16 +74,16 @@ Each of these files contains lines like this:
     msgid "failed to get terminal name"
     msgstr "erro ao ler o nome do terminal"
 
-The comment line, starting "`#`", shows the source filename and line number
-at which this message can be found.  The "`msgid`" is the original message
-in the program, in English.  The "`msgstr`" is the translated text.
+The comment line, starting _"#"_, shows the source filename and line number
+at which this message can be found.  The _"msgid"_ is the original message
+in the program, in English.  The _"msgstr"_ is the translated text.
 
 It is the "`msgstr`" lines which need to be updated by translators.
 
 Message catalogue files should all be encoded as UTF-8.
 
-After making a change to a "`.po`" file, test it by compiling it and installing
-to a temporary location, like this:
+After making a change to a _".po"_ file, test it by compiling it and
+installing to a temporary location, like this:
 
     ./configure --enable-debugging --prefix=/tmp/yourtest
     make clean
@@ -96,40 +96,40 @@ to a temporary location, like this:
     /tmp/yourtest/bin/pv --help
     exit
 
-Replace "`--help`" with whatever is appropriate for your test.  In this
-example, the language being tested is "`de`" (German), on a system which is
+Replace "**--help**" with whatever is appropriate for your test.  In this
+example, the language being tested is _"de"_ (German), on a system which is
 running with UTF-8 support.
 
 In the example above, a new shell is started by typing "`bash`" so that
 after your tests, "`exit`" will return you to your previous shell with your
 language settings intact.
 
-Note that at the start, you have to re-run "`configure`" with "`--prefix`"
+Note that at the start, you have to re-run _configure_ with "**--prefix**"
 rather than using "`make DESTDIR=...`", because the locale directory is set
-at compile time.  Also, on Debian at least, both "`LC_ALL`" and "`LANGUAGE`"
-must be set.
+at compile time.  Also, on Debian at least, both the environment variables
+_"LC_ALL"_ and _"LANGUAGE"_ must be set.
 
 To find untranslated strings in a language that's already supported but
 which you can help with gaps in, use this command:
 
     msgattrib --untranslated < po/fr.po
 
-replacing "`po/fr.po`" as appropriate.
+replacing _"po/fr.po"_ as appropriate.
 
-To add a new language, create the new message catalogue file under "`po/`"
-by copying "`po/pv.pot`" to "`po/xx.po`", where "`xx`" is the language code,
-and adjusting it.  The "`.pot`" file is generated automatically by "`make`".
+To add a new language, create the new message catalogue file under _"po/"_
+by copying _"po/pv.pot"_ to _"po/xx.po"_, where _"xx"_ is the language code,
+and adjusting it.  The _".pot"_ file is generated automatically by _make_.
 
-Next, add the language code to "`po/LINGUAS`" - this is a list of the
+Next, add the language code to _"po/LINGUAS"_ - this is a list of the
 2-letter codes of the supported languages.
 
 Finally, run "`./config.status`" and "`make -C po update-po`".
 
 When the source code is updated, running "`make -C po update-po`" will
-update the "`pv.pot`" file so that it lists where all the messages are in
-the source.  It will also use _msgmerge_ to update all of the "`.po`" files
-from the updated "`pv.pot`" file.  After doing this, look for missing
-translations (empty "`msgstr`" lines) or translations marked as "fuzzy", as
+update the _"pv.pot"_ file so that it lists where all the messages are in
+the source.  It will also use _msgmerge_ to update all of the _".po"_ files
+from the updated _"pv.pot"_ file.  After doing this, look for missing
+translations (empty _"msgstr"_ lines) or translations marked as "fuzzy", as
 these will need to be corrected by translators.
 
 
@@ -146,25 +146,25 @@ The package maintainer should run through these steps for a new release:
    * <https://cvsweb.openbsd.org/ports/sysutils/pv/>
    * <https://packages.fedoraproject.org/pkgs/pv/pv/>
  * Run "`make indent; make indent indentclean check`"
- * Check that `po/POTFILES.in` is up to date
+ * Check that _po/POTFILES.in_ is up to date
  * Run "`make -C po update-po`"
  * Run "`make analyse`" and see whether remaining warnings can be addressed
  * Version bump and documentation checks:
-   * Update the version in `configure.ac` and `docs/NEWS.md`
-   * Check that `docs/NEWS.md` is up to date
-   * Check that the manual `docs/pv.1` is up to date
+   * Update the version in _configure.ac_ and _docs/NEWS.md_
+   * Check that _docs/NEWS.md_ is up to date
+   * Check that the manual _docs/pv.1_ is up to date
    * Run "`make docs/pv.1.md`" and, if using VPATH, copy the result to the source directory
-   * Check that the year displayed by src/main/version.c is correct
+   * Check that the year displayed by _src/main/version.c_ is correct
  * Ensure everything has been committed to the repository
- * Run "`autoreconf`" in the source directory
+ * Run "`autoreconf -is`" in the source directory
  * Consistency and build checks:
-   * Wipe the build directory, and run "`configure`" there
+   * Wipe the build directory, and run _configure_ there
    * Run "`make distcheck`"
    * Run "`./configure && make check`" on all test systems including Cygwin, using the `tar.gz` that was just created
    * Run a cross-compilation check
  * Run "`make release MAINTAINER=<signing-user>`"
  * Update the project web site:
-   * Copy the release `.tar.gz`, `.txt`, and `.asc` files to the web site
+   * Copy the release _.tar.gz_, _.txt_, and _.asc_ files to the web site
    * Use "`pandoc --from markdown --to html`" to convert the news and manual to HTML
    * Update the news and manual on the web site
    * Update the version numbers on the web site
