@@ -1,10 +1,10 @@
-### 1.9.24 - UNRELEASED
+### 1.9.24 - 19 December 2024
 
+ * *feature:* new **--format** sequences for graphical progress bars - "**%{bar-block}**", "**%{bar-granular}**", and "**%{bar-shaded}**" ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
+ * *feature:* new **--format** sequence "**%{sgr:colour,...}**" to use ECMA-48 Select Graphic Rendition codes to add colours
  * *feature:* new **--bar-style** option to change the default bar style ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
- * *feature:* new bar formats "**%{bar-plain}**", "**%{bar-block}**", "**%{bar-granular}**", "**%{bar-shaded}**" ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
- * *feature:* new bar format "**%{sgr:colour,...}**" to use ECMA-48 Select Graphic Rendition codes to add colours
  * *feature:* allow decimal values such as "1.5G" with "**--size**", "**--rate-limit**", "**--buffer-size**", and "**error-skip-block**" ([#35](https://codeberg.org/a-j-wood/pv/issues/35))
- * *cleanup:* track transfer percentage as a floating point value for better precision (and rounding)
+ * *cleanup:* improve progress bar granularity on wide displays by internally tracking the transfer percentage as a decimal number
  * *cleanup:* correct detection of **--remote** usability on GNU Hurd
  * *cleanup:* reduce likelihood of race conditions in tests when running on slow systems
  * *cleanup:* reduce memory footprint
