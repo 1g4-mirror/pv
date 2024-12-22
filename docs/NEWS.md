@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *fix:* test failure of **--watchfd** on macOS corrected
+
 ### 1.9.24 - 19 December 2024
 
  * *feature:* new **--format** sequences for graphical progress bars - "**%{bar-block}**", "**%{bar-granular}**", and "**%{bar-shaded}**" ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
