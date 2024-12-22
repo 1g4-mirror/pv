@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2024-12-19 21:10+0000\n"
+"POT-Creation-Date: 2024-12-22 12:09+0000\n"
 "PO-Revision-Date: 2024-10-12 23:51+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -496,7 +496,7 @@ msgstr "oran ölçülmedi"
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:300 src/pv/watchpid.c:308
-#: src/pv/watchpid.c:384 src/pv/watchpid.c:405
+#: src/pv/watchpid.c:385 src/pv/watchpid.c:406
 msgid "pid"
 msgstr "pid"
 
