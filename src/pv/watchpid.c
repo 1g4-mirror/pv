@@ -308,7 +308,7 @@ static int pidfds(pvstate_t state, unsigned int pid, struct proc_fdinfo **fds, i
 		pv_error(state, "%s: alloc failed: %s", _("pid"), strerror(errno));
 		return -1;
 	}
-	memset(fds, 0, size_needed);
+	memset(*fds, 0, size_needed);
 
 	proc_pidinfo(pid, PROC_PIDLISTFDS, 0, *fds, size_needed);
 
