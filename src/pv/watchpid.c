@@ -419,9 +419,12 @@ int pv_watchpid_scanfds(pvstate_t state,
 #else
 		if (sscanf(d->d_name, "%d", &fd) != 1)
 			continue;
+#endif
+
+		/* Skip if the fd is outside the array. */
 		if ((fd < 0) || (fd >= FD_SETSIZE))
 			continue;
-#endif
+
 		/*
 		 * Skip if this fd is already known to us.
 		 */
