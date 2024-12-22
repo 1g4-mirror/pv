@@ -1,6 +1,6 @@
 ### 1.9.25 - 22 December 2024
 
- * *fix:* test failure of **--watchfd** on macOS corrected
+ * *fix:* test failure of **--watchfd** on macOS corrected ([#124](https://codeberg.org/a-j-wood/pv/issues/124))
 
 ### 1.9.24 - 19 December 2024
 
