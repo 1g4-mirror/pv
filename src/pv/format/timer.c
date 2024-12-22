@@ -33,6 +33,10 @@ pvdisplay_bytecount_t pv_formatter_timer(pvformatter_args_t args)
 	if (args->state->transfer.elapsed_seconds > (long double) 360000000.0L)
 		args->state->transfer.elapsed_seconds = (long double) 360000000.0L;
 
+	/* Also check it's not negative. */
+	if (args->state->transfer.elapsed_seconds < 0.0)
+		args->state->transfer.elapsed_seconds = 0.0;
+
 	/*
 	 * If the elapsed time is more than a day, include a day count as
 	 * well as hours, minutes, and seconds.
