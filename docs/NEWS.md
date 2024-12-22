@@ -1,4 +1,4 @@
-### UNRELEASED
+### 1.9.25 - 22 December 2024
 
  * *fix:* test failure of **--watchfd** on macOS corrected
 
