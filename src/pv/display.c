@@ -1138,7 +1138,9 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	 * with a dynamic width.
 	 */
 
-	dynamic_segment_width = state->control.width - static_portion_width;
+	dynamic_segment_width = 0;
+	if (state->control.width > static_portion_width)
+		dynamic_segment_width = state->control.width - static_portion_width;
 
 	/*
 	 * Divide the total remaining screen space by the number of dynamic
