@@ -1,7 +1,7 @@
 /*
  * Functions relating to elapsed time.
  *
- * Copyright 2023-2024 Andrew Wood
+ * Copyright 2023-2025 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */

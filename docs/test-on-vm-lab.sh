@@ -23,6 +23,9 @@
 #
 # Requires "scw" (https://www.ivarch.com/programs/scw.shtml).
 #
+# Copyright 2024-2025 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+#
 # Version: 0.0.1 / 16 Dec 2024
 
 # Number of tests to run in parallel on each host.

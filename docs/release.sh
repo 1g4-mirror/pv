@@ -10,6 +10,9 @@
 # All of the release artefacts are placed in a "RELEASE-x" directory, where
 # "x" is the version.
 #
+# Copyright 2024-2025 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+#
 # Version: 0.0.2 / 16 Dec 2024
 
 srcdir="$(awk '/^VPATH/{print $NF}' < Makefile | sed -n 1p)"

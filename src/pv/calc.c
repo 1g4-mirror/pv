@@ -1,7 +1,7 @@
 /*
  * Functions for updating the calculated state of the transfer.
  *
- * Copyright 2024 Andrew Wood
+ * Copyright 2024-2025 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */

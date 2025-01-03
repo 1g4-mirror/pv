@@ -51,7 +51,7 @@ run it as described above.
 See "[docs/ACKNOWLEDGEMENTS.md](./docs/ACKNOWLEDGEMENTS.md)" for a list of
 contributors.
 
-Copyright (C) 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood.
+Copyright (C) 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2025 Andrew Wood.
 
 License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl-3.0.html>.
 

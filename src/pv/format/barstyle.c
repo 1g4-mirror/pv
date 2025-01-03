@@ -1,7 +1,7 @@
 /*
  * Formatter functions for styled progress bars.
  *
- * Copyright 2024 Andrew Wood
+ * Copyright 2024-2025 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */

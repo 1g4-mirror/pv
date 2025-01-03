@@ -3,7 +3,7 @@
  * `configure' script.  Include this after config.h and before anything
  * else.
  *
- * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2024 Andrew Wood
+ * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2025 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */

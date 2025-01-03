@@ -15,6 +15,9 @@
 # The packages built with this script are not "official", in that they are
 # not part of any Linux distribution and may not follow the distribution's
 # policies.  Use at your own risk.
+#
+# Copyright 2024-2025 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 
 sourceArchive="$1"
 test -n "${sourceArchive}" && test -f "${sourceArchive}" \
