@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *fix:* turn off IPC support if _sys/shm.h_ is not available, for compilation on Termux
+
 ### 1.9.25 - 22 December 2024
 
  * *fix:* test failure of **--watchfd** on macOS corrected ([#124](https://codeberg.org/a-j-wood/pv/issues/124))

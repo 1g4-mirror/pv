@@ -173,6 +173,7 @@ yes
 
 if test "$IPC_SUPPORT" = "yes"; then
   AC_CHECK_HEADERS([sys/ipc.h], [], [IPC_SUPPORT=no])
+  AC_CHECK_HEADERS([sys/shm.h], [], [IPC_SUPPORT=no])
   AC_CHECK_HEADERS([sys/param.h])
   if test "$IPC_SUPPORT" = "yes"; then
     AC_CHECK_FUNCS([shmget], [], [IPC_SUPPORT=no])
