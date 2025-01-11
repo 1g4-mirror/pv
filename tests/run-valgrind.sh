@@ -35,6 +35,13 @@ if test "${SKIP_VALGRIND_TESTS}" = "1"; then
 	exit 77
 fi
 
+if command -v arch >/dev/null 2>&1 && arch | grep -Fq -e arm -e aarch; then
+	if ! test "${ENABLE_VALGRIND_ARM}" = "1"; then
+		echo "skipping valgrind on ARM without ENABLE_VALGRIND_ARM"
+		exit 77
+	fi
+fi
+
 valgrindHelp="$(valgrind --help 2>&1)"
 for valgrindOption in "verbose" "show-error-list" "error-exitcode" "track-fds" "leak-check"; do
 	echo "${valgrindHelp}" | grep -Fq "${valgrindOption}" || { echo "test requires \`valgrind --${valgrindOption}'"; exit 77; }

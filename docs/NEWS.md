@@ -1,6 +1,7 @@
 ### UNRELEASED
 
  * *fix:* turn off IPC support if _sys/shm.h_ is not available, for compilation on Termux
+ * *fix:* bypass valgrind checks on ARM by default due to false positives
 
 ### 1.9.25 - 22 December 2024
 
