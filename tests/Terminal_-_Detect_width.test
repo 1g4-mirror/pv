@@ -37,6 +37,7 @@ runInTerminal () {
 	# tmux 1.8 doesn't have "resize-window"
 	echo "resize-pane -x ${terminalWidth} -y 5"
 	echo "pipe-pane 'cat > ${workFile1}'"
+	sleep 0.5
 	echo "respawn-pane -k \"${commandToRun}\""
 	sleep "${secondsToWait}"
 	echo "kill-server"
@@ -51,7 +52,7 @@ runInTerminal () {
 # longest number of characters seen between "[" and "]".
 #
 runWidthTest () {
-	runInTerminal "$1" 1 "${testSubject} -pSs 1K </dev/zero >/dev/null" \
+	runInTerminal "$1" "$2" "${testSubject} -pSs 1K </dev/zero >/dev/null" \
 	| tr '\r' '\n' \
 	| sed -n 's/^.*\[//;s/\].*$//p' \
 	| awk 'BEGIN {m=0} {n=length($0); m=(n>m?n:m)} END {print m}'
@@ -64,7 +65,11 @@ runWidthTest () {
 #
 widthTest () {
 	terminalWidth="$1"
-	longestBar=$(runWidthTest "${terminalWidth}")
+	longestBar=$(runWidthTest "${terminalWidth}" 1)
+	# Retry test with longer delay, if null result.
+	if test -z "${longestBar}" || test "${longestBar}" -eq 0; then
+		longestBar=$(runWidthTest "${terminalWidth}" 5)
+	fi
 	if test -z "${longestBar}"; then
 		echo "no output from test at width=${terminalWidth}"
 		exit 1
