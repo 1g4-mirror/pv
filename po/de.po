@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2025-01-11 20:59+0000\n"
-"PO-Revision-Date: 2025-01-14 17:19+0000\n"
-"Last-Translator: m0yellow <m0yellow@users.noreply.translate.codeberg.org>\n"
+"PO-Revision-Date: 2025-01-14 20:39+0000\n"
+"Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -507,7 +507,7 @@ msgstr "Endzeit"
 
 #: src/pv/loop.c:550
 msgid "rate min/avg/max/mdev"
-msgstr "Rate Min/Durchschnitt/Max/Standardabw"
+msgstr "Rate min/mittel/max/abweichung"
 
 #: src/pv/loop.c:562
 msgid "rate not measured"
