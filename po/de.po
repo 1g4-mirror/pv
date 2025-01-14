@@ -2,21 +2,21 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2025-01-11 20:59+0000\n"
-"PO-Revision-Date: 2024-10-13 20:43+0000\n"
-"Last-Translator: fnetX <otto@codeberg.org>\n"
+"PO-Revision-Date: 2025-01-14 20:39+0000\n"
+"Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
 "Language: de\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.7.2\n"
+"X-Generator: Weblate 5.9.2\n"
 "Date: 1999-06-01 15:18:29+0100\n"
 "From: Andrew Wood <ivarch@ubik>\n"
 "Xgettext-Options: --default-domain=pkgbuild --directory=./.pkgdir --add-"
 "comments --keyword=_ --keyword=N_\n"
-"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/init."
-"c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/guts/"
-"configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
+"Files: src/getopt/getopt.c src/getopt/getopt1.c src/version.c src/main/"
+"init.c src/main/help.c src/main/xpmptr.c src/guts/load.c src/guts/stop.c src/"
+"guts/configure.c src/guts/make.c src/guts/install.c src/guts/prefs.c src/ui/"
 "generate.c src/ui/main.c src/ui/xpm.c src/ui/status.c src/ui/activate.c src/"
 "ui/handlers/main.c src/ui/handlers/package.c src/ui/handlers/prefs.c src/ui/"
 "handlers/dirsel.c src/ui/handlers/popup.c src/ui/handlers/help.c src/ui/"
@@ -158,19 +158,19 @@ msgstr "setze den NAMEn für visuelle Darstellung"
 
 #: src/main/help.c:311
 msgid "STYLE"
-msgstr ""
+msgstr "Stil"
 
 #: src/main/help.c:312
 msgid "set default bar style to NAME"
-msgstr ""
+msgstr "setze die voreingestellte Darstellung auf NAME"
 
 #: src/main/help.c:314
 msgid "SPEC"
-msgstr ""
+msgstr "STIL"
 
 #: src/main/help.c:315
 msgid "also send progress to SPEC"
-msgstr ""
+msgstr "Fortschritt auch an SPEC senden"
 
 #: src/main/help.c:318
 msgid "output transfer statistics at the end"
@@ -288,7 +288,7 @@ msgstr ""
 
 #: src/main/help.c:555
 msgid "Supported format sequences:"
-msgstr ""
+msgstr "unterstützte Formate:"
 
 #: src/main/help.c:569
 #, c-format
@@ -337,7 +337,7 @@ msgstr "Speicherzuweisung für `argv' der Option fehlgeschlagen"
 
 #: src/main/options.c:417
 msgid "numeric value not understood"
-msgstr ""
+msgstr "numerischen Wert nicht verstanden"
 
 #: src/main/options.c:435
 msgid "integer argument expected"
@@ -506,9 +506,8 @@ msgid "FIN"
 msgstr "Endzeit"
 
 #: src/pv/loop.c:550
-#, fuzzy
 msgid "rate min/avg/max/mdev"
-msgstr "Rate min/mittel/max/mdev"
+msgstr "Rate min/mittel/max/abweichung"
 
 #: src/pv/loop.c:562
 msgid "rate not measured"
