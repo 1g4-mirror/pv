@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *i18n:* German translations updated
+
 ### 1.9.27 - 12 January 2025
 
  * *fix:* turn off IPC support if _sys/shm.h_ is not available, for compilation on Termux
