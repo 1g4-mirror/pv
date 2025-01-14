@@ -115,7 +115,8 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
    * anonymous suggestions (7)
  * **German**
    * [Hartmut Goebel](https://translate.codeberg.org/user/htgoebel/) (77)
-   * [Benny](https://translate.codeberg.org/user/Benny/) (6)
+   * [m0yellow](https://translate.codeberg.org/user/m0yellow/) (9)
+   * [Benny](https://translate.codeberg.org/user/Benny/) (7)
    * [kre](https://translate.codeberg.org/user/kre/) (2)
    * [fnetX](https://translate.codeberg.org/user/fnetX/) (1)
  * **Polish**
