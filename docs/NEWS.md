@@ -1,6 +1,8 @@
 ### UNRELEASED
 
  * *i18n:* German translations updated
+ * *i18n:* Polish translations updated
+ * *i18n:* Russian translations updated
 
 ### 1.9.27 - 12 January 2025
 
