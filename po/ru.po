@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2025-01-11 20:59+0000\n"
-"PO-Revision-Date: 2024-10-22 18:07+0000\n"
+"PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
 "Language: ru\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.8.1\n"
+"X-Generator: Weblate 5.9.2\n"
 
 #: src/main/help.c:236
 msgid "show progress bar"
@@ -143,11 +143,11 @@ msgstr "писать ИМЯ до визуальной информации"
 
 #: src/main/help.c:311
 msgid "STYLE"
-msgstr ""
+msgstr "СТИЛЬ"
 
 #: src/main/help.c:312
 msgid "set default bar style to NAME"
-msgstr ""
+msgstr "задать стиль полоски по умолчанию как НАЗВАНИЕ"
 
 #: src/main/help.c:314
 msgid "SPEC"
@@ -271,7 +271,7 @@ msgstr ""
 
 #: src/main/help.c:555
 msgid "Supported format sequences:"
-msgstr ""
+msgstr "Поддерживаемые последовательности:"
 
 #: src/main/help.c:569
 #, c-format
@@ -320,7 +320,7 @@ msgstr "не удалось выделить память для структу�
 
 #: src/main/options.c:417
 msgid "numeric value not understood"
-msgstr ""
+msgstr "число не распознано"
 
 #: src/main/options.c:435
 msgid "integer argument expected"
