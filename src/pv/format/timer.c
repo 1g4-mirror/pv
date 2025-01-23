@@ -13,6 +13,8 @@
 
 /*
  * Elapsed time.
+ *
+ * TODO: show as a number if --numeric is active.
  */
 pvdisplay_bytecount_t pv_formatter_timer(pvformatter_args_t args)
 {

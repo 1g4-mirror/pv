@@ -13,6 +13,8 @@
 
 /*
  * Average transfer rate.
+ *
+ * TODO: show exact number without suffix if --numeric is active.
  */
 pvdisplay_bytecount_t pv_formatter_average_rate(pvformatter_args_t args)
 {

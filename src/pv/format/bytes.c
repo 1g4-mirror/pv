@@ -13,6 +13,8 @@
 
 /*
  * Number of bytes or lines transferred.
+ *
+ * TODO: show exact number without suffix if --numeric is active.
  */
 pvdisplay_bytecount_t pv_formatter_bytes(pvformatter_args_t args)
 {

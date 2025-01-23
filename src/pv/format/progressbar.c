@@ -382,6 +382,8 @@ pvdisplay_bytecount_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 
 /*
  * The number after the progress bar.
+ *
+ * TODO: show percentage without adornment if --numeric is active.
  */
 pvdisplay_bytecount_t pv_formatter_progress_amount_only(pvformatter_args_t args)
 {

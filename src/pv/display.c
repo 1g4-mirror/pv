@@ -487,6 +487,8 @@ pvdisplay_bytecount_t pv_formatter_segmentcontent(char *content, pvformatter_arg
  * If --rate was given, we output the current transfer rate instead of the
  * percentage.  With --bytes as well, the rate is given after the
  * bytes/lines.
+ *
+ * TODO: replace this with a custom --format string.
  */
 static bool pv__format_numeric(pvstate_t state, pvdisplay_t display)
 {
@@ -1077,6 +1079,8 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 	/*
 	 * Use the numeric mode function if we're in numeric mode.
+	 *
+	 * TODO: use a custom --format string instead.
 	 */
 	if (state->control.numeric) {
 		return pv__format_numeric(state, display);

@@ -509,6 +509,8 @@ int main(int argc, char **argv)
 	pv_state_watch_fd_set(state, opts->watch_fd);
 	pv_state_average_rate_window_set(state, opts->average_rate_window);
 
+	/* TODO: with --numeric, call a separate default format function. */
+
 	pv_state_set_format(state, opts->progress, opts->timer, can_have_eta ? opts->eta : false,
 			    can_have_eta ? opts->fineta : false, opts->rate, opts->average_rate,
 			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
