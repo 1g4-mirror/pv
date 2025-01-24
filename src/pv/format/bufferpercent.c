@@ -13,8 +13,6 @@
 
 /*
  * Percentage transfer buffer utilisation.
- *
- * TODO: show exact number without suffix if --numeric is active.
  */
 pvdisplay_bytecount_t pv_formatter_buffer_percent(pvformatter_args_t args)
 {
