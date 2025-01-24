@@ -13,8 +13,6 @@
 
 /*
  * Elapsed time.
- *
- * TODO: show as a number if --numeric is active.
  */
 pvdisplay_bytecount_t pv_formatter_timer(pvformatter_args_t args)
 {
@@ -39,11 +37,15 @@ pvdisplay_bytecount_t pv_formatter_timer(pvformatter_args_t args)
 	if (args->state->transfer.elapsed_seconds < 0.0)
 		args->state->transfer.elapsed_seconds = 0.0;
 
-	/*
-	 * If the elapsed time is more than a day, include a day count as
-	 * well as hours, minutes, and seconds.
-	 */
-	if (args->state->transfer.elapsed_seconds > (long double) 86400.0L) {
+	if (args->state->control.numeric) {
+		/* Numeric mode - show the number of seconds, unformatted. */
+		(void) pv_snprintf(content, sizeof(content), "%.4Lf",
+				   args->state->transfer.elapsed_seconds);
+	} else if (args->state->transfer.elapsed_seconds > (long double) 86400.0L) {
+		/*
+		 * If the elapsed time is more than a day, include a day count as
+		 * well as hours, minutes, and seconds.
+		 */
 		(void) pv_snprintf(content,
 				   sizeof(content),
 				   "%ld:%02ld:%02ld:%02ld",

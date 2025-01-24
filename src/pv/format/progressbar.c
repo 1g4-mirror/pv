@@ -382,20 +382,23 @@ pvdisplay_bytecount_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 
 /*
  * The number after the progress bar.
- *
- * TODO: show percentage without adornment if --numeric is active.
  */
 pvdisplay_bytecount_t pv_formatter_progress_amount_only(pvformatter_args_t args)
 {
 	char content[256];		 /* flawfinder: ignore - always bounded */
 	pvdisplay_bytecount_t bytes;
 
-	content[0] = '\0';
+	memset(content, 0, sizeof(content));
 
 	if (0 == args->buffer_size)
 		return 0;
 
-	if (args->state->control.size > 0 || args->state->control.rate_gauge) {
+	if (args->state->control.numeric) {
+		/* Numeric mode - percentage as a rounded integer with no suffix. */
+		(void) pv_snprintf(content, sizeof(content), "%.0f", args->state->calc.percentage);
+		bytes = strlen(content);	/* flawfinder: ignore */
+		/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
+	} else if (args->state->control.size > 0 || args->state->control.rate_gauge) {
 		/* Known size or rate gauge - percentage or rate. */
 		bytes = pv_formatter_progress_knownsize(args, content, sizeof(content), false, false, true);
 	} else {
