@@ -97,8 +97,7 @@ percentage, one per line, on standard error, suitable for passing to a tool
 such as \fBdialog\fR(1).
 Note that \*(lq\fB\-\-force\fR\*(rq is not required if
 \*(lq\fB\-\-numeric\fR\*(rq is being used.
-.TP
-.B ""
+.IP
 Combining \*(lq\fB\-\-numeric\fR\*(rq with \*(lq\fB\-\-bytes\fR\*(rq will
 cause the number of bytes processed so far to be output instead of a
 percentage.
@@ -109,8 +108,7 @@ Adding \*(lq\fB\-\-rate\fR\*(rq adds the transfer rate to each output line
 byte/line count).
 Adding \*(lq\fB\-\-timer\fR\*(rq prefixes each output line with the elapsed
 time so far, as a decimal number of seconds.
-.TP
-.B ""
+.IP
 Combining \*(lq\fB\-\-numeric\fR\*(rq with \*(lq\fB\-\-format\fR\*(rq allows
 for custom output.  The default format string components for
 \*(lq\fB\-\-numeric\fR\*(rq are
@@ -155,12 +153,9 @@ A suffix of \*(lqK\*(rq, \*(lqM\*(rq, \*(lqG\*(rq, or \*(lqT\*(rq can be
 added to denote kibibytes (*1024), mebibytes, gibibytes, tebibytes.
 If \*(lq\fB\-\-si\fR\*(rq appears before this option, suffixes will denote
 kilobytes (*1000), megabytes, and so on instead.
-.TP
-.B ""
+.IP
 If \fISIZE\fR starts with \*(lq\fB@\fR\*(rq, the size of file whose name
 follows the @ will be used.
-.TP
-.B ""
 .TP
 .B \-g, \-\-gauge
 If the progress bar is shown but the size is not known, then instead of
@@ -171,8 +166,7 @@ rate as a percentage of the maximum rate seen so far.
 Instead of counting bytes, count lines (newline characters).
 The progress bar will only move when a new line is found, and the value
 passed to \*(lq\fB\-\-size\fR\*(rq will be interpreted as a line count.
-.TP
-.B ""
+.IP
 If this option is used without \*(lq\fB\-\-size\fR\*(rq, the "total size"
 (in this case, total line count) is calculated by reading through all input
 files once before transfer starts.
@@ -290,8 +284,7 @@ The corresponding parts of the output will be null bytes.
 At first only a few bytes will be skipped, but if there are many errors in a
 row then the skips will move up to chunks of 512.
 This is intended to be similar to \*(lq\fIdd\~conv=sync,noerror\fR\*(rq.
-.TP
-.B ""
+.IP
 Specify \*(lq\fB\-\-skip\-errors\fR\*(rq twice to only report a read error
 once per file, instead of reporting each byte range skipped.
 .TP
@@ -303,8 +296,7 @@ block of \fIBYTES\fR bytes as soon as an error occurs.
 There may still be some shorter skips where the block being skipped
 coincides with the end of the transfer buffer.
 The same suffixes as \*(lq\fB\-\-size\fR\*(rq can be used.
-.TP
-.B ""
+.IP
 This option can only be used with \*(lq\fB\-\-skip\-errors\fR\*(rq
 and is intended for use when reading from a block device, such as
 \*(lq\fB\-\-skip\-errors\~\-\-error\-skip\-block\~4K\fR\*(rq
@@ -345,8 +337,7 @@ exhausted, read all of \fIFILE\fR and write it to the output.
 \fIFILE\fR remains in place afterwards, unless it is
 \*(lq\fB-\fR\*(rq, in which case \fBpv\fR creates a temporary file for this
 purpose, and automatically removes it afterwards.
-.TP
-.B ""
+.IP
 This can be useful if you have a pipeline which generates data (your
 input) quickly but you don't know the size, and you wish to pass it to some
 slower process, once all of the input has been generated and you know its
@@ -364,8 +355,7 @@ Instead of transferring data, watch file descriptor \fIFD\fR of process
 The \fBpv\fR process will exit when \fIFD\fR either changes to a different
 file, changes read/write mode, or is closed; other data transfer modifiers -
 and remote control - may not be used with this option.
-.TP
-.B ""
+.IP
 If only a \fIPID\fR is specified, then that process will be watched, and all
 regular files and block devices it opens will be shown with a progress bar.
 The \fBpv\fR process will exit when process \fIPID\fR exits.
@@ -497,8 +487,7 @@ Emit ECMA-48 SGR (Select Graphic Rendition) codes if the terminal supports
 colours, where \fIcolour,...\fR is a comma-separated list of any of the
 keywords below, or the numeric values from \fBconsole_codes\fR(4).  If
 colour support is not available, nothing is emitted.
-.TP
-.B ""
+.IP
 Supported keywords are:
 \fBreset\fR or \fBnone\fR,
 \fBblack\fR,
@@ -538,12 +527,10 @@ Supported keywords are:
 \fBno\-underscore\fR or \fBno\-underline\fR,
 \fBno\-blink\fR,
 \fBno\-reverse\fR.
-.TP
-.B ""
+.IP
 With colours, the optional "fg-" prefix indicates foreground; a prefix of
 "bg-" indicates background.
-.TP
-.B ""
+.IP
 For example, \*(lq\fB%{sgr:green,bold}TEXT%{sgr:reset}\fR\*(lq will make
 \fITEXT\fR bold green on supported terminals.
 .TP

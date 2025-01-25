@@ -100,7 +100,7 @@ are explicitly switched on will be shown.
     suitable for passing to a tool such as **dialog**(1). Note that
     "**\--force**" is not required if "**\--numeric**" is being used.
 
-:   Combining "**\--numeric**" with "**\--bytes**" will cause the number
+    Combining "**\--numeric**" with "**\--bytes**" will cause the number
     of bytes processed so far to be output instead of a percentage.
     Adding "**\--line-mode**" as well as "**\--bytes**" writes the
     number of lines instead of bytes or a percentage. Adding
@@ -109,7 +109,7 @@ are explicitly switched on will be shown.
     count). Adding "**\--timer**" prefixes each output line with the
     elapsed time so far, as a decimal number of seconds.
 
-:   Combining "**\--numeric**" with "**\--format**" allows for custom
+    Combining "**\--numeric**" with "**\--format**" allows for custom
     output. The default format string components for "**\--numeric**"
     are "**%t %b %r %{progress-amount-only}**" in that order, each item
     being active or inactive according to the rules above (so the
@@ -156,10 +156,8 @@ are explicitly switched on will be shown.
     tebibytes. If "**\--si**" appears before this option, suffixes will
     denote kilobytes (\*1000), megabytes, and so on instead.
 
-:   If *SIZE* starts with "**@**", the size of file whose name follows
+    If *SIZE* starts with "**@**", the size of file whose name follows
     the @ will be used.
-
-:   
 
 **-g, \--gauge**
 
@@ -173,7 +171,7 @@ are explicitly switched on will be shown.
     progress bar will only move when a new line is found, and the value
     passed to "**\--size**" will be interpreted as a line count.
 
-:   If this option is used without "**\--size**", the \"total size\" (in
+    If this option is used without "**\--size**", the \"total size\" (in
     this case, total line count) is calculated by reading through all
     input files once before transfer starts. If any inputs are pipes or
     non-regular files, or are unreadable, the total size will not be
@@ -296,7 +294,7 @@ are explicitly switched on will be shown.
     errors in a row then the skips will move up to chunks of 512. This
     is intended to be similar to "*dd conv=sync,noerror*".
 
-:   Specify "**\--skip-errors**" twice to only report a read error once
+    Specify "**\--skip-errors**" twice to only report a read error once
     per file, instead of reporting each byte range skipped.
 
 **-Z BYTES, \--error-skip-block BYTES**
@@ -309,7 +307,7 @@ are explicitly switched on will be shown.
     coincides with the end of the transfer buffer. The same suffixes as
     "**\--size**" can be used.
 
-:   This option can only be used with "**\--skip-errors**" and is
+    This option can only be used with "**\--skip-errors**" and is
     intended for use when reading from a block device, such as
     "**\--skip-errors \--error-skip-block 4K**" to skip in 4 kibibyte
     blocks. This will speed up reads from faulty media, at the expense
@@ -353,7 +351,7 @@ are explicitly switched on will be shown.
     **pv** creates a temporary file for this purpose, and automatically
     removes it afterwards.
 
-:   This can be useful if you have a pipeline which generates data (your
+    This can be useful if you have a pipeline which generates data (your
     input) quickly but you don\'t know the size, and you wish to pass it
     to some slower process, once all of the input has been generated and
     you know its size, so you can see its progress. Note that when doing
@@ -371,7 +369,7 @@ are explicitly switched on will be shown.
     closed; other data transfer modifiers - and remote control - may not
     be used with this option.
 
-:   If only a *PID* is specified, then that process will be watched, and
+    If only a *PID* is specified, then that process will be watched, and
     all regular files and block devices it opens will be shown with a
     progress bar. The **pv** process will exit when process *PID* exits.
 
@@ -521,7 +519,7 @@ contain the following sequences:
     **console_codes**(4). If colour support is not available, nothing is
     emitted.
 
-:   Supported keywords are: **reset** or **none**, **black**, **red**,
+    Supported keywords are: **reset** or **none**, **black**, **red**,
     **green**, **brown** or **yellow**, **blue**, **magenta**, **cyan**,
     **white**, **fg-black**, **fg-red**, **fg-green**, **fg-brown** or
     **fg-yellow**, **fg-blue**, **fg-magenta**, **fg-cyan**,
@@ -532,10 +530,10 @@ contain the following sequences:
     **reverse**, **no-bold** or **no-dim**, **no-italic**,
     **no-underscore** or **no-underline**, **no-blink**, **no-reverse**.
 
-:   With colours, the optional \"fg-\" prefix indicates foreground; a
+    With colours, the optional \"fg-\" prefix indicates foreground; a
     prefix of \"bg-\" indicates background.
 
-:   For example, "**%{sgr:green,bold}TEXT%{sgr:reset}**" will make
+    For example, "**%{sgr:green,bold}TEXT%{sgr:reset}**" will make
     *TEXT* bold green on supported terminals.
 
 **%%**
