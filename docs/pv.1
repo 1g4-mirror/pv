@@ -1,4 +1,4 @@
-.TH PV 1 2025-01-12 pv-1.9.27 "User Commands"
+.TH PV 1 2025-01-25 pv-1.9.31 "User Commands"
 .\"
 .SH NAME
 pv \- monitor the progress of data through a pipe
@@ -109,6 +109,14 @@ Adding \*(lq\fB\-\-rate\fR\*(rq adds the transfer rate to each output line
 byte/line count).
 Adding \*(lq\fB\-\-timer\fR\*(rq prefixes each output line with the elapsed
 time so far, as a decimal number of seconds.
+.TP
+.B ""
+Combining \*(lq\fB\-\-numeric\fR\*(rq with \*(lq\fB\-\-format\fR\*(rq allows
+for custom output.  The default format string components for
+\*(lq\fB\-\-numeric\fR\*(rq are
+\*(lq\fB%t\~%b\~%r\~%{progress\-amount\-only}\fR\*(rq in that order, each
+item being active or inactive according to the rules above (so the default
+with no other options is \*(lq\fB%{progress\-amount\-only}\fR\*(rq.
 .TP
 .B \-q, \-\-quiet
 No output.
@@ -664,6 +672,14 @@ the progress display:
 .in +4
 .EX
 pv \-\-format '%a %p : %L' big.log | processing-script
+.EE
+.in
+.PP
+Showing progress as lines of JSON data:
+.PP
+.in +4
+.EX
+pv \-\-numeric \-\-format '{"elapsed":%t,"bytes":%b,"rate":%r,"percentage":%{progress-amount-only}}' big.log | processing-script
 .EE
 .in
 .\"

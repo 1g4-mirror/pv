@@ -109,6 +109,12 @@ are explicitly switched on will be shown.
     count). Adding "**\--timer**" prefixes each output line with the
     elapsed time so far, as a decimal number of seconds.
 
+:   Combining "**\--numeric**" with "**\--format**" allows for custom
+    output. The default format string components for "**\--numeric**"
+    are "**%t %b %r %{progress-amount-only}**" in that order, each item
+    being active or inactive according to the rules above (so the
+    default with no other options is "**%{progress-amount-only}**".
+
 **-q, \--quiet**
 
 :   No output. Useful if the "**\--rate-limit**" option is being used on
@@ -628,6 +634,10 @@ Sending logs to a processing script, showing the most recent line as
 part of the progress display:
 
     pv --format '%a %p : %L' big.log | processing-script
+
+Showing progress as lines of JSON data:
+
+    pv --numeric --format '{"elapsed":%t,"bytes":%b,"rate":%r,"percentage":%{progress-amount-only}}' big.log | processing-script
 
 # EXIT STATUS
 
