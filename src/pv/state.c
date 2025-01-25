@@ -263,35 +263,59 @@ void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, b
 	}
 
 	state->control.default_format[0] = '\0';
-	PV_ADDFORMAT(name, "%N");
-	PV_ADDFORMAT(bytes, "%b");
-	PV_ADDFORMAT(bufpercent, "%T");
-	PV_ADDFORMAT(timer, "%t");
-	PV_ADDFORMAT(rate, "%r");
-	PV_ADDFORMAT(average_rate, "%a");
-	PV_ADDFORMAT(progress, "%p");
-	PV_ADDFORMAT(eta, "%e");
-	PV_ADDFORMAT(fineta, "%I");
-	if (lastwritten > 0) {
-		char buf[16];		 /* flawfinder: ignore */
-		memset(buf, 0, sizeof(buf));
-		(void) pv_snprintf(buf, sizeof(buf), "%%%uA", (unsigned int) lastwritten);
-		PV_ADDFORMAT(lastwritten > 0, buf);
+
+	if (false == state->control.numeric) {
+		/* Standard progress display mode (without "--numeric"). */
+
 		/*
-		 * flawfinder rationale: large enough for string, zeroed
-		 * before use, only written to by pv_snprintf() with the
-		 * right buffer length.
+		 * Add the format strings for the enabled options in a
+		 * standard order.
 		 */
+		PV_ADDFORMAT(name, "%N");
+		PV_ADDFORMAT(bytes, "%b");
+		PV_ADDFORMAT(bufpercent, "%T");
+		PV_ADDFORMAT(timer, "%t");
+		PV_ADDFORMAT(rate, "%r");
+		PV_ADDFORMAT(average_rate, "%a");
+		PV_ADDFORMAT(progress, "%p");
+		PV_ADDFORMAT(eta, "%e");
+		PV_ADDFORMAT(fineta, "%I");
+
+		if (lastwritten > 0) {
+			char buf[16];		 /* flawfinder: ignore */
+			memset(buf, 0, sizeof(buf));
+			(void) pv_snprintf(buf, sizeof(buf), "%%%uA", (unsigned int) lastwritten);
+			PV_ADDFORMAT(lastwritten > 0, buf);
+			/*
+			 * flawfinder rationale: large enough for string,
+			 * zeroed before use, only written to by
+			 * pv_snprintf() with the right buffer length.
+			 */
+		}
+
+	} else {
+		/* Numeric mode has different behaviour. */
+
+		PV_ADDFORMAT(timer, "%t");
+		PV_ADDFORMAT(bytes, "%b");
+		PV_ADDFORMAT(rate, "%r");
+		PV_ADDFORMAT(!(bytes || rate), "%{progress-amount-only}");
+
 	}
 
+	debug("%s: [%s]", "default format set", state->control.default_format);
+
+	/* Free any previously set name. */
 	if (NULL != state->control.name) {
 		free(state->control.name);
 		state->control.name = NULL;
 	}
 
+	/* Set a new name if one was given. */
 	if (NULL != name)
 		state->control.name = pv_strdup(name);
 
+	/* Tell pv_format() that the format has changed. */
 	state->flag.reparse_display = 1;
 }
 

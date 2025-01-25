@@ -471,86 +471,6 @@ pvdisplay_bytecount_t pv_formatter_segmentcontent(char *content, pvformatter_arg
 
 
 /*
- * Populate the display buffer for numeric-output mode.
- *
- * Called by pv_format() and has the same semantics.
- *
- * In numeric output mode, our output is just the percentage completion, as
- * a number by itself.
- *
- * With --timer, we prefix the output with the elapsed time.
- *
- * With --bytes, we output the bytes transferred so far instead of the
- * percentage (or we output the number lines transferred, if --lines was
- * given with --bytes).
- *
- * If --rate was given, we output the current transfer rate instead of the
- * percentage.  With --bytes as well, the rate is given after the
- * bytes/lines.
- *
- * TODO: replace this with a custom --format string.
- */
-static bool pv__format_numeric(pvstate_t state, pvdisplay_t display)
-{
-	char msg_timer[128];		 /* flawfinder: ignore */
-	char msg_bytes[128];		 /* flawfinder: ignore */
-	char msg_rate[128];		 /* flawfinder: ignore */
-	char msg_percent[128];		 /* flawfinder: ignore */
-	bool first_item, show_percentage;
-
-	/* flawfinder: each buffer is kept safe by pv_snprintf(). */
-
-	if (NULL == display->display_buffer)
-		return false;
-
-	first_item = true;
-	show_percentage = true;
-
-	msg_timer[0] = '\0';
-	if (display->showing_timer) {
-		(void) pv_snprintf(msg_timer, sizeof(msg_timer), "%s%.4Lf", first_item ? "" : " ",
-				   state->transfer.elapsed_seconds);
-		first_item = false;
-	}
-
-	msg_bytes[0] = '\0';
-	if (display->showing_bytes) {
-		(void) pv_snprintf(msg_bytes, sizeof(msg_bytes),
-				   "%s%lld", first_item ? "" : " ",
-				   (long long) ((state->control.bits ? 8 : 1) * state->transfer.transferred));
-		first_item = false;
-		show_percentage = false;
-	}
-
-	msg_rate[0] = '\0';
-	if (display->showing_rate) {
-		(void) pv_snprintf(msg_rate, sizeof(msg_rate),
-				   "%s%.4Lf", first_item ? "" : " ",
-				   ((state->control.bits ? 8.0 : 1.0) * state->calc.transfer_rate));
-		first_item = false;
-		show_percentage = false;
-	}
-
-	msg_percent[0] = '\0';
-	if (show_percentage) {
-		(void) pv_snprintf(msg_percent, sizeof(msg_percent),
-				   "%s%.0f", first_item ? "" : " ", state->calc.percentage);
-		first_item = false;
-	}
-
-	(void) pv_snprintf(display->display_buffer,
-			   display->display_buffer_size, "%.39s%.39s%.39s%.39s\n", msg_timer, msg_bytes,
-			   msg_rate, msg_percent);
-
-	display->display_string_bytes = strlen(display->display_buffer);	/* flawfinder: ignore */
-	/* flawfinder: always \0 terminated by pv_snprintf(). */
-	display->display_string_width = display->display_string_bytes;
-
-	return true;
-}
-
-
-/*
  * Format sequence lookup table.
  */
 /*@keep@ */ static struct pvdisplay_component_s *pv__format_components(void)
@@ -1077,15 +997,6 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		display->display_buffer[0] = '\0';
 	}
 
-	/*
-	 * Use the numeric mode function if we're in numeric mode.
-	 *
-	 * TODO: use a custom --format string instead.
-	 */
-	if (state->control.numeric) {
-		return pv__format_numeric(state, display);
-	}
-
 	/* Clear the SGR active codes flag, for the SGR formatter. */
 	display->sgr_code_active = false;
 
@@ -1314,6 +1225,7 @@ void pv_display(pvstate_t state, bool final)
 
 	if (state->control.numeric) {
 		pv_tty_write(state, state->display.display_buffer, state->display.display_string_bytes);
+		pv_tty_write(state, "\n", 1);
 	} else if (state->control.cursor) {
 		if (state->control.force || pv_in_foreground()) {
 			pv_crs_update(state, state->display.display_buffer);
