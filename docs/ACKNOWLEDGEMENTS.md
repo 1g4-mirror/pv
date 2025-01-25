@@ -106,6 +106,7 @@ is acknowledged and greatly appreciated:
  * [heitbaum](https://codeberg.org/heitbaum) - assisted with cross-compilation fault introduced in 1.9.7 ([#120](https://codeberg.org/a-j-wood/pv/issues/120))
  * [meego](https://codeberg.org/meego) - suggested "**%nL**", the last line preview ([#121](https://codeberg.org/a-j-wood/pv/issues/121))
  * [Alexander Petrossian](https://github.com/neopaf) - suggested using Unicode output for a more granular progress bar, and provided the codepoints to use ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
+ * [jmealo](https://codeberg.org/jmealo) - suggested JSON progress output ([#127](https://codeberg.org/a-j-wood/pv/issues/127))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
