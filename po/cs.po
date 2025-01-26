@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2025-01-11 20:59+0000\n"
+"POT-Creation-Date: 2025-01-26 20:07+0000\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -419,7 +419,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1067 src/pv/transfer.c:1056
+#: src/pv/display.c:989 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "selhala alokace vyrovnávací paměti"
 
@@ -451,26 +451,26 @@ msgstr "(žádný)"
 msgid "(stdin)"
 msgstr "(stdin)"
 
-#: src/pv/format/averagerate.c:30 src/pv/format/progressbar.c:93
-#: src/pv/format/rate.c:32 src/pv/loop.c:551
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:93
+#: src/pv/format/rate.c:37 src/pv/loop.c:551
 msgid "b/s"
 msgstr "b/s"
 
-#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:97
-#: src/pv/format/rate.c:36
+#: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:97
+#: src/pv/format/rate.c:41
 msgid "/s"
 msgstr "/s"
 
-#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:97
-#: src/pv/format/rate.c:36 src/pv/loop.c:551
+#: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:97
+#: src/pv/format/rate.c:41 src/pv/loop.c:551
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/format/bytes.c:31
+#: src/pv/format/bytes.c:37
 msgid "b"
 msgstr "b"
 
-#: src/pv/format/bytes.c:35 src/pv/transfer.c:594
+#: src/pv/format/bytes.c:41 src/pv/transfer.c:594
 msgid "B"
 msgstr "B"
 
@@ -502,7 +502,7 @@ msgstr "pid"
 msgid "history structure allocation failed"
 msgstr "selhala alokace struktury historie"
 
-#: src/pv/state.c:593 src/pv/state.c:604
+#: src/pv/state.c:617 src/pv/state.c:628
 msgid "file list allocation failed"
 msgstr "selhala alokace seznamu souborů"
 

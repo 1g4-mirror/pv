@@ -27,8 +27,7 @@ pvdisplay_bytecount_t pv_formatter_average_rate(pvformatter_args_t args)
 	if (args->state->control.numeric) {
 		/* numeric - raw value without suffix. */
 		(void) pv_snprintf(content, sizeof(content),
-				   "%.4Lf",
-				   ((args->state->control.bits ? 8.0 : 1.0) * args->state->calc.average_rate));
+				   "%.4Lf", ((args->state->control.bits ? 8.0 : 1.0) * args->state->calc.average_rate));
 	} else if (args->state->control.bits && !args->state->control.linemode) {
 		/* bits per second */
 		pv_describe_amount(content, sizeof(content),

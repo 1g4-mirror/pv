@@ -282,7 +282,7 @@ void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, b
 		PV_ADDFORMAT(fineta, "%I");
 
 		if (lastwritten > 0) {
-			char buf[16];		 /* flawfinder: ignore */
+			char buf[16];	 /* flawfinder: ignore */
 			memset(buf, 0, sizeof(buf));
 			(void) pv_snprintf(buf, sizeof(buf), "%%%uA", (unsigned int) lastwritten);
 			PV_ADDFORMAT(lastwritten > 0, buf);

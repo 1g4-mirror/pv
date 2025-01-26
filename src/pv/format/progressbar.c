@@ -396,7 +396,7 @@ pvdisplay_bytecount_t pv_formatter_progress_amount_only(pvformatter_args_t args)
 	if (args->state->control.numeric) {
 		/* Numeric mode - percentage as a rounded integer with no suffix. */
 		(void) pv_snprintf(content, sizeof(content), "%.0f", args->state->calc.percentage);
-		bytes = strlen(content);	/* flawfinder: ignore */
+		bytes = strlen(content);    /* flawfinder: ignore */
 		/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
 	} else if (args->state->control.size > 0 || args->state->control.rate_gauge) {
 		/* Known size or rate gauge - percentage or rate. */

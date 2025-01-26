@@ -30,7 +30,8 @@ pvdisplay_bytecount_t pv_formatter_bytes(pvformatter_args_t args)
 		/* Numeric mode - raw values only, no suffix. */
 		(void) pv_snprintf(content, sizeof(content),
 				   "%lld",
-				   (long long) ((args->state->control.bits ? 8 : 1) * args->state->transfer.transferred));
+				   (long long) ((args->state->control.bits ? 8 : 1) *
+						args->state->transfer.transferred));
 	} else if (args->state->control.bits && !args->state->control.linemode) {
 		pv_describe_amount(content, sizeof(content), "%s",
 				   (long double) (args->state->transfer.transferred * 8), "", _("b"),
