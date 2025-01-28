@@ -29,8 +29,20 @@ if ! test -n "${testInstallDir}"; then
 fi
 
 export DESTDIR="${testInstallDir}"
-if ! ${makeCommand} -C "${makeDir}" install DESTDIR="${testInstallDir}" >"${workFile1}" 2>&1; then
-	echo "\`make install' exited $?"
+${makeCommand} -C "${makeDir}" install DESTDIR="${testInstallDir}" >"${workFile1}" 2>&1
+rc=$?
+if ! test "${rc}" -eq 0; then
+	if ! test "${makeCommand}" = "make"; then
+		# Retry with plain "make".
+		makeCommand="make"
+		${makeCommand} -C "${makeDir}" install DESTDIR="${testInstallDir}" >>"${workFile1}" 2>&1
+		rc=$?
+	fi
+fi
+if ! test ${rc} -eq 0; then
+	echo "\`make install' exited ${rc}"
+	echo "command: ${makeCommand} -C '${makeDir}' install DESTDIR='${testInstallDir}'"
+	cat "${workFile1}"
 	rm -rf "${testInstallDir}"
 	exit 1
 fi
