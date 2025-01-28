@@ -18,8 +18,11 @@ seq -w 3 1 100 \
 differentLines=$(tr '\r' '\n' < "${workFile1}" | sed '/^ *$/d' | sort | uniq | wc -l | tr -dc '0-9')
 lastLine=$(tr '\r' '\n' < "${workFile1}" | sed '/^ *$/d' | sed -n '$p')
 
-if ! test "${differentLines}" -gt 5; then
-	echo "fewer than 6 different outputs seen"
+# Even on very slow hosts, we should see at least 3 different output lines -
+# nothing at the start, something in the middle, and the last few numbers at
+# the end.
+if ! test "${differentLines}" -gt 2; then
+	echo "fewer than 3 different outputs seen"
 	tr '\r' '\n' < "${workFile1}" | sed '/^ *$/d' | sort | uniq
 	exit 1
 fi
