@@ -159,19 +159,19 @@ msgstr "préfixer les informations visuelles avec NOM"
 
 #: src/main/help.c:311
 msgid "STYLE"
-msgstr ""
+msgstr "STYLE"
 
 #: src/main/help.c:312
 msgid "set default bar style to NAME"
-msgstr ""
+msgstr "définir le style de barre par défaut à NOM"
 
 #: src/main/help.c:314
 msgid "SPEC"
-msgstr ""
+msgstr "SPÉCIFICATION"
 
 #: src/main/help.c:315
 msgid "also send progress to SPEC"
-msgstr ""
+msgstr "aussi envoyer la progression à SPÉCIFICATION"
 
 #: src/main/help.c:318
 msgid "output transfer statistics at the end"
@@ -289,7 +289,7 @@ msgstr ""
 
 #: src/main/help.c:555
 msgid "Supported format sequences:"
-msgstr ""
+msgstr "Séquences de formatage supportées :"
 
 #: src/main/help.c:569
 #, c-format
@@ -314,19 +314,19 @@ msgstr "est un répertoire"
 
 #: src/main/options.c:187
 msgid "failed to generate sysfs filename"
-msgstr ""
+msgstr "échec de génération du nom de fichier sysfs"
 
 #: src/main/options.c:209
 msgid "failed to read sysfs size file"
-msgstr ""
+msgstr "échec de la lecture de la taille du fichier sysfs"
 
 #: src/main/options.c:229
 msgid "failed to open block device"
-msgstr ""
+msgstr "échec de l'ouverture du périphérique de bloc"
 
 #: src/main/options.c:239
 msgid "failed to determine size of block device"
-msgstr ""
+msgstr "échec de l'évaluation de la taille du périphérique de bloc"
 
 #: src/main/options.c:345
 msgid "option structure allocation failed"
@@ -338,7 +338,7 @@ msgstr "l'allocation pour la structure de l'option argv a échoué"
 
 #: src/main/options.c:417
 msgid "numeric value not understood"
-msgstr ""
+msgstr "valeur numérique non comprise"
 
 #: src/main/options.c:435
 msgid "integer argument expected"
