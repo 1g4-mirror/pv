@@ -116,6 +116,7 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
    * anonymous suggestions (7)
  * **German**
    * [Hartmut Goebel](https://translate.codeberg.org/user/htgoebel/) (77)
+   * [Maxi_Mega](https://translate.codeberg.org/user/Maxi_Mega/) (11)
    * [m0yellow](https://translate.codeberg.org/user/m0yellow/) (9)
    * [Benny](https://translate.codeberg.org/user/Benny/) (7)
    * [kre](https://translate.codeberg.org/user/kre/) (2)

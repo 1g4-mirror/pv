@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *i18n:* French translations updated
+
 ### 1.9.31 - 28 January 2025
 
  * *feature:* the **--format** option can now be used with **--numeric** for customised numeric output, such as JSON ([#127](https://codeberg.org/a-j-wood/pv/issues/127))
