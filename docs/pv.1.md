@@ -742,10 +742,8 @@ be integers with no suffix.
 
 # REPORTING BUGS
 
-Please report any bugs to **pv@ivarch.com**.
-
-Alternatively, use the issue tracker linked from the [**pv** home
-page](https://www.ivarch.com/programs/pv.shtml).
+Please report bugs or feature requests via the issue tracker linked from the
+[**pv** home page](https://www.ivarch.com/programs/pv.shtml).
 
 # SEE ALSO
 

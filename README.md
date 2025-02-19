@@ -69,8 +69,8 @@ You should have received a copy of the GNU General Public License, version
 3, in "[docs/COPYING](./docs/COPYING)".  If not, see
 <https://www.gnu.org/licenses/gpl-3.0.html>.
 
-Please report any bugs to **pv@ivarch.com**, or use the issue tracker linked
-from the **pv** home page.
+Please report bugs or request features via the issue tracker linked from the
+home page.
 
 The **pv** home page is at:
 
