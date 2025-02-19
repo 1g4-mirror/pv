@@ -74,7 +74,7 @@ home page.
 
 The **pv** home page is at:
 
-> [https://www.ivarch.com/programs/pv.shtml](https://www.ivarch.com/programs/pv.shtml)
+> [https://ivarch.com/programs/pv.shtml](https://ivarch.com/programs/pv.shtml)
 
 The latest version can always be found here.
 
