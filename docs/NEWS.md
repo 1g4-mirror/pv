@@ -4,7 +4,7 @@
 
 ### 1.9.31 - 28 January 2025
 
- * *feature:* the **--format** option can now be used with **--numeric** for customised numeric output, such as JSON ([#127](https://codeberg.org/a-j-wood/pv/issues/127))
+ * *feature:* the **--format** option can now be used with **--numeric** for customised numeric output, such as JSON ([#127](https://codeberg.org/ivarch/pv/issues/127))
  * *i18n:* German translations updated
  * *i18n:* Polish translations updated
  * *i18n:* Russian translations updated
@@ -16,14 +16,14 @@
 
 ### 1.9.25 - 22 December 2024
 
- * *fix:* test failure of **--watchfd** on macOS corrected ([#124](https://codeberg.org/a-j-wood/pv/issues/124))
+ * *fix:* test failure of **--watchfd** on macOS corrected ([#124](https://codeberg.org/ivarch/pv/issues/124))
 
 ### 1.9.24 - 19 December 2024
 
- * *feature:* new **--format** sequences for graphical progress bars - "**%{bar-block}**", "**%{bar-granular}**", and "**%{bar-shaded}**" ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
+ * *feature:* new **--format** sequences for graphical progress bars - "**%{bar-block}**", "**%{bar-granular}**", and "**%{bar-shaded}**" ([#15](https://codeberg.org/ivarch/pv/issues/15))
  * *feature:* new **--format** sequence "**%{sgr:colour,...}**" to use ECMA-48 Select Graphic Rendition codes to add colours
- * *feature:* new **--bar-style** option to change the default bar style ([#15](https://codeberg.org/a-j-wood/pv/issues/15))
- * *feature:* allow decimal values such as "1.5G" with "**--size**", "**--rate-limit**", "**--buffer-size**", and "**error-skip-block**" ([#35](https://codeberg.org/a-j-wood/pv/issues/35))
+ * *feature:* new **--bar-style** option to change the default bar style ([#15](https://codeberg.org/ivarch/pv/issues/15))
+ * *feature:* allow decimal values such as "1.5G" with "**--size**", "**--rate-limit**", "**--buffer-size**", and "**error-skip-block**" ([#35](https://codeberg.org/ivarch/pv/issues/35))
  * *cleanup:* improve progress bar granularity on wide displays by internally tracking the transfer percentage as a decimal number
  * *cleanup:* correct detection of **--remote** usability on GNU Hurd
  * *cleanup:* reduce likelihood of race conditions in tests when running on slow systems
@@ -32,41 +32,41 @@
 
 ### 1.9.15 - 8 December 2024
 
- * *feature:* new **--format** sequence "**%nL**", showing the most recent line written ([#121](https://codeberg.org/a-j-wood/pv/issues/121))
+ * *feature:* new **--format** sequence "**%nL**", showing the most recent line written ([#121](https://codeberg.org/ivarch/pv/issues/121))
  * *feature:* each **--format** sequence now has a more readable equivalent name, for example "**%r**" can be written as "**%{rate}**"
  * *feature:* new **--format** sequences "**%{progress-bar-only}**" and "**%{progress-amount-only}**"
- * *fix:* allow **--format** to include "%nA" more than once, with different "n" values ([#122](https://codeberg.org/a-j-wood/pv/issues/122))
+ * *fix:* allow **--format** to include "%nA" more than once, with different "n" values ([#122](https://codeberg.org/ivarch/pv/issues/122))
  * *fix:* allow **--format** to include "%p" more than once, with optional width prefix
  * *fix:* calculate width correctly when wide characters are in **--format** strings
- * *fix:* add _configure_ script fallback for **--remote** check when cross-compiling ([#120](https://codeberg.org/a-j-wood/pv/issues/120))
- * *fix:* allow **extra-display** to be changed by **--remote** ([#123](https://codeberg.org/a-j-wood/pv/issues/123))
+ * *fix:* add _configure_ script fallback for **--remote** check when cross-compiling ([#120](https://codeberg.org/ivarch/pv/issues/120))
+ * *fix:* allow **extra-display** to be changed by **--remote** ([#123](https://codeberg.org/ivarch/pv/issues/123))
  * *cleanup:* refactored display formatters into separate functions
  * *cleanup:* improve format parser handling of dangling or invalid "%" sequences
 
 ### 1.9.7 - 2 December 2024
 
- * *feature:* new **--extra-display** option to update window and process titles ([#3](https://codeberg.org/a-j-wood/pv/issues/3), [#4](https://codeberg.org/a-j-wood/pv/issues/4))
- * *fix:* correct failure to report file positions in **--watchfd** ([#118](https://codeberg.org/a-j-wood/pv/issues/118))
+ * *feature:* new **--extra-display** option to update window and process titles ([#3](https://codeberg.org/ivarch/pv/issues/3), [#4](https://codeberg.org/ivarch/pv/issues/4))
+ * *fix:* correct failure to report file positions in **--watchfd** ([#118](https://codeberg.org/ivarch/pv/issues/118))
  * *i18n:* Russian translations added
- * *cleanup:* tests added for **--watchfd** ([#10](https://codeberg.org/a-j-wood/pv/issues/10))
- * *cleanup:* worked around file descriptor leak false positives in valgrind 3.23 ([#97](https://codeberg.org/a-j-wood/pv/issues/97))
+ * *cleanup:* tests added for **--watchfd** ([#10](https://codeberg.org/ivarch/pv/issues/10))
+ * *cleanup:* worked around file descriptor leak false positives in valgrind 3.23 ([#97](https://codeberg.org/ivarch/pv/issues/97))
  * *cleanup:* cleared all *shellcheck* warnings in the test scripts
- * *cleanup:* check at compile-time whether **--remote** is going to be usable ([#119](https://codeberg.org/a-j-wood/pv/issues/119))
+ * *cleanup:* check at compile-time whether **--remote** is going to be usable ([#119](https://codeberg.org/ivarch/pv/issues/119))
 
 ### 1.9.0 - 15 October 2024
 
- * *feature:* new **--store-and-forward** option to read input to a file first, then write it to the output ([#100](https://codeberg.org/a-j-wood/pv/issues/100))
- * *feature:* new **--stats** option to show transfer stats at the end, like "`ping`" ([#49](https://codeberg.org/a-j-wood/pv/issues/49))
- * *feature:* **--rate** can now be used with **--numeric** ([#17](https://codeberg.org/a-j-wood/pv/issues/17))
- * *feature:* **--gauge** with **--progress** to show rate gauge when size is unknown ([#46](https://codeberg.org/a-j-wood/pv/issues/46))
+ * *feature:* new **--store-and-forward** option to read input to a file first, then write it to the output ([#100](https://codeberg.org/ivarch/pv/issues/100))
+ * *feature:* new **--stats** option to show transfer stats at the end, like "`ping`" ([#49](https://codeberg.org/ivarch/pv/issues/49))
+ * *feature:* **--rate** can now be used with **--numeric** ([#17](https://codeberg.org/ivarch/pv/issues/17))
+ * *feature:* **--gauge** with **--progress** to show rate gauge when size is unknown ([#46](https://codeberg.org/ivarch/pv/issues/46))
  * *i18n:* comprehensive German translations update
  * *i18n:* comprehensive Polish translations update
  * *i18n:* complete Turkish translations added
  * *i18n:* complete Czech translations added
  * *i18n:* updates to French translations
- * *fix:* resume stopped pipelines when running in the background (part of [#56](https://codeberg.org/a-j-wood/pv/issues/56))
+ * *fix:* resume stopped pipelines when running in the background (part of [#56](https://codeberg.org/ivarch/pv/issues/56))
  * *fix:* inspect the output pipe buffer to give a more accurate progress indicator of how much the next command has consumed
- * *fix:* prefix completion time (**--fineta**) with *FIN* rather than *ETA* ([#43](https://codeberg.org/a-j-wood/pv/issues/43))
+ * *fix:* prefix completion time (**--fineta**) with *FIN* rather than *ETA* ([#43](https://codeberg.org/ivarch/pv/issues/43))
  * *fix:* surround average rate (**--average-rate**) with brackets rather than square brackets
  * *fix:* correct a memory leak in **--watchfd PID**
  * *fix:* make **--direct-io** work correctly with **--output** instead of assuming stdout
@@ -81,44 +81,44 @@
 
 ### 1.8.14 - 7 September 2024
 
- * *fix:* correct double-free on exit when using **--watchfd** ([#96](https://codeberg.org/a-j-wood/pv/issues/96)) reported by [jettero](https://codeberg.org/jettero)
+ * *fix:* correct double-free on exit when using **--watchfd** ([#96](https://codeberg.org/ivarch/pv/issues/96)) reported by [jettero](https://codeberg.org/jettero)
 
 ### 1.8.13 - 18 August 2024
 
- * *feature:* when using **--size @FILE**, *FILE* can be a block device, and its size will be used (pull request [#94](https://codeberg.org/a-j-wood/pv/pulls/94)) supplied by [alexanderperlis](https://codeberg.org/alexanderperlis)
+ * *feature:* when using **--size @FILE**, *FILE* can be a block device, and its size will be used (pull request [#94](https://codeberg.org/ivarch/pv/pulls/94)) supplied by [alexanderperlis](https://codeberg.org/alexanderperlis)
 
 ### 1.8.12 - 18 July 2024
 
- * *fix:* correct the detection of output block device size that was broken in 1.8.10 ([#91](https://codeberg.org/a-j-wood/pv/issues/91))
- * *fix:* do not treat a zero/interrupted write as an end of file (pull requests [#92](https://codeberg.org/a-j-wood/pv/pulls/92) and [#93](https://codeberg.org/a-j-wood/pv/pulls/93))
+ * *fix:* correct the detection of output block device size that was broken in 1.8.10 ([#91](https://codeberg.org/ivarch/pv/issues/91))
+ * *fix:* do not treat a zero/interrupted write as an end of file (pull requests [#92](https://codeberg.org/ivarch/pv/pulls/92) and [#93](https://codeberg.org/ivarch/pv/pulls/93))
 
 ### 1.8.10 - 15 June 2024
 
- * *feature:* new **--output** option to write to a file instead of standard output (pull request [#90](https://codeberg.org/a-j-wood/pv/pulls/90)) supplied by [xmort](https://codeberg.org/xmort)
+ * *feature:* new **--output** option to write to a file instead of standard output (pull request [#90](https://codeberg.org/ivarch/pv/pulls/90)) supplied by [xmort](https://codeberg.org/xmort)
 
 ### 1.8.9 - 21 April 2024
 
- * *feature:* new **--si** option to display and interpret size suffixes in multiples of 1000 rather than 1024 (pull request [#85](https://codeberg.org/a-j-wood/pv/pulls/85)) supplied by [kevinruddy](https://codeberg.org/kevinruddy)
- * *fix:* continue producing progress output when the output is blocking writes ([#34](https://codeberg.org/a-j-wood/pv/issues/34), [#86](https://codeberg.org/a-j-wood/pv/issues/86), [#87](https://codeberg.org/a-j-wood/pv/issues/87))
- * *fix:* honour the *TMPDIR* / *TMP* environment variables again, rather than hard-coding "`/tmp`", when using a terminal lock file (originally removed in 1.8.0) ([#88](https://codeberg.org/a-j-wood/pv/issues/88))
- * *i18n:* corrections and missing strings added to French translations (pull request [#83](https://codeberg.org/a-j-wood/pv/pulls/83)) supplied by [Thomas Bertels](https://codeberg.org/tbertels)
+ * *feature:* new **--si** option to display and interpret size suffixes in multiples of 1000 rather than 1024 (pull request [#85](https://codeberg.org/ivarch/pv/pulls/85)) supplied by [kevinruddy](https://codeberg.org/kevinruddy)
+ * *fix:* continue producing progress output when the output is blocking writes ([#34](https://codeberg.org/ivarch/pv/issues/34), [#86](https://codeberg.org/ivarch/pv/issues/86), [#87](https://codeberg.org/ivarch/pv/issues/87))
+ * *fix:* honour the *TMPDIR* / *TMP* environment variables again, rather than hard-coding "`/tmp`", when using a terminal lock file (originally removed in 1.8.0) ([#88](https://codeberg.org/ivarch/pv/issues/88))
+ * *i18n:* corrections and missing strings added to French translations (pull request [#83](https://codeberg.org/ivarch/pv/pulls/83)) supplied by [Thomas Bertels](https://codeberg.org/tbertels)
 
 ### 1.8.5 - 19 November 2023
 
- * *fix:* corrected percentage formatting so it doesn't jump from 2 to 3 characters wide at 100% ([#80](https://codeberg.org/a-j-wood/pv/issues/80))
+ * *fix:* corrected percentage formatting so it doesn't jump from 2 to 3 characters wide at 100% ([#80](https://codeberg.org/ivarch/pv/issues/80))
  * *fix:* replaced **--remote** mechanism, using a temporary file instead of SysV IPC, so it can work reliably even when there are multiple PV instances
  * *fix:* corrected compilation failure when without IPC support
- * *security:* addressed all issues highlighted by the software auditing tools "`splint`" and "`flawfinder`" (see "`make analyse`") ([#77](https://codeberg.org/a-j-wood/pv/issues/77))
+ * *security:* addressed all issues highlighted by the software auditing tools "`splint`" and "`flawfinder`" (see "`make analyse`") ([#77](https://codeberg.org/ivarch/pv/issues/77))
  * *cleanup:* compilation warnings fixed on non-IPC and MacOS systems
 
 ### 1.8.0 - 24 September 2023
 
 #### Features
 
- * *feature:* new **--discard** option to discard input as if writing to */dev/null* ([#42](https://codeberg.org/a-j-wood/pv/issues/42))
- * *feature:* new **--error-skip-block** option to make **--skip-errors** skip whole blocks ([#37](https://codeberg.org/a-j-wood/pv/issues/37))
- * *feature:* use `posix_fadvise()` like `cat`(1) does, to improve efficiency ([#39](https://codeberg.org/a-j-wood/pv/issues/39))
- * *feature:* new **--enable-static** option to "`configure`" for static builds ([#75](https://codeberg.org/a-j-wood/pv/pull/75))
+ * *feature:* new **--discard** option to discard input as if writing to */dev/null* ([#42](https://codeberg.org/ivarch/pv/issues/42))
+ * *feature:* new **--error-skip-block** option to make **--skip-errors** skip whole blocks ([#37](https://codeberg.org/ivarch/pv/issues/37))
+ * *feature:* use `posix_fadvise()` like `cat`(1) does, to improve efficiency ([#39](https://codeberg.org/ivarch/pv/issues/39))
+ * *feature:* new **--enable-static** option to "`configure`" for static builds ([#75](https://codeberg.org/ivarch/pv/pull/75))
 
 #### Security
 
@@ -130,10 +130,10 @@
 
  * *fix:* only report errors about missing files when starting to transfer from them, not while calculating size, and behave more like `cat`(1) by skipping them and moving on
  * *fix:* auto-calculate total line count with **--line-mode** when all inputs are regular files
- * *fix:* use `clock_gettime()` in ETA calculation to cope with machine suspend/resume ([#13](https://codeberg.org/a-j-wood/pv/issues/13))
- * *fix:* if **--width** or **--height** were provided, do not change them when the window size changes ([#36](https://codeberg.org/a-j-wood/pv/issues/36))
- * *fix:* when a file descriptor position in **--watchfd** moves backwards, show the rate using the correct prefix ([#41](https://codeberg.org/a-j-wood/pv/issues/41))
- * *fix:* rewrite terminal state save/restore so state is not intermittently garbled on exit when using **--cursor** ([#20](https://codeberg.org/a-j-wood/pv/issues/20)), ([#24](https://codeberg.org/a-j-wood/pv/issues/24))
+ * *fix:* use `clock_gettime()` in ETA calculation to cope with machine suspend/resume ([#13](https://codeberg.org/ivarch/pv/issues/13))
+ * *fix:* if **--width** or **--height** were provided, do not change them when the window size changes ([#36](https://codeberg.org/ivarch/pv/issues/36))
+ * *fix:* when a file descriptor position in **--watchfd** moves backwards, show the rate using the correct prefix ([#41](https://codeberg.org/ivarch/pv/issues/41))
+ * *fix:* rewrite terminal state save/restore so state is not intermittently garbled on exit when using **--cursor** ([#20](https://codeberg.org/ivarch/pv/issues/20)), ([#24](https://codeberg.org/ivarch/pv/issues/24))
 
 #### Cleanups
 
@@ -142,8 +142,8 @@
  * *cleanup:* replaced the test harness with the one native to GNU Automake
  * *cleanup:* added a test for terminal width detection to "`make check`"
  * *cleanup:* added a test to "`make check`" to ensure that "`make install`" installs everything expected
- * *cleanup:* replaced *AC_HEADER_TIOCGWINSZ* with *AC_CHECK_HEADERS(sys/ioctl.h)* for better MacOS compatibility ([#74](https://codeberg.org/a-j-wood/pv/issues/74))
- * *cleanup:* with **--sync**, call `fsync()` instead of `fdatasync()` on incapable systems ([#73](https://codeberg.org/a-j-wood/pv/issues/73))
+ * *cleanup:* replaced *AC_HEADER_TIOCGWINSZ* with *AC_CHECK_HEADERS(sys/ioctl.h)* for better MacOS compatibility ([#74](https://codeberg.org/ivarch/pv/issues/74))
+ * *cleanup:* with **--sync**, call `fsync()` instead of `fdatasync()` on incapable systems ([#73](https://codeberg.org/ivarch/pv/issues/73))
  * *cleanup:* the manual is now a static file instead of needing to be built with "`configure`"
 
 #### Dropped items
@@ -159,7 +159,7 @@
 
 ### 1.7.24 - 30 July 2023
 
- * *fix:* correct terminal size detection, broken in 1.7.17 by the configuration script rewrite ([#72](https://codeberg.org/a-j-wood/pv/issues/72))
+ * *fix:* correct terminal size detection, broken in 1.7.17 by the configuration script rewrite ([#72](https://codeberg.org/ivarch/pv/issues/72))
  * *security:* removed *DEBUG* environment variable in debug mode, added **--debug** instead
  * *cleanup:* added "`make analyse`" to run "`splint`" and "`flawfinder`" on all source files
  * *cleanup:* corrected detection of boolean capability
@@ -172,8 +172,8 @@
 
 ### 1.7.17 - 27 July 2023
 
- * *feature:* new **--sync** option to flush cache to disk after every write (related to [#6](https://codeberg.org/a-j-wood/pv/issues/6), to improve accuracy when writing to slow disks)
- * *feature:* new **--direct-io** option to bypass cache - implements [#29 "Option to enable O_DIRECT"](https://codeberg.org/a-j-wood/pv/issues/29) - requested by Romain Kang, Jacek Wielemborek
+ * *feature:* new **--sync** option to flush cache to disk after every write (related to [#6](https://codeberg.org/ivarch/pv/issues/6), to improve accuracy when writing to slow disks)
+ * *feature:* new **--direct-io** option to bypass cache - implements [#29 "Option to enable O_DIRECT"](https://codeberg.org/ivarch/pv/issues/29) - requested by Romain Kang, Jacek Wielemborek
  * *fix:* correct byte prefix size to 2 spaces in rate display, so progress display size remains constant at low transfer rates
  * *cleanup:* rewrote `configure.in` as per suggestions in newer "`autoconf`" manuals
  * *cleanup:* replaced `header.in` with one generated by "`autoheader`", moving custom logic to a separate header file "`config-aux.h`"
@@ -193,18 +193,18 @@
 ### 1.7.0 - 17 July 2023
 
  * *dropped:* support for Red Hat Enterprise Linux and its derivatives has been dropped; removed the RPM spec file, and will no longer build binaries
- * *feature:* the **--size** option now accepts "`@filename`" to use the size of another file (pull request [#57](https://codeberg.org/a-j-wood/pv/pull/57) supplied by [Dave Beckett](https://github.com/dajobe))
- * *feature:* the **--watchfd** option is now available on OS X (pull request [#60](https://codeberg.org/a-j-wood/pv/pull/60) supplied by [christoph-zededa](https://github.com/christoph-zededa))
- * *feature:* new **--bits** option to show bit count instead of byte count (adapted from pull request [#63](https://codeberg.org/a-j-wood/pv/pull/63) supplied by [Nick Black](https://nick-black.com))
- * *feature:* new **--average-rate-window** option, to set the window over which the average rate is calculated, also used for ETA (modified from pull request [#65](https://codeberg.org/a-j-wood/pv/pull/65) supplied by [lemonsqueeze](https://github.com/lemonsqueeze))
- * *feature:* the **--watchfd** option will now show relative filenames, if they are under the current directory (pull request [#66](https://codeberg.org/a-j-wood/pv/pull/66) supplied by [ikasty](https://github.com/ikasty))
- * *fix:* correction to `pv_in_foreground()` to behave as its comment block says it should, when not on a terminal - corrects [#19 "No output in Arch Linux initcpio after 1.6.6"](https://codeberg.org/a-j-wood/pv/issues/19), [#31 "No output written from inside zsh <() construct"](https://codeberg.org/a-j-wood/pv/issues/31), [#55 "pv Stopped Working in the Background"](https://codeberg.org/a-j-wood/pv/issues/55) (pull request [#64](https://codeberg.org/a-j-wood/pv/pull/64) supplied by [Michael Weiß](https://github.com/quitschbo))
- * *fix:* workaround for OS X 11 behaviour in configure script regarding stat64 at compile time (pull request [#57](https://codeberg.org/a-j-wood/pv/pull/57) supplied by [Dave Beckett](https://github.com/dajobe))
- * *fix:* workaround for macOS equivalence of stat to stat64 - patches from [Filippo Valsorda](https://github.com/FiloSottile) and [Demitri Muna](https://github.com/demitri), correcting [#33 "Fix compilation problems due to `stat64()` on Apple Silicon"](https://codeberg.org/a-j-wood/pv/issues/33)
- * *fix:* add burst rate limit to transfer, so rate limits are not broken by bursty traffic (pull request [#62](https://codeberg.org/a-j-wood/pv/pull/62) supplied by [Volodymyr Bychkovyak](https://github.com/vbychkoviak))
- * *fix:* corrected **--force** option so it will still output progress when not in the same process group as the owner of the terminal - corrects [#23 "No output with "-f" when run in background after 1.6.6"](https://codeberg.org/a-j-wood/pv/issues/23) and helps to correct [#31 "No output written from inside zsh <() construct"](https://codeberg.org/a-j-wood/pv/issues/31)
- * *fix:* corrected elapsed time display to show as D:HH:MM:SS after 1 day, like the ETA does - corrects [#16 "Show days in same format in ETA as in elapsed time"](https://codeberg.org/a-j-wood/pv/issues/16)
- * *fix:* corrected bug where percentages went down after 100% when in **--numeric** mode with a **--size** that was too small - corrects [#26 "Correct "-n" behaviour when going past 100% of "-s" size"](https://codeberg.org/a-j-wood/pv/issues/26)
+ * *feature:* the **--size** option now accepts "`@filename`" to use the size of another file (pull request [#57](https://codeberg.org/ivarch/pv/pull/57) supplied by [Dave Beckett](https://github.com/dajobe))
+ * *feature:* the **--watchfd** option is now available on OS X (pull request [#60](https://codeberg.org/ivarch/pv/pull/60) supplied by [christoph-zededa](https://github.com/christoph-zededa))
+ * *feature:* new **--bits** option to show bit count instead of byte count (adapted from pull request [#63](https://codeberg.org/ivarch/pv/pull/63) supplied by [Nick Black](https://nick-black.com))
+ * *feature:* new **--average-rate-window** option, to set the window over which the average rate is calculated, also used for ETA (modified from pull request [#65](https://codeberg.org/ivarch/pv/pull/65) supplied by [lemonsqueeze](https://github.com/lemonsqueeze))
+ * *feature:* the **--watchfd** option will now show relative filenames, if they are under the current directory (pull request [#66](https://codeberg.org/ivarch/pv/pull/66) supplied by [ikasty](https://github.com/ikasty))
+ * *fix:* correction to `pv_in_foreground()` to behave as its comment block says it should, when not on a terminal - corrects [#19 "No output in Arch Linux initcpio after 1.6.6"](https://codeberg.org/ivarch/pv/issues/19), [#31 "No output written from inside zsh <() construct"](https://codeberg.org/ivarch/pv/issues/31), [#55 "pv Stopped Working in the Background"](https://codeberg.org/ivarch/pv/issues/55) (pull request [#64](https://codeberg.org/ivarch/pv/pull/64) supplied by [Michael Weiß](https://github.com/quitschbo))
+ * *fix:* workaround for OS X 11 behaviour in configure script regarding stat64 at compile time (pull request [#57](https://codeberg.org/ivarch/pv/pull/57) supplied by [Dave Beckett](https://github.com/dajobe))
+ * *fix:* workaround for macOS equivalence of stat to stat64 - patches from [Filippo Valsorda](https://github.com/FiloSottile) and [Demitri Muna](https://github.com/demitri), correcting [#33 "Fix compilation problems due to `stat64()` on Apple Silicon"](https://codeberg.org/ivarch/pv/issues/33)
+ * *fix:* add burst rate limit to transfer, so rate limits are not broken by bursty traffic (pull request [#62](https://codeberg.org/ivarch/pv/pull/62) supplied by [Volodymyr Bychkovyak](https://github.com/vbychkoviak))
+ * *fix:* corrected **--force** option so it will still output progress when not in the same process group as the owner of the terminal - corrects [#23 "No output with "-f" when run in background after 1.6.6"](https://codeberg.org/ivarch/pv/issues/23) and helps to correct [#31 "No output written from inside zsh <() construct"](https://codeberg.org/ivarch/pv/issues/31)
+ * *fix:* corrected elapsed time display to show as D:HH:MM:SS after 1 day, like the ETA does - corrects [#16 "Show days in same format in ETA as in elapsed time"](https://codeberg.org/ivarch/pv/issues/16)
+ * *fix:* corrected bug where percentages went down after 100% when in **--numeric** mode with a **--size** that was too small - corrects [#26 "Correct "-n" behaviour when going past 100% of "-s" size"](https://codeberg.org/ivarch/pv/issues/26)
  * *i18n:* recoded Polish translation file to UTF-8
  * *i18n:* removed inaccurate fuzzy translation matches
  * *docs:* moved all open issues into GitHub and updated the TODO list

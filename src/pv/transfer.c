@@ -185,7 +185,7 @@ static ssize_t pv__transfer_read_repeated(int fd, char *buf, size_t count)
  * not guaranteed to succeed for _all_ sizes; we may end up returning 0 if this
  * occurs. (The first write() may return -1 / EINTR if the consumer doesn't
  * read any data before our timeout and the buffer of whatever stdout is is
- * near-full.) (see https://codeberg.org/a-j-wood/pv/pulls/93)
+ * near-full.) (see https://codeberg.org/ivarch/pv/pulls/93)
  *
  * If "sync_after_write" is true, we call fdatasync() after each write() (or
  * fsync() if _POSIX_SYNCHRONIZED_IO is not > 0).

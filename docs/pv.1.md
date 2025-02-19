@@ -709,7 +709,7 @@ brackets to force the use of a subshell:
 
     pv InputFile | ( while read -r line; do sleep 0.1; done; )
 
-Refer to [issue #105](https://codeberg.org/a-j-wood/pv/issues/105) for
+Refer to [issue #105](https://codeberg.org/ivarch/pv/issues/105) for
 full details.
 
 The "**\--remote**" option requires that either */run/user/\<uid\>/* or

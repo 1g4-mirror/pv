@@ -138,7 +138,7 @@ these will need to be corrected by translators.
 The package maintainer should run through these steps for a new release:
 
  * Check for patches and bug reports:
-   * <https://codeberg.org/a-j-wood/pv/issues>
+   * <https://codeberg.org/ivarch/pv/issues>
    * <https://tracker.debian.org/pkg/pv>
    * <https://launchpad.net/ubuntu/+source/pv>
    * <https://archlinux.org/packages/extra/x86_64/pv/>
