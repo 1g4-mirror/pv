@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: pv@ivarch.com\n"
 "POT-Creation-Date: 2025-01-28 21:21+0000\n"
-"PO-Revision-Date: 2025-02-09 17:17+0000\n"
-"Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
+"PO-Revision-Date: 2025-05-31 08:58+0000\n"
+"Last-Translator: milimarg <milimarg@noreply.codeberg.org>\n"
 "Language-Team: French <https://translate.codeberg.org/projects/pv/pv/fr/>\n"
 "Language: fr\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 5.9.2\n"
+"X-Generator: Weblate 5.11.4\n"
 "Date: 1999-06-01 15:18:29+0100\n"
 "From: Andrew Wood <ivarch@ubik>\n"
 "Xgettext-Options: --default-domain=pkgbuild --directory=./.pkgdir --add-"
@@ -440,11 +440,11 @@ msgstr "échec de l'ouverture du terminal"
 
 #: src/pv/display.c:249
 msgid "yzafpnum kMGTPEZY"
-msgstr ""
+msgstr "yzafpnum kMGTPEZY"
 
 #: src/pv/display.c:267
 msgid "yzafpnum KMGTPEZY"
-msgstr ""
+msgstr "yzafpnum KMGTPEZY"
 
 #: src/pv/display.c:989 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
@@ -476,12 +476,12 @@ msgstr "(aucun)"
 
 #: src/pv/file.c:414
 msgid "(stdin)"
-msgstr ""
+msgstr "(stdin)"
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:93
 #: src/pv/format/rate.c:37 src/pv/loop.c:551
 msgid "b/s"
-msgstr ""
+msgstr "b/s"
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:97
 #: src/pv/format/rate.c:41
@@ -495,7 +495,7 @@ msgstr "O/s"
 
 #: src/pv/format/bytes.c:37
 msgid "b"
-msgstr ""
+msgstr "b"
 
 #: src/pv/format/bytes.c:41 src/pv/transfer.c:594
 msgid "B"
@@ -507,15 +507,15 @@ msgstr "ETA"
 
 #: src/pv/format/fineta.c:81
 msgid "FIN"
-msgstr ""
+msgstr "FIN"
 
 #: src/pv/loop.c:550
 msgid "rate min/avg/max/mdev"
-msgstr ""
+msgstr "taux min/moy/max/écart-type"
 
 #: src/pv/loop.c:562
 msgid "rate not measured"
-msgstr ""
+msgstr "taux non mesuré"
 
 #: src/pv/loop.c:772 src/pv/loop.c:823 src/pv/loop.c:876 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
@@ -523,7 +523,7 @@ msgstr ""
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:300 src/pv/watchpid.c:308
 #: src/pv/watchpid.c:385 src/pv/watchpid.c:406
 msgid "pid"
-msgstr ""
+msgstr "pid"
 
 #: src/pv/state.c:40
 msgid "history structure allocation failed"
@@ -559,15 +559,15 @@ msgstr "aucun tampon de transfert alloué"
 
 #: src/pv/transfer.c:676
 msgid "failed to set interval timer"
-msgstr ""
+msgstr "La définition de l'intervalle du minuteur a échoué"
 
 #: src/pv/transfer.c:702
 msgid "failed to clear interval timer"
-msgstr ""
+msgstr "La réinitialisation des intervalles du minuteur a échoué"
 
 #: src/pv/transfer.c:744
 msgid "line position buffer allocation failed"
-msgstr ""
+msgstr "L'allocation de la position de la ligne de la mémoire tampon a échoué"
 
 #: src/pv/transfer.c:917
 msgid "write failed"
@@ -580,7 +580,7 @@ msgstr "l'appel de sélection a échoué"
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:121 src/pv/watchpid.c:130
 #: src/pv/watchpid.c:184 src/pv/watchpid.c:193 src/pv/watchpid.c:204
 msgid "fd"
-msgstr ""
+msgstr "fd"
 
 #: src/pv/watchpid.c:130 src/pv/watchpid.c:204
 msgid "not a regular file or block device"
