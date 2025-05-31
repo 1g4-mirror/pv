@@ -30,7 +30,7 @@ pv (Pipe Viewer) can be inserted into any normal pipeline between two
 processes to give a visual indication of how quickly data is passing
 through, how long it has taken, how near to completion it is, and an
 estimate of how long it will be until completion."
-packageUrl="https://ivarch.com/programs/pv.shtml"
+packageUrl="https://ivarch.com/p/pv"
 sourceUrl="https://ivarch.com/programs/sources/${packageName}-%{version}.tar.gz"
 packageEmail="Andrew Wood <pv@ivarch.com>"
 

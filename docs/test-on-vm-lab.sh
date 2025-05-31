@@ -21,7 +21,7 @@
 # (without timestamps), "framework-output.log" (messages from this script),
 # and the "config.log", "test-suite.log", and "tests/" from the build area.
 #
-# Requires "scw" (https://ivarch.com/programs/scw.shtml).
+# Requires "scw" (https://ivarch.com/p/scw).
 #
 # Copyright 2024-2025 Andrew Wood
 # License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
