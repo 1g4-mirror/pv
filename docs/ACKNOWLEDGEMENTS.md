@@ -114,6 +114,7 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
    * [mmatous](https://translate.codeberg.org/user/mmatous/) (135)
  * **French**
    * anonymous suggestions (7)
+   * [milimarg](https://codeberg.org/milimarg) (13)
  * **German**
    * [Hartmut Goebel](https://translate.codeberg.org/user/htgoebel/) (77)
    * [Maxi_Mega](https://translate.codeberg.org/user/Maxi_Mega/) (11)
