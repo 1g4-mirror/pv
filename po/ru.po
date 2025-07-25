@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-07-25 22:13+0100\n"
+"POT-Creation-Date: 2025-07-25 23:58+0100\n"
 "PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -286,87 +286,87 @@ msgstr "(ввод)"
 msgid "state allocation failed"
 msgstr ""
 
-#: src/main/options.c:144 src/pv/file.c:324
+#: src/main/options.c:146 src/pv/file.c:324
 msgid "failed to stat file"
 msgstr "не удалось получить информацию о файле"
 
-#: src/main/options.c:158
+#: src/main/options.c:160
 msgid "is a directory"
 msgstr "является каталогом"
 
-#: src/main/options.c:187
+#: src/main/options.c:189
 msgid "failed to generate sysfs filename"
 msgstr "не удалось создать имя файла sysfs"
 
-#: src/main/options.c:209
+#: src/main/options.c:211
 msgid "failed to read sysfs size file"
 msgstr "не удалось узнать размер файла sysfs"
 
-#: src/main/options.c:229
+#: src/main/options.c:231
 msgid "failed to open block device"
 msgstr "не удалось открыть блочное устройство"
 
-#: src/main/options.c:239
+#: src/main/options.c:241
 msgid "failed to determine size of block device"
 msgstr "не удалось определить размер блочного устройства"
 
-#: src/main/options.c:345
+#: src/main/options.c:347
 msgid "option structure allocation failed"
 msgstr "не удалось выделить память для структуры опций"
 
-#: src/main/options.c:364
+#: src/main/options.c:366
 msgid "option structure argv allocation failed"
 msgstr "не удалось выделить память для структуры опций argv"
 
-#: src/main/options.c:417
+#: src/main/options.c:419
 msgid "numeric value not understood"
 msgstr "число не распознано"
 
-#: src/main/options.c:435
+#: src/main/options.c:437
 msgid "integer argument expected"
 msgstr "ожидалось целое число"
 
-#: src/main/options.c:447
+#: src/main/options.c:449
 msgid "numeric argument expected"
 msgstr "ожидалось число"
 
-#: src/main/options.c:458
+#: src/main/options.c:460
 msgid "process ID or pid:fd pair expected"
 msgstr "ожидался ИД процесса или пара ИДпр:ДФ"
 
-#: src/main/options.c:465
+#: src/main/options.c:467
 msgid "invalid process ID"
 msgstr "неправильный ИД процесса"
 
-#: src/main/options.c:698
+#: src/main/options.c:700
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Выполните `%s --help' для получения подробностей."
 
-#: src/main/options.c:700
+#: src/main/options.c:702
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Выполните `%s -h' для получения подробностей."
 
-#: src/main/options.c:731
+#: src/main/options.c:733
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
 msgstr ""
 
-#: src/main/options.c:740
+#: src/main/options.c:742
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:749
+#: src/main/options.c:751
 msgid "cannot use remote control when watching file descriptors"
 msgstr "удалённое управление невозможно при отслеживании дескрипторов файлов"
 
-#: src/main/options.c:758
+#: src/main/options.c:760
 msgid "cannot transfer files when watching file descriptors"
 msgstr "передача файлов невозможна при отслеживании дескрипторов файлов"
 
-#: src/main/options.c:773
+#: src/main/options.c:775
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "невозможно на системах без /proc/self/fdinfo"
 
