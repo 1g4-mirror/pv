@@ -401,6 +401,17 @@ int pv_main_loop(pvstate_t state)
 		}
 
 		/*
+		 * If we've read everything and written everything, and the
+		 * output pipe buffer is NOT empty, then pause a short while
+		 * so we don't spin in a tight loop waiting for the output
+		 * buffer to empty (#164).
+		 */
+		if (eof_in && eof_out && state->transfer.written_but_not_consumed > 0) {
+			debug("%s", "EOF but bytes remain in output pipe - sleeping");
+			pv_nanosleep(50000000);
+		}
+
+		/*
 		 * Just go round the loop again if there's no display and
 		 * we're not reporting statistics.
 		 */
