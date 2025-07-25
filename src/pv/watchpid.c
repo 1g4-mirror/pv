@@ -490,6 +490,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 		info_array[use_idx].state->control.name = NULL;
 		info_array[use_idx].state->control.format_string = NULL;
 		info_array[use_idx].state->control.output_name = NULL;
+		info_array[use_idx].state->control.default_bar_style = NULL;
 		/*@+mustfreeonly@ */
 		info_array[use_idx].state->control.default_format[0] = '\0';
 		use_format_string =
@@ -497,6 +498,16 @@ int pv_watchpid_scanfds(pvstate_t state,
 		if (NULL != use_format_string)
 			(void) pv_snprintf(info_array[use_idx].state->control.default_format, PV_SIZEOF_DEFAULT_FORMAT,
 					   "%.510s", use_format_string);
+
+		/*
+		 * Duplicate the default bar style string, if there is one.
+		 */
+		if (NULL != state->control.default_bar_style) {
+			/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
+			info_array[use_idx].state->control.default_bar_style =
+			    pv_strdup(state->control.default_bar_style);
+			/*@+mustfreeonly@ */
+		}
 
 		/*
 		 * Copy over all the display values, blanking out the
