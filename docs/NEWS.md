@@ -1,4 +1,4 @@
-### UNRELEASED
+### 1.9.33 - UNRELEASED
 
  * *fix:* prevent tight loop consuming CPU when waiting for a partially filled output pipe to be drained ([#164](https://codeberg.org/ivarch/pv/issues/164))
  * *i18n:* French translations updated
