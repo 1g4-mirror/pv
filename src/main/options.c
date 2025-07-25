@@ -57,6 +57,8 @@ void opts_free( /*@only@ */ opts_t opts)
 		free(opts->pidfile);
 	if (NULL != opts->output)
 		free(opts->output);
+	if (NULL != opts->default_bar_style)
+		free(opts->default_bar_style);
 	if (NULL != opts->store_and_forward_file)
 		free(opts->store_and_forward_file);
 	if (NULL != opts->extra_display)
