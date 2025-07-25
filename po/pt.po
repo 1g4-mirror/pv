@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-07-25 20:14+0100\n"
+"POT-Creation-Date: 2025-07-25 22:13+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -425,7 +425,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:989 src/pv/transfer.c:1056
+#: src/pv/display.c:989 src/pv/transfer.c:1057
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
@@ -548,11 +548,11 @@ msgstr ""
 msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:917
+#: src/pv/transfer.c:918
 msgid "write failed"
 msgstr "erro de gravação"
 
-#: src/pv/transfer.c:1158
+#: src/pv/transfer.c:1159
 msgid "select call failed"
 msgstr "erro na chamada da função select"
 

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-07-25 20:14+0100\n"
+"POT-Creation-Date: 2025-07-25 22:13+0100\n"
 "PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -420,7 +420,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:989 src/pv/transfer.c:1056
+#: src/pv/display.c:989 src/pv/transfer.c:1057
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 
@@ -543,11 +543,11 @@ msgstr "не удалось очистить измеритель временн
 msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:917
+#: src/pv/transfer.c:918
 msgid "write failed"
 msgstr "запись не удалась"
 
-#: src/pv/transfer.c:1158
+#: src/pv/transfer.c:1159
 msgid "select call failed"
 msgstr "запрос выборки не удался"
 
