@@ -503,10 +503,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 		 * Duplicate the default bar style string, if there is one.
 		 */
 		if (NULL != state->control.default_bar_style) {
-			/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
-			info_array[use_idx].state->control.default_bar_style =
-			    pv_strdup(state->control.default_bar_style);
-			/*@+mustfreeonly@ */
+			pv_state_default_bar_style_set(info_array[use_idx].state, state->control.default_bar_style);
 		}
 
 		/*
