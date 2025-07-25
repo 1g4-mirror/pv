@@ -1,4 +1,4 @@
-### 1.9.33 - UNRELEASED
+### 1.9.34 - UNRELEASED
 
  * *fix:* prevent tight loop consuming CPU when waiting for a partially filled output pipe to be drained ([#164](https://codeberg.org/ivarch/pv/issues/164))
  * *fix:* correct a memory handling fault when using **--bar-style** with **--watchfd** ([#163](https://codeberg.org/ivarch/pv/issues/163))

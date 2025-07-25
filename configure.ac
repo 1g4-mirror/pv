@@ -4,7 +4,7 @@ dnl Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2025 Andrew Wood
 dnl
 dnl License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 
-AC_INIT([pv], [1.9.33], [https://codeberg.org/ivarch/pv/issues], [pv], [https://ivarch.com/p/pv])
+AC_INIT([pv], [1.9.34], [https://codeberg.org/ivarch/pv/issues], [pv], [https://ivarch.com/p/pv])
 AC_CONFIG_SRCDIR([src/include/config.h.in])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_HEADERS([src/include/config.h])
