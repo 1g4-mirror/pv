@@ -1101,8 +1101,10 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	if ((state->control.linemode) && (lineswritten != NULL))
 		*lineswritten = 0;
 
-	if ((*eof_in) && (*eof_out))
+	if ((*eof_in) && (*eof_out)) {
+		debug("%s %d: %s", "fd", fd, "early return 0 - EOF in and out");
 		return 0;
+	}
 
 	check_read_fd = -1;
 	check_write_fd = -1;
@@ -1144,8 +1146,10 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		/*
 		 * Ignore transient errors by returning 0 immediately.
 		 */
-		if (EINTR == errno)
+		if (EINTR == errno) {
+			debug("%s %d: %s", "fd", fd, "early return 0 - is_data_ready < 0");
 			return 0;
+		}
 
 		/*
 		 * Any other error is a problem and we must report back.
@@ -1170,8 +1174,12 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * NB this can update state->transfer.written because of splice().
 	 */
 	if (ready_to_read) {
-		if (pv__transfer_read(state, fd, eof_in, eof_out, allowed) == 0)
+		if (pv__transfer_read(state, fd, eof_in, eof_out, allowed) == 0) {
+			debug("%s %d: %s (%s=%s, %s=%s, %s=%lu)", "fd", fd,
+			      "early return 0 - pv__transfer_read returned 0", "eof_in", eof_in ? "true" : "false",
+			      "eof_out", eof_out ? "true" : "false", "allowed", (unsigned long) allowed);
 			return 0;
+		}
 	}
 
 	/*
@@ -1202,8 +1210,12 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	    && (state->transfer.read_position > state->transfer.write_position)
 	    && (state->transfer.to_write > 0)
 	    && (NULL != lineswritten)) {
-		if (pv__transfer_write(state, eof_in, eof_out, lineswritten) == 0)
+		if (pv__transfer_write(state, eof_in, eof_out, lineswritten) == 0) {
+			debug("%s %d: %s (%s=%s, %s=%s, %s=%lu)", "fd", fd,
+			      "early return 0 - pv__transfer_write returned 0", "eof_in", eof_in ? "true" : "false",
+			      "eof_out", eof_out ? "true" : "false", "lineswritten", (unsigned long) lineswritten);
 			return 0;
+		}
 	}
 #ifdef MAXIMISE_BUFFER_FILL
 	/*
@@ -1224,6 +1236,10 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		}
 	}
 #endif				/* MAXIMISE_BUFFER_FILL */
+
+	if (0 == state->transfer.written) {
+		debug("%s %d: %s", "fd", fd, "end-of-function return 0 - transfer.written is zero");
+	}
 
 	return state->transfer.written;
 }
