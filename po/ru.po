@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2025-01-28 21:21+0000\n"
+"Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
+"POT-Creation-Date: 2025-07-25 20:14+0100\n"
 "PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -453,7 +453,7 @@ msgid "(stdin)"
 msgstr "(стд. ввод)"
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:93
-#: src/pv/format/rate.c:37 src/pv/loop.c:551
+#: src/pv/format/rate.c:37 src/pv/loop.c:562
 msgid "b/s"
 msgstr "бит/с"
 
@@ -463,7 +463,7 @@ msgid "/s"
 msgstr "/с"
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:97
-#: src/pv/format/rate.c:41 src/pv/loop.c:551
+#: src/pv/format/rate.c:41 src/pv/loop.c:562
 msgid "B/s"
 msgstr "байт/с"
 
@@ -483,15 +483,15 @@ msgstr "ОЖИД"
 msgid "FIN"
 msgstr "ЗАВЕРШ"
 
-#: src/pv/loop.c:550
+#: src/pv/loop.c:561
 msgid "rate min/avg/max/mdev"
 msgstr "скор. мин/сред/макс/дев"
 
-#: src/pv/loop.c:562
+#: src/pv/loop.c:573
 msgid "rate not measured"
 msgstr "скорость не изменяется"
 
-#: src/pv/loop.c:772 src/pv/loop.c:823 src/pv/loop.c:876 src/pv/watchpid.c:99
+#: src/pv/loop.c:783 src/pv/loop.c:834 src/pv/loop.c:887 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:300 src/pv/watchpid.c:308
@@ -547,7 +547,7 @@ msgstr ""
 msgid "write failed"
 msgstr "запись не удалась"
 
-#: src/pv/transfer.c:1154
+#: src/pv/transfer.c:1158
 msgid "select call failed"
 msgstr "запрос выборки не удался"
 

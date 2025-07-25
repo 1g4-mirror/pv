@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Report-Msgid-Bugs-To: pv@ivarch.com\n"
-"POT-Creation-Date: 2025-01-28 21:21+0000\n"
+"Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
+"POT-Creation-Date: 2025-07-25 20:14+0100\n"
 "PO-Revision-Date: 2025-01-14 20:39+0000\n"
 "Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -475,7 +475,7 @@ msgid "(stdin)"
 msgstr "(stdin)"
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:93
-#: src/pv/format/rate.c:37 src/pv/loop.c:551
+#: src/pv/format/rate.c:37 src/pv/loop.c:562
 msgid "b/s"
 msgstr "b/s"
 
@@ -485,7 +485,7 @@ msgid "/s"
 msgstr "/s"
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:97
-#: src/pv/format/rate.c:41 src/pv/loop.c:551
+#: src/pv/format/rate.c:41 src/pv/loop.c:562
 msgid "B/s"
 msgstr "B/s"
 
@@ -505,15 +505,15 @@ msgstr "ETA"
 msgid "FIN"
 msgstr "Endzeit"
 
-#: src/pv/loop.c:550
+#: src/pv/loop.c:561
 msgid "rate min/avg/max/mdev"
 msgstr "Rate min/mittel/max/abweichung"
 
-#: src/pv/loop.c:562
+#: src/pv/loop.c:573
 msgid "rate not measured"
 msgstr "Übertragungsrate nicht gemessen"
 
-#: src/pv/loop.c:772 src/pv/loop.c:823 src/pv/loop.c:876 src/pv/watchpid.c:99
+#: src/pv/loop.c:783 src/pv/loop.c:834 src/pv/loop.c:887 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
 #: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:202 src/pv/watchpid.c:300 src/pv/watchpid.c:308
@@ -569,7 +569,7 @@ msgstr "Zuweisung des Zeilenpuffers fehlgeschlagen"
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:1154
+#: src/pv/transfer.c:1158
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 
