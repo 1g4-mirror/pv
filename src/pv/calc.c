@@ -59,6 +59,9 @@ static void pv__update_average_rate_history(pvtransfercalc_t calc, readonly_pvtr
 	} else {
 		off_t bytes = (calc->history[last].transferred - calc->history[first].transferred);
 		long double sec = (calc->history[last].elapsed_sec - calc->history[first].elapsed_sec);
+		/* Safety check to avoid division by zero. */
+		if (sec < 0.000001 && sec > -0.000001)
+			sec = 0.000001;
 		calc->current_avg_rate = (long double) bytes / sec;
 	}
 }
