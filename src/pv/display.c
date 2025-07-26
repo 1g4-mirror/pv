@@ -946,7 +946,7 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 
 /*
  * Update display->display_buffer with status information formatted
- * according to the state held within the given structure.
+ * according to the state held within the given structures.
  *
  * If "reinitialise" is true, the format string is reparsed first.  This
  * should be true for the first call, and true whenever the format is
@@ -961,9 +961,11 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
  * display->display_string_len to the length of the string in
  * display->display_buffer, in bytes.
  *
+ * Updates status->exit_status if buffer allocation fails.
+ *
  * See pv__format_init for the adjustments that may be made to "control".
  */
-bool pv_format(pvstate_t state, pvcontrol_t control, readonly_pvtransferstate_t transfer,
+bool pv_format(pvprogramstatus_t status, pvcontrol_t control, readonly_pvtransferstate_t transfer,
 	       readonly_pvtransfercalc_t calc, /*@null@ */ const char *format_supplied, pvdisplay_t display,
 	       bool reinitialise, bool final)
 {
@@ -1042,7 +1044,7 @@ bool pv_format(pvstate_t state, pvcontrol_t control, readonly_pvtransferstate_t 
 		new_buffer = malloc(new_size + 16);
 		if (NULL == new_buffer) {
 			pv_error("%s: %s", _("buffer allocation failed"), strerror(errno));
-			state->status.exit_status |= PV_ERROREXIT_MEMORY;
+			status->exit_status |= PV_ERROREXIT_MEMORY;
 			display->display_buffer = NULL;
 			return false;
 		}
@@ -1268,14 +1270,14 @@ void pv_display(pvstate_t state, bool final)
 	}
 
 	if (!pv_format
-	    (state, &(state->control), &(state->transfer), &(state->calc), state->control.format_string,
+	    (&(state->status), &(state->control), &(state->transfer), &(state->calc), state->control.format_string,
 	     &(state->display), reinitialise, final))
 		return;
 
 	if (0 != state->control.extra_displays) {
 		if (!pv_format
-		    (state, &(state->control), &(state->transfer), &(state->calc), state->control.extra_format_string,
-		     &(state->extra_display), reinitialise, final))
+		    (&(state->status), &(state->control), &(state->transfer), &(state->calc),
+		     state->control.extra_format_string, &(state->extra_display), reinitialise, final))
 			return;
 	}
 
