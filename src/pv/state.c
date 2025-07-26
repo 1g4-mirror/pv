@@ -59,10 +59,10 @@ void pv_state_reset(pvstate_t state)
 	state->status.current_input_file = -1;
 
 	state->display.initial_offset = 0;
-	state->display.display_visible = false;
+	state->display.output_produced = false;
 
 	state->extra_display.initial_offset = 0;
-	state->extra_display.display_visible = false;
+	state->extra_display.output_produced = false;
 
 	/*
 	 * Explicitly set important floating point values to 0, as memset()

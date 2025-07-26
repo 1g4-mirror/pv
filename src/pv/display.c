@@ -57,7 +57,7 @@
 void pv_error(pvstate_t state, char *format, ...)
 {
 	va_list ap;
-	if (state->display.display_visible)
+	if (state->display.output_produced)
 		fprintf(stderr, "\n");
 	fprintf(stderr, "%s: ", state->status.program_name);
 	va_start(ap, format);
@@ -1229,13 +1229,13 @@ void pv_display(pvstate_t state, bool final)
 	} else if (state->control.cursor) {
 		if (state->control.force || pv_in_foreground()) {
 			pv_crs_update(state, state->display.display_buffer);
-			state->display.display_visible = true;
+			state->display.output_produced = true;
 		}
 	} else {
 		if (state->control.force || pv_in_foreground()) {
 			pv_tty_write(&(state->flags), state->display.display_buffer, state->display.display_string_bytes);
 			pv_tty_write(&(state->flags), "\r", 1);
-			state->display.display_visible = true;
+			state->display.output_produced = true;
 		}
 	}
 
@@ -1248,7 +1248,7 @@ void pv_display(pvstate_t state, bool final)
 		pv_tty_write(&(state->flags), "\033]2;", 4);
 		pv_tty_write(&(state->flags), state->extra_display.display_buffer, state->extra_display.display_string_bytes);
 		pv_tty_write(&(state->flags), "\033\\", 2);
-		state->extra_display.display_visible = true;
+		state->extra_display.output_produced = true;
 		debug("%s: [%s]", "windowtitle display", state->extra_display.display_buffer);
 	}
 
@@ -1256,7 +1256,7 @@ void pv_display(pvstate_t state, bool final)
 	    && (NULL != state->extra_display.display_buffer)
 	    ) {
 		setproctitle("%s", state->extra_display.display_buffer);
-		state->extra_display.display_visible = true;
+		state->extra_display.output_produced = true;
 		debug("%s: [%s]", "processtitle display", state->extra_display.display_buffer);
 	}
 }

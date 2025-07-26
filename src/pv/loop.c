@@ -394,7 +394,7 @@ int pv_main_loop(pvstate_t state)
 		 */
 		if (eof_in && eof_out && 0 == state->transfer.written_but_not_consumed) {
 			final_update = true;
-			if ((state->display.display_visible)
+			if ((state->display.output_produced)
 			    || (state->control.delay_start < 0.001)) {
 				pv_elapsedtime_copy(&next_update, &cur_time);
 			}
@@ -521,7 +521,7 @@ int pv_main_loop(pvstate_t state)
 		pv_crs_fini(state);
 	} else {
 		if ((!state->control.numeric) && (!state->control.no_display)
-		    && (state->display.display_visible))
+		    && (state->display.output_produced))
 			pv_tty_write(&(state->flags), "\n", 1);
 	}
 

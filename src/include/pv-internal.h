@@ -295,7 +295,7 @@ struct pvstate_s {
 		bool colour_permitted;		 /* whether colour is permitted for this display */
 		bool sgr_code_active;		 /* set while SGR code is active in a display line */
 		bool final_update;		 /* set internally on the final update */
-		bool display_visible;		 /* set once anything written to terminal */
+		bool output_produced;		 /* set once anything written to terminal */
 
 	} display;
 
