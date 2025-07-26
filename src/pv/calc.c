@@ -17,7 +17,7 @@
  * rate, otherwise calulate the average rate from the difference between the
  * current position + elapsed time pair, and the oldest pair in the buffer.
  */
-static void pv__update_average_rate_history(pvtransfercalc_t calc, pvtransferstate_t transfer,
+static void pv__update_average_rate_history(pvtransfercalc_t calc, readonly_pvtransferstate_t transfer,
 					    unsigned int history_interval, long double rate)
 {
 	size_t first = calc->history_first;
@@ -65,7 +65,7 @@ static void pv__update_average_rate_history(pvtransfercalc_t calc, pvtransfersta
 
 
 /*
- * Update all calculated transfer state (usually state->calc).
+ * Update all calculated transfer state in calc (usually from state->calc).
  *
  * If "final" is true, this is the final update, so calc->transfer_rate and
  * calc->average_rate are given as an average over the whole transfer;
@@ -75,8 +75,8 @@ static void pv__update_average_rate_history(pvtransfercalc_t calc, pvtransfersta
  * control->size is greater than zero, otherwise it will increase by 2 each
  * call and wrap at 200.
  */
-void pv_calculate_transfer_rate(pvtransfercalc_t calc, pvtransferstate_t transfer, pvcontrol_t control,
-				pvdisplay_t display, bool final)
+void pv_calculate_transfer_rate(pvtransfercalc_t calc, readonly_pvtransferstate_t transfer,
+				readonly_pvcontrol_t control, readonly_pvdisplay_t display, bool final)
 {
 	off_t bytes_since_last;
 	long double time_since_last, transfer_rate, average_rate;
@@ -141,12 +141,13 @@ void pv_calculate_transfer_rate(pvtransfercalc_t calc, pvtransferstate_t transfe
 	 * period of the transfer.
 	 */
 	if (final) {
+		long double total_elapsed_seconds = (long double) (transfer->elapsed_seconds);
 		/* Safety check to avoid division by zero. */
-		if (transfer->elapsed_seconds < 0.000001)
-			transfer->elapsed_seconds = 0.000001;
+		if (total_elapsed_seconds < 0.000001)
+			total_elapsed_seconds = 0.000001;
 		average_rate =
 		    (((long double) (transfer->transferred)) -
-		     ((long double) display->initial_offset)) / (long double) (transfer->elapsed_seconds);
+		     ((long double) display->initial_offset)) / total_elapsed_seconds;
 		transfer_rate = average_rate;
 	}
 

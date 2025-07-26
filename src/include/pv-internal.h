@@ -441,6 +441,22 @@ typedef struct pvipcstate_s *pvipcstate_t;
 typedef struct pvtransferstate_s *pvtransferstate_t;
 
 /*
+ * Read-only counterparts to the above structure pointers, to be used in
+ * function declarations where the function definitely shouldn't be altering
+ * the contents of the structure.
+ */
+typedef const struct pvprogramstatus_s * const readonly_pvprogramstatus_t;
+typedef const struct pvinputfiles_s * const readonly_pvinputfiles_t;
+typedef const struct pvcontrol_s * const readonly_pvcontrol_t;
+typedef const struct pvsignal_s * const readonly_pvsignal_t;
+typedef const struct pvtransientflags_s * const readonly_pvtransientflags_t;
+typedef const struct pvdisplay_s * const readonly_pvdisplay_t;
+typedef const struct pvdisplay_segment_s * const readonly_pvdisplay_segment_t;
+typedef const struct pvtransfercalc_s * const readonly_pvtransfercalc_t;
+typedef const struct pvipcstate_s * const readonly_pvipcstate_t;
+typedef const struct pvtransferstate_s * const readonly_pvtransferstate_t;
+
+/*
  * Structure containing the parameters used by formatters.
  */
 struct pvformatter_args_s {
@@ -490,7 +506,7 @@ typedef struct pvwatchfd_s *pvwatchfd_t;
 void pv_error(pvstate_t, char *, ...);
 
 int pv_main_loop(pvstate_t);
-void pv_calculate_transfer_rate(pvtransfercalc_t, pvtransferstate_t, pvcontrol_t, pvdisplay_t, bool);
+void pv_calculate_transfer_rate(pvtransfercalc_t, readonly_pvtransferstate_t, readonly_pvcontrol_t, readonly_pvdisplay_t, bool);
 
 long pv_bound_long(long, long, long);
 long pv_seconds_remaining(const off_t, const off_t, const long double);
