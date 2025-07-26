@@ -337,7 +337,7 @@ struct pvstate_s {
 	/********************
 	 * Cursor/IPC state *
 	 ********************/
-	struct pvipcstate_s {
+	struct pvcursorstate_s {
 		char lock_file[PV_SIZEOF_CRS_LOCK_FILE];
 #ifdef HAVE_IPC
 		/*@keep@*/ /*@null@*/ struct pvipccursorstate_s *shared; /* data shared between instances */
@@ -437,7 +437,7 @@ typedef struct pvtransientflags_s *pvtransientflags_t;
 typedef struct pvdisplay_s *pvdisplay_t;
 typedef struct pvdisplay_segment_s *pvdisplay_segment_t;
 typedef struct pvtransfercalc_s *pvtransfercalc_t;
-typedef struct pvipcstate_s *pvipcstate_t;
+typedef struct pvcursorstate_s *pvcursorstate_t;
 typedef struct pvtransferstate_s *pvtransferstate_t;
 
 /*
@@ -453,7 +453,7 @@ typedef const struct pvtransientflags_s * const readonly_pvtransientflags_t;
 typedef const struct pvdisplay_s * const readonly_pvdisplay_t;
 typedef const struct pvdisplay_segment_s * const readonly_pvdisplay_segment_t;
 typedef const struct pvtransfercalc_s * const readonly_pvtransfercalc_t;
-typedef const struct pvipcstate_s * const readonly_pvipcstate_t;
+typedef const struct pvcursorstate_s * const readonly_pvcursorstate_t;
 typedef const struct pvtransferstate_s * const readonly_pvtransferstate_t;
 
 /*
