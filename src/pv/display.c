@@ -553,15 +553,23 @@ char *pv_format_sequences(void)
 
 /*
  * Initialise the output format structure, based on the current options.
+ *
+ * May update control->checked_colour_support and
+ * control->can_display_colour.
  */
-static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supplied, pvdisplay_t display)
+static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t transfer, readonly_pvtransfercalc_t calc,
+			    /*@null@ */ const char *format_supplied, pvdisplay_t display)
 {
 	struct pvdisplay_component_s *format_component_array;
 	const char *display_format;
 	size_t strpos;
 	size_t segment;
 
-	if (NULL == state)
+	if (NULL == control)
+		return;
+	if (NULL == transfer)
+		return;
+	if (NULL == calc)
 		return;
 	if (NULL == display)
 		return;
@@ -578,7 +586,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 	display->showing_previous_line = false;
 	display->format_uses_colour = false;
 
-	display_format = NULL == format_supplied ? state->control.default_format : format_supplied;
+	display_format = NULL == format_supplied ? control->default_format : format_supplied;
 
 	if (NULL == display_format)
 		return;
@@ -781,9 +789,9 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 
 			formatter_info.display = display;
 			formatter_info.segment = &(display->format[segment]);
-			formatter_info.control = &(state->control);
-			formatter_info.transfer = &(state->transfer);
-			formatter_info.calc = &(state->calc);
+			formatter_info.control = control;
+			formatter_info.transfer = transfer;
+			formatter_info.calc = calc;
 			formatter_info.buffer = dummy_buffer;
 			formatter_info.buffer_size = 0;
 			formatter_info.offset = 0;
@@ -803,16 +811,16 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 		display->format_segment_count++;
 	}
 
-	if (display->format_uses_colour && !state->control.checked_colour_support) {
-		state->control.checked_colour_support = true;
+	if (display->format_uses_colour && !control->checked_colour_support) {
+		control->checked_colour_support = true;
 #ifdef ENABLE_NCURSES
 		/*
 		 * If we have terminal info support, check whether the
 		 * current terminal supports colour - or just assume it's
 		 * supported if we're forcing output.
 		 */
-		if (true == state->control.force) {
-			state->control.can_display_colour = true;
+		if (true == control->force) {
+			control->can_display_colour = true;
 			debug("%s", "force mode - assuming terminal supports colour");
 		} else {
 			char *term_env = NULL;
@@ -822,22 +830,22 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			 * flawfinder - here we pass responsibility to the
 			 * ncurses library to behave OK with $TERM.
 			 */
-			state->control.can_display_colour = false;
+			control->can_display_colour = false;
 			if (NULL != term_env) {
 				int setup_err = 0;
 
 				if ((0 == setupterm(term_env, STDERR_FILENO, &setup_err))
 				    && (tigetnum("colors") > 1)
 				    ) {
-					state->control.can_display_colour = true;
+					control->can_display_colour = true;
 					debug("%s: %s", term_env, "terminal supports colour");
 				} else {
-					state->control.can_display_colour = false;
+					control->can_display_colour = false;
 					debug("%s: %s", term_env, "terminal does not support colour");
 				}
 			} else {
 				/* If TERM is unset, disable colour. */
-				state->control.can_display_colour = false;
+				control->can_display_colour = false;
 				debug("%s", "no TERM variable - disabling colour support");
 			}
 		}
@@ -848,8 +856,8 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 		 * to determine whether colour is available, unless --force
 		 * was supplied, in which case colour support is assumed.
 		 */
-		if (true == state->control.force) {
-			state->control.can_display_colour = true;
+		if (true == control->force) {
+			control->can_display_colour = true;
 			debug("%s", "force mode - assuming terminal supports colour");
 		} else {
 			FILE *command_fptr;
@@ -865,21 +873,21 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			 */
 
 			if (NULL == command_fptr) {
-				state->control.can_display_colour = false;
+				control->can_display_colour = false;
 				debug("%s (%s)", "popen failed - disabling colour support", strerror(errno));
 			} else {
 				int colour_count;
 				if (1 == fscanf(command_fptr, "%d", &colour_count)) {
 					if (colour_count > 1) {
-						state->control.can_display_colour = true;
+						control->can_display_colour = true;
 						debug("%s (%d)", "terminal supports colour", colour_count);
 					} else {
-						state->control.can_display_colour = false;
+						control->can_display_colour = false;
 						debug("%s (%d)",
 						      "fewer than 2 colours available - disabling colour support");
 					}
 				} else {
-					state->control.can_display_colour = false;
+					control->can_display_colour = false;
 					debug("%s", "tput did not produce a number - disabling colour support");
 				}
 				/*@-unrecog@ *//* splint doesn't know pclose(). */
@@ -892,7 +900,7 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 		 * Without terminal info support, just assume colour is
 		 * available.
 		 */
-		state->control.can_display_colour = true;
+		control->can_display_colour = true;
 		debug("%s", "terminal info support not compiled in - assuming colour support");
 #endif				/* (! ENABLE_NCURSES) && (! USE_POPEN_TPUTS) */
 #endif				/* ! ENABLE_NCURSES */
@@ -916,9 +924,12 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
  * When returning true, this function will have also set
  * display->display_string_len to the length of the string in
  * display->display_buffer, in bytes.
+ *
+ * See pv__format_init for the adjustments that may be made to "control".
  */
-bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdisplay_t display, bool reinitialise,
-	       bool final)
+bool pv_format(pvstate_t state, pvcontrol_t control, readonly_pvtransferstate_t transfer,
+	       readonly_pvtransfercalc_t calc, /*@null@ */ const char *format_supplied, pvdisplay_t display,
+	       bool reinitialise, bool final)
 {
 	struct pvdisplay_component_s *format_component_array;
 	char display_segments[PV_SIZEOF_FORMAT_SEGMENTS_BUF];	/* flawfinder: ignore - always bounded */
@@ -932,8 +943,12 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	memset(&formatter_info, 0, sizeof(formatter_info));
 	display_segments[0] = '\0';
 
-	/* Quick safety check - state and display must exist. */
-	if (NULL == state)
+	/* Quick safety check for null pointers. */
+	if (NULL == control)
+		return false;
+	if (NULL == transfer)
+		return false;
+	if (NULL == calc)
 		return false;
 	if (NULL == display)
 		return false;
@@ -942,9 +957,9 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	formatter_info.buffer = display_segments;
 	formatter_info.buffer_size = sizeof(display_segments);
 	formatter_info.offset = 0;
-	formatter_info.control = &(state->control);
-	formatter_info.transfer = &(state->transfer);
-	formatter_info.calc = &(state->calc);
+	formatter_info.control = control;
+	formatter_info.transfer = transfer;
+	formatter_info.calc = calc;
 
 	format_component_array = pv__format_components();
 
@@ -953,24 +968,24 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 	/* Reinitialise if we were asked to. */
 	if (reinitialise)
-		pv__format_init(state, format_supplied, display);
+		pv__format_init(control, transfer, calc, format_supplied, display);
 
 	/* The format string is needed for the static segments. */
-	display_format = NULL == format_supplied ? state->control.default_format : format_supplied;
+	display_format = NULL == format_supplied ? control->default_format : format_supplied;
 	if (NULL == display_format)
 		return false;
 
 	/* Determine the type of thing being counted for transfer, rate, etc. */
 	display->count_type = PV_TRANSFERCOUNT_BYTES;
-	if (state->control.linemode)
+	if (control->linemode)
 		display->count_type = PV_TRANSFERCOUNT_LINES;
-	else if (state->control.decimal_units)
+	else if (control->decimal_units)
 		display->count_type = PV_TRANSFERCOUNT_DECBYTES;
 
 	/*
 	 * Reallocate the output buffer if the display width changes.
 	 */
-	if (display->display_buffer != NULL && display->display_buffer_size < (size_t) ((state->control.width * 4))) {
+	if (display->display_buffer != NULL && display->display_buffer_size < (size_t) ((control->width * 4))) {
 		free(display->display_buffer);
 		display->display_buffer = NULL;
 		display->display_buffer_size = 0;
@@ -983,9 +998,9 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		char *new_buffer;
 		size_t new_size;
 
-		new_size = (size_t) ((4 * state->control.width) + 80);
-		if (NULL != state->control.name)
-			new_size += strlen(state->control.name);	/* flawfinder: ignore */
+		new_size = (size_t) ((4 * control->width) + 80);
+		if (NULL != control->name)
+			new_size += strlen(control->name);	/* flawfinder: ignore */
 		/* flawfinder: name is always set by pv_strdup(), which bounds with a \0. */
 
 		new_buffer = malloc(new_size + 16);
@@ -1058,8 +1073,8 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	 */
 
 	dynamic_segment_width = 0;
-	if (state->control.width > static_portion_width)
-		dynamic_segment_width = state->control.width - static_portion_width;
+	if (control->width > static_portion_width)
+		dynamic_segment_width = control->width - static_portion_width;
 
 	/*
 	 * Divide the total remaining screen space by the number of dynamic
@@ -1069,7 +1084,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 		dynamic_segment_width /= dynamic_segment_count;
 
 	debug("control.width=%d static_portion_width=%d dynamic_segment_width=%d dynamic_segment_count=%d",
-	      state->control.width, static_portion_width, dynamic_segment_width, dynamic_segment_count);
+	      control->width, static_portion_width, dynamic_segment_width, dynamic_segment_count);
 
 	for (segment_idx = 0; segment_idx < display->format_segment_count; segment_idx++) {
 		pvdisplay_segment_t segment;
@@ -1157,7 +1172,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	 * spaces at the end, so that we don't leave dangling bits behind.
 	 */
 	if ((new_display_string_width < display->display_string_width)
-	    && (state->control.width >= display->prev_screen_width)) {
+	    && (control->width >= display->prev_screen_width)) {
 		char spaces[32];	 /* flawfinder: ignore - terminated, bounded */
 		int spaces_to_add;
 
@@ -1177,7 +1192,7 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 
 	display->display_string_bytes = new_display_string_bytes;
 	display->display_string_width = new_display_string_width;
-	display->prev_screen_width = state->control.width;
+	display->prev_screen_width = control->width;
 
 	return true;
 }
@@ -1216,11 +1231,15 @@ void pv_display(pvstate_t state, bool final)
 		state->flags.reparse_display = 0;
 	}
 
-	if (!pv_format(state, state->control.format_string, &(state->display), reinitialise, final))
+	if (!pv_format
+	    (state, &(state->control), &(state->transfer), &(state->calc), state->control.format_string,
+	     &(state->display), reinitialise, final))
 		return;
 
 	if (0 != state->control.extra_displays) {
-		if (!pv_format(state, state->control.extra_format_string, &(state->extra_display), reinitialise, final))
+		if (!pv_format
+		    (state, &(state->control), &(state->transfer), &(state->calc), state->control.extra_format_string,
+		     &(state->extra_display), reinitialise, final))
 			return;
 	}
 
