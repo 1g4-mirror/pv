@@ -43,7 +43,7 @@ static void pv_sig_ensure_tty_tostop()
 		return;
 
 	/* Can't look at terminal flags if backgrounded. */
-	if (1 == pv_sig_state->flag.suspend_stderr)
+	if (1 == pv_sig_state->flags.suspend_stderr)
 		return;
 
 	if (0 != tcgetattr(STDERR_FILENO, &terminal_attributes)) {
@@ -52,13 +52,13 @@ static void pv_sig_ensure_tty_tostop()
 	}
 
 	/* Can't set terminal flags if backgrounded. */
-	if (1 == pv_sig_state->flag.suspend_stderr)
+	if (1 == pv_sig_state->flags.suspend_stderr)
 		return;
 
 	if (0 == (terminal_attributes.c_lflag & TOSTOP)) {
 		terminal_attributes.c_lflag |= TOSTOP;
 		if (0 == tcsetattr(STDERR_FILENO, TCSANOW, &terminal_attributes)) {
-			pv_sig_state->flag.clear_tty_tostop_on_exit = 1;
+			pv_sig_state->flags.clear_tty_tostop_on_exit = 1;
 			debug("%s", "set terminal TOSTOP attribute");
 #if HAVE_IPC
 			/*
@@ -95,11 +95,11 @@ static void pv_sig_ttou( /*@unused@ */  __attribute__((unused))
 	if (NULL == pv_sig_state)
 		return;
 
-	if (1 != pv_sig_state->flag.suspend_stderr) {
+	if (1 != pv_sig_state->flags.suspend_stderr) {
 		debug("%s", "SIGTTOU - suspending stderr");
-		pv_sig_state->flag.suspend_stderr = 1;
+		pv_sig_state->flags.suspend_stderr = 1;
 		/* Also tell the SIGCONT handler to do nothing next time. */
-		pv_sig_state->flag.skip_next_sigcont++;
+		pv_sig_state->flags.skip_next_sigcont++;
 		/* Raise an immediate SIGCONT to bring the rest of the pipeline back up. */
 		/*@-unrecog@ *//* splint doesn't know about killpg() */
 		if (0 != killpg(getpgrp(), SIGCONT)) {
@@ -142,19 +142,19 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 	if (NULL == pv_sig_state)
 		return;
 
-	if (pv_sig_state->flag.skip_next_sigcont > 0) {
+	if (pv_sig_state->flags.skip_next_sigcont > 0) {
 		debug("%s: %d", "SIGCONT received but ignored - current value of skip_next_sigcont",
-		      pv_sig_state->flag.skip_next_sigcont);
-		pv_sig_state->flag.skip_next_sigcont--;
+		      pv_sig_state->flags.skip_next_sigcont);
+		pv_sig_state->flags.skip_next_sigcont--;
 		return;
-	} else if (pv_sig_state->flag.skip_next_sigcont < 0) {
-		pv_sig_state->flag.skip_next_sigcont = 0;
+	} else if (pv_sig_state->flags.skip_next_sigcont < 0) {
+		pv_sig_state->flags.skip_next_sigcont = 0;
 		debug("%s", "skip_next_sigcont underrun cleared");
 	}
 
-	debug("%s: %d", "SIGCONT received - current value of suspend_stderr", pv_sig_state->flag.suspend_stderr);
+	debug("%s: %d", "SIGCONT received - current value of suspend_stderr", pv_sig_state->flags.suspend_stderr);
 
-	pv_sig_state->flag.terminal_resized = 1;
+	pv_sig_state->flags.terminal_resized = 1;
 
 	/*
 	 * We can only make the time adjustments if this SIGCONT followed a
@@ -182,16 +182,16 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 	 * Try resuming our use of stderr, if we had suspended it, but only
 	 * if we're now in the foreground.
 	 */
-	if (1 == pv_sig_state->flag.suspend_stderr) {
+	if (1 == pv_sig_state->flags.suspend_stderr) {
 		if (pv_in_foreground()) {
 			debug("%s", "SIGCONT - resuming stderr");
-			pv_sig_state->flag.suspend_stderr = 0;
+			pv_sig_state->flags.suspend_stderr = 0;
 		} else {
 			debug("%s", "SIGCONT but still in background - not resuming stderr");
 		}
 	}
 
-	if (0 == pv_sig_state->flag.suspend_stderr) {
+	if (0 == pv_sig_state->flags.suspend_stderr) {
 		pv_sig_ensure_tty_tostop();
 #ifdef HAVE_IPC
 		pv_crs_needreinit(pv_sig_state);
@@ -209,7 +209,7 @@ static void pv_sig_winch( /*@unused@ */  __attribute__((unused))
 {
 	if (NULL == pv_sig_state)
 		return;
-	pv_sig_state->flag.terminal_resized = 1;
+	pv_sig_state->flags.terminal_resized = 1;
 }
 #endif
 
@@ -222,7 +222,7 @@ static void pv_sig_term( /*@unused@ */  __attribute__((unused))
 {
 	if (NULL == pv_sig_state)
 		return;
-	pv_sig_state->flag.trigger_exit = 1;
+	pv_sig_state->flags.trigger_exit = 1;
 }
 
 
@@ -297,7 +297,7 @@ void pv_sig_init(pvstate_t state)
 
 	pv_sig_state = state;
 
-	pv_sig_state->flag.suspend_stderr = 0;
+	pv_sig_state->flags.suspend_stderr = 0;
 	pv_elapsedtime_zero(&(pv_sig_state->signal.tstp_time));
 	pv_elapsedtime_zero(&(pv_sig_state->signal.toffset));
 
@@ -320,7 +320,7 @@ void pv_sig_init(pvstate_t state)
 	 * Handle SIGTTOU by continuing with output switched off, so that we
 	 * can be stopped and backgrounded without messing up the terminal.
 	 */
-	pv_sig_state->flag.skip_next_sigcont = 0;
+	pv_sig_state->flags.skip_next_sigcont = 0;
 	sa.sa_handler = pv_sig_ttou;
 	(void) sigemptyset(&(sa.sa_mask));
 	sa.sa_flags = 0;
@@ -436,7 +436,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 #endif
 	(void) sigaction(SIGALRM, &(pv_sig_state->signal.old_sigalrm), NULL);
 
-	need_to_clear_tostop = (1 == pv_sig_state->flag.clear_tty_tostop_on_exit) ? true : false;
+	need_to_clear_tostop = (1 == pv_sig_state->flags.clear_tty_tostop_on_exit) ? true : false;
 
 	if (pv_sig_state->control.cursor) {
 #ifdef HAVE_IPC
@@ -477,7 +477,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 			}
 		}
 
-		pv_sig_state->flag.clear_tty_tostop_on_exit = 0;
+		pv_sig_state->flags.clear_tty_tostop_on_exit = 0;
 	}
 }
 
@@ -537,14 +537,14 @@ void pv_sig_checkbg(void)
 
 	next_check = time(NULL) + 1;
 
-	if (0 == pv_sig_state->flag.suspend_stderr)
+	if (0 == pv_sig_state->flags.suspend_stderr)
 		return;
 
 	if (!pv_in_foreground())
 		return;
 
 	debug("%s: %s", "pv_sig_checkbg", "attempting to resume stderr");
-	pv_sig_state->flag.suspend_stderr = 0;
+	pv_sig_state->flags.suspend_stderr = 0;
 
 	pv_sig_ensure_tty_tostop();
 #ifdef HAVE_IPC

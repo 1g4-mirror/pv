@@ -575,13 +575,13 @@ int pv_watchpid_scanfds(pvstate_t state,
 				debug("%s", "zero size - removing estimated time remaining");
 				/* strlen-1 here to include trailing \0 */
 				memmove(fmt, fmt + 2, strlen(fmt) - 1);	/* flawfinder: ignore */
-				info_array[use_idx].state->flag.reparse_display = 1;
+				info_array[use_idx].state->flags.reparse_display = 1;
 			}
 			while (NULL != (fmt = strstr(info_array[use_idx].state->control.default_format, "%I"))) {
 				debug("%s", "zero size - removing estimated completion time");
 				/* strlen-1 here to include trailing \0 */
 				memmove(fmt, fmt + 2, strlen(fmt) - 1);	/* flawfinder: ignore */
-				info_array[use_idx].state->flag.reparse_display = 1;
+				info_array[use_idx].state->flags.reparse_display = 1;
 			}
 			/* flawfinder: default_format is always \0-terminated. */
 		}
@@ -591,7 +591,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 
 		/* Carry the display_name through to the display state, and reparse. */
 		pv_state_name_set(info_array[use_idx].state, info_array[use_idx].display_name);
-		info_array[use_idx].state->flag.reparse_display = 1;
+		info_array[use_idx].state->flags.reparse_display = 1;
 
 		pv_elapsedtime_read(&(info_array[use_idx].start_time));
 

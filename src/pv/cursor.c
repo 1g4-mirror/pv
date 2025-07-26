@@ -411,7 +411,7 @@ void pv_crs_init(pvstate_t state)
 	 * If we have already set the terminal TOSTOP attribute, set the
 	 * flag in shared memory to let the other instances know.
 	 */
-	if ((!state->cursor.noipc) && (1 == state->flag.clear_tty_tostop_on_exit) && (NULL != state->cursor.shared)) {
+	if ((!state->cursor.noipc) && (1 == state->flags.clear_tty_tostop_on_exit) && (NULL != state->cursor.shared)) {
 		debug("%s", "propagating local clear_tty_tostop_on_exit true value to shared tty_tostop_added flag");
 		state->cursor.shared->tty_tostop_added = true;
 	}
@@ -436,7 +436,7 @@ void pv_crs_init(pvstate_t state)
 		 * initial ypos.
 		 */
 		if (state->cursor.y_start > 0)
-			pv_tty_write(state, "\n", 1);
+			pv_tty_write(&(state->flags), "\n", 1);
 		pv_crs_unlock(state, terminalfd);
 
 		if (state->cursor.y_start < 1)
@@ -469,7 +469,7 @@ static void pv_crs_reinit(pvstate_t state)
 {
 	debug("%s", "reinit");
 
-	if (1 == state->flag.suspend_stderr) {
+	if (1 == state->flags.suspend_stderr) {
 		debug("%s", "reinit abandoned - stderr is suspended");
 		return;
 	}
@@ -568,9 +568,9 @@ void pv_crs_update(pvstate_t state, const char *output_line)
 			memset(cup_cmd, 0, sizeof(cup_cmd));
 			(void) pv_snprintf(cup_cmd, sizeof(cup_cmd), "\033[%u;1H", state->control.height);
 			cup_cmd_length = strlen(cup_cmd);	/* flawfinder: ignore */
-			pv_tty_write(state, cup_cmd, cup_cmd_length);
+			pv_tty_write(&(state->flags), cup_cmd, cup_cmd_length);
 			for (; offs > 0; offs--) {
-				pv_tty_write(state, "\n", 1);
+				pv_tty_write(&(state->flags), "\n", 1);
 			}
 
 			pv_crs_unlock(state, STDERR_FILENO);
@@ -603,8 +603,8 @@ void pv_crs_update(pvstate_t state, const char *output_line)
 
 	pv_crs_lock(state, STDERR_FILENO);
 
-	pv_tty_write(state, cup_cmd, cup_cmd_length);
-	pv_tty_write(state, output_line, output_line_length);
+	pv_tty_write(&(state->flags), cup_cmd, cup_cmd_length);
+	pv_tty_write(&(state->flags), output_line, output_line_length);
 
 	pv_crs_unlock(state, STDERR_FILENO);
 }
@@ -643,7 +643,7 @@ void pv_crs_fini(pvstate_t state)
 
 	pv_crs_lock(state, STDERR_FILENO);
 
-	pv_tty_write(state, cup_cmd, strlen(cup_cmd));	/* flawfinder: ignore */
+	pv_tty_write(&(state->flags), cup_cmd, strlen(cup_cmd));	/* flawfinder: ignore */
 	/* flawfinder - pv_snprintf() always \0-terminates (see above). */
 
 #ifdef HAVE_IPC
@@ -653,10 +653,10 @@ void pv_crs_fini(pvstate_t state)
 	 * it.
 	 */
 	if ((!state->cursor.noipc) && (NULL != state->cursor.shared) && state->cursor.shared->tty_tostop_added) {
-		if (0 == state->flag.clear_tty_tostop_on_exit) {
+		if (0 == state->flags.clear_tty_tostop_on_exit) {
 			debug("%s",
 			      "propagating shared tty_tostop_added true value to local clear_tty_tostop_on_exit flag");
-			state->flag.clear_tty_tostop_on_exit = 1;
+			state->flags.clear_tty_tostop_on_exit = 1;
 		}
 	}
 

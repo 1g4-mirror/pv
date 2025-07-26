@@ -140,9 +140,9 @@ void pv_write_retry(int fd, const char *buf, size_t count)
  * Write the given buffer to the terminal, like pv_write_retry(), unless
  * stderr is suspended.
  */
-void pv_tty_write(pvstate_t state, const char *buf, size_t count)
+void pv_tty_write(readonly_pvtransientflags_t flags, const char * buf, size_t count)
 {
-	while (0 == state->flag.suspend_stderr && count > 0) {
+	while (0 == flags->suspend_stderr && count > 0) {
 		ssize_t nwritten;
 
 		nwritten = write(STDERR_FILENO, buf, count);
@@ -1207,9 +1207,9 @@ void pv_display(pvstate_t state, bool final)
 	 * If the display options need reparsing, do so to generate new
 	 * formatting parameters.
 	 */
-	if (0 != state->flag.reparse_display) {
+	if (0 != state->flags.reparse_display) {
 		reinitialise = true;
-		state->flag.reparse_display = 0;
+		state->flags.reparse_display = 0;
 	}
 
 	if (!pv_format(state, state->control.format_string, &(state->display), reinitialise, final))
@@ -1224,8 +1224,8 @@ void pv_display(pvstate_t state, bool final)
 		return;
 
 	if (state->control.numeric) {
-		pv_tty_write(state, state->display.display_buffer, state->display.display_string_bytes);
-		pv_tty_write(state, "\n", 1);
+		pv_tty_write(&(state->flags), state->display.display_buffer, state->display.display_string_bytes);
+		pv_tty_write(&(state->flags), "\n", 1);
 	} else if (state->control.cursor) {
 		if (state->control.force || pv_in_foreground()) {
 			pv_crs_update(state, state->display.display_buffer);
@@ -1233,8 +1233,8 @@ void pv_display(pvstate_t state, bool final)
 		}
 	} else {
 		if (state->control.force || pv_in_foreground()) {
-			pv_tty_write(state, state->display.display_buffer, state->display.display_string_bytes);
-			pv_tty_write(state, "\r", 1);
+			pv_tty_write(&(state->flags), state->display.display_buffer, state->display.display_string_bytes);
+			pv_tty_write(&(state->flags), "\r", 1);
 			state->display.display_visible = true;
 		}
 	}
@@ -1245,9 +1245,9 @@ void pv_display(pvstate_t state, bool final)
 	    && (state->control.force || pv_in_foreground())
 	    && (NULL != state->extra_display.display_buffer)
 	    ) {
-		pv_tty_write(state, "\033]2;", 4);
-		pv_tty_write(state, state->extra_display.display_buffer, state->extra_display.display_string_bytes);
-		pv_tty_write(state, "\033\\", 2);
+		pv_tty_write(&(state->flags), "\033]2;", 4);
+		pv_tty_write(&(state->flags), state->extra_display.display_buffer, state->extra_display.display_string_bytes);
+		pv_tty_write(&(state->flags), "\033\\", 2);
 		state->extra_display.display_visible = true;
 		debug("%s: [%s]", "windowtitle display", state->extra_display.display_buffer);
 	}

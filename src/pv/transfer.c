@@ -910,7 +910,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	if (EPIPE == write_errno) {
 		*eof_in = true;
 		*eof_out = true;
-		state->flag.pipe_closed = 1;
+		state->flags.pipe_closed = 1;
 		debug("%s", "SIGPIPE received - setting pipe_closed");
 		return 0;
 	}

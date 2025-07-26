@@ -241,7 +241,7 @@ struct pvstate_s {
 		volatile sig_atomic_t suspend_stderr;	 /* whether writing to stderr is suspended */
 		volatile sig_atomic_t skip_next_sigcont; /* whether to ignore the next SIGCONT */
 		volatile sig_atomic_t pipe_closed;	 /* whether the output pipe was closed */
-	} flag;
+	} flags;
 
 	/*****************
 	 * Display state *
@@ -565,7 +565,7 @@ int pv_next_file(pvstate_t, unsigned int, int);
 /*@keep@*/ const char *pv_current_file_name(pvstate_t);
 
 void pv_write_retry(int, const char *, size_t);
-void pv_tty_write(pvstate_t, const char *, size_t);
+void pv_tty_write(readonly_pvtransientflags_t, const char *, size_t);
 
 void pv_crs_fini(pvstate_t);
 void pv_crs_init(pvstate_t);

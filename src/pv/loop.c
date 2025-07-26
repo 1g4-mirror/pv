@@ -223,7 +223,7 @@ int pv_main_loop(pvstate_t state)
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
-		if (1 == state->flag.trigger_exit)
+		if (1 == state->flags.trigger_exit)
 			break;
 
 		if (state->control.rate_limit > 0) {
@@ -292,7 +292,7 @@ int pv_main_loop(pvstate_t state)
 		if (output_is_pipe) {
 			int nbytes;
 			nbytes = 0;
-			if (0 != state->flag.pipe_closed) {
+			if (0 != state->flags.pipe_closed) {
 				if (0 != state->transfer.written_but_not_consumed)
 					debug("%s",
 					      "clearing written_but_not_consumed because the output pipe was closed");
@@ -487,10 +487,10 @@ int pv_main_loop(pvstate_t state)
 		state->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 		/* Resize the display, if a resize signal was received. */
-		if (1 == state->flag.terminal_resized) {
+		if (1 == state->flags.terminal_resized) {
 			unsigned int new_width, new_height;
 
-			state->flag.terminal_resized = 0;
+			state->flags.terminal_resized = 0;
 
 			new_width = (unsigned int) (state->control.width);
 			new_height = state->control.height;
@@ -522,10 +522,10 @@ int pv_main_loop(pvstate_t state)
 	} else {
 		if ((!state->control.numeric) && (!state->control.no_display)
 		    && (state->display.display_visible))
-			pv_tty_write(state, "\n", 1);
+			pv_tty_write(&(state->flags), "\n", 1);
 	}
 
-	if (1 == state->flag.trigger_exit)
+	if (1 == state->flags.trigger_exit)
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
 
 	if (input_fd >= 0)
@@ -563,7 +563,7 @@ int pv_main_loop(pvstate_t state)
 				rate_deviation, state->control.bits ? _("b/s") : _("B/s"));
 
 		if (stats_size > 0 && stats_size < (int) (sizeof(stats_buf)))
-			pv_tty_write(state, stats_buf, (size_t) stats_size);
+			pv_tty_write(&(state->flags), stats_buf, (size_t) stats_size);
 	} else if (state->control.show_stats && state->calc.measurements_taken < 1) {
 		char msg_buf[256];	 /* flawfinder: ignore */
 		int msg_size;
@@ -574,7 +574,7 @@ int pv_main_loop(pvstate_t state)
 		msg_size = pv_snprintf(msg_buf, sizeof(msg_buf), "%s\n", _("rate not measured"));
 
 		if (msg_size > 0 && msg_size < (int) (sizeof(msg_buf)))
-			pv_tty_write(state, msg_buf, (size_t) msg_size);
+			pv_tty_write(&(state->flags), msg_buf, (size_t) msg_size);
 	}
 
 	return state->status.exit_status;
@@ -623,7 +623,7 @@ int pv_watchfd_loop(pvstate_t state)
 			/* strlen-1 here to include trailing \0 */
 			memmove(fmt, fmt + 2, strlen(fmt) - 1);	/* flawfinder: ignore */
 			/* flawfinder: default_format is always \0 terminated */
-			state->flag.reparse_display = 1;
+			state->flags.reparse_display = 1;
 		}
 	}
 
@@ -651,7 +651,7 @@ int pv_watchfd_loop(pvstate_t state)
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
-		if (1 == state->flag.trigger_exit)
+		if (1 == state->flags.trigger_exit)
 			break;
 
 		position_now = pv_watchfd_position(&info);
@@ -704,10 +704,10 @@ int pv_watchfd_loop(pvstate_t state)
 		state->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 		/* Resize the display, if a resize signal was received. */
-		if (1 == state->flag.terminal_resized) {
+		if (1 == state->flags.terminal_resized) {
 			unsigned int new_width, new_height;
 
-			state->flag.terminal_resized = 0;
+			state->flags.terminal_resized = 0;
 
 			new_width = (unsigned int) (state->control.width);
 			new_height = state->control.height;
@@ -726,9 +726,9 @@ int pv_watchfd_loop(pvstate_t state)
 	}
 
 	if (!state->control.numeric)
-		pv_tty_write(state, "\n", 1);
+		pv_tty_write(&(state->flags), "\n", 1);
 
-	if (1 == state->flag.trigger_exit)
+	if (1 == state->flags.trigger_exit)
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
 
 	/*
@@ -825,7 +825,7 @@ int pv_watchpid_loop(pvstate_t state)
 	while (true) {
 		int rc, fd, displayed_lines;
 
-		if (1 == state->flag.trigger_exit)
+		if (1 == state->flags.trigger_exit)
 			break;
 
 		pv_elapsedtime_read(&cur_time);
@@ -857,10 +857,10 @@ int pv_watchpid_loop(pvstate_t state)
 			pv_elapsedtime_copy(&next_update, &cur_time);
 
 		/* Resize the display, if a resize signal was received. */
-		if (1 == state->flag.terminal_resized) {
+		if (1 == state->flags.terminal_resized) {
 			unsigned int new_width, new_height;
 
-			state->flag.terminal_resized = 0;
+			state->flags.terminal_resized = 0;
 
 			new_width = (unsigned int) (state->control.width);
 			new_height = state->control.height;
@@ -878,7 +878,7 @@ int pv_watchpid_loop(pvstate_t state)
 				info_array[idx].state->control.width = state->control.width;
 				info_array[idx].state->control.height = state->control.height;
 				pv_watchpid_setname(state, &(info_array[idx]));
-				info_array[idx].state->flag.reparse_display = 1;
+				info_array[idx].state->flags.reparse_display = 1;
 			}
 		}
 
@@ -974,7 +974,7 @@ int pv_watchpid_loop(pvstate_t state)
 
 			if (displayed_lines > 0) {
 				debug("%s", "adding newline");
-				pv_tty_write(state, "\n", 1);
+				pv_tty_write(&(state->flags), "\n", 1);
 			}
 
 			if (NULL == info_array[idx].state) {
@@ -1005,10 +1005,10 @@ int pv_watchpid_loop(pvstate_t state)
 		while (blank_lines > 0) {
 			pvdisplay_width_t blank_count;
 			if (displayed_lines > 0)
-				pv_tty_write(state, "\n", 1);
+				pv_tty_write(&(state->flags), "\n", 1);
 			for (blank_count = 0; blank_count < state->control.width; blank_count++)
-				pv_tty_write(state, " ", 1);
-			pv_tty_write(state, "\r", 1);
+				pv_tty_write(&(state->flags), " ", 1);
+			pv_tty_write(&(state->flags), "\r", 1);
 			blank_lines--;
 			displayed_lines++;
 		}
@@ -1016,7 +1016,7 @@ int pv_watchpid_loop(pvstate_t state)
 		debug("%s: %d", "displayed lines", displayed_lines);
 
 		while (displayed_lines > 1) {
-			pv_tty_write(state, "\033[A", 3);
+			pv_tty_write(&(state->flags), "\033[A", 3);
 			displayed_lines--;
 		}
 	}
@@ -1028,14 +1028,14 @@ int pv_watchpid_loop(pvstate_t state)
 	while (blank_lines > 0) {
 		pvdisplay_width_t blank_count;
 		for (blank_count = 0; blank_count < state->control.width; blank_count++)
-			pv_tty_write(state, " ", 1);
-		pv_tty_write(state, "\r", 1);
+			pv_tty_write(&(state->flags), " ", 1);
+		pv_tty_write(&(state->flags), "\r", 1);
 		blank_lines--;
 		if (blank_lines > 0)
-			pv_tty_write(state, "\n", 1);
+			pv_tty_write(&(state->flags), "\n", 1);
 	}
 	while (prev_displayed_lines > 1) {
-		pv_tty_write(state, "\033[A", 3);
+		pv_tty_write(&(state->flags), "\033[A", 3);
 		prev_displayed_lines--;
 	}
 

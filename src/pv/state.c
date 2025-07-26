@@ -55,7 +55,7 @@ void pv_state_reset(pvstate_t state)
 	if (NULL == state)
 		return;
 
-	state->flag.reparse_display = 1;
+	state->flags.reparse_display = 1;
 	state->status.current_input_file = -1;
 
 	state->display.initial_offset = 0;
@@ -316,7 +316,7 @@ void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, b
 		state->control.name = pv_strdup(name);
 
 	/* Tell pv_format() that the format has changed. */
-	state->flag.reparse_display = 1;
+	state->flags.reparse_display = 1;
 }
 
 
