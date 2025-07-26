@@ -506,7 +506,8 @@ int pv_main_loop(pvstate_t state)
 
 		if (state->control.no_display) {
 			/* If there's no display, calculate rate for the statistics. */
-			pv_calculate_transfer_rate(state, final_update);
+			pv_calculate_transfer_rate(&(state->calc), &(state->transfer), &(state->control),
+						   &(state->display), final_update);
 		} else {
 			/* Produce the display. */
 			pv_display(state, final_update);

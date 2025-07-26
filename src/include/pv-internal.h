@@ -490,7 +490,7 @@ typedef struct pvwatchfd_s *pvwatchfd_t;
 void pv_error(pvstate_t, char *, ...);
 
 int pv_main_loop(pvstate_t);
-void pv_calculate_transfer_rate(pvstate_t, bool);
+void pv_calculate_transfer_rate(pvtransfercalc_t, pvtransferstate_t, pvcontrol_t, pvdisplay_t, bool);
 
 long pv_bound_long(long, long, long);
 long pv_seconds_remaining(const off_t, const off_t, const long double);

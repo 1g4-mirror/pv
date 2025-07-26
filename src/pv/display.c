@@ -1194,7 +1194,7 @@ void pv_display(pvstate_t state, bool final)
 
 	pv_sig_checkbg();
 
-	pv_calculate_transfer_rate(state, final);
+	pv_calculate_transfer_rate(&(state->calc), &(state->transfer), &(state->control), &(state->display), final);
 
 	/*
 	 * Enable colour on the main display, and disable it on the extra
