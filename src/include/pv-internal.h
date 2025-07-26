@@ -429,8 +429,16 @@ struct pvstate_s {
 	} transfer;
 };
 
+typedef struct pvprogramstatus_s *pvprogramstatus_t;
+typedef struct pvinputfiles_s *pvinputfiles_t;
+typedef struct pvcontrol_s *pvcontrol_t;
+typedef struct pvsignal_s *pvsignal_t;
+typedef struct pvtransientflags_s *pvtransientflags_t;
 typedef struct pvdisplay_s *pvdisplay_t;
 typedef struct pvdisplay_segment_s *pvdisplay_segment_t;
+typedef struct pvtransfercalc_s *pvtransfercalc_t;
+typedef struct pvipcstate_s *pvipcstate_t;
+typedef struct pvtransferstate_s *pvtransferstate_t;
 
 /*
  * Structure containing the parameters used by formatters.
