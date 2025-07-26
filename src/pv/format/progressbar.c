@@ -74,28 +74,26 @@ static pvdisplay_bytecount_t pv_formatter_progress_knownsize(pvformatter_args_t 
 
 	memset(after_bar, 0, sizeof(after_bar));
 
-	if (args->state->control.size > 0) {
+	if (args->control->size > 0) {
 		/* Percentage of data transferred. */
-		bar_percentage = (double) (args->state->calc.percentage);
+		bar_percentage = (double) (args->calc->percentage);
 		(void) pv_snprintf(after_bar, sizeof(after_bar), " %3ld%%", (int) bar_percentage);
 	} else {
 		/* Current rate vs max rate. */
 		bar_percentage = 0.0;
-		if (args->state->calc.rate_max > 0) {
-			bar_percentage =
-			    (double) (100.0 * args->state->calc.transfer_rate / args->state->calc.rate_max);
+		if (args->calc->rate_max > 0) {
+			bar_percentage = (double) (100.0 * args->calc->transfer_rate / args->calc->rate_max);
 		}
 
 		/*@-mustfreefresh@ */
-		if (args->state->control.bits && !args->state->control.linemode) {
+		if (args->control->bits && !args->control->linemode) {
 			/* bits per second */
 			pv_describe_amount(after_bar, sizeof(after_bar), "/%s",
-					   8.0 * args->state->calc.rate_max, "", _("b/s"), args->display->count_type);
+					   8.0 * args->calc->rate_max, "", _("b/s"), args->display->count_type);
 		} else {
 			/* bytes or lines per second */
 			pv_describe_amount(after_bar, sizeof(after_bar),
-					   "/%s", args->state->calc.rate_max, _("/s"), _("B/s"),
-					   args->display->count_type);
+					   "/%s", args->calc->rate_max, _("/s"), _("B/s"), args->display->count_type);
 		}
 		/*@+mustfreefresh@ *//* splint: see above about gettext(). */
 	}
@@ -247,7 +245,7 @@ static pvdisplay_bytecount_t pv_formatter_progress_unknownsize(pvformatter_args_
 	 * here we make values above 100 send the indicator back down again,
 	 * so it moves back and forth.
 	 */
-	indicator_position = args->state->calc.percentage;
+	indicator_position = args->calc->percentage;
 	if (indicator_position > 200.0)
 #if HAVE_FMOD
 		indicator_position = fmod(indicator_position, 200.0);
@@ -316,7 +314,7 @@ pvdisplay_bytecount_t pv_formatter_progress(pvformatter_args_t args)
 
 	if (0 == args->segment->parameter) {
 		const char *default_name;
-		default_name = args->state->control.default_bar_style;
+		default_name = args->control->default_bar_style;
 		/*@-branchstate@ */
 		if (NULL == default_name)
 			default_name = "plain";
@@ -328,7 +326,7 @@ pvdisplay_bytecount_t pv_formatter_progress(pvformatter_args_t args)
 	if (0 == args->buffer_size)
 		return 0;
 
-	if (args->state->control.size > 0 || args->state->control.rate_gauge) {
+	if (args->control->size > 0 || args->control->rate_gauge) {
 		/* Known size or rate gauge - bar with percentage. */
 		bytes = pv_formatter_progress_knownsize(args, content, sizeof(content), true, true, true);
 	} else {
@@ -354,7 +352,7 @@ pvdisplay_bytecount_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 
 	if (0 == args->segment->parameter) {
 		const char *default_name;
-		default_name = args->state->control.default_bar_style;
+		default_name = args->control->default_bar_style;
 		/*@-branchstate@ */
 		if (NULL == default_name)
 			default_name = "plain";
@@ -366,7 +364,7 @@ pvdisplay_bytecount_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 	if (0 == args->buffer_size)
 		return 0;
 
-	if (args->state->control.size > 0 || args->state->control.rate_gauge) {
+	if (args->control->size > 0 || args->control->rate_gauge) {
 		/* Known size or rate gauge - bar with percentage. */
 		bytes = pv_formatter_progress_knownsize(args, content, sizeof(content), false, true, false);
 	} else {
@@ -393,12 +391,12 @@ pvdisplay_bytecount_t pv_formatter_progress_amount_only(pvformatter_args_t args)
 	if (0 == args->buffer_size)
 		return 0;
 
-	if (args->state->control.numeric) {
+	if (args->control->numeric) {
 		/* Numeric mode - percentage as a rounded integer with no suffix. */
-		(void) pv_snprintf(content, sizeof(content), "%.0f", args->state->calc.percentage);
+		(void) pv_snprintf(content, sizeof(content), "%.0f", args->calc->percentage);
 		bytes = strlen(content);    /* flawfinder: ignore */
 		/* flawfinder: always \0-terminated by pv_snprintf() and the earlier memset(). */
-	} else if (args->state->control.size > 0 || args->state->control.rate_gauge) {
+	} else if (args->control->size > 0 || args->control->rate_gauge) {
 		/* Known size or rate gauge - percentage or rate. */
 		bytes = pv_formatter_progress_knownsize(args, content, sizeof(content), false, false, true);
 	} else {

@@ -445,24 +445,26 @@ typedef struct pvtransferstate_s *pvtransferstate_t;
  * function declarations where the function definitely shouldn't be altering
  * the contents of the structure.
  */
-typedef const struct pvprogramstatus_s * const readonly_pvprogramstatus_t;
-typedef const struct pvinputfiles_s * const readonly_pvinputfiles_t;
-typedef const struct pvcontrol_s * const readonly_pvcontrol_t;
-typedef const struct pvsignal_s * const readonly_pvsignal_t;
-typedef const struct pvtransientflags_s * const readonly_pvtransientflags_t;
-typedef const struct pvdisplay_s * const readonly_pvdisplay_t;
-typedef const struct pvdisplay_segment_s * const readonly_pvdisplay_segment_t;
-typedef const struct pvtransfercalc_s * const readonly_pvtransfercalc_t;
-typedef const struct pvcursorstate_s * const readonly_pvcursorstate_t;
-typedef const struct pvtransferstate_s * const readonly_pvtransferstate_t;
+typedef const struct pvprogramstatus_s * readonly_pvprogramstatus_t;
+typedef const struct pvinputfiles_s * readonly_pvinputfiles_t;
+typedef const struct pvcontrol_s * readonly_pvcontrol_t;
+typedef const struct pvsignal_s * readonly_pvsignal_t;
+typedef const struct pvtransientflags_s * readonly_pvtransientflags_t;
+typedef const struct pvdisplay_s * readonly_pvdisplay_t;
+typedef const struct pvdisplay_segment_s * readonly_pvdisplay_segment_t;
+typedef const struct pvtransfercalc_s * readonly_pvtransfercalc_t;
+typedef const struct pvcursorstate_s * readonly_pvcursorstate_t;
+typedef const struct pvtransferstate_s * readonly_pvtransferstate_t;
 
 /*
  * Structure containing the parameters used by formatters.
  */
 struct pvformatter_args_s {
-	/*@dependent@*/ pvstate_t state;		/* overall state */
 	/*@dependent@*/ pvdisplay_t display;		/* the display being updated */
 	/*@dependent@*/ pvdisplay_segment_t segment;	/* the segment of the display */
+	/*@dependent@*/ readonly_pvcontrol_t control;		/* program control settings */
+	/*@dependent@*/ readonly_pvtransferstate_t transfer;	/* transfer state */
+	/*@dependent@*/ readonly_pvtransfercalc_t calc;		/* calculated transfer state */
 	/*@dependent@*/ char *buffer;			/* buffer to write formatted segments into */
 	pvdisplay_bytecount_t buffer_size;		/* size of the buffer */
 	pvdisplay_bytecount_t offset;			/* current write position in the buffer */

@@ -44,7 +44,7 @@ static bool pv_barstyle(pvformatter_args_t args, pvbarstyle_t style, const char 
 
 	memset(style, 0, sizeof(*style));
 
-	if (args->state->control.can_display_utf8 && 0 == strcmp(name, "block")) {
+	if (args->control->can_display_utf8 && 0 == strcmp(name, "block")) {
 
 		style->style_id = 2;
 
@@ -58,7 +58,7 @@ static bool pv_barstyle(pvformatter_args_t args, pvbarstyle_t style, const char 
 
 		return true;
 
-	} else if (args->state->control.can_display_utf8 && 0 == strcmp(name, "granular")) {
+	} else if (args->control->can_display_utf8 && 0 == strcmp(name, "granular")) {
 
 		style->style_id = 3;
 
@@ -79,7 +79,7 @@ static bool pv_barstyle(pvformatter_args_t args, pvbarstyle_t style, const char 
 
 		return true;
 
-	} else if (args->state->control.can_display_utf8 && 0 == strcmp(name, "shaded")) {
+	} else if (args->control->can_display_utf8 && 0 == strcmp(name, "shaded")) {
 
 		style->style_id = 4;
 
@@ -164,7 +164,7 @@ pvdisplay_bytecount_t pv_formatter_bar_default(pvformatter_args_t args)
 {
 	if (0 == args->segment->parameter) {
 		const char *default_name;
-		default_name = args->state->control.default_bar_style;
+		default_name = args->control->default_bar_style;
 		/*@-branchstate@ */
 		if (NULL == default_name)
 			default_name = "plain";

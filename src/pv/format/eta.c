@@ -24,16 +24,15 @@ pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t args)
 	/*
 	 * Don't try to calculate this if the size is not known.
 	 */
-	if (args->state->control.size < 1)
+	if (args->control->size < 1)
 		return 0;
 
 	if (0 == args->buffer_size)
 		return 0;
 
 	eta =
-	    pv_seconds_remaining((args->state->transfer.transferred - args->display->initial_offset),
-				 args->state->control.size - args->display->initial_offset,
-				 args->state->calc.current_avg_rate);
+	    pv_seconds_remaining((args->transfer->transferred - args->display->initial_offset),
+				 args->control->size - args->display->initial_offset, args->calc->current_avg_rate);
 
 	/*
 	 * Bounds check, so we don't overrun the suffix buffer.  This means

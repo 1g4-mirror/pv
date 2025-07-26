@@ -140,7 +140,7 @@ void pv_write_retry(int fd, const char *buf, size_t count)
  * Write the given buffer to the terminal, like pv_write_retry(), unless
  * stderr is suspended.
  */
-void pv_tty_write(readonly_pvtransientflags_t flags, const char * buf, size_t count)
+void pv_tty_write(readonly_pvtransientflags_t flags, const char *buf, size_t count)
 {
 	while (0 == flags->suspend_stderr && count > 0) {
 		ssize_t nwritten;
@@ -779,9 +779,11 @@ static void pv__format_init(pvstate_t state, /*@null@ */ const char *format_supp
 			memset(&formatter_info, 0, sizeof(formatter_info));
 			dummy_buffer[0] = '\0';
 
-			formatter_info.state = state;
 			formatter_info.display = display;
 			formatter_info.segment = &(display->format[segment]);
+			formatter_info.control = &(state->control);
+			formatter_info.transfer = &(state->transfer);
+			formatter_info.calc = &(state->calc);
 			formatter_info.buffer = dummy_buffer;
 			formatter_info.buffer_size = 0;
 			formatter_info.offset = 0;
@@ -936,11 +938,13 @@ bool pv_format(pvstate_t state, /*@null@ */ const char *format_supplied, pvdispl
 	if (NULL == display)
 		return false;
 
-	formatter_info.state = state;
 	formatter_info.display = display;
 	formatter_info.buffer = display_segments;
 	formatter_info.buffer_size = sizeof(display_segments);
 	formatter_info.offset = 0;
+	formatter_info.control = &(state->control);
+	formatter_info.transfer = &(state->transfer);
+	formatter_info.calc = &(state->calc);
 
 	format_component_array = pv__format_components();
 
@@ -1233,7 +1237,8 @@ void pv_display(pvstate_t state, bool final)
 		}
 	} else {
 		if (state->control.force || pv_in_foreground()) {
-			pv_tty_write(&(state->flags), state->display.display_buffer, state->display.display_string_bytes);
+			pv_tty_write(&(state->flags), state->display.display_buffer,
+				     state->display.display_string_bytes);
 			pv_tty_write(&(state->flags), "\r", 1);
 			state->display.output_produced = true;
 		}
@@ -1246,7 +1251,8 @@ void pv_display(pvstate_t state, bool final)
 	    && (NULL != state->extra_display.display_buffer)
 	    ) {
 		pv_tty_write(&(state->flags), "\033]2;", 4);
-		pv_tty_write(&(state->flags), state->extra_display.display_buffer, state->extra_display.display_string_bytes);
+		pv_tty_write(&(state->flags), state->extra_display.display_buffer,
+			     state->extra_display.display_string_bytes);
 		pv_tty_write(&(state->flags), "\033\\", 2);
 		state->extra_display.output_produced = true;
 		debug("%s: [%s]", "windowtitle display", state->extra_display.display_buffer);
