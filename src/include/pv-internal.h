@@ -60,7 +60,7 @@ extern "C" {
 /*
  * Structure for data shared between multiple "pv -c" instances.
  */
-struct pvcursorstate_s {
+struct pvipccursorstate_s {
 	int y_topmost;		/* terminal row of topmost "pv" instance */
 	bool tty_tostop_added;	/* whether any instance had to set TOSTOP on the terminal */
 };
@@ -340,7 +340,7 @@ struct pvstate_s {
 	struct pvipcstate_s {
 		char lock_file[PV_SIZEOF_CRS_LOCK_FILE];
 #ifdef HAVE_IPC
-		/*@keep@*/ /*@null@*/ struct pvcursorstate_s *shared; /* data shared between instances */
+		/*@keep@*/ /*@null@*/ struct pvipccursorstate_s *shared; /* data shared between instances */
 		int shmid;		 /* ID of our shared memory segment */
 		int pvcount;		 /* number of `pv' processes in total */
 		int pvmax;		 /* highest number of `pv's seen */

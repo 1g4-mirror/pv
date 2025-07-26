@@ -315,7 +315,7 @@ static int pv_crs_ipcinit(pvstate_t state, char *ttyfile, int terminalfd)
 		return 1;
 	}
 
-	state->cursor.shmid = shmget(key, sizeof(struct pvcursorstate_s), 0600 | IPC_CREAT);
+	state->cursor.shmid = shmget(key, sizeof(struct pvipccursorstate_s), 0600 | IPC_CREAT);
 	if (state->cursor.shmid < 0) {
 		debug("%s: %s", "shmget failed", strerror(errno));
 		pv_crs_unlock(state, terminalfd);
