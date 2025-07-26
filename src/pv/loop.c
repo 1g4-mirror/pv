@@ -732,7 +732,7 @@ int pv_watchfd_loop(pvstate_t state)
 
 	/*
 	 * Free the state structure specific to this file descriptor. 
-	 * Uunused so far - this is so that in future we could watch
+	 * Unused so far - this is so that in future we could watch
 	 * multiple file descriptors similar to pv_watchpid_loop().
 	 */
 	if (NULL != info.state) {
