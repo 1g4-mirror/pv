@@ -315,7 +315,10 @@ int main(int argc, char **argv)
 	}
 
 	/* Set the error message prefix. */
+	/*@-keeptrans@ */
 	pv_set_error_prefix(opts->program_name);
+	/* splint - this function doesn't add an alias or release it. */
+	/*@+keeptrans@ */
 
 	/*
 	 * Allocate our internal state buffer.
