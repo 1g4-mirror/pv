@@ -141,7 +141,7 @@ struct pvstate_s {
 	/******************
 	 * Program status *
 	 ******************/
-	struct {
+	struct pvprogramstatus_s {
 		/*@only@*/ char *program_name;	 /* program name for error reporting */
 		char cwd[PV_SIZEOF_CWD];	 /* current working directory for relative path */
 		int current_input_file;		 /* index of current file being read */
@@ -151,7 +151,7 @@ struct pvstate_s {
 	/***************
 	 * Input files *
 	 ***************/
-	struct {
+	struct pvinputfiles_s {
 		/*@only@*/ /*@null@*/ char **filename; /* input filenames */
 		unsigned int file_count;	 /* number of input files */
 	} files;
@@ -159,7 +159,7 @@ struct pvstate_s {
 	/*******************
 	 * Program control *
 	 *******************/
-	struct {
+	struct pvcontrol_s {
 		char default_format[PV_SIZEOF_DEFAULT_FORMAT];	 /* default format string */
 		double interval;                 /* interval between updates */
 		double delay_start;              /* delay before first display */
@@ -208,7 +208,7 @@ struct pvstate_s {
 	/*******************
 	 * Signal handling *
 	 *******************/
-	struct {
+	struct pvsignal_s {
 		/* old signal handlers to restore in pv_sig_fini(). */
 		struct sigaction old_sigpipe;
 		struct sigaction old_sigttou;
@@ -233,7 +233,7 @@ struct pvstate_s {
 	/*******************
 	 * Transient flags *
 	 *******************/
-	struct {
+	struct pvtransientflags_s {
 		volatile sig_atomic_t reparse_display;	 /* whether to re-check format string */
 		volatile sig_atomic_t terminal_resized;	 /* whether we need to get term size again */
 		volatile sig_atomic_t trigger_exit;	 /* whether we need to abort right now */
@@ -305,7 +305,7 @@ struct pvstate_s {
 	/************************************
 	 * Calculated state of the transfer *
 	 ************************************/
-	struct {
+	struct pvtransfercalc_s {
 		long double transfer_rate;	 /* calculated transfer rate */
 		long double average_rate;	 /* calculated average transfer rate */
 
@@ -337,7 +337,7 @@ struct pvstate_s {
 	/********************
 	 * Cursor/IPC state *
 	 ********************/
-	struct {
+	struct pvipcstate_s {
 		char lock_file[PV_SIZEOF_CRS_LOCK_FILE];
 #ifdef HAVE_IPC
 		/*@keep@*/ /*@null@*/ struct pvcursorstate_s *shared; /* data shared between instances */
@@ -373,7 +373,7 @@ struct pvstate_s {
 	 * is the offset in the buffer that we've written data up to.  It
 	 * will always be less than or equal to read_position.
 	 */
-	struct {
+	struct pvtransferstate_s {
 		long double elapsed_seconds;	 /* how long we have been transferring data for */
 		/*@only@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
 		size_t buffer_size;		 /* size of buffer */
