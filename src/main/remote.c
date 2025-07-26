@@ -22,7 +22,7 @@
 #include <sys/stat.h>
 
 #ifdef PV_REMOTE_CONTROL
-void pv_error(pvstate_t, char *, ...);
+void pv_error(char *, ...);
 
 struct remote_msg {
 	bool progress;			 /* progress bar flag */
@@ -161,7 +161,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	 * Check that the remote process exists.
 	 */
 	if (kill((pid_t) (opts->remote), 0) != 0) {
-		pv_error(state, "%u: %s", opts->remote, strerror(errno));
+		pv_error("%u: %s", opts->remote, strerror(errno));
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
@@ -225,7 +225,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv__control_file(control_filename, sizeof(control_filename), (pid_t) getpid(), true);
 	if (NULL == control_fptr) {
-		pv_error(state, "%s", strerror(errno));
+		pv_error("%s", strerror(errno));
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
@@ -234,14 +234,14 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	 * it.
 	 */
 	if (1 != fwrite(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
-		pv_error(state, "%s", strerror(errno));
+		pv_error("%s", strerror(errno));
 		(void) fclose(control_fptr);
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
 	if (0 != fclose(control_fptr)) {
-		pv_error(state, "%s", strerror(errno));
+		pv_error("%s", strerror(errno));
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
@@ -253,7 +253,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	signal_sender = 0;
 	(void) pv_sigusr2_received(state, &signal_sender);
 	if (kill((pid_t) (opts->remote), SIGUSR2) != 0) {
-		pv_error(state, "%u: %s", opts->remote, strerror(errno));
+		pv_error("%u: %s", opts->remote, strerror(errno));
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
@@ -291,7 +291,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	 * Remove the remote control file.
 	 */
 	if (0 != remove(control_filename)) {
-		pv_error(state, "%s", strerror(errno));
+		pv_error("%s", strerror(errno));
 	}
 
 	/*
@@ -306,7 +306,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	 * warnings, but in this case it's unavoidable, and mitigated by the
 	 * fact we only translate each string once.
 	 */
-	pv_error(state, "%u: %s", opts->remote, _("message not received"));
+	pv_error("%u: %s", opts->remote, _("message not received"));
 	return PV_ERROREXIT_REMOTE_OR_PID;
 	/*@+mustfreefresh @ */
 }
@@ -338,7 +338,7 @@ void pv_remote_check(pvstate_t state)
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv__control_file(control_filename, sizeof(control_filename), signal_sender, false);
 	if (NULL == control_fptr) {
-		pv_error(state, "%s: %s", control_filename, strerror(errno));
+		pv_error("%s: %s", control_filename, strerror(errno));
 		return;
 	}
 
@@ -347,13 +347,13 @@ void pv_remote_check(pvstate_t state)
 	 * it.
 	 */
 	if (1 != fread(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
-		pv_error(state, "%s", strerror(errno));
+		pv_error("%s", strerror(errno));
 		(void) fclose(control_fptr);
 		return;
 	}
 
 	if (0 != fclose(control_fptr)) {
-		pv_error(state, "%s", strerror(errno));
+		pv_error("%s", strerror(errno));
 		return;
 	}
 

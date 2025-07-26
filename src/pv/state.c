@@ -36,8 +36,7 @@ static void pv_alloc_history(pvstate_t state)
 		 * leak warnings, but in this case it's unavoidable, and
 		 * mitigated by the fact we only translate each string once.
 		 */
-		fprintf(stderr, "%s: %s: %s\n", state->status.program_name,
-			_("history structure allocation failed"), strerror(errno));
+		pv_error("%s: %s", _("history structure allocation failed"), strerror(errno));
 		/*@+mustfreefresh@ */
 		return;
 	}
@@ -108,7 +107,7 @@ void pv_state_reset(pvstate_t state)
 /*
  * Create a new state structure, and return it, or 0 (NULL) on error.
  */
-pvstate_t pv_state_alloc(const char *program_name)
+pvstate_t pv_state_alloc(void)
 {
 	pvstate_t state;
 
@@ -116,17 +115,6 @@ pvstate_t pv_state_alloc(const char *program_name)
 	if (NULL == state)
 		return NULL;
 	memset(state, 0, sizeof(*state));
-
-	/* splint 3.1.2 thinks this is required for some reason. */
-	if (NULL != state->status.program_name) {
-		free(state->status.program_name);
-	}
-
-	state->status.program_name = pv_strdup(program_name);
-	if (NULL == state->status.program_name) {
-		free(state);
-		return NULL;
-	}
 
 	state->control.watch_pid = 0;
 	state->control.watch_fd = -1;
@@ -172,9 +160,9 @@ void pv_state_free(pvstate_t state)
 	if (state->control.output_fd >= 0) {
 		if (STDOUT_FILENO != state->control.output_fd) {
 			if (close(state->control.output_fd) < 0) {
-				fprintf(stderr, "%s: %s: %s\n", state->status.program_name,
-					NULL == state->control.output_name ? "(null)" : state->control.output_name,
-					strerror(errno));
+				pv_error("%s: %s",
+					 NULL == state->control.output_name ? "(null)" : state->control.output_name,
+					 strerror(errno));
 			}
 		}
 		state->control.output_fd = -1;
@@ -184,10 +172,6 @@ void pv_state_free(pvstate_t state)
 		free(state->control.output_name);
 		state->control.output_name = NULL;
 	}
-
-	if (NULL != state->status.program_name)
-		free(state->status.program_name);
-	state->status.program_name = NULL;
 
 	if (NULL != state->display.display_buffer)
 		free(state->display.display_buffer);
@@ -549,9 +533,9 @@ void pv_state_output_set(pvstate_t state, int fd, const char *name)
 	 */
 	if (state->control.output_fd >= 0 && state->control.output_fd != STDOUT_FILENO) {
 		if (close(state->control.output_fd) < 0) {
-			fprintf(stderr, "%s: %s: %s\n", state->status.program_name,
-				NULL == state->control.output_name ? "(null)" : state->control.output_name,
-				strerror(errno));
+			pv_error("%s: %s",
+				 NULL == state->control.output_name ? "(null)" : state->control.output_name,
+				 strerror(errno));
 		}
 	}
 	if (NULL != state->control.output_name)
@@ -614,8 +598,7 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 	state->files.filename = calloc((size_t) (input_file_count + 1), sizeof(char *));
 	if (NULL == state->files.filename) {
 		/*@-mustfreefresh@ *//* see similar _() issue above */
-		fprintf(stderr, "%s: %s: %s\n", state->status.program_name, _("file list allocation failed"),
-			strerror(errno));
+		pv_error("%s: %s", _("file list allocation failed"), strerror(errno));
 		/*@+mustfreefresh@ */
 		return;
 	}
@@ -624,8 +607,7 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 		state->files.filename[file_idx] = pv_strdup(input_files[file_idx]);
 		if (NULL == state->files.filename[file_idx]) {
 			/*@-mustfreefresh@ *//* see similar _() issue above */
-			fprintf(stderr, "%s: %s: %s\n", state->status.program_name,
-				_("file list allocation failed"), strerror(errno));
+			pv_error("%s: %s", _("file list allocation failed"), strerror(errno));
 			/*@+mustfreefresh@ */
 			return;
 		}

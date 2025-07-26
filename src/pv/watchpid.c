@@ -96,7 +96,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 
 	if (kill(info->watch_pid, 0) != 0) {
 		if (!automatic)
-			pv_error(state, "%s %u: %s", _("pid"), info->watch_pid, strerror(errno));
+			pv_error("%s %u: %s", _("pid"), info->watch_pid, strerror(errno));
 		return 1;
 	}
 
@@ -105,8 +105,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 				  PROC_PIDFDVNODEPATHINFO, &vnodeInfo,
 				  PROC_PIDFDVNODEPATHINFO_SIZE);
 	if (size != PROC_PIDFDVNODEPATHINFO_SIZE) {
-		pv_error(state, "%s %u: %s %d: %s",
-			 _("pid"), info->watch_pid, _("fd"), info->watch_fd, strerror(errno));
+		pv_error("%s %u: %s %d: %s", _("pid"), info->watch_pid, _("fd"), info->watch_fd, strerror(errno));
 		return 3;
 	}
 
@@ -116,7 +115,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 
 	if (!(0 == stat(info->file_fdpath, &(info->sb_fd)))) {
 		if (!automatic)
-			pv_error(state, "%s %u: %s %d: %s: %s",
+			pv_error("%s %u: %s %d: %s: %s",
 				 _("pid"),
 				 info->watch_pid, _("fd"), info->watch_fd, info->file_fdpath, strerror(errno));
 		return 3;
@@ -124,7 +123,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 
 	if (!filesize(info)) {
 		if (!automatic)
-			pv_error(state, "%s %u: %s %d: %s: %s",
+			pv_error("%s %u: %s %d: %s: %s",
 				 _("pid"),
 				 info->watch_pid,
 				 _("fd"), info->watch_fd, info->file_fdpath, _("not a regular file or block device"));
@@ -162,7 +161,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 
 	if (kill(info->watch_pid, 0) != 0) {
 		if (!automatic)
-			pv_error(state, "%s %u: %s", _("pid"), info->watch_pid, strerror(errno));
+			pv_error("%s %u: %s", _("pid"), info->watch_pid, strerror(errno));
 		return 1;
 	}
 	(void) pv_snprintf(info->file_fdinfo, PV_SIZEOF_FILE_FDINFO,
@@ -180,7 +179,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 		 * and then only if it's a block device - see filesize().
 		 */
 		if (!automatic)
-			pv_error(state, "%s %u: %s %d: %s",
+			pv_error("%s %u: %s %d: %s",
 				 _("pid"), info->watch_pid, _("fd"), info->watch_fd, strerror(errno));
 		return 2;
 	}
@@ -188,7 +187,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 	if (!((0 == stat(info->file_fd, &(info->sb_fd)))
 	      && (0 == lstat(info->file_fd, &(info->sb_fd_link))))) {
 		if (!automatic)
-			pv_error(state, "%s %u: %s %d: %s: %s",
+			pv_error("%s %u: %s %d: %s: %s",
 				 _("pid"),
 				 info->watch_pid, _("fd"), info->watch_fd, info->file_fdpath, strerror(errno));
 		return 3;
@@ -198,7 +197,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 
 	if (!filesize(info)) {
 		if (!automatic)
-			pv_error(state, "%s %u: %s %d: %s: %s",
+			pv_error("%s %u: %s %d: %s: %s",
 				 _("pid"),
 				 info->watch_pid,
 				 _("fd"), info->watch_fd, info->file_fdpath, _("not a regular file or block device"));
@@ -297,7 +296,7 @@ static int pidfds(pvstate_t state, unsigned int pid, struct proc_fdinfo **fds, i
 {
 	int size_needed = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, 0, 0);
 	if (size_needed == -1) {
-		pv_error(state, "%s: unable to list pid fds: %s", _("pid"), strerror(errno));
+		pv_error("%s: unable to list pid fds: %s", _("pid"), strerror(errno));
 		return -1;
 	}
 
@@ -305,7 +304,7 @@ static int pidfds(pvstate_t state, unsigned int pid, struct proc_fdinfo **fds, i
 
 	*fds = (struct proc_fdinfo *) malloc(size_needed);
 	if (*fds == NULL) {
-		pv_error(state, "%s: alloc failed: %s", _("pid"), strerror(errno));
+		pv_error("%s: alloc failed: %s", _("pid"), strerror(errno));
 		return -1;
 	}
 	memset(*fds, 0, size_needed);
@@ -382,7 +381,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 	int fd_infos_count = 0;
 
 	if (pidfds(state, watch_pid, &fd_infos, &fd_infos_count) != 0) {
-		pv_error(state, "%s: pidfds failed", _("pid"));
+		pv_error("%s: pidfds failed", _("pid"));
 		return -1;
 	}
 #else
@@ -403,7 +402,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 
 #ifdef __APPLE__
 	if (fd_infos_count < 1) {
-		pv_error(state, "%s: no fds found", _("pid"));
+		pv_error("%s: no fds found", _("pid"));
 		return -1;
 	}
 	for (int i = 0; i < fd_infos_count; i++) {
@@ -468,7 +467,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 
 		/* Allocate new display state. */
 		/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
-		info_array[use_idx].state = pv_state_alloc(state->status.program_name);
+		info_array[use_idx].state = pv_state_alloc();
 		/*@+mustfreeonly@ */
 		if (NULL == info_array[use_idx].state)
 			return 2;

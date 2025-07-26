@@ -142,7 +142,6 @@ struct pvstate_s {
 	 * Program status *
 	 ******************/
 	struct pvprogramstatus_s {
-		/*@only@*/ char *program_name;	 /* program name for error reporting */
 		char cwd[PV_SIZEOF_CWD];	 /* current working directory for relative path */
 		int current_input_file;		 /* index of current file being read */
 		int exit_status; 		 /* exit status to give (0=OK) */
@@ -505,7 +504,7 @@ struct pvwatchfd_s {
 };
 typedef struct pvwatchfd_s *pvwatchfd_t;
 
-void pv_error(pvstate_t, char *, ...);
+void pv_error(char *, ...);
 
 int pv_main_loop(pvstate_t);
 void pv_calculate_transfer_rate(pvtransfercalc_t, readonly_pvtransferstate_t, readonly_pvcontrol_t, readonly_pvdisplay_t, bool);

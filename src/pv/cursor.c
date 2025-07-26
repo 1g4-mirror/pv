@@ -58,7 +58,7 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 	ttydev = ttyname(fd);
 	if (!ttydev) {
 		if (!state->control.force) {
-			pv_error(state, "%s: %s", _("failed to get terminal name"), strerror(errno));
+			pv_error("%s: %s", _("failed to get terminal name"), strerror(errno));
 		}
 		/*
 		 * If we don't know our terminal name, we can neither do IPC
@@ -103,7 +103,7 @@ static void pv_crs_open_lockfile(pvstate_t state, int fd)
 	 */
 
 	if (state->cursor.lock_fd < 0) {
-		pv_error(state, "%s: %s: %s", state->cursor.lock_file, _("failed to open lock file"), strerror(errno));
+		pv_error("%s: %s: %s", state->cursor.lock_file, _("failed to open lock file"), strerror(errno));
 		state->control.cursor = 0;
 		return;
 	}
@@ -136,7 +136,7 @@ static void pv_crs_lock(pvstate_t state, int fd)
 					lock_fd = state->cursor.lock_fd;
 				}
 			} else {
-				pv_error(state, "%s: %s", _("lock attempt failed"), strerror(errno));
+				pv_error("%s: %s", _("lock attempt failed"), strerror(errno));
 				return;
 			}
 		}
@@ -397,7 +397,7 @@ void pv_crs_init(pvstate_t state)
 	 */
 
 	if (terminalfd < 0) {
-		pv_error(state, "%s: %s: %s", _("failed to open terminal"), ttyfile, strerror(errno));
+		pv_error("%s: %s: %s", _("failed to open terminal"), ttyfile, strerror(errno));
 		state->control.cursor = false;
 		return;
 	}

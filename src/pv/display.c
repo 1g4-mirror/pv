@@ -50,16 +50,52 @@
 #endif
 
 /*
+ * The error prefix for messages (the program name); whether it has been
+ * set; and whether any output has been displayed yet, indicating whether
+ * any errors must be preceded by a newline.
+ */
+static char pv__error_prefix[64];	 /* flawfinder: ignore */
+static bool pv__error_prefix_set = false;
+static bool pv__output_produced = false;
+
+/*
+ * flawfinder rationale: zeroed before use, string copy is bounded to 1 less
+ * than size so it always has \0 termination.  Not used unless initialised,
+ * by checking pv__error_prefix_set.
+ */
+
+/*
+ * Set the error message prefix.
+ */
+void pv_set_error_prefix( /*@unique@ */ const char *prefix)
+{
+	if (NULL == prefix)
+		return;
+	memset(pv__error_prefix, 0, sizeof(pv__error_prefix));
+	strncpy(pv__error_prefix, prefix, sizeof(pv__error_prefix) - 1);	/* flawfinder: ignore */
+	pv__error_prefix_set = true;
+	/*
+	 * flawfinder rationale: strncpy's pointers are as valid as we can
+	 * make them since the first is a static buffer and the second is
+	 * caller-supplied.  The caller must \0-terminate the string but in
+	 * any case it is bounded to 1 less than the size of the
+	 * destination.  The destination is zeroed before use so the result
+	 * is guaranteed to be \0-terminated.
+	 */
+}
+
+/*
  * Output an error message.  If we've displayed anything to the terminal
  * already, then put a newline before our error so we don't write over what
  * we've written.
  */
-void pv_error(pvstate_t state, char *format, ...)
+void pv_error(char *format, ...)
 {
 	va_list ap;
-	if (state->display.output_produced)
+	if (pv__output_produced)
 		fprintf(stderr, "\n");
-	fprintf(stderr, "%s: ", state->status.program_name);
+	if (pv__error_prefix_set)
+		fprintf(stderr, "%s: ", pv__error_prefix);
 	va_start(ap, format);
 	(void) vfprintf(stderr, format, ap);	/* flawfinder: ignore */
 	va_end(ap);
@@ -1005,7 +1041,7 @@ bool pv_format(pvstate_t state, pvcontrol_t control, readonly_pvtransferstate_t 
 
 		new_buffer = malloc(new_size + 16);
 		if (NULL == new_buffer) {
-			pv_error(state, "%s: %s", _("buffer allocation failed"), strerror(errno));
+			pv_error("%s: %s", _("buffer allocation failed"), strerror(errno));
 			state->status.exit_status |= PV_ERROREXIT_MEMORY;
 			display->display_buffer = NULL;
 			return false;
@@ -1253,6 +1289,7 @@ void pv_display(pvstate_t state, bool final)
 		if (state->control.force || pv_in_foreground()) {
 			pv_crs_update(state, state->display.display_buffer);
 			state->display.output_produced = true;
+			pv__output_produced = true;
 		}
 	} else {
 		if (state->control.force || pv_in_foreground()) {
@@ -1260,6 +1297,7 @@ void pv_display(pvstate_t state, bool final)
 				     state->display.display_string_bytes);
 			pv_tty_write(&(state->flags), "\r", 1);
 			state->display.output_produced = true;
+			pv__output_produced = true;
 		}
 	}
 

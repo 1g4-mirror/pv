@@ -781,7 +781,7 @@ int pv_watchpid_loop(pvstate_t state)
 	 * it's not there at the start.
 	 */
 	if (kill(state->control.watch_pid, 0) != 0) {
-		pv_error(state, "%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
+		pv_error("%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
 		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		return PV_ERROREXIT_ACCESS;
 	}
@@ -832,7 +832,7 @@ int pv_watchpid_loop(pvstate_t state)
 
 		if (kill(state->control.watch_pid, 0) != 0) {
 			if (first_pass) {
-				pv_error(state, "%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
+				pv_error("%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				if (NULL != info_array)
 					free(info_array);
@@ -885,7 +885,7 @@ int pv_watchpid_loop(pvstate_t state)
 		rc = pv_watchpid_scanfds(state, state->control.watch_pid, &array_length, &info_array, fd_to_idx);
 		if (rc != 0) {
 			if (first_pass) {
-				pv_error(state, "%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
+				pv_error("%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				if (NULL != info_array)
 					free(info_array);

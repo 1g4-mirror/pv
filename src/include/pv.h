@@ -176,9 +176,14 @@ void pv_nanosleep(long long);
  */
 
 /*
+ * Set the prefix (program name) for any PV error messages.
+ */
+extern void pv_set_error_prefix(/*@unique@ */ const char *);
+
+/*
  * Create a new state structure, and return it, or 0 (NULL) on error.
  */
-extern /*@null@*/ /*@only@*/ pvstate_t pv_state_alloc(const char *);
+extern /*@null@*/ /*@only@*/ pvstate_t pv_state_alloc(void);
 
 /*
  * Clear the calculated parts of a state structure.

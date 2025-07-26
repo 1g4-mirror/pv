@@ -314,10 +314,13 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	/* Set the error message prefix. */
+	pv_set_error_prefix(opts->program_name);
+
 	/*
 	 * Allocate our internal state buffer.
 	 */
-	state = pv_state_alloc(opts->program_name);
+	state = pv_state_alloc();
 	if (NULL == state) {
 		/*@-mustfreefresh@ */
 		/*

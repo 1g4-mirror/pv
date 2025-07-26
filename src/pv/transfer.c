@@ -460,7 +460,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 * reached the end of this file.
 	 */
 	if (do_not_skip_errors) {
-		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("read failed"), strerror(errno));
+		pv_error("%s: %s: %s", pv_current_file_name(state), _("read failed"), strerror(errno));
 		*eof_in = true;
 		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;
@@ -476,7 +476,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 	if (!state->transfer.read_error_warning_shown) {
 		/*@-compdef@ */
-		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("warning: read errors detected"),
+		pv_error("%s: %s: %s", pv_current_file_name(state), _("warning: read errors detected"),
 			 strerror(errno));
 		/*@+compdef@ */
 		/* splint - see previous pv_current_file_name() call. */
@@ -492,7 +492,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 */
 	if (0 > orig_offset) {
 		/*@-compdef@ */
-		pv_error(state, "%s: %s: %s", pv_current_file_name(state), _("file is not seekable"), strerror(errno));
+		pv_error("%s: %s: %s", pv_current_file_name(state), _("file is not seekable"), strerror(errno));
 		/*@+compdef@ */
 		/* splint - see previous pv_current_file_name() calls. */
 		*eof_in = true;
@@ -569,8 +569,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		 */
 		if (EINVAL != errno) {
 			/*@-compdef@ */
-			pv_error(state,
-				 "%s: %s: %s", pv_current_file_name(state), _("failed to seek past error"),
+			pv_error("%s: %s: %s", pv_current_file_name(state), _("failed to seek past error"),
 				 strerror(errno));
 			/*@+compdef@ */
 			/* splint - see previous pv_current_file_name() calls. */
@@ -588,7 +587,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		state->transfer.read_position += amount_skipped;
 		if (state->control.skip_errors < 2) {
 			/*@-compdef@ */
-			pv_error(state, "%s: %s: %ld - %ld (%ld %s)",
+			pv_error("%s: %s: %ld - %ld (%ld %s)",
 				 pv_current_file_name(state),
 				 _("skipped past read error"), (long) orig_offset, (long) skip_offset,
 				 (long) amount_skipped, _("B"));
@@ -631,7 +630,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	int write_errno;
 
 	if (NULL == state->transfer.transfer_buffer) {
-		pv_error(state, "%s", _("no transfer buffer allocated"));
+		pv_error("%s", _("no transfer buffer allocated"));
 		state->status.exit_status |= PV_ERROREXIT_MEMORY;
 		*eof_out = true;
 		state->transfer.written = -1;
@@ -673,7 +672,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		      (long) (new_timer.it_value.tv_usec));
 
 		if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
-			pv_error(state, "%s: %s", _("failed to set interval timer"), strerror(errno));
+			pv_error("%s: %s", _("failed to set interval timer"), strerror(errno));
 		}
 
 #else				/* ! HAVE_SETITIMER */
@@ -699,7 +698,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		new_timer.it_value.tv_sec = 0;
 		new_timer.it_value.tv_usec = 0;
 		if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
-			pv_error(state, "%s: %s", _("failed to clear interval timer"), strerror(errno));
+			pv_error("%s: %s", _("failed to clear interval timer"), strerror(errno));
 		}
 
 		/*@+unrecog@ */
@@ -741,7 +740,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				state->transfer.line_positions =
 				    calloc((size_t) (state->transfer.line_positions_capacity), sizeof(off_t));
 				if (NULL == state->transfer.line_positions) {
-					pv_error(state, "%s: %s", _("line position buffer allocation failed"),
+					pv_error("%s: %s", _("line position buffer allocation failed"),
 						 strerror(errno));
 				}
 				/*@+mustfreeonly@ */
@@ -915,7 +914,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		return 0;
 	}
 
-	pv_error(state, "%s: %s", _("write failed"), strerror(write_errno));
+	pv_error("%s: %s", _("write failed"), strerror(write_errno));
 	state->status.exit_status |= PV_ERROREXIT_TRANSFER;
 	*eof_out = true;
 	state->transfer.written = -1;
@@ -1054,7 +1053,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		state->transfer.transfer_buffer =
 		    pv__allocate_aligned_buffer(state->control.output_fd, fd, state->control.target_buffer_size + 32);
 		if (NULL == state->transfer.transfer_buffer) {
-			pv_error(state, "%s: %s", _("buffer allocation failed"), strerror(errno));
+			pv_error("%s: %s", _("buffer allocation failed"), strerror(errno));
 			state->status.exit_status |= PV_ERROREXIT_MEMORY;
 			return -1;
 		}
@@ -1156,8 +1155,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		 * Any other error is a problem and we must report back.
 		 */
 		/*@-compdef@ */
-		pv_error(state, "%s: %s: %d: %s", pv_current_file_name(state), _("select call failed"), n,
-			 strerror(errno));
+		pv_error("%s: %s: %d: %s", pv_current_file_name(state), _("select call failed"), n, strerror(errno));
 		/*@+compdef@ */
 		/* splint - see previous pv_current_file_name() calls. */
 
