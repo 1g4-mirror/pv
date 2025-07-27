@@ -494,7 +494,7 @@ struct pvwatchfd_s {
 	char file_fd[PV_SIZEOF_FILE_FD];	 /* path to /proc fd symlink  */
 #endif
 	char file_fdpath[PV_SIZEOF_FILE_FDPATH]; /* path to file that was opened */
-	char display_name[PV_SIZEOF_DISPLAY_NAME]; /* name to show on progress bar */
+	/*@keep@ */ char display_name[PV_SIZEOF_DISPLAY_NAME]; /* name to show on progress bar */
 	struct stat sb_fd;		 /* stat of fd symlink */
 	struct stat sb_fd_link;		 /* lstat of fd symlink */
 	off_t size;			 /* size of whole file, 0 if unknown */

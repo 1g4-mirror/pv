@@ -1003,7 +1003,14 @@ int pv_watchpid_loop(pvstate_t state)
 					   &(state->control), &(info_array[idx].state->flags),
 					   &(info_array[idx].state->transfer), &(info_array[idx].state->calc),
 					   &(state->cursor), &(info_array[idx].state->display), NULL, false);
+				/*@-mustfreeonly@ */
 				state->control.name = NULL;
+				/*
+				 * splint warns of a memory leak, but we'd
+				 * set name to be an alias of display_name,
+				 * so nothing is lost here.
+				 */
+				/*@+mustfreeonly@ */
 				displayed_lines++;
 			}
 		}
