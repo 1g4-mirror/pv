@@ -516,6 +516,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 		/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
 		info_array[use_idx].state->display.display_buffer = NULL;
 		info_array[use_idx].state->display.display_buffer_size = 0;
+		info_array[use_idx].state->display.name = NULL;
 		info_array[use_idx].state->calc.history = NULL;
 		info_array[use_idx].state->calc.history_len = 0;
 		/*@+mustfreeonly@ */

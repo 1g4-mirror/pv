@@ -177,6 +177,11 @@ void pv_state_free(pvstate_t state)
 		free(state->display.display_buffer);
 	state->display.display_buffer = NULL;
 
+	if (NULL != state->display.name) {
+		/* The display name pointer is an alias, so don't free it. */
+		state->display.name = NULL;
+	}
+
 	if (NULL != state->extra_display.display_buffer)
 		free(state->extra_display.display_buffer);
 	state->extra_display.display_buffer = NULL;
@@ -298,6 +303,11 @@ void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, b
 	/* Set a new name if one was given. */
 	if (NULL != name)
 		state->control.name = pv_strdup(name);
+
+	/*@-onlytrans@ *//* splint correctly warns about possibly leaking memory. */
+	/* Alias this new name pointer, even if it's NULL, to display.name. */
+	state->display.name = state->control.name;
+	/*@+onlytrans@ */
 
 	/* Tell pv_format() that the format has changed. */
 	state->flags.reparse_display = 1;
@@ -442,6 +452,10 @@ void pv_state_name_set(pvstate_t state, /*@null@ */ const char *val)
 	}
 	if (NULL != val)
 		state->control.name = pv_strdup(val);
+	/*@-onlytrans@ *//* splint correctly warns about possibly leaking memory. */
+	/* display.name is an alias - don't free it. */
+	state->display.name = state->control.name;
+	/*@+onlytrans@ */
 }
 
 void pv_state_default_bar_style_set(pvstate_t state, /*@null@ */ const char *val)

@@ -1044,8 +1044,8 @@ bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_
 		size_t new_size;
 
 		new_size = (size_t) ((4 * control->width) + 80);
-		if (NULL != control->name)
-			new_size += strlen(control->name);	/* flawfinder: ignore */
+		if (NULL != display->name)
+			new_size += strlen(display->name);	/* flawfinder: ignore */
 		/* flawfinder: name is always set by pv_strdup(), which bounds with a \0. */
 
 		new_buffer = malloc(new_size + 16);
