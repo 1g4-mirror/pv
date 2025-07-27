@@ -19,7 +19,7 @@
 #include <fcntl.h>
 
 #ifdef HAVE_IPC
-void pv_crs_needreinit(pvstate_t);
+void pv_crs_needreinit(pvcursorstate_t);
 #endif
 
 /*@null@*/ static pvstate_t pv_sig_state = NULL;
@@ -194,7 +194,7 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 	if (0 == pv_sig_state->flags.suspend_stderr) {
 		pv_sig_ensure_tty_tostop();
 #ifdef HAVE_IPC
-		pv_crs_needreinit(pv_sig_state);
+		pv_crs_needreinit(&(pv_sig_state->cursor));
 #endif
 	}
 }
@@ -548,6 +548,6 @@ void pv_sig_checkbg(void)
 
 	pv_sig_ensure_tty_tostop();
 #ifdef HAVE_IPC
-	pv_crs_needreinit(pv_sig_state);
+	pv_crs_needreinit(&(pv_sig_state->cursor));
 #endif
 }

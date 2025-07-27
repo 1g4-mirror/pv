@@ -352,6 +352,7 @@ struct pvstate_s {
 #ifdef HAVE_IPC
 		bool noipc;		 /* set if we can't use IPC */
 #endif				/* HAVE_IPC */
+		bool disable;		 /* set if cursor positioning can't be used */
 	} cursor;
 
 	/*******************
@@ -563,10 +564,9 @@ pvdisplay_bytecount_t pv_formatter_sgr(pvformatter_args_t);
 bool pv_format (pvprogramstatus_t, readonly_pvcontrol_t,
 		readonly_pvtransferstate_t, readonly_pvtransfercalc_t,
 		/*@null@ */ const char *, pvdisplay_t, bool, bool);
-void pv_display (pvstate_t, pvprogramstatus_t, readonly_pvcontrol_t,
-		 pvtransientflags_t, readonly_pvtransferstate_t,
-		 pvtransfercalc_t, pvcursorstate_t, pvdisplay_t, /*@null@ */
-		 pvdisplay_t, bool);
+void pv_display (pvprogramstatus_t, readonly_pvcontrol_t, pvtransientflags_t,
+		 readonly_pvtransferstate_t, pvtransfercalc_t,
+		 pvcursorstate_t, pvdisplay_t, /*@null@ */ pvdisplay_t, bool);
 
 ssize_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);
 int pv_next_file(pvstate_t, unsigned int, int);
@@ -575,11 +575,11 @@ int pv_next_file(pvstate_t, unsigned int, int);
 void pv_write_retry(int, const char *, size_t);
 void pv_tty_write(readonly_pvtransientflags_t, const char *, size_t);
 
-void pv_crs_fini(pvstate_t);
-void pv_crs_init(pvstate_t);
-void pv_crs_update(pvstate_t, const char *);
+void pv_crs_fini(pvcursorstate_t, readonly_pvcontrol_t, pvtransientflags_t);
+void pv_crs_init(pvcursorstate_t, readonly_pvcontrol_t, pvtransientflags_t);
+void pv_crs_update(pvcursorstate_t, readonly_pvcontrol_t, pvtransientflags_t, const char *);
 #ifdef HAVE_IPC
-void pv_crs_needreinit(pvstate_t);
+void pv_crs_needreinit(pvcursorstate_t);
 #endif
 
 void pv_sig_allowpause(void);

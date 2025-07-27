@@ -118,7 +118,7 @@ int pv_main_loop(pvstate_t state)
 	 * don't need to.
 	 */
 
-	pv_crs_init(state);
+	pv_crs_init(&(state->cursor), &(state->control), &(state->flags));
 
 	eof_in = false;
 	eof_out = false;
@@ -166,7 +166,7 @@ int pv_main_loop(pvstate_t state)
 	 */
 	if (input_fd < 0) {
 		if (state->control.cursor)
-			pv_crs_fini(state);
+			pv_crs_fini(&(state->cursor), &(state->control), &(state->flags));
 		return state->status.exit_status;
 	}
 #if HAVE_POSIX_FADVISE
@@ -270,7 +270,7 @@ int pv_main_loop(pvstate_t state)
 		if (written < 0) {
 			debug("%s: %s", "write error from pv_transfer", strerror(errno));
 			if (state->control.cursor)
-				pv_crs_fini(state);
+				pv_crs_fini(&(state->cursor), &(state->control), &(state->flags));
 			return state->status.exit_status;
 		}
 
@@ -510,7 +510,7 @@ int pv_main_loop(pvstate_t state)
 						   &(state->display), final_update);
 		} else {
 			/* Produce the display. */
-			pv_display(state, &(state->status), &(state->control), &(state->flags), &(state->transfer),
+			pv_display(&(state->status), &(state->control), &(state->flags), &(state->transfer),
 				   &(state->calc), &(state->cursor), &(state->display), &(state->extra_display),
 				   final_update);
 		}
@@ -520,7 +520,7 @@ int pv_main_loop(pvstate_t state)
 	      eof_out ? "true" : "false");
 
 	if (state->control.cursor) {
-		pv_crs_fini(state);
+		pv_crs_fini(&(state->cursor), &(state->control), &(state->flags));
 	} else {
 		if ((!state->control.numeric) && (!state->control.no_display)
 		    && (state->display.output_produced))
@@ -724,7 +724,7 @@ int pv_watchfd_loop(pvstate_t state)
 				state->control.height = new_height;
 		}
 
-		pv_display(state, &(state->status), &(state->control), &(state->flags), &(state->transfer),
+		pv_display(&(state->status), &(state->control), &(state->flags), &(state->transfer),
 			   &(state->calc), &(state->cursor), &(state->display), &(state->extra_display), ended);
 	}
 
@@ -990,7 +990,7 @@ int pv_watchpid_loop(pvstate_t state)
 			if (NULL != info_array[idx].state) {
 				info_array[idx].state->transfer.transferred = position_now;
 				info_array[idx].state->transfer.total_written = position_now;
-				pv_display(info_array[idx].state, &(info_array[idx].state->status),
+				pv_display(&(info_array[idx].state->status),
 					   &(info_array[idx].state->control), &(info_array[idx].state->flags),
 					   &(info_array[idx].state->transfer), &(info_array[idx].state->calc),
 					   &(info_array[idx].state->cursor), &(info_array[idx].state->display),

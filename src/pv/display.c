@@ -1249,14 +1249,12 @@ bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_
  * If "final" is true, this is the final update, so the rate is given as an
  * an average over the whole transfer; otherwise the current rate is shown.
  */
-void pv_display(pvstate_t state, pvprogramstatus_t status, readonly_pvcontrol_t control, pvtransientflags_t flags,
+void pv_display(pvprogramstatus_t status, readonly_pvcontrol_t control, pvtransientflags_t flags,
 		readonly_pvtransferstate_t transfer, pvtransfercalc_t calc, pvcursorstate_t cursor, pvdisplay_t display,
 		/*@null@ */ pvdisplay_t extra_display, bool final)
 {
 	bool reinitialise = false;
 
-	if (NULL == state)
-		return;
 	if (NULL == status)
 		return;
 	if (NULL == control)
@@ -1310,7 +1308,7 @@ void pv_display(pvstate_t state, pvprogramstatus_t status, readonly_pvcontrol_t 
 		pv_tty_write(flags, "\n", 1);
 	} else if (control->cursor) {
 		if (control->force || pv_in_foreground()) {
-			pv_crs_update(state, display->display_buffer);
+			pv_crs_update(cursor, control, flags, display->display_buffer);
 			display->output_produced = true;
 			pv__output_produced = true;
 		}
