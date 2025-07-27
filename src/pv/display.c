@@ -593,7 +593,8 @@ char *pv_format_sequences(void)
  * May update status->checked_colour_support and
  * status->terminal_supports_colour.
  */
-static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_pvtransferstate_t transfer, readonly_pvtransfercalc_t calc,
+static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_pvtransferstate_t transfer,
+			    readonly_pvtransfercalc_t calc,
 			    /*@null@ */ const char *format_supplied, pvdisplay_t display)
 {
 	struct pvdisplay_component_s *format_component_array;
@@ -1248,86 +1249,100 @@ bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_
  * If "final" is true, this is the final update, so the rate is given as an
  * an average over the whole transfer; otherwise the current rate is shown.
  */
-void pv_display(pvstate_t state, bool final)
+void pv_display(pvstate_t state, pvprogramstatus_t status, readonly_pvcontrol_t control, pvtransientflags_t flags,
+		readonly_pvtransferstate_t transfer, pvtransfercalc_t calc, pvcursorstate_t cursor, pvdisplay_t display,
+		/*@null@ */ pvdisplay_t extra_display, bool final)
 {
 	bool reinitialise = false;
 
 	if (NULL == state)
 		return;
+	if (NULL == status)
+		return;
+	if (NULL == control)
+		return;
+	if (NULL == flags)
+		return;
+	if (NULL == transfer)
+		return;
+	if (NULL == calc)
+		return;
+	if (NULL == cursor)
+		return;
+	if (NULL == display)
+		return;
 
 	pv_sig_checkbg();
 
-	pv_calculate_transfer_rate(&(state->calc), &(state->transfer), &(state->control), &(state->display), final);
+	pv_calculate_transfer_rate(calc, transfer, control, display, final);
 
 	/*
 	 * Enable colour on the main display, and disable it on the extra
 	 * display (process title, window title).
 	 */
-	state->display.colour_permitted = true;
-	state->extra_display.colour_permitted = false;
+	display->colour_permitted = true;
+	if (NULL != extra_display)
+		extra_display->colour_permitted = false;
 
 	/*
 	 * If the display options need reparsing, do so to generate new
 	 * formatting parameters.
 	 */
-	if (0 != state->flags.reparse_display) {
+	if (0 != flags->reparse_display) {
 		reinitialise = true;
-		state->flags.reparse_display = 0;
+		flags->reparse_display = 0;
 	}
 
-	if (!pv_format
-	    (&(state->status), &(state->control), &(state->transfer), &(state->calc), state->control.format_string,
-	     &(state->display), reinitialise, final))
+	if (!pv_format(status, control, transfer, calc, control->format_string, display, reinitialise, final))
 		return;
 
-	if (0 != state->control.extra_displays) {
+	if ((NULL != extra_display) && (0 != control->extra_displays)) {
 		if (!pv_format
-		    (&(state->status), &(state->control), &(state->transfer), &(state->calc),
-		     state->control.extra_format_string, &(state->extra_display), reinitialise, final))
+		    (status, control, transfer, calc, control->extra_format_string, extra_display, reinitialise, final))
 			return;
 	}
 
-	if (NULL == state->display.display_buffer)
+	if (NULL == display->display_buffer)
 		return;
 
-	if (state->control.numeric) {
-		pv_tty_write(&(state->flags), state->display.display_buffer, state->display.display_string_bytes);
-		pv_tty_write(&(state->flags), "\n", 1);
-	} else if (state->control.cursor) {
-		if (state->control.force || pv_in_foreground()) {
-			pv_crs_update(state, state->display.display_buffer);
-			state->display.output_produced = true;
+	if (control->numeric) {
+		pv_tty_write(flags, display->display_buffer, display->display_string_bytes);
+		pv_tty_write(flags, "\n", 1);
+	} else if (control->cursor) {
+		if (control->force || pv_in_foreground()) {
+			pv_crs_update(state, display->display_buffer);
+			display->output_produced = true;
 			pv__output_produced = true;
 		}
 	} else {
-		if (state->control.force || pv_in_foreground()) {
-			pv_tty_write(&(state->flags), state->display.display_buffer,
-				     state->display.display_string_bytes);
-			pv_tty_write(&(state->flags), "\r", 1);
-			state->display.output_produced = true;
+		if (control->force || pv_in_foreground()) {
+			pv_tty_write(flags, display->display_buffer, display->display_string_bytes);
+			pv_tty_write(flags, "\r", 1);
+			display->output_produced = true;
 			pv__output_produced = true;
 		}
 	}
 
-	debug("%s: [%s]", "display", state->display.display_buffer);
+	debug("%s: [%s]", "display", display->display_buffer);
 
-	if ((0 != (PV_DISPLAY_WINDOWTITLE & state->control.extra_displays))
-	    && (state->control.force || pv_in_foreground())
-	    && (NULL != state->extra_display.display_buffer)
+	if ((0 != (PV_DISPLAY_WINDOWTITLE & control->extra_displays))
+	    && (control->force || pv_in_foreground())
+	    && (NULL != extra_display)
+	    && (NULL != extra_display->display_buffer)
 	    ) {
-		pv_tty_write(&(state->flags), "\033]2;", 4);
-		pv_tty_write(&(state->flags), state->extra_display.display_buffer,
-			     state->extra_display.display_string_bytes);
-		pv_tty_write(&(state->flags), "\033\\", 2);
-		state->extra_display.output_produced = true;
-		debug("%s: [%s]", "windowtitle display", state->extra_display.display_buffer);
+		pv_tty_write(flags, "\033]2;", 4);
+		pv_tty_write(flags, extra_display->display_buffer, extra_display->display_string_bytes);
+		pv_tty_write(flags, "\033\\", 2);
+		extra_display->output_produced = true;
+		debug("%s: [%s]", "windowtitle display", extra_display->display_buffer);
 	}
 
-	if ((0 != (PV_DISPLAY_PROCESSTITLE & state->control.extra_displays))
-	    && (NULL != state->extra_display.display_buffer)
+	if ((0 != (PV_DISPLAY_PROCESSTITLE & control->extra_displays))
+	    && (NULL != extra_display)
+	    && (NULL != extra_display->display_buffer)
 	    ) {
-		setproctitle("%s", state->extra_display.display_buffer);
-		state->extra_display.output_produced = true;
-		debug("%s: [%s]", "processtitle display", state->extra_display.display_buffer);
+		setproctitle("%s", extra_display->display_buffer);
+		extra_display->output_produced = true;
+		debug("%s: [%s]", "processtitle display", extra_display->display_buffer);
 	}
 }

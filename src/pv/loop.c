@@ -510,7 +510,9 @@ int pv_main_loop(pvstate_t state)
 						   &(state->display), final_update);
 		} else {
 			/* Produce the display. */
-			pv_display(state, final_update);
+			pv_display(state, &(state->status), &(state->control), &(state->flags), &(state->transfer),
+				   &(state->calc), &(state->cursor), &(state->display), &(state->extra_display),
+				   final_update);
 		}
 	}
 
@@ -722,7 +724,8 @@ int pv_watchfd_loop(pvstate_t state)
 				state->control.height = new_height;
 		}
 
-		pv_display(state, ended);
+		pv_display(state, &(state->status), &(state->control), &(state->flags), &(state->transfer),
+			   &(state->calc), &(state->cursor), &(state->display), &(state->extra_display), ended);
 	}
 
 	if (!state->control.numeric)
@@ -987,7 +990,11 @@ int pv_watchpid_loop(pvstate_t state)
 			if (NULL != info_array[idx].state) {
 				info_array[idx].state->transfer.transferred = position_now;
 				info_array[idx].state->transfer.total_written = position_now;
-				pv_display(info_array[idx].state, false);
+				pv_display(info_array[idx].state, &(info_array[idx].state->status),
+					   &(info_array[idx].state->control), &(info_array[idx].state->flags),
+					   &(info_array[idx].state->transfer), &(info_array[idx].state->calc),
+					   &(info_array[idx].state->cursor), &(info_array[idx].state->display),
+					   &(info_array[idx].state->extra_display), false);
 				displayed_lines++;
 			}
 		}
