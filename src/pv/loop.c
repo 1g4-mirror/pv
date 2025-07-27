@@ -999,6 +999,7 @@ int pv_watchpid_loop(pvstate_t state)
 				info_array[idx].state->transfer.transferred = position_now;
 				info_array[idx].state->transfer.total_written = position_now;
 				state->control.name = info_array[idx].display_name;
+				state->control.size = info_array[idx].size;
 				pv_display(&(state->status),
 					   &(state->control), &(info_array[idx].state->flags),
 					   &(info_array[idx].state->transfer), &(info_array[idx].state->calc),
