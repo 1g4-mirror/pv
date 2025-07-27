@@ -990,11 +990,10 @@ int pv_watchpid_loop(pvstate_t state)
 			if (NULL != info_array[idx].state) {
 				info_array[idx].state->transfer.transferred = position_now;
 				info_array[idx].state->transfer.total_written = position_now;
-				pv_display(&(info_array[idx].state->status),
+				pv_display(&(state->status),
 					   &(info_array[idx].state->control), &(info_array[idx].state->flags),
 					   &(info_array[idx].state->transfer), &(info_array[idx].state->calc),
-					   &(info_array[idx].state->cursor), &(info_array[idx].state->display),
-					   &(info_array[idx].state->extra_display), false);
+					   &(state->cursor), &(info_array[idx].state->display), NULL, false);
 				displayed_lines++;
 			}
 		}
