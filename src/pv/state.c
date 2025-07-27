@@ -21,15 +21,18 @@
 #include <fcntl.h>
 
 
-/* alloc / realloc history buffer */
-static void pv_alloc_history(pvstate_t state)
+/*
+ * Allocate or reallocate the history buffer for calculating average
+ * transfer rate.
+ */
+static void pv_alloc_history(pvtransfercalc_t calc)
 {
-	if (NULL != state->calc.history)
-		free(state->calc.history);
-	state->calc.history = NULL;
+	if (NULL != calc->history)
+		free(calc->history);
+	calc->history = NULL;
 
-	state->calc.history = calloc((size_t) (state->calc.history_len), sizeof(state->calc.history[0]));
-	if (NULL == state->calc.history) {
+	calc->history = calloc((size_t) (calc->history_len), sizeof(calc->history[0]));
+	if (NULL == calc->history) {
 		/*@-mustfreefresh@ */
 		/*
 		 * splint note: the gettext calls made by _() cause memory
@@ -41,8 +44,8 @@ static void pv_alloc_history(pvstate_t state)
 		return;
 	}
 
-	state->calc.history_first = state->calc.history_last = 0;
-	state->calc.history[0].elapsed_sec = 0.0;	/* to be safe, memset() not recommended for doubles */
+	calc->history_first = calc->history_last = 0;
+	calc->history[0].elapsed_sec = 0.0;	/* to be safe, memset() not recommended for doubles */
 }
 
 
@@ -579,7 +582,7 @@ void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
 		state->calc.history_len = (size_t) (val + 1);
 		state->control.history_interval = 1;
 	}
-	pv_alloc_history(state);
+	pv_alloc_history(&(state->calc));
 }
 
 void pv_state_set_terminal_supports_utf8(pvstate_t state, bool val)
