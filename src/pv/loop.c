@@ -602,9 +602,11 @@ int pv_watchfd_loop(pvstate_t state)
 	memset(&info, 0, sizeof(info));
 	info.watch_pid = state->control.watch_pid;
 	info.watch_fd = state->control.watch_fd;
+	pv_reset_watchfd(&info);
 	rc = pv_watchfd_info(state, &info, false);
 	if (0 != rc) {
 		state->status.exit_status |= PV_ERROREXIT_ACCESS;
+		pv_freecontents_watchfd(&info);
 		/*@-compdestroy@ */
 		return state->status.exit_status;
 		/*@+compdestroy@ */
@@ -734,15 +736,7 @@ int pv_watchfd_loop(pvstate_t state)
 	if (1 == state->flags.trigger_exit)
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
 
-	/*
-	 * Free the state structure specific to this file descriptor. 
-	 * Unused so far - this is so that in future we could watch
-	 * multiple file descriptors similar to pv_watchpid_loop().
-	 */
-	if (NULL != info.state) {
-		pv_state_free(info.state);
-		info.state = NULL;
-	}
+	pv_freecontents_watchfd(&info);
 
 	/*@-compdestroy@ */
 	return state->status.exit_status;
@@ -884,12 +878,10 @@ int pv_watchpid_loop(pvstate_t state)
 			state->control.height = new_height;
 
 			for (idx = 0; NULL != info_array && idx < array_length; idx++) {
-				if (NULL == info_array[idx].state)
+				if (info_array[idx].watch_fd < 0)
 					continue;
-				info_array[idx].state->control.width = state->control.width;
-				info_array[idx].state->control.height = state->control.height;
 				pv_watchpid_setname(state, &(info_array[idx]));
-				info_array[idx].state->flags.reparse_display = 1;
+				info_array[idx].flags.reparse_display = 1;
 			}
 		}
 
@@ -928,18 +920,15 @@ int pv_watchpid_loop(pvstate_t state)
 				if (pv_watchfd_changed(&(info_array[idx]))) {
 					fd_to_idx[fd] = -1;
 					info_array[idx].watch_pid = 0;
-					if (NULL != info_array[idx].state)
-						pv_state_free(info_array[idx].state);
-					/*@-mustfreeonly@ *//* not a leak - we've just free()d it. */
-					info_array[idx].state = NULL;
-					/*@+mustfreeonly@ */
+					info_array[idx].watch_fd = -1;
+					pv_freecontents_watchfd(&(info_array[idx]));
 					debug("%s %d: %s", "fd", fd, "removing");
 				}
 				continue;
 			}
 
-			if (NULL == info_array[idx].state) {
-				debug("%s %d: %s", "fd", fd, "null state - skipping");
+			if (info_array[idx].watch_fd < 0) {
+				debug("%s %d: %s", "fd", fd, "negative fd - skipping");
 				continue;
 			}
 
@@ -952,11 +941,8 @@ int pv_watchpid_loop(pvstate_t state)
 			if (position_now < 0) {
 				fd_to_idx[fd] = -1;
 				info_array[idx].watch_pid = 0;
-				if (NULL != info_array[idx].state)
-					pv_state_free(info_array[idx].state);
-				/*@-mustfreeonly@ *//* not a leak - we've just free()d it. */
-				info_array[idx].state = NULL;
-				/*@+mustfreeonly@ */
+				info_array[idx].watch_fd = -1;
+				pv_freecontents_watchfd(&(info_array[idx]));
 				debug("%s %d: %s", "fd", fd, "removing");
 				continue;
 			}
@@ -978,32 +964,25 @@ int pv_watchpid_loop(pvstate_t state)
 			 */
 			pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
 
-			if (NULL != info_array[idx].state) {
-				info_array[idx].state->transfer.elapsed_seconds =
-				    pv_elapsedtime_seconds(&transfer_elapsed);
-			}
+			info_array[idx].transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 			if (displayed_lines > 0) {
 				debug("%s", "adding newline");
 				pv_tty_write(&(state->flags), "\n", 1);
 			}
 
-			if (NULL == info_array[idx].state) {
-				debug("%s %d [%d]: %s / %Ld", "fd", fd, idx, "(null state)", position_now);
-			} else {
-				debug("%s %d [%d]: %Lf / %Ld", "fd", fd, idx,
-				      info_array[idx].state->transfer.elapsed_seconds, position_now);
-			}
+			debug("%s %d [%d]: %Lf / %Ld", "fd", fd, idx,
+			      info_array[idx].transfer.elapsed_seconds, position_now);
 
-			if (NULL != info_array[idx].state) {
-				info_array[idx].state->transfer.transferred = position_now;
-				info_array[idx].state->transfer.total_written = position_now;
+			if (info_array[idx].watch_fd >= 0) {
+				info_array[idx].transfer.transferred = position_now;
+				info_array[idx].transfer.total_written = position_now;
 				state->control.name = info_array[idx].display_name;
 				state->control.size = info_array[idx].size;
 				pv_display(&(state->status),
-					   &(state->control), &(info_array[idx].state->flags),
-					   &(info_array[idx].state->transfer), &(info_array[idx].state->calc),
-					   &(state->cursor), &(info_array[idx].state->display), NULL, false);
+					   &(state->control), &(info_array[idx].flags),
+					   &(info_array[idx].transfer), &(info_array[idx].calc),
+					   &(state->cursor), &(info_array[idx].display), NULL, false);
 				/*@-mustfreeonly@ */
 				state->control.name = NULL;
 				/*
@@ -1067,10 +1046,8 @@ int pv_watchpid_loop(pvstate_t state)
 	 * Free the per-fd state.
 	 */
 	for (idx = 0; NULL != info_array && idx < array_length; idx++) {
-		if (NULL == info_array[idx].state)
-			continue;
-		pv_state_free(info_array[idx].state);
-		info_array[idx].state = NULL;
+		pv_freecontents_watchfd(&(info_array[idx]));
+		info_array[idx].watch_fd = -1;
 	}
 
 	if (NULL != info_array)

@@ -217,6 +217,46 @@ pvstate_t pv_state_alloc(void)
 
 
 /*
+ * Free dynamic contents of a display structure.
+ */
+void pv_freecontents_display(pvdisplay_t display)
+{
+	if (NULL != display->display_buffer)
+		free(display->display_buffer);
+	display->display_buffer = NULL;
+}
+
+
+/*
+ * Free dynamic contents of a transfer state structure.
+ */
+void pv_freecontents_transfer(pvtransferstate_t transfer)
+{
+	/*@-keeptrans@ */
+	if (NULL != transfer->transfer_buffer)
+		free(transfer->transfer_buffer);
+	transfer->transfer_buffer = NULL;
+	/*@+keeptrans@ */
+	/* splint - explicitly freeing this structure, so free() here is OK. */
+
+	if (NULL != transfer->line_positions)
+		free(transfer->line_positions);
+	transfer->line_positions = NULL;
+}
+
+
+/*
+ * Free dynamic contents of a calculated transfer state structure.
+ */
+void pv_freecontents_calc(pvtransfercalc_t calc)
+{
+	if (NULL != calc->history)
+		free(calc->history);
+	calc->history = NULL;
+}
+
+
+/*
  * Free a state structure, after which it can no longer be used.
  */
 void pv_state_free(pvstate_t state)
@@ -244,13 +284,8 @@ void pv_state_free(pvstate_t state)
 		state->control.output_name = NULL;
 	}
 
-	if (NULL != state->display.display_buffer)
-		free(state->display.display_buffer);
-	state->display.display_buffer = NULL;
-
-	if (NULL != state->extra_display.display_buffer)
-		free(state->extra_display.display_buffer);
-	state->extra_display.display_buffer = NULL;
+	pv_freecontents_display(&(state->display));
+	pv_freecontents_display(&(state->extra_display));
 
 	if (NULL != state->control.name) {
 		free(state->control.name);
@@ -272,20 +307,9 @@ void pv_state_free(pvstate_t state)
 		state->control.extra_format_string = NULL;
 	}
 
-	/*@-keeptrans@ */
-	if (NULL != state->transfer.transfer_buffer)
-		free(state->transfer.transfer_buffer);
-	state->transfer.transfer_buffer = NULL;
-	/*@+keeptrans@ */
-	/* splint - explicitly freeing this structure, so free() here is OK. */
+	pv_freecontents_transfer(&(state->transfer));
 
-	if (NULL != state->transfer.line_positions)
-		free(state->transfer.line_positions);
-	state->transfer.line_positions = NULL;
-
-	if (NULL != state->calc.history)
-		free(state->calc.history);
-	state->calc.history = NULL;
+	pv_freecontents_calc(&(state->calc));
 
 	if (NULL != state->files.filename) {
 		unsigned int file_idx;

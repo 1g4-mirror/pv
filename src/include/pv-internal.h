@@ -488,6 +488,10 @@ struct pvdisplay_component_s {
 
 
 struct pvwatchfd_s {
+	struct pvtransientflags_s flags;	/* transient flags */
+	struct pvtransferstate_s transfer;	/* transfer state */
+	struct pvtransfercalc_s calc;	 /* calculated transfer state */
+	struct pvdisplay_s display;	 /* display data */
 #ifdef __APPLE__
 #else
 	char file_fdinfo[PV_SIZEOF_FILE_FDINFO]; /* path to /proc fdinfo file */
@@ -500,7 +504,6 @@ struct pvwatchfd_s {
 	off_t size;			 /* size of whole file, 0 if unknown */
 	off_t position;			 /* position last seen at */
 	struct timespec start_time;	 /* time we started watching the fd */
-	/*@null@*/ pvstate_t state;	 /* state object for flags and display */
 	pid_t watch_pid;		 /* PID to watch */
 	int watch_fd;			 /* fd to watch, -1 = not displayed */
 };
@@ -577,6 +580,11 @@ void pv_reset_calc(pvtransfercalc_t);
 void pv_reset_transfer(pvtransferstate_t);
 void pv_reset_flags(pvtransientflags_t);
 void pv_reset_display(pvdisplay_t);
+void pv_reset_watchfd(pvwatchfd_t);
+void pv_freecontents_display(pvdisplay_t);
+void pv_freecontents_transfer(pvtransferstate_t);
+void pv_freecontents_calc(pvtransfercalc_t);
+void pv_freecontents_watchfd(pvwatchfd_t);
 
 void pv_write_retry(int, const char *, size_t);
 void pv_tty_write(readonly_pvtransientflags_t, const char *, size_t);

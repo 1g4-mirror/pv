@@ -366,6 +366,33 @@ static bool extend_info_array(int *array_length_ptr, pvwatchfd_t * info_array_pt
 
 
 /*
+ * Reset calculated values in the given watchfd info structure.
+ */
+void pv_reset_watchfd(pvwatchfd_t info)
+{
+	if (NULL == info)
+		return;
+	pv_reset_calc(&(info->calc));
+	pv_reset_transfer(&(info->transfer));
+	pv_reset_flags(&(info->flags));
+	pv_reset_display(&(info->display));
+}
+
+
+/*
+ * Free dynamically allocated areas in the given watchfd info structure.
+ */
+void pv_freecontents_watchfd(pvwatchfd_t info)
+{
+	if (NULL == info)
+		return;
+	pv_freecontents_calc(&(info->calc));
+	pv_freecontents_transfer(&(info->transfer));
+	pv_freecontents_display(&(info->display));
+}
+
+
+/*
  * Scan the given process and update the arrays with any new file
  * descriptors.
  *
@@ -413,7 +440,6 @@ int pv_watchpid_scanfds(pvstate_t state,
 #endif
 		int fd, check_idx, use_idx, rc;
 		off_t position_now;
-		const char *use_format_string;
 
 		fd = -1;
 #ifdef __APPLE__
@@ -464,64 +490,16 @@ int pv_watchpid_scanfds(pvstate_t state,
 		 */
 		memset(&(info_array[use_idx]), 0, sizeof(info_array[use_idx]));
 
+		pv_reset_watchfd(&(info_array[use_idx]));
 		info_array[use_idx].watch_pid = watch_pid;
 		info_array[use_idx].watch_fd = fd;
 
-		/* Allocate new display state. */
-		/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
-		info_array[use_idx].state = pv_state_alloc();
-		/*@+mustfreeonly@ */
-		if (NULL == info_array[use_idx].state)
-			return 2;
-
-		/* Copy the main status.cwd value to the new state. */
-		memcpy(&(info_array[use_idx].state->status.cwd), &(state->status.cwd), sizeof(state->status.cwd));	/* flawfinder: ignore */
-		/* flawfinder: bounded to destination object size. */
-
 		/*
-		 * Copy over all the control values, blanking out the
-		 * dynamically allocated strings, and setting the default
-		 * format (fixed buffer) to the required format string
-		 * instead of allocating a new dynamic format string for the
-		 * copy (so there's less dynamic allocation going on).
+		 * Set set the average rate window so that a new history
+		 * buffer is allocated for this state.
 		 */
-		memcpy(&(info_array[use_idx].state->control), &(state->control), sizeof(state->control));	/* flawfinder: ignore */
-		/* flawfinder: bounded to destination object size. */
-		/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
-		info_array[use_idx].state->control.name = NULL;
-		info_array[use_idx].state->control.format_string = NULL;
-		info_array[use_idx].state->control.output_name = NULL;
-		info_array[use_idx].state->control.default_bar_style = NULL;
-		/*@+mustfreeonly@ */
-		info_array[use_idx].state->control.default_format[0] = '\0';
-		use_format_string =
-		    NULL != state->control.format_string ? state->control.format_string : state->control.default_format;
-		if (NULL != use_format_string)
-			(void) pv_snprintf(info_array[use_idx].state->control.default_format, PV_SIZEOF_DEFAULT_FORMAT,
-					   "%.510s", use_format_string);
-
-		/*
-		 * Duplicate the default bar style string, if there is one.
-		 */
-		if (NULL != state->control.default_bar_style) {
-			pv_state_default_bar_style_set(info_array[use_idx].state, state->control.default_bar_style);
-		}
-
-		/*
-		 * Copy over all the display values, blanking out the
-		 * dynamically allocated parts as above; then set the
-		 * average rate window so that a new history buffer is
-		 * allocated for this state.
-		 */
-		memcpy(&(info_array[use_idx].state->display), &(state->display), sizeof(state->display));	/* flawfinder: ignore */
-		/* flawfinder: bounded to destination object size. */
-		/*@-mustfreeonly@ *//* splint - this is not a leak, this is a new entry. */
-		info_array[use_idx].state->display.display_buffer = NULL;
-		info_array[use_idx].state->display.display_buffer_size = 0;
-		info_array[use_idx].state->calc.history = NULL;
-		info_array[use_idx].state->calc.history_len = 0;
-		/*@+mustfreeonly@ */
-		pv_state_average_rate_window_set(info_array[use_idx].state, state->control.average_rate_window);
+		(void) pv_update_calc_average_rate_window(&(info_array[use_idx].calc),
+							  state->control.average_rate_window);
 
 #ifdef __APPLE__
 		if (fd_infos[i].proc_fdtype != PROX_FDTYPE_VNODE) {
@@ -536,12 +514,9 @@ int pv_watchpid_scanfds(pvstate_t state,
 		 */
 		if ((rc != 0) && (rc != 4)) {
 			debug("%s %d: %s: %d", "fd", fd, "lookup failed - marking slot for re-use", use_idx);
+			pv_freecontents_watchfd(&(info_array[use_idx]));
 			info_array[use_idx].watch_pid = 0;
-			if (NULL != info_array[use_idx].state)
-				pv_state_free(info_array[use_idx].state);
-			/*@-mustfreeonly@ *//* not a leak - we've just free()d it. */
-			info_array[use_idx].state = NULL;
-			/*@+mustfreeonly@ */
+			info_array[use_idx].watch_fd = -1;
 			continue;
 		}
 
@@ -556,42 +531,11 @@ int pv_watchpid_scanfds(pvstate_t state,
 			info_array[use_idx].watch_fd = -1;
 		}
 
-		/* NULL check on the state - skip if not usable. */
-		if (NULL == info_array[use_idx].state) {
-			debug("%s %d: %s", "fd", fd, "state is NULL - marking as not displayable");
-			info_array[use_idx].watch_fd = -1;
-			continue;
-		}
-
-		/*
-		 * Set the displayed size appropriately; if the size is 0,
-		 * or not known, remove %e and %I from the state's default
-		 * format string so that neither estimated time remaining
-		 * nor estimated time of completion are displayed.
-		 */
-		info_array[use_idx].state->control.size = info_array[use_idx].size;
-		if (info_array[use_idx].size < 1) {
-			char *fmt;
-			while (NULL != (fmt = strstr(info_array[use_idx].state->control.default_format, "%e"))) {
-				debug("%s", "zero size - removing estimated time remaining");
-				/* strlen-1 here to include trailing \0 */
-				memmove(fmt, fmt + 2, strlen(fmt) - 1);	/* flawfinder: ignore */
-				info_array[use_idx].state->flags.reparse_display = 1;
-			}
-			while (NULL != (fmt = strstr(info_array[use_idx].state->control.default_format, "%I"))) {
-				debug("%s", "zero size - removing estimated completion time");
-				/* strlen-1 here to include trailing \0 */
-				memmove(fmt, fmt + 2, strlen(fmt) - 1);	/* flawfinder: ignore */
-				info_array[use_idx].state->flags.reparse_display = 1;
-			}
-			/* flawfinder: default_format is always \0-terminated. */
-		}
-
 		/* Set the info display_name appropriately. */
 		pv_watchpid_setname(state, &(info_array[use_idx]));
 
-		/* Reparse. */
-		info_array[use_idx].state->flags.reparse_display = 1;
+		/* Force the display to be re-parsed. */
+		info_array[use_idx].flags.reparse_display = 1;
 
 		pv_elapsedtime_read(&(info_array[use_idx].start_time));
 
@@ -600,11 +544,11 @@ int pv_watchpid_scanfds(pvstate_t state,
 		 * display), if known, so that ETA and so on are calculated
 		 * correctly.
 		 */
-		info_array[use_idx].state->display.initial_offset = 0;
+		info_array[use_idx].display.initial_offset = 0;
 		info_array[use_idx].position = 0;
 		position_now = pv_watchfd_position(&(info_array[use_idx]));
 		if (position_now >= 0) {
-			info_array[use_idx].state->display.initial_offset = position_now;
+			info_array[use_idx].display.initial_offset = position_now;
 			info_array[use_idx].position = position_now;
 		}
 	}
