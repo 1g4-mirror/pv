@@ -570,7 +570,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 		 * nor estimated time of completion are displayed.
 		 */
 		info_array[use_idx].state->control.size = info_array[use_idx].size;
-		if (info_array[use_idx].state->control.size < 1) {
+		if (info_array[use_idx].size < 1) {
 			char *fmt;
 			while (NULL != (fmt = strstr(info_array[use_idx].state->control.default_format, "%e"))) {
 				debug("%s", "zero size - removing estimated time remaining");
