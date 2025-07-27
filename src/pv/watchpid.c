@@ -333,6 +333,7 @@ static bool extend_info_array(int *array_length_ptr, pvwatchfd_t * info_array_pt
 	int array_length = 0;
 	struct pvwatchfd_s *info_array = NULL;
 	struct pvwatchfd_s *new_info_array;
+	int idx;
 
 	array_length = *array_length_ptr;
 	info_array = *info_array_ptr;
@@ -351,6 +352,19 @@ static bool extend_info_array(int *array_length_ptr, pvwatchfd_t * info_array_pt
 
 	if (NULL == new_info_array) {
 		return false;
+	}
+
+	debug("%s", "extended info array");
+
+	/*
+	 * We now have to re-point all of the display.name pointers to their
+	 * respective display_name buffers, in case realloc moved the
+	 * array's base address.
+	 */
+	for (idx = 0; idx < array_length; idx++) {
+		if (NULL != new_info_array[idx].state) {
+			new_info_array[idx].state->display.name = new_info_array[idx].display_name;
+		}
 	}
 
 	*info_array_ptr = new_info_array;
@@ -589,8 +603,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 		/* Set the info display_name appropriately. */
 		pv_watchpid_setname(state, &(info_array[use_idx]));
 
-		/* Carry the display_name through to the display state, and reparse. */
-		pv_state_name_set(info_array[use_idx].state, info_array[use_idx].display_name);
+		/* Reparse. */
 		info_array[use_idx].state->flags.reparse_display = 1;
 
 		pv_elapsedtime_read(&(info_array[use_idx].start_time));
@@ -663,4 +676,14 @@ void pv_watchpid_setname(pvstate_t state, pvwatchfd_t info)
 	}
 
 	debug("%s: %d: [%s]", "set name for fd", info->watch_fd, info->display_name);
+
+	/*
+	 * Set the display.name alias so the display_name is used by
+	 * pv_display().
+	 */
+	if (NULL != info->state) {
+		info->state->display.name = info->display_name;
+		debug("%s: %d: [%s] / %p", "set display.name for fd", info->watch_fd, info->state->display.name,
+		      info->state->display.name);
+	}
 }
