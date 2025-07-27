@@ -109,7 +109,7 @@ pvdisplay_bytecount_t pv_formatter_sgr(pvformatter_args_t args)
 
 	args->display->format_uses_colour = true;
 
-	if (!args->control->terminal_supports_colour)
+	if (!args->status->terminal_supports_colour)
 		return 0;
 	if (NULL == args->segment->string_parameter)
 		return 0;

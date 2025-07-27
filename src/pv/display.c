@@ -590,10 +590,10 @@ char *pv_format_sequences(void)
 /*
  * Initialise the output format structure, based on the current options.
  *
- * May update control->checked_colour_support and
- * control->terminal_supports_colour.
+ * May update status->checked_colour_support and
+ * status->terminal_supports_colour.
  */
-static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t transfer, readonly_pvtransfercalc_t calc,
+static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_pvtransferstate_t transfer, readonly_pvtransfercalc_t calc,
 			    /*@null@ */ const char *format_supplied, pvdisplay_t display)
 {
 	struct pvdisplay_component_s *format_component_array;
@@ -601,6 +601,8 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 	size_t strpos;
 	size_t segment;
 
+	if (NULL == status)
+		return;
 	if (NULL == control)
 		return;
 	if (NULL == transfer)
@@ -825,6 +827,7 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 
 			formatter_info.display = display;
 			formatter_info.segment = &(display->format[segment]);
+			formatter_info.status = status;
 			formatter_info.control = control;
 			formatter_info.transfer = transfer;
 			formatter_info.calc = calc;
@@ -847,8 +850,8 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 		display->format_segment_count++;
 	}
 
-	if (display->format_uses_colour && !control->checked_colour_support) {
-		control->checked_colour_support = true;
+	if (display->format_uses_colour && !status->checked_colour_support) {
+		status->checked_colour_support = true;
 #ifdef ENABLE_NCURSES
 		/*
 		 * If we have terminal info support, check whether the
@@ -856,7 +859,7 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 		 * supported if we're forcing output.
 		 */
 		if (true == control->force) {
-			control->terminal_supports_colour = true;
+			status->terminal_supports_colour = true;
 			debug("%s", "force mode - assuming terminal supports colour");
 		} else {
 			char *term_env = NULL;
@@ -866,22 +869,22 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 			 * flawfinder - here we pass responsibility to the
 			 * ncurses library to behave OK with $TERM.
 			 */
-			control->terminal_supports_colour = false;
+			status->terminal_supports_colour = false;
 			if (NULL != term_env) {
 				int setup_err = 0;
 
 				if ((0 == setupterm(term_env, STDERR_FILENO, &setup_err))
 				    && (tigetnum("colors") > 1)
 				    ) {
-					control->terminal_supports_colour = true;
+					status->terminal_supports_colour = true;
 					debug("%s: %s", term_env, "terminal supports colour");
 				} else {
-					control->terminal_supports_colour = false;
+					status->terminal_supports_colour = false;
 					debug("%s: %s", term_env, "terminal does not support colour");
 				}
 			} else {
 				/* If TERM is unset, disable colour. */
-				control->terminal_supports_colour = false;
+				status->terminal_supports_colour = false;
 				debug("%s", "no TERM variable - disabling colour support");
 			}
 		}
@@ -893,7 +896,7 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 		 * was supplied, in which case colour support is assumed.
 		 */
 		if (true == control->force) {
-			control->terminal_supports_colour = true;
+			status->terminal_supports_colour = true;
 			debug("%s", "force mode - assuming terminal supports colour");
 		} else {
 			FILE *command_fptr;
@@ -909,21 +912,21 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 			 */
 
 			if (NULL == command_fptr) {
-				control->terminal_supports_colour = false;
+				status->terminal_supports_colour = false;
 				debug("%s (%s)", "popen failed - disabling colour support", strerror(errno));
 			} else {
 				int colour_count;
 				if (1 == fscanf(command_fptr, "%d", &colour_count)) {
 					if (colour_count > 1) {
-						control->terminal_supports_colour = true;
+						status->terminal_supports_colour = true;
 						debug("%s (%d)", "terminal supports colour", colour_count);
 					} else {
-						control->terminal_supports_colour = false;
+						status->terminal_supports_colour = false;
 						debug("%s (%d)",
 						      "fewer than 2 colours available - disabling colour support");
 					}
 				} else {
-					control->terminal_supports_colour = false;
+					status->terminal_supports_colour = false;
 					debug("%s", "tput did not produce a number - disabling colour support");
 				}
 				/*@-unrecog@ *//* splint doesn't know pclose(). */
@@ -936,7 +939,7 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 		 * Without terminal info support, just assume colour is
 		 * available.
 		 */
-		control->terminal_supports_colour = true;
+		status->terminal_supports_colour = true;
 		debug("%s", "terminal info support not compiled in - assuming colour support");
 #endif				/* (! ENABLE_NCURSES) && (! USE_POPEN_TPUTS) */
 #endif				/* ! ENABLE_NCURSES */
@@ -963,9 +966,9 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
  *
  * Updates status->exit_status if buffer allocation fails.
  *
- * See pv__format_init for the adjustments that may be made to "control".
+ * See pv__format_init for the adjustments that may be made to "status".
  */
-bool pv_format(pvprogramstatus_t status, pvcontrol_t control, readonly_pvtransferstate_t transfer,
+bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_pvtransferstate_t transfer,
 	       readonly_pvtransfercalc_t calc, /*@null@ */ const char *format_supplied, pvdisplay_t display,
 	       bool reinitialise, bool final)
 {
@@ -982,6 +985,8 @@ bool pv_format(pvprogramstatus_t status, pvcontrol_t control, readonly_pvtransfe
 	display_segments[0] = '\0';
 
 	/* Quick safety check for null pointers. */
+	if (NULL == status)
+		return false;
 	if (NULL == control)
 		return false;
 	if (NULL == transfer)
@@ -995,6 +1000,7 @@ bool pv_format(pvprogramstatus_t status, pvcontrol_t control, readonly_pvtransfe
 	formatter_info.buffer = display_segments;
 	formatter_info.buffer_size = sizeof(display_segments);
 	formatter_info.offset = 0;
+	formatter_info.status = status;
 	formatter_info.control = control;
 	formatter_info.transfer = transfer;
 	formatter_info.calc = calc;
@@ -1006,7 +1012,7 @@ bool pv_format(pvprogramstatus_t status, pvcontrol_t control, readonly_pvtransfe
 
 	/* Reinitialise if we were asked to. */
 	if (reinitialise)
-		pv__format_init(control, transfer, calc, format_supplied, display);
+		pv__format_init(status, control, transfer, calc, format_supplied, display);
 
 	/* The format string is needed for the static segments. */
 	display_format = NULL == format_supplied ? control->default_format : format_supplied;
@@ -1121,7 +1127,7 @@ bool pv_format(pvprogramstatus_t status, pvcontrol_t control, readonly_pvtransfe
 	if (dynamic_segment_count > 1)
 		dynamic_segment_width /= dynamic_segment_count;
 
-	debug("control.width=%d static_portion_width=%d dynamic_segment_width=%d dynamic_segment_count=%d",
+	debug("control->width=%d static_portion_width=%d dynamic_segment_width=%d dynamic_segment_count=%d",
 	      control->width, static_portion_width, dynamic_segment_width, dynamic_segment_count);
 
 	for (segment_idx = 0; segment_idx < display->format_segment_count; segment_idx++) {

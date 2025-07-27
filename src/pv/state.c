@@ -570,7 +570,7 @@ void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
 
 void pv_state_set_terminal_supports_utf8(pvstate_t state, bool val)
 {
-	state->control.terminal_supports_utf8 = val;
+	state->status.terminal_supports_utf8 = val;
 }
 
 /*

@@ -145,6 +145,9 @@ struct pvstate_s {
 		char cwd[PV_SIZEOF_CWD];	 /* current working directory for relative path */
 		int current_input_file;		 /* index of current file being read */
 		int exit_status; 		 /* exit status to give (0=OK) */
+		bool terminal_supports_utf8;	 /* whether the terminal supports UTF-8 */
+		bool terminal_supports_colour;	 /* whether the terminal supports colour */
+		bool checked_colour_support;	 /* whether we have checked colour support yet */
 	} status;
 
 	/***************
@@ -197,9 +200,6 @@ struct pvstate_s {
 		bool no_splice;                  /* never use splice() */
 		bool discard_input;              /* write nothing to stdout */
 		bool show_stats;		 /* show statistics on exit */
-		bool terminal_supports_utf8;	 /* whether the terminal supports UTF-8 */
-		bool terminal_supports_colour;	 /* whether the terminal supports colour */
-		bool checked_colour_support;	 /* whether we have checked colour support yet */
 		bool width_set_manually;	 /* width was set manually, not detected */
 		bool height_set_manually;	 /* height was set manually, not detected */
 	} control;
@@ -461,7 +461,8 @@ typedef const struct pvtransferstate_s * readonly_pvtransferstate_t;
 struct pvformatter_args_s {
 	/*@dependent@*/ pvdisplay_t display;		/* the display being updated */
 	/*@dependent@*/ pvdisplay_segment_t segment;	/* the segment of the display */
-	/*@dependent@*/ readonly_pvcontrol_t control;		/* program control settings */
+	/*@dependent@*/ readonly_pvprogramstatus_t status;	/* program status */
+	/*@dependent@*/ readonly_pvcontrol_t control;		/* control settings */
 	/*@dependent@*/ readonly_pvtransferstate_t transfer;	/* transfer state */
 	/*@dependent@*/ readonly_pvtransfercalc_t calc;		/* calculated transfer state */
 	/*@dependent@*/ char *buffer;			/* buffer to write formatted segments into */
@@ -559,7 +560,7 @@ pvdisplay_bytecount_t pv_formatter_previous_line(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_name(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_sgr(pvformatter_args_t);
 
-bool pv_format(pvprogramstatus_t, pvcontrol_t, readonly_pvtransferstate_t, readonly_pvtransfercalc_t, /*@null@*/ const char *, pvdisplay_t, bool, bool);
+bool pv_format(pvprogramstatus_t, readonly_pvcontrol_t, readonly_pvtransferstate_t, readonly_pvtransfercalc_t, /*@null@*/ const char *, pvdisplay_t, bool, bool);
 void pv_display(pvstate_t, bool);
 ssize_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);
 int pv_next_file(pvstate_t, unsigned int, int);
