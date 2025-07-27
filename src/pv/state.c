@@ -25,7 +25,7 @@
  * Allocate or reallocate the history buffer for calculating average
  * transfer rate.
  */
-static void pv_alloc_history(pvtransfercalc_t calc)
+static void pv_alloc_calc_history(pvtransfercalc_t calc)
 {
 	if (NULL != calc->history)
 		free(calc->history);
@@ -50,6 +50,113 @@ static void pv_alloc_history(pvtransfercalc_t calc)
 
 
 /*
+ * Set the "calc" state sub-structure's history length appropriately for the
+ * given average rate window setting, allocate an appropriate history, and
+ * return the appropriate history interval to use.
+ */
+unsigned int pv_update_calc_average_rate_window(pvtransfercalc_t calc, unsigned int val)
+{
+	unsigned int history_interval;
+
+	if (val < 1)
+		val = 1;
+
+	if (val >= 20) {
+		calc->history_len = (size_t) (val / 5 + 1);
+		history_interval = 5;
+	} else {
+		calc->history_len = (size_t) (val + 1);
+		history_interval = 1;
+	}
+
+	pv_alloc_calc_history(calc);
+
+	return history_interval;
+}
+
+
+/*
+ * Clear the "calc" part of a state structure.
+ */
+void pv_reset_calc(pvtransfercalc_t calc)
+{
+	if (NULL == calc)
+		return;
+	/*
+	 * Explicitly set important floating point values to 0, as memset()
+	 * is not recommended for this.
+	 */
+	calc->transfer_rate = 0.0;
+	calc->average_rate = 0.0;
+	calc->prev_elapsed_sec = 0.0;
+	calc->prev_rate = 0.0;
+	calc->prev_trans = 0.0;
+	calc->current_avg_rate = 0.0;
+	calc->rate_min = 0.0;
+	calc->rate_max = 0.0;
+	calc->rate_sum = 0.0;
+	calc->ratesquared_sum = 0.0;
+	calc->measurements_taken = 0;
+	calc->prev_transferred = 0;
+	calc->percentage = 0.0;
+	calc->history_first = calc->history_last = 0;
+	if (NULL != calc->history) {
+		calc->history[0].elapsed_sec = 0.0;
+	}
+}
+
+
+/*
+ * Clear the "transfer" part of a state structure.
+ */
+void pv_reset_transfer(pvtransferstate_t transfer)
+{
+	if (NULL == transfer)
+		return;
+
+	transfer->elapsed_seconds = 0.0;
+	transfer->read_position = 0;
+	transfer->write_position = 0;
+	transfer->to_write = 0;
+	transfer->written = 0;
+	transfer->total_written = 0;
+	transfer->written_but_not_consumed = 0;
+	transfer->read_errors_in_a_row = 0;
+	transfer->last_read_skip_fd = 0;
+#ifdef HAVE_SPLICE
+	transfer->splice_failed_fd = -1;
+#endif				/* HAVE_SPLICE */
+
+	transfer->line_positions_length = 0;
+	transfer->line_positions_head = 0;
+	transfer->last_output_position = 0;
+}
+
+
+/*
+ * Reset the calculated parts of the "flags" state structure.
+ */
+void pv_reset_flags(pvtransientflags_t flags)
+{
+	if (NULL == flags)
+		return;
+	flags->reparse_display = 1;
+}
+
+
+/*
+ * Reset the calculated parts of a "display" state structure.
+ */
+void pv_reset_display(pvdisplay_t display)
+{
+	if (NULL == display)
+		return;
+	display->initial_offset = 0;
+	display->output_produced = false;
+}
+
+
+/*
  * Clear the calculated parts of a state structure.
  */
 void pv_state_reset(pvstate_t state)
@@ -57,53 +164,14 @@ void pv_state_reset(pvstate_t state)
 	if (NULL == state)
 		return;
 
-	state->flags.reparse_display = 1;
+	pv_reset_flags(&(state->flags));
 	state->status.current_input_file = -1;
 
-	state->display.initial_offset = 0;
-	state->display.output_produced = false;
+	pv_reset_display(&(state->display));
+	pv_reset_display(&(state->extra_display));
 
-	state->extra_display.initial_offset = 0;
-	state->extra_display.output_produced = false;
-
-	/*
-	 * Explicitly set important floating point values to 0, as memset()
-	 * is not recommended for this.
-	 */
-	state->calc.transfer_rate = 0.0;
-	state->calc.average_rate = 0.0;
-	state->calc.prev_elapsed_sec = 0.0;
-	state->calc.prev_rate = 0.0;
-	state->calc.prev_trans = 0.0;
-	state->calc.current_avg_rate = 0.0;
-	state->calc.rate_min = 0.0;
-	state->calc.rate_max = 0.0;
-	state->calc.rate_sum = 0.0;
-	state->calc.ratesquared_sum = 0.0;
-	state->calc.measurements_taken = 0;
-	state->calc.prev_transferred = 0;
-	state->calc.percentage = 0.0;
-	state->calc.history_first = state->calc.history_last = 0;
-	if (NULL != state->calc.history) {
-		state->calc.history[0].elapsed_sec = 0.0;
-	}
-
-	state->transfer.elapsed_seconds = 0.0;
-	state->transfer.read_position = 0;
-	state->transfer.write_position = 0;
-	state->transfer.to_write = 0;
-	state->transfer.written = 0;
-	state->transfer.total_written = 0;
-	state->transfer.written_but_not_consumed = 0;
-	state->transfer.read_errors_in_a_row = 0;
-	state->transfer.last_read_skip_fd = 0;
-#ifdef HAVE_SPLICE
-	state->transfer.splice_failed_fd = -1;
-#endif				/* HAVE_SPLICE */
-
-	state->transfer.line_positions_length = 0;
-	state->transfer.line_positions_head = 0;
-	state->transfer.last_output_position = 0;
+	pv_reset_calc(&(state->calc));
+	pv_reset_transfer(&(state->transfer));
 }
 
 
@@ -561,14 +629,7 @@ void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
 	if (val < 1)
 		val = 1;
 	state->control.average_rate_window = val;
-	if (val >= 20) {
-		state->calc.history_len = (size_t) (val / 5 + 1);
-		state->control.history_interval = 5;
-	} else {
-		state->calc.history_len = (size_t) (val + 1);
-		state->control.history_interval = 1;
-	}
-	pv_alloc_history(&(state->calc));
+	state->control.history_interval = pv_update_calc_average_rate_window(&(state->calc), val);
 }
 
 void pv_state_set_terminal_supports_utf8(pvstate_t state, bool val)

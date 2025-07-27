@@ -572,6 +572,12 @@ ssize_t pv_transfer(pvstate_t, int, bool *, bool *, off_t, long *);
 int pv_next_file(pvstate_t, unsigned int, int);
 /*@keep@*/ const char *pv_current_file_name(pvstate_t);
 
+unsigned int pv_update_calc_average_rate_window(pvtransfercalc_t, unsigned int);
+void pv_reset_calc(pvtransfercalc_t);
+void pv_reset_transfer(pvtransferstate_t);
+void pv_reset_flags(pvtransientflags_t);
+void pv_reset_display(pvdisplay_t);
+
 void pv_write_retry(int, const char *, size_t);
 void pv_tty_write(readonly_pvtransientflags_t, const char *, size_t);
 
