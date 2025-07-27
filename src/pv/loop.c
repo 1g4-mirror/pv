@@ -790,6 +790,14 @@ int pv_watchpid_loop(pvstate_t state)
 	}
 
 	/*
+	 * Make sure there's no name set.
+	 */
+	if (NULL != state->control.name) {
+		free(state->control.name);
+		state->control.name = NULL;
+	}
+
+	/*
 	 * Make sure there's a format string, and then insert %N into it if
 	 * it's not present.
 	 */
@@ -990,10 +998,12 @@ int pv_watchpid_loop(pvstate_t state)
 			if (NULL != info_array[idx].state) {
 				info_array[idx].state->transfer.transferred = position_now;
 				info_array[idx].state->transfer.total_written = position_now;
+				state->control.name = info_array[idx].display_name;
 				pv_display(&(state->status),
-					   &(info_array[idx].state->control), &(info_array[idx].state->flags),
+					   &(state->control), &(info_array[idx].state->flags),
 					   &(info_array[idx].state->transfer), &(info_array[idx].state->calc),
 					   &(state->cursor), &(info_array[idx].state->display), NULL, false);
+				state->control.name = NULL;
 				displayed_lines++;
 			}
 		}

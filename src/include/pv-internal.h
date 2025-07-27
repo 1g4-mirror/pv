@@ -245,14 +245,6 @@ struct pvstate_s {
 	/*****************
 	 * Display state *
 	 *****************/
-	/*
-	 * Note that the "name" pointer is an alias - it should point to
-	 * some other string that's allocated and freed separately, such as
-	 * control.name.  It is used here so that the name can be changed
-	 * for different display structures without having to also change
-	 * the control structure, for example when watching multiple file
-	 * descriptors with --watchfd.
-	 */
 	struct pvdisplay_s {
 
 		struct pvdisplay_segment_s {	/* format string broken into segments */
@@ -280,8 +272,6 @@ struct pvstate_s {
 		/*@only@*/ /*@null@*/ char *display_buffer;	/* buffer for display string */
 		off_t initial_offset;			 /* offset when first opened (when watching fds) */
 		size_t next_line_len;				 /* length of currently receiving line so far */
-
-		/*@dependent@*/ /*@null@*/ const char *name; /* copy of pointer to string for %N */
 
 		size_t format_segment_count;	 /* number of format string segments */
 
