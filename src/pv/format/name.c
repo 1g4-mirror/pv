@@ -35,7 +35,7 @@ pvdisplay_bytecount_t pv_formatter_name(pvformatter_args_t args)
 	(void) pv_snprintf(string_format, sizeof(string_format), "%%%d.500s:", field_width);
 
 	content[0] = '\0';
-	if (args->display->name) {
+	if (NULL != args->display->name) {
 		(void) pv_snprintf(content, sizeof(content), string_format, args->display->name);
 	}
 
