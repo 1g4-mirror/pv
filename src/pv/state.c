@@ -568,9 +568,9 @@ void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
 	pv_alloc_history(state);
 }
 
-void pv_state_set_can_display_utf8(pvstate_t state, bool val)
+void pv_state_set_terminal_supports_utf8(pvstate_t state, bool val)
 {
-	state->control.can_display_utf8 = val;
+	state->control.terminal_supports_utf8 = val;
 }
 
 /*

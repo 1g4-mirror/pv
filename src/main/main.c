@@ -281,7 +281,7 @@ int main(int argc, char **argv)
 	/*@only@ */ pvstate_t state = NULL;
 	int retcode = 0;
 	bool can_have_eta = true;
-	bool can_display_utf8 = false;
+	bool terminal_supports_utf8 = false;
 
 #if ! HAVE_SETPROCTITLE
 	initproctitle(argc, argv);
@@ -295,7 +295,7 @@ int main(int argc, char **argv)
 #ifdef HAVE_LANGINFO_H
 	/*@-mustfreefresh@ *//* splint thinks nl_langinfo() leaks memory */
 	if (0 == strcmp(nl_langinfo(CODESET), "UTF-8"))
-		can_display_utf8 = true;
+		terminal_supports_utf8 = true;
 	/*@+mustfreefresh@ */
 #endif
 #endif
@@ -519,8 +519,8 @@ int main(int argc, char **argv)
 			    can_have_eta ? opts->fineta : false, opts->rate, opts->average_rate,
 			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
 
-	debug("%s: %s", "can_display_utf8", can_display_utf8 ? "true" : "false");
-	pv_state_set_can_display_utf8(state, can_display_utf8);
+	debug("%s: %s", "terminal_supports_utf8", terminal_supports_utf8 ? "true" : "false");
+	pv_state_set_terminal_supports_utf8(state, terminal_supports_utf8);
 
 	/* Initialise the signal handling. */
 	pv_sig_init(state);

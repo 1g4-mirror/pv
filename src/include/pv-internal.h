@@ -197,8 +197,8 @@ struct pvstate_s {
 		bool no_splice;                  /* never use splice() */
 		bool discard_input;              /* write nothing to stdout */
 		bool show_stats;		 /* show statistics on exit */
-		bool can_display_utf8;		 /* whether UTF-8 output is permitted */
-		bool can_display_colour;	 /* whether the terminal supports colour */
+		bool terminal_supports_utf8;	 /* whether the terminal supports UTF-8 */
+		bool terminal_supports_colour;	 /* whether the terminal supports colour */
 		bool checked_colour_support;	 /* whether we have checked colour support yet */
 		bool width_set_manually;	 /* width was set manually, not detected */
 		bool height_set_manually;	 /* height was set manually, not detected */

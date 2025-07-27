@@ -591,7 +591,7 @@ char *pv_format_sequences(void)
  * Initialise the output format structure, based on the current options.
  *
  * May update control->checked_colour_support and
- * control->can_display_colour.
+ * control->terminal_supports_colour.
  */
 static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t transfer, readonly_pvtransfercalc_t calc,
 			    /*@null@ */ const char *format_supplied, pvdisplay_t display)
@@ -856,7 +856,7 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 		 * supported if we're forcing output.
 		 */
 		if (true == control->force) {
-			control->can_display_colour = true;
+			control->terminal_supports_colour = true;
 			debug("%s", "force mode - assuming terminal supports colour");
 		} else {
 			char *term_env = NULL;
@@ -866,22 +866,22 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 			 * flawfinder - here we pass responsibility to the
 			 * ncurses library to behave OK with $TERM.
 			 */
-			control->can_display_colour = false;
+			control->terminal_supports_colour = false;
 			if (NULL != term_env) {
 				int setup_err = 0;
 
 				if ((0 == setupterm(term_env, STDERR_FILENO, &setup_err))
 				    && (tigetnum("colors") > 1)
 				    ) {
-					control->can_display_colour = true;
+					control->terminal_supports_colour = true;
 					debug("%s: %s", term_env, "terminal supports colour");
 				} else {
-					control->can_display_colour = false;
+					control->terminal_supports_colour = false;
 					debug("%s: %s", term_env, "terminal does not support colour");
 				}
 			} else {
 				/* If TERM is unset, disable colour. */
-				control->can_display_colour = false;
+				control->terminal_supports_colour = false;
 				debug("%s", "no TERM variable - disabling colour support");
 			}
 		}
@@ -893,7 +893,7 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 		 * was supplied, in which case colour support is assumed.
 		 */
 		if (true == control->force) {
-			control->can_display_colour = true;
+			control->terminal_supports_colour = true;
 			debug("%s", "force mode - assuming terminal supports colour");
 		} else {
 			FILE *command_fptr;
@@ -909,21 +909,21 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 			 */
 
 			if (NULL == command_fptr) {
-				control->can_display_colour = false;
+				control->terminal_supports_colour = false;
 				debug("%s (%s)", "popen failed - disabling colour support", strerror(errno));
 			} else {
 				int colour_count;
 				if (1 == fscanf(command_fptr, "%d", &colour_count)) {
 					if (colour_count > 1) {
-						control->can_display_colour = true;
+						control->terminal_supports_colour = true;
 						debug("%s (%d)", "terminal supports colour", colour_count);
 					} else {
-						control->can_display_colour = false;
+						control->terminal_supports_colour = false;
 						debug("%s (%d)",
 						      "fewer than 2 colours available - disabling colour support");
 					}
 				} else {
-					control->can_display_colour = false;
+					control->terminal_supports_colour = false;
 					debug("%s", "tput did not produce a number - disabling colour support");
 				}
 				/*@-unrecog@ *//* splint doesn't know pclose(). */
@@ -936,7 +936,7 @@ static void pv__format_init(pvcontrol_t control, readonly_pvtransferstate_t tran
 		 * Without terminal info support, just assume colour is
 		 * available.
 		 */
-		control->can_display_colour = true;
+		control->terminal_supports_colour = true;
 		debug("%s", "terminal info support not compiled in - assuming colour support");
 #endif				/* (! ENABLE_NCURSES) && (! USE_POPEN_TPUTS) */
 #endif				/* ! ENABLE_NCURSES */
