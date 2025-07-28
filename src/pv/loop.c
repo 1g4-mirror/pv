@@ -589,6 +589,8 @@ int pv_main_loop(pvstate_t state)
  * according to the given options.
  *
  * Returns nonzero on error.
+ *
+ * TODO: unify this with pv_watchpid_loop.
  */
 int pv_watchfd_loop(pvstate_t state)
 {
