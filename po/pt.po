@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-07-26 14:50+0100\n"
+"POT-Creation-Date: 2025-09-14 16:41+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -285,11 +285,11 @@ msgstr "Por favor, reporte quaisquer defeitos para %s"
 msgid "(input)"
 msgstr ""
 
-#: src/main/main.c:328
+#: src/main/main.c:334
 msgid "state allocation failed"
 msgstr "alocação de memória de status falhou"
 
-#: src/main/options.c:146 src/pv/file.c:324
+#: src/main/options.c:146 src/pv/file.c:342
 msgid "failed to stat file"
 msgstr "erro obtendo informações do arquivo"
 
@@ -417,98 +417,98 @@ msgstr "tentativa de bloqueio falhou"
 msgid "failed to open terminal"
 msgstr "erro abrindo o terminal"
 
-#: src/pv/display.c:249
+#: src/pv/display.c:285
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:267
+#: src/pv/display.c:303
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:989 src/pv/transfer.c:1057
+#: src/pv/display.c:1053 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
-#: src/pv/file.c:149
+#: src/pv/file.c:153
 msgid "failed to seek to start of output"
 msgstr "não pode mover para o início da produção"
 
-#: src/pv/file.c:294
+#: src/pv/file.c:303
 msgid "failed to close file"
 msgstr "erro fechando o arquivo"
 
-#: src/pv/file.c:317
+#: src/pv/file.c:335
 msgid "failed to read file"
 msgstr "erro lendo o arquivo"
 
-#: src/pv/file.c:332
+#: src/pv/file.c:350
 msgid "failed to stat output file"
 msgstr "erro obtendo informações do arquivo de saída"
 
-#: src/pv/file.c:354
+#: src/pv/file.c:372
 msgid "input file is output file"
 msgstr "os arquivos de entrada e saída são o mesmo"
 
-#: src/pv/file.c:412
+#: src/pv/file.c:429
 msgid "(none)"
 msgstr ""
 
-#: src/pv/file.c:414
+#: src/pv/file.c:431
 msgid "(stdin)"
 msgstr ""
 
-#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:93
-#: src/pv/format/rate.c:37 src/pv/loop.c:562
+#: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
+#: src/pv/format/rate.c:36 src/pv/loop.c:565
 msgid "b/s"
 msgstr ""
 
-#: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:97
-#: src/pv/format/rate.c:41
+#: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
+#: src/pv/format/rate.c:40
 msgid "/s"
 msgstr ""
 
-#: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:97
-#: src/pv/format/rate.c:41 src/pv/loop.c:562
+#: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
+#: src/pv/format/rate.c:40 src/pv/loop.c:565
 msgid "B/s"
 msgstr "B/s"
 
-#: src/pv/format/bytes.c:37
+#: src/pv/format/bytes.c:35
 msgid "b"
 msgstr ""
 
-#: src/pv/format/bytes.c:41 src/pv/transfer.c:594
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:593
 msgid "B"
 msgstr ""
 
-#: src/pv/format/eta.c:53 src/pv/format/eta.c:57
+#: src/pv/format/eta.c:52 src/pv/format/eta.c:56
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/format/fineta.c:81
+#: src/pv/format/fineta.c:80
 msgid "FIN"
 msgstr ""
 
-#: src/pv/loop.c:561
+#: src/pv/loop.c:564
 msgid "rate min/avg/max/mdev"
 msgstr ""
 
-#: src/pv/loop.c:573
+#: src/pv/loop.c:576
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:783 src/pv/loop.c:834 src/pv/loop.c:887 src/pv/watchpid.c:99
-#: src/pv/watchpid.c:109 src/pv/watchpid.c:120 src/pv/watchpid.c:128
-#: src/pv/watchpid.c:165 src/pv/watchpid.c:184 src/pv/watchpid.c:192
-#: src/pv/watchpid.c:202 src/pv/watchpid.c:300 src/pv/watchpid.c:308
-#: src/pv/watchpid.c:385 src/pv/watchpid.c:406
+#: src/pv/loop.c:783 src/pv/loop.c:842 src/pv/loop.c:893 src/pv/watchpid.c:99
+#: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
+#: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
+#: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
+#: src/pv/watchpid.c:413 src/pv/watchpid.c:434
 msgid "pid"
 msgstr ""
 
-#: src/pv/state.c:40
+#: src/pv/state.c:42
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:617 src/pv/state.c:628
+#: src/pv/state.c:686 src/pv/state.c:698
 msgid "file list allocation failed"
 msgstr ""
 
@@ -524,43 +524,43 @@ msgstr "aviso: erros de leitura detectados"
 msgid "file is not seekable"
 msgstr "não pode mover dentro do arquivo"
 
-#: src/pv/transfer.c:573
+#: src/pv/transfer.c:572
 msgid "failed to seek past error"
 msgstr "não pode ir além do erro"
 
-#: src/pv/transfer.c:593
+#: src/pv/transfer.c:592
 msgid "skipped past read error"
 msgstr "ignorado erro de leitura"
 
-#: src/pv/transfer.c:634
+#: src/pv/transfer.c:633
 msgid "no transfer buffer allocated"
 msgstr ""
 
-#: src/pv/transfer.c:676
+#: src/pv/transfer.c:675
 msgid "failed to set interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:702
+#: src/pv/transfer.c:701
 msgid "failed to clear interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:744
+#: src/pv/transfer.c:743
 msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:918
+#: src/pv/transfer.c:917
 msgid "write failed"
 msgstr "erro de gravação"
 
-#: src/pv/transfer.c:1159
+#: src/pv/transfer.c:1158
 msgid "select call failed"
 msgstr "erro na chamada da função select"
 
-#: src/pv/watchpid.c:109 src/pv/watchpid.c:121 src/pv/watchpid.c:130
-#: src/pv/watchpid.c:184 src/pv/watchpid.c:193 src/pv/watchpid.c:204
+#: src/pv/watchpid.c:108 src/pv/watchpid.c:120 src/pv/watchpid.c:129
+#: src/pv/watchpid.c:183 src/pv/watchpid.c:192 src/pv/watchpid.c:203
 msgid "fd"
 msgstr ""
 
-#: src/pv/watchpid.c:130 src/pv/watchpid.c:204
+#: src/pv/watchpid.c:129 src/pv/watchpid.c:203
 msgid "not a regular file or block device"
 msgstr "não é um arquivo regular ou dispositivo de bloqueio"
