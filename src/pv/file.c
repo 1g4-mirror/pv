@@ -54,6 +54,10 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 	for (file_idx = 0; file_idx < state->files.file_count; file_idx++) {
 		int rc;
 
+		/* Skip any NULL entries, though they should be impossible. */
+		if (NULL == state->files.filename[file_idx])
+			continue;
+
 		if (0 == strcmp(state->files.filename[file_idx], "-")) {
 			rc = fstat(STDIN_FILENO, &sb);
 			if (rc != 0) {
@@ -187,6 +191,10 @@ static off_t pv_calc_total_lines(pvstate_t state)
 		int fd = -1;
 		int rc = 0;
 
+		/* Skip any NULL entries, though they should be impossible. */
+		if (NULL == state->files.filename[file_idx])
+			continue;
+
 		if (0 == strcmp(state->files.filename[file_idx], "-")) {
 			rc = fstat(STDIN_FILENO, &sb);
 			if ((rc != 0) || (!S_ISREG(sb.st_mode))) {
@@ -288,6 +296,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	struct stat osb;
 	int fd;
 	bool input_file_is_output;
+	char *next_filename;
 
 	if (oldfd >= 0) {
 		if (0 != close(oldfd)) {
@@ -303,10 +312,20 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		return -1;
 	}
 
-	if ((NULL == state->files.filename) || (0 == strcmp(state->files.filename[filenum], "-"))) {
+	next_filename = NULL;
+	if (NULL != state->files.filename) {
+		next_filename = state->files.filename[filenum];
+		if (NULL == next_filename) {
+			debug("%s: @%d, max %d", "unexpected null filename", filenum, state->files.file_count);
+			state->status.exit_status |= PV_ERROREXIT_TRANSITION;
+			return -1;
+		}
+	}
+
+	if ((NULL == next_filename) || (0 == strcmp(next_filename, "-"))) {
 		fd = STDIN_FILENO;
 	} else {
-		fd = open(state->files.filename[filenum], O_RDONLY);	/* flawfinder: ignore */
+		fd = open(next_filename, O_RDONLY);		/* flawfinder: ignore */
 		/*
 		 * flawfinder rationale: the input file list is under the
 		 * control of the operator by its nature, so we can't refuse
@@ -314,7 +333,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		 */
 		if (fd < 0) {
 			pv_error("%s: %s: %s",
-				 _("failed to read file"), state->files.filename[filenum], strerror(errno));
+				 _("failed to read file"), next_filename, strerror(errno));
 			state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			return -1;
 		}
@@ -322,7 +341,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 
 	if (0 != fstat(fd, &isb)) {
 		pv_error("%s: %s: %s", _("failed to stat file"),
-			 NULL == state->files.filename ? "-" : state->files.filename[filenum], strerror(errno));
+			 NULL == next_filename ? "-" : next_filename, strerror(errno));
 		(void) close(fd);
 		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		return -1;
@@ -352,7 +371,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 
 	if (input_file_is_output) {
 		pv_error("%s: %s", _("input file is output file"),
-			 NULL == state->files.filename ? "-" : state->files.filename[filenum]);
+			 NULL == next_filename ? "-" : next_filename);
 		(void) close(fd);
 		state->status.exit_status |= PV_ERROREXIT_OUROBOROS;
 		return -1;

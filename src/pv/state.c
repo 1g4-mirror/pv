@@ -667,41 +667,39 @@ void pv_state_set_terminal_supports_utf8(pvstate_t state, bool val)
 void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const char **input_files)
 {
 	unsigned int file_idx;
+	/*@only@*/ nullable_string_t *new_array;
 
+	/* Free the old array and its contents, if there was one. */
 	if (NULL != state->files.filename) {
 		for (file_idx = 0; file_idx < state->files.file_count; file_idx++) {
-			/*@-unqualifiedtrans@ */
 			free(state->files.filename[file_idx]);
-			/*@+unqualifiedtrans@ */
-			/*
-			 * TODO: find a way to tell splint the array
-			 * contents are "only" and "null" as well as the
-			 * array itself.
-			 */
 		}
 		free(state->files.filename);
 		state->files.filename = NULL;
 		state->files.file_count = 0;
 	}
-	state->files.filename = calloc((size_t) (input_file_count + 1), sizeof(char *));
-	if (NULL == state->files.filename) {
+
+	/* Allocate an empty new array of the right size. */
+	new_array = calloc((size_t) (input_file_count + 1), sizeof(char *));
+	if (NULL == new_array) {
 		/*@-mustfreefresh@ *//* see similar _() issue above */
 		pv_error("%s: %s", _("file list allocation failed"), strerror(errno));
 		/*@+mustfreefresh@ */
 		return;
 	}
+	state->files.filename = new_array;
+
+	/* Populate the new array with copies of the filenames. */
 	for (file_idx = 0; file_idx < input_file_count; file_idx++) {
-		/*@-nullstate@ */
-		state->files.filename[file_idx] = pv_strdup(input_files[file_idx]);
-		if (NULL == state->files.filename[file_idx]) {
+		/*@only@*/ char *new_string;
+		new_string = pv_strdup(input_files[file_idx]);
+		if (NULL == new_string) {
 			/*@-mustfreefresh@ *//* see similar _() issue above */
 			pv_error("%s: %s", _("file list allocation failed"), strerror(errno));
 			/*@+mustfreefresh@ */
 			return;
 		}
+		state->files.filename[file_idx] = new_string;
 	}
 	state->files.file_count = input_file_count;
 }
-
-/*@+nullstate@*/
-/* splint: see unqualifiedtrans note by free() above. */

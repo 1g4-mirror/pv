@@ -131,6 +131,7 @@ typedef uint16_t pvdisplay_bytecount_t;
 typedef uint16_t pvdisplay_width_t;
 #define PVDISPLAY_WIDTH_MAX (65535)	/* UINT16_MAX */
 
+typedef /*@only@*/ /*@null@*/ char * nullable_string_t;
 
 /*
  * Structure for holding PV internal state. Opaque outside the PV library.
@@ -154,7 +155,7 @@ struct pvstate_s {
 	 * Input files *
 	 ***************/
 	struct pvinputfiles_s {
-		/*@only@*/ /*@null@*/ char **filename; /* input filenames */
+		/*@only@*/ /*@null@*/ nullable_string_t *filename; /* input filenames */
 		unsigned int file_count;	 /* number of input files */
 	} files;
 
