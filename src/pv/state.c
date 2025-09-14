@@ -667,7 +667,7 @@ void pv_state_set_terminal_supports_utf8(pvstate_t state, bool val)
 void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const char **input_files)
 {
 	unsigned int file_idx;
-	/*@only@*/ nullable_string_t *new_array;
+	/*@only@ */ nullable_string_t *new_array;
 
 	/* Free the old array and its contents, if there was one. */
 	if (NULL != state->files.filename) {
@@ -691,7 +691,7 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 
 	/* Populate the new array with copies of the filenames. */
 	for (file_idx = 0; file_idx < input_file_count; file_idx++) {
-		/*@only@*/ char *new_string;
+		/*@only@ */ char *new_string;
 		new_string = pv_strdup(input_files[file_idx]);
 		if (NULL == new_string) {
 			/*@-mustfreefresh@ *//* see similar _() issue above */

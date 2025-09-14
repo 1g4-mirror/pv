@@ -325,15 +325,14 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	if ((NULL == next_filename) || (0 == strcmp(next_filename, "-"))) {
 		fd = STDIN_FILENO;
 	} else {
-		fd = open(next_filename, O_RDONLY);		/* flawfinder: ignore */
+		fd = open(next_filename, O_RDONLY);	/* flawfinder: ignore */
 		/*
 		 * flawfinder rationale: the input file list is under the
 		 * control of the operator by its nature, so we can't refuse
 		 * to open symlinks etc as that would be counterintuitive.
 		 */
 		if (fd < 0) {
-			pv_error("%s: %s: %s",
-				 _("failed to read file"), next_filename, strerror(errno));
+			pv_error("%s: %s: %s", _("failed to read file"), next_filename, strerror(errno));
 			state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			return -1;
 		}
@@ -370,8 +369,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		input_file_is_output = false;
 
 	if (input_file_is_output) {
-		pv_error("%s: %s", _("input file is output file"),
-			 NULL == next_filename ? "-" : next_filename);
+		pv_error("%s: %s", _("input file is output file"), NULL == next_filename ? "-" : next_filename);
 		(void) close(fd);
 		state->status.exit_status |= PV_ERROREXIT_OUROBOROS;
 		return -1;
