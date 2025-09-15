@@ -175,6 +175,7 @@ struct pvstate_s {
 		off_t rate_limit;                /* rate limit, in bytes per second */
 		size_t target_buffer_size;       /* buffer size (0=default) */
 		off_t size;                      /* total size of data */
+		/* TODO: replace watch_pid, watch_fd with an array of structs (#12) */
 		pid_t watch_pid;		 /* process to watch fds of */
 		unsigned int skip_errors;        /* skip read errors counter */
 		int watch_fd;			 /* fd to watch */

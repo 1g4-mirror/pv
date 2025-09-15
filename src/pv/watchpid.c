@@ -449,6 +449,11 @@ int pv_watchpid_scanfds(pvstate_t state,
 			continue;
 #endif
 
+		/*
+		 * TODO: determine whether fd_to_idx really helps here,
+		 * since it constrains us to fds < FD_SETSIZE.
+		 */
+
 		/* Skip if the fd is outside the array. */
 		if ((fd < 0) || (fd >= FD_SETSIZE))
 			continue;
