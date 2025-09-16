@@ -131,6 +131,14 @@ typedef uint16_t pvdisplay_bytecount_t;
 typedef uint16_t pvdisplay_width_t;
 #define PVDISPLAY_WIDTH_MAX (65535)	/* UINT16_MAX */
 
+/* Process and (optional) file descriptor to watch with "--watchfd". */
+struct pvwatchspec_s {
+	pid_t pid;		 /* process to watch fds of */
+	int fd;			 /* fd to watch, or 0 for all */
+};
+typedef struct pvwatchspec_s *pvwatchspec_t;
+
+/* String pointer, that is the only pointer to this resource, that can be null. */
 typedef /*@only@*/ /*@null@*/ char * nullable_string_t;
 
 /*
