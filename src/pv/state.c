@@ -323,6 +323,15 @@ void pv_state_free(pvstate_t state)
 		state->files.filename = NULL;
 	}
 
+	if (NULL != state->watchfd.pid) {
+		free(state->watchfd.pid);
+		state->watchfd.pid = NULL;
+	}
+	if (NULL != state->watchfd.fd) {
+		free(state->watchfd.fd);
+		state->watchfd.fd = NULL;
+	}
+
 	free(state);
 
 	return;
@@ -702,4 +711,50 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 		state->files.filename[file_idx] = new_string;
 	}
 	state->files.file_count = input_file_count;
+}
+
+/*
+ * Set the arrays of watchfd process IDs and file descriptors.
+ */
+void pv_state_watchfds(pvstate_t state, unsigned int watchfd_count, const pid_t * pids, const int *fds)
+{
+	unsigned int item_idx;
+	/*@only@ */ pid_t *new_pid_array = NULL;
+	/*@only@ */ int *new_fd_array = NULL;
+
+	/* Free the old arrays, if there were any. */
+	if (NULL != state->watchfd.pid) {
+		free(state->watchfd.pid);
+		state->watchfd.pid = NULL;
+	}
+	if (NULL != state->watchfd.fd) {
+		free(state->watchfd.fd);
+		state->watchfd.fd = NULL;
+	}
+	state->watchfd.count = 0;
+
+	/* Allocate empty new arrays of the right size. */
+	new_pid_array = calloc((size_t) (watchfd_count + 1), sizeof(pid_t));
+	if (NULL == new_pid_array) {
+		/*@-mustfreefresh@ *//* see similar _() issue above */
+		pv_error("%s: %s", _("process list allocation failed"), strerror(errno));
+		/*@+mustfreefresh@ */
+		return;
+	}
+	state->watchfd.pid = new_pid_array;
+	new_fd_array = calloc((size_t) (watchfd_count + 1), sizeof(int));
+	if (NULL == new_fd_array) {
+		/*@-mustfreefresh@ *//* see similar _() issue above */
+		pv_error("%s: %s", _("file descriptor list allocation failed"), strerror(errno));
+		/*@+mustfreefresh@ */
+		return;
+	}
+	state->watchfd.fd = new_fd_array;
+
+	/* Populate the new arrays with the values supplied. */
+	for (item_idx = 0; item_idx < watchfd_count; item_idx++) {
+		state->watchfd.pid[item_idx] = pids[item_idx];
+		state->watchfd.fd[item_idx] = fds[item_idx];
+	}
+	state->watchfd.count = watchfd_count;
 }

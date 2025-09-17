@@ -131,13 +131,6 @@ typedef uint16_t pvdisplay_bytecount_t;
 typedef uint16_t pvdisplay_width_t;
 #define PVDISPLAY_WIDTH_MAX (65535)	/* UINT16_MAX */
 
-/* Process and (optional) file descriptor to watch with "--watchfd". */
-struct pvwatchspec_s {
-	pid_t pid;		 /* process to watch fds of */
-	int fd;			 /* fd to watch, or 0 for all */
-};
-typedef struct pvwatchspec_s *pvwatchspec_t;
-
 /* String pointer, that is the only pointer to this resource, that can be null. */
 typedef /*@only@*/ /*@null@*/ char * nullable_string_t;
 
@@ -167,6 +160,15 @@ struct pvstate_s {
 		unsigned int file_count;	 /* number of input files */
 	} files;
 
+	/*********************************
+	 * Items to watch with --watchfd *
+	 *********************************/
+	struct pvwatchspec_s {
+		/*@only@*/ /*@null@*/ pid_t *pid; /* array of processes to watch fds of */
+		/*@only@*/ /*@null@*/ int *fd;	/* array of fds to watch in each one (0=all) */
+		unsigned int count;	/* number of items in these arrays */
+	} watchfd;
+
 	/*******************
 	 * Program control *
 	 *******************/
@@ -183,7 +185,7 @@ struct pvstate_s {
 		off_t rate_limit;                /* rate limit, in bytes per second */
 		size_t target_buffer_size;       /* buffer size (0=default) */
 		off_t size;                      /* total size of data */
-		/* TODO: replace watch_pid, watch_fd with an array of structs (#12) */
+		/* TODO: replace watch_pid, watch_fd with arrays (#12) */
 		pid_t watch_pid;		 /* process to watch fds of */
 		unsigned int skip_errors;        /* skip read errors counter */
 		int watch_fd;			 /* fd to watch */

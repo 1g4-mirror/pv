@@ -240,6 +240,7 @@ extern void pv_state_average_rate_window_set(pvstate_t, unsigned int);
 extern void pv_state_set_terminal_supports_utf8(pvstate_t, bool);
 
 extern void pv_state_inputfiles(pvstate_t, unsigned int, const char **);
+extern void pv_state_watchfds(pvstate_t, unsigned int, const pid_t *, const int *);
 
 /*
  * Work out whether we are in the foreground.

@@ -56,8 +56,8 @@ struct opts_s {
 	unsigned int height;           /* screen height */
 	unsigned int argc;             /* number of non-option arguments */
 	unsigned int argv_length;      /* allocated array size */
-	size_t watchfd_count;	       /* number of watchfd items */
-	size_t watchfd_length;	       /* allocated array size */
+	unsigned int watchfd_count;	       /* number of watchfd items */
+	unsigned int watchfd_length;	       /* allocated array size */
 	bool do_nothing;               /* exit-without-doing-anything flag */
 	bool progress;                 /* progress bar flag */
 	bool timer;                    /* timer flag */

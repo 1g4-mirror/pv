@@ -388,6 +388,13 @@ int main(int argc, char **argv)
 	}
 
 	/*
+	 * Put the list of watchfd items into the PV internal state.
+	 */
+	if ((opts->watchfd_count > 0) && (NULL != opts->watchfd_pid) && (NULL != opts->watchfd_fd)) {
+		pv_state_watchfds(state, opts->watchfd_count, opts->watchfd_pid, opts->watchfd_fd);
+	}
+
+	/*
 	 * If stderr is not a terminal and we're neither forcing output nor
 	 * outputting numerically, we will have nothing to display at all.
 	 */
