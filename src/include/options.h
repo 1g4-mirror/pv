@@ -39,6 +39,8 @@ struct opts_s {
 	/*@keep@*/ /*@null@*/ char *pidfile; /* PID file, if any */
 	/*@keep@*/ /*@null@*/ char *store_and_forward_file; /* store and forward file, if any */
 	/*@keep@*/ /*@null@*/ char *extra_display; /* extra display specifier, if any */
+	/*@keep@*/ /*@null@*/ pid_t *watchfd_pid;  /* array of processes to watch fds of */
+	/*@keep@*/ /*@null@*/ int *watchfd_fd;  /* array of fds to watch in each one (0=all) */
 	/*@keep@*/ /*@null@*/ const char **argv;   /* array of non-option arguments */
 	size_t lastwritten;            /* show N bytes last written */
 	off_t rate_limit;              /* rate limit, in bytes per second */
@@ -54,6 +56,8 @@ struct opts_s {
 	unsigned int height;           /* screen height */
 	unsigned int argc;             /* number of non-option arguments */
 	unsigned int argv_length;      /* allocated array size */
+	size_t watchfd_count;	       /* number of watchfd items */
+	size_t watchfd_length;	       /* allocated array size */
 	bool do_nothing;               /* exit-without-doing-anything flag */
 	bool progress;                 /* progress bar flag */
 	bool timer;                    /* timer flag */

@@ -63,6 +63,10 @@ void opts_free( /*@only@ */ opts_t opts)
 		free(opts->store_and_forward_file);
 	if (NULL != opts->extra_display)
 		free(opts->extra_display);
+	if (NULL != opts->watchfd_pid)
+		free(opts->watchfd_pid);
+	if (NULL != opts->watchfd_fd)
+		free(opts->watchfd_fd);
 	if (NULL != opts->argv)
 		free(opts->argv);
 	/*@+keeptrans@ */
@@ -100,6 +104,40 @@ bool opts_add_file(opts_t opts, const char *filename)
 	 */
 
 	opts->argv[opts->argc++] = filename;
+
+	return true;
+}
+
+/*
+ * Add a process ID and file descriptor to the list of items to watch with
+ * --watchfd, returning false on error.
+ */
+static bool opts_add_watchfd(opts_t opts, pid_t pid, int fd)
+{
+	/*@-branchstate@ */
+	if ((opts->watchfd_count >= opts->watchfd_length) || (NULL == opts->watchfd_pid)) {
+		opts->watchfd_length = opts->watchfd_count + 10;
+		/*@-keeptrans@ */
+		opts->watchfd_pid = realloc(opts->watchfd_pid, opts->watchfd_length * sizeof(pid_t));
+		opts->watchfd_fd = realloc(opts->watchfd_fd, opts->watchfd_length * sizeof(int));
+		/*@+keeptrans@ */
+		if ((NULL == opts->watchfd_pid) || (NULL == opts->watchfd_fd)) {
+			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			opts->watchfd_length = 0;
+			opts->watchfd_count = 0;
+			return false;
+		}
+	}
+	/*@+branchstate@ */
+
+	/*
+	 * splint notes: we turned off "branchstate" and "keeptrans" above
+	 * because of the same reason as in opts_add_file().
+	 */
+
+	opts->watchfd_pid[opts->watchfd_count] = pid;
+	opts->watchfd_fd[opts->watchfd_count] = fd;
+	opts->watchfd_count++;
 
 	return true;
 }
@@ -468,6 +506,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				opts_free(opts);
 				return NULL;
 				/*@+mustfreefresh@ */
+			}
+			if (!opts_add_watchfd(opts, (pid_t) check_pid, check_fd)) {
+				opts_free(opts);
+				return NULL;
 			}
 			break;
 		default:
