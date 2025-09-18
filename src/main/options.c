@@ -410,6 +410,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 
 	numopts = 0;
 
+	opts->action = PV_ACTION_TRANSFER;
 	opts->interval = 1;
 	opts->delay_start = 0;
 	opts->watch_pid = 0;
@@ -507,10 +508,6 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				return NULL;
 				/*@+mustfreefresh@ */
 			}
-			if (!opts_add_watchfd(opts, (pid_t) check_pid, check_fd)) {
-				opts_free(opts);
-				return NULL;
-			}
 			break;
 		default:
 			break;
@@ -522,11 +519,11 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		switch (c) {
 		case 'h':
 			display_help();
-			opts->do_nothing = true;
+			opts->action = PV_ACTION_NOTHING;
 			return opts;	    /* early return */
 		case 'V':
 			display_version();
-			opts->do_nothing = true;
+			opts->action = PV_ACTION_NOTHING;
 			return opts;	    /* early return */
 		case 'p':
 			opts->progress = true;
@@ -683,6 +680,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				opts_free(opts);
 				return NULL;
 			}
+			opts->action = PV_ACTION_STORE_AND_FORWARD;
 			break;
 		case 'R':
 			opts->remote = (pid_t) pv_getnum_count(optarg, false);
@@ -718,6 +716,11 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			(void) sscanf(optarg, "%u:%d", &parse_pid, &parse_fd);
 			opts->watch_pid = (pid_t) parse_pid;
 			opts->watch_fd = parse_fd;
+			if (!opts_add_watchfd(opts, (pid_t) parse_pid, parse_fd)) {
+				opts_free(opts);
+				return NULL;
+			}
+			opts->action = PV_ACTION_WATCHFD;
 			break;
 		case 'o':
 			opts->output = pv_strdup(optarg);
@@ -766,7 +769,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	if (NULL == opts)
 		return NULL;
 
-	if (0 != opts->watch_pid) {
+	if (PV_ACTION_WATCHFD == opts->action) {
 		if (opts->linemode || opts->null_terminated_lines || opts->stop_at_size
 		    || (opts->skip_errors > 0) || (opts->buffer_size > 0)
 		    || (opts->rate_limit > 0)) {
@@ -796,6 +799,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			/*@+mustfreefresh@ */
 		}
 
+		/* TODO: accept additional args as pid[:fd] */
 		if (optind < (int) argc) {
 			/*@-mustfreefresh@ *//* see above */
 			fprintf(stderr, "%s: %s\n", opts->program_name,
@@ -846,8 +850,6 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			return NULL;
 		}
 	}
-
-	/* TODO: set an enum to say which mode to use (nothing, PV, watchfd) */
 
 	return opts;
 }

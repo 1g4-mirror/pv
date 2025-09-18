@@ -24,6 +24,16 @@ struct opts_s;
 typedef struct opts_s *opts_t;
 
 /*
+ * Overall program actions to select.
+ */
+typedef enum {
+	PV_ACTION_NOTHING,		/* do nothing, and exit */
+	PV_ACTION_TRANSFER,		/* transfer data */
+	PV_ACTION_STORE_AND_FORWARD,	/* store to file, then output from it */
+	PV_ACTION_WATCHFD		/* watch process file descriptors */
+} pvaction_t;
+
+/*
  * Structure describing run-time options.
  *
  * Members are ordered by size to minimise padding.
@@ -58,7 +68,7 @@ struct opts_s {
 	unsigned int argv_length;      /* allocated array size */
 	unsigned int watchfd_count;	       /* number of watchfd items */
 	unsigned int watchfd_length;	       /* allocated array size */
-	bool do_nothing;               /* exit-without-doing-anything flag */
+	pvaction_t action;	       /* the program action to perform */
 	bool progress;                 /* progress bar flag */
 	bool timer;                    /* timer flag */
 	bool eta;                      /* ETA flag */

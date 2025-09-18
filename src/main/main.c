@@ -308,7 +308,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Early exit if necessary, such as with "-h". */
-	if (opts->do_nothing) {
+	if (PV_ACTION_NOTHING == opts->action) {
 		debug("%s", "nothing to do - exiting with status 0");
 		opts_free(opts);
 		return 0;
@@ -465,7 +465,7 @@ int main(int argc, char **argv)
 	pv_state_stop_at_size_set(state, opts->stop_at_size);
 
 	/* Total size calculation, in normal transfer mode. */
-	if (0 == opts->watch_pid) {
+	if (PV_ACTION_TRANSFER == opts->action) {
 		/*
 		 * If no size was given, try to calculate the total size.
 		 */
@@ -533,22 +533,30 @@ int main(int argc, char **argv)
 	pv_sig_init(state);
 
 	/* Run the appropriate main loop. */
-	if (0 == opts->watch_pid && NULL == opts->store_and_forward_file) {
+	switch (opts->action) {
+	case PV_ACTION_NOTHING:
+		break;
+	case PV_ACTION_TRANSFER:
 		/* Normal "transfer data" mode. */
 		pv_remote_init();
 		retcode = pv_main_loop(state);
 		pv_remote_fini();
-	} else if (0 == opts->watch_pid && NULL != opts->store_and_forward_file) {
+		break;
+	case PV_ACTION_STORE_AND_FORWARD:
 		/* Store-and-forward transfer mode. */
 		pv_remote_init();
 		retcode = pv__store_and_forward(state, opts, can_have_eta);
 		pv_remote_fini();
-	} else if (0 != opts->watch_pid && -1 == opts->watch_fd) {
-		/* "Watch all file descriptors of another process" mode. */
-		retcode = pv_watchpid_loop(state);
-	} else if (0 != opts->watch_pid && -1 != opts->watch_fd) {
-		/* "Watch a specific file descriptor of another process" mode. */
-		retcode = pv_watchfd_loop(state);
+		break;
+	case PV_ACTION_WATCHFD:
+		if (-1 == opts->watch_fd) {
+			/* "Watch all file descriptors of another process" mode. */
+			retcode = pv_watchpid_loop(state);
+		} else if (-1 != opts->watch_fd) {
+			/* "Watch a specific file descriptor of another process" mode. */
+			retcode = pv_watchfd_loop(state);
+		}
+		break;
 	}
 
 	/* Clear up the PID file, if one was written. */
