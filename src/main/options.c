@@ -847,5 +847,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		}
 	}
 
+	/* TODO: set an enum to say which mode to use (nothing, PV, watchfd) */
+
 	return opts;
 }
