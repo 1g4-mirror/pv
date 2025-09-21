@@ -413,8 +413,6 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	opts->action = PV_ACTION_TRANSFER;
 	opts->interval = 1;
 	opts->delay_start = 0;
-	opts->watch_pid = 0;
-	opts->watch_fd = -1;
 	opts->average_rate_window = 30;
 
 	opts->width_set_manually = false;
@@ -714,8 +712,6 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			parse_fd = -1;
 			/* No syntax check here, already done earlier */
 			(void) sscanf(optarg, "%u:%d", &parse_pid, &parse_fd);
-			opts->watch_pid = (pid_t) parse_pid;
-			opts->watch_fd = parse_fd;
 			if (!opts_add_watchfd(opts, (pid_t) parse_pid, parse_fd)) {
 				opts_free(opts);
 				return NULL;

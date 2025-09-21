@@ -59,8 +59,6 @@ struct opts_s {
 	off_t error_skip_block;        /* skip block size, 0 for adaptive */
 	pid_t remote;                  /* PID of pv to update settings of */
 	unsigned int skip_errors;      /* skip read errors counter */
-	pid_t watch_pid;	       /* process to watch fds of */
-	int watch_fd;		       /* fd to watch */
 	unsigned int average_rate_window; /* time window in seconds for average rate calculations */
 	unsigned int width;            /* screen width */
 	unsigned int height;           /* screen height */

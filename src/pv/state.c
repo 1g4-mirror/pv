@@ -187,8 +187,7 @@ pvstate_t pv_state_alloc(void)
 		return NULL;
 	memset(state, 0, sizeof(*state));
 
-	state->control.watch_pid = 0;
-	state->control.watch_fd = -1;
+	state->watchfd.count = 0;
 	state->control.output_fd = -1;
 #ifdef HAVE_IPC
 	state->cursor.shmid = -1;
@@ -617,16 +616,6 @@ void pv_state_extra_display_set(pvstate_t state, /*@null@ */ const char *val)
 		if (NULL != word_start)
 			word_start += offset;
 	}
-}
-
-void pv_state_watch_pid_set(pvstate_t state, pid_t val)
-{
-	state->control.watch_pid = val;
-}
-
-void pv_state_watch_fd_set(pvstate_t state, int val)
-{
-	state->control.watch_fd = val;
 }
 
 void pv_state_output_set(pvstate_t state, int fd, const char *name)

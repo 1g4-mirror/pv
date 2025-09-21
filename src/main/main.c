@@ -518,8 +518,6 @@ int main(int argc, char **argv)
 	pv_state_default_bar_style_set(state, opts->default_bar_style);
 	pv_state_format_string_set(state, opts->format);
 	pv_state_extra_display_set(state, opts->extra_display);
-	pv_state_watch_pid_set(state, opts->watch_pid);
-	pv_state_watch_fd_set(state, opts->watch_fd);
 	pv_state_average_rate_window_set(state, opts->average_rate_window);
 
 	pv_state_set_format(state, opts->progress, opts->timer, can_have_eta ? opts->eta : false,
@@ -549,10 +547,10 @@ int main(int argc, char **argv)
 		pv_remote_fini();
 		break;
 	case PV_ACTION_WATCHFD:
-		if (-1 == opts->watch_fd) {
+		if ((opts->watchfd_count > 0) && (NULL != opts->watchfd_fd) && (-1 == opts->watchfd_fd[0])) {
 			/* "Watch all file descriptors of another process" mode. */
 			retcode = pv_watchpid_loop(state);
-		} else if (-1 != opts->watch_fd) {
+		} else if ((opts->watchfd_count > 0) && (NULL != opts->watchfd_fd) && (-1 != opts->watchfd_fd[0])) {
 			/* "Watch a specific file descriptor of another process" mode. */
 			retcode = pv_watchfd_loop(state);
 		}

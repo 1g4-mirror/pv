@@ -584,9 +584,9 @@ int pv_main_loop(pvstate_t state)
 
 
 /*
- * Watch the progress of file descriptor state->control.watch_fd in process
- * state->control.watch_pid and show details about the transfer on standard error
- * according to the given options.
+ * Watch the progress of file descriptor state->watchfd.fd[0] in process
+ * state->watch_fd.pid[0] and show details about the transfer on standard
+ * error according to the given options.
  *
  * Returns nonzero on error.
  *
@@ -601,9 +601,17 @@ int pv_watchfd_loop(pvstate_t state)
 	bool ended, first_check;
 	int rc;
 
+	/* If there's nothing to watch - do nothing. */
+	if (state->watchfd.count < 1)
+		return 0;
+	if (NULL == state->watchfd.pid)
+		return PV_ERROREXIT_MEMORY;
+	if (NULL == state->watchfd.fd)
+		return PV_ERROREXIT_MEMORY;
+
 	memset(&info, 0, sizeof(info));
-	info.watch_pid = state->control.watch_pid;
-	info.watch_fd = state->control.watch_fd;
+	info.watch_pid = state->watchfd.pid[0];
+	info.watch_fd = state->watchfd.fd[0];
 	pv_reset_watchfd(&info);
 	rc = pv_watchfd_info(state, &info, false);
 	if (0 != rc) {
@@ -748,9 +756,9 @@ int pv_watchfd_loop(pvstate_t state)
 
 
 /*
- * Watch the progress of all file descriptors in process state->control.watch_pid
- * and show details about the transfers on standard error according to the
- * given options.
+ * Watch the progress of all file descriptors in process
+ * state->watchfd.pid[0] and show details about the transfers on standard
+ * error according to the given options.
  *
  * Replaces format_string in "state" so that starts with "%N " if it doesn't
  * already do so.
@@ -775,12 +783,18 @@ int pv_watchpid_loop(pvstate_t state)
 	 * explicitly terminated with \0.
 	 */
 
+	/* If there's nothing to watch - do nothing. */
+	if (state->watchfd.count < 1)
+		return 0;
+	if (NULL == state->watchfd.pid)
+		return PV_ERROREXIT_MEMORY;
+
 	/*
 	 * Make sure the process exists first, so we can give an error if
 	 * it's not there at the start.
 	 */
-	if (kill(state->control.watch_pid, 0) != 0) {
-		pv_error("%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
+	if (kill(state->watchfd.pid[0], 0) != 0) {
+		pv_error("%s %u: %s", _("pid"), state->watchfd.pid[0], strerror(errno));
 		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		return PV_ERROREXIT_ACCESS;
 	}
@@ -837,9 +851,9 @@ int pv_watchpid_loop(pvstate_t state)
 
 		pv_elapsedtime_read(&cur_time);
 
-		if (kill(state->control.watch_pid, 0) != 0) {
+		if (kill(state->watchfd.pid[0], 0) != 0) {
 			if (first_pass) {
-				pv_error("%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
+				pv_error("%s %u: %s", _("pid"), state->watchfd.pid[0], strerror(errno));
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				if (NULL != info_array)
 					free(info_array);
@@ -887,10 +901,10 @@ int pv_watchpid_loop(pvstate_t state)
 			}
 		}
 
-		rc = pv_watchpid_scanfds(state, state->control.watch_pid, &array_length, &info_array, fd_to_idx);
+		rc = pv_watchpid_scanfds(state, state->watchfd.pid[0], &array_length, &info_array, fd_to_idx);
 		if (rc != 0) {
 			if (first_pass) {
-				pv_error("%s %u: %s", _("pid"), state->control.watch_pid, strerror(errno));
+				pv_error("%s %u: %s", _("pid"), state->watchfd.pid[0], strerror(errno));
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				if (NULL != info_array)
 					free(info_array);
