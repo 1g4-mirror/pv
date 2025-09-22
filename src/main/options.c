@@ -795,15 +795,34 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			/*@+mustfreefresh@ */
 		}
 
-		/* TODO: accept additional args as pid[:fd] */
-		if (optind < (int) argc) {
-			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: %s\n", opts->program_name,
-				_("cannot transfer files when watching file descriptors"));
-			opts_free(opts);
-			return NULL;
-			/*@+mustfreefresh@ */
+		/* Accept additional pid[:fd] arguments. */
+		while (optind < (int) argc) {
+			parse_pid = 0;
+			parse_fd = -1;
+			if (sscanf(argv[optind], "%u:%d", &parse_pid, &parse_fd)
+			    < 1) {
+				/*@-mustfreefresh@ *//* see above */
+				fprintf(stderr, "%s: -d: %s: %s\n",
+					opts->program_name, argv[optind], _("process ID or pid:fd pair expected"));
+				opts_free(opts);
+				return NULL;
+				/*@+mustfreefresh@ */
+			}
+			if (parse_pid < 1) {
+				/*@-mustfreefresh@ *//* see above */
+				fprintf(stderr, "%s: -d: %s: %s\n", opts->program_name, argv[optind],
+					_("invalid process ID"));
+				opts_free(opts);
+				return NULL;
+				/*@+mustfreefresh@ */
+			}
+			if (!opts_add_watchfd(opts, (pid_t) parse_pid, parse_fd)) {
+				opts_free(opts);
+				return NULL;
+			}
+			optind++;
 		}
+
 #ifndef __APPLE__
 		if (0 != access("/proc/self/fdinfo", X_OK)) {	/* flawfinder: ignore */
 			/*
