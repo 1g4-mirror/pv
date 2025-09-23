@@ -795,6 +795,15 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			/*@+mustfreefresh@ */
 		}
 
+		if (NULL != opts->output) {
+			/*@-mustfreefresh@ *//* see above */
+			fprintf(stderr, "%s: -o: %s\n", opts->program_name,
+				_("cannot transfer files when watching file descriptors"));
+			opts_free(opts);
+			return NULL;
+			/*@+mustfreefresh@ */
+		}
+
 		/* Accept additional pid[:fd] arguments. */
 		while (optind < (int) argc) {
 			parse_pid = 0;
