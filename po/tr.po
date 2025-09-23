@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-09-23 05:37+0100\n"
+"POT-Creation-Date: 2025-09-23 05:45+0100\n"
 "PO-Revision-Date: 2024-10-12 23:51+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -330,11 +330,11 @@ msgstr "tamsayı bağımsız değişkeni bekleniyor"
 msgid "numeric argument expected"
 msgstr "sayısal bağımsız değişken bekleniyor"
 
-#: src/main/options.c:497 src/main/options.c:806
+#: src/main/options.c:497 src/main/options.c:815
 msgid "process ID or pid:fd pair expected"
 msgstr "süreç kimliği (ID) veya pid:fd çifti bekleniyor"
 
-#: src/main/options.c:504 src/main/options.c:814
+#: src/main/options.c:504 src/main/options.c:823
 msgid "invalid process ID"
 msgstr "geçersiz süreç kimliği (ID)"
 
@@ -364,7 +364,11 @@ msgstr "dosya tanımlayıcılarını izlerken imleç konumlandırmayı kullanama
 msgid "cannot use remote control when watching file descriptors"
 msgstr "dosya tanımlayıcılarını izlerken uzaktan kumandayı kullanamaz"
 
-#: src/main/options.c:836
+#: src/main/options.c:801
+msgid "cannot transfer files when watching file descriptors"
+msgstr "dosya tanımlayıcıları izlenirken dosya aktarılamıyor"
+
+#: src/main/options.c:845
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "/proc/self/fdinfo olmayan sistemlerde kullanılamaz"
 
@@ -568,6 +572,3 @@ msgstr "fd"
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:203
 msgid "not a regular file or block device"
 msgstr "normal bir dosya veya blok aygıtı değil"
-
-#~ msgid "cannot transfer files when watching file descriptors"
-#~ msgstr "dosya tanımlayıcıları izlenirken dosya aktarılamıyor"

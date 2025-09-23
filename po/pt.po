@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-09-23 05:37+0100\n"
+"POT-Creation-Date: 2025-09-23 05:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -333,11 +333,11 @@ msgstr "argumento inteiro esperado"
 msgid "numeric argument expected"
 msgstr "argumento numérico esperado"
 
-#: src/main/options.c:497 src/main/options.c:806
+#: src/main/options.c:497 src/main/options.c:815
 msgid "process ID or pid:fd pair expected"
 msgstr "ID do processo ou par pid:fd esperado"
 
-#: src/main/options.c:504 src/main/options.c:814
+#: src/main/options.c:504 src/main/options.c:823
 msgid "invalid process ID"
 msgstr "ID de processo inválido"
 
@@ -369,7 +369,11 @@ msgstr ""
 msgid "cannot use remote control when watching file descriptors"
 msgstr "não pode usar o controle remoto ao assistir os descritores de arquivo"
 
-#: src/main/options.c:836
+#: src/main/options.c:801
+msgid "cannot transfer files when watching file descriptors"
+msgstr "não pode transferir arquivos ao assistir descritores de arquivo"
+
+#: src/main/options.c:845
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "não disponível em sistemas sem /proc/self/fdinfo"
 
@@ -572,6 +576,3 @@ msgstr ""
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:203
 msgid "not a regular file or block device"
 msgstr "não é um arquivo regular ou dispositivo de bloqueio"
-
-#~ msgid "cannot transfer files when watching file descriptors"
-#~ msgstr "não pode transferir arquivos ao assistir descritores de arquivo"

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-09-23 05:37+0100\n"
+"POT-Creation-Date: 2025-09-23 05:45+0100\n"
 "PO-Revision-Date: 2025-01-14 20:39+0000\n"
 "Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -347,11 +347,11 @@ msgstr "Ganzzahliges Argument erwartet"
 msgid "numeric argument expected"
 msgstr "numerisches Argument erwartet"
 
-#: src/main/options.c:497 src/main/options.c:806
+#: src/main/options.c:497 src/main/options.c:815
 msgid "process ID or pid:fd pair expected"
 msgstr "Prozess-ID oder PID:FD-Paar erwartet"
 
-#: src/main/options.c:504 src/main/options.c:814
+#: src/main/options.c:504 src/main/options.c:823
 msgid "invalid process ID"
 msgstr "ungültige Prozess-ID"
 
@@ -385,7 +385,12 @@ msgstr ""
 "Beim Beobachten von Dateideskriptoren kann die Fernbedienung nicht verwenden "
 "werden"
 
-#: src/main/options.c:836
+#: src/main/options.c:801
+msgid "cannot transfer files when watching file descriptors"
+msgstr ""
+"Beim Beobachten von Dateideskriptoren können Dateien nicht übertragen werden"
+
+#: src/main/options.c:845
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "Nicht verfügbar auf Systemen ohne /proc/self/fdinfo"
 
@@ -588,8 +593,3 @@ msgstr "fd"
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:203
 msgid "not a regular file or block device"
 msgstr "ist weder eine normale Datei noch ein Blockgerät"
-
-#~ msgid "cannot transfer files when watching file descriptors"
-#~ msgstr ""
-#~ "Beim Beobachten von Dateideskriptoren können Dateien nicht übertragen "
-#~ "werden"
