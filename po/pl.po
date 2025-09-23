@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-09-14 16:41+0100\n"
+"POT-Creation-Date: 2025-09-23 05:37+0100\n"
 "PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -298,69 +298,69 @@ msgstr "(wejście)"
 msgid "state allocation failed"
 msgstr "alokacja stanu programu nie powiodła się"
 
-#: src/main/options.c:146 src/pv/file.c:342
+#: src/main/options.c:184 src/pv/file.c:342
 msgid "failed to stat file"
 msgstr "nie udało się wykonać operacji stat na pliku"
 
-#: src/main/options.c:160
+#: src/main/options.c:198
 msgid "is a directory"
 msgstr "jest katalogiem"
 
-#: src/main/options.c:189
+#: src/main/options.c:227
 msgid "failed to generate sysfs filename"
 msgstr "nie udało się wygenerować nazwy pliku dla sysfs"
 
-#: src/main/options.c:211
+#: src/main/options.c:249
 msgid "failed to read sysfs size file"
 msgstr "nie udało się odczytać rozmiaru pliku sysfs"
 
-#: src/main/options.c:231
+#: src/main/options.c:269
 msgid "failed to open block device"
 msgstr "nie udało się otworzyć urządzenia blokowego"
 
-#: src/main/options.c:241
+#: src/main/options.c:279
 msgid "failed to determine size of block device"
 msgstr "nie udało się ustalić rozmiaru urządzenia blokowego"
 
-#: src/main/options.c:347
+#: src/main/options.c:385
 msgid "option structure allocation failed"
 msgstr "nie udało się zaalokować struktur opcji"
 
-#: src/main/options.c:366
+#: src/main/options.c:404
 msgid "option structure argv allocation failed"
 msgstr "nie udało się zaalokować struktur opcji argv"
 
-#: src/main/options.c:419
+#: src/main/options.c:456
 msgid "numeric value not understood"
 msgstr "wartość liczbowa niezrozumiana"
 
-#: src/main/options.c:437
+#: src/main/options.c:474
 msgid "integer argument expected"
 msgstr "oczekiwany argument typu liczby całkowitej"
 
-#: src/main/options.c:449
+#: src/main/options.c:486
 msgid "numeric argument expected"
 msgstr "oczekiwany argument liczbowy"
 
-#: src/main/options.c:460
+#: src/main/options.c:497 src/main/options.c:806
 msgid "process ID or pid:fd pair expected"
 msgstr "oczekiwany proces ID lub para PID:FD"
 
-#: src/main/options.c:467
+#: src/main/options.c:504 src/main/options.c:814
 msgid "invalid process ID"
 msgstr "niepoprawne ID procesu"
 
-#: src/main/options.c:700
+#: src/main/options.c:741
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Spróbuj `%s --help' by uzyskać więcej informacji."
 
-#: src/main/options.c:702
+#: src/main/options.c:743
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Spróbuj `%s -h' by uzyskać więcej informacji."
 
-#: src/main/options.c:733
+#: src/main/options.c:774
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -368,23 +368,19 @@ msgstr ""
 "nie można użyć trybu zliczania linii lub opcji modyfikujących przesył "
 "łącznie z opcją obserwowania deskryptorów plików"
 
-#: src/main/options.c:742
+#: src/main/options.c:783
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "nie można użyć pozycjonowania kursora łącznie z opcją obserwowania "
 "deskryptorów plików"
 
-#: src/main/options.c:751
+#: src/main/options.c:792
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "nie można użyć opcji zaktualizowania ustawień procesu łącznie z opcją "
 "obserwowania deskryptorów plików"
 
-#: src/main/options.c:760
-msgid "cannot transfer files when watching file descriptors"
-msgstr "nie można przesyłać plików z opcją obserwowania deskryptorów plików"
-
-#: src/main/options.c:775
+#: src/main/options.c:836
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "niedostępne na systemach bez /proc/self/fdinfo"
 
@@ -509,7 +505,7 @@ msgstr "prędkość min/śr/max/odch"
 msgid "rate not measured"
 msgstr "prędkość niezmierzona"
 
-#: src/pv/loop.c:783 src/pv/loop.c:842 src/pv/loop.c:893 src/pv/watchpid.c:99
+#: src/pv/loop.c:797 src/pv/loop.c:856 src/pv/loop.c:907 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
 #: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
 #: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
@@ -521,8 +517,20 @@ msgstr "pid"
 msgid "history structure allocation failed"
 msgstr "nie udało się zaalokować struktury historii"
 
-#: src/pv/state.c:686 src/pv/state.c:698
+#: src/pv/state.c:684 src/pv/state.c:696
 msgid "file list allocation failed"
+msgstr "nie udało się zaalokować listy plików"
+
+#: src/pv/state.c:729
+#, fuzzy
+#| msgid "file list allocation failed"
+msgid "process list allocation failed"
+msgstr "nie udało się zaalokować listy plików"
+
+#: src/pv/state.c:737
+#, fuzzy
+#| msgid "file list allocation failed"
+msgid "file descriptor list allocation failed"
 msgstr "nie udało się zaalokować listy plików"
 
 #: src/pv/transfer.c:463
@@ -578,3 +586,6 @@ msgstr "fd"
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:203
 msgid "not a regular file or block device"
 msgstr "plik nie jest plikiem regularnym lub urządzeniem blokowym"
+
+#~ msgid "cannot transfer files when watching file descriptors"
+#~ msgstr "nie można przesyłać plików z opcją obserwowania deskryptorów plików"
