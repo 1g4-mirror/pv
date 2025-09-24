@@ -591,6 +591,7 @@ int pv_main_loop(pvstate_t state)
  * Returns nonzero on error.
  *
  * TODO: unify this with pv_watchpid_loop.
+ * TODO: watch more than one fd, if watchfd.count > 1.
  */
 int pv_watchfd_loop(pvstate_t state)
 {
@@ -608,6 +609,11 @@ int pv_watchfd_loop(pvstate_t state)
 		return PV_ERROREXIT_MEMORY;
 	if (NULL == state->watchfd.fd)
 		return PV_ERROREXIT_MEMORY;
+
+	/* Call pv_watchpid_loop() instead if no specific fd was given. */
+	if (-1 == state->watchfd.fd[0]) {
+		return pv_watchpid_loop(state);
+	}
 
 	memset(&info, 0, sizeof(info));
 	info.watch_pid = state->watchfd.pid[0];

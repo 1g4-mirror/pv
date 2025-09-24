@@ -547,13 +547,8 @@ int main(int argc, char **argv)
 		pv_remote_fini();
 		break;
 	case PV_ACTION_WATCHFD:
-		if ((opts->watchfd_count > 0) && (NULL != opts->watchfd_fd) && (-1 == opts->watchfd_fd[0])) {
-			/* "Watch all file descriptors of another process" mode. */
-			retcode = pv_watchpid_loop(state);
-		} else if ((opts->watchfd_count > 0) && (NULL != opts->watchfd_fd) && (-1 != opts->watchfd_fd[0])) {
-			/* "Watch a specific file descriptor of another process" mode. */
-			retcode = pv_watchfd_loop(state);
-		}
+		/* "Watch file descriptor(s) of another process" mode. */
+		retcode = pv_watchfd_loop(state);
 		break;
 	}
 
