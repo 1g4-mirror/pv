@@ -6,7 +6,7 @@ pv - monitor the progress of data through a pipe
 
 **pv** \[*OPTION*\]\... \[*FILE*\]\...
 
-**pv** **-d**\|**\--watchfd** *PID*\[:*FD*\] \[*OPTION*\]\...
+**pv** \[*OPTION*\]\... **-d**\|**\--watchfd** *PID*\[:*FD*\]\...
 
 **pv** **-R**\|**\--remote** *PID* \[*OPTION*\]\...
 
@@ -364,14 +364,19 @@ are explicitly switched on will be shown.
 **-d PID\[:FD\], \--watchfd PID\[:FD\]**
 
 :   Instead of transferring data, watch file descriptor *FD* of process
-    *PID*, and show its progress. The **pv** process will exit when *FD*
-    either changes to a different file, changes read/write mode, or is
-    closed; other data transfer modifiers - and remote control - may not
-    be used with this option.
+    *PID*, and show its progress. Other data transfer modifiers - and
+    remote control - may not be used with this option.
 
-    If only a *PID* is specified, then that process will be watched, and
-    all regular files and block devices it opens will be shown with a
-    progress bar. The **pv** process will exit when process *PID* exits.
+    If a *PID* is specified without an *FD*, then that process will be
+    watched, and all regular files and block devices it opens will be
+    shown with a progress bar.
+
+    All remaining non-option arguments will also be treated as *PID*s or
+    as *PID*:*FD* pairs.
+
+    The **pv** process will exit when all *FD*s have either changed to a
+    different file, changed read/write mode, or have closed, and all
+    *PID*s (without a specific *FD*) have exited.
 
 **-R PID, \--remote PID**
 
