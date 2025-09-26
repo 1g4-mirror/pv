@@ -618,6 +618,8 @@ int pv_watchfd_loop(pvstate_t state)
 	memset(&info, 0, sizeof(info));
 	info.watch_pid = state->watchfd.pid[0];
 	info.watch_fd = state->watchfd.fd[0];
+	info.displayable = true;
+	info.unused = false;
 	pv_reset_watchfd(&info);
 	rc = pv_watchfd_info(state, &info, false);
 	if (0 != rc) {
@@ -900,7 +902,7 @@ int pv_watchpid_loop(pvstate_t state)
 			state->control.height = new_height;
 
 			for (idx = 0; NULL != info_array && idx < array_length; idx++) {
-				if (info_array[idx].watch_fd < 0)
+				if (!info_array[idx].displayable)
 					continue;
 				pv_watchpid_setname(state, &(info_array[idx]));
 				info_array[idx].flags.reparse_display = 1;
@@ -934,15 +936,20 @@ int pv_watchpid_loop(pvstate_t state)
 			if (idx < 0)
 				continue;
 
-			if (info_array[idx].watch_fd < 0) {
+			if (info_array[idx].unused) {
+				debug("%s %d: %s", "fd", fd, "unused array entry - skipping");
+				continue;
+			}
+
+			if (!info_array[idx].displayable) {
 				/*
 				 * Non-displayable fd - just remove if
 				 * changed
 				 */
 				if (pv_watchfd_changed(&(info_array[idx]))) {
 					fd_to_idx[fd] = -1;
-					info_array[idx].watch_pid = 0;
-					info_array[idx].watch_fd = -1;
+					info_array[idx].unused = true;
+					info_array[idx].displayable = false;
 					pv_freecontents_watchfd(&(info_array[idx]));
 					debug("%s %d: %s", "fd", fd, "removing");
 				}
@@ -962,8 +969,8 @@ int pv_watchpid_loop(pvstate_t state)
 
 			if (position_now < 0) {
 				fd_to_idx[fd] = -1;
-				info_array[idx].watch_pid = 0;
-				info_array[idx].watch_fd = -1;
+				info_array[idx].unused = true;
+				info_array[idx].displayable = false;
 				pv_freecontents_watchfd(&(info_array[idx]));
 				debug("%s %d: %s", "fd", fd, "removing");
 				continue;
@@ -1069,7 +1076,8 @@ int pv_watchpid_loop(pvstate_t state)
 	 */
 	for (idx = 0; NULL != info_array && idx < array_length; idx++) {
 		pv_freecontents_watchfd(&(info_array[idx]));
-		info_array[idx].watch_fd = -1;
+		info_array[idx].unused = true;
+		info_array[idx].displayable = false;
 	}
 
 	if (NULL != info_array)

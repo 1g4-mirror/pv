@@ -514,7 +514,9 @@ struct pvwatchfd_s {
 	off_t position;			 /* position last seen at */
 	struct timespec start_time;	 /* time we started watching the fd */
 	pid_t watch_pid;		 /* PID to watch */
-	int watch_fd;			 /* fd to watch, -1 = not displayed */
+	int watch_fd;			 /* fd to watch */
+	bool displayable;		 /* false if not displayable */
+	bool unused;			 /* true if free for re-use */
 };
 typedef struct pvwatchfd_s *pvwatchfd_t;
 

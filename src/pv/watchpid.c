@@ -353,6 +353,8 @@ static bool extend_info_array(int *array_length_ptr, pvwatchfd_t * info_array_pt
 		return false;
 	}
 
+	new_info_array[array_length - 1].unused = true;
+
 	debug("%s", "extended info array");
 
 	*info_array_ptr = new_info_array;
@@ -466,12 +468,11 @@ int pv_watchpid_scanfds(pvstate_t state,
 		}
 
 		/*
-		 * See if there's an empty slot we can re-use. An empty slot
-		 * has a watch_pid of 0.
+		 * See if there's an empty slot we can re-use.
 		 */
 		use_idx = -1;
 		for (check_idx = 0; check_idx < array_length; check_idx++) {
-			if (info_array[check_idx].watch_pid == 0) {
+			if (info_array[check_idx].unused) {
 				use_idx = check_idx;
 				break;
 			}
@@ -498,6 +499,8 @@ int pv_watchpid_scanfds(pvstate_t state,
 		pv_reset_watchfd(&(info_array[use_idx]));
 		info_array[use_idx].watch_pid = watch_pid;
 		info_array[use_idx].watch_fd = fd;
+		info_array[use_idx].unused = false;
+		info_array[use_idx].displayable = true;
 
 		/*
 		 * Set the average rate window so that a new history buffer
@@ -520,20 +523,20 @@ int pv_watchpid_scanfds(pvstate_t state,
 		if ((rc != 0) && (rc != 4)) {
 			debug("%s %d: %s: %d", "fd", fd, "lookup failed - marking slot for re-use", use_idx);
 			pv_freecontents_watchfd(&(info_array[use_idx]));
-			info_array[use_idx].watch_pid = 0;
-			info_array[use_idx].watch_fd = -1;
+			info_array[use_idx].unused = true;
+			info_array[use_idx].displayable = false;
 			continue;
 		}
 
 		fd_to_idx[fd] = use_idx;
 
 		/*
-		 * Not displayable - set fd to -1 so the main loop doesn't
-		 * show it.
+		 * Not displayable - mark it as such so the main loop
+		 * doesn't show it.
 		 */
 		if (rc != 0) {
 			debug("%s %d: %s", "fd", fd, "marking as not displayable");
-			info_array[use_idx].watch_fd = -1;
+			info_array[use_idx].displayable = false;
 		}
 
 		/* Set the info display_name appropriately. */
