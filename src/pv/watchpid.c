@@ -395,14 +395,35 @@ void pv_freecontents_watchfd(pvwatchfd_t info)
 
 
 /*
+ * Comparison function for qsort, to compare two pvwatchfd_s structures.
+ */
+static int pv_compare_watchfd(const void *a, const void *b)
+{
+	int fd_a, fd_b;
+
+	fd_a = 0;
+	fd_b = 0;
+	if (NULL != a)
+		fd_a = ((pvwatchfd_t) a)->watch_fd;
+	if (NULL != b)
+		fd_b = ((pvwatchfd_t) b)->watch_fd;
+
+	if (fd_a < fd_b)
+		return -1;
+	if (fd_a > fd_b)
+		return 1;
+	return 0;
+}
+
+
+/*
  * Scan the given process and update the arrays with any new file
  * descriptors.
  *
  * Returns 0 on success, 1 if the process no longer exists or could not be
  * read, or 2 for a memory allocation error.
  */
-int pv_watchpid_scanfds(pvstate_t state,
-			pid_t watch_pid, int *array_length_ptr, pvwatchfd_t * info_array_ptr, int *fd_to_idx)
+int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int *array_length_ptr, pvwatchfd_t * info_array_ptr)
 {
 	int array_length = 0;
 	struct pvwatchfd_s *info_array = NULL;
@@ -419,6 +440,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 	char fd_dir[512];		 /* flawfinder: ignore - zeroed, bounded with pv_snprintf(). */
 	DIR *dptr;
 	struct dirent *d;
+	bool changes_made;
 
 	memset(fd_dir, 0, sizeof(fd_dir));
 	(void) pv_snprintf(fd_dir, sizeof(fd_dir), "/proc/%u/fd", watch_pid);
@@ -431,6 +453,8 @@ int pv_watchpid_scanfds(pvstate_t state,
 	array_length = *array_length_ptr;
 	info_array = *info_array_ptr;
 
+	changes_made = false;
+
 #ifdef __APPLE__
 	if (fd_infos_count < 1) {
 		pv_error("%s: no fds found", _("pid"));
@@ -440,7 +464,7 @@ int pv_watchpid_scanfds(pvstate_t state,
 #else
 	while ((d = readdir(dptr)) != NULL) {
 #endif
-		int fd, check_idx, use_idx, rc;
+		int fd, check_idx, found_idx, use_idx, rc;
 		off_t position_now;
 
 		fd = -1;
@@ -451,21 +475,24 @@ int pv_watchpid_scanfds(pvstate_t state,
 			continue;
 #endif
 
-		/*
-		 * TODO: determine whether fd_to_idx really helps here,
-		 * since it constrains us to fds < FD_SETSIZE.
-		 */
-
-		/* Skip if the fd is outside the array. */
-		if ((fd < 0) || (fd >= FD_SETSIZE))
+		/* Skip if the fd is negative. */
+		if (fd < 0)
 			continue;
 
 		/*
 		 * Skip if this fd is already known to us.
 		 */
-		if (fd_to_idx[fd] != -1) {
-			continue;
+		found_idx = -1;
+		for (check_idx = 0; check_idx < array_length; check_idx++) {
+			if (info_array[check_idx].unused)
+				continue;
+			if (info_array[check_idx].watch_fd != fd)
+				continue;
+			found_idx = check_idx;
+			break;
 		}
+		if (found_idx >= 0)
+			continue;
 
 		/*
 		 * See if there's an empty slot we can re-use.
@@ -490,6 +517,8 @@ int pv_watchpid_scanfds(pvstate_t state,
 		}
 
 		debug("%s: %d => index %d", "found new fd", fd, use_idx);
+
+		changes_made = true;
 
 		/*
 		 * Initialise the details of this new entry.
@@ -528,8 +557,6 @@ int pv_watchpid_scanfds(pvstate_t state,
 			continue;
 		}
 
-		fd_to_idx[fd] = use_idx;
-
 		/*
 		 * Not displayable - mark it as such so the main loop
 		 * doesn't show it.
@@ -567,6 +594,14 @@ int pv_watchpid_scanfds(pvstate_t state,
 #else
 	(void) closedir(dptr);
 #endif
+
+	/*
+	 * If any changes were made (i.e. new file descriptors were found),
+	 * sort the array so that file descriptors are always displayed in
+	 * ascending numerical order.
+	 */
+	if (changes_made && NULL != info_array && array_length > 1)
+		qsort(info_array, (size_t) array_length, sizeof(info_array[0]), pv_compare_watchfd);
 
 	return 0;
 }

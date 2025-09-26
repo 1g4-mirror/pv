@@ -779,7 +779,6 @@ int pv_watchpid_loop(pvstate_t state)
 	char new_format_string[512];	 /* flawfinder: ignore */
 	struct pvwatchfd_s *info_array = NULL;
 	int array_length = 0;
-	int fd_to_idx[FD_SETSIZE];
 	struct timespec next_update, cur_time;
 	int idx;
 	int prev_displayed_lines, blank_lines;
@@ -845,14 +844,10 @@ int pv_watchpid_loop(pvstate_t state)
 	pv_elapsedtime_copy(&next_update, &cur_time);
 	pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
 
-	for (idx = 0; idx < FD_SETSIZE; idx++) {
-		fd_to_idx[idx] = -1;
-	}
-
 	prev_displayed_lines = 0;
 
 	while (true) {
-		int rc, fd, displayed_lines;
+		int rc, displayed_lines;
 
 		if (1 == state->flags.trigger_exit)
 			break;
@@ -909,7 +904,7 @@ int pv_watchpid_loop(pvstate_t state)
 			}
 		}
 
-		rc = pv_watchpid_scanfds(state, state->watchfd.pid[0], &array_length, &info_array, fd_to_idx);
+		rc = pv_watchpid_scanfds(state, state->watchfd.pid[0], &array_length, &info_array);
 		if (rc != 0) {
 			if (first_pass) {
 				pv_error("%s %u: %s", _("pid"), state->watchfd.pid[0], strerror(errno));
@@ -924,22 +919,17 @@ int pv_watchpid_loop(pvstate_t state)
 		first_pass = false;
 		displayed_lines = 0;
 
-		for (fd = 0; fd < FD_SETSIZE && NULL != info_array; fd++) {
+		for (idx = 0; NULL != info_array && idx < array_length; idx++) {
 			off_t position_now;
 			struct timespec init_time, transfer_elapsed;
 
+			/* Skip unused array entries. */
+			if (info_array[idx].unused)
+				continue;
+
+			/* No more lines if we've filled the display. */
 			if (displayed_lines >= (int) (state->control.height))
 				break;
-
-			idx = fd_to_idx[fd];
-
-			if (idx < 0)
-				continue;
-
-			if (info_array[idx].unused) {
-				debug("%s %d: %s", "fd", fd, "unused array entry - skipping");
-				continue;
-			}
 
 			if (!info_array[idx].displayable) {
 				/*
@@ -947,17 +937,16 @@ int pv_watchpid_loop(pvstate_t state)
 				 * changed
 				 */
 				if (pv_watchfd_changed(&(info_array[idx]))) {
-					fd_to_idx[fd] = -1;
+					debug("%s %d: %s", "fd", info_array[idx].watch_fd, "removing");
 					info_array[idx].unused = true;
 					info_array[idx].displayable = false;
 					pv_freecontents_watchfd(&(info_array[idx]));
-					debug("%s %d: %s", "fd", fd, "removing");
 				}
 				continue;
 			}
 
 			if (info_array[idx].watch_fd < 0) {
-				debug("%s %d: %s", "fd", fd, "negative fd - skipping");
+				debug("%s %d: %s", "fd", info_array[idx].watch_fd, "negative fd - skipping");
 				continue;
 			}
 
@@ -968,11 +957,10 @@ int pv_watchpid_loop(pvstate_t state)
 			position_now = pv_watchfd_position(&(info_array[idx]));
 
 			if (position_now < 0) {
-				fd_to_idx[fd] = -1;
+				debug("%s %d: %s", "fd", info_array[idx].watch_fd, "removing");
 				info_array[idx].unused = true;
 				info_array[idx].displayable = false;
 				pv_freecontents_watchfd(&(info_array[idx]));
-				debug("%s %d: %s", "fd", fd, "removing");
 				continue;
 			}
 
@@ -1000,7 +988,7 @@ int pv_watchpid_loop(pvstate_t state)
 				pv_tty_write(&(state->flags), "\n", 1);
 			}
 
-			debug("%s %d [%d]: %Lf / %Ld", "fd", fd, idx,
+			debug("%s %d [%d]: %Lf / %Ld", "fd", info_array[idx].watch_fd, idx,
 			      info_array[idx].transfer.elapsed_seconds, position_now);
 
 			if (info_array[idx].watch_fd >= 0) {
