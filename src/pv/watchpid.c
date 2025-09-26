@@ -500,8 +500,8 @@ int pv_watchpid_scanfds(pvstate_t state,
 		info_array[use_idx].watch_fd = fd;
 
 		/*
-		 * Set set the average rate window so that a new history
-		 * buffer is allocated for this state.
+		 * Set the average rate window so that a new history buffer
+		 * is allocated for this state.
 		 */
 		(void) pv_update_calc_average_rate_window(&(info_array[use_idx].calc),
 							  state->control.average_rate_window);
