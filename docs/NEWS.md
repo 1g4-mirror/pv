@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *feature:* permit multiple arguments to **--watchfd** ([#12](https://codeberg.org/ivarch/pv/issues/12))
+
 ### 1.9.34 - 26 July 2025
 
  * *fix:* prevent tight loop consuming CPU when waiting for a partially filled output pipe to be drained ([#164](https://codeberg.org/ivarch/pv/issues/164))
