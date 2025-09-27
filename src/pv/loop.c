@@ -648,6 +648,7 @@ int pv_watchfd_loop(pvstate_t state)
 		if (NULL == original_format_string) {
 			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N");
 		} else if (NULL == strstr(original_format_string, "%N")) {
+			/* TODO: also check for %{name} as well as %N. */
 			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N %s",
 					   original_format_string);
 		} else {
