@@ -584,25 +584,40 @@ int pv_main_loop(pvstate_t state)
 
 
 /*
- * Watch the progress of file descriptor state->watchfd.fd[0] in process
- * state->watch_fd.pid[0] and show details about the transfer on standard
- * error according to the given options.
+ * Watch the progress of the PID:FD pairs, or of all FDs under PIDs, as
+ * specified in state->watchfd, showing details on standard error according
+ * to the given options.
+ *
+ * Replaces format_string in "state" so that starts with "%N " if it doesn't
+ * already do so.
  *
  * Returns nonzero on error.
  *
- * TODO: unify this with pv_watchpid_loop.
- * TODO: watch more than one fd, if watchfd.count > 1.
+ * TODO: if more than one PID is being watched, display the PID as well.
  */
 int pv_watchfd_loop(pvstate_t state)
 {
-	struct pvwatchfd_s info;
-	off_t position_now;
-	struct timespec next_update, cur_time;
-	struct timespec init_time, next_remotecheck, transfer_elapsed;
-	bool ended, first_check;
-	int rc;
+	struct {			 /* details for each PID:FD specified by operator */
+		pid_t pid;		 /* watched PID */
+		int fd;			 /* watched fd, or -1 for all */
+		pvwatchfd_t info_array;	 /* watch information for each fd */
+		int array_length;	 /* length of watch info array */
+		bool finished;		 /* "PID:FD": fd closed; or PID gone */
+	} *watching;
+	unsigned int watch_idx;
+	bool all_watching_finished;
+	const char *original_format_string;
+	char new_format_string[512];	 /* flawfinder: ignore */
+	struct timespec next_update, next_remotecheck, cur_time;
+	int prev_displayed_lines, blank_lines;
 
-	/* If there's nothing to watch - do nothing. */
+	/*
+	 * flawfinder rationale (new_format_string): zeroed with memset(),
+	 * only written to with pv_snprintf() which checks boundaries, and
+	 * explicitly terminated with \0.
+	 */
+
+	/* If there's nothing to watch, do nothing at all. */
 	if (state->watchfd.count < 1)
 		return 0;
 	if (NULL == state->watchfd.pid)
@@ -610,27 +625,138 @@ int pv_watchfd_loop(pvstate_t state)
 	if (NULL == state->watchfd.fd)
 		return PV_ERROREXIT_MEMORY;
 
-	/* Call pv_watchpid_loop() instead if no specific fd was given. */
-	if (-1 == state->watchfd.fd[0]) {
-		return pv_watchpid_loop(state);
+	/*
+	 * Make sure there's no name set.
+	 */
+	if (NULL != state->control.name) {
+		free(state->control.name);
+		state->control.name = NULL;
 	}
 
-	memset(&info, 0, sizeof(info));
-	info.watch_pid = state->watchfd.pid[0];
-	info.watch_fd = state->watchfd.fd[0];
-	info.displayable = true;
-	info.unused = false;
-	pv_reset_watchfd(&info);
-	rc = pv_watchfd_info(state, &info, false);
-	if (0 != rc) {
-		state->status.exit_status |= PV_ERROREXIT_ACCESS;
-		pv_freecontents_watchfd(&info);
-		/*@-compdestroy@ */
-		return state->status.exit_status;
-		/*@+compdestroy@ */
-		/* splint: no leak of info.state as it is unused so far. */
+	/*
+	 * Make sure there's a format string, and then insert %N into it if
+	 * it's not present AND we're either watching more than one item, or
+	 * the item we're watching is a whole PID, not a single FD.
+	 */
+	original_format_string =
+	    NULL != state->control.format_string ? state->control.format_string : state->control.default_format;
+	memset(new_format_string, 0, sizeof(new_format_string));
+
+	if (state->watchfd.count > 1 || -1 == state->watchfd.fd[0]) {
+		/* Watching more than one single FD; need %N. */
+		if (NULL == original_format_string) {
+			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N");
+		} else if (NULL == strstr(original_format_string, "%N")) {
+			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N %s",
+					   original_format_string);
+		} else {
+			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%s", original_format_string);
+		}
+	} else {
+		/* Watching only one FD; don't prepend %N. */
+		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%s",
+				   NULL == original_format_string ? "" : original_format_string);
+	}
+	new_format_string[sizeof(new_format_string) - 1] = '\0';
+	if (NULL != state->control.format_string)
+		free(state->control.format_string);
+	state->control.format_string = pv_strdup(new_format_string);
+
+	/*
+	 * Allocate the watching array.
+	 */
+	watching = malloc(state->watchfd.count * sizeof(*watching));
+	if (NULL == watching) {
+		pv_error("%s: %s", _("buffer allocation failed"), strerror(errno));
+		return PV_ERROREXIT_MEMORY;
+	}
+	memset(watching, 0, state->watchfd.count * sizeof(*watching));
+
+	/*
+	 * Populate the watching array.  In the process of doing so, raise
+	 * errors if any of the initially specified PIDs or PID:FD pairs
+	 * don't exist or aren't readable.
+	 */
+	for (watch_idx = 0; watch_idx < state->watchfd.count; watch_idx++) {
+		int rc;
+
+		watching[watch_idx].pid = state->watchfd.pid[watch_idx];
+		watching[watch_idx].fd = state->watchfd.fd[watch_idx];
+		watching[watch_idx].info_array = NULL;
+		watching[watch_idx].array_length = 0;
+		watching[watch_idx].finished = false;
+
+		if (kill(watching[watch_idx].pid, 0) != 0) {
+			/* Inaccessible PID - error, mark as finished. */
+			pv_error("%s %u: %s", _("pid"), watching[watch_idx].pid, strerror(errno));
+			state->status.exit_status |= PV_ERROREXIT_ACCESS;
+			watching[watch_idx].finished = true;
+			continue;
+		}
+
+		if (-1 == watching[watch_idx].fd) {
+			/*
+			 * If this is a whole-PID watch, do the initial FD
+			 * scan to list all the FDs under that PID.
+			 */
+			rc = pv_watchpid_scanfds(state, watching[watch_idx].pid, -1,
+						 &(watching[watch_idx].array_length),
+						 &(watching[watch_idx].info_array));
+			if (rc != 0) {
+				/* Scan failed - error, mark as finished. */
+				pv_error("%s %u: %s", _("pid"), watching[watch_idx].pid, strerror(errno));
+				state->status.exit_status |= PV_ERROREXIT_ACCESS;
+				watching[watch_idx].finished = true;
+			}
+		} else {
+			/*
+			 * Scan the PID for the one specific FD given.
+			 */
+			rc = pv_watchpid_scanfds(state, watching[watch_idx].pid, watching[watch_idx].fd,
+						 &(watching[watch_idx].array_length),
+						 &(watching[watch_idx].info_array));
+			if (rc != 0) {
+				/* Scan failed - mark as finished. */
+				state->status.exit_status |= PV_ERROREXIT_ACCESS;
+				watching[watch_idx].finished = true;
+			} else if (0 == watching[watch_idx].array_length) {
+				/* FD not found - error, mark as finished. */
+				pv_error("%s %u: %s %d: %s",
+					 _("pid"), watching[watch_idx].pid, _("fd"), watching[watch_idx].fd,
+					 strerror(ENOENT));
+				state->status.exit_status |= PV_ERROREXIT_ACCESS;
+				watching[watch_idx].finished = true;
+			} else if (!watching[watch_idx].info_array[0].displayable) {
+				/* FD not displayable - mark as finished. */
+				state->status.exit_status |= PV_ERROREXIT_ACCESS;
+				watching[watch_idx].finished = true;
+			}
+		}
 	}
 
+	/*
+	 * Skip to the end if none of the items to watch can be watched.
+	 */
+	all_watching_finished = true;
+	for (watch_idx = 0; watch_idx < state->watchfd.count; watch_idx++) {
+		if (watching[watch_idx].finished)
+			continue;
+		all_watching_finished = false;
+		break;
+	}
+	if (all_watching_finished)
+		goto end_pv_watchfd_loop;
+
+	/*
+	 * TODO: special-case, if we are watching one single PID:FD,
+	 * state->control.size < 1, then set state->control.size to the size
+	 * that FD points to, and if there's still no size, remove the ETA
+	 * from the format string.
+	 * Need to check whether retaining this old feature is still
+	 * relevant.
+	 */
+	/* Old code to refactor into here: */
+#if 0
 	/*
 	 * Use a size if one was passed, otherwise use the total size
 	 * calculated.
@@ -648,53 +774,46 @@ int pv_watchfd_loop(pvstate_t state)
 			state->flags.reparse_display = 1;
 		}
 	}
+#endif
+
+	/*
+	 * Prepare timing structures for the main loop.
+	 */
 
 	memset(&cur_time, 0, sizeof(cur_time));
 	memset(&next_remotecheck, 0, sizeof(next_remotecheck));
 	memset(&next_update, 0, sizeof(next_update));
-	memset(&init_time, 0, sizeof(init_time));
-	memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
 
 	pv_elapsedtime_read(&cur_time);
-	pv_elapsedtime_copy(&(info.start_time), &cur_time);
 	pv_elapsedtime_copy(&next_remotecheck, &cur_time);
 	pv_elapsedtime_copy(&next_update, &cur_time);
 	pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
 
-	ended = false;
-	first_check = true;
+	/*
+	 * Main loop - continually check each watching[] item and display
+	 * progress until all watched items have finished or an exit signal
+	 * is received.
+	 */
 
-	while (!ended) {
-		/*
-		 * Check for remote messages from -R every short while.
-		 */
+	prev_displayed_lines = 0;
+	all_watching_finished = false;
+
+	while (!all_watching_finished) {
+		int displayed_lines;
+		bool terminal_resized;
+
+		/* Check for remote messages from -R every short while. */
 		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
 			pv_remote_check(state);
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
+		/* End the loop if a signal handler has set the exit flag. */
 		if (1 == state->flags.trigger_exit)
 			break;
 
-		position_now = pv_watchfd_position(&info);
-
-		if (position_now < 0) {
-			ended = true;
-		} else {
-			if (first_check) {
-				state->display.initial_offset = position_now;
-				first_check = false;
-			}
-			state->transfer.transferred = position_now;
-			state->transfer.total_written = position_now;
-		}
-
+		/* Get the current time. */
 		pv_elapsedtime_read(&cur_time);
-
-		/* Ended - force a display update. */
-		if (ended) {
-			pv_elapsedtime_copy(&next_update, &cur_time);
-		}
 
 		/*
 		 * Restart the loop after a brief delay, if it's not time to
@@ -705,6 +824,7 @@ int pv_watchfd_loop(pvstate_t state)
 			continue;
 		}
 
+		/* Set the time of the next display update. */
 		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
 
 		/* Set the "next update" time to now, if it's in the past. */
@@ -712,175 +832,13 @@ int pv_watchfd_loop(pvstate_t state)
 			pv_elapsedtime_copy(&next_update, &cur_time);
 
 		/*
-		 * Calculate the effective start time: the time we actually
-		 * started, plus the total time we spent stopped.
+		 * Resize the display, if a resize signal was received.
+		 *
+		 * We also set a local flag to tell the display loop below
+		 * to trigger a name reset and display reparse for every FD
+		 * output line, to inherit the size change.
 		 */
-		pv_elapsedtime_add(&init_time, &(info.start_time), &(state->signal.toffset));
-
-		/*
-		 * Now get the effective elapsed transfer time - current
-		 * time minus effective start time.
-		 */
-		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
-
-		state->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
-
-		/* Resize the display, if a resize signal was received. */
-		if (1 == state->flags.terminal_resized) {
-			unsigned int new_width, new_height;
-
-			state->flags.terminal_resized = 0;
-
-			new_width = (unsigned int) (state->control.width);
-			new_height = state->control.height;
-			pv_screensize(&new_width, &new_height);
-
-			if (new_width > PVDISPLAY_WIDTH_MAX)
-				new_width = PVDISPLAY_WIDTH_MAX;
-
-			if (!state->control.width_set_manually)
-				state->control.width = (pvdisplay_width_t) new_width;
-			if (!state->control.height_set_manually)
-				state->control.height = new_height;
-		}
-
-		pv_display(&(state->status), &(state->control), &(state->flags), &(state->transfer),
-			   &(state->calc), &(state->cursor), &(state->display), &(state->extra_display), ended);
-	}
-
-	if (!state->control.numeric)
-		pv_tty_write(&(state->flags), "\n", 1);
-
-	if (1 == state->flags.trigger_exit)
-		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
-
-	pv_freecontents_watchfd(&info);
-
-	/*@-compdestroy@ */
-	return state->status.exit_status;
-	/*@+compdestroy@ */
-	/* splint: no leak of info.state as we just freed it above. */
-}
-
-
-/*
- * Watch the progress of all file descriptors in process
- * state->watchfd.pid[0] and show details about the transfers on standard
- * error according to the given options.
- *
- * Replaces format_string in "state" so that starts with "%N " if it doesn't
- * already do so.
- *
- * Returns nonzero on error.
- */
-int pv_watchpid_loop(pvstate_t state)
-{
-	const char *original_format_string;
-	char new_format_string[512];	 /* flawfinder: ignore */
-	struct pvwatchfd_s *info_array = NULL;
-	int array_length = 0;
-	struct timespec next_update, cur_time;
-	int idx;
-	int prev_displayed_lines, blank_lines;
-	bool first_pass = true;
-
-	/*
-	 * flawfinder rationale (new_format_string): zeroed with memset(),
-	 * only written to with pv_snprintf() which checks boundaries, and
-	 * explicitly terminated with \0.
-	 */
-
-	/* If there's nothing to watch - do nothing. */
-	if (state->watchfd.count < 1)
-		return 0;
-	if (NULL == state->watchfd.pid)
-		return PV_ERROREXIT_MEMORY;
-
-	/*
-	 * Make sure the process exists first, so we can give an error if
-	 * it's not there at the start.
-	 */
-	if (kill(state->watchfd.pid[0], 0) != 0) {
-		pv_error("%s %u: %s", _("pid"), state->watchfd.pid[0], strerror(errno));
-		state->status.exit_status |= PV_ERROREXIT_ACCESS;
-		return PV_ERROREXIT_ACCESS;
-	}
-
-	/*
-	 * Make sure there's no name set.
-	 */
-	if (NULL != state->control.name) {
-		free(state->control.name);
-		state->control.name = NULL;
-	}
-
-	/*
-	 * Make sure there's a format string, and then insert %N into it if
-	 * it's not present.
-	 */
-	original_format_string =
-	    NULL != state->control.format_string ? state->control.format_string : state->control.default_format;
-	memset(new_format_string, 0, sizeof(new_format_string));
-	if (NULL == original_format_string) {
-		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N");
-	} else if (NULL == strstr(original_format_string, "%N")) {
-		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N %s", original_format_string);
-	} else {
-		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%s", original_format_string);
-	}
-	new_format_string[sizeof(new_format_string) - 1] = '\0';
-	if (NULL != state->control.format_string)
-		free(state->control.format_string);
-	state->control.format_string = pv_strdup(new_format_string);
-
-	/*
-	 * Get things ready for the main loop.
-	 */
-
-	memset(&cur_time, 0, sizeof(cur_time));
-	memset(&next_update, 0, sizeof(next_update));
-
-	pv_elapsedtime_read(&cur_time);
-	pv_elapsedtime_copy(&next_update, &cur_time);
-	pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
-
-	prev_displayed_lines = 0;
-
-	while (true) {
-		int rc, displayed_lines;
-
-		if (1 == state->flags.trigger_exit)
-			break;
-
-		pv_elapsedtime_read(&cur_time);
-
-		if (kill(state->watchfd.pid[0], 0) != 0) {
-			if (first_pass) {
-				pv_error("%s %u: %s", _("pid"), state->watchfd.pid[0], strerror(errno));
-				state->status.exit_status |= PV_ERROREXIT_ACCESS;
-				if (NULL != info_array)
-					free(info_array);
-				return PV_ERROREXIT_ACCESS;
-			}
-			break;
-		}
-
-		/*
-		 * Restart the loop after a brief delay, if it's not time to
-		 * update the display.
-		 */
-		if (pv_elapsedtime_compare(&cur_time, &next_update) < 0) {
-			pv_nanosleep(50000000);
-			continue;
-		}
-
-		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
-
-		/* Set the "next update" time to now, if it's in the past. */
-		if (pv_elapsedtime_compare(&next_update, &cur_time) < 0)
-			pv_elapsedtime_copy(&next_update, &cur_time);
-
-		/* Resize the display, if a resize signal was received. */
+		terminal_resized = false;
 		if (1 == state->flags.terminal_resized) {
 			unsigned int new_width, new_height;
 
@@ -896,110 +854,146 @@ int pv_watchpid_loop(pvstate_t state)
 			state->control.width = (pvdisplay_width_t) new_width;
 			state->control.height = new_height;
 
-			for (idx = 0; NULL != info_array && idx < array_length; idx++) {
-				if (!info_array[idx].displayable)
-					continue;
-				pv_watchpid_setname(state, &(info_array[idx]));
-				info_array[idx].flags.reparse_display = 1;
-			}
+			terminal_resized = true;
 		}
 
-		rc = pv_watchpid_scanfds(state, state->watchfd.pid[0], &array_length, &info_array);
-		if (rc != 0) {
-			if (first_pass) {
-				pv_error("%s %u: %s", _("pid"), state->watchfd.pid[0], strerror(errno));
-				state->status.exit_status |= PV_ERROREXIT_ACCESS;
-				if (NULL != info_array)
-					free(info_array);
-				return PV_ERROREXIT_ACCESS;
-			}
-			break;
-		}
-
-		first_pass = false;
+		/*
+		 * Run through each watched item.
+		 */
 		displayed_lines = 0;
+		for (watch_idx = 0; NULL != watching && watch_idx < state->watchfd.count; watch_idx++) {
+			int info_idx;
 
-		for (idx = 0; NULL != info_array && idx < array_length; idx++) {
-			off_t position_now;
-			struct timespec init_time, transfer_elapsed;
-
-			/* Skip unused array entries. */
-			if (info_array[idx].unused)
+			/* Skip watched items that have finished. */
+			if (watching[watch_idx].finished)
 				continue;
 
-			/* No more lines if we've filled the display. */
-			if (displayed_lines >= (int) (state->control.height))
-				break;
-
-			if (!info_array[idx].displayable) {
+			if (-1 == watching[watch_idx].fd) {
+				int rc;
 				/*
-				 * Non-displayable fd - just remove if
-				 * changed
+				 * If this watched item is a whole PID,
+				 * rescan that PID's FDs.
 				 */
-				if (pv_watchfd_changed(&(info_array[idx]))) {
-					debug("%s %d: %s", "fd", info_array[idx].watch_fd, "removing");
-					info_array[idx].unused = true;
-					info_array[idx].displayable = false;
-					pv_freecontents_watchfd(&(info_array[idx]));
+				rc = pv_watchpid_scanfds(state, watching[watch_idx].pid, -1,
+							 &(watching[watch_idx].array_length),
+							 &(watching[watch_idx].info_array));
+				if (rc != 0) {
+					/*
+					 * PID now inaccessible - mark it as
+					 * finished and skip over it.
+					 */
+					watching[watch_idx].finished = true;
+					continue;
 				}
-				continue;
-			}
-
-			if (info_array[idx].watch_fd < 0) {
-				debug("%s %d: %s", "fd", info_array[idx].watch_fd, "negative fd - skipping");
-				continue;
+			} else {
+				/*
+				 * It this watched item is a single FD, and
+				 * that FD is no longer usable, mark the
+				 * item as finished and move on.
+				 */
+				if ((NULL == watching[watch_idx].info_array) || (0 == watching[watch_idx].array_length)
+				    || (watching[watch_idx].info_array[0].unused)
+				    || (!watching[watch_idx].info_array[0].displayable)) {
+					watching[watch_idx].finished = true;
+					continue;
+				}
 			}
 
 			/*
-			 * Displayable fd - display, or remove if changed
+			 * Run through the info array of this item.
 			 */
+			for (info_idx = 0;
+			     NULL != watching[watch_idx].info_array && info_idx < watching[watch_idx].array_length;
+			     info_idx++) {
+				off_t position_now;
+				struct timespec init_time, transfer_elapsed;
+				pvwatchfd_t info_item = &(watching[watch_idx].info_array[info_idx]);
 
-			position_now = pv_watchfd_position(&(info_array[idx]));
+				/* Skip unused array entries. */
+				if (info_item->unused)
+					continue;
 
-			if (position_now < 0) {
-				debug("%s %d: %s", "fd", info_array[idx].watch_fd, "removing");
-				info_array[idx].unused = true;
-				info_array[idx].displayable = false;
-				pv_freecontents_watchfd(&(info_array[idx]));
-				continue;
-			}
+				/* No more lines if we've filled the display. */
+				if (displayed_lines >= (int) (state->control.height))
+					break;
 
-			info_array[idx].position = position_now;
+				if (!info_item->displayable) {
+					/*
+					 * Non-displayable fd - just remove if
+					 * changed.
+					 */
+					if (pv_watchfd_changed(info_item)) {
+						debug("%s %d: %s", "fd", info_item->watch_fd, "removing");
+						info_item->unused = true;
+						info_item->displayable = false;
+						pv_freecontents_watchfd(info_item);
+					}
+					continue;
+				}
 
-			memset(&init_time, 0, sizeof(init_time));
-			memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
+				if (info_item->watch_fd < 0) {
+					debug("%s %d: %s", "fd", info_item->watch_fd, "negative fd - skipping");
+					continue;
+				}
 
-			/*
-			 * Calculate the effective start time: the time we actually
-			 * started, plus the total time we spent stopped.
-			 */
-			pv_elapsedtime_add(&init_time, &(info_array[idx].start_time), &(state->signal.toffset));
+				/*
+				 * Displayable fd - display, or remove if
+				 * changed.
+				 */
 
-			/*
-			 * Now get the effective elapsed transfer time - current
-			 * time minus effective start time.
-			 */
-			pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
+				position_now = pv_watchfd_position(info_item);
 
-			info_array[idx].transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+				if (position_now < 0) {
+					debug("%s %d: %s", "fd", info_item->watch_fd, "removing");
+					info_item->unused = true;
+					info_item->displayable = false;
+					pv_freecontents_watchfd(info_item);
+					continue;
+				}
 
-			if (displayed_lines > 0) {
-				debug("%s", "adding newline");
-				pv_tty_write(&(state->flags), "\n", 1);
-			}
+				info_item->position = position_now;
 
-			debug("%s %d [%d]: %Lf / %Ld", "fd", info_array[idx].watch_fd, idx,
-			      info_array[idx].transfer.elapsed_seconds, position_now);
+				memset(&init_time, 0, sizeof(init_time));
+				memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
 
-			if (info_array[idx].watch_fd >= 0) {
-				info_array[idx].transfer.transferred = position_now;
-				info_array[idx].transfer.total_written = position_now;
-				state->control.name = info_array[idx].display_name;
-				state->control.size = info_array[idx].size;
+				/*
+				 * Calculate the effective start time: the time we actually
+				 * started, plus the total time we spent stopped.
+				 */
+				pv_elapsedtime_add(&init_time, &(info_item->start_time), &(state->signal.toffset));
+
+				/*
+				 * Now get the effective elapsed transfer time - current
+				 * time minus effective start time.
+				 */
+				pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
+
+				info_item->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+
+				if (displayed_lines > 0) {
+					debug("%s", "adding newline");
+					pv_tty_write(&(state->flags), "\n", 1);
+				}
+
+				debug("%s %d, %s %d [%d/%d]: %Lf / %Ld", "pid", (int) (info_item->watch_pid), "fd",
+				      info_item->watch_fd, watch_idx, info_idx, info_item->transfer.elapsed_seconds,
+				      position_now);
+
+				if (terminal_resized) {
+					pv_watchpid_setname(state, info_item);
+					info_item->flags.reparse_display = 1;
+				}
+
+				info_item->transfer.transferred = position_now;
+				info_item->transfer.total_written = position_now;
+				state->control.name = info_item->display_name;
+				state->control.size = info_item->size;
+
 				pv_display(&(state->status),
-					   &(state->control), &(info_array[idx].flags),
-					   &(info_array[idx].transfer), &(info_array[idx].calc),
-					   &(state->cursor), &(info_array[idx].display), NULL, false);
+					   &(state->control), &(info_item->flags),
+					   &(info_item->transfer), &(info_item->calc),
+					   &(state->cursor), &(info_item->display), NULL, false);
+
 				/*@-mustfreeonly@ */
 				state->control.name = NULL;
 				/*
@@ -1008,8 +1002,10 @@ int pv_watchpid_loop(pvstate_t state)
 				 * so nothing is lost here.
 				 */
 				/*@+mustfreeonly@ */
+
 				displayed_lines++;
 			}
+
 		}
 
 		/*
@@ -1039,10 +1035,22 @@ int pv_watchpid_loop(pvstate_t state)
 			pv_tty_write(&(state->flags), "\033[A", 3);
 			displayed_lines--;
 		}
+
+		/* Check whether all watched items have finished. */
+		all_watching_finished = true;
+		for (watch_idx = 0; watch_idx < state->watchfd.count; watch_idx++) {
+			if (watching[watch_idx].finished)
+				continue;
+			all_watching_finished = false;
+			break;
+		}
 	}
 
+	if (!state->control.numeric)
+		pv_tty_write(&(state->flags), "\n", 1);
+
 	/*
-	 * Clean up our displayed lines on exit.
+	 * Clean up our displayed lines after the display loop.
 	 */
 	blank_lines = prev_displayed_lines;
 	while (blank_lines > 0) {
@@ -1060,16 +1068,34 @@ int pv_watchpid_loop(pvstate_t state)
 	}
 
 	/*
-	 * Free the per-fd state.
+	 * If a signal caused the end of the loop, reflect that in the
+	 * return code.
 	 */
-	for (idx = 0; NULL != info_array && idx < array_length; idx++) {
-		pv_freecontents_watchfd(&(info_array[idx]));
-		info_array[idx].unused = true;
-		info_array[idx].displayable = false;
+	if (1 == state->flags.trigger_exit)
+		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
+
+      end_pv_watchfd_loop:
+	/* Free all allocated memory. */
+	/*@-compdestroy@ */
+	for (watch_idx = 0; NULL != watching && watch_idx < state->watchfd.count; watch_idx++) {
+		int info_idx;
+		if (NULL == watching[watch_idx].info_array)
+			continue;
+		for (info_idx = 0; info_idx < watching[watch_idx].array_length; info_idx++) {
+			pv_freecontents_watchfd(&(watching[watch_idx].info_array[info_idx]));
+		}
+		free(watching[watch_idx].info_array);
+		watching[watch_idx].info_array = NULL;
+		watching[watch_idx].array_length = 0;
 	}
+	free(watching);
+	watching = NULL;
 
-	if (NULL != info_array)
-		free(info_array);
-
-	return 0;
+	return state->status.exit_status;
+	/*@+compdestroy @ */
+	/*
+	 * splint warns that watching[].info_array->transfer.transfer_buffer
+	 * and other deep structures may not be deallocated and so leak
+	 * memory, but that's what pv_freecontents_watchfd() takes care of.
+	 */
 }

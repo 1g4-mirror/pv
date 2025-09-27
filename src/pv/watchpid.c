@@ -418,12 +418,14 @@ static int pv_compare_watchfd(const void *a, const void *b)
 
 /*
  * Scan the given process and update the arrays with any new file
- * descriptors.
+ * descriptors.  If "watch_fd" is not -1, then all other file descriptors
+ * numbers will be ignored,
  *
  * Returns 0 on success, 1 if the process no longer exists or could not be
  * read, or 2 for a memory allocation error.
  */
-int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int *array_length_ptr, pvwatchfd_t * info_array_ptr)
+int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *array_length_ptr,
+			pvwatchfd_t * info_array_ptr)
 {
 	int array_length = 0;
 	struct pvwatchfd_s *info_array = NULL;
@@ -477,6 +479,10 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int *array_length_ptr,
 
 		/* Skip if the fd is negative. */
 		if (fd < 0)
+			continue;
+
+		/* If a watch_fd was specified, skip if this isn't it. */
+		if (watch_fd >= 0 && watch_fd != fd)
 			continue;
 
 		/*
@@ -544,7 +550,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int *array_length_ptr,
 		}
 #endif
 		/* Retrieve the details of this file descriptor. */
-		rc = pv_watchfd_info(state, &(info_array[use_idx]), true);
+		rc = pv_watchfd_info(state, &(info_array[use_idx]), -1 == watch_fd ? true : false);
 
 		/*
 		 * Lookup failed - mark this slot as being free for re-use.

@@ -273,14 +273,9 @@ extern bool pv_sigusr2_received(pvstate_t, pid_t *);
 extern int pv_main_loop(pvstate_t);
 
 /*
- * Watch the selected file descriptor of the selected process.
+ * Watch the selected file descriptors of the selected processes.
  */
 extern int pv_watchfd_loop(pvstate_t);
-
-/*
- * Watch the selected process.
- */
-extern int pv_watchpid_loop(pvstate_t);
 
 /*
  * Shut down signal handlers after running the main loop.
