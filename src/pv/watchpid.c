@@ -617,6 +617,9 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
  * Set the display name for the given watched file descriptor, truncating at
  * the relevant places according to the current screen width.
  *
+ * If more than one distinct PID is being watched, include the PID in the
+ * name as well as the file descriptor number.
+ *
  * If the file descriptor is pointing to a file under the current working
  * directory, show its relative path, not the full path.
  */
@@ -639,20 +642,36 @@ void pv_watchpid_setname(pvstate_t state, pvwatchfd_t info)
 	}
 
 	max_display_length = (int) (state->control.width / 2) - 6;
+	if (state->watchfd.multiple_pids)
+		max_display_length -= 9;
 	if (max_display_length >= (int) path_length) {
-		(void) pv_snprintf(info->display_name,
-				   PV_SIZEOF_DISPLAY_NAME, "%4d:%.498s", info->watch_fd, file_fdpath);
+		if (state->watchfd.multiple_pids) {
+			(void) pv_snprintf(info->display_name,
+					   PV_SIZEOF_DISPLAY_NAME, "%8d:%4d:%.498s", (int) (info->watch_pid),
+					   info->watch_fd, file_fdpath);
+		} else {
+			(void) pv_snprintf(info->display_name,
+					   PV_SIZEOF_DISPLAY_NAME, "%4d:%.498s", info->watch_fd, file_fdpath);
+		}
 	} else {
 		int prefix_length, suffix_length;
 
 		prefix_length = max_display_length / 4;
 		suffix_length = max_display_length - prefix_length - 3;
 
-		(void) pv_snprintf(info->display_name,
-				   PV_SIZEOF_DISPLAY_NAME,
-				   "%4d:%.*s...%.*s",
-				   info->watch_fd, prefix_length,
-				   file_fdpath, suffix_length, file_fdpath + path_length - suffix_length);
+		if (state->watchfd.multiple_pids) {
+			(void) pv_snprintf(info->display_name,
+					   PV_SIZEOF_DISPLAY_NAME,
+					   "%8d:%4d:%.*s...%.*s",
+					   (int) (info->watch_pid), info->watch_fd, prefix_length,
+					   file_fdpath, suffix_length, file_fdpath + path_length - suffix_length);
+		} else {
+			(void) pv_snprintf(info->display_name,
+					   PV_SIZEOF_DISPLAY_NAME,
+					   "%4d:%.*s...%.*s",
+					   info->watch_fd, prefix_length,
+					   file_fdpath, suffix_length, file_fdpath + path_length - suffix_length);
+		}
 	}
 
 	debug("%s: %d: [%s]", "set name for fd", info->watch_fd, info->display_name);

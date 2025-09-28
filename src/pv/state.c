@@ -721,6 +721,7 @@ void pv_state_watchfds(pvstate_t state, unsigned int watchfd_count, const pid_t 
 		state->watchfd.fd = NULL;
 	}
 	state->watchfd.count = 0;
+	state->watchfd.multiple_pids = false;
 
 	/* Allocate empty new arrays of the right size. */
 	new_pid_array = calloc((size_t) (watchfd_count + 1), sizeof(pid_t));
@@ -744,6 +745,11 @@ void pv_state_watchfds(pvstate_t state, unsigned int watchfd_count, const pid_t 
 	for (item_idx = 0; item_idx < watchfd_count; item_idx++) {
 		state->watchfd.pid[item_idx] = pids[item_idx];
 		state->watchfd.fd[item_idx] = fds[item_idx];
+		if ((item_idx > 0) && (pids[item_idx] != pids[item_idx - 1]))
+			state->watchfd.multiple_pids = true;
 	}
 	state->watchfd.count = watchfd_count;
+
+	debug("%s=%d, %s=%s", "watchfd.count", state->watchfd.count, "multiple_pids",
+	      state->watchfd.multiple_pids ? "true" : "false");
 }

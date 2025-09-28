@@ -167,6 +167,7 @@ struct pvstate_s {
 		/*@only@*/ /*@null@*/ pid_t *pid; /* array of processes to watch fds of */
 		/*@only@*/ /*@null@*/ int *fd;	/* array of fds to watch in each one (0=all) */
 		unsigned int count;	/* number of items in these arrays */
+		bool multiple_pids;	/* true if more than one distinct PID */
 	} watchfd;
 
 	/*******************

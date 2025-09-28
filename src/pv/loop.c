@@ -593,7 +593,6 @@ int pv_main_loop(pvstate_t state)
  *
  * Returns nonzero on error.
  *
- * TODO: if more than one PID is being watched, display the PID as well.
  * TODO: re-add "%N" after receiving a remote update, e.g. "-R pid -u block".
  */
 int pv_watchfd_loop(pvstate_t state)
