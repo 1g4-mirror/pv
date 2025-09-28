@@ -584,6 +584,72 @@ int pv_main_loop(pvstate_t state)
 
 
 /*
+ * Update the main format string for use with --watchfd, such that if
+ * necessary, it starts with "%N " if it doesn't already.
+ */
+void pv_watchfd_update_format_string(pvstate_t state)
+{
+	const char *original_format_string;
+	char new_format_string[512];	 /* flawfinder: ignore */
+
+	/*
+	 * flawfinder rationale (new_format_string): zeroed with memset(),
+	 * only written to with pv_snprintf() which checks boundaries, and
+	 * explicitly terminated with \0.
+	 */
+
+	/* If there's nothing to watch, do nothing. */
+	if (state->watchfd.count < 1)
+		return;
+	if (NULL == state->watchfd.pid)
+		return;
+	if (NULL == state->watchfd.fd)
+		return;
+
+	/*
+	 * Make sure there's a format string, and then insert %N into it if
+	 * it's not present AND we're either watching more than one item, or
+	 * the item we're watching is a whole PID, not a single FD.
+	 */
+	original_format_string = state->control.format_string;
+	if (NULL == original_format_string)
+		original_format_string = state->control.default_format;
+	if (NULL == original_format_string)
+		return;
+
+	memset(new_format_string, 0, sizeof(new_format_string));
+
+	if (state->watchfd.count > 1 || -1 == state->watchfd.fd[0]) {
+		/* Watching more than one single FD; need %N. */
+		if (NULL == strstr(original_format_string, "%N")) {
+			/* TODO: also check for %{name} as well as %N. */
+			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N %s",
+					   original_format_string);
+		} else {
+			/* If the format string is set, nothing to do. */
+			if (NULL != state->control.format_string)
+				return;
+			/* Prepare a copy of the default format. */
+			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%s", original_format_string);
+		}
+	} else {
+		/* Watching only one FD; don't prepend %N. */
+		/* If the format string is set, nothing to do. */
+		if (NULL != state->control.format_string)
+			return;
+		/* Prepare a copy of the default format. */
+		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%s", original_format_string);
+	}
+
+	new_format_string[sizeof(new_format_string) - 1] = '\0';
+
+	if (NULL != state->control.format_string)
+		free(state->control.format_string);
+	state->control.format_string = pv_strdup(new_format_string);
+}
+
+
+/*
  * Watch the progress of the PID:FD pairs, or of all FDs under PIDs, as
  * specified in state->watchfd, showing details on standard error according
  * to the given options.
@@ -606,16 +672,8 @@ int pv_watchfd_loop(pvstate_t state)
 	} *watching;
 	unsigned int watch_idx;
 	bool all_watching_finished;
-	const char *original_format_string;
-	char new_format_string[512];	 /* flawfinder: ignore */
 	struct timespec next_update, next_remotecheck, cur_time;
 	int prev_displayed_lines, blank_lines;
-
-	/*
-	 * flawfinder rationale (new_format_string): zeroed with memset(),
-	 * only written to with pv_snprintf() which checks boundaries, and
-	 * explicitly terminated with \0.
-	 */
 
 	/* If there's nothing to watch, do nothing at all. */
 	if (state->watchfd.count < 1)
@@ -633,35 +691,8 @@ int pv_watchfd_loop(pvstate_t state)
 		state->control.name = NULL;
 	}
 
-	/*
-	 * Make sure there's a format string, and then insert %N into it if
-	 * it's not present AND we're either watching more than one item, or
-	 * the item we're watching is a whole PID, not a single FD.
-	 */
-	original_format_string =
-	    NULL != state->control.format_string ? state->control.format_string : state->control.default_format;
-	memset(new_format_string, 0, sizeof(new_format_string));
-
-	if (state->watchfd.count > 1 || -1 == state->watchfd.fd[0]) {
-		/* Watching more than one single FD; need %N. */
-		if (NULL == original_format_string) {
-			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N");
-		} else if (NULL == strstr(original_format_string, "%N")) {
-			/* TODO: also check for %{name} as well as %N. */
-			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N %s",
-					   original_format_string);
-		} else {
-			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%s", original_format_string);
-		}
-	} else {
-		/* Watching only one FD; don't prepend %N. */
-		(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%s",
-				   NULL == original_format_string ? "" : original_format_string);
-	}
-	new_format_string[sizeof(new_format_string) - 1] = '\0';
-	if (NULL != state->control.format_string)
-		free(state->control.format_string);
-	state->control.format_string = pv_strdup(new_format_string);
+	/* Adjust the format string so PID:FD or FD prefixes are shown. */
+	pv_watchfd_update_format_string(state);
 
 	/*
 	 * Allocate the watching array.
