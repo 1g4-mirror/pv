@@ -613,7 +613,7 @@ void pv_sig_checkbg(void);
 void pv_sig_nopause(void);
 
 void pv_remote_init(pvstate_t);
-void pv_remote_check(pvstate_t);
+bool pv_remote_check(pvstate_t);
 void pv_remote_fini(pvstate_t);
 int pv_remote_set(pvstate_t);
 

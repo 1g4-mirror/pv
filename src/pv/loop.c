@@ -219,7 +219,7 @@ int pv_main_loop(pvstate_t state)
 		 * Check for remote messages from -R every short while.
 		 */
 		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
-			pv_remote_check(state);
+			(void) pv_remote_check(state);
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
@@ -836,7 +836,7 @@ int pv_watchfd_loop(pvstate_t state)
 
 		/* Check for remote messages from -R every short while. */
 		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
-			pv_remote_check(state);
+			(void) pv_remote_check(state);
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 

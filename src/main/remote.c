@@ -318,8 +318,10 @@ int pv_remote_set(opts_t opts, pvstate_t state)
  *
  * NB relies on pv_state_set_format() causing the output format to be
  * reparsed.
+ *
+ * Returns true if something was received, false otherwise.
  */
-void pv_remote_check(pvstate_t state)
+bool pv_remote_check(pvstate_t state)
 {
 	pid_t signal_sender;
 	char control_filename[4096];	 /* flawfinder: ignore */
@@ -333,13 +335,13 @@ void pv_remote_check(pvstate_t state)
 	 */
 	signal_sender = 0;
 	if (!pv_sigusr2_received(state, &signal_sender))
-		return;
+		return false;
 
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv__control_file(control_filename, sizeof(control_filename), signal_sender, false);
 	if (NULL == control_fptr) {
 		pv_error("%s: %s", control_filename, strerror(errno));
-		return;
+		return false;
 	}
 
 	/*
@@ -349,12 +351,12 @@ void pv_remote_check(pvstate_t state)
 	if (1 != fread(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
 		pv_error("%s", strerror(errno));
 		(void) fclose(control_fptr);
-		return;
+		return false;
 	}
 
 	if (0 != fclose(control_fptr)) {
 		pv_error("%s", strerror(errno));
-		return;
+		return false;
 	}
 
 	/*
@@ -398,6 +400,8 @@ void pv_remote_check(pvstate_t state)
 		pv_state_format_string_set(state, msgbuf.format);
 	if (msgbuf.extra_display[0] != '\0')
 		pv_state_extra_display_set(state, msgbuf.extra_display);
+
+	return true;
 }
 
 
