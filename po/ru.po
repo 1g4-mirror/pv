@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-09-23 05:45+0100\n"
+"POT-Creation-Date: 2025-09-29 16:57+0100\n"
 "PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -420,7 +420,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:1053 src/pv/transfer.c:1056
+#: src/pv/display.c:1053 src/pv/loop.c:702 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 
@@ -491,13 +491,19 @@ msgstr "скор. мин/сред/макс/дев"
 msgid "rate not measured"
 msgstr "скорость не изменяется"
 
-#: src/pv/loop.c:797 src/pv/loop.c:856 src/pv/loop.c:907 src/pv/watchpid.c:99
+#: src/pv/loop.c:723 src/pv/loop.c:739 src/pv/loop.c:757 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
 #: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
 #: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
-#: src/pv/watchpid.c:413 src/pv/watchpid.c:434
+#: src/pv/watchpid.c:439 src/pv/watchpid.c:462
 msgid "pid"
 msgstr "ИДпр"
+
+#: src/pv/loop.c:757 src/pv/watchpid.c:108 src/pv/watchpid.c:120
+#: src/pv/watchpid.c:129 src/pv/watchpid.c:183 src/pv/watchpid.c:192
+#: src/pv/watchpid.c:203
+msgid "fd"
+msgstr "дф"
 
 #: src/pv/state.c:42
 msgid "history structure allocation failed"
@@ -507,13 +513,13 @@ msgstr "не удалось выделить память для структу�
 msgid "file list allocation failed"
 msgstr "не удалось выделить память для списка файлов"
 
-#: src/pv/state.c:729
+#: src/pv/state.c:730
 #, fuzzy
 #| msgid "file list allocation failed"
 msgid "process list allocation failed"
 msgstr "не удалось выделить память для списка файлов"
 
-#: src/pv/state.c:737
+#: src/pv/state.c:738
 #, fuzzy
 #| msgid "file list allocation failed"
 msgid "file descriptor list allocation failed"
@@ -562,11 +568,6 @@ msgstr "запись не удалась"
 #: src/pv/transfer.c:1158
 msgid "select call failed"
 msgstr "запрос выборки не удался"
-
-#: src/pv/watchpid.c:108 src/pv/watchpid.c:120 src/pv/watchpid.c:129
-#: src/pv/watchpid.c:183 src/pv/watchpid.c:192 src/pv/watchpid.c:203
-msgid "fd"
-msgstr "дф"
 
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:203
 msgid "not a regular file or block device"

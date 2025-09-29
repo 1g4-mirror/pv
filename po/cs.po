@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-09-23 05:45+0100\n"
+"POT-Creation-Date: 2025-09-29 16:57+0100\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -419,7 +419,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1053 src/pv/transfer.c:1056
+#: src/pv/display.c:1053 src/pv/loop.c:702 src/pv/transfer.c:1056
 msgid "buffer allocation failed"
 msgstr "selhala alokace vyrovnávací paměti"
 
@@ -490,13 +490,19 @@ msgstr "rychlost min/avg/max/std"
 msgid "rate not measured"
 msgstr "rychlost neměřena"
 
-#: src/pv/loop.c:797 src/pv/loop.c:856 src/pv/loop.c:907 src/pv/watchpid.c:99
+#: src/pv/loop.c:723 src/pv/loop.c:739 src/pv/loop.c:757 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
 #: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
 #: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
-#: src/pv/watchpid.c:413 src/pv/watchpid.c:434
+#: src/pv/watchpid.c:439 src/pv/watchpid.c:462
 msgid "pid"
 msgstr "pid"
+
+#: src/pv/loop.c:757 src/pv/watchpid.c:108 src/pv/watchpid.c:120
+#: src/pv/watchpid.c:129 src/pv/watchpid.c:183 src/pv/watchpid.c:192
+#: src/pv/watchpid.c:203
+msgid "fd"
+msgstr "ds"
 
 #: src/pv/state.c:42
 msgid "history structure allocation failed"
@@ -506,13 +512,13 @@ msgstr "selhala alokace struktury historie"
 msgid "file list allocation failed"
 msgstr "selhala alokace seznamu souborů"
 
-#: src/pv/state.c:729
+#: src/pv/state.c:730
 #, fuzzy
 #| msgid "file list allocation failed"
 msgid "process list allocation failed"
 msgstr "selhala alokace seznamu souborů"
 
-#: src/pv/state.c:737
+#: src/pv/state.c:738
 #, fuzzy
 #| msgid "file list allocation failed"
 msgid "file descriptor list allocation failed"
@@ -561,11 +567,6 @@ msgstr "zápis selhal"
 #: src/pv/transfer.c:1158
 msgid "select call failed"
 msgstr "selhalo volání select"
-
-#: src/pv/watchpid.c:108 src/pv/watchpid.c:120 src/pv/watchpid.c:129
-#: src/pv/watchpid.c:183 src/pv/watchpid.c:192 src/pv/watchpid.c:203
-msgid "fd"
-msgstr "ds"
 
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:203
 msgid "not a regular file or block device"
