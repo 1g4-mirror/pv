@@ -429,6 +429,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 {
 	int array_length = 0;
 	struct pvwatchfd_s *info_array = NULL;
+	bool changes_made;
 
 #ifdef __APPLE__
 	struct proc_fdinfo *fd_infos = NULL;
@@ -442,7 +443,6 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 	char fd_dir[512];		 /* flawfinder: ignore - zeroed, bounded with pv_snprintf(). */
 	DIR *dptr;
 	struct dirent *d;
-	bool changes_made;
 
 	memset(fd_dir, 0, sizeof(fd_dir));
 	(void) pv_snprintf(fd_dir, sizeof(fd_dir), "/proc/%u/fd", watch_pid);
