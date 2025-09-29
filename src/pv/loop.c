@@ -587,7 +587,7 @@ int pv_main_loop(pvstate_t state)
  * Update the main format string for use with --watchfd, such that if
  * necessary, it starts with "%N " if it doesn't already.
  */
-void pv_watchfd_update_format_string(pvstate_t state)
+static void pv_watchfd_update_format_string(pvstate_t state)
 {
 	const char *original_format_string;
 	char new_format_string[512];	 /* flawfinder: ignore */
@@ -658,8 +658,6 @@ void pv_watchfd_update_format_string(pvstate_t state)
  * already do so.
  *
  * Returns nonzero on error.
- *
- * TODO: re-add "%N" after receiving a remote update, e.g. "-R pid -u block".
  */
 int pv_watchfd_loop(pvstate_t state)
 {
@@ -836,7 +834,12 @@ int pv_watchfd_loop(pvstate_t state)
 
 		/* Check for remote messages from -R every short while. */
 		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
-			(void) pv_remote_check(state);
+			if (pv_remote_check(state)) {
+				/* Message received - ensure format has %N. */
+				pv_watchfd_update_format_string(state);
+				/* Fake a resize, to force a reparse. */
+				state->flags.terminal_resized = 1;
+			}
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
