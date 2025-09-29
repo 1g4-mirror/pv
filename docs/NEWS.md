@@ -1,6 +1,7 @@
 ### UNRELEASED
 
  * *feature:* permit multiple arguments to **--watchfd** ([#12](https://codeberg.org/ivarch/pv/issues/12))
+ * *fix:* improve support for changing the format of a **--watchfd** process with **--remote**
 
 ### 1.9.34 - 26 July 2025
 
