@@ -119,6 +119,7 @@ void pv_reset_transfer(pvtransferstate_t transfer)
 	transfer->write_position = 0;
 	transfer->to_write = 0;
 	transfer->written = 0;
+	transfer->total_bytes_read = 0;
 	transfer->total_written = 0;
 	transfer->written_but_not_consumed = 0;
 	transfer->read_errors_in_a_row = 0;

@@ -395,6 +395,7 @@ struct pvstate_s {
 
 		size_t written_but_not_consumed; /* bytes in the output pipe, unread */
 
+		off_t total_bytes_read;		 /* total bytes read */
 		off_t total_written;		 /* total bytes or lines written */
 		off_t transferred;		 /* amount transferred (written - unconsumed) */
 

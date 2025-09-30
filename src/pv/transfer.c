@@ -300,41 +300,59 @@ static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool
  * returns 1.
  *
  * At most, the number of bytes read will be the number of bytes remaining
- * in the input buffer.  If state->control.rate_limit is >0, and/or "allowed" is >0,
- * then the maximum number of bytes read will be the number remaining unused
- * in the input buffer or the value of "allowed", whichever is smaller.
+ * in the input buffer, capped to the number of bytes left until
+ * state->control.size is reached if state->control.stop_at_size is true.
+ * If state->control.rate_limit is >0, and/or "max_to_write" is >0, and
+ * splice() is used, then the maximum number of bytes read will be further
+ * capped to the value of "max_to_write", since splice() writes as well as
+ * reads.
  *
- * If splice() was successfully used, sets state->transfer.splice_used to true; if it
- * failed, then state->transfer.splice_failed_fd is updated to the current fd so
- * splice() won't be tried again until the next input file.
+ * If splice() was successfully used, sets state->transfer.splice_used to
+ * true; if it failed, then state->transfer.splice_failed_fd is updated to
+ * the current fd so splice() won't be tried again until the next input
+ * file.
  *
- * Updates state->transfer.read_position by the number of bytes read, unless splice()
- * was used, in which case it does not since there's nothing in the buffer
- * (and it also adds the bytes to state->transfer.written since they've been written
- * to the output).
+ * Updates state->transfer.read_position by the number of bytes read, unless
+ * splice() was used, in which case it does not since there's nothing in the
+ * buffer (and it also adds the bytes to state->transfer.written since
+ * they've been written to the output).
  *
- * On read error, updates state->status.exit_status, and if allowed by
+ * Also increases state->transfer.total_bytes_read by the number of bytes
+ * read, regardless of whether splice() was used, since total_bytes_read is
+ * what it says it is, rather than being a buffer indicator.
+ *
+ * On read error, updates state->status.exit_status, and if max_to_write by
  * state->control.skip_errors, tries to skip past the problem.
  *
  * If the end of the input file is reached or the error is unrecoverable,
  * sets *eof_in to true.  If all data in the buffer has been written at this
  * point, then also sets *eof_out to true.
  */
-static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t allowed)
+static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t max_to_write)
 {
 	bool do_not_skip_errors;
 	size_t bytes_can_read;
 	off_t amount_to_skip, amount_skipped, orig_offset, skip_offset;
 	ssize_t nread;
-#ifdef HAVE_SPLICE
-	size_t bytes_to_splice;
-#endif				/* HAVE_SPLICE */
 
 	do_not_skip_errors = false;
 	if (0 == state->control.skip_errors)
 		do_not_skip_errors = true;
 
 	bytes_can_read = state->transfer.buffer_size - state->transfer.read_position;
+
+	/*
+	 * Don't read past control.size if stop_at_size is true (issue
+	 * #166).
+	 *
+	 * This isn't workable in line mode.
+	 */
+	if (state->control.stop_at_size && state->control.size > 0 && !state->control.linemode) {
+		off_t bytes_remaining_to_read = state->control.size - state->transfer.total_bytes_read;
+		if (bytes_can_read > (size_t) bytes_remaining_to_read)
+			bytes_can_read = (size_t) bytes_remaining_to_read;
+	}
+
 	nread = 0;
 
 #ifdef HAVE_SPLICE
@@ -342,8 +360,10 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	if ((!state->control.linemode) && (!state->control.no_splice)
 	    && (fd != state->transfer.splice_failed_fd)
 	    && (0 == state->transfer.to_write)) {
-		if (state->control.rate_limit > 0 || allowed != 0) {
-			bytes_to_splice = (size_t) allowed;
+		size_t bytes_to_splice;
+
+		if (state->control.rate_limit > 0 || max_to_write != 0) {
+			bytes_to_splice = (size_t) max_to_write;
 		} else {
 			bytes_to_splice = bytes_can_read;
 		}
@@ -365,6 +385,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 			 */
 		} else if (nread > 0) {
 			state->transfer.written = nread;
+			state->transfer.total_bytes_read += nread;
 #ifdef HAVE_FDATASYNC
 			if (state->control.sync_after_write) {
 				/*
@@ -430,6 +451,8 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 #else
 		state->transfer.read_position += nread;
 #endif				/* HAVE_SPLICE */
+		/* Update the counter of all bytes read so far. */
+		state->transfer.total_bytes_read += nread;
 		return 1;
 	}
 
