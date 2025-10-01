@@ -347,7 +347,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 *
 	 * This isn't workable in line mode.
 	 */
-	if (state->control.stop_at_size && state->control.size > 0 && !state->control.linemode) {
+	if (state->control.stop_at_size && !state->control.linemode) {
 		off_t bytes_remaining_to_read = state->control.size - state->transfer.total_bytes_read;
 		if (bytes_can_read > (size_t) bytes_remaining_to_read)
 			bytes_can_read = (size_t) bytes_remaining_to_read;
