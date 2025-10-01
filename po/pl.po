@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
 "POT-Creation-Date: 2025-09-30 22:30+0100\n"
-"PO-Revision-Date: 2025-01-15 19:08+0000\n"
-"Last-Translator: coralpink <coralpink@users.noreply.translate.codeberg.org>\n"
+"PO-Revision-Date: 2025-10-02 13:23+0000\n"
+"Last-Translator: Coral Pink <coralpink@noreply.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.9.2\n"
+"X-Generator: Weblate 5.13.2\n"
 
 #: src/main/help.c:236
 msgid "show progress bar"
@@ -532,16 +532,12 @@ msgid "file list allocation failed"
 msgstr "nie udało się zaalokować listy plików"
 
 #: src/pv/state.c:731
-#, fuzzy
-#| msgid "file list allocation failed"
 msgid "process list allocation failed"
-msgstr "nie udało się zaalokować listy plików"
+msgstr "nie udało się zaalokować listy procesów"
 
 #: src/pv/state.c:739
-#, fuzzy
-#| msgid "file list allocation failed"
 msgid "file descriptor list allocation failed"
-msgstr "nie udało się zaalokować listy plików"
+msgstr "nie udało się zaalokować listy deskryptorów plików"
 
 #: src/pv/transfer.c:486
 msgid "read failed"
