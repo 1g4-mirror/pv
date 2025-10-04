@@ -362,7 +362,7 @@ are explicitly switched on will be shown.
 
 ## Alternative operating modes
 
-**-d**, **\--watchfd** *PID*\[**:***FD*\]\|=*NAME*\|@*LISTFILE*\...
+**-d**, **\--watchfd** *PID*\[:*FD*\]\|=*NAME*\|@*LISTFILE*\...
 
 :   Instead of transferring data, watch file descriptor *FD* of process
     *PID*, and show its progress. Other data transfer modifiers - and
