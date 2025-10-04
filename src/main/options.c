@@ -35,7 +35,7 @@
 
 void display_help(void);
 void display_version(void);
-static bool opts_watchfd_parse(opts_t, const char *optarg, /*@null@ */ const char *, unsigned int);
+static bool opts_watchfd_parse(opts_t, const char *, /*@null@ */ const char *, unsigned int);
 
 
 /*
@@ -384,7 +384,7 @@ static bool opts_watchfd_parse(opts_t opts, const char *argument, /*@null@ */ co
 	parse_pid = 0;
 	parse_fd = -1;
 
-	if (sscanf(optarg, "%u:%d", &parse_pid, &parse_fd) < 1) {
+	if (sscanf(argument, "%u:%d", &parse_pid, &parse_fd) < 1) {
 		/*@-mustfreefresh@ *//* see above */
 		if (NULL != filename) {
 			fprintf(stderr, "%s: -d: %s:%u: %s\n",
