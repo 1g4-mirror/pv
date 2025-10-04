@@ -27,6 +27,7 @@
 #endif
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
@@ -157,8 +158,123 @@ static bool opts_watchfd_add_item(opts_t opts, pid_t pid, int fd)
  */
 static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 {
-	/* TODO: read from pgrep, without using popen() or system() */
-	return false;
+	int fds[2];
+	pid_t pid;
+	FILE *fptr;
+	char buffer[1024];		 /* flawfinder: ignore */
+	pid_t waited_pid;
+	int pid_status;
+	bool ok;
+
+	/*
+	 * flawfinder: buffer is zeroed before each use, and fgets() is
+	 * passed one less than its size so the string functions in the loop
+	 * always find a null byte at the end.
+	 */
+
+	/* Pipe for communicating with pgrep. */
+	if (pipe(fds) < 0) {
+		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		return false;
+	}
+
+	/* Subprocess in which to run pgrep. */
+	pid = (pid_t) fork();
+	if (pid < 0) {
+		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		(void) close(fds[0]);
+		(void) close(fds[1]);
+		return false;
+	} else if (0 == pid) {
+		int nullfd;
+
+		/* Child process - close stdin, set up stdout, run pgrep. */
+
+		/* Replace stdin with /dev/null. */
+		nullfd = open("/dev/null", O_RDONLY);	/* flawfinder: ignore */
+		/* flawfinder: /dev/null is trusted. */
+		if (nullfd < 0) {
+			fprintf(stderr, "%s: %s: %s\n", opts->program_name, "/dev/null", strerror(errno));
+			exit(EXIT_FAILURE);
+		}
+		if (dup2(nullfd, STDIN_FILENO) < 0) {
+			perror("dup2");
+			exit(EXIT_FAILURE);
+		}
+		(void) close(nullfd);
+
+		/* Replace stdout with the write end of the pipe. */
+		if (dup2(fds[1], STDOUT_FILENO) < 0) {
+			perror("dup2");
+			exit(EXIT_FAILURE);
+		}
+		(void) close(fds[1]);
+
+		/* Close the read end of the pipe. */
+		(void) close(fds[0]);
+
+		/* Run pgrep. */
+		if (execlp("pgrep", "pgrep", process_name, NULL) < 0) {	/* flawfinder: ignore */
+			perror("pgrep");
+		}
+		/*
+		 * flawfinder: deliberately calling pgrep as there isn't a
+		 * portable library to use instead.
+		 */
+		exit(EXIT_FAILURE);
+	}
+
+	/* Close the write end of the pipe. */
+	(void) close(fds[1]);
+
+	/* Open a file stream on the read end of the pipe. */
+	fptr = fdopen(fds[0], "r");
+	if (NULL == fptr) {
+		perror("fdopen");
+		(void) close(fds[0]);
+		return false;
+	}
+
+	/* Read the lines of output from the child process. */
+
+	ok = true;
+	memset(buffer, 0, sizeof(buffer));
+	while ((0 == feof(fptr)) && (NULL != fgets(buffer, (int) (sizeof(buffer) - 1), fptr))) {
+		unsigned int watch_pid;
+
+		/* Skip all lines if we've hit any errors. */
+		if (!ok) {
+			memset(buffer, 0, sizeof(buffer));
+			continue;
+		}
+
+		/* Skip lines without valid PID. */
+		watch_pid = 0;
+		if (sscanf(buffer, "%u", &watch_pid) < 1)
+			continue;
+		if (watch_pid < 1)
+			continue;
+
+		if (!opts_watchfd_parse(opts, buffer, NULL, 0))
+			ok = false;
+
+		memset(buffer, 0, sizeof(buffer));
+	}
+
+
+	/* Close the stream from the read end of the pipe. */
+	(void) fclose(fptr);
+
+	/* Wait for the child process to exit. */
+	do {
+		/*@-type@ */
+		/* splint disagreement about __pid_t vs pid_t. */
+		pid_status = 0;
+		waited_pid = waitpid(pid, &pid_status, 0);
+		/*@+type@ */
+	} while (-1 == waited_pid && errno == EINTR);
+
+	return ok;
 }
 
 
