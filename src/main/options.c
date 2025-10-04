@@ -34,6 +34,14 @@
 
 void display_help(void);
 void display_version(void);
+static bool opts_watchfd_parse(opts_t, const char *optarg, /*@null@ */ const char *, unsigned int);
+
+
+/*
+ * splint note about mustfreefresh: the gettext calls made by _() cause
+ * memory leak warnings, but in these cases it's unavoidable, and mitigated
+ * by the fact we only translate each string once.
+ */
 
 
 /*
@@ -112,7 +120,7 @@ bool opts_add_file(opts_t opts, const char *filename)
  * Add a process ID and file descriptor to the list of items to watch with
  * --watchfd, returning false on error.
  */
-static bool opts_add_watchfd(opts_t opts, pid_t pid, int fd)
+static bool opts_watchfd_add_item(opts_t opts, pid_t pid, int fd)
 {
 	/*@-branchstate@ */
 	if ((opts->watchfd_count >= opts->watchfd_length) || (NULL == opts->watchfd_pid)) {
@@ -140,6 +148,154 @@ static bool opts_add_watchfd(opts_t opts, pid_t pid, int fd)
 	opts->watchfd_count++;
 
 	return true;
+}
+
+
+/*
+ * Look for processes with the given name, and add all of them to the list
+ * of watched PIDs.  Returns false on error.
+ */
+static bool opts_watchfd_processname(opts_t opts, const char *process_name)
+{
+	/* TODO: document "-d =NAME" syntax */
+	/* TODO: read from pgrep, without using popen() or system() */
+	return false;
+}
+
+
+/*
+ * Read additional "-d" values from the given file, returning false on
+ * failure.
+ */
+static bool opts_watchfd_listfile(opts_t opts, const char *filename)
+{
+	FILE *fptr;
+	char buffer[1024];		 /* flawfinder: ignore */
+	unsigned int linenumber;
+
+	/* TODO: document "-d @FILE" syntax */
+
+	/*
+	 * flawfinder: buffer is zeroed before each use, and fgets() is
+	 * passed one less than its size so the string functions in the loop
+	 * always find a null byte at the end.
+	 */
+
+	fptr = fopen(filename, "r");	    /* flawfinder: ignore */
+	/*
+	 * flawfinder note: caller directly controls filename, and we're
+	 * opening the file read-only.
+	 */
+	if (NULL == fptr) {
+		fprintf(stderr, "%s: -d @: %s: %s\n", opts->program_name, filename, strerror(errno));
+		return false;
+	}
+
+	linenumber = 0;
+	memset(buffer, 0, sizeof(buffer));
+
+	while ((0 == feof(fptr)) && (NULL != fgets(buffer, (int) (sizeof(buffer) - 1), fptr))) {
+		char *argument;
+		char *nlptr;
+
+		linenumber++;
+
+		/* Remove trailing carriage returns or newlines. */
+		nlptr = strchr(buffer, '\r');
+		if (NULL != nlptr)
+			nlptr[0] = '\0';
+		nlptr = strchr(buffer, '\n');
+		if (NULL != nlptr)
+			nlptr[0] = '\0';
+
+		/* Ignore leading spaces. */
+		argument = buffer;
+		while (argument[0] != '\0' && (argument[0] == ' ' || argument[0] == '\t'))
+			argument++;
+
+		/* Ignore blank lines or comment lines. */
+		if ((argument[0] == '\0') || (argument[0] == '#')) {
+			memset(buffer, 0, sizeof(buffer));
+			continue;
+		}
+
+		/* Reject "@" lines. */
+		if (argument[0] == '@') {
+			(void) fclose(fptr);
+			return false;
+		}
+
+		if (!opts_watchfd_parse(opts, argument, filename, linenumber)) {
+			(void) fclose(fptr);
+			return false;
+		}
+
+		memset(buffer, 0, sizeof(buffer));
+	}
+
+	(void) fclose(fptr);
+	return true;
+}
+
+
+/*
+ * Parse a "-d" option value and make the appropriate additions to the list
+ * of watchfd items, returning false on failure.
+ */
+static bool opts_watchfd_parse(opts_t opts, const char *argument, /*@null@ */ const char *filename, unsigned int line)
+{
+	unsigned int parse_pid;
+	int parse_fd;
+
+	if ('@' == argument[0]) {
+		/* "-d @FILE" syntax - read more values from FILE. */
+
+		/* Don't allow this syntax in a list file. */
+		if (NULL != filename) {
+			/*@-mustfreefresh@ *//* see above */
+			fprintf(stderr, "%s: -d @: %s:%u: %s\n",
+				opts->program_name, filename, line, _("list files may not contain @ lines"));
+			return false;
+			/*@+mustfreefresh@ */
+		}
+
+		return opts_watchfd_listfile(opts, argument + 1);
+
+	} else if ('=' == argument[0]) {
+		/* "-d =NAME" syntax - find processes named NAME. */
+		return opts_watchfd_processname(opts, argument + 1);
+	}
+
+	/* "-d PID[:FD]" syntax. */
+
+	parse_pid = 0;
+	parse_fd = -1;
+
+	if (sscanf(optarg, "%u:%d", &parse_pid, &parse_fd) < 1) {
+		/*@-mustfreefresh@ *//* see above */
+		if (NULL != filename) {
+			fprintf(stderr, "%s: -d: %s:%u: %s\n",
+				opts->program_name, filename, line, _("process ID or pid:fd pair expected"));
+		} else {
+			fprintf(stderr, "%s: -d: %s\n", opts->program_name, _("process ID or pid:fd pair expected"));
+		}
+		return false;
+		/*@+mustfreefresh@ */
+	}
+
+	if (parse_pid < 1) {
+		/*@-mustfreefresh@ *//* see above */
+		if (NULL != filename) {
+			fprintf(stderr, "%s: -d: %s:%u: %u: %s\n",
+				opts->program_name, filename, line, parse_pid, _("invalid process ID"));
+		} else {
+			fprintf(stderr, "%s: -d: %u: %s\n", opts->program_name, parse_pid, _("invalid process ID"));
+		}
+		return false;
+		/*@+mustfreefresh@ */
+	}
+
+	return opts_watchfd_add_item(opts, (pid_t) parse_pid, parse_fd);
 }
 
 
@@ -174,12 +330,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 	stat_rc = stat(size_file, &sb);
 
 	if (0 != stat_rc) {
-		/*@-mustfreefresh@ */
-		/*
-		 * splint note: the gettext calls made by _() cause memory
-		 * leak warnings, but in this case it's unavoidable, and
-		 * mitigated by the fact we only translate each string once.
-		 */
+		/*@-mustfreefresh@ *//* see above */
 		fprintf(stderr, "%s: %s: %s: %s\n",
 			opts->program_name, size_file, _("failed to stat file"), strerror(errno));
 		return false;
@@ -369,8 +520,8 @@ opts_t opts_parse(unsigned int argc, char **argv)
 #endif
 	    ;
 	int c, numopts;
-	unsigned int check_pid, parse_pid;
-	int check_fd, parse_fd;
+	unsigned int check_pid;
+	int check_fd;
 	opts_t opts;
 	char *leafptr;
 
@@ -490,8 +641,49 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'd':
+			if ('@' == optarg[0]) {
+				/* "-d @FILE" syntax - check FILE exists. */
+				if (optarg[1] == '\0') {
+					/*@-mustfreefresh@ *//* see above */
+					fprintf(stderr, "%s: -%c @: %s\n",
+						opts->program_name, c, _("missing filename"));
+					opts_free(opts);
+					return NULL;
+					/*@+mustfreefresh@ */
+				} else if (0 != access(optarg + 1, R_OK)) {	/* flawfinder: ignore */
+					/*
+					 * flawfinder rationale: we're not
+					 * using access() to check
+					 * permissions, only to help give a
+					 * usable error message, so there's
+					 * no TOCTOU issue.
+					 */
+					/*@-mustfreefresh@ *//* see above */
+					fprintf(stderr, "%s: -%c @: %s: %s\n",
+						opts->program_name, c, optarg + 1, strerror(errno));
+					opts_free(opts);
+					return NULL;
+					/*@+mustfreefresh@ */
+				}
+				break;
+			} else if ('=' == optarg[0]) {
+				/*
+				 * "-d =NAME" syntax - check NAME is not
+				 * blank.
+				 */
+				if (optarg[1] == '\0') {
+					/*@-mustfreefresh@ *//* see above */
+					fprintf(stderr, "%s: -%c %c: %s\n",
+						opts->program_name, c, optarg[0], _("missing process name"));
+					opts_free(opts);
+					return NULL;
+					/*@+mustfreefresh@ */
+				}
+				break;
+			}
 			if (sscanf(optarg, "%u:%d", &check_pid, &check_fd)
 			    < 1) {
+				/* "-d PID[:FD]" syntax - check numbers. */
 				/*@-mustfreefresh@ *//* see above */
 				fprintf(stderr, "%s: -%c: %s\n",
 					opts->program_name, c, _("process ID or pid:fd pair expected"));
@@ -708,11 +900,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'd':
-			parse_pid = 0;
-			parse_fd = -1;
-			/* No syntax check here, already done earlier */
-			(void) sscanf(optarg, "%u:%d", &parse_pid, &parse_fd);
-			if (!opts_add_watchfd(opts, (pid_t) parse_pid, parse_fd)) {
+			if (!opts_watchfd_parse(opts, optarg, NULL, 0)) {
 				opts_free(opts);
 				return NULL;
 			}
@@ -804,28 +992,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			/*@+mustfreefresh@ */
 		}
 
-		/* Accept additional pid[:fd] arguments. */
+		/* Accept additional watchfd arguments. */
 		while (optind < (int) argc) {
-			parse_pid = 0;
-			parse_fd = -1;
-			if (sscanf(argv[optind], "%u:%d", &parse_pid, &parse_fd)
-			    < 1) {
-				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -d: %s: %s\n",
-					opts->program_name, argv[optind], _("process ID or pid:fd pair expected"));
-				opts_free(opts);
-				return NULL;
-				/*@+mustfreefresh@ */
-			}
-			if (parse_pid < 1) {
-				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -d: %s: %s\n", opts->program_name, argv[optind],
-					_("invalid process ID"));
-				opts_free(opts);
-				return NULL;
-				/*@+mustfreefresh@ */
-			}
-			if (!opts_add_watchfd(opts, (pid_t) parse_pid, parse_fd)) {
+			if (!opts_watchfd_parse(opts, argv[optind], NULL, 0)) {
 				opts_free(opts);
 				return NULL;
 			}
