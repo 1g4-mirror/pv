@@ -584,6 +584,53 @@ int pv_main_loop(pvstate_t state)
 
 
 /*
+ * Return true if the given string contains a "%N" or "%{name}" format
+ * sequence.
+ */
+static bool format_contains_name(const char *format_string)
+{
+	while ('\0' != format_string[0]) {
+		/* If we're not on a '%' character, move on. */
+		if ('%' != format_string[0]) {
+			format_string++;
+			continue;
+		}
+		/* Move past the '%'. */
+		format_string++;
+		/* Early return if we've run out of string. */
+		if ('\0' == format_string[0])
+			return false;
+		/* If we've found "%N", return true. */
+		if ('N' == format_string[0])
+			return true;
+		/* If we've found "%%", move on and go back round the loop. */
+		if ('%' == format_string[0]) {
+			format_string++;
+			continue;
+		}
+		/* Move past any digits, for the "%123{name}" syntax. */
+		while ('\0' != format_string[0] && (format_string[0] >= '0' && format_string[0] <= '9'))
+			format_string++;
+		/*
+		 * If the next character isn't '{', this isn't a valid
+		 * "%{xyz}" sequence, so go back to the top of the loop to
+		 * skip to the next '%'.
+		 */
+		if ('{' != format_string[0])
+			continue;
+		/*
+		 * If the next part is "{name}", forming "%{name}", return
+		 * true.
+		 */
+		if (0 == strncmp(format_string, "{name}", 6))
+			return true;
+		/* Loop round again to keep looking. */
+	}
+	return false;
+}
+
+
+/*
  * Update the main format string for use with --watchfd, such that if
  * necessary, it starts with "%N " if it doesn't already.
  */
@@ -621,8 +668,7 @@ static void pv_watchfd_update_format_string(pvstate_t state)
 
 	if (state->watchfd.count > 1 || -1 == state->watchfd.fd[0]) {
 		/* Watching more than one single FD; need %N. */
-		if (NULL == strstr(original_format_string, "%N")) {
-			/* TODO: also check for %{name} as well as %N. */
+		if (!format_contains_name(original_format_string)) {
 			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N %s",
 					   original_format_string);
 		} else {
