@@ -3,15 +3,15 @@ msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
 "POT-Creation-Date: 2025-09-30 22:30+0100\n"
-"PO-Revision-Date: 2024-10-12 23:51+0000\n"
-"Last-Translator: a-j-wood <a-j-wood@users.noreply.translate.codeberg.org>\n"
+"PO-Revision-Date: 2025-10-05 20:09+0000\n"
+"Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.7.2\n"
+"X-Generator: Weblate 5.13.2\n"
 
 #: src/main/help.c:236
 msgid "show progress bar"
@@ -143,19 +143,19 @@ msgstr "görsel bilgiyi İSİM ile öne ekle"
 
 #: src/main/help.c:311
 msgid "STYLE"
-msgstr ""
+msgstr "BİÇİM"
 
 #: src/main/help.c:312
 msgid "set default bar style to NAME"
-msgstr ""
+msgstr "öntanımlı çubuk biçimini İSİM olarak ayarla"
 
 #: src/main/help.c:314
 msgid "SPEC"
-msgstr ""
+msgstr "BELİRT"
 
 #: src/main/help.c:315
 msgid "also send progress to SPEC"
-msgstr ""
+msgstr "ilerlemeyi BELİRT ögesine de gönder"
 
 #: src/main/help.c:318
 msgid "output transfer statistics at the end"
@@ -271,7 +271,7 @@ msgstr ""
 
 #: src/main/help.c:555
 msgid "Supported format sequences:"
-msgstr ""
+msgstr "Desteklenen biçim dizileri:"
 
 #: src/main/help.c:569
 #, c-format
@@ -320,7 +320,7 @@ msgstr "seçenek yapısı argv tahsisi başarısız oldu"
 
 #: src/main/options.c:456
 msgid "numeric value not understood"
-msgstr ""
+msgstr "sayısal değer anlaşılmadı"
 
 #: src/main/options.c:474
 msgid "integer argument expected"
@@ -515,16 +515,12 @@ msgid "file list allocation failed"
 msgstr "dosya listesi tahsisi başarısız oldu"
 
 #: src/pv/state.c:731
-#, fuzzy
-#| msgid "file list allocation failed"
 msgid "process list allocation failed"
-msgstr "dosya listesi tahsisi başarısız oldu"
+msgstr "işlem listesi tahsisi başarısız oldu"
 
 #: src/pv/state.c:739
-#, fuzzy
-#| msgid "file list allocation failed"
 msgid "file descriptor list allocation failed"
-msgstr "dosya listesi tahsisi başarısız oldu"
+msgstr "dosya tanımlayıcı listesi tahsisi başarısız oldu"
 
 #: src/pv/transfer.c:486
 msgid "read failed"
