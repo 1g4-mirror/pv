@@ -7,7 +7,8 @@ pv \- monitor the progress of data through a pipe
 .B pv
 [\fIOPTION\fR]... [\fIFILE\fR]...
 .PP
-\fBpv\fR [\fIOPTION\fR]... \fB\-d\fR|\fB\-\-watchfd\fR \fIPID\fR[:\fIFD\fR]...
+\fBpv\fR [\fIOPTION\fR]... \fB\-d\fR|\fB\-\-watchfd\fR
+\fIPID\fR[:\fIFD\fR]|=\fINAME\fR|@\fILISTFILE\fR...
 .PP
 \fBpv\fR \fB\-R\fR|\fB\-\-remote\fR \fIPID\fR [\fIOPTION\fR]...
 .\"
@@ -349,7 +350,7 @@ doesn't affect the progress display.
 .\"
 .SS "Alternative operating modes"
 .TP
-.BI \-d\  PID\fR[\fB:\fR\fIFD\fR],\  \fB\-\-watchfd\  PID\fR[\fB:\fR\fIFD\fR]
+\fB\-d\fR, \fB\-\-watchfd\fR \fIPID\fR[\fB:\fR\fIFD\fR]|=\fINAME\fR|@\fILISTFILE\fR...
 Instead of transferring data, watch file descriptor \fIFD\fR of process
 \fIPID\fR, and show its progress.
 Other data transfer modifiers - and remote control - may not be used with
@@ -359,8 +360,14 @@ If a \fIPID\fR is specified without an \fIFD\fR, then that process will be
 watched, and all regular files and block devices it opens will be shown with
 a progress bar.
 .IP
-All remaining non-option arguments will also be treated as
-\fIPID\fRs or as \fIPID\fR:\fIFD\fR pairs.
+If a \fINAME\fR is specified, prefixed with "=", then processes with that
+name will be found with \fBpgrep\fR(1), and as watched described above.
+.IP
+If a \fILISTFILE\fR is specified, prefixed with "@", the lines in that file
+will be used as additional arguments.
+.IP
+All remaining non-option arguments will also be treated as additional
+arguments.
 .IP
 The \fBpv\fR process will exit when all \fIFD\fRs have either changed to a
 different file, changed read/write mode, or have closed, and all \fIPID\fRs

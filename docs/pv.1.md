@@ -6,7 +6,8 @@ pv - monitor the progress of data through a pipe
 
 **pv** \[*OPTION*\]\... \[*FILE*\]\...
 
-**pv** \[*OPTION*\]\... **-d**\|**\--watchfd** *PID*\[:*FD*\]\...
+**pv** \[*OPTION*\]\... **-d**\|**\--watchfd**
+*PID*\[:*FD*\]\|=*NAME*\|@*LISTFILE*\...
 
 **pv** **-R**\|**\--remote** *PID* \[*OPTION*\]\...
 
@@ -361,7 +362,7 @@ are explicitly switched on will be shown.
 
 ## Alternative operating modes
 
-**-d PID\[:FD\], \--watchfd PID\[:FD\]**
+**-d**, **\--watchfd** *PID*\[**:***FD*\]\|=*NAME*\|@*LISTFILE*\...
 
 :   Instead of transferring data, watch file descriptor *FD* of process
     *PID*, and show its progress. Other data transfer modifiers - and
@@ -371,8 +372,15 @@ are explicitly switched on will be shown.
     watched, and all regular files and block devices it opens will be
     shown with a progress bar.
 
-    All remaining non-option arguments will also be treated as *PID*s or
-    as *PID*:*FD* pairs.
+    If a *NAME* is specified, prefixed with \"=\", then processes with
+    that name will be found with **pgrep**(1), and as watched described
+    above.
+
+    If a *LISTFILE* is specified, prefixed with \"@\", the lines in that
+    file will be used as additional arguments.
+
+    All remaining non-option arguments will also be treated as
+    additional arguments.
 
     The **pv** process will exit when all *FD*s have either changed to a
     different file, changed read/write mode, or have closed, and all

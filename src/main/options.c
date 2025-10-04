@@ -157,7 +157,6 @@ static bool opts_watchfd_add_item(opts_t opts, pid_t pid, int fd)
  */
 static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 {
-	/* TODO: document "-d =NAME" syntax */
 	/* TODO: read from pgrep, without using popen() or system() */
 	return false;
 }
@@ -172,8 +171,6 @@ static bool opts_watchfd_listfile(opts_t opts, const char *filename)
 	FILE *fptr;
 	char buffer[1024];		 /* flawfinder: ignore */
 	unsigned int linenumber;
-
-	/* TODO: document "-d @FILE" syntax */
 
 	/*
 	 * flawfinder: buffer is zeroed before each use, and fgets() is
