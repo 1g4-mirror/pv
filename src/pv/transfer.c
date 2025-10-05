@@ -966,7 +966,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 /*@only@*/
 static char *pv__allocate_aligned_buffer(int outfd, int infd, size_t target_size)
 {
-	char *newptr;
+	void *newptr;
 
 #if defined(HAVE_FPATHCONF) && defined(HAVE_POSIX_MEMALIGN) && defined(_PC_REC_XFER_ALIGN)
 	long input_alignment, output_alignment, min_alignment;
