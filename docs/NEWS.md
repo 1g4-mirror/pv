@@ -1,6 +1,8 @@
 ### UNRELEASED
 
  * *feature:* permit multiple arguments to **--watchfd** ([#12](https://codeberg.org/ivarch/pv/issues/12))
+ * *feature:* new "**=NAME**" syntax for **--watchfd** to watch processes by name using **pgrep**(1) ([#95](https://codeberg.org/ivarch/pv/issues/95))
+ * *feature:* new "**@LISTFILE**" syntax for **--watchfd** to watch processes listed in a file
  * *fix:* improve support for changing the format of a **--watchfd** process with **--remote**
  * *fix:* don't read more than **--size** bytes when using **--stop-at-size** ([#166](https://codeberg.org/ivarch/pv/issues/166))
  * *fix:* transfer nothing if **--stop-at-size** is given a **--size** of 0 ([#166](https://codeberg.org/ivarch/pv/issues/166))
