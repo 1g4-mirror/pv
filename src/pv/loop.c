@@ -824,35 +824,6 @@ int pv_watchfd_loop(pvstate_t state)
 		goto end_pv_watchfd_loop;
 
 	/*
-	 * TODO: special-case, if we are watching one single PID:FD,
-	 * state->control.size < 1, then set state->control.size to the size
-	 * that FD points to, and if there's still no size, remove the ETA
-	 * from the format string.
-	 * Need to check whether retaining this old feature is still
-	 * relevant.
-	 */
-	/* Old code to refactor into here: */
-#if 0
-	/*
-	 * Use a size if one was passed, otherwise use the total size
-	 * calculated.
-	 */
-	if (0 >= state->control.size)
-		state->control.size = info.size;
-
-	if (state->control.size < 1) {
-		char *fmt;
-		while (NULL != (fmt = strstr(state->control.default_format, "%e"))) {
-			debug("%s", "zero size - removing ETA");
-			/* strlen-1 here to include trailing \0 */
-			memmove(fmt, fmt + 2, strlen(fmt) - 1);	/* flawfinder: ignore */
-			/* flawfinder: default_format is always \0 terminated */
-			state->flags.reparse_display = 1;
-		}
-	}
-#endif
-
-	/*
 	 * Prepare timing structures for the main loop.
 	 */
 
