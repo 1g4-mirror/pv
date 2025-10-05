@@ -349,7 +349,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	 */
 	if (state->control.stop_at_size && !state->control.linemode) {
 		off_t bytes_remaining_to_read = state->control.size - state->transfer.total_bytes_read;
-		if (bytes_can_read > (size_t) bytes_remaining_to_read) {
+		if ((long long) bytes_can_read > (long long) bytes_remaining_to_read) {
 			debug("%lld > (%lld-%lld=%lld): %s", (long long) bytes_can_read,
 			      (long long) (state->control.size), (long long) state->transfer.total_bytes_read,
 			      (long long) bytes_remaining_to_read, "truncating for stop-at-size");
