@@ -7,6 +7,7 @@
  * *fix:* don't read more than **--size** bytes when using **--stop-at-size** ([#166](https://codeberg.org/ivarch/pv/issues/166))
  * *fix:* transfer nothing if **--stop-at-size** is given a **--size** of 0 ([#166](https://codeberg.org/ivarch/pv/issues/166))
  * *i18n:* Finnish translation stub added
+ * *i18n:* Turkish translations updated
 
 ### 1.9.34 - 26 July 2025
 
