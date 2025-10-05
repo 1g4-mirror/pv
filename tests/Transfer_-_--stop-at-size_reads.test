@@ -51,4 +51,25 @@ if ! test "${catOutput}" = 'fghi'; then
 	exit 1
 fi
 
+# Test again with -C to ensure that it works with splice turned off.
+
+printf '%s\n' 'abcdefghi' | (
+"${testSubject}" -qCSs5 > "${workFile1}"
+cat > "${workFile2}"
+)
+
+# pv should have read 5 bytes and put them into workFile1.
+pvOutput="$(cat "${workFile1}")"
+if ! test "${pvOutput}" = 'abcde'; then
+	echo "with -C, expected pv to write [abcde], got [${pvOutput}]"
+	exit 1
+fi
+
+# cat should have read the remaining bytes and put them into workFile2.
+catOutput="$(cat "${workFile2}")"
+if ! test "${catOutput}" = 'fghi'; then
+	echo "with pv -C, expected cat to write [fghi], got [${catOutput}]"
+	exit 1
+fi
+
 exit 0
