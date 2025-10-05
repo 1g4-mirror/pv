@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-09-30 22:30+0100\n"
+"POT-Creation-Date: 2025-10-05 21:41+0100\n"
 "PO-Revision-Date: 2025-01-14 20:39+0000\n"
 "Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -303,69 +303,81 @@ msgstr "(eingabe)"
 msgid "state allocation failed"
 msgstr "Speicherzuweisung für `state' fehlgeschlagen"
 
-#: src/main/options.c:184 src/pv/file.c:342
-msgid "failed to stat file"
-msgstr "konnte Dateiinformationen nicht lesen"
+#: src/main/options.c:370
+msgid "list files may not contain @ lines"
+msgstr ""
 
-#: src/main/options.c:198
-msgid "is a directory"
-msgstr "ist ein Verzeichnis"
-
-#: src/main/options.c:227
-msgid "failed to generate sysfs filename"
-msgstr "konnte Sysfs-Dateinamen nicht erzeugen"
-
-#: src/main/options.c:249
-msgid "failed to read sysfs size file"
-msgstr "konnte Größe der Sysfs-Datei nicht lesen"
-
-#: src/main/options.c:269
-msgid "failed to open block device"
-msgstr "konnte Blockgerät nicht öffnen"
-
-#: src/main/options.c:279
-msgid "failed to determine size of block device"
-msgstr "konnte Größe des Blockgeräts nicht ermitteln"
-
-#: src/main/options.c:385
-msgid "option structure allocation failed"
-msgstr "Speicherzuweisung für `option' fehlgeschlagen"
-
-#: src/main/options.c:404
-msgid "option structure argv allocation failed"
-msgstr "Speicherzuweisung für `argv' der Option fehlgeschlagen"
-
-#: src/main/options.c:456
-msgid "numeric value not understood"
-msgstr "numerischen Wert nicht verstanden"
-
-#: src/main/options.c:474
-msgid "integer argument expected"
-msgstr "Ganzzahliges Argument erwartet"
-
-#: src/main/options.c:486
-msgid "numeric argument expected"
-msgstr "numerisches Argument erwartet"
-
-#: src/main/options.c:497 src/main/options.c:815
+#: src/main/options.c:391 src/main/options.c:393 src/main/options.c:802
 msgid "process ID or pid:fd pair expected"
 msgstr "Prozess-ID oder PID:FD-Paar erwartet"
 
-#: src/main/options.c:504 src/main/options.c:823
+#: src/main/options.c:403 src/main/options.c:405 src/main/options.c:809
 msgid "invalid process ID"
 msgstr "ungültige Prozess-ID"
 
-#: src/main/options.c:741
+#: src/main/options.c:448 src/pv/file.c:342
+msgid "failed to stat file"
+msgstr "konnte Dateiinformationen nicht lesen"
+
+#: src/main/options.c:462
+msgid "is a directory"
+msgstr "ist ein Verzeichnis"
+
+#: src/main/options.c:491
+msgid "failed to generate sysfs filename"
+msgstr "konnte Sysfs-Dateinamen nicht erzeugen"
+
+#: src/main/options.c:513
+msgid "failed to read sysfs size file"
+msgstr "konnte Größe der Sysfs-Datei nicht lesen"
+
+#: src/main/options.c:533
+msgid "failed to open block device"
+msgstr "konnte Blockgerät nicht öffnen"
+
+#: src/main/options.c:543
+msgid "failed to determine size of block device"
+msgstr "konnte Größe des Blockgeräts nicht ermitteln"
+
+#: src/main/options.c:649
+msgid "option structure allocation failed"
+msgstr "Speicherzuweisung für `option' fehlgeschlagen"
+
+#: src/main/options.c:668
+msgid "option structure argv allocation failed"
+msgstr "Speicherzuweisung für `argv' der Option fehlgeschlagen"
+
+#: src/main/options.c:720
+msgid "numeric value not understood"
+msgstr "numerischen Wert nicht verstanden"
+
+#: src/main/options.c:738
+msgid "integer argument expected"
+msgstr "Ganzzahliges Argument erwartet"
+
+#: src/main/options.c:750
+msgid "numeric argument expected"
+msgstr "numerisches Argument erwartet"
+
+#: src/main/options.c:762
+msgid "missing filename"
+msgstr ""
+
+#: src/main/options.c:790
+msgid "missing process name"
+msgstr ""
+
+#: src/main/options.c:1042
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "`%s --help' zeigt weitere Informationen an."
 
-#: src/main/options.c:743
+#: src/main/options.c:1044
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "`%s -h' zeigt weitere Informationen an."
 
-#: src/main/options.c:774
+#: src/main/options.c:1075
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -373,24 +385,24 @@ msgstr ""
 "Beim Beobachten von Dateideskriptoren können keine Optionen für den "
 "Zeilenmodus oder den Übertragungsmodifikator verwendet werden"
 
-#: src/main/options.c:783
+#: src/main/options.c:1084
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "Beim Beobachten von Dateideskriptoren kann Cursor-Positionierung nicht "
 "verwendet werden"
 
-#: src/main/options.c:792
+#: src/main/options.c:1093
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "Beim Beobachten von Dateideskriptoren kann die Fernbedienung nicht verwenden "
 "werden"
 
-#: src/main/options.c:801
+#: src/main/options.c:1102
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "Beim Beobachten von Dateideskriptoren können Dateien nicht übertragen werden"
 
-#: src/main/options.c:845
+#: src/main/options.c:1127
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "Nicht verfügbar auf Systemen ohne /proc/self/fdinfo"
 
@@ -442,7 +454,7 @@ msgstr "yzafpnµm kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:1053 src/pv/loop.c:700 src/pv/transfer.c:1079
+#: src/pv/display.c:1053 src/pv/loop.c:746 src/pv/transfer.c:1083
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
@@ -493,7 +505,7 @@ msgstr "B/s"
 msgid "b"
 msgstr "b"
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:616
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:620
 msgid "B"
 msgstr "B"
 
@@ -513,7 +525,7 @@ msgstr "Rate min/mittel/max/abweichung"
 msgid "rate not measured"
 msgstr "Übertragungsrate nicht gemessen"
 
-#: src/pv/loop.c:721 src/pv/loop.c:737 src/pv/loop.c:755 src/pv/watchpid.c:99
+#: src/pv/loop.c:767 src/pv/loop.c:783 src/pv/loop.c:801 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
 #: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
 #: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
@@ -521,7 +533,7 @@ msgstr "Übertragungsrate nicht gemessen"
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:755 src/pv/watchpid.c:108 src/pv/watchpid.c:120
+#: src/pv/loop.c:801 src/pv/watchpid.c:108 src/pv/watchpid.c:120
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:183 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:203
 msgid "fd"
@@ -547,47 +559,47 @@ msgstr "Speicherzuweisung für die Dateiliste fehlgeschlagen"
 msgid "file descriptor list allocation failed"
 msgstr "Speicherzuweisung für die Dateiliste fehlgeschlagen"
 
-#: src/pv/transfer.c:486
+#: src/pv/transfer.c:490
 msgid "read failed"
 msgstr "read-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:502
+#: src/pv/transfer.c:506
 msgid "warning: read errors detected"
 msgstr "warnung: lesefehler erkannt"
 
-#: src/pv/transfer.c:518
+#: src/pv/transfer.c:522
 msgid "file is not seekable"
 msgstr "Datei ist nicht durchsuchbar"
 
-#: src/pv/transfer.c:595
+#: src/pv/transfer.c:599
 msgid "failed to seek past error"
 msgstr "konnte den Fehler nicht überwinden"
 
-#: src/pv/transfer.c:615
+#: src/pv/transfer.c:619
 msgid "skipped past read error"
 msgstr "über den Lesefehler hinaus verschoben"
 
-#: src/pv/transfer.c:656
+#: src/pv/transfer.c:660
 msgid "no transfer buffer allocated"
 msgstr "Speicherzuweisung für den Transferpuffer fehlgeschlagen"
 
-#: src/pv/transfer.c:698
+#: src/pv/transfer.c:702
 msgid "failed to set interval timer"
 msgstr "konnte Intervall-Timer nicht setzen"
 
-#: src/pv/transfer.c:724
+#: src/pv/transfer.c:728
 msgid "failed to clear interval timer"
 msgstr "konnte Intervall-Timer nicht löschen"
 
-#: src/pv/transfer.c:766
+#: src/pv/transfer.c:770
 msgid "line position buffer allocation failed"
 msgstr "Zuweisung des Zeilenpuffers fehlgeschlagen"
 
-#: src/pv/transfer.c:940
+#: src/pv/transfer.c:944
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:1181
+#: src/pv/transfer.c:1185
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 
