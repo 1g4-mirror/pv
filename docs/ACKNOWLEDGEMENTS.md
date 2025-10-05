@@ -129,5 +129,6 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
    * [0ko](https://translate.codeberg.org/user/0ko/) (157)
  * **Turkish**
    * [omerdduran](https://translate.codeberg.org/user/omerdduran/) (129)
+   * [Oğuz Ersen](https://codeberg.org/ersen) (8)
 
 ---
