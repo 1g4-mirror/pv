@@ -160,7 +160,7 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	fractional_part = fractional_part / fractional_divisor;
 	integral_part += fractional_part;
 
-	debug("%s [%s] = %ld", str, decimal_units ? "decimal" : "binary", integral_part);
+	debug("%s [%s] = %lld", str, decimal_units ? "decimal" : "binary", (long long) integral_part);
 
 	return integral_part;
 }
