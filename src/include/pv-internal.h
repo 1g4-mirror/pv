@@ -518,6 +518,9 @@ struct pvwatchfd_s {
 	off_t size;			 /* size of whole file, 0 if unknown */
 	off_t position;			 /* position last seen at */
 	struct timespec start_time;	 /* time we started watching the fd */
+	/* TODO: changes for #81, retaining closed fds for a little while: */
+	/* TODO: track "closed" as well as "displayable"/"unused" */
+	/* TODO: track when closed, i.e. when ready to be removed */
 	pid_t watch_pid;		 /* PID to watch */
 	int watch_fd;			 /* fd to watch */
 	bool displayable;		 /* false if not displayable */
