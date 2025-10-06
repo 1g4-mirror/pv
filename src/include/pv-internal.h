@@ -498,6 +498,9 @@ struct pvdisplay_component_s {
 };
 
 
+/*
+ * Structure defining the current state of a single watched file descriptor.
+ */
 struct pvwatchfd_s {
 	struct pvtransientflags_s flags;	/* transient flags */
 	struct pvtransferstate_s transfer;	/* transfer state */
