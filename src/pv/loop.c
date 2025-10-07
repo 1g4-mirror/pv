@@ -712,6 +712,7 @@ int pv_watchfd_loop(pvstate_t state)
 		int fd;			 /* watched fd, or -1 for all */
 		pvwatchfd_t info_array;	 /* watch information for each fd */
 		int array_length;	 /* length of watch info array */
+		/* TODO: "finished but not time to stop showing" flag for #81 */
 		bool finished;		 /* "PID:FD": fd closed; or PID gone */
 	} *watching;
 	unsigned int watch_idx;
