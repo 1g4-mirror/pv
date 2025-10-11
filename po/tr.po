@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-10-05 21:41+0100\n"
+"POT-Creation-Date: 2025-10-11 16:00+0100\n"
 "PO-Revision-Date: 2025-10-05 20:09+0000\n"
 "Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -433,7 +433,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1053 src/pv/loop.c:746 src/pv/transfer.c:1083
+#: src/pv/display.c:1053 src/pv/loop.c:747 src/pv/transfer.c:1083
 msgid "buffer allocation failed"
 msgstr "arabellek tahsisi başarısız oldu"
 
@@ -504,7 +504,7 @@ msgstr "oran min/ortalama/maks/standart sapma"
 msgid "rate not measured"
 msgstr "oran ölçülmedi"
 
-#: src/pv/loop.c:767 src/pv/loop.c:783 src/pv/loop.c:801 src/pv/watchpid.c:99
+#: src/pv/loop.c:768 src/pv/loop.c:784 src/pv/loop.c:802 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
 #: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
 #: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
@@ -512,7 +512,7 @@ msgstr "oran ölçülmedi"
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:801 src/pv/watchpid.c:108 src/pv/watchpid.c:120
+#: src/pv/loop.c:802 src/pv/watchpid.c:108 src/pv/watchpid.c:120
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:183 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:203
 msgid "fd"
