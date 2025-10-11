@@ -4,22 +4,19 @@
 # build directory, such as one in which "configure" has been run, i.e. 
 # there should be a Makefile present.
 #
-# If ~/.config/packaging-hosts exists, then build-package.sh is run on each
-# one and the resultant packages (RPMs, DEBs, etc) are copied back.
+# Requires "parmo" (https://ivarch.com/p/parmo); builds for all targets that
+# parmo supports.
 #
-# All of the release artefacts are placed in a "RELEASE-x" directory, where
-# "x" is the version.
+# All of the release artefacts are placed in a "PV-RELEASE-x" directory,
+# where "x" is the version.
 #
 # Copyright 2024-2025 Andrew Wood
 # License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
-#
-# Version: 0.0.2 / 16 Dec 2024
 
 srcdir="$(awk '/^VPATH/{print $NF}' < Makefile | sed -n 1p)"
 manuals="$(find "${srcdir}/docs" -mindepth 1 -maxdepth 1 -type f -name "*.[0-9]" -printf "%f\n")"
 mainProgram="$(awk '/^[a-z]+_PROGRAMS/{print $3}' Makefile |cut -d '$' -f 1 | sed -n 1p)"
 labTestScript="${srcdir}/docs/test-on-vm-lab.sh"
-packageBuildScript="${srcdir}/docs/build-package.sh"
 
 status () {
 	test -n "$*" && printf "\n"
@@ -43,7 +40,6 @@ possiblyDie () {
 }
 
 test -e "${labTestScript}" || labTestScript=""
-test -e "${packageBuildScript}" || packageBuildScript=""
 
 # The checklist is re-ordered a little so that we defer making changes (like
 # "make indent") until as late as possible, in case any checks fail.
@@ -72,6 +68,7 @@ make analyse || possiblyDie "failed 'make analyse'"
 status "Version checks"
 
 #   * Check that _docs/NEWS.md_ is up to date
+sed -n 1p docs/NEWS.md | grep -Fqi unreleased && possiblyDie "NEWS.md says 'unreleased' on line 1"
 versionInNews="$(awk 'FNR==1{print $2}' "${srcdir}/docs/NEWS.md")"
 printf "%s\n" "${versionInNews}" | grep -Eq '^[0-9]' || possiblyDie "version in NEWS.md (${versionInNews}) is not numeric"
 
@@ -158,44 +155,56 @@ fi
 #   * Copy the release _.tar.gz_, _.txt_, and _.asc_ files to the web site
 #   * Use "_pandoc --from markdown --to html_" to convert the news and manual to HTML
 status "Release dir"
-rm -rf "RELEASE-${versionInNews}"
-mkdir "RELEASE-${versionInNews}"
-cp "${sourceArchive}" "${sourceArchive}.asc" "${sourceArchive}.txt" "RELEASE-${versionInNews}/" || possiblyDie "failed to copy release files"
+releaseDir="PV-RELEASE-${versionInNews}"
+rm -rf "${releaseDir}"
+mkdir "${releaseDir}"
+cp "${sourceArchive}" "${sourceArchive}.asc" "${sourceArchive}.txt" "${releaseDir}/" || possiblyDie "failed to copy release files"
 
 status "HTML docs"
 for manPage in ${manuals}; do
-	pandoc --from markdown --to html --shift-heading-level-by=1 < "${srcdir}/docs/${manPage}.md" > "RELEASE-${versionInNews}/${manPage}.html"
+	pandoc --from markdown --to html --shift-heading-level-by=1 < "${srcdir}/docs/${manPage}.md" > "${releaseDir}/${manPage}.html"
 done
-pandoc --from markdown --to html < "${srcdir}/docs/NEWS.md" > "RELEASE-${versionInNews}/news.html"
+pandoc --from markdown --to html < "${srcdir}/docs/NEWS.md" > "${releaseDir}/news.html"
 
 # Build OS packages.
-packagingHosts="$(cat ~/.config/packaging-hosts 2>/dev/null)"
-test -n "${packageBuildScript}" || packagingHosts=""
-for buildHost in ${packagingHosts}; do
-	remoteWorkDir="$(ssh "${buildHost}" "mktemp -d")" || continue
-	test -n "${remoteWorkDir}" || continue
-	status "Package: ${buildHost}"
+buildTargets=$(parmo targets)
+if test -n "${MAINTAINER}"; then
+	gpg --export-secret-key --armor "${MAINTAINER}" > "${workDir}/signing-key" \
+	|| possiblyDie 'failed to export signing key'
+fi
+for buildTarget in ${buildTargets}; do
+	status "Package: ${buildTarget}"
 	buildOK=true
-	scp "${packageBuildScript}" "${buildHost}:${remoteWorkDir}/build-package.sh" || buildOK=false
-	${buildOK} && scp "${sourceArchive}" "${buildHost}:${remoteWorkDir}/" || buildOK=false
-	# shellcheck disable=SC2029
-	${buildOK} && ssh -t "${buildHost}" "cd \"${remoteWorkDir}\" && SKIP_VALGRIND_TESTS=\"${SKIP_VALGRIND_TESTS}\" MAINTAINER=\"${MAINTAINER}\" sh ./build-package.sh ./*gz" || buildOK=false
-	# shellcheck disable=SC2029
-	${buildOK} && ssh "${buildHost}" "rm \"${remoteWorkDir}\"/${sourceArchive##*/} \"${remoteWorkDir}/build-package.sh\""
-	${buildOK} && mkdir -p "RELEASE-${versionInNews}/${buildHost}"
-	${buildOK} && scp "${buildHost}:${remoteWorkDir}/*" "RELEASE-${versionInNews}/${buildHost}/"
-	# shellcheck disable=SC2029
-	ssh "${buildHost}" "rm -rf \"${remoteWorkDir}\""
+	rm -rf "${workDir}/package"
+	mkdir "${workDir}/package"
+	if test -s "${workDir}/signing-key"; then
+		parmo --key "${workDir}/signing-key" --source "${sourceArchive}" --destination "${workDir}/package" --target "${buildTarget}" build-package \
+		|| possiblyDie "${buildTarget}: build failed"
+	else
+		parmo --source "${sourceArchive}" --destination "${workDir}/package" --target "${buildTarget}" build-package \
+		|| possiblyDie "${buildTarget}: build failed"
+	fi
+	find "${workDir}/package" -type f \
+	| while read -r packageFile; do
+		destinationFile="${releaseDir}/${packageFile##*/}"
+		case "${destinationFile}" in
+		*.deb) destinationFile="${destinationFile%.deb}_${buildTarget}.deb" ;;
+		*.txt) destinationFile="" ;;
+		esac
+		test -n "${destinationFile}" || continue
+		cp "${packageFile}" "${destinationFile}"
+		chmod 644 "${destinationFile}"
+	done
 done
 
-find "RELEASE-${versionInNews}/" -type f -exec chmod 644 '{}' ';'
-find "RELEASE-${versionInNews}/" -type d -exec chmod 755 '{}' ';'
+find "${releaseDir}/" -type f -exec chmod 644 '{}' ';'
+find "${releaseDir}/" -type d -exec chmod 755 '{}' ';'
 
 status "Done"
 
 cat <<EOF
 
-Files are under: RELEASE-${versionInNews}/
+Files are under: ${releaseDir}/
 
 Still to do:
   * Update the news and manual on the web site
