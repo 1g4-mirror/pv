@@ -1,4 +1,4 @@
-### 1.9.42 - UNRELEASED
+### 1.9.42 - 11 October 2025
 
  * *feature:* permit multiple arguments to **--watchfd** ([#12](https://codeberg.org/ivarch/pv/issues/12))
  * *feature:* new "**=NAME**" syntax for **--watchfd** to watch processes by name using **pgrep**(1) ([#95](https://codeberg.org/ivarch/pv/issues/95))
