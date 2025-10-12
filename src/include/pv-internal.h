@@ -205,6 +205,7 @@ struct pvstate_s {
 		bool no_display;                 /* do nothing other than pipe data */
 		bool stop_at_size;               /* set if we stop at "size" bytes */
 		bool sync_after_write;           /* set if we sync after every write */
+		bool sparse_output;		 /* set if we leave holes in the output */
 		bool direct_io;                  /* set if O_DIRECT is to be used */
 		bool direct_io_changed;          /* set when direct_io is changed */
 		bool no_splice;                  /* never use splice() */
@@ -437,6 +438,7 @@ struct pvstate_s {
 		bool splice_used;
 #endif
 		bool read_error_warning_shown;
+		bool output_not_seekable;	/* set if lseek() fails on output */
 	} transfer;
 };
 
