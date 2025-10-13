@@ -273,9 +273,9 @@ from or to a pipe than regular \fBread\fR(2) and \fBwrite\fR(2), but means
 that the transfer buffer may not be used.
 This prevents \*(lq\fB\-\-buffer\-percent\fR\*(rq and
 \*(lq\fB\-\-last\-written\fR\*(rq from working, cannot work with
-\*(lq\fB\-\-discard\fR\*(rq, and makes \*(lq\fB\-\-buffer\-size\fR\*(rq
-redundant, so using any of those options automatically switches on
-\*(lq\fB\-\-no\-splice\fR\*(rq.
+\*(lq\fB\-\-sparse\fR\*(rq or \*(lq\fB\-\-discard\fR\*(rq, and makes
+\*(lq\fB\-\-buffer\-size\fR\*(rq redundant, so using any of those options
+automatically switches on \*(lq\fB\-\-no\-splice\fR\*(rq.
 Switching on this option results in a small loss of transfer efficiency.
 It has no effect on systems where \fBsplice\fR(2) is unavailable.
 .TP
@@ -324,6 +324,13 @@ Due to memory alignment requirements, it also may cause read or write
 failures with an error of \*(lqInvalid argument\*(rq, especially if reading
 and writing files across a variety of filesystems in a single \fBpv\fR call.
 Use this option with caution.
+.TP
+.B \-O, \-\-sparse
+When writing null bytes, try to seek, producing a sparse output file.
+Implies \*(lq\fB\-\-no\-splice\fR\*(rq.
+On filesystems without sparse file support, or when the output is not
+seekable, this option will have no effect other than to turn on
+\*(lq\fB\-\-no\-splice\fR\*(rq.
 .TP
 .B \-X, \-\-discard
 Instead of transferring input data to standard output, discard it.
