@@ -509,6 +509,7 @@ int main(int argc, char **argv)
 	pv_state_error_skip_block_set(state, opts->error_skip_block);
 	pv_state_sync_after_write_set(state, opts->sync_after_write);
 	pv_state_direct_io_set(state, opts->direct_io);
+	pv_state_sparse_output_set(state, opts->sparse_output);
 	pv_state_discard_input_set(state, opts->discard_input);
 	pv_state_rate_limit_set(state, opts->rate_limit);
 	pv_state_target_buffer_size_set(state, opts->buffer_size);

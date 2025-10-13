@@ -672,6 +672,62 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	} else if (state->transfer.to_write > 0) {
 
 		/*
+		 * In sparse output mode, check whether all of the bytes to
+		 * be written are null, and if so, try to seek the output
+		 * instead of writing the null bytes.
+		 */
+		if (state->control.sparse_output && !state->transfer.output_not_seekable) {
+			bool all_nulls = true;
+			size_t write_check_position, write_end_position;
+			write_check_position = state->transfer.write_position;
+			write_end_position = write_check_position + (size_t) (state->transfer.to_write);
+			while (all_nulls && write_check_position < write_end_position) {
+				if ('\0' == state->transfer.transfer_buffer[write_check_position]) {
+					write_check_position++;
+				} else {
+					all_nulls = false;
+				}
+			}
+			if (all_nulls) {
+				struct stat sb;
+
+				/*
+				 * Get the current size of the output file,
+				 * so we can attempt to enlarge it with
+				 * ftruncate() and then use lseek() to skip
+				 * to the new end of the file.
+				 *
+				 * If any step fails, mark the output not
+				 * seekable so we stop trying.
+				 */
+				memset(&sb, 0, sizeof(sb));
+
+				/*@+longintegral@ */
+				/*
+				 * splint has trouble with off_t / __off_t, in the lseek() call.
+				 */
+				if (0 != fstat(state->control.output_fd, &sb)) {
+					debug("%s: %s", "output fstat() failed", strerror(errno));
+					state->transfer.output_not_seekable = true;
+				} else if (0 !=
+					   ftruncate(state->control.output_fd,
+						     sb.st_size + (off_t) (state->transfer.to_write))) {
+					debug("%s: %s", "output ftruncate() failed", strerror(errno));
+					state->transfer.output_not_seekable = true;
+				} else if (lseek(state->control.output_fd, (off_t) (state->transfer.to_write), SEEK_CUR)
+					   == (off_t) - 1) {
+					debug("%s: %s", "output lseek() failed", strerror(errno));
+					state->transfer.output_not_seekable = true;
+				} else {
+					/* Seek successful - skip write. */
+					nwritten = state->transfer.to_write;
+					goto pv__transfer_write_completed;
+				}
+				/*@-longintegral@ */
+			}
+		}
+
+		/*
 		 * Set an interval timer or an alarm to interrupt the write
 		 * with a signal if the write takes too long, so we can
 		 * continue producing progress information.
@@ -733,6 +789,9 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		debug("%s", "cancelling alarm");
 		(void) alarm(0);
 #endif				/* HAVE_SETITIMER */
+
+	      pv__transfer_write_completed:
+		/* If lseek() worked for sparse output, it jumps down here. */
 	}
 
 	if (nwritten > 0) {

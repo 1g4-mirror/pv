@@ -131,6 +131,7 @@ void pv_reset_transfer(pvtransferstate_t transfer)
 	transfer->line_positions_length = 0;
 	transfer->line_positions_head = 0;
 	transfer->last_output_position = 0;
+	transfer->output_not_seekable = false;
 }
 
 
@@ -492,6 +493,11 @@ void pv_state_direct_io_set(pvstate_t state, bool val)
 {
 	state->control.direct_io = val;
 	state->control.direct_io_changed = true;
+}
+
+void pv_state_sparse_output_set(pvstate_t state, bool val)
+{
+	state->control.sparse_output = val;
 }
 
 void pv_state_discard_input_set(pvstate_t state, bool val)

@@ -221,6 +221,7 @@ extern void pv_state_error_skip_block_set(pvstate_t, off_t);
 extern void pv_state_stop_at_size_set(pvstate_t, bool);
 extern void pv_state_sync_after_write_set(pvstate_t, bool);
 extern void pv_state_direct_io_set(pvstate_t, bool);
+extern void pv_state_sparse_output_set(pvstate_t, bool);
 extern void pv_state_rate_limit_set(pvstate_t, off_t);
 extern void pv_state_target_buffer_size_set(pvstate_t, size_t);
 extern void pv_state_no_splice_set(pvstate_t, bool);
