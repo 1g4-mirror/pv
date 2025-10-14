@@ -140,7 +140,7 @@ if test "$1" = "--testRunner"; then
 	exit 1
 fi
 
-labHosts="$(cat ~/.config/lab-hosts 2>/dev/null)"
+labHosts="$(grep -v '^#' ~/.config/lab-hosts 2>/dev/null)"
 
 workDir=$(mktemp -d) || exit 1
 trap 'rm -rf "${workDir}"' EXIT
