@@ -656,7 +656,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	ssize_t nwritten;
 	int write_errno;
 	bool all_nulls;
-	struct stat sb;
+	off_t output_offset;
 	size_t write_check_position, write_end_position;
 
 	if (NULL == state->transfer.transfer_buffer) {
@@ -693,31 +693,24 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			if (all_nulls) {
 
 				/*
-				 * Get the current size of the output file,
-				 * so we can attempt to enlarge it with
-				 * ftruncate() and then use lseek() to skip
-				 * to the new end of the file.
+				 * Use lseek() to move forward in the file,
+				 * and then ftruncate() it to its new size.
 				 *
 				 * If any step fails, mark the output not
 				 * seekable so we stop trying.
 				 */
-				memset(&sb, 0, sizeof(sb));
 
 				/*@+longintegral@ */
 				/*
 				 * splint has trouble with off_t / __off_t, in the lseek() call.
 				 */
-				if (0 != fstat(state->control.output_fd, &sb)) {
-					debug("%s: %s", "output fstat() failed", strerror(errno));
-					state->transfer.output_not_seekable = true;
-				} else if (0 !=
-					   ftruncate(state->control.output_fd,
-						     sb.st_size + (off_t) (state->transfer.to_write))) {
-					debug("%s: %s", "output ftruncate() failed", strerror(errno));
-					state->transfer.output_not_seekable = true;
-				} else if (lseek(state->control.output_fd, (off_t) (state->transfer.to_write), SEEK_CUR)
-					   == (off_t) - 1) {
+				output_offset =
+				    lseek(state->control.output_fd, (off_t) (state->transfer.to_write), SEEK_CUR);
+				if (output_offset == (off_t) - 1) {
 					debug("%s: %s", "output lseek() failed", strerror(errno));
+					state->transfer.output_not_seekable = true;
+				} else if (0 != ftruncate(state->control.output_fd, output_offset)) {
+					debug("%s: %s", "output ftruncate() failed", strerror(errno));
 					state->transfer.output_not_seekable = true;
 				} else {
 					/* Seek successful - skip write. */
