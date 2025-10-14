@@ -655,6 +655,9 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 {
 	ssize_t nwritten;
 	int write_errno;
+	bool all_nulls;
+	struct stat sb;
+	size_t write_check_position, write_end_position;
 
 	if (NULL == state->transfer.transfer_buffer) {
 		pv_error("%s", _("no transfer buffer allocated"));
@@ -677,10 +680,9 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		 * instead of writing the null bytes.
 		 */
 		if (state->control.sparse_output && !state->transfer.output_not_seekable) {
-			bool all_nulls = true;
-			size_t write_check_position, write_end_position;
 			write_check_position = state->transfer.write_position;
 			write_end_position = write_check_position + (size_t) (state->transfer.to_write);
+			all_nulls = true;
 			while (all_nulls && write_check_position < write_end_position) {
 				if ('\0' == state->transfer.transfer_buffer[write_check_position]) {
 					write_check_position++;
@@ -689,7 +691,6 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				}
 			}
 			if (all_nulls) {
-				struct stat sb;
 
 				/*
 				 * Get the current size of the output file,
@@ -789,10 +790,10 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		debug("%s", "cancelling alarm");
 		(void) alarm(0);
 #endif				/* HAVE_SETITIMER */
-
-	      pv__transfer_write_completed:
-		/* If lseek() worked for sparse output, it jumps down here. */
 	}
+
+      pv__transfer_write_completed:
+	/* If lseek() worked for sparse output, it jumps down here. */
 
 	if (nwritten > 0) {
 		bool tracking_lines = false;
