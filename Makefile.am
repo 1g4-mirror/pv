@@ -95,6 +95,7 @@ tests/Modifiers_-_--line-mode.test \
 tests/Modifiers_-_--size_from_file_size.test \
 tests/Modifiers_-_--size.test \
 tests/Modifiers_-_--sync.test \
+tests/Sparse_-_Basic.test \
 tests/Terminal_-_Detect_width.test \
 tests/Transfer_-_--rate-limit.test \
 tests/Transfer_-_--remote.test \
