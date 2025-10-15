@@ -88,8 +88,8 @@ struct opts_s {
 	bool no_splice;                /* flag set if never to use splice */
 	bool stop_at_size;             /* set if we stop at "size" bytes */
 	bool sync_after_write;         /* set if we sync after every write */
-	bool sparse_output;            /* set if we leave holes in the output */
 	bool direct_io;                /* set if O_DIRECT is to be used */
+	bool sparse_output;            /* set if we leave holes in the output */
 	bool discard_input;            /* set to write nothing to output */
 	bool show_stats;	       /* set to write statistics at the end */
 	bool width_set_manually;       /* width was set manually, not detected */

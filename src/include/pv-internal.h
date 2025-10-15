@@ -203,12 +203,12 @@ struct pvstate_s {
 		bool decimal_units;		 /* use decimal prefixes */
 		bool null_terminated_lines;      /* lines are null-terminated */
 		bool no_display;                 /* do nothing other than pipe data */
+		bool no_splice;                  /* never use splice() */
 		bool stop_at_size;               /* set if we stop at "size" bytes */
 		bool sync_after_write;           /* set if we sync after every write */
-		bool sparse_output;		 /* set if we leave holes in the output */
 		bool direct_io;                  /* set if O_DIRECT is to be used */
 		bool direct_io_changed;          /* set when direct_io is changed */
-		bool no_splice;                  /* never use splice() */
+		bool sparse_output;		 /* set if we leave holes in the output */
 		bool discard_input;              /* write nothing to stdout */
 		bool show_stats;		 /* show statistics on exit */
 		bool width_set_manually;	 /* width was set manually, not detected */
