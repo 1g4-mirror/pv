@@ -276,6 +276,8 @@ static void pv_truncate_output(pvstate_t state)
 	if (current_offset == (off_t) - 1)
 		return;
 
+	debug("%s: %ld", "truncating to current offset", (long) current_offset);
+
 	if (0 != ftruncate(state->control.output_fd, current_offset)) {
 		debug("%s: %s", "output ftruncate() failed", strerror(errno));
 	}

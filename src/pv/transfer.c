@@ -711,6 +711,8 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 					state->transfer.output_not_seekable = true;
 				} else {
 					/* Seek successful - skip write. */
+					debug("%s (%ld) -> %s: %ld", "skipped null writes",
+					      (long) (state->transfer.to_write), "new position", (long) output_offset);
 					nwritten = state->transfer.to_write;
 					goto pv__transfer_write_completed;
 				}
