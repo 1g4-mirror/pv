@@ -709,22 +709,6 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				if (output_offset == (off_t) - 1) {
 					debug("%s: %s", "output lseek() failed", strerror(errno));
 					state->transfer.output_not_seekable = true;
-				} else if (0 != ftruncate(state->control.output_fd, output_offset)) {
-					/* TODO: don't ftruncate() immediately. */
-					/*
-					 * On XFS filesystems it looks like
-					 * this can actually make a sparse
-					 * file take up more space than a
-					 * regular file, though it's not
-					 * obvious yet whether the
-					 * ftruncate() is causing it or just
-					 * the lseek().
-					 *
-					 * Maybe just ftruncate() at the end
-					 * of the program.
-					 */
-					debug("%s: %s", "output ftruncate() failed", strerror(errno));
-					state->transfer.output_not_seekable = true;
 				} else {
 					/* Seek successful - skip write. */
 					nwritten = state->transfer.to_write;

@@ -258,6 +258,31 @@ void pv_freecontents_calc(pvtransfercalc_t calc)
 
 
 /*
+ * Truncate the output file descriptor to its current position, if it's a
+ * valid fd, we're in sparse output mode, and no lseek() failed.
+ */
+static void pv_truncate_output(pvstate_t state)
+{
+	off_t current_offset;
+
+	if (!state->control.sparse_output)
+		return;
+	if (state->transfer.output_not_seekable)
+		return;
+	if (state->control.output_fd < 0)
+		return;
+
+	current_offset = lseek(state->control.output_fd, (off_t) 0, SEEK_CUR);
+	if (current_offset == (off_t) - 1)
+		return;
+
+	if (0 != ftruncate(state->control.output_fd, current_offset)) {
+		debug("%s: %s", "output ftruncate() failed", strerror(errno));
+	}
+}
+
+
+/*
  * Free a state structure, after which it can no longer be used.
  */
 void pv_state_free(pvstate_t state)
@@ -270,6 +295,7 @@ void pv_state_free(pvstate_t state)
 	 * still know the program name and output filename.
 	 */
 	if (state->control.output_fd >= 0) {
+		pv_truncate_output(state);
 		if (STDOUT_FILENO != state->control.output_fd) {
 			if (close(state->control.output_fd) < 0) {
 				pv_error("%s: %s",
@@ -631,6 +657,7 @@ void pv_state_output_set(pvstate_t state, int fd, const char *name)
 	 * Close any previous output file first, so we can report any errors
 	 * before we store the new output filename.
 	 */
+	pv_truncate_output(state);
 	if (state->control.output_fd >= 0 && state->control.output_fd != STDOUT_FILENO) {
 		if (close(state->control.output_fd) < 0) {
 			pv_error("%s: %s",
