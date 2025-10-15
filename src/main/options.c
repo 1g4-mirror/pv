@@ -612,6 +612,8 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "stop-at-size", 0, NULL, (int) 'S' },
 		{ "sync", 0, NULL, (int) 'Y' },
 		{ "direct-io", 0, NULL, (int) 'K' },
+		{ "sparse", 0, NULL, (int) 'O' },
+		{ "sparse-output", 0, NULL, (int) 'O' },
 		{ "discard", 0, NULL, (int) 'X' },
 		{ "store-and-forward", 1, NULL, (int) 'U' },
 		{ "remote", 1, NULL, (int) 'R' },
@@ -627,7 +629,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKXU:R:P:d:m:o:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:P:d:m:o:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -971,6 +973,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'K':
 			opts->direct_io = true;
+			break;
+		case 'O':
+			opts->sparse_output = true;
+			opts->no_splice = true;
 			break;
 		case 'X':
 			opts->discard_input = true;

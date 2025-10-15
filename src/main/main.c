@@ -448,7 +448,12 @@ int main(int argc, char **argv)
 	 * do this before looking at setting the size, as the size
 	 * calculation looks at the output file if the input size can't be
 	 * calculated (issue #91).
+	 *
+	 * We have to set the sparse output flag before doing this, so that
+	 * in sparse mode the lseek() on O_APPEND can be done (issue #45);
+	 * see the comments in pv_state_output_set() in src/pv/state.c.
 	 */
+	pv_state_sparse_output_set(state, opts->sparse_output);
 	retcode = pv__set_output(state, opts, opts->output);
 	if (0 != retcode) {
 		pv_state_free(state);

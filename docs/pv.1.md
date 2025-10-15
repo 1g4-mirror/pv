@@ -281,11 +281,11 @@ are explicitly switched on will be shown.
     data from or to a pipe than regular **read**(2) and **write**(2),
     but means that the transfer buffer may not be used. This prevents
     "**\--buffer-percent**" and "**\--last-written**" from working,
-    cannot work with "**\--discard**", and makes "**\--buffer-size**"
-    redundant, so using any of those options automatically switches on
-    "**\--no-splice**". Switching on this option results in a small loss
-    of transfer efficiency. It has no effect on systems where
-    **splice**(2) is unavailable.
+    cannot work with "**\--sparse**" or "**\--discard**", and makes
+    "**\--buffer-size**" redundant, so using any of those options
+    automatically switches on "**\--no-splice**". Switching on this
+    option results in a small loss of transfer efficiency. It has no
+    effect on systems where **splice**(2) is unavailable.
 
 **-E, \--skip-errors**
 
@@ -335,6 +335,13 @@ are explicitly switched on will be shown.
     read or write failures with an error of "Invalid argument",
     especially if reading and writing files across a variety of
     filesystems in a single **pv** call. Use this option with caution.
+
+**-O, \--sparse**
+
+:   When writing null bytes, try to seek, producing a sparse output
+    file. Implies "**\--no-splice**". On filesystems without sparse file
+    support, or when the output is not seekable, this option will have
+    no effect other than to turn on "**\--no-splice**".
 
 **-X, \--discard**
 

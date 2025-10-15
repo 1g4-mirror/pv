@@ -131,6 +131,7 @@ void pv_reset_transfer(pvtransferstate_t transfer)
 	transfer->line_positions_length = 0;
 	transfer->line_positions_head = 0;
 	transfer->last_output_position = 0;
+	transfer->output_not_seekable = false;
 }
 
 
@@ -257,6 +258,38 @@ void pv_freecontents_calc(pvtransfercalc_t calc)
 
 
 /*
+ * Truncate the output file descriptor to its current position, if it's a
+ * valid fd, we're in sparse output mode, and no lseek() failed.
+ */
+static void pv_truncate_output(pvstate_t state)
+{
+	off_t current_offset;
+
+	if (!state->control.sparse_output)
+		return;
+	if (state->transfer.output_not_seekable)
+		return;
+	if (state->control.output_fd < 0)
+		return;
+
+	current_offset = (off_t) lseek(state->control.output_fd, (off_t) 0, SEEK_CUR);
+	if (current_offset == (off_t) - 1)
+		return;
+
+	debug("%s: %ld", "truncating to current offset", (long) current_offset);
+
+	/*@+longintegral@ */
+	/*
+	 * splint has trouble with off_t / __off_t.
+	 */
+	if (0 != ftruncate(state->control.output_fd, current_offset)) {
+		debug("%s: %s", "output ftruncate() failed", strerror(errno));
+	}
+	/*@-longintegral@ */
+}
+
+
+/*
  * Free a state structure, after which it can no longer be used.
  */
 void pv_state_free(pvstate_t state)
@@ -269,6 +302,7 @@ void pv_state_free(pvstate_t state)
 	 * still know the program name and output filename.
 	 */
 	if (state->control.output_fd >= 0) {
+		pv_truncate_output(state);
 		if (STDOUT_FILENO != state->control.output_fd) {
 			if (close(state->control.output_fd) < 0) {
 				pv_error("%s: %s",
@@ -494,6 +528,11 @@ void pv_state_direct_io_set(pvstate_t state, bool val)
 	state->control.direct_io_changed = true;
 }
 
+void pv_state_sparse_output_set(pvstate_t state, bool val)
+{
+	state->control.sparse_output = val;
+}
+
 void pv_state_discard_input_set(pvstate_t state, bool val)
 {
 	state->control.discard_input = val;
@@ -625,6 +664,7 @@ void pv_state_output_set(pvstate_t state, int fd, const char *name)
 	 * Close any previous output file first, so we can report any errors
 	 * before we store the new output filename.
 	 */
+	pv_truncate_output(state);
 	if (state->control.output_fd >= 0 && state->control.output_fd != STDOUT_FILENO) {
 		if (close(state->control.output_fd) < 0) {
 			pv_error("%s: %s",
@@ -645,6 +685,22 @@ void pv_state_output_set(pvstate_t state, int fd, const char *name)
 	 */
 	fcntl(state->control.output_fd, F_SETFL, O_NONBLOCK | fcntl(state->control.output_fd, F_GETFL));
 #endif				/* MAKE_OUTPUT_NONBLOCKING */
+
+	/*
+	 * In sparse output mode, if the output is in append mode (>>),
+	 * explicitly lseek() to the end of the file.  Otherwise, the file
+	 * offset is not set until the first write(), which means that if
+	 * the input starts with null bytes, when we lseek() past them
+	 * relative to the current position, the "current position" is 0
+	 * rather than the end of the file, and the file gets truncated on
+	 * exit to the wrong size.
+	 */
+	if (state->control.sparse_output && 0 != (fcntl(fd, F_GETFL) & O_APPEND)) {
+		debug("%s", "sparse output mode, and appending - seeking output to the end");
+		if ((off_t) lseek(fd, 0, SEEK_END) == (off_t) - 1) {
+			debug("%s: %s", "lseek failed", strerror(errno));
+		}
+	}
 }
 
 void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
