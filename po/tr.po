@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-10-11 16:00+0100\n"
+"POT-Creation-Date: 2025-10-15 23:42+0100\n"
 "PO-Revision-Date: 2025-10-05 20:09+0000\n"
 "Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -169,8 +169,8 @@ msgstr "standart hata bir terminal olmasa bile çıktı yazdır"
 msgid "use cursor positioning escape sequences"
 msgstr "imleç konumlandırma kaçış dizilerini kullan"
 
-#: src/main/help.c:327 src/main/help.c:357 src/main/help.c:369
-#: src/main/help.c:379
+#: src/main/help.c:327 src/main/help.c:360 src/main/help.c:372
+#: src/main/help.c:382
 msgid "FILE"
 msgstr "DOSYA"
 
@@ -219,61 +219,65 @@ msgid "use direct I/O to bypass cache"
 msgstr "Önbelleği atlamak için doğrudan I/O kullan"
 
 #: src/main/help.c:355
+msgid "try to seek instead of writing null bytes"
+msgstr ""
+
+#: src/main/help.c:358
 msgid "discard input instead of writing to output"
 msgstr "Girdiyi çıktıya yazmak yerine yok say"
 
-#: src/main/help.c:358
+#: src/main/help.c:361
 msgid "write all input to FILE before writing to output"
 msgstr "çıktıya yazmadan önce tüm girdiyi DOSYA'ya yaz"
 
-#: src/main/help.c:360
-msgid "PID[:FD]"
-msgstr "PID[:FD]"
+#: src/main/help.c:363
+msgid "PID[:FD]|=NAME|@LISTFILE"
+msgstr ""
 
-#: src/main/help.c:361
+#: src/main/help.c:364
 msgid "watch file FD opened by process PID"
 msgstr "FD izleme dosyası PID işlemi tarafından açıldı"
 
-#: src/main/help.c:364
+#: src/main/help.c:367
 msgid "PID"
 msgstr "PID"
 
-#: src/main/help.c:365
+#: src/main/help.c:368
 msgid "update settings of process PID"
 msgstr "süreç PID ayarlarını güncelle"
 
-#: src/main/help.c:370
+#: src/main/help.c:373
 msgid "save process ID in FILE"
 msgstr "FILE'da işlem kimliğini (ID) kaydet"
 
-#: src/main/help.c:373
+#: src/main/help.c:376
 msgid "show this help and exit"
 msgstr "bu yardımı göster ve çık"
 
-#: src/main/help.c:376
+#: src/main/help.c:379
 msgid "show version information and exit"
 msgstr "sürüm bilgilerini göster ve çık"
 
-#: src/main/help.c:380
+#: src/main/help.c:383
 msgid "write debug logs to FILE"
 msgstr "Hata ayıklama kayıtlarını DOSYA'ya yaz"
 
-#: src/main/help.c:406
+#: src/main/help.c:409
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Kullanım şekli: %s [AYAR] [DOSYA]..."
 
-#: src/main/help.c:417
+#: src/main/help.c:420
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "İzleme ile DOSYA(lar)ı veya standart girdiyi standart çıktı ile birleştirin."
 
-#: src/main/help.c:555
+#: src/main/help.c:558
 msgid "Supported format sequences:"
 msgstr "Desteklenen biçim dizileri:"
 
-#: src/main/help.c:569
+#: src/main/help.c:572
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Lütfen hataları şu adrese bildirin: %s"
@@ -290,11 +294,11 @@ msgstr "durum tahsisi başarısız oldu"
 msgid "list files may not contain @ lines"
 msgstr ""
 
-#: src/main/options.c:391 src/main/options.c:393 src/main/options.c:802
+#: src/main/options.c:391 src/main/options.c:393 src/main/options.c:804
 msgid "process ID or pid:fd pair expected"
 msgstr "süreç kimliği (ID) veya pid:fd çifti bekleniyor"
 
-#: src/main/options.c:403 src/main/options.c:405 src/main/options.c:809
+#: src/main/options.c:403 src/main/options.c:405 src/main/options.c:811
 msgid "invalid process ID"
 msgstr "geçersiz süreç kimliği (ID)"
 
@@ -322,45 +326,45 @@ msgstr "blok aygıtı açılamadı"
 msgid "failed to determine size of block device"
 msgstr "blok aygıtının boyutu belirlenemedi"
 
-#: src/main/options.c:649
+#: src/main/options.c:651
 msgid "option structure allocation failed"
 msgstr "seçenek yapısı tahsisi başarısız oldu"
 
-#: src/main/options.c:668
+#: src/main/options.c:670
 msgid "option structure argv allocation failed"
 msgstr "seçenek yapısı argv tahsisi başarısız oldu"
 
-#: src/main/options.c:720
+#: src/main/options.c:722
 msgid "numeric value not understood"
 msgstr "sayısal değer anlaşılmadı"
 
-#: src/main/options.c:738
+#: src/main/options.c:740
 msgid "integer argument expected"
 msgstr "tamsayı bağımsız değişkeni bekleniyor"
 
-#: src/main/options.c:750
+#: src/main/options.c:752
 msgid "numeric argument expected"
 msgstr "sayısal bağımsız değişken bekleniyor"
 
-#: src/main/options.c:762
+#: src/main/options.c:764
 msgid "missing filename"
 msgstr ""
 
-#: src/main/options.c:790
+#: src/main/options.c:792
 msgid "missing process name"
 msgstr ""
 
-#: src/main/options.c:1042
+#: src/main/options.c:1048
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Daha fazla bilgi için `%s --help' seçeneğini deneyin."
 
-#: src/main/options.c:1044
+#: src/main/options.c:1050
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Daha fazla bilgi için `%s -h' seçeneğini deneyin."
 
-#: src/main/options.c:1075
+#: src/main/options.c:1081
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -368,19 +372,19 @@ msgstr ""
 "dosya tanımlayıcılarını izlerken satır modu veya aktarım değiştirici "
 "seçeneklerini kullanamaz"
 
-#: src/main/options.c:1084
+#: src/main/options.c:1090
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr "dosya tanımlayıcılarını izlerken imleç konumlandırmayı kullanamaz"
 
-#: src/main/options.c:1093
+#: src/main/options.c:1099
 msgid "cannot use remote control when watching file descriptors"
 msgstr "dosya tanımlayıcılarını izlerken uzaktan kumandayı kullanamaz"
 
-#: src/main/options.c:1102
+#: src/main/options.c:1108
 msgid "cannot transfer files when watching file descriptors"
 msgstr "dosya tanımlayıcıları izlenirken dosya aktarılamıyor"
 
-#: src/main/options.c:1127
+#: src/main/options.c:1133
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "/proc/self/fdinfo olmayan sistemlerde kullanılamaz"
 
@@ -433,7 +437,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1053 src/pv/loop.c:747 src/pv/transfer.c:1083
+#: src/pv/display.c:1053 src/pv/loop.c:747 src/pv/transfer.c:1135
 msgid "buffer allocation failed"
 msgstr "arabellek tahsisi başarısız oldu"
 
@@ -522,15 +526,15 @@ msgstr "fd"
 msgid "history structure allocation failed"
 msgstr "geçmiş yapısı tahsisi başarısız oldu"
 
-#: src/pv/state.c:685 src/pv/state.c:697
+#: src/pv/state.c:741 src/pv/state.c:753
 msgid "file list allocation failed"
 msgstr "dosya listesi tahsisi başarısız oldu"
 
-#: src/pv/state.c:731
+#: src/pv/state.c:787
 msgid "process list allocation failed"
 msgstr "işlem listesi tahsisi başarısız oldu"
 
-#: src/pv/state.c:739
+#: src/pv/state.c:795
 msgid "file descriptor list allocation failed"
 msgstr "dosya tanımlayıcı listesi tahsisi başarısız oldu"
 
@@ -554,30 +558,33 @@ msgstr "geçmiş hatayı aramakta başarısız oldu"
 msgid "skipped past read error"
 msgstr "geçmiş okuma hatası atlandı"
 
-#: src/pv/transfer.c:660
+#: src/pv/transfer.c:663
 msgid "no transfer buffer allocated"
 msgstr "aktarım arabelleği ayrılmamış"
 
-#: src/pv/transfer.c:702
+#: src/pv/transfer.c:751
 msgid "failed to set interval timer"
 msgstr "aralık zamanlayıcısı ayarlanamadı"
 
-#: src/pv/transfer.c:728
+#: src/pv/transfer.c:777
 msgid "failed to clear interval timer"
 msgstr "aralık zamanlayıcısı temizlenemedi"
 
-#: src/pv/transfer.c:770
+#: src/pv/transfer.c:822
 msgid "line position buffer allocation failed"
 msgstr "satır konumu arabellek tahsisi başarısız oldu"
 
-#: src/pv/transfer.c:944
+#: src/pv/transfer.c:996
 msgid "write failed"
 msgstr "yazma başarısız"
 
-#: src/pv/transfer.c:1185
+#: src/pv/transfer.c:1237
 msgid "select call failed"
 msgstr "seçme çağrısı başarısız oldu"
 
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:203
 msgid "not a regular file or block device"
 msgstr "normal bir dosya veya blok aygıtı değil"
+
+#~ msgid "PID[:FD]"
+#~ msgstr "PID[:FD]"
