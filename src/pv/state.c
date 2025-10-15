@@ -272,15 +272,20 @@ static void pv_truncate_output(pvstate_t state)
 	if (state->control.output_fd < 0)
 		return;
 
-	current_offset = lseek(state->control.output_fd, (off_t) 0, SEEK_CUR);
+	current_offset = (off_t) lseek(state->control.output_fd, (off_t) 0, SEEK_CUR);
 	if (current_offset == (off_t) - 1)
 		return;
 
 	debug("%s: %ld", "truncating to current offset", (long) current_offset);
 
+	/*@+longintegral@ */
+	/*
+	 * splint has trouble with off_t / __off_t.
+	 */
 	if (0 != ftruncate(state->control.output_fd, current_offset)) {
 		debug("%s: %s", "output ftruncate() failed", strerror(errno));
 	}
+	/*@-longintegral@ */
 }
 
 
@@ -680,6 +685,22 @@ void pv_state_output_set(pvstate_t state, int fd, const char *name)
 	 */
 	fcntl(state->control.output_fd, F_SETFL, O_NONBLOCK | fcntl(state->control.output_fd, F_GETFL));
 #endif				/* MAKE_OUTPUT_NONBLOCKING */
+
+	/*
+	 * In sparse output mode, if the output is in append mode (>>),
+	 * explicitly lseek() to the end of the file.  Otherwise, the file
+	 * offset is not set until the first write(), which means that if
+	 * the input starts with null bytes, when we lseek() past them
+	 * relative to the current position, the "current position" is 0
+	 * rather than the end of the file, and the file gets truncated on
+	 * exit to the wrong size.
+	 */
+	if (state->control.sparse_output && 0 != (fcntl(fd, F_GETFL) & O_APPEND)) {
+		debug("%s", "sparse output mode, and appending - seeking output to the end");
+		if ((off_t) lseek(fd, 0, SEEK_END) == (off_t) - 1) {
+			debug("%s: %s", "lseek failed", strerror(errno));
+		}
+	}
 }
 
 void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
