@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *feature:* new **--sparse** option to write sparse output ([#45](https://codeberg.org/ivarch/pv/issues/45))
+
 ### 1.9.42 - 11 October 2025
 
  * *feature:* permit multiple arguments to **--watchfd** ([#12](https://codeberg.org/ivarch/pv/issues/12))
