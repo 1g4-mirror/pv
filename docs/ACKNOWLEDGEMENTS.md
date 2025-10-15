@@ -108,6 +108,7 @@ is acknowledged and greatly appreciated:
  * [Alexander Petrossian](https://github.com/neopaf) - suggested using Unicode output for a more granular progress bar, and provided the codepoints to use ([#15](https://codeberg.org/ivarch/pv/issues/15))
  * [jmealo](https://codeberg.org/jmealo) - suggested JSON progress output ([#127](https://codeberg.org/ivarch/pv/issues/127))
  * [ipaqmaster](https://codeberg.org/ipaqmaster) - investigated 100%-CPU utilisation bug when piping to a command that has exited ([#164](https://codeberg.org/ivarch/pv/issues/164))
+ * Andriy Galetski, and also [thinrope](https://codeberg.org/thinrope) - suggested the "**--sparse**" option ([#45](https://codeberg.org/ivarch/pv/issues/45))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
