@@ -760,6 +760,12 @@ Numbers passed to "**\--last-written**", "**\--width**",
 "**\--height**", "**\--average-rate-window**", and "**\--remote**" must
 be integers with no suffix.
 
+When "**\--sparse**" is in effect and output is being written to a file,
+that file may look like it has stopped growing if inspected with
+**ls**(1) while null bytes are being written, even though **pv** still
+reports progress. This is because of the way sparse output is achieved,
+and the file will be the correct size when the transfer ends.
+
 # REPORTING BUGS
 
 Please report bugs or feature requests via the issue tracker linked from

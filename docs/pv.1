@@ -800,6 +800,13 @@ Numbers passed to \*(lq\fB\-\-last\-written\fR\*(rq,
 \*(lq\fB\-\-width\fR\*(rq, \*(lq\fB\-\-height\fR\*(rq,
 \*(lq\fB\-\-average\-rate\-window\fR\*(rq, and \*(lq\fB\-\-remote\fR\*(rq
 must be integers with no suffix.
+.PP
+When \*(lq\fB\-\-sparse\fR\*(rq is in effect and output is being written to
+a file, that file may look like it has stopped growing if inspected with
+\fBls\fR(1) while null bytes are being written, even though \fBpv\fR still
+reports progress.
+This is because of the way sparse output is achieved, and the file will be
+the correct size when the transfer ends.
 .\"
 .SH REPORTING BUGS
 Please report bugs or feature requests via the issue tracker linked from the
