@@ -720,10 +720,9 @@ int pv_watchfd_loop(pvstate_t state)
 	int prev_displayed_lines, blank_lines;
 
 	/*
-	 * TODO: new logic:
 	 * In each watching[].info_array[] fd info item, once its "watch_fd"
-	 * is closed, set its "closed" flag to true and its "end_time" to
-	 * now but don't mark it "unused" until its "end_time" is long
+	 * is closed, its "closed" flag is set to true and its "end_time" to
+	 * now.  It isn't marked "unused" until its "end_time" is long
 	 * enough ago, so the information is held on-screen for a short
 	 * while after the fd closes or the PID exits (#81).
 	 */
@@ -1016,8 +1015,7 @@ int pv_watchfd_loop(pvstate_t state)
 					seconds_since_closed = pv_elapsedtime_seconds(&time_since_closed);
 
 					/* Closed for long enough - remove. */
-					/* TODO: configurable period */
-					if (seconds_since_closed > 5.0) {
+					if (seconds_since_closed > state->control.interval) {
 						debug("%s %d: %s (%Lf s)", "fd", info_item->watch_fd,
 						      "closed for long enough - removing", seconds_since_closed);
 						info_item->unused = true;
