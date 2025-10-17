@@ -418,7 +418,7 @@ static int pv_compare_watchfd(const void *a, const void *b)
 
 /*
  * Scan the given process and update the arrays with any new file
- * descriptors.  If "watch_fd" is not -1, then all other file descriptors
+ * descriptors.  If "watch_fd" is not -1, then all other file descriptor
  * numbers will be ignored,
  *
  * Returns 0 on success, 1 if the process no longer exists or could not be
@@ -494,6 +494,16 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 				continue;
 			if (info_array[check_idx].watch_fd != fd)
 				continue;
+			if (info_array[check_idx].closed) {
+				/*
+				 * If the fd is known but closed,
+				 * immediately free it for re-use.
+				 */
+				info_array[check_idx].unused = true;
+				info_array[check_idx].displayable = false;
+				pv_freecontents_watchfd(&(info_array[check_idx]));
+				continue;
+			}
 			found_idx = check_idx;
 			break;
 		}
@@ -534,6 +544,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 		pv_reset_watchfd(&(info_array[use_idx]));
 		info_array[use_idx].watch_pid = watch_pid;
 		info_array[use_idx].watch_fd = fd;
+		info_array[use_idx].closed = false;
 		info_array[use_idx].unused = false;
 		info_array[use_idx].displayable = true;
 

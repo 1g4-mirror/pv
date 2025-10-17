@@ -712,7 +712,6 @@ int pv_watchfd_loop(pvstate_t state)
 		int fd;			 /* watched fd, or -1 for all */
 		pvwatchfd_t info_array;	 /* watch information for each fd */
 		int array_length;	 /* length of watch info array */
-		struct timespec pid_last_seen;	/* when this PID was last seen */
 		bool finished;		 /* "PID:FD": fd closed; or PID gone */
 	} *watching;
 	unsigned int watch_idx;
@@ -722,23 +721,12 @@ int pv_watchfd_loop(pvstate_t state)
 
 	/*
 	 * TODO: new logic:
-	 * For each watching[] item, "pid_last_seen" stops being updated
-	 * when the PID ceases to exist.  If "fd" is >=0 then
-	 * "pid_last_seen" is set to the newest of the "fd_last_seen" values
-	 * of the info_array[] fd info items.  When "pid_last_seen" is too
-	 * old, "finished" becomes true so this watching[] item stops being
-	 * displayed.
-	 *
 	 * In each watching[].info_array[] fd info item, once its "watch_fd"
-	 * is closed, its "fd_last_seen" stops being updated, and once
-	 * that's stopped updating long enough, its "unused" becomes true.
-	 *
-	 * All of this allows information to be held on-screen for a short
+	 * is closed, set its "closed" flag to true and its "end_time" to
+	 * now but don't mark it "unused" until its "end_time" is long
+	 * enough ago, so the information is held on-screen for a short
 	 * while after the fd closes or the PID exits (#81).
 	 */
-
-	/* TODO: implement the above (pid_last_seen, fd_last_seen) */
-	/* TODO: check whether pid_last_seen is needed, or only fd_last_seen */
 
 	/* If there's nothing to watch, do nothing at all. */
 	if (state->watchfd.count < 1)
@@ -953,10 +941,9 @@ int pv_watchfd_loop(pvstate_t state)
 				if (rc != 0) {
 					/*
 					 * PID now inaccessible - mark it as
-					 * finished and skip over it.
+					 * finished.
 					 */
 					watching[watch_idx].finished = true;
-					continue;
 				}
 			} else {
 				/*
@@ -979,7 +966,6 @@ int pv_watchfd_loop(pvstate_t state)
 			     NULL != watching[watch_idx].info_array && info_idx < watching[watch_idx].array_length;
 			     info_idx++) {
 				off_t position_now;
-				struct timespec init_time, transfer_elapsed;
 				pvwatchfd_t info_item = &(watching[watch_idx].info_array[info_idx]);
 
 				/* Skip unused array entries. */
@@ -996,7 +982,8 @@ int pv_watchfd_loop(pvstate_t state)
 					 * changed.
 					 */
 					if (pv_watchfd_changed(info_item)) {
-						debug("%s %d: %s", "fd", info_item->watch_fd, "removing");
+						debug("%s %d: %s", "fd", info_item->watch_fd,
+						      "non-displayable, and has changed - removing");
 						info_item->unused = true;
 						info_item->displayable = false;
 						pv_freecontents_watchfd(info_item);
@@ -1014,34 +1001,86 @@ int pv_watchfd_loop(pvstate_t state)
 				 * changed.
 				 */
 
-				position_now = pv_watchfd_position(info_item);
+				position_now = -1;
 
-				if (position_now < 0) {
-					debug("%s %d: %s", "fd", info_item->watch_fd, "removing");
-					info_item->unused = true;
-					info_item->displayable = false;
-					pv_freecontents_watchfd(info_item);
-					continue;
+				if (info_item->closed) {
+					/*
+					 * Closed fd - check how long since
+					 * it was closed.
+					 */
+					struct timespec time_since_closed;
+					long double seconds_since_closed;
+
+					memset(&time_since_closed, 0, sizeof(time_since_closed));
+					pv_elapsedtime_subtract(&time_since_closed, &cur_time, &(info_item->end_time));
+					seconds_since_closed = pv_elapsedtime_seconds(&time_since_closed);
+
+					/* Closed for long enough - remove. */
+					/* TODO: configurable period */
+					if (seconds_since_closed > 5.0) {
+						debug("%s %d: %s (%Lf s)", "fd", info_item->watch_fd,
+						      "closed for long enough - removing", seconds_since_closed);
+						info_item->unused = true;
+						info_item->displayable = false;
+						pv_freecontents_watchfd(info_item);
+						continue;
+					}
+
+				} else {
+
+					/*
+					 * Open fd - get its current
+					 * position.
+					 */
+
+					position_now = pv_watchfd_position(info_item);
+
+					if (position_now < 0) {
+						/*
+						 * The fd was closed - mark
+						 * as closed.
+						 */
+						debug("%s %d: %s", "fd", info_item->watch_fd, "marking as closed");
+						pv_elapsedtime_copy(&(info_item->end_time), &cur_time);
+						info_item->closed = true;
+					}
 				}
 
-				info_item->position = position_now;
+				if (position_now >= 0) {
+					/*
+					 * If the fd is still open and we
+					 * got its current position, update
+					 * its position and timers.
+					 */
+					struct timespec init_time, transfer_elapsed;
 
-				memset(&init_time, 0, sizeof(init_time));
-				memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
+					info_item->position = position_now;
+
+					memset(&init_time, 0, sizeof(init_time));
+					memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
+
+					/*
+					 * Calculate the effective start
+					 * time: the time we actually
+					 * started, plus the total time we
+					 * spent stopped.
+					 */
+					pv_elapsedtime_add(&init_time, &(info_item->start_time),
+							   &(state->signal.toffset));
+
+					/*
+					 * Now get the effective elapsed
+					 * transfer time - current time
+					 * minus effective start time.
+					 */
+					pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
+
+					info_item->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+				}
 
 				/*
-				 * Calculate the effective start time: the time we actually
-				 * started, plus the total time we spent stopped.
+				 * Now display the information about the fd.
 				 */
-				pv_elapsedtime_add(&init_time, &(info_item->start_time), &(state->signal.toffset));
-
-				/*
-				 * Now get the effective elapsed transfer time - current
-				 * time minus effective start time.
-				 */
-				pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
-
-				info_item->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 				if (displayed_lines > 0) {
 					debug("%s", "adding newline");
@@ -1050,15 +1089,15 @@ int pv_watchfd_loop(pvstate_t state)
 
 				debug("%s %d, %s %d [%d/%d]: %Lf / %Ld", "pid", (int) (info_item->watch_pid), "fd",
 				      info_item->watch_fd, watch_idx, info_idx, info_item->transfer.elapsed_seconds,
-				      position_now);
+				      info_item->position);
 
 				if (terminal_resized) {
 					pv_watchpid_setname(state, info_item);
 					info_item->flags.reparse_display = 1;
 				}
 
-				info_item->transfer.transferred = position_now;
-				info_item->transfer.total_written = position_now;
+				info_item->transfer.transferred = info_item->position;
+				info_item->transfer.total_written = info_item->position;
 				state->control.name = info_item->display_name;
 				state->control.size = info_item->size;
 
@@ -1119,25 +1158,16 @@ int pv_watchfd_loop(pvstate_t state)
 		}
 	}
 
-	if (!state->control.numeric)
-		pv_tty_write(&(state->flags), "\n", 1);
-
-	/*
-	 * Clean up our displayed lines after the display loop.
-	 */
-	blank_lines = prev_displayed_lines;
-	while (blank_lines > 0) {
-		pvdisplay_width_t blank_count;
-		for (blank_count = 0; blank_count < state->control.width; blank_count++)
-			pv_tty_write(&(state->flags), " ", 1);
-		pv_tty_write(&(state->flags), "\r", 1);
-		blank_lines--;
-		if (blank_lines > 0)
+	if (!state->control.numeric) {
+		/*
+		 * Move the cursor past the displayed lines, so the last
+		 * output stays on the screen and isn't overwritten by the
+		 * command prompt (#81).
+		 */
+		while (prev_displayed_lines > 0) {
 			pv_tty_write(&(state->flags), "\n", 1);
-	}
-	while (prev_displayed_lines > 1) {
-		pv_tty_write(&(state->flags), "\033[A", 3);
-		prev_displayed_lines--;
+			prev_displayed_lines--;
+		}
 	}
 
 	/*
