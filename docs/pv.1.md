@@ -1,6 +1,6 @@
 # NAME
 
-pv - monitor the progress of data through a pipe
+pv - monitor and manage the progress of data through a pipe
 
 # SYNOPSIS
 
@@ -15,11 +15,15 @@ pv - monitor the progress of data through a pipe
 
 Show the progress of data through a pipeline by giving information such
 as time elapsed, percentage completed (with progress bar), current
-throughput rate, total data transferred, and ETA.
+throughput rate, total data transferred, and ETA. The data flow rate,
+error handling strategy, buffer size, and cache interaction can all be
+adjusted.
 
 Each *FILE* is copied to standard output. With no *FILE*, or when *FILE*
-is "-", standard input is read. This is the same behaviour as
-**cat**(1).
+is "-", standard input is read.
+
+In "**\--watchfd**" mode, inspect another process and show its progress
+through the files it has open.
 
 # OPTIONS
 

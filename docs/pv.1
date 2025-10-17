@@ -1,7 +1,7 @@
 .TH PV 1 2025-10-17 pv-1.9.44 "User Commands"
 .\"
 .SH NAME
-pv \- monitor the progress of data through a pipe
+pv \- monitor and manage the progress of data through a pipe
 .\"
 .SH SYNOPSIS
 .B pv
@@ -16,11 +16,15 @@ pv \- monitor the progress of data through a pipe
 Show the progress of data through a pipeline by giving information such as
 time elapsed, percentage completed (with progress bar), current throughput
 rate, total data transferred, and ETA.
+The data flow rate, error handling strategy, buffer size, and cache
+interaction can all be adjusted.
 .PP
 Each \fIFILE\fR is copied to standard output.
 With no \fIFILE\fR, or when \fIFILE\fR is \*(lq-\*(rq, standard input is
 read.
-This is the same behaviour as \fBcat\fR(1).
+.PP
+In \*(lq\fB\-\-watchfd\fR\*(rq mode, inspect another process and show its
+progress through the files it has open.
 .\"
 .SH OPTIONS
 .\"
