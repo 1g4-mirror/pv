@@ -1,4 +1,4 @@
-### UNRELEASED
+### 1.9.44 - UNRELEASED
 
  * *feature:* new **--sparse** option to write sparse output ([#45](https://codeberg.org/ivarch/pv/issues/45))
  * *fix:* don't clear the **--watchfd** display when the watched process ends ([#81](https://codeberg.org/ivarch/pv/issues/81))
