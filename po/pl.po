@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-10-15 23:42+0100\n"
+"POT-Creation-Date: 2025-10-17 23:09+0100\n"
 "PO-Revision-Date: 2025-10-02 13:23+0000\n"
 "Last-Translator: Coral Pink <coralpink@noreply.codeberg.org>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -453,7 +453,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1053 src/pv/loop.c:747 src/pv/transfer.c:1135
+#: src/pv/display.c:1053 src/pv/loop.c:754 src/pv/transfer.c:1135
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 
@@ -525,7 +525,7 @@ msgstr "prędkość min/śr/max/odch"
 msgid "rate not measured"
 msgstr "prędkość niezmierzona"
 
-#: src/pv/loop.c:768 src/pv/loop.c:784 src/pv/loop.c:802 src/pv/watchpid.c:99
+#: src/pv/loop.c:775 src/pv/loop.c:791 src/pv/loop.c:809 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
 #: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
 #: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
@@ -533,7 +533,7 @@ msgstr "prędkość niezmierzona"
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:802 src/pv/watchpid.c:108 src/pv/watchpid.c:120
+#: src/pv/loop.c:809 src/pv/watchpid.c:108 src/pv/watchpid.c:120
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:183 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:203
 msgid "fd"
