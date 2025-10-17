@@ -712,12 +712,33 @@ int pv_watchfd_loop(pvstate_t state)
 		int fd;			 /* watched fd, or -1 for all */
 		pvwatchfd_t info_array;	 /* watch information for each fd */
 		int array_length;	 /* length of watch info array */
+		struct timespec pid_last_seen;	/* when this PID was last seen */
 		bool finished;		 /* "PID:FD": fd closed; or PID gone */
 	} *watching;
 	unsigned int watch_idx;
 	bool all_watching_finished;
 	struct timespec next_update, next_remotecheck, cur_time;
 	int prev_displayed_lines, blank_lines;
+
+	/*
+	 * TODO: new logic:
+	 * For each watching[] item, "pid_last_seen" stops being updated
+	 * when the PID ceases to exist.  If "fd" is >=0 then
+	 * "pid_last_seen" is set to the newest of the "fd_last_seen" values
+	 * of the info_array[] fd info items.  When "pid_last_seen" is too
+	 * old, "finished" becomes true so this watching[] item stops being
+	 * displayed.
+	 *
+	 * In each watching[].info_array[] fd info item, once its "watch_fd"
+	 * is closed, its "fd_last_seen" stops being updated, and once
+	 * that's stopped updating long enough, its "unused" becomes true.
+	 *
+	 * All of this allows information to be held on-screen for a short
+	 * while after the fd closes or the PID exits (#81).
+	 */
+
+	/* TODO: implement the above (pid_last_seen, fd_last_seen) */
+	/* TODO: check whether pid_last_seen is needed, or only fd_last_seen */
 
 	/* If there's nothing to watch, do nothing at all. */
 	if (state->watchfd.count < 1)

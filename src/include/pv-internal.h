@@ -520,10 +520,18 @@ struct pvwatchfd_s {
 	off_t size;			 /* size of whole file, 0 if unknown */
 	off_t position;			 /* position last seen at */
 	struct timespec start_time;	 /* time we started watching the fd */
+	struct timespec fd_last_seen;	 /* time the fd was last seen open */
 	pid_t watch_pid;		 /* PID to watch */
 	int watch_fd;			 /* fd to watch */
 	bool displayable;		 /* false if not displayable */
 	bool unused;			 /* true if free for re-use */
+	/*
+	 * After the "watch_fd" is found to be closed, "fd_last_seen" stops
+	 * being updated; when "fd_last_seen" is old enough, "unused"
+	 * becomes true so the slot can be re-used.  This allows fd
+	 * information to be held on-screen for a short while after the fd
+	 * is closed (#81).
+	 */
 };
 typedef struct pvwatchfd_s *pvwatchfd_t;
 
