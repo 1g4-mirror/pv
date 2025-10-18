@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-10-17 23:09+0100\n"
+"POT-Creation-Date: 2025-10-18 19:34+0100\n"
 "PO-Revision-Date: 2025-01-14 20:39+0000\n"
 "Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
