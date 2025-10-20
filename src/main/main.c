@@ -368,6 +368,8 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/* TODO: add logic for --query mode. */
+
 	/*
 	 * If no files were given, pretend "-" was given (stdin).
 	 */

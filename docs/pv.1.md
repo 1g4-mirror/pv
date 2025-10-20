@@ -11,6 +11,8 @@ pv - monitor and manage the progress of data through a pipe
 
 **pv** **-R**\|**\--remote** *PID* \[*OPTION*\]\...
 
+**pv** **-Q**\|**\--query** *PID* \[*OPTION*\]\...
+
 # DESCRIPTION
 
 Show the progress of data through a pipeline by giving information such
@@ -409,6 +411,15 @@ are explicitly switched on will be shown.
     "**\--cursor**", "**\--line-mode**", "**\--force**",
     "**\--delay-start**", "**\--skip-errors**", and
     "**\--stop-at-size**".
+
+**-Q PID, \--query PID**
+
+:   Display the transfer progress of another instance of **pv** with
+    process ID *PID*. Some output modifiers can only be used while
+    querying another process if they match those of that process - such
+    as "**\--line-mode**", "**\--null**", and
+    "**\--average-rate-window**". Data transfer modifiers will have no
+    effect.
 
 ## Other options
 

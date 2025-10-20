@@ -617,6 +617,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "discard", 0, NULL, (int) 'X' },
 		{ "store-and-forward", 1, NULL, (int) 'U' },
 		{ "remote", 1, NULL, (int) 'R' },
+		{ "query", 1, NULL, (int) 'Q' },
 		{ "pidfile", 1, NULL, (int) 'P' },
 		{ "watchfd", 1, NULL, (int) 'd' },
 		{ "output", 1, NULL, (int) 'o' },
@@ -629,7 +630,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:P:d:m:o:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:Q:P:d:m:o:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -732,6 +733,8 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'H':
 			/*@fallthrough@ */
 		case 'R':
+			/*@fallthrough@ */
+		case 'Q':
 			/*@fallthrough@ */
 		case 'm':
 			if (!pv_getnum_check(optarg, PV_NUMTYPE_BARE_INTEGER)) {
@@ -994,6 +997,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'R':
 			opts->remote = (pid_t) pv_getnum_count(optarg, false);
 			break;
+		case 'Q':
+			opts->query = (pid_t) pv_getnum_count(optarg, false);
+			break;
 		case 'P':
 			opts->pidfile = pv_strdup(optarg);
 			if (NULL == opts->pidfile) {
@@ -1102,6 +1108,15 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			/*@+mustfreefresh@ */
 		}
 
+		if (0 != opts->query) {
+			/*@-mustfreefresh@ *//* see above */
+			fprintf(stderr, "%s: %s\n", opts->program_name,
+				_("cannot use remote query when watching file descriptors"));
+			opts_free(opts);
+			return NULL;
+			/*@+mustfreefresh@ */
+		}
+
 		if (NULL != opts->output) {
 			/*@-mustfreefresh@ *//* see above */
 			fprintf(stderr, "%s: -o: %s\n", opts->program_name,
@@ -1138,6 +1153,16 @@ opts_t opts_parse(unsigned int argc, char **argv)
 #endif
 	}
 
+	/* Don't allow -R and -Q together. */
+	if ((0 != opts->remote) && (0 != opts->query)) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s\n", opts->program_name,
+			_("cannot use remote control and remote query together"));
+		opts_free(opts);
+		return NULL;
+		/*@+mustfreefresh@ */
+	}
+
 	/*
 	 * Default options: -pterb
 	 */
@@ -1152,6 +1177,8 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/* If -Z was given but not -E, pretend one -E was given too. */
 	if (opts->error_skip_block > 0 && 0 == opts->skip_errors)
 		opts->skip_errors = 1;
+
+	/* TODO: error if -Q given and there are any remaining arguments. */
 
 	/*
 	 * Store remaining command-line arguments.

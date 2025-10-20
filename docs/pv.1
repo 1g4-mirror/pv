@@ -11,6 +11,8 @@ pv \- monitor and manage the progress of data through a pipe
 \fIPID\fR[:\fIFD\fR]|=\fINAME\fR|@\fILISTFILE\fR...
 .PP
 \fBpv\fR \fB\-R\fR|\fB\-\-remote\fR \fIPID\fR [\fIOPTION\fR]...
+.PP
+\fBpv\fR \fB\-Q\fR|\fB\-\-query\fR \fIPID\fR [\fIOPTION\fR]...
 .\"
 .SH DESCRIPTION
 Show the progress of data through a pipeline by giving information such as
@@ -395,6 +397,16 @@ Note that some options cannot be changed while running, such as
 \*(lq\fB\-\-cursor\fR\*(rq, \*(lq\fB\-\-line\-mode\fR\*(rq,
 \*(lq\fB\-\-force\fR\*(rq, \*(lq\fB\-\-delay\-start\fR\*(rq,
 \*(lq\fB\-\-skip\-errors\fR\*(rq, and \*(lq\fB\-\-stop\-at\-size\fR\*(rq.
+.TP
+.BI \-Q\  PID \fR,\ \fB\-\-query\  PID
+Display the transfer progress of another instance of \fBpv\fR with process
+ID \fIPID\fR.
+Some output modifiers can only be used while querying another process if
+they match those of that process - such as
+\*(lq\fB\-\-line\-mode\fR\*(rq,
+\*(lq\fB\-\-null\fR\*(rq, and
+\*(lq\fB\-\-average\-rate\-window\fR\*(rq.
+Data transfer modifiers will have no effect.
 .\"
 .SS "Other options"
 .TP

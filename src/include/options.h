@@ -58,6 +58,7 @@ struct opts_s {
 	off_t size;                    /* total size of data */
 	off_t error_skip_block;        /* skip block size, 0 for adaptive */
 	pid_t remote;                  /* PID of pv to update settings of */
+	pid_t query;                   /* PID of pv to query progress of */
 	unsigned int skip_errors;      /* skip read errors counter */
 	unsigned int average_rate_window; /* time window in seconds for average rate calculations */
 	unsigned int width;            /* screen width */
