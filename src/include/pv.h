@@ -13,6 +13,7 @@
 #include "config.h"
 #endif
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <signal.h>
@@ -267,6 +268,14 @@ extern void pv_sig_init(pvstate_t);
  */
 extern bool pv_sigusr2_received(pvstate_t, pid_t *);
 #endif
+
+/*
+ * Return a stream pointer for a control file associated with a particular
+ * process ID and signal.
+ */
+/*@null@ */
+/*@dependent@ */
+extern FILE *pv_open_controlfile(char *, size_t, pid_t, int, bool);
 
 /*
  * Enter the main transfer loop, transferring all input files to the output.
