@@ -236,7 +236,7 @@ struct pvstate_s {
 		struct timespec toffset;	 /* total time spent stopped */
 #ifdef PV_REMOTE_CONTROL
 		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
-		volatile pid_t sender;		 /* PID of sending process for SIGUSR2 */
+		volatile pid_t sender_usr2;	 /* PID of sending process for SIGUSR2 */
 #endif
 	} signal;
 

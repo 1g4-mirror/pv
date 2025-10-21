@@ -239,7 +239,7 @@ static void pv_sig_usr2( /*@unused@ */  __attribute__((unused))
 		return;
 	if (NULL == info)
 		return;
-	pv_sig_state->signal.sender = info->si_pid;
+	pv_sig_state->signal.sender_usr2 = info->si_pid;
 	pv_sig_state->signal.rxusr2 = 1;
 }
 
@@ -255,7 +255,7 @@ bool pv_sigusr2_received(pvstate_t state, pid_t * pid)
 	if (0 == state->signal.rxusr2)
 		return false;
 	if (NULL != pid)
-		*pid = state->signal.sender;
+		*pid = state->signal.sender_usr2;
 	state->signal.rxusr2 = 0;
 	return true;
 }
