@@ -26,6 +26,8 @@
 int pv_remote_set(opts_t, pvstate_t);
 void pv_remote_init(void);
 void pv_remote_fini(void);
+// TODO
+// int pv_remote_transferstate_fetch(pvstate_t, pid_t, /*@null@ */ off_t *);
 
 /*
  * Write a PID file, returning nonzero on error.  Write it atomically, such
@@ -368,8 +370,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	/* TODO: add logic for --query mode. */
-
 	/*
 	 * If no files were given, pretend "-" was given (stdin).
 	 */
@@ -492,6 +492,31 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/* Initialise the signal handling. */
+	pv_sig_init(state);
+
+	/*
+	 * Get the total size, in query mode.
+	 *
+	 * Note that this uses signals, so signal handling has to have been
+	 * set up first.
+	 */
+	if (PV_ACTION_QUERY == opts->action) {
+		opts->size = 0;
+// TODO         retcode = pv_remote_transferstate_fetch(state, opts->query, &(opts->size));
+		if (0 != retcode) {
+			pv_sig_fini(state);
+			pv_state_free(state);
+			opts_free(opts);
+			return retcode;
+		}
+		/* As above - no ETA if the size is unknown. */
+		if (opts->size < 1) {
+			can_have_eta = false;
+			debug("%s", "size unknown - ETA disabled");
+		}
+	}
+
 	/*
 	 * Copy the remaining parameters from the options into the main
 	 * state.
@@ -534,9 +559,6 @@ int main(int argc, char **argv)
 	debug("%s: %s", "terminal_supports_utf8", terminal_supports_utf8 ? "true" : "false");
 	pv_state_set_terminal_supports_utf8(state, terminal_supports_utf8);
 
-	/* Initialise the signal handling. */
-	pv_sig_init(state);
-
 	/* Run the appropriate main loop. */
 	switch (opts->action) {
 	case PV_ACTION_NOTHING:
@@ -556,6 +578,12 @@ int main(int argc, char **argv)
 	case PV_ACTION_WATCHFD:
 		/* "Watch file descriptor(s) of another process" mode. */
 		retcode = pv_watchfd_loop(state);
+		break;
+	case PV_ACTION_QUERY:
+		/* "Watch progress of another pv" mode. */
+		pv_remote_init();
+		/* TODO: loop watching transfer progress until finished. */
+		pv_remote_fini();
 		break;
 	}
 
