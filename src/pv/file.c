@@ -464,3 +464,86 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	/*@+onlytrans@ */
 	/*@+observertrans@ */
 }
+
+
+/*
+ * Return a stream pointer, and populate the filename buffer, for a control
+ * file associated with a particular process ID, for the given signal
+ * number; it will be opened for writing if "sender" is true.  Returns NULL
+ * on error.
+ */
+/*@null@ */
+/*@dependent@ */
+FILE *pv_open_controlfile(char *filename, size_t bufsize, pid_t control_pid, int signum, bool sender)
+{
+	int open_flags, open_mode, control_fd;
+	/*@dependent@ */ FILE *control_fptr = NULL;
+
+	open_flags = O_RDONLY;
+#ifdef O_NOFOLLOW
+	open_flags += O_NOFOLLOW;
+#endif
+	if (sender)
+		open_flags = O_WRONLY | O_CREAT | O_EXCL;
+
+	open_mode = 0644;
+
+	(void) pv_snprintf(filename, bufsize, "/run/user/%lu/pv.remote.%d.%lu", (unsigned long) geteuid(), signum,
+			   (unsigned long) control_pid);
+	control_fd = open(filename, open_flags, open_mode);	/* flawfinder: ignore */
+
+	/*
+	 * If /run/user/<uid> wasn't usable, try $HOME/.pv instead.
+	 */
+	if (control_fd < 0) {
+		char *home_dir;
+
+		home_dir = getenv("HOME");  /* flawfinder: ignore */
+		if (NULL == home_dir)
+			return NULL;
+		if ('\0' == home_dir[0])
+			return NULL;
+
+		/*
+		 * flawfinder rationale: null and zero-size values are
+		 * rejected, and the destination buffer is bounded.
+		 */
+
+		(void) pv_snprintf(filename, bufsize, "%s/.pv/remote.%d.%lu", home_dir, signum,
+				   (unsigned long) control_pid);
+		control_fd = open(filename, open_flags, open_mode);	/* flawfinder: ignore */
+
+		/*
+		 * If the open failed, try creating the $HOME/.pv directory
+		 * first.
+		 */
+		if (control_fd < 0) {
+			(void) pv_snprintf(filename, bufsize, "%s/.pv", home_dir);
+			(void) mkdir(filename, 0700);
+			/* In case of weird umask, explicitly chmod the dir. */
+			(void) chmod(filename, 0700);	/* flawfinder: ignore */
+			(void) pv_snprintf(filename, bufsize, "%s/.pv/remote.%d.%lu", home_dir, signum,
+					   (unsigned long) control_pid);
+			control_fd = open(filename, open_flags, open_mode);	/* flawfinder: ignore */
+		}
+	}
+
+	/*
+	 * flawfinder rationale: the files are in a directory whose parents
+	 * cannot be manipulated, and we are not allowing the final
+	 * component to be a symbolic link.  We are checking that $HOME is
+	 * not NULL, and it's bounded by pv_snprintf() so it can't overshoot
+	 * the filename buffer.  When we chmod $HOME/.pv, we assume that an
+	 * attacker is unlikely to be able to manipulate $HOME's contents to
+	 * make use of us setting $HOME/.pv to mode 700.
+	 */
+
+	if (control_fd < 0)
+		return NULL;
+
+	debug("%s: %s", "control filename", filename);
+
+	control_fptr = fdopen(control_fd, sender ? "wb" : "rb");
+
+	return control_fptr;
+}
