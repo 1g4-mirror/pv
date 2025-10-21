@@ -707,8 +707,8 @@ pv \-\-numeric \-\-format '{"elapsed":%t,"bytes":%b,"rate":%r,"percentage":%{pro
 .in
 .\"
 .SH EXIT STATUS
-An exit status of 1 indicates a problem with the \*(lq\fB\-\-remote\fR\*(rq
-or \*(lq\fB\-\-pidfile\fR\*(rq options.
+An exit status of 1 indicates a problem with the \*(lq\fB\-\-remote\fR\*(rq,
+\*(lq\fB\-\-query\fR\*(rq, or \*(lq\fB\-\-pidfile\fR\*(rq options.
 .PP
 Any other exit status is a bitmask of the following:
 .TP 5
@@ -737,10 +737,10 @@ The following environment variables may affect \fBpv\fR:
 .TP
 .B HOME
 The current user's home directory.
-This may be used by \*(lq\fB\-\-remote\fR\*(rq to exchange messages between
-\fBpv\fR instances: if the \fI/run/user/UID/\fR directory does not exist
-(where \fIUID\fR is the current user ID), then \fI$HOME/.pv/\fR will be used
-instead.
+This may be used by \*(lq\fB\-\-remote\fR\*(rq and \*(lq\fB\-\-query\fR\*(rq
+to exchange messages between \fBpv\fR instances: if the \fI/run/user/UID/\fR
+directory does not exist (where \fIUID\fR is the current user ID), then
+\fI$HOME/.pv/\fR will be used instead.
 .TP
 .BR TMPDIR ", " TMP
 The directory to create per-tty lock files for the terminal when using
@@ -784,9 +784,9 @@ issue #105
 .UE
 for full details.
 .PP
-The \*(lq\fB\-\-remote\fR\*(rq option requires that either
-\fI/run/user/<uid>/\fR or \fI$HOME/\fR can be written to, for inter-process
-communication.
+The \*(lq\fB\-\-remote\fR\*(rq and \*(lq\fB\-\-query\fR\*(rq options require
+that either \fI/run/user/<uid>/\fR or \fI$HOME/\fR can be written to, for
+inter-process communication.
 .PP
 The \*(lq\fB\-\-size\fR\*(rq option has no effect if used with
 \*(lq\fB\-\-watchfd\fR\~\fIPID\fR\*(rq to watch all file descriptors of a
@@ -814,8 +814,8 @@ have a suffix.
 .PP
 Numbers passed to \*(lq\fB\-\-last\-written\fR\*(rq,
 \*(lq\fB\-\-width\fR\*(rq, \*(lq\fB\-\-height\fR\*(rq,
-\*(lq\fB\-\-average\-rate\-window\fR\*(rq, and \*(lq\fB\-\-remote\fR\*(rq
-must be integers with no suffix.
+\*(lq\fB\-\-average\-rate\-window\fR\*(rq, \*(lq\fB\-\-remote\fR\*(rq, and
+\*(lq\fB\-\-query\fR\*(rq must be integers with no suffix.
 .PP
 When \*(lq\fB\-\-sparse\fR\*(rq is in effect and output is being written to
 a file, that file may look like it has stopped growing if inspected with

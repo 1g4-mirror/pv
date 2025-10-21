@@ -674,8 +674,8 @@ Showing progress as lines of JSON data:
 
 # EXIT STATUS
 
-An exit status of 1 indicates a problem with the "**\--remote**" or
-"**\--pidfile**" options.
+An exit status of 1 indicates a problem with the "**\--remote**",
+"**\--query**", or "**\--pidfile**" options.
 
 Any other exit status is a bitmask of the following:
 
@@ -713,9 +713,10 @@ The following environment variables may affect **pv**:
 **HOME**
 
 :   The current user\'s home directory. This may be used by
-    "**\--remote**" to exchange messages between **pv** instances: if
-    the */run/user/UID/* directory does not exist (where *UID* is the
-    current user ID), then *\$HOME/.pv/* will be used instead.
+    "**\--remote**" and "**\--query**" to exchange messages between
+    **pv** instances: if the */run/user/UID/* directory does not exist
+    (where *UID* is the current user ID), then *\$HOME/.pv/* will be
+    used instead.
 
 **TMPDIR**, **TMP**
 
@@ -747,8 +748,9 @@ brackets to force the use of a subshell:
 Refer to [issue #105](https://codeberg.org/ivarch/pv/issues/105) for
 full details.
 
-The "**\--remote**" option requires that either */run/user/\<uid\>/* or
-*\$HOME/* can be written to, for inter-process communication.
+The "**\--remote**" and "**\--query**" options require that either
+*/run/user/\<uid\>/* or *\$HOME/* can be written to, for inter-process
+communication.
 
 The "**\--size**" option has no effect if used with
 "**\--watchfd** *PID*" to watch all file descriptors of a process, but
@@ -772,8 +774,8 @@ Numbers passed to "**\--interval**" and "**\--delay-start**" may be
 integers or decimals, but may not have a suffix.
 
 Numbers passed to "**\--last-written**", "**\--width**",
-"**\--height**", "**\--average-rate-window**", and "**\--remote**" must
-be integers with no suffix.
+"**\--height**", "**\--average-rate-window**", "**\--remote**", and
+"**\--query**" must be integers with no suffix.
 
 When "**\--sparse**" is in effect and output is being written to a file,
 that file may look like it has stopped growing if inspected with
