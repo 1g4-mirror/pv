@@ -365,4 +365,4 @@ int pv_remote_set(			 /*@unused@ */
 	return PV_ERROREXIT_REMOTE_OR_PID;
 }
 
-#endif				/* SA_SIGINFO */
+#endif				/* PV_REMOTE_CONTROL */
