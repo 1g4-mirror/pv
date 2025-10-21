@@ -260,10 +260,7 @@ bool pv_sigusr2_received(pvstate_t state, pid_t * pid)
 	return true;
 }
 
-#endif
 
-
-#ifdef PV_REMOTE_QUERY
 /*
  * Handle a SIGUSR1 by setting a flag to say we received it, after recording
  * the sending PID.
@@ -297,7 +294,7 @@ bool pv_sigusr1_received(pvstate_t state, pid_t * pid)
 	return true;
 }
 
-#endif
+#endif				/* PV_REMOTE_CONTROL */
 
 
 /*
@@ -425,9 +422,7 @@ void pv_sig_init(pvstate_t state)
 	/*@+unrecog@ */
 	(void) sigaction(SIGUSR2, &sa, &(pv_sig_state->signal.old_sigusr2));
 	memset(&sa, 0, sizeof(sa));
-#endif
 
-#ifdef PV_REMOTE_QUERY
 	/*
 	 * Handle SIGUSR1 by setting a flag to say the signal has been
 	 * received, and storing the sending process's PID.
@@ -440,7 +435,7 @@ void pv_sig_init(pvstate_t state)
 	/*@+unrecog@ */
 	(void) sigaction(SIGUSR1, &sa, &(pv_sig_state->signal.old_sigusr1));
 	memset(&sa, 0, sizeof(sa));
-#endif
+#endif				/* PV_REMOTE_CONTROL */
 
 	/*
 	 * Ensure that the TOSTOP terminal attribute is set, so that a
@@ -485,8 +480,6 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 	(void) sigaction(SIGTERM, &(pv_sig_state->signal.old_sigterm), NULL);
 #ifdef PV_REMOTE_CONTROL
 	(void) sigaction(SIGUSR2, &(pv_sig_state->signal.old_sigusr2), NULL);
-#endif
-#ifdef PV_REMOTE_QUERY
 	(void) sigaction(SIGUSR1, &(pv_sig_state->signal.old_sigusr1), NULL);
 #endif
 	(void) sigaction(SIGALRM, &(pv_sig_state->signal.old_sigalrm), NULL);

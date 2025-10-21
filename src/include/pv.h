@@ -267,6 +267,11 @@ extern void pv_sig_init(pvstate_t);
  * Return true if SIGUSR2 has been received, and indicate the sender.
  */
 extern bool pv_sigusr2_received(pvstate_t, pid_t *);
+
+/*
+ * Return true if SIGUSR1 has been received, and indicate the sender.
+ */
+extern bool pv_sigusr1_received(pvstate_t, pid_t *);
 #endif
 
 /*

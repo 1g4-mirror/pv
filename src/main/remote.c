@@ -233,15 +233,16 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 
 
 /*
- * Check for a remote control message and, if there is one, replace the
- * current process's options with those being passed in.
+ * Check for a --remote message (SIGUSR2), returning false if none was
+ * found.
  *
- * NB relies on pv_state_set_format() causing the output format to be
- * reparsed.
+ * If a message was received, update the current process's options with the
+ * ones in the message.
  *
- * Returns true if something was received, false otherwise.
+ * Note that this relies on pv_state_set_format() causing the output format
+ * to be reparsed.
  */
-bool pv_remote_check(pvstate_t state)
+static bool pv__rxsignal_usr2(pvstate_t state)
 {
 	pid_t signal_sender;
 	char control_filename[4096];	 /* flawfinder: ignore */
@@ -287,7 +288,7 @@ bool pv_remote_check(pvstate_t state)
 		debug("%u: %s", signal_sender, strerror(errno));
 	}
 
-	debug("%s", "received remote message");
+	debug("%s", "received remote control message");
 
 	pv_state_format_string_set(state, NULL);
 	pv_state_name_set(state, NULL);
@@ -325,11 +326,91 @@ bool pv_remote_check(pvstate_t state)
 }
 
 
+/*
+ * Check for a --query message (SIGUSR1).
+ *
+ * If a message was received, then if it's type 0 (query), write a type 1
+ * message containing the total size and current transfer state to the
+ * control file and send a SIGUSR1 to the sending process.  If it's type 1
+ * (response), update the transfer state - and control.size - from the
+ * message in the control file.
+ */
+static void pv__rxsignal_usr1(pvstate_t state)
+{
+	pid_t signal_sender;
+	char control_filename[4096];	 /* flawfinder: ignore */
+	FILE *control_fptr;
+
+	/* flawfinder rationale: as above. */
+
+	/*
+	 * Return early if a SIGUSR1 signal has not been received.
+	 */
+	signal_sender = 0;
+	if (!pv_sigusr1_received(state, &signal_sender))
+		return;
+
+	memset(control_filename, 0, sizeof(control_filename));
+	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), signal_sender, SIGUSR1, false);
+	if (NULL == control_fptr) {
+		pv_error("%s: %s", control_filename, strerror(errno));
+		return;
+	}
+
+/* TODO: read the message */
+
+	if (0 != fclose(control_fptr)) {
+		pv_error("%s", strerror(errno));
+		return;
+	}
+
+/* TODO: handle message */
+}
+
+
+/*
+ * Check for remote control messages.  For a SIGUSR2 (--remote), replace the
+ * current process's options with those being passed in.  For a SIGUSR1
+ * (--query), either receive transfer state from the sending process, or
+ * send our transfer state to the sending process, depending on the content
+ * of the message.
+ *
+ * NB --remote relies on pv_state_set_format() causing the output format to
+ * be reparsed.
+ *
+ * Returns true if a --remote message was received, false otherwise.
+ */
+bool pv_remote_check(pvstate_t state)
+{
+	bool received_remote;
+
+	received_remote = pv__rxsignal_usr2(state);
+	pv__rxsignal_usr1(state);
+
+	return received_remote;
+}
+
+
+/*
+ * Replace the transfer state with that of the given process, populating
+ * *sizeptr with that process's idea of the total transfer size if sizeptr
+ * isn't NULL.
+ *
+ * Returns nonzero on error, after reporting the error.
+ */
+int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_t * sizeptr)
+{
+	/* TODO: write this */
+	return PV_ERROREXIT_REMOTE_OR_PID;
+}
+
+
 #else				/* !PV_REMOTE_CONTROL */
 
 /*
  * Dummy stubs for remote control when we don't have PV_REMOTE_CONTROL.
  */
+
 void pv_remote_check( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 {
 }
@@ -344,27 +425,6 @@ int pv_remote_set(			 /*@unused@ */
 	return PV_ERROREXIT_REMOTE_OR_PID;
 }
 
-#endif				/* PV_REMOTE_CONTROL */
-
-#ifdef PV_REMOTE_QUERY
-/*
- * Replace the transfer state with that of the given process, populating
- * *sizeptr with that process's idea of the total transfer size if sizeptr
- * isn't NULL.
- *
- * Returns nonzero on error, after reporting the error.
- */
-int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_t * sizeptr)
-{
-	/* TODO: write this */
-	return PV_ERROREXIT_REMOTE_OR_PID;
-}
-
-#else				/* !PV_REMOTE_QUERY */
-
-/*
- * Dummy stubs for remote querying when we don't have PV_REMOTE_QUERY.
- */
 
 int pv_remote_transferstate_fetch(	 /*@unused@ */
 					 __attribute__((unused)) pvstate_t state,	/*@unused@ */
@@ -377,4 +437,4 @@ int pv_remote_transferstate_fetch(	 /*@unused@ */
 	return PV_ERROREXIT_REMOTE_OR_PID;
 }
 
-#endif				/* PV_REMOTE_QUERY */
+#endif				/* PV_REMOTE_CONTROL */

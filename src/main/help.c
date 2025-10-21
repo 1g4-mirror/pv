@@ -368,12 +368,10 @@ void display_help(void)
 		{ "-R", "--remote", N_("PID"),
 		 N_("update settings of process PID"),
 		 { 0, 0, 0, 0} },
-#endif				/* PV_REMOTE_CONTROL */
-#ifdef PV_REMOTE_QUERY
 		{ "-Q", "--query", N_("PID"),
 		 N_("show progress of process PID"),
 		 { 0, 0, 0, 0} },
-#endif				/* PV_REMOTE_QUERY */
+#endif				/* PV_REMOTE_CONTROL */
 		{ "", NULL, NULL, NULL, { 0, 0, 0, 0} },
 		{ "-P", "--pidfile", N_("FILE"),
 		 N_("save process ID in FILE"),

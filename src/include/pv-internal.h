@@ -230,8 +230,6 @@ struct pvstate_s {
 		struct sigaction old_sigterm;
 #ifdef PV_REMOTE_CONTROL
 		struct sigaction old_sigusr2;
-#endif
-#ifdef PV_REMOTE_QUERY
 		struct sigaction old_sigusr1;
 #endif
 		struct sigaction old_sigalrm;
@@ -240,8 +238,6 @@ struct pvstate_s {
 #ifdef PV_REMOTE_CONTROL
 		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
 		volatile pid_t sender_usr2;	 /* PID of sending process for SIGUSR2 */
-#endif
-#ifdef PV_REMOTE_QUERY
 		volatile sig_atomic_t rxusr1;	 /* whether SIGUSR1 was received */
 		volatile pid_t sender_usr1;	 /* PID of sending process for SIGUSR1 */
 #endif
