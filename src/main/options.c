@@ -1178,7 +1178,17 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	if (opts->error_skip_block > 0 && 0 == opts->skip_errors)
 		opts->skip_errors = 1;
 
-	/* TODO: error if -Q given and there are any remaining arguments. */
+	/*
+	 * Don't allow any non-option arguments with -R or -Q.
+	 */
+	if ((optind < (int) argc) && ((0 != opts->remote) || (0 != opts->query))) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s: %s\n", opts->program_name, 0 != opts->remote ? "-R" : "-Q",
+			_("files cannot be specified with this option"));
+		opts_free(opts);
+		return NULL;
+		/*@+mustfreefresh@ */
+	}
 
 	/*
 	 * Store remaining command-line arguments.
