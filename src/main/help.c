@@ -360,6 +360,7 @@ void display_help(void)
 		{ "-U", "--store-and-forward", N_("FILE"),
 		 N_("write all input to FILE before writing to output"),
 		 { 0, 0, 0, 0} },
+		{ "", NULL, NULL, NULL, { 0, 0, 0, 0} },
 		{ "-d", "--watchfd", N_("PID[:FD]|=NAME|@LISTFILE"),
 		 N_("watch file FD opened by process PID"),
 		 { 0, 0, 0, 0} },
