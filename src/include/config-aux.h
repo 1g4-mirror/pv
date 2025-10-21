@@ -51,3 +51,11 @@ typedef bool _Bool;
 #define PV_REMOTE_CONTROL 1
 # endif
 #endif
+
+/* Whether "--query" should be available. */
+#undef PV_REMOTE_QUERY
+#if HAVE_DECL_SA_SIGINFO
+# if SIGINFO_PROVIDES_PID
+#define PV_REMOTE_QUERY 1
+# endif
+#endif
