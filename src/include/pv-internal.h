@@ -25,7 +25,7 @@ extern "C" {
 
 #define RATE_GRANULARITY	100000000	 /* nsec between -L rate chunks */
 #define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
-#define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R */
+#define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R and -Q */
 #define BUFFER_SIZE		(size_t) 409600	 /* default transfer buffer size */
 #define BUFFER_SIZE_MAX		(size_t) 524288	 /* max auto transfer buffer size */
 #define MAX_READ_AT_ONCE	(size_t) 524288	 /* max to read() in one go */
@@ -231,12 +231,19 @@ struct pvstate_s {
 #ifdef PV_REMOTE_CONTROL
 		struct sigaction old_sigusr2;
 #endif
+#ifdef PV_REMOTE_QUERY
+		struct sigaction old_sigusr1;
+#endif
 		struct sigaction old_sigalrm;
 		struct timespec tstp_time;	 /* see pv_sig_tstp() / __cont() */
 		struct timespec toffset;	 /* total time spent stopped */
 #ifdef PV_REMOTE_CONTROL
 		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
 		volatile pid_t sender_usr2;	 /* PID of sending process for SIGUSR2 */
+#endif
+#ifdef PV_REMOTE_QUERY
+		volatile sig_atomic_t rxusr1;	 /* whether SIGUSR1 was received */
+		volatile pid_t sender_usr1;	 /* PID of sending process for SIGUSR1 */
 #endif
 	} signal;
 
@@ -620,9 +627,7 @@ void pv_sig_allowpause(void);
 void pv_sig_checkbg(void);
 void pv_sig_nopause(void);
 
-void pv_remote_init(pvstate_t);
 bool pv_remote_check(pvstate_t);
-void pv_remote_fini(pvstate_t);
 int pv_remote_set(pvstate_t);
 
 int pv_watchfd_info(pvstate_t, pvwatchfd_t, bool);

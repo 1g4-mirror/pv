@@ -24,10 +24,7 @@
 #endif
 
 int pv_remote_set(opts_t, pvstate_t);
-void pv_remote_init(void);
-void pv_remote_fini(void);
-// TODO
-// int pv_remote_transferstate_fetch(pvstate_t, pid_t, /*@null@ */ off_t *);
+int pv_remote_transferstate_fetch(pvstate_t, pid_t, /*@null@ */ off_t *);
 
 /*
  * Write a PID file, returning nonzero on error.  Write it atomically, such
@@ -503,7 +500,7 @@ int main(int argc, char **argv)
 	 */
 	if (PV_ACTION_QUERY == opts->action) {
 		opts->size = 0;
-// TODO         retcode = pv_remote_transferstate_fetch(state, opts->query, &(opts->size));
+		retcode = pv_remote_transferstate_fetch(state, opts->query, &(opts->size));
 		if (0 != retcode) {
 			pv_sig_fini(state);
 			pv_state_free(state);
@@ -565,15 +562,11 @@ int main(int argc, char **argv)
 		break;
 	case PV_ACTION_TRANSFER:
 		/* Normal "transfer data" mode. */
-		pv_remote_init();
 		retcode = pv_main_loop(state);
-		pv_remote_fini();
 		break;
 	case PV_ACTION_STORE_AND_FORWARD:
 		/* Store-and-forward transfer mode. */
-		pv_remote_init();
 		retcode = pv__store_and_forward(state, opts, can_have_eta);
-		pv_remote_fini();
 		break;
 	case PV_ACTION_WATCHFD:
 		/* "Watch file descriptor(s) of another process" mode. */
@@ -581,9 +574,7 @@ int main(int argc, char **argv)
 		break;
 	case PV_ACTION_QUERY:
 		/* "Watch progress of another pv" mode. */
-		pv_remote_init();
 		/* TODO: loop watching transfer progress until finished. */
-		pv_remote_fini();
 		break;
 	}
 

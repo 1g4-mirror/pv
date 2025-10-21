@@ -21,8 +21,9 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#ifdef PV_REMOTE_CONTROL
 void pv_error(char *, ...);
+
+#ifdef PV_REMOTE_CONTROL
 
 struct remote_msg {
 	bool progress;			 /* progress bar flag */
@@ -324,40 +325,51 @@ bool pv_remote_check(pvstate_t state)
 }
 
 
-/*
- * Initialise remote message reception handling.
- */
-void pv_remote_init(void)
-{
-}
-
-
-/*
- * Clean up after remote message reception handling.
- */
-void pv_remote_fini(void)
-{
-}
-
 #else				/* !PV_REMOTE_CONTROL */
 
 /*
  * Dummy stubs for remote control when we don't have PV_REMOTE_CONTROL.
  */
-void pv_remote_init(void)
-{
-}
-
 void pv_remote_check( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 {
 }
 
-void pv_remote_fini(void)
-{
-}
 
 int pv_remote_set(			 /*@unused@ */
 			 __attribute__((unused)) opts_t opts, /*@unused@ */  __attribute__((unused)) pvstate_t state)
+{
+	/*@-mustfreefresh@ *//* splint - see above */
+	pv_error("%s", _("SA_SIGINFO not supported on this system"));
+	/*@+mustfreefresh@ */
+	return PV_ERROREXIT_REMOTE_OR_PID;
+}
+
+#endif				/* PV_REMOTE_CONTROL */
+
+#ifdef PV_REMOTE_QUERY
+/*
+ * Replace the transfer state with that of the given process, populating
+ * *sizeptr with that process's idea of the total transfer size if sizeptr
+ * isn't NULL.
+ *
+ * Returns nonzero on error, after reporting the error.
+ */
+int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_t * sizeptr)
+{
+	/* TODO: write this */
+	return PV_ERROREXIT_REMOTE_OR_PID;
+}
+
+#else				/* !PV_REMOTE_QUERY */
+
+/*
+ * Dummy stubs for remote querying when we don't have PV_REMOTE_QUERY.
+ */
+
+int pv_remote_transferstate_fetch(	 /*@unused@ */
+					 __attribute__((unused)) pvstate_t state,	/*@unused@ */
+					 __attribute__((unused)) pid_t query,	/*@null@ *//*@unused@ */
+					 __attribute__((unused)) off_t * sizeptr)
 {
 	/*@-mustfreefresh@ *//* splint - see above */
 	fprintf(stderr, "%s\n", _("SA_SIGINFO not supported on this system"));
@@ -365,4 +377,4 @@ int pv_remote_set(			 /*@unused@ */
 	return PV_ERROREXIT_REMOTE_OR_PID;
 }
 
-#endif				/* PV_REMOTE_CONTROL */
+#endif				/* PV_REMOTE_QUERY */

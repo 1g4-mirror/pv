@@ -263,6 +263,43 @@ bool pv_sigusr2_received(pvstate_t state, pid_t * pid)
 #endif
 
 
+#ifdef PV_REMOTE_QUERY
+/*
+ * Handle a SIGUSR1 by setting a flag to say we received it, after recording
+ * the sending PID.
+ */
+static void pv_sig_usr1( /*@unused@ */  __attribute__((unused))
+			int sig, siginfo_t * info, /*@unused@ */  __attribute__((unused))
+			void *ucontext)
+{
+	if (NULL == pv_sig_state)
+		return;
+	if (NULL == info)
+		return;
+	pv_sig_state->signal.sender_usr1 = info->si_pid;
+	pv_sig_state->signal.rxusr1 = 1;
+}
+
+
+/*
+ * Return true if a SIGUSR1 signal has been received since the last time
+ * this function was called, populating *pid with the sending PID if so.
+ */
+bool pv_sigusr1_received(pvstate_t state, pid_t * pid)
+{
+	if (NULL == state)
+		return false;
+	if (0 == state->signal.rxusr1)
+		return false;
+	if (NULL != pid)
+		*pid = state->signal.sender_usr1;
+	state->signal.rxusr1 = 0;
+	return true;
+}
+
+#endif
+
+
 /*
  * Handle alarm signals by doing nothing.
  *
@@ -390,6 +427,21 @@ void pv_sig_init(pvstate_t state)
 	memset(&sa, 0, sizeof(sa));
 #endif
 
+#ifdef PV_REMOTE_QUERY
+	/*
+	 * Handle SIGUSR1 by setting a flag to say the signal has been
+	 * received, and storing the sending process's PID.
+	 */
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_sigaction = pv_sig_usr1;
+	(void) sigemptyset(&(sa.sa_mask));
+	/*@-unrecog@ *//* splint doesn't know about SA_SIGINFO */
+	sa.sa_flags = SA_SIGINFO;
+	/*@+unrecog@ */
+	(void) sigaction(SIGUSR1, &sa, &(pv_sig_state->signal.old_sigusr1));
+	memset(&sa, 0, sizeof(sa));
+#endif
+
 	/*
 	 * Ensure that the TOSTOP terminal attribute is set, so that a
 	 * SIGTTOU signal will be raised if we try to write to the terminal
@@ -433,6 +485,9 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 	(void) sigaction(SIGTERM, &(pv_sig_state->signal.old_sigterm), NULL);
 #ifdef PV_REMOTE_CONTROL
 	(void) sigaction(SIGUSR2, &(pv_sig_state->signal.old_sigusr2), NULL);
+#endif
+#ifdef PV_REMOTE_QUERY
+	(void) sigaction(SIGUSR1, &(pv_sig_state->signal.old_sigusr1), NULL);
 #endif
 	(void) sigaction(SIGALRM, &(pv_sig_state->signal.old_sigalrm), NULL);
 
