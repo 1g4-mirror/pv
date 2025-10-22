@@ -216,7 +216,7 @@ int pv_main_loop(pvstate_t state)
 		cansend = 0;
 
 		/*
-		 * Check for remote messages from -R every short while.
+		 * Check for remote messages from -R, -Q every short while.
 		 */
 		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
 			(void) pv_remote_check(state);
@@ -857,7 +857,7 @@ int pv_watchfd_loop(pvstate_t state)
 		int displayed_lines;
 		bool terminal_resized;
 
-		/* Check for remote messages from -R every short while. */
+		/* Check for remote messages from -R, -Q every short while. */
 		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
 			if (pv_remote_check(state)) {
 				/* Message received - ensure format has %N. */
