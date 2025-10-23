@@ -376,9 +376,9 @@ struct pvstate_s {
 	 * The transfer buffer is used for moving data from the input files
 	 * to the output when splice() is not available.
 	 *
-	 * If buffer_size is smaller than pv__target_bufsize, then
+	 * If buffer_size is smaller than control.target_buffer_size, then
 	 * pv_transfer() will try to reallocate transfer_buffer to make
-	 * buffer_size equal to pv__target_bufsize.
+	 * buffer_size equal to control.target_buffer_size.
 	 *
 	 * Data from the input files is read into the buffer; read_position
 	 * is the offset in the buffer that we've read data up to.
