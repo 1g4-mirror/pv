@@ -624,7 +624,6 @@ void pv_sig_checkbg(void);
 void pv_sig_nopause(void);
 
 bool pv_remote_check(pvstate_t);
-int pv_remote_set(pvstate_t);
 
 int pv_watchfd_info(pvstate_t, pvwatchfd_t, bool);
 bool pv_watchfd_changed(pvwatchfd_t);

@@ -6,9 +6,12 @@
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
 
+/* TODO: move this to srv/pv/ instead of src/main/ since it uses internal pv structures. */
+
 #include "config.h"
 #include "options.h"
 #include "pv.h"
+#include "pv-internal.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,6 +28,7 @@ void pv_error(char *, ...);
 
 #ifdef PV_REMOTE_CONTROL
 
+/* Structure for transferring settings with --remote. */
 struct remote_msg {
 	bool progress;			 /* progress bar flag */
 	bool timer;			 /* timer flag */
@@ -46,6 +50,14 @@ struct remote_msg {
 	char name[256];			 /* flawfinder: ignore */
 	char format[256];		 /* flawfinder: ignore */
 	char extra_display[256];	 /* flawfinder: ignore */
+};
+
+/* Structure for transferring transfer state with --query. */
+struct query_msg {
+	long double elapsed_seconds;	 /* from state.transfer */
+	off_t transferred;		 /* from state.transfer */
+	off_t size;			 /* from state.control */
+	bool response;			 /* true if this is the response signal. */
 };
 
 /*
@@ -210,6 +222,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	/*
 	 * Remove the remote control file.
 	 */
+	debug("%s: %s", "removing", control_filename);
 	if (0 != remove(control_filename)) {
 		pv_error("%s", strerror(errno));
 	}
@@ -333,13 +346,20 @@ static bool pv__rxsignal_usr2(pvstate_t state)
  * message containing the total size and current transfer state to the
  * control file and send a SIGUSR1 to the sending process.  If it's type 1
  * (response), update the transfer state - and control.size - from the
- * message in the control file.
+ * message in the control file.  In both cases, the receiver of the message
+ * deletes the associated control file.
+ *
+ * Returns true if a signal was received and dealt with, false otherwise.
+ *
+ * If match_sender is not zero, then ignores the signal and returns false if
+ * the sending PID is not match_sender.
  */
-static void pv__rxsignal_usr1(pvstate_t state)
+static bool pv__rxsignal_usr1(pvstate_t state, pid_t match_sender)
 {
 	pid_t signal_sender;
 	char control_filename[4096];	 /* flawfinder: ignore */
 	FILE *control_fptr;
+	struct query_msg msgbuf;
 
 	/* flawfinder rationale: as above. */
 
@@ -348,23 +368,97 @@ static void pv__rxsignal_usr1(pvstate_t state)
 	 */
 	signal_sender = 0;
 	if (!pv_sigusr1_received(state, &signal_sender))
-		return;
+		return false;
+
+	/*
+	 * If match_sender was specified, ignore the signal if the sender
+	 * doesn't match.
+	 */
+	if ((0 != match_sender) && (signal_sender != match_sender)) {
+		debug("%s=%d, %s=%d - %s", "match_sender", match_sender, "signal_sender", signal_sender,
+		      "ignoring USR1");
+		return false;
+	}
 
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), signal_sender, SIGUSR1, false);
 	if (NULL == control_fptr) {
 		pv_error("%s: %s", control_filename, strerror(errno));
-		return;
+		return false;
 	}
 
-/* TODO: read the message */
+	/*
+	 * Read the message buffer from the remote control file, close it,
+	 * and delete it.
+	 */
+	if (1 != fread(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
+		pv_error("%s", strerror(errno));
+		(void) fclose(control_fptr);
+		return false;
+	}
 
 	if (0 != fclose(control_fptr)) {
 		pv_error("%s", strerror(errno));
-		return;
+		return false;
 	}
 
-/* TODO: handle message */
+	debug("%s: %s", "removing", control_filename);
+	if (0 != remove(control_filename)) {
+		pv_error("%s", strerror(errno));
+		return false;
+	}
+
+	if (msgbuf.response) {
+		/* Response message - update local state. */
+		debug("%s: %d", "query response received", signal_sender);
+		state->transfer.elapsed_seconds = msgbuf.elapsed_seconds;
+		state->transfer.transferred = msgbuf.transferred;
+		state->control.size = msgbuf.size;
+		return true;
+	}
+
+	/* Query message - transmit state to sender. */
+
+	debug("%s: %d", "query received", signal_sender);
+
+	msgbuf.elapsed_seconds = state->transfer.elapsed_seconds;
+	msgbuf.transferred = state->transfer.transferred;
+	msgbuf.size = state->control.size;
+	msgbuf.response = true;
+
+	memset(control_filename, 0, sizeof(control_filename));
+	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), (pid_t) getpid(), SIGUSR1, true);
+	if (NULL == control_fptr) {
+		pv_error("%s", strerror(errno));
+		return true;		    /* true since the signal was received. */
+	}
+
+	if (1 != fwrite(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
+		pv_error("%s", strerror(errno));
+		(void) fclose(control_fptr);
+		(void) remove(control_filename);
+		return true;		    /* as above. */
+	}
+
+	if (0 != fclose(control_fptr)) {
+		pv_error("%s", strerror(errno));
+		(void) remove(control_filename);
+		return true;
+	}
+
+	/*
+	 * Send a SIGUSR1 signal to the remote process, to tell it this
+	 * query response message is ready to read.
+	 */
+	if (kill((pid_t) (signal_sender), SIGUSR1) != 0) {
+		pv_error("%u: %s", signal_sender, strerror(errno));
+		(void) remove(control_filename);
+		return true;
+	}
+
+	debug("%s: %d", "query response sent", signal_sender);
+
+	return true;
 }
 
 
@@ -385,23 +479,134 @@ bool pv_remote_check(pvstate_t state)
 	bool received_remote;
 
 	received_remote = pv__rxsignal_usr2(state);
-	pv__rxsignal_usr1(state);
+	(void) pv__rxsignal_usr1(state, 0);
 
 	return received_remote;
 }
 
 
 /*
- * Replace the transfer state with that of the given process, populating
- * *sizeptr with that process's idea of the total transfer size if sizeptr
- * isn't NULL.
+ * Replace the transfer state with that of the given process, including the
+ * total transfer size.
  *
  * Returns nonzero on error, after reporting the error.
  */
-int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_t * sizeptr)
+int pv_remote_transferstate_fetch(pvstate_t state, pid_t query)
 {
-	/* TODO: write this */
+	char control_filename[4096];	 /* flawfinder: ignore */
+	FILE *control_fptr;
+	struct query_msg msgbuf;
+	pid_t signal_sender;
+	long timeout;
+	bool received;
+
+	/*
+	 * flawfinder rationale: buffer is large enough, explicitly zeroed,
+	 * and always bounded properly as we are only writing to it with
+	 * pv_snprintf().
+	 */
+
+	/*
+	 * Check that the remote process exists.
+	 */
+	if (kill((pid_t) (query), 0) != 0) {
+		pv_error("%u: %s", query, strerror(errno));
+		return PV_ERROREXIT_REMOTE_OR_PID;
+	}
+
+	/* Set up the query message. */
+	memset(&msgbuf, 0, sizeof(msgbuf));
+	msgbuf.response = false;
+
+	/*
+	 * Get the filename and file stream to use.
+	 */
+	memset(control_filename, 0, sizeof(control_filename));
+	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), (pid_t) getpid(), SIGUSR1, true);
+	if (NULL == control_fptr) {
+		pv_error("%s", strerror(errno));
+		return PV_ERROREXIT_REMOTE_OR_PID;
+	}
+
+	/*
+	 * Write the message to the control file, and close it.
+	 */
+	if (1 != fwrite(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
+		pv_error("%s", strerror(errno));
+		(void) fclose(control_fptr);
+		(void) remove(control_filename);
+		return PV_ERROREXIT_REMOTE_OR_PID;
+	}
+
+	if (0 != fclose(control_fptr)) {
+		pv_error("%s", strerror(errno));
+		(void) remove(control_filename);
+		return PV_ERROREXIT_REMOTE_OR_PID;
+	}
+
+	/*
+	 * Send a SIGUSR1 signal to the remote process, to tell it a query
+	 * message is ready, after first clearing our own SIGUSR1 received
+	 * flag.
+	 */
+	signal_sender = 0;
+	(void) pv_sigusr1_received(state, &signal_sender);
+	if (kill((pid_t) (query), SIGUSR1) != 0) {
+		pv_error("%u: %s", query, strerror(errno));
+		(void) remove(control_filename);
+		return PV_ERROREXIT_REMOTE_OR_PID;
+	}
+
+	debug("%s: %d", "query sent", query);
+
+	/*
+	 * Wait for a SIGUSR1 signal to be sent back with a query response
+	 * message.
+	 */
+
+	timeout = 1100000;
+	received = false;
+
+	while (timeout > 10000 && !received && 0 == state->flags.trigger_exit) {
+		struct timeval tv;
+
+		memset(&tv, 0, sizeof(tv));
+		tv.tv_sec = 0;
+		tv.tv_usec = 10000;
+		/*@-nullpass@ *//* splint: NULL is OK with select() */
+		(void) select(0, NULL, NULL, NULL, &tv);
+		/*@+nullpass@ */
+		timeout -= 10000;
+
+		if (pv__rxsignal_usr1(state, query)) {
+			debug("%s", "response received");
+			received = true;
+		}
+	}
+
+	/*
+	 * Remove the control file in case it still exists - the other
+	 * process should have removed it.
+	 */
+	debug("%s: %s", "cleaning up", control_filename);
+	(void) remove(control_filename);
+
+	/*
+	 * Return 0 if the message was received.
+	 */
+	if (received)
+		return 0;
+
+	/*@-mustfreefresh@ */
+	/*
+	 * splint note: the gettext calls made by _() cause memory leak
+	 * warnings, but in this case it's unavoidable, and mitigated by the
+	 * fact we only translate each string once.
+	 */
+	pv_error("%u: %s", query, _("message not received"));
 	return PV_ERROREXIT_REMOTE_OR_PID;
+	/*@+mustfreefresh @ */
+
 }
 
 
@@ -428,8 +633,7 @@ int pv_remote_set(			 /*@unused@ */
 
 int pv_remote_transferstate_fetch(	 /*@unused@ */
 					 __attribute__((unused)) pvstate_t state,	/*@unused@ */
-					 __attribute__((unused)) pid_t query,	/*@null@ *//*@unused@ */
-					 __attribute__((unused)) off_t * sizeptr)
+					 __attribute__((unused)) pid_t query)
 {
 	/*@-mustfreefresh@ *//* splint - see above */
 	fprintf(stderr, "%s\n", _("SA_SIGINFO not supported on this system"));
