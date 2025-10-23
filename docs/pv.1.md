@@ -415,11 +415,12 @@ are explicitly switched on will be shown.
 **-Q PID, \--query PID**
 
 :   Display the transfer progress of another instance of **pv** with
-    process ID *PID*. Some output modifiers can only be used while
-    querying another process if they match those of that process - such
-    as "**\--line-mode**", "**\--null**", and
-    "**\--average-rate-window**". Data transfer modifiers will have no
-    effect.
+    process ID *PID*, owned by the same user.
+
+    Some output modifiers can only be used while querying another
+    process if they match those of that process - such as
+    "**\--line-mode**", "**\--null**", and "**\--average-rate-window**".
+    Data transfer modifiers will have no effect.
 
 ## Other options
 
