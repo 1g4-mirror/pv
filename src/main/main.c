@@ -24,7 +24,7 @@
 #endif
 
 int pv_remote_set(opts_t, pvstate_t);
-int pv_remote_transferstate_fetch(pvstate_t, pid_t);
+int pv_remote_transferstate_fetch(pvstate_t, pid_t, bool);
 
 /*
  * Write a PID file, returning nonzero on error.  Write it atomically, such
@@ -500,7 +500,7 @@ int main(int argc, char **argv)
 	 */
 	if (PV_ACTION_QUERY == opts->action) {
 		opts->size = 0;
-		retcode = pv_remote_transferstate_fetch(state, opts->query);
+		retcode = pv_remote_transferstate_fetch(state, opts->query, false);
 		if (0 != retcode) {
 			pv_sig_fini(state);
 			pv_state_free(state);
@@ -574,7 +574,7 @@ int main(int argc, char **argv)
 		break;
 	case PV_ACTION_QUERY:
 		/* "Watch progress of another pv" mode. */
-		/* TODO: loop watching transfer progress until finished. */
+		retcode = pv_query_loop(state, opts->query);
 		break;
 	}
 

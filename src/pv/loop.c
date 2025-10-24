@@ -28,6 +28,8 @@
 #include <math.h>
 #endif
 
+int pv_remote_transferstate_fetch(pvstate_t, pid_t, bool);
+
 
 #if HAVE_SQRTL
 #else
@@ -414,6 +416,9 @@ int pv_main_loop(pvstate_t state)
 		/*
 		 * Just go round the loop again if there's no display and
 		 * we're not reporting statistics.
+		 *
+		 * TODO: still calculate elapsed time, otherwise -Q can't
+		 * read it (#101).
 		 */
 		if (state->control.no_display && !state->control.show_stats)
 			continue;
@@ -434,7 +439,7 @@ int pv_main_loop(pvstate_t state)
 					continue;
 			}
 
-			state->control.wait = 0;
+			state->control.wait = false;
 
 			/*
 			 * Reset the timer offset counter now that data
@@ -1199,4 +1204,200 @@ int pv_watchfd_loop(pvstate_t state)
 	 * and other deep structures may not be deallocated and so leak
 	 * memory, but that's what pv_freecontents_watchfd() takes care of.
 	 */
+}
+
+
+/*
+ * Watch the progress of another pv process.
+ *
+ * Returns nonzero on error.
+ */
+int pv_query_loop(pvstate_t state, pid_t query)
+{
+	struct timespec cur_time, next_remotecheck, next_update;
+
+	pv_crs_init(&(state->cursor), &(state->control), &(state->flags));
+
+	/*
+	 * NB transfer.total_written has been initialised by main().
+	 */
+
+	state->display.initial_offset = 0;
+
+	memset(&cur_time, 0, sizeof(cur_time));
+	memset(&next_remotecheck, 0, sizeof(next_remotecheck));
+	memset(&next_update, 0, sizeof(next_update));
+
+	pv_elapsedtime_read(&cur_time);
+	pv_elapsedtime_copy(&next_remotecheck, &cur_time);
+	pv_elapsedtime_copy(&next_update, &cur_time);
+
+	if ((state->control.delay_start > 0)
+	    && (state->control.delay_start > state->control.interval)) {
+		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.delay_start));
+	} else {
+		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
+	}
+
+	/*
+	 * Repeat until the queried process exits.
+	 */
+
+	while (0 == kill(query, 0)) {
+
+		/*
+		 * Check for remote messages from -R, and run the query,
+		 * every short while.
+		 */
+		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
+			if (0 != pv_remote_transferstate_fetch(state, query, true))
+				break;
+			(void) pv_remote_check(state);
+			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
+			/*
+			 * Set the next-remote-check time to now +
+			 * REMOTE_INTERVAL, if it's still in the past.
+			 */
+			if (pv_elapsedtime_compare(&next_update, &cur_time) < 0) {
+				pv_elapsedtime_copy(&next_update, &cur_time);
+				pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
+			}
+		}
+
+		if (1 == state->flags.trigger_exit)
+			break;
+
+		/* Now check the current time. */
+		pv_elapsedtime_read(&cur_time);
+
+		/*
+		 * Just go round the loop again if there's no display and
+		 * we're not reporting statistics.
+		 */
+		if (state->control.no_display && !state->control.show_stats) {
+			pv_nanosleep(50000000);
+			continue;
+		}
+
+		/*
+		 * If -W was given, we don't output anything until something
+		 * has been transferred.
+		 */
+		if (state->control.wait) {
+			/* Restart the loop if nothing written yet. */
+			if (state->transfer.transferred < 1) {
+				pv_nanosleep(50000000);
+				continue;
+			}
+
+			state->control.wait = false;
+
+			/*
+			 * Start the display at the next interval.
+			 */
+			pv_elapsedtime_copy(&next_update, &cur_time);
+			pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
+		}
+
+		/* Restart the loop if it's not time to update the display. */
+		if (pv_elapsedtime_compare(&cur_time, &next_update) < 0) {
+			pv_nanosleep(50000000);
+			continue;
+		}
+
+		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
+
+		/* Set the "next update" time to now, if it's in the past. */
+		if (pv_elapsedtime_compare(&next_update, &cur_time) < 0)
+			pv_elapsedtime_copy(&next_update, &cur_time);
+
+		/* Resize the display, if a resize signal was received. */
+		/* TODO: maybe put this in a function, it's a copy-paste from pv_main_loop */
+		if (1 == state->flags.terminal_resized) {
+			unsigned int new_width, new_height;
+
+			state->flags.terminal_resized = 0;
+
+			new_width = (unsigned int) (state->control.width);
+			new_height = state->control.height;
+			pv_screensize(&new_width, &new_height);
+
+			if (new_width > PVDISPLAY_WIDTH_MAX)
+				new_width = PVDISPLAY_WIDTH_MAX;
+			if (!state->control.width_set_manually)
+				state->control.width = (pvdisplay_width_t) new_width;
+			if (!state->control.height_set_manually)
+				state->control.height = new_height;
+		}
+
+		if (state->control.no_display) {
+			/* If there's no display, calculate rate for the statistics. */
+			pv_calculate_transfer_rate(&(state->calc), &(state->transfer), &(state->control),
+						   &(state->display), false);
+		} else {
+			/* Produce the display. */
+			pv_display(&(state->status), &(state->control), &(state->flags), &(state->transfer),
+				   &(state->calc), &(state->cursor), &(state->display), &(state->extra_display), false);
+		}
+	}
+
+	if (state->control.cursor) {
+		pv_crs_fini(&(state->cursor), &(state->control), &(state->flags));
+	} else {
+		if ((!state->control.numeric) && (!state->control.no_display)
+		    && (state->display.output_produced))
+			pv_tty_write(&(state->flags), "\n", 1);
+	}
+
+	if (1 == state->flags.trigger_exit)
+		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
+
+	/* Calculate and display the transfer statistics. */
+	/* TODO: put this in a function, it's a copy-paste from pv_main_loop */
+	if (state->control.show_stats && state->calc.measurements_taken > 0) {
+		char stats_buf[256];	 /* flawfinder: ignore */
+		long double rate_mean, rate_variance, rate_deviation;
+		int stats_size;
+
+		/* flawfinder: made safe by use of pv_snprintf() */
+
+		rate_mean = state->calc.rate_sum / ((long double) (state->calc.measurements_taken));
+		rate_variance =
+		    (state->calc.ratesquared_sum / ((long double) (state->calc.measurements_taken))) -
+		    (rate_mean * rate_mean);
+#if HAVE_SQRTL
+		rate_deviation = sqrtl(rate_variance);
+#else
+		rate_deviation = ldsqrt(rate_variance);
+#endif
+
+		debug("%s: %ld", "measurements taken", state->calc.measurements_taken);
+		debug("%s: %.3Lf", "rate_sum", state->calc.rate_sum);
+		debug("%s: %.3Lf", "ratesquared_sum", state->calc.ratesquared_sum);
+		debug("%s: %.3Lf", "rate_mean", rate_mean);
+		debug("%s: %.3Lf", "rate_variance", rate_variance);
+		debug("%s: %.3Lf", "rate_deviation", rate_deviation);
+
+		memset(stats_buf, 0, sizeof(stats_buf));
+		stats_size =
+		    pv_snprintf(stats_buf, sizeof(stats_buf), "%s = %.3Lf/%.3Lf/%.3Lf/%.3Lf %s\n",
+				_("rate min/avg/max/mdev"), state->calc.rate_min, rate_mean, state->calc.rate_max,
+				rate_deviation, state->control.bits ? _("b/s") : _("B/s"));
+
+		if (stats_size > 0 && stats_size < (int) (sizeof(stats_buf)))
+			pv_tty_write(&(state->flags), stats_buf, (size_t) stats_size);
+	} else if (state->control.show_stats && state->calc.measurements_taken < 1) {
+		char msg_buf[256];	 /* flawfinder: ignore */
+		int msg_size;
+
+		/* flawfinder: made safe by use of pv_snprintf() */
+
+		memset(msg_buf, 0, sizeof(msg_buf));
+		msg_size = pv_snprintf(msg_buf, sizeof(msg_buf), "%s\n", _("rate not measured"));
+
+		if (msg_size > 0 && msg_size < (int) (sizeof(msg_buf)))
+			pv_tty_write(&(state->flags), msg_buf, (size_t) msg_size);
+	}
+
+	return state->status.exit_status;
 }

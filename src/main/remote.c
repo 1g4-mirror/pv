@@ -489,9 +489,9 @@ bool pv_remote_check(pvstate_t state)
  * Replace the transfer state with that of the given process, including the
  * total transfer size.
  *
- * Returns nonzero on error, after reporting the error.
+ * Returns nonzero on error.  If "silent" is false, reports the error.
  */
-int pv_remote_transferstate_fetch(pvstate_t state, pid_t query)
+int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, bool silent)
 {
 	char control_filename[4096];	 /* flawfinder: ignore */
 	FILE *control_fptr;
@@ -510,7 +510,8 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query)
 	 * Check that the remote process exists.
 	 */
 	if (kill((pid_t) (query), 0) != 0) {
-		pv_error("%u: %s", query, strerror(errno));
+		if (!silent)
+			pv_error("%u: %s", query, strerror(errno));
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
@@ -524,7 +525,8 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query)
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), (pid_t) getpid(), SIGUSR1, true);
 	if (NULL == control_fptr) {
-		pv_error("%s", strerror(errno));
+		if (!silent)
+			pv_error("%s", strerror(errno));
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
@@ -532,14 +534,16 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query)
 	 * Write the message to the control file, and close it.
 	 */
 	if (1 != fwrite(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
-		pv_error("%s", strerror(errno));
+		if (!silent)
+			pv_error("%s", strerror(errno));
 		(void) fclose(control_fptr);
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
 	if (0 != fclose(control_fptr)) {
-		pv_error("%s", strerror(errno));
+		if (!silent)
+			pv_error("%s", strerror(errno));
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
@@ -552,7 +556,8 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query)
 	signal_sender = 0;
 	(void) pv_sigusr1_received(state, &signal_sender);
 	if (kill((pid_t) (query), SIGUSR1) != 0) {
-		pv_error("%u: %s", query, strerror(errno));
+		if (!silent)
+			pv_error("%u: %s", query, strerror(errno));
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
@@ -603,7 +608,8 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query)
 	 * warnings, but in this case it's unavoidable, and mitigated by the
 	 * fact we only translate each string once.
 	 */
-	pv_error("%u: %s", query, _("message not received"));
+	if (!silent)
+		pv_error("%u: %s", query, _("message not received"));
 	return PV_ERROREXIT_REMOTE_OR_PID;
 	/*@+mustfreefresh @ */
 

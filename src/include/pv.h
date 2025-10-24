@@ -293,6 +293,11 @@ extern int pv_main_loop(pvstate_t);
 extern int pv_watchfd_loop(pvstate_t);
 
 /*
+ * Watch the progress of another pv process.
+ */
+extern int pv_query_loop(pvstate_t, pid_t);
+
+/*
  * Shut down signal handlers after running the main loop.
  */
 extern void pv_sig_fini(pvstate_t);
