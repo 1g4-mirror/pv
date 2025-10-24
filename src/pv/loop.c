@@ -54,6 +54,34 @@ static long ldsqrt(long double value)
 
 
 /*
+ * If the flag is set to say that a terminal resize signal was received,
+ * clear the flag and resize the display, and return true.
+ */
+static bool pv__resize_display_on_signal(pvstate_t state)
+{
+	unsigned int new_width, new_height;
+
+	if (0 == state->flags.terminal_resized)
+		return false;
+
+	state->flags.terminal_resized = 0;
+
+	new_width = (unsigned int) (state->control.width);
+	new_height = state->control.height;
+	pv_screensize(&new_width, &new_height);
+
+	if (new_width > PVDISPLAY_WIDTH_MAX)
+		new_width = PVDISPLAY_WIDTH_MAX;
+	if (!state->control.width_set_manually)
+		state->control.width = (pvdisplay_width_t) new_width;
+	if (!state->control.height_set_manually)
+		state->control.height = new_height;
+
+	return true;
+}
+
+
+/*
  * Pipe data from a list of files to standard output, giving information
  * about the transfer on standard error according to the given options.
  *
@@ -492,22 +520,7 @@ int pv_main_loop(pvstate_t state)
 		state->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
 
 		/* Resize the display, if a resize signal was received. */
-		if (1 == state->flags.terminal_resized) {
-			unsigned int new_width, new_height;
-
-			state->flags.terminal_resized = 0;
-
-			new_width = (unsigned int) (state->control.width);
-			new_height = state->control.height;
-			pv_screensize(&new_width, &new_height);
-
-			if (new_width > PVDISPLAY_WIDTH_MAX)
-				new_width = PVDISPLAY_WIDTH_MAX;
-			if (!state->control.width_set_manually)
-				state->control.width = (pvdisplay_width_t) new_width;
-			if (!state->control.height_set_manually)
-				state->control.height = new_height;
-		}
+		(void) pv__resize_display_on_signal(state);
 
 		if (state->control.no_display) {
 			/* If there's no display, calculate rate for the statistics. */
@@ -903,24 +916,7 @@ int pv_watchfd_loop(pvstate_t state)
 		 * to trigger a name reset and display reparse for every FD
 		 * output line, to inherit the size change.
 		 */
-		terminal_resized = false;
-		if (1 == state->flags.terminal_resized) {
-			unsigned int new_width, new_height;
-
-			state->flags.terminal_resized = 0;
-
-			new_width = (unsigned int) (state->control.width);
-			new_height = state->control.height;
-			pv_screensize(&new_width, &new_height);
-
-			if (new_width > PVDISPLAY_WIDTH_MAX)
-				new_width = PVDISPLAY_WIDTH_MAX;
-
-			state->control.width = (pvdisplay_width_t) new_width;
-			state->control.height = new_height;
-
-			terminal_resized = true;
-		}
+		terminal_resized = pv__resize_display_on_signal(state);
 
 		/*
 		 * Run through each watched item.
@@ -1312,23 +1308,7 @@ int pv_query_loop(pvstate_t state, pid_t query)
 			pv_elapsedtime_copy(&next_update, &cur_time);
 
 		/* Resize the display, if a resize signal was received. */
-		/* TODO: maybe put this in a function, it's a copy-paste from pv_main_loop */
-		if (1 == state->flags.terminal_resized) {
-			unsigned int new_width, new_height;
-
-			state->flags.terminal_resized = 0;
-
-			new_width = (unsigned int) (state->control.width);
-			new_height = state->control.height;
-			pv_screensize(&new_width, &new_height);
-
-			if (new_width > PVDISPLAY_WIDTH_MAX)
-				new_width = PVDISPLAY_WIDTH_MAX;
-			if (!state->control.width_set_manually)
-				state->control.width = (pvdisplay_width_t) new_width;
-			if (!state->control.height_set_manually)
-				state->control.height = new_height;
-		}
+		(void) pv__resize_display_on_signal(state);
 
 		if (state->control.no_display) {
 			/* If there's no display, calculate rate for the statistics. */
