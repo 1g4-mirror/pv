@@ -28,7 +28,7 @@
 #include <math.h>
 #endif
 
-int pv_remote_transferstate_fetch(pvstate_t, pid_t, bool);
+int pv_remote_transferstate_fetch(pvstate_t, pid_t, /*@null@ */ off_t *, bool);
 
 
 #if HAVE_SQRTL
@@ -1250,7 +1250,7 @@ int pv_query_loop(pvstate_t state, pid_t query)
 		 * every short while.
 		 */
 		if (pv_elapsedtime_compare(&cur_time, &next_remotecheck) > 0) {
-			if (0 != pv_remote_transferstate_fetch(state, query, true))
+			if (0 != pv_remote_transferstate_fetch(state, query, NULL, true))
 				break;
 			(void) pv_remote_check(state);
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);

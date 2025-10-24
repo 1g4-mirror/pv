@@ -342,12 +342,16 @@ static bool pv__rxsignal_usr2(pvstate_t state)
 /*
  * Check for a --query message (SIGUSR1).
  *
- * If a message was received, then if it's type 0 (query), write a type 1
- * message containing the total size and current transfer state to the
- * control file and send a SIGUSR1 to the sending process.  If it's type 1
- * (response), update the transfer state - and control.size - from the
- * message in the control file.  In both cases, the receiver of the message
- * deletes the associated control file.
+ * If a type 0 message was received (query), then write a type 1 (response)
+ * message to the control file and send a SIGUSR1 to the sending process.
+ *
+ * If a type 1 message was received (response), update the state from the
+ * message in the control file.
+ *
+ * In both cases, the receiver of the message deletes its control file.
+ *
+ * The state transferred by message is transfer.elapsed_seconds,
+ * transfer.transferred, and control.size.
  *
  * Returns true if a signal was received and dealt with, false otherwise.
  *
@@ -380,10 +384,16 @@ static bool pv__rxsignal_usr1(pvstate_t state, pid_t match_sender)
 		return false;
 	}
 
+	/*
+	 * Note that we use debug() rather than pv_error() here so that the
+	 * display of a running pv doesn't get interrupted by, for example,
+	 * a querying pv being terminated.
+	 */
+
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), signal_sender, SIGUSR1, false);
 	if (NULL == control_fptr) {
-		pv_error("%s: %s", control_filename, strerror(errno));
+		debug("%s: %s", control_filename, strerror(errno));
 		return false;
 	}
 
@@ -392,25 +402,26 @@ static bool pv__rxsignal_usr1(pvstate_t state, pid_t match_sender)
 	 * and delete it.
 	 */
 	if (1 != fread(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
-		pv_error("%s", strerror(errno));
+		debug("fread: %s", strerror(errno));
 		(void) fclose(control_fptr);
 		return false;
 	}
 
 	if (0 != fclose(control_fptr)) {
-		pv_error("%s", strerror(errno));
+		debug("fclose: %s", strerror(errno));
 		return false;
 	}
 
 	debug("%s: %s", "removing", control_filename);
 	if (0 != remove(control_filename)) {
-		pv_error("%s", strerror(errno));
+		debug("remove: %s", strerror(errno));
 		return false;
 	}
 
 	if (msgbuf.response) {
 		/* Response message - update local state. */
-		debug("%s: %d", "query response received", signal_sender);
+		debug("%s: %d [%Lg, %ld, %ld]", "query response received", signal_sender, msgbuf.elapsed_seconds,
+		      msgbuf.transferred, msgbuf.size);
 		state->transfer.elapsed_seconds = msgbuf.elapsed_seconds;
 		state->transfer.transferred = msgbuf.transferred;
 		state->control.size = msgbuf.size;
@@ -429,19 +440,19 @@ static bool pv__rxsignal_usr1(pvstate_t state, pid_t match_sender)
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), (pid_t) getpid(), SIGUSR1, true);
 	if (NULL == control_fptr) {
-		pv_error("%s", strerror(errno));
+		debug("%s", strerror(errno));
 		return true;		    /* true since the signal was received. */
 	}
 
 	if (1 != fwrite(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
-		pv_error("%s", strerror(errno));
+		debug("fwrite: %s", strerror(errno));
 		(void) fclose(control_fptr);
 		(void) remove(control_filename);
 		return true;		    /* as above. */
 	}
 
 	if (0 != fclose(control_fptr)) {
-		pv_error("%s", strerror(errno));
+		debug("fclose: %s", strerror(errno));
 		(void) remove(control_filename);
 		return true;
 	}
@@ -451,7 +462,7 @@ static bool pv__rxsignal_usr1(pvstate_t state, pid_t match_sender)
 	 * query response message is ready to read.
 	 */
 	if (kill((pid_t) (signal_sender), SIGUSR1) != 0) {
-		pv_error("%u: %s", signal_sender, strerror(errno));
+		debug("%u: %s", signal_sender, strerror(errno));
 		(void) remove(control_filename);
 		return true;
 	}
@@ -487,11 +498,13 @@ bool pv_remote_check(pvstate_t state)
 
 /*
  * Replace the transfer state with that of the given process, including the
- * total transfer size.
+ * total transfer size.  If sizeptr is not NULL, the size is also copied to
+ * *sizeptr (this is so a caller can get the size without knowing the
+ * structure of pvstate_t).
  *
  * Returns nonzero on error.  If "silent" is false, reports the error.
  */
-int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, bool silent)
+int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_t * sizeptr, bool silent)
 {
 	char control_filename[4096];	 /* flawfinder: ignore */
 	FILE *control_fptr;
@@ -586,6 +599,8 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, bool silent)
 		if (pv__rxsignal_usr1(state, query)) {
 			debug("%s", "response received");
 			received = true;
+			if (NULL != sizeptr)
+				*sizeptr = state->control.size;
 		}
 	}
 
