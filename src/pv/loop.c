@@ -82,6 +82,62 @@ static bool pv__resize_display_on_signal(pvstate_t state)
 
 
 /*
+ * Calculate and display the transfer statistics at the end of the transfer,
+ * if stats are enabled and any measurements were taken.
+ */
+static void pv__show_stats(pvstate_t state)
+{
+	if (!state->control.show_stats)
+		return;
+
+	if (state->calc.measurements_taken > 0) {
+		char stats_buf[256];	 /* flawfinder: ignore */
+		long double rate_mean, rate_variance, rate_deviation;
+		int stats_size;
+
+		/* flawfinder: made safe by use of pv_snprintf() */
+
+		rate_mean = state->calc.rate_sum / ((long double) (state->calc.measurements_taken));
+		rate_variance =
+		    (state->calc.ratesquared_sum / ((long double) (state->calc.measurements_taken))) -
+		    (rate_mean * rate_mean);
+#if HAVE_SQRTL
+		rate_deviation = sqrtl(rate_variance);
+#else
+		rate_deviation = ldsqrt(rate_variance);
+#endif
+
+		debug("%s: %ld", "measurements taken", state->calc.measurements_taken);
+		debug("%s: %.3Lf", "rate_sum", state->calc.rate_sum);
+		debug("%s: %.3Lf", "ratesquared_sum", state->calc.ratesquared_sum);
+		debug("%s: %.3Lf", "rate_mean", rate_mean);
+		debug("%s: %.3Lf", "rate_variance", rate_variance);
+		debug("%s: %.3Lf", "rate_deviation", rate_deviation);
+
+		memset(stats_buf, 0, sizeof(stats_buf));
+		stats_size =
+		    pv_snprintf(stats_buf, sizeof(stats_buf), "%s = %.3Lf/%.3Lf/%.3Lf/%.3Lf %s\n",
+				_("rate min/avg/max/mdev"), state->calc.rate_min, rate_mean, state->calc.rate_max,
+				rate_deviation, state->control.bits ? _("b/s") : _("B/s"));
+
+		if (stats_size > 0 && stats_size < (int) (sizeof(stats_buf)))
+			pv_tty_write(&(state->flags), stats_buf, (size_t) stats_size);
+	} else if (state->control.show_stats && state->calc.measurements_taken < 1) {
+		char msg_buf[256];	 /* flawfinder: ignore */
+		int msg_size;
+
+		/* flawfinder: made safe by use of pv_snprintf() */
+
+		memset(msg_buf, 0, sizeof(msg_buf));
+		msg_size = pv_snprintf(msg_buf, sizeof(msg_buf), "%s\n", _("rate not measured"));
+
+		if (msg_size > 0 && msg_size < (int) (sizeof(msg_buf)))
+			pv_tty_write(&(state->flags), msg_buf, (size_t) msg_size);
+	}
+}
+
+
+/*
  * Pipe data from a list of files to standard output, giving information
  * about the transfer on standard error according to the given options.
  *
@@ -552,50 +608,7 @@ int pv_main_loop(pvstate_t state)
 		(void) close(input_fd);
 
 	/* Calculate and display the transfer statistics. */
-	if (state->control.show_stats && state->calc.measurements_taken > 0) {
-		char stats_buf[256];	 /* flawfinder: ignore */
-		long double rate_mean, rate_variance, rate_deviation;
-		int stats_size;
-
-		/* flawfinder: made safe by use of pv_snprintf() */
-
-		rate_mean = state->calc.rate_sum / ((long double) (state->calc.measurements_taken));
-		rate_variance =
-		    (state->calc.ratesquared_sum / ((long double) (state->calc.measurements_taken))) -
-		    (rate_mean * rate_mean);
-#if HAVE_SQRTL
-		rate_deviation = sqrtl(rate_variance);
-#else
-		rate_deviation = ldsqrt(rate_variance);
-#endif
-
-		debug("%s: %ld", "measurements taken", state->calc.measurements_taken);
-		debug("%s: %.3Lf", "rate_sum", state->calc.rate_sum);
-		debug("%s: %.3Lf", "ratesquared_sum", state->calc.ratesquared_sum);
-		debug("%s: %.3Lf", "rate_mean", rate_mean);
-		debug("%s: %.3Lf", "rate_variance", rate_variance);
-		debug("%s: %.3Lf", "rate_deviation", rate_deviation);
-
-		memset(stats_buf, 0, sizeof(stats_buf));
-		stats_size =
-		    pv_snprintf(stats_buf, sizeof(stats_buf), "%s = %.3Lf/%.3Lf/%.3Lf/%.3Lf %s\n",
-				_("rate min/avg/max/mdev"), state->calc.rate_min, rate_mean, state->calc.rate_max,
-				rate_deviation, state->control.bits ? _("b/s") : _("B/s"));
-
-		if (stats_size > 0 && stats_size < (int) (sizeof(stats_buf)))
-			pv_tty_write(&(state->flags), stats_buf, (size_t) stats_size);
-	} else if (state->control.show_stats && state->calc.measurements_taken < 1) {
-		char msg_buf[256];	 /* flawfinder: ignore */
-		int msg_size;
-
-		/* flawfinder: made safe by use of pv_snprintf() */
-
-		memset(msg_buf, 0, sizeof(msg_buf));
-		msg_size = pv_snprintf(msg_buf, sizeof(msg_buf), "%s\n", _("rate not measured"));
-
-		if (msg_size > 0 && msg_size < (int) (sizeof(msg_buf)))
-			pv_tty_write(&(state->flags), msg_buf, (size_t) msg_size);
-	}
+	pv__show_stats(state);
 
 	return state->status.exit_status;
 }
@@ -1333,51 +1346,7 @@ int pv_query_loop(pvstate_t state, pid_t query)
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
 
 	/* Calculate and display the transfer statistics. */
-	/* TODO: put this in a function, it's a copy-paste from pv_main_loop */
-	if (state->control.show_stats && state->calc.measurements_taken > 0) {
-		char stats_buf[256];	 /* flawfinder: ignore */
-		long double rate_mean, rate_variance, rate_deviation;
-		int stats_size;
-
-		/* flawfinder: made safe by use of pv_snprintf() */
-
-		rate_mean = state->calc.rate_sum / ((long double) (state->calc.measurements_taken));
-		rate_variance =
-		    (state->calc.ratesquared_sum / ((long double) (state->calc.measurements_taken))) -
-		    (rate_mean * rate_mean);
-#if HAVE_SQRTL
-		rate_deviation = sqrtl(rate_variance);
-#else
-		rate_deviation = ldsqrt(rate_variance);
-#endif
-
-		debug("%s: %ld", "measurements taken", state->calc.measurements_taken);
-		debug("%s: %.3Lf", "rate_sum", state->calc.rate_sum);
-		debug("%s: %.3Lf", "ratesquared_sum", state->calc.ratesquared_sum);
-		debug("%s: %.3Lf", "rate_mean", rate_mean);
-		debug("%s: %.3Lf", "rate_variance", rate_variance);
-		debug("%s: %.3Lf", "rate_deviation", rate_deviation);
-
-		memset(stats_buf, 0, sizeof(stats_buf));
-		stats_size =
-		    pv_snprintf(stats_buf, sizeof(stats_buf), "%s = %.3Lf/%.3Lf/%.3Lf/%.3Lf %s\n",
-				_("rate min/avg/max/mdev"), state->calc.rate_min, rate_mean, state->calc.rate_max,
-				rate_deviation, state->control.bits ? _("b/s") : _("B/s"));
-
-		if (stats_size > 0 && stats_size < (int) (sizeof(stats_buf)))
-			pv_tty_write(&(state->flags), stats_buf, (size_t) stats_size);
-	} else if (state->control.show_stats && state->calc.measurements_taken < 1) {
-		char msg_buf[256];	 /* flawfinder: ignore */
-		int msg_size;
-
-		/* flawfinder: made safe by use of pv_snprintf() */
-
-		memset(msg_buf, 0, sizeof(msg_buf));
-		msg_size = pv_snprintf(msg_buf, sizeof(msg_buf), "%s\n", _("rate not measured"));
-
-		if (msg_size > 0 && msg_size < (int) (sizeof(msg_buf)))
-			pv_tty_write(&(state->flags), msg_buf, (size_t) msg_size);
-	}
+	pv__show_stats(state);
 
 	return state->status.exit_status;
 }
