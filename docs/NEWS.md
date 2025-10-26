@@ -1,4 +1,6 @@
-### UNRELEASED
+### 1.9.45 - UNRELEASED
+
+ * *feature*: new **--query** option to show the transfer status of another running **pv** ([#101](https://codeberg.org/ivarch/pv/issues/101))
 
 ### 1.9.44 - 18 October 2025
 
