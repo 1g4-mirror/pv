@@ -1,12 +1,10 @@
 /*
- * Remote-control functions.
+ * Remote-control and remote-query functions.
  *
  * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2025 Andrew Wood
  *
  * License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
  */
-
-/* TODO: move this to srv/pv/ instead of src/main/ since it uses internal pv structures. */
 
 #include "config.h"
 #include "pv.h"
