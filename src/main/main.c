@@ -23,9 +23,6 @@
 #include <langinfo.h>
 #endif
 
-int pv_remote_set(opts_t, pvstate_t);
-int pv_remote_transferstate_fetch(pvstate_t, pid_t, /*@null@ */ off_t *, bool);
-
 /*
  * Write a PID file, returning nonzero on error.  Write it atomically, such
  * that the file either exists and contains the PID, or is not updated at
@@ -338,23 +335,6 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * -R specified - send the message, then exit.
-	 */
-	if (opts->remote > 0) {
-		/* Initialise signal handling. */
-		pv_sig_init(state);
-		/* Send the message. */
-		retcode = pv_remote_set(opts, state);
-		/* Close down the signal handling. */
-		pv_sig_fini(state);
-		/* Free resources. */
-		pv_state_free(state);
-		opts_free(opts);
-		/* Early exit. */
-		return retcode;
-	}
-
-	/*
 	 * Write a PID file if -P was specified.
 	 */
 	if (opts->pidfile != NULL) {
@@ -572,8 +552,12 @@ int main(int argc, char **argv)
 		/* "Watch file descriptor(s) of another process" mode. */
 		retcode = pv_watchfd_loop(state);
 		break;
+	case PV_ACTION_REMOTE_CONTROL:
+		/* Change the options of another running pv. */
+		retcode = pv_remote_set(state, opts->remote);
+		break;
 	case PV_ACTION_QUERY:
-		/* "Watch progress of another pv" mode. */
+		/* Query the progress of another running pv. */
 		retcode = pv_query_loop(state, opts->query);
 		break;
 	}

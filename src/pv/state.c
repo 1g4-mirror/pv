@@ -336,6 +336,11 @@ void pv_state_free(pvstate_t state)
 		state->control.format_string = NULL;
 	}
 
+	if (NULL != state->control.extra_display_spec) {
+		free(state->control.extra_display_spec);
+		state->control.extra_display_spec = NULL;
+	}
+
 	if (NULL != state->control.extra_format_string) {
 		free(state->control.extra_format_string);
 		state->control.extra_format_string = NULL;
@@ -383,6 +388,16 @@ void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, b
 			(void) pv_strlcat(state->control.default_format, " ", sizeof(state->control.default_format)); \
 		(void) pv_strlcat(state->control.default_format, y, sizeof(state->control.default_format)); \
 	}
+
+	state->control.format_option.progress = progress;
+	state->control.format_option.timer = timer;
+	state->control.format_option.eta = eta;
+	state->control.format_option.fineta = fineta;
+	state->control.format_option.rate = rate;
+	state->control.format_option.average_rate = average_rate;
+	state->control.format_option.bytes = bytes;
+	state->control.format_option.bufpercent = bufpercent;
+	state->control.format_option.lastwritten = lastwritten;
 
 	state->control.default_format[0] = '\0';
 
@@ -612,6 +627,11 @@ void pv_state_extra_display_set(pvstate_t state, /*@null@ */ const char *val)
 	const char *word_start;
 	size_t offset;
 
+	if (NULL != state->control.extra_display_spec) {
+		free(state->control.extra_display_spec);
+		state->control.extra_display_spec = NULL;
+	}
+
 	if (NULL != state->control.extra_format_string) {
 		free(state->control.extra_format_string);
 		state->control.extra_format_string = NULL;
@@ -620,6 +640,9 @@ void pv_state_extra_display_set(pvstate_t state, /*@null@ */ const char *val)
 	state->control.extra_displays = 0;
 	if (NULL == val)
 		return;
+
+	if (NULL != val)
+		state->control.extra_display_spec = pv_strdup(val);
 
 	word_start = val;
 	while (NULL != word_start && '\0' != word_start[0]) {

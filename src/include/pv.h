@@ -298,6 +298,19 @@ extern int pv_watchfd_loop(pvstate_t);
 extern int pv_query_loop(pvstate_t, pid_t);
 
 /*
+ * Set the options of another pv process.
+ */
+int pv_remote_set(pvstate_t, pid_t);
+
+/*
+ * Query another pv process for its elapsed transfer time, amount
+ * transferred, and total size, and update the local state with those
+ * values.  Optionally also return the total size separately.  Reports
+ * errors unless "silent" is true.
+ */
+int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_t *sizeptr, bool silent);
+
+/*
  * Shut down signal handlers after running the main loop.
  */
 extern void pv_sig_fini(pvstate_t);

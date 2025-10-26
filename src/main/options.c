@@ -996,6 +996,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'R':
 			opts->remote = (pid_t) pv_getnum_count(optarg, false);
+			opts->action = PV_ACTION_REMOTE_CONTROL;
 			break;
 		case 'Q':
 			opts->query = (pid_t) pv_getnum_count(optarg, false);

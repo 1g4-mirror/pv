@@ -179,7 +179,8 @@ struct pvstate_s {
 		double delay_start;              /* delay before first display */
 		/*@only@*/ /*@null@*/ char *name;		 /* display name */
 		/*@only@*/ /*@null@*/ char *format_string;	 /* output format string */
-		/*@only@*/ /*@null@*/ char *extra_format_string; /* extra format string */
+		/*@only@*/ /*@null@*/ char *extra_display_spec;  /* full spec for extra displays */
+		/*@only@*/ /*@null@*/ char *extra_format_string; /* extra format string alone */
 		/*@null@*/ char *output_name;    /* name of the output, for diagnostics */
 		/*@null@*/ char *default_bar_style; /* which bar style to use by default */
 		off_t error_skip_block;          /* skip block size, 0 for adaptive */
@@ -193,6 +194,17 @@ struct pvstate_s {
 		pvdisplay_width_t width;         /* screen width */
 		unsigned int height;             /* screen height */
 		unsigned int extra_displays;	 /* bitmask of extra display destinations */
+		struct {			 /* old-style format options (used by -R) */
+			size_t lastwritten;	  /* --last-written (amount) */
+			bool progress;		  /* --progress */
+			bool timer;		  /* --timer */
+			bool eta;		  /* --eta */
+			bool fineta;		  /* --fineta */
+			bool rate;		  /* --rate */
+			bool average_rate;	  /* --average-rate */
+			bool bytes;		  /* --bytes */
+			bool bufpercent;	  /* --buffer-percent */
+		} format_option;
 		bool force;                      /* display even if not on terminal */
 		bool cursor;                     /* use cursor positioning */
 		bool numeric;                    /* numeric output only */

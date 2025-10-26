@@ -9,7 +9,6 @@
 /* TODO: move this to srv/pv/ instead of src/main/ since it uses internal pv structures. */
 
 #include "config.h"
-#include "options.h"
 #include "pv.h"
 #include "pv-internal.h"
 
@@ -23,8 +22,6 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-
-void pv_error(char *, ...);
 
 #ifdef PV_REMOTE_CONTROL
 
@@ -74,7 +71,7 @@ struct query_msg {
  *
  * Returns nonzero on error.
  */
-int pv_remote_set(opts_t opts, pvstate_t state)
+int pv_remote_set(pvstate_t state, pid_t remote)
 {
 	char control_filename[4096];	 /* flawfinder: ignore */
 	FILE *control_fptr;
@@ -92,58 +89,58 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	/*
 	 * Check that the remote process exists.
 	 */
-	if (kill((pid_t) (opts->remote), 0) != 0) {
-		pv_error("%u: %s", opts->remote, strerror(errno));
+	if (kill((pid_t) (remote), 0) != 0) {
+		pv_error("%u: %s", remote, strerror(errno));
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
-
-	/*
-	 * Make sure parameters are within sensible bounds.
-	 */
-	if (opts->width < 1)
-		opts->width = 80;
-	if (opts->height < 1)
-		opts->height = 25;
-	if (opts->width > 999999)
-		opts->width = 999999;
-	if (opts->height > 999999)
-		opts->height = 999999;
-	if ((opts->interval > 0) && (opts->interval < 0.1))
-		opts->interval = 0.1;
-	if (opts->interval > 600)
-		opts->interval = 600;
 
 	/*
 	 * Copy parameters into message buffer.
 	 */
 	memset(&msgbuf, 0, sizeof(msgbuf));
-	msgbuf.progress = opts->progress;
-	msgbuf.timer = opts->timer;
-	msgbuf.eta = opts->eta;
-	msgbuf.fineta = opts->fineta;
-	msgbuf.rate = opts->rate;
-	msgbuf.average_rate = opts->average_rate;
-	msgbuf.bytes = opts->bytes;
-	msgbuf.bufpercent = opts->bufpercent;
-	msgbuf.lastwritten = opts->lastwritten;
-	msgbuf.rate_limit = opts->rate_limit;
-	msgbuf.buffer_size = opts->buffer_size;
-	msgbuf.size = opts->size;
-	msgbuf.interval = opts->interval;
-	msgbuf.width = opts->width;
-	msgbuf.height = opts->height;
-	msgbuf.width_set_manually = opts->width_set_manually;
-	msgbuf.height_set_manually = opts->height_set_manually;
+	msgbuf.progress = state->control.format_option.progress;
+	msgbuf.timer = state->control.format_option.timer;
+	msgbuf.eta = state->control.format_option.eta;
+	msgbuf.fineta = state->control.format_option.fineta;
+	msgbuf.rate = state->control.format_option.rate;
+	msgbuf.average_rate = state->control.format_option.average_rate;
+	msgbuf.bytes = state->control.format_option.bytes;
+	msgbuf.bufpercent = state->control.format_option.bufpercent;
+	msgbuf.lastwritten = state->control.format_option.lastwritten;
+	msgbuf.rate_limit = state->control.rate_limit;
+	msgbuf.buffer_size = state->control.target_buffer_size;
+	msgbuf.size = state->control.size;
+	msgbuf.interval = state->control.interval;
+	msgbuf.width = (unsigned int) (state->control.width);
+	msgbuf.height = (unsigned int) (state->control.height);
+	msgbuf.width_set_manually = state->control.width_set_manually;
+	msgbuf.height_set_manually = state->control.height_set_manually;
 
-	if (opts->name != NULL) {
-		strncpy(msgbuf.name, opts->name, sizeof(msgbuf.name) - 1);	/* flawfinder: ignore */
+	if (state->control.name != NULL) {
+		strncpy(msgbuf.name, state->control.name, sizeof(msgbuf.name) - 1);	/* flawfinder: ignore */
 	}
-	if (opts->format != NULL) {
-		strncpy(msgbuf.format, opts->format, sizeof(msgbuf.format) - 1);	/* flawfinder: ignore */
+	if (state->control.format_string != NULL) {
+		strncpy(msgbuf.format, state->control.format_string, sizeof(msgbuf.format) - 1);	/* flawfinder: ignore */
 	}
-	if (opts->extra_display != NULL) {
-		strncpy(msgbuf.extra_display, opts->extra_display, sizeof(msgbuf.extra_display) - 1);	/* flawfinder: ignore */
+	if (state->control.extra_display_spec != NULL) {
+		strncpy(msgbuf.extra_display, state->control.extra_display_spec, sizeof(msgbuf.extra_display) - 1);	/* flawfinder: ignore */
 	}
+
+	/*
+	 * Make sure parameters are within sensible bounds.
+	 */
+	if (msgbuf.width < 1)
+		msgbuf.width = 80;
+	if (msgbuf.height < 1)
+		msgbuf.height = 25;
+	if (msgbuf.width > 999999)
+		msgbuf.width = 999999;
+	if (msgbuf.height > 999999)
+		msgbuf.height = 999999;
+	if ((msgbuf.interval > 0) && (msgbuf.interval < 0.1))
+		msgbuf.interval = 0.1;
+	if (msgbuf.interval > 600)
+		msgbuf.interval = 600;
 
 	/*
 	 * flawfinder rationale: name, format, and extra_display are
@@ -184,8 +181,8 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	 */
 	signal_sender = 0;
 	(void) pv_sigusr2_received(state, &signal_sender);
-	if (kill((pid_t) (opts->remote), SIGUSR2) != 0) {
-		pv_error("%u: %s", opts->remote, strerror(errno));
+	if (kill((pid_t) (remote), SIGUSR2) != 0) {
+		pv_error("%u: %s", remote, strerror(errno));
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
@@ -212,7 +209,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 		timeout -= 10000;
 
 		if (pv_sigusr2_received(state, &signal_sender)) {
-			if (signal_sender == opts->remote) {
+			if (signal_sender == remote) {
 				debug("%s", "message received");
 				received = true;
 			}
@@ -239,7 +236,7 @@ int pv_remote_set(opts_t opts, pvstate_t state)
 	 * warnings, but in this case it's unavoidable, and mitigated by the
 	 * fact we only translate each string once.
 	 */
-	pv_error("%u: %s", opts->remote, _("message not received"));
+	pv_error("%u: %s", remote, _("message not received"));
 	return PV_ERROREXIT_REMOTE_OR_PID;
 	/*@+mustfreefresh @ */
 }
@@ -643,7 +640,7 @@ void pv_remote_check( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 
 
 int pv_remote_set(			 /*@unused@ */
-			 __attribute__((unused)) opts_t opts, /*@unused@ */  __attribute__((unused)) pvstate_t state)
+			 __attribute__((unused)) pvstate_t state, /*@unused@ */  __attribute__((unused)) pid_t remote)
 {
 	/*@-mustfreefresh@ *//* splint - see above */
 	pv_error("%s", _("SA_SIGINFO not supported on this system"));
