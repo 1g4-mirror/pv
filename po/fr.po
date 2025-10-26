@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-10-18 19:34+0100\n"
+"POT-Creation-Date: 2025-10-26 13:15+0000\n"
 "PO-Revision-Date: 2025-05-31 08:58+0000\n"
 "Last-Translator: milimarg <milimarg@noreply.codeberg.org>\n"
 "Language-Team: French <https://translate.codeberg.org/projects/pv/pv/fr/>\n"
@@ -186,8 +186,8 @@ msgstr ""
 msgid "use cursor positioning escape sequences"
 msgstr "utiliser les séquences d'échappements de positionnement de curseur"
 
-#: src/main/help.c:327 src/main/help.c:360 src/main/help.c:372
-#: src/main/help.c:382
+#: src/main/help.c:327 src/main/help.c:360 src/main/help.c:376
+#: src/main/help.c:386
 msgid "FILE"
 msgstr "FICHIER"
 
@@ -247,64 +247,68 @@ msgstr "rejeter l'entrée au lieu de l'écrire vers la sortie"
 msgid "write all input to FILE before writing to output"
 msgstr "écrire toute l'entrée vers FICHIER avant de l'écrire vers la sortie"
 
-#: src/main/help.c:363
+#: src/main/help.c:364
 msgid "PID[:FD]|=NAME|@LISTFILE"
 msgstr ""
 
-#: src/main/help.c:364
+#: src/main/help.c:365
 msgid "watch file FD opened by process PID"
 msgstr "surveiller le fichier FD ouvert par le processus PID"
 
-#: src/main/help.c:367
+#: src/main/help.c:368 src/main/help.c:371
 msgid "PID"
 msgstr "PID"
 
-#: src/main/help.c:368
+#: src/main/help.c:369
 msgid "update settings of process PID"
 msgstr "mettre à jour la configuration du processus PID"
 
-#: src/main/help.c:373
+#: src/main/help.c:372
+msgid "show progress of process PID"
+msgstr ""
+
+#: src/main/help.c:377
 msgid "save process ID in FILE"
 msgstr "enregistrer l'ID de processus dans FICHIER"
 
-#: src/main/help.c:376
+#: src/main/help.c:380
 msgid "show this help and exit"
 msgstr "afficher cette aide puis quitter"
 
-#: src/main/help.c:379
+#: src/main/help.c:383
 msgid "show version information and exit"
 msgstr "afficher la version puis quitter"
 
-#: src/main/help.c:383
+#: src/main/help.c:387
 msgid "write debug logs to FILE"
 msgstr "écrire les journaux de déboggage vers FICHIER"
 
-#: src/main/help.c:409
+#: src/main/help.c:413
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Utilisation : %s [OPTIONS] [FICHIER]..."
 
-#: src/main/help.c:420
+#: src/main/help.c:424
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Concaténer FICHIER(s), ou l'entrée standard, sur la sortie standard avec "
 "monitorage."
 
-#: src/main/help.c:558
+#: src/main/help.c:562
 msgid "Supported format sequences:"
 msgstr "Séquences de formatage supportées :"
 
-#: src/main/help.c:572
+#: src/main/help.c:576
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "SVP rapporter tous bogues à %s"
 
-#: src/main/main.c:232
+#: src/main/main.c:228
 msgid "(input)"
 msgstr "(entrée)"
 
-#: src/main/main.c:334
+#: src/main/main.c:330
 msgid "state allocation failed"
 msgstr "échec de l'allocation de mémoire de condition"
 
@@ -312,11 +316,11 @@ msgstr "échec de l'allocation de mémoire de condition"
 msgid "list files may not contain @ lines"
 msgstr ""
 
-#: src/main/options.c:391 src/main/options.c:393 src/main/options.c:804
+#: src/main/options.c:391 src/main/options.c:393 src/main/options.c:807
 msgid "process ID or pid:fd pair expected"
 msgstr "ID de processus ou paire pid:fd attendue"
 
-#: src/main/options.c:403 src/main/options.c:405 src/main/options.c:811
+#: src/main/options.c:403 src/main/options.c:405 src/main/options.c:814
 msgid "invalid process ID"
 msgstr "ID de processus non valide"
 
@@ -344,45 +348,45 @@ msgstr "échec de l'ouverture du périphérique de bloc"
 msgid "failed to determine size of block device"
 msgstr "échec de l'évaluation de la taille du périphérique de bloc"
 
-#: src/main/options.c:651
+#: src/main/options.c:652
 msgid "option structure allocation failed"
 msgstr "l'allocation pour la structure d'une option a échoué"
 
-#: src/main/options.c:670
+#: src/main/options.c:671
 msgid "option structure argv allocation failed"
 msgstr "l'allocation pour la structure de l'option argv a échoué"
 
-#: src/main/options.c:722
+#: src/main/options.c:723
 msgid "numeric value not understood"
 msgstr "valeur numérique non comprise"
 
-#: src/main/options.c:740
+#: src/main/options.c:743
 msgid "integer argument expected"
 msgstr "Valeur entière attendue"
 
-#: src/main/options.c:752
+#: src/main/options.c:755
 msgid "numeric argument expected"
 msgstr "Valeur numérique attendue"
 
-#: src/main/options.c:764
+#: src/main/options.c:767
 msgid "missing filename"
 msgstr ""
 
-#: src/main/options.c:792
+#: src/main/options.c:795
 msgid "missing process name"
 msgstr ""
 
-#: src/main/options.c:1048
+#: src/main/options.c:1056
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Essayez `%s --help' pour plus d'informations."
 
-#: src/main/options.c:1050
+#: src/main/options.c:1058
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Essayez `%s -h' pour plus d'informations."
 
-#: src/main/options.c:1081
+#: src/main/options.c:1089
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -390,35 +394,39 @@ msgstr ""
 "impossible d'utiliser le mode ligne ou les options de modificateur de "
 "transfert lors de la visualisation des descripteurs de fichiers"
 
-#: src/main/options.c:1090
+#: src/main/options.c:1098
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "impossible d'utiliser le positionnement du curseur lors de la visualisation "
 "des descripteurs de fichier"
 
-#: src/main/options.c:1099
+#: src/main/options.c:1107
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "impossible d'utiliser la télécommande lors de la visualisation des "
 "descripteurs de fichiers"
 
-#: src/main/options.c:1108
+#: src/main/options.c:1116
+msgid "cannot use remote query when watching file descriptors"
+msgstr ""
+
+#: src/main/options.c:1125
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "impossible de transférer des fichiers lorsque vous regardez des descripteurs "
 "de fichiers"
 
-#: src/main/options.c:1133
+#: src/main/options.c:1150
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "non disponible sur les systèmes sans /proc/self/fdinfo"
 
-#: src/main/remote.c:309
-msgid "message not received"
-msgstr "message non reçu"
+#: src/main/options.c:1162
+msgid "cannot use remote control and remote query together"
+msgstr ""
 
-#: src/main/remote.c:444
-msgid "SA_SIGINFO not supported on this system"
-msgstr "SA_SIGINFO non pris en charge sur ce système"
+#: src/main/options.c:1189
+msgid "files cannot be specified with this option"
+msgstr ""
 
 #: src/main/version.c:28
 msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
@@ -462,7 +470,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1053 src/pv/loop.c:754 src/pv/transfer.c:1135
+#: src/pv/display.c:1053 src/pv/loop.c:800 src/pv/transfer.c:1135
 msgid "buffer allocation failed"
 msgstr "échec de l'allocation de mémoire tampon"
 
@@ -495,7 +503,7 @@ msgid "(stdin)"
 msgstr "(stdin)"
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
-#: src/pv/format/rate.c:36 src/pv/loop.c:565
+#: src/pv/format/rate.c:36 src/pv/loop.c:121
 msgid "b/s"
 msgstr "b/s"
 
@@ -505,7 +513,7 @@ msgid "/s"
 msgstr "/s"
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
-#: src/pv/format/rate.c:40 src/pv/loop.c:565
+#: src/pv/format/rate.c:40 src/pv/loop.c:121
 msgid "B/s"
 msgstr "O/s"
 
@@ -525,15 +533,15 @@ msgstr "ETA"
 msgid "FIN"
 msgstr "FIN"
 
-#: src/pv/loop.c:564
+#: src/pv/loop.c:120
 msgid "rate min/avg/max/mdev"
 msgstr "taux min/moy/max/écart-type"
 
-#: src/pv/loop.c:576
+#: src/pv/loop.c:132
 msgid "rate not measured"
 msgstr "taux non mesuré"
 
-#: src/pv/loop.c:775 src/pv/loop.c:791 src/pv/loop.c:809 src/pv/watchpid.c:99
+#: src/pv/loop.c:821 src/pv/loop.c:837 src/pv/loop.c:855 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
 #: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
 #: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
@@ -541,25 +549,33 @@ msgstr "taux non mesuré"
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:809 src/pv/watchpid.c:108 src/pv/watchpid.c:120
+#: src/pv/loop.c:855 src/pv/watchpid.c:108 src/pv/watchpid.c:120
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:183 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:203
 msgid "fd"
 msgstr "fd"
 
+#: src/pv/remote.c:237 src/pv/remote.c:622
+msgid "message not received"
+msgstr "message non reçu"
+
+#: src/pv/remote.c:644 src/pv/remote.c:655
+msgid "SA_SIGINFO not supported on this system"
+msgstr "SA_SIGINFO non pris en charge sur ce système"
+
 #: src/pv/state.c:42
 msgid "history structure allocation failed"
 msgstr "l'allocation de la structure de l'historique a échoué"
 
-#: src/pv/state.c:741 src/pv/state.c:753
+#: src/pv/state.c:764 src/pv/state.c:776
 msgid "file list allocation failed"
 msgstr "échec de l'allocation de la liste de fichiers"
 
-#: src/pv/state.c:787
+#: src/pv/state.c:810
 msgid "process list allocation failed"
 msgstr ""
 
-#: src/pv/state.c:795
+#: src/pv/state.c:818
 msgid "file descriptor list allocation failed"
 msgstr ""
 

@@ -1,9 +1,8 @@
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-10-18 19:34+0100\n"
+"POT-Creation-Date: 2025-10-26 13:15+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -168,8 +167,8 @@ msgstr ""
 msgid "use cursor positioning escape sequences"
 msgstr ""
 
-#: src/main/help.c:327 src/main/help.c:360 src/main/help.c:372
-#: src/main/help.c:382
+#: src/main/help.c:327 src/main/help.c:360 src/main/help.c:376
+#: src/main/help.c:386
 msgid "FILE"
 msgstr ""
 
@@ -229,62 +228,66 @@ msgstr ""
 msgid "write all input to FILE before writing to output"
 msgstr ""
 
-#: src/main/help.c:363
+#: src/main/help.c:364
 msgid "PID[:FD]|=NAME|@LISTFILE"
 msgstr ""
 
-#: src/main/help.c:364
+#: src/main/help.c:365
 msgid "watch file FD opened by process PID"
 msgstr ""
 
-#: src/main/help.c:367
+#: src/main/help.c:368 src/main/help.c:371
 msgid "PID"
 msgstr ""
 
-#: src/main/help.c:368
+#: src/main/help.c:369
 msgid "update settings of process PID"
 msgstr ""
 
-#: src/main/help.c:373
+#: src/main/help.c:372
+msgid "show progress of process PID"
+msgstr ""
+
+#: src/main/help.c:377
 msgid "save process ID in FILE"
 msgstr ""
 
-#: src/main/help.c:376
+#: src/main/help.c:380
 msgid "show this help and exit"
 msgstr ""
 
-#: src/main/help.c:379
+#: src/main/help.c:383
 msgid "show version information and exit"
 msgstr ""
 
-#: src/main/help.c:383
+#: src/main/help.c:387
 msgid "write debug logs to FILE"
 msgstr ""
 
-#: src/main/help.c:409
+#: src/main/help.c:413
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr ""
 
-#: src/main/help.c:420
+#: src/main/help.c:424
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 
-#: src/main/help.c:558
+#: src/main/help.c:562
 msgid "Supported format sequences:"
 msgstr ""
 
-#: src/main/help.c:572
+#: src/main/help.c:576
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr ""
 
-#: src/main/main.c:232
+#: src/main/main.c:228
 msgid "(input)"
 msgstr ""
 
-#: src/main/main.c:334
+#: src/main/main.c:330
 msgid "state allocation failed"
 msgstr ""
 
@@ -292,11 +295,11 @@ msgstr ""
 msgid "list files may not contain @ lines"
 msgstr ""
 
-#: src/main/options.c:391 src/main/options.c:393 src/main/options.c:804
+#: src/main/options.c:391 src/main/options.c:393 src/main/options.c:807
 msgid "process ID or pid:fd pair expected"
 msgstr ""
 
-#: src/main/options.c:403 src/main/options.c:405 src/main/options.c:811
+#: src/main/options.c:403 src/main/options.c:405 src/main/options.c:814
 msgid "invalid process ID"
 msgstr ""
 
@@ -324,72 +327,76 @@ msgstr ""
 msgid "failed to determine size of block device"
 msgstr ""
 
-#: src/main/options.c:651
+#: src/main/options.c:652
 msgid "option structure allocation failed"
 msgstr ""
 
-#: src/main/options.c:670
+#: src/main/options.c:671
 msgid "option structure argv allocation failed"
 msgstr ""
 
-#: src/main/options.c:722
+#: src/main/options.c:723
 msgid "numeric value not understood"
 msgstr ""
 
-#: src/main/options.c:740
+#: src/main/options.c:743
 msgid "integer argument expected"
 msgstr ""
 
-#: src/main/options.c:752
+#: src/main/options.c:755
 msgid "numeric argument expected"
 msgstr ""
 
-#: src/main/options.c:764
+#: src/main/options.c:767
 msgid "missing filename"
 msgstr ""
 
-#: src/main/options.c:792
+#: src/main/options.c:795
 msgid "missing process name"
 msgstr ""
 
-#: src/main/options.c:1048
+#: src/main/options.c:1056
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr ""
 
-#: src/main/options.c:1050
+#: src/main/options.c:1058
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr ""
 
-#: src/main/options.c:1081
+#: src/main/options.c:1089
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
 msgstr ""
 
-#: src/main/options.c:1090
+#: src/main/options.c:1098
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1099
+#: src/main/options.c:1107
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1108
+#: src/main/options.c:1116
+msgid "cannot use remote query when watching file descriptors"
+msgstr ""
+
+#: src/main/options.c:1125
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1133
+#: src/main/options.c:1150
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr ""
 
-#: src/main/remote.c:309
-msgid "message not received"
+#: src/main/options.c:1162
+msgid "cannot use remote control and remote query together"
 msgstr ""
 
-#: src/main/remote.c:444
-msgid "SA_SIGINFO not supported on this system"
+#: src/main/options.c:1189
+msgid "files cannot be specified with this option"
 msgstr ""
 
 #: src/main/version.c:28
@@ -432,7 +439,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:1053 src/pv/loop.c:754 src/pv/transfer.c:1135
+#: src/pv/display.c:1053 src/pv/loop.c:800 src/pv/transfer.c:1135
 msgid "buffer allocation failed"
 msgstr ""
 
@@ -465,7 +472,7 @@ msgid "(stdin)"
 msgstr ""
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
-#: src/pv/format/rate.c:36 src/pv/loop.c:565
+#: src/pv/format/rate.c:36 src/pv/loop.c:121
 msgid "b/s"
 msgstr ""
 
@@ -475,7 +482,7 @@ msgid "/s"
 msgstr ""
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
-#: src/pv/format/rate.c:40 src/pv/loop.c:565
+#: src/pv/format/rate.c:40 src/pv/loop.c:121
 msgid "B/s"
 msgstr ""
 
@@ -495,15 +502,15 @@ msgstr ""
 msgid "FIN"
 msgstr ""
 
-#: src/pv/loop.c:564
+#: src/pv/loop.c:120
 msgid "rate min/avg/max/mdev"
 msgstr ""
 
-#: src/pv/loop.c:576
+#: src/pv/loop.c:132
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:775 src/pv/loop.c:791 src/pv/loop.c:809 src/pv/watchpid.c:99
+#: src/pv/loop.c:821 src/pv/loop.c:837 src/pv/loop.c:855 src/pv/watchpid.c:99
 #: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
 #: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
 #: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
@@ -511,25 +518,33 @@ msgstr ""
 msgid "pid"
 msgstr ""
 
-#: src/pv/loop.c:809 src/pv/watchpid.c:108 src/pv/watchpid.c:120
+#: src/pv/loop.c:855 src/pv/watchpid.c:108 src/pv/watchpid.c:120
 #: src/pv/watchpid.c:129 src/pv/watchpid.c:183 src/pv/watchpid.c:192
 #: src/pv/watchpid.c:203
 msgid "fd"
+msgstr ""
+
+#: src/pv/remote.c:237 src/pv/remote.c:622
+msgid "message not received"
+msgstr ""
+
+#: src/pv/remote.c:644 src/pv/remote.c:655
+msgid "SA_SIGINFO not supported on this system"
 msgstr ""
 
 #: src/pv/state.c:42
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:741 src/pv/state.c:753
+#: src/pv/state.c:764 src/pv/state.c:776
 msgid "file list allocation failed"
 msgstr ""
 
-#: src/pv/state.c:787
+#: src/pv/state.c:810
 msgid "process list allocation failed"
 msgstr ""
 
-#: src/pv/state.c:795
+#: src/pv/state.c:818
 msgid "file descriptor list allocation failed"
 msgstr ""
 
