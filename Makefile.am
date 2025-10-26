@@ -15,7 +15,6 @@ src/main/debug.c \
 src/main/help.c \
 src/main/main.c \
 src/main/options.c \
-src/main/remote.c \
 src/main/version.c \
 src/pv/calc.c \
 src/pv/cursor.c \
@@ -38,6 +37,7 @@ src/pv/format/timer.c \
 src/pv/loop.c \
 src/pv/number.c \
 src/pv/proctitle.c \
+src/pv/remote.c \
 src/pv/signal.c \
 src/pv/state.c \
 src/pv/string.c \
