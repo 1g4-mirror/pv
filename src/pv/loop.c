@@ -527,16 +527,6 @@ int pv_main_loop(pvstate_t state)
 		}
 
 		/*
-		 * Just go round the loop again if there's no display and
-		 * we're not reporting statistics.
-		 *
-		 * TODO: still calculate elapsed time, otherwise -Q can't
-		 * read it (#101).
-		 */
-		if (state->control.no_display && !state->control.show_stats)
-			continue;
-
-		/*
 		 * If -W was given, we don't output anything until we have
 		 * written a byte (or line, in line mode), at which point
 		 * we then count time as if we started when the first byte
@@ -577,6 +567,18 @@ int pv_main_loop(pvstate_t state)
 			pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
 		}
 
+		/* Calculate the elapsed transfer time. */
+		state->transfer.elapsed_seconds =
+		    pv__elapsed_transfer_time(&start_time, &cur_time, &(state->signal.toffset));
+
+		/*
+		 * Just go round the loop again if there's no display and
+		 * we're not reporting statistics.
+		 */
+		if (state->control.no_display && !state->control.show_stats) {
+			continue;
+		}
+
 		/* Restart the loop if it's not time to update the display. */
 		if (pv_elapsedtime_compare(&cur_time, &next_update) < 0) {
 			continue;
@@ -587,10 +589,6 @@ int pv_main_loop(pvstate_t state)
 		/* Set the "next update" time to now, if it's in the past. */
 		if (pv_elapsedtime_compare(&next_update, &cur_time) < 0)
 			pv_elapsedtime_copy(&next_update, &cur_time);
-
-		/* Calculate the elapsed transfer time. */
-		state->transfer.elapsed_seconds =
-		    pv__elapsed_transfer_time(&start_time, &cur_time, &(state->signal.toffset));
 
 		/* Resize the display, if a resize signal was received. */
 		(void) pv__resize_display_on_signal(state);
