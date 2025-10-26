@@ -138,6 +138,35 @@ static void pv__show_stats(pvstate_t state)
 
 
 /*
+ * Return the elapsed transfer time, given the time the transfer loop
+ * started, the current time, and the total time spent stopped.
+ */
+static long double pv__elapsed_transfer_time(const struct timespec *loop_start_time,
+					     const struct timespec *current_time,
+					     const struct timespec *time_spent_stopped)
+{
+	struct timespec effective_start_time, transfer_elapsed;
+
+	memset(&effective_start_time, 0, sizeof(effective_start_time));
+	memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
+
+	/*
+	 * Calculate the effective start time: the time we actually started,
+	 * plus the total time we spent stopped.
+	 */
+	pv_elapsedtime_add(&effective_start_time, loop_start_time, time_spent_stopped);
+
+	/*
+	 * Now get the effective elapsed transfer time - current time minus
+	 * effective start time.
+	 */
+	pv_elapsedtime_subtract(&transfer_elapsed, current_time, &effective_start_time);
+
+	return pv_elapsedtime_seconds(&transfer_elapsed);
+}
+
+
+/*
  * Pipe data from a list of files to standard output, giving information
  * about the transfer on standard error according to the given options.
  *
@@ -151,7 +180,7 @@ int pv_main_loop(pvstate_t state)
 	long double target;
 	bool eof_in, eof_out, final_update;
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
-	struct timespec init_time, next_remotecheck, transfer_elapsed;
+	struct timespec next_remotecheck;
 	int input_fd, output_fd;
 	unsigned int file_idx;
 	bool output_is_pipe;
@@ -559,21 +588,9 @@ int pv_main_loop(pvstate_t state)
 		if (pv_elapsedtime_compare(&next_update, &cur_time) < 0)
 			pv_elapsedtime_copy(&next_update, &cur_time);
 
-		/*
-		 * Calculate the effective start time: the time we actually
-		 * started, plus the total time we spent stopped.
-		 */
-		memset(&init_time, 0, sizeof(init_time));
-		pv_elapsedtime_add(&init_time, &start_time, &(state->signal.toffset));
-
-		/*
-		 * Now get the effective elapsed transfer time - current
-		 * time minus effective start time.
-		 */
-		memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
-		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
-
-		state->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+		/* Calculate the elapsed transfer time. */
+		state->transfer.elapsed_seconds =
+		    pv__elapsed_transfer_time(&start_time, &cur_time, &(state->signal.toffset));
 
 		/* Resize the display, if a resize signal was received. */
 		(void) pv__resize_display_on_signal(state);
@@ -1063,35 +1080,15 @@ int pv_watchfd_loop(pvstate_t state)
 					 * If the fd is still open and we
 					 * got its current position, update
 					 * its position and timers.
-					 *
-					 * TODO: consolidate duplicate code,
-					 * this is similar to
-					 * pv_main_loop().
 					 */
-					struct timespec init_time, transfer_elapsed;
-
 					info_item->position = position_now;
-
-					memset(&init_time, 0, sizeof(init_time));
-					memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
-
 					/*
-					 * Calculate the effective start
-					 * time: the time we actually
-					 * started, plus the total time we
-					 * spent stopped.
+					 * TODO: per-fd toffset counters
+					 * (#169).
 					 */
-					pv_elapsedtime_add(&init_time, &(info_item->start_time),
-							   &(state->signal.toffset));
-
-					/*
-					 * Now get the effective elapsed
-					 * transfer time - current time
-					 * minus effective start time.
-					 */
-					pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &init_time);
-
-					info_item->transfer.elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+					info_item->transfer.elapsed_seconds =
+					    pv__elapsed_transfer_time(&(info_item->start_time), &cur_time,
+								      &(state->signal.toffset));
 				}
 
 				/*
