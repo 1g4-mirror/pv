@@ -1063,6 +1063,10 @@ int pv_watchfd_loop(pvstate_t state)
 					 * If the fd is still open and we
 					 * got its current position, update
 					 * its position and timers.
+					 *
+					 * TODO: consolidate duplicate code,
+					 * this is similar to
+					 * pv_main_loop().
 					 */
 					struct timespec init_time, transfer_elapsed;
 
