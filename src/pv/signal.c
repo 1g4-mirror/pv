@@ -121,7 +121,7 @@ static void pv_sig_tstp( /*@unused@ */  __attribute__((unused))
 {
 	if (NULL == pv_sig_state)
 		return;
-	pv_elapsedtime_read(&(pv_sig_state->signal.tstp_time));
+	pv_elapsedtime_read(&(pv_sig_state->signal.when_tstp_arrived));
 	if (0 != raise(SIGSTOP)) {
 		debug("%s: %s", "raise", strerror(errno));
 	}
@@ -160,7 +160,7 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 	 * We can only make the time adjustments if this SIGCONT followed a
 	 * SIGTSTP such that we have a stop time.
 	 */
-	if (0 != pv_sig_state->signal.tstp_time.tv_sec) {
+	if (0 != pv_sig_state->signal.when_tstp_arrived.tv_sec) {
 
 		memset(&current_time, 0, sizeof(current_time));
 		memset(&time_spent_stopped, 0, sizeof(time_spent_stopped));
@@ -168,14 +168,14 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 		pv_elapsedtime_read(&current_time);
 
 		/* time spent stopped = current time - time SIGTSTP received */
-		pv_elapsedtime_subtract(&time_spent_stopped, &current_time, &(pv_sig_state->signal.tstp_time));
+		pv_elapsedtime_subtract(&time_spent_stopped, &current_time, &(pv_sig_state->signal.when_tstp_arrived));
 
 		/* add time spent stopped the total stopped-time count */
-		pv_elapsedtime_add(&(pv_sig_state->signal.toffset), &(pv_sig_state->signal.toffset),
-				   &time_spent_stopped);
+		pv_elapsedtime_add(&(pv_sig_state->signal.total_stoppage_time),
+				   &(pv_sig_state->signal.total_stoppage_time), &time_spent_stopped);
 
 		/* reset the SIGTSTP receipt time */
-		pv_elapsedtime_zero(&(pv_sig_state->signal.tstp_time));
+		pv_elapsedtime_zero(&(pv_sig_state->signal.when_tstp_arrived));
 	}
 
 	/*
@@ -332,8 +332,8 @@ void pv_sig_init(pvstate_t state)
 	pv_sig_state = state;
 
 	pv_sig_state->flags.suspend_stderr = 0;
-	pv_elapsedtime_zero(&(pv_sig_state->signal.tstp_time));
-	pv_elapsedtime_zero(&(pv_sig_state->signal.toffset));
+	pv_elapsedtime_zero(&(pv_sig_state->signal.when_tstp_arrived));
+	pv_elapsedtime_zero(&(pv_sig_state->signal.total_stoppage_time));
 
 	/*
 	 * Note that we cast all sigemptyset() and sigaction() return values

@@ -245,8 +245,8 @@ struct pvstate_s {
 		struct sigaction old_sigusr1;
 #endif
 		struct sigaction old_sigalrm;
-		struct timespec tstp_time;	 /* see pv_sig_tstp() / __cont() */
-		struct timespec toffset;	 /* total time spent stopped */
+		struct timespec when_tstp_arrived;	 /* see pv_sig_tstp() / __cont() */
+		struct timespec total_stoppage_time;	 /* total time spent stopped */
 #ifdef PV_REMOTE_CONTROL
 		volatile sig_atomic_t rxusr2;	 /* whether SIGUSR2 was received */
 		volatile pid_t sender_usr2;	 /* PID of sending process for SIGUSR2 */

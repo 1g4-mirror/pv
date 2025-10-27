@@ -143,7 +143,7 @@ static void pv__show_stats(pvstate_t state)
  */
 static long double pv__elapsed_transfer_time(const struct timespec *loop_start_time,
 					     const struct timespec *current_time,
-					     const struct timespec *time_spent_stopped)
+					     const struct timespec *total_stoppage_time)
 {
 	struct timespec effective_start_time, transfer_elapsed;
 
@@ -154,7 +154,7 @@ static long double pv__elapsed_transfer_time(const struct timespec *loop_start_t
 	 * Calculate the effective start time: the time we actually started,
 	 * plus the total time we spent stopped.
 	 */
-	pv_elapsedtime_add(&effective_start_time, loop_start_time, time_spent_stopped);
+	pv_elapsedtime_add(&effective_start_time, loop_start_time, total_stoppage_time);
 
 	/*
 	 * Now get the effective elapsed transfer time - current time minus
@@ -556,7 +556,7 @@ int pv_main_loop(pvstate_t state)
 			 */
 			pv_sig_nopause();
 			pv_elapsedtime_read(&start_time);
-			pv_elapsedtime_zero(&(state->signal.toffset));
+			pv_elapsedtime_zero(&(state->signal.total_stoppage_time));
 			pv_sig_allowpause();
 
 			/*
@@ -569,7 +569,7 @@ int pv_main_loop(pvstate_t state)
 
 		/* Calculate the elapsed transfer time. */
 		state->transfer.elapsed_seconds =
-		    pv__elapsed_transfer_time(&start_time, &cur_time, &(state->signal.toffset));
+		    pv__elapsed_transfer_time(&start_time, &cur_time, &(state->signal.total_stoppage_time));
 
 		/*
 		 * Just go round the loop again if there's no display and
@@ -1081,12 +1081,12 @@ int pv_watchfd_loop(pvstate_t state)
 					 */
 					info_item->position = position_now;
 					/*
-					 * TODO: per-fd toffset counters
-					 * (#169).
+					 * TODO: per-fd total_stoppage_time
+					 * counters (#169).
 					 */
 					info_item->transfer.elapsed_seconds =
 					    pv__elapsed_transfer_time(&(info_item->start_time), &cur_time,
-								      &(state->signal.toffset));
+								      &(state->signal.total_stoppage_time));
 				}
 
 				/*
