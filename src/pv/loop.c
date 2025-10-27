@@ -694,9 +694,7 @@ static void pv_watchfd_update_format_string(pvstate_t state)
 	/* If there's nothing to watch, do nothing. */
 	if (state->watchfd.count < 1)
 		return;
-	if (NULL == state->watchfd.pid)
-		return;
-	if (NULL == state->watchfd.fd)
+	if (NULL == state->watchfd.watching)
 		return;
 
 	/*
@@ -712,7 +710,7 @@ static void pv_watchfd_update_format_string(pvstate_t state)
 
 	memset(new_format_string, 0, sizeof(new_format_string));
 
-	if (state->watchfd.count > 1 || -1 == state->watchfd.fd[0]) {
+	if (state->watchfd.count > 1 || -1 == state->watchfd.watching[0].fd) {
 		/* Watching more than one single FD; need %N. */
 		if (!format_contains_name(original_format_string)) {
 			(void) pv_snprintf(new_format_string, sizeof(new_format_string), "%%N %s",
@@ -753,13 +751,7 @@ static void pv_watchfd_update_format_string(pvstate_t state)
  */
 int pv_watchfd_loop(pvstate_t state)
 {
-	struct {			 /* details for each PID:FD specified by operator */
-		pid_t pid;		 /* watched PID */
-		int fd;			 /* watched fd, or -1 for all */
-		pvwatchfd_t info_array;	 /* watch information for each fd */
-		int array_length;	 /* length of watch info array */
-		bool finished;		 /* "PID:FD": fd closed; or PID gone */
-	} *watching;
+	struct pvwatcheditem_s *watching;
 	unsigned int watch_idx;
 	bool all_watching_finished;
 	struct timespec next_update, next_remotecheck, cur_time;
@@ -776,10 +768,11 @@ int pv_watchfd_loop(pvstate_t state)
 	/* If there's nothing to watch, do nothing at all. */
 	if (state->watchfd.count < 1)
 		return 0;
-	if (NULL == state->watchfd.pid)
+	if (NULL == state->watchfd.watching)
 		return PV_ERROREXIT_MEMORY;
-	if (NULL == state->watchfd.fd)
-		return PV_ERROREXIT_MEMORY;
+
+	/* Local alias for less cumbersome access. */
+	watching = state->watchfd.watching;
 
 	/*
 	 * Make sure there's no name set.
@@ -793,16 +786,6 @@ int pv_watchfd_loop(pvstate_t state)
 	pv_watchfd_update_format_string(state);
 
 	/*
-	 * Allocate the watching array.
-	 */
-	watching = malloc(state->watchfd.count * sizeof(*watching));
-	if (NULL == watching) {
-		pv_error("%s: %s", _("buffer allocation failed"), strerror(errno));
-		return PV_ERROREXIT_MEMORY;
-	}
-	memset(watching, 0, state->watchfd.count * sizeof(*watching));
-
-	/*
 	 * Populate the watching array.  In the process of doing so, raise
 	 * errors if any of the initially specified PIDs or PID:FD pairs
 	 * don't exist or aren't readable.
@@ -810,8 +793,6 @@ int pv_watchfd_loop(pvstate_t state)
 	for (watch_idx = 0; watch_idx < state->watchfd.count; watch_idx++) {
 		int rc;
 
-		watching[watch_idx].pid = state->watchfd.pid[watch_idx];
-		watching[watch_idx].fd = state->watchfd.fd[watch_idx];
 		watching[watch_idx].info_array = NULL;
 		watching[watch_idx].array_length = 0;
 		watching[watch_idx].finished = false;
@@ -849,7 +830,7 @@ int pv_watchfd_loop(pvstate_t state)
 				/* Scan failed - mark as finished. */
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				watching[watch_idx].finished = true;
-			} else if (0 == watching[watch_idx].array_length) {
+			} else if ((0 == watching[watch_idx].array_length) || (NULL == watching[watch_idx].info_array)) {
 				/* FD not found - error, mark as finished. */
 				pv_error("%s %u: %s %d: %s",
 					 _("pid"), watching[watch_idx].pid, _("fd"), watching[watch_idx].fd,
@@ -1189,29 +1170,10 @@ int pv_watchfd_loop(pvstate_t state)
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
 
       end_pv_watchfd_loop:
-	/* Free all allocated memory. */
-	/*@-compdestroy@ */
-	for (watch_idx = 0; NULL != watching && watch_idx < state->watchfd.count; watch_idx++) {
-		int info_idx;
-		if (NULL == watching[watch_idx].info_array)
-			continue;
-		for (info_idx = 0; info_idx < watching[watch_idx].array_length; info_idx++) {
-			pv_freecontents_watchfd(&(watching[watch_idx].info_array[info_idx]));
-		}
-		free(watching[watch_idx].info_array);
-		watching[watch_idx].info_array = NULL;
-		watching[watch_idx].array_length = 0;
-	}
-	free(watching);
-	watching = NULL;
+	/* Free all allocated sub-structures. */
+	pv_freecontents_watchfd_items(watching, state->watchfd.count);
 
 	return state->status.exit_status;
-	/*@+compdestroy @ */
-	/*
-	 * splint warns that watching[].info_array->transfer.transfer_buffer
-	 * and other deep structures may not be deallocated and so leak
-	 * memory, but that's what pv_freecontents_watchfd() takes care of.
-	 */
 }
 
 

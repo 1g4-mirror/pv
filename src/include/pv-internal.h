@@ -131,6 +131,12 @@ typedef uint16_t pvdisplay_bytecount_t;
 typedef uint16_t pvdisplay_width_t;
 #define PVDISPLAY_WIDTH_MAX (65535)	/* UINT16_MAX */
 
+/*
+ * Structure defining the current state of a single watched file descriptor.
+ */
+struct pvwatchfd_s;
+typedef /*@null@*/ struct pvwatchfd_s *pvwatchfd_t;
+
 /* String pointer, that is the only pointer to this resource, that can be null. */
 typedef /*@only@*/ /*@null@*/ char * nullable_string_t;
 
@@ -163,9 +169,16 @@ struct pvstate_s {
 	/*********************************
 	 * Items to watch with --watchfd *
 	 *********************************/
-	struct pvwatchspec_s {
-		/*@only@*/ /*@null@*/ pid_t *pid; /* array of processes to watch fds of */
-		/*@only@*/ /*@null@*/ int *fd;	/* array of fds to watch in each one (0=all) */
+	struct {
+		/*@only@*/ /*@null@*/
+		struct pvwatcheditem_s {	/* array of PID or PID:FD items */
+			pid_t pid;		 /* watched PID */
+			int fd;			 /* watched fd, or -1 for all */
+			/*@null@*/
+			pvwatchfd_t info_array;	 /* watch information for each fd */
+			int array_length;	 /* length of watch info array */
+			bool finished;		 /* "PID:FD": fd closed; or PID gone */
+		} *watching;
 		unsigned int count;	/* number of items in these arrays */
 		bool multiple_pids;	/* true if more than one distinct PID */
 	} watchfd;
@@ -469,6 +482,36 @@ typedef struct pvcursorstate_s *pvcursorstate_t;
 typedef struct pvtransferstate_s *pvtransferstate_t;
 
 /*
+ * Structure defining the current state of a single watched file descriptor.
+ * The full definition needs to go here as it refers to sub-structures of
+ * the main state, defined above.
+ */
+struct pvwatchfd_s {
+	struct pvtransientflags_s flags;	/* transient flags */
+	struct pvtransferstate_s transfer;	/* transfer state */
+	struct pvtransfercalc_s calc;	 /* calculated transfer state */
+	struct pvdisplay_s display;	 /* display data */
+#ifdef __APPLE__
+#else
+	char file_fdinfo[PV_SIZEOF_FILE_FDINFO]; /* path to /proc fdinfo file */
+	char file_fd[PV_SIZEOF_FILE_FD];	 /* path to /proc fd symlink  */
+#endif
+	char file_fdpath[PV_SIZEOF_FILE_FDPATH]; /* path to file that was opened */
+	/*@keep@ */ char display_name[PV_SIZEOF_DISPLAY_NAME]; /* name to show on progress bar */
+	struct stat sb_fd;		 /* stat of fd symlink */
+	struct stat sb_fd_link;		 /* lstat of fd symlink */
+	off_t size;			 /* size of whole file, 0 if unknown */
+	off_t position;			 /* position last seen at */
+	struct timespec start_time;	 /* time we started watching the fd */
+	struct timespec end_time;	 /* time the fd was marked as closed */
+	pid_t watch_pid;		 /* PID the fd belongs to */
+	int watch_fd;			 /* fd to watch */
+	bool closed;			 /* true once the fd is closed */
+	bool displayable;		 /* false if not displayable */
+	bool unused;			 /* true if free for re-use */
+};
+
+/*
  * Read-only counterparts to the above structure pointers, to be used in
  * function declarations where the function definitely shouldn't be altering
  * the contents of the structure.
@@ -513,36 +556,6 @@ struct pvdisplay_component_s {
 	/*@null@ */ pvdisplay_formatter_t function;	/* function to call */
 	bool dynamic;			 /* whether it can scale with screen size */
 };
-
-
-/*
- * Structure defining the current state of a single watched file descriptor.
- */
-struct pvwatchfd_s {
-	struct pvtransientflags_s flags;	/* transient flags */
-	struct pvtransferstate_s transfer;	/* transfer state */
-	struct pvtransfercalc_s calc;	 /* calculated transfer state */
-	struct pvdisplay_s display;	 /* display data */
-#ifdef __APPLE__
-#else
-	char file_fdinfo[PV_SIZEOF_FILE_FDINFO]; /* path to /proc fdinfo file */
-	char file_fd[PV_SIZEOF_FILE_FD];	 /* path to /proc fd symlink  */
-#endif
-	char file_fdpath[PV_SIZEOF_FILE_FDPATH]; /* path to file that was opened */
-	/*@keep@ */ char display_name[PV_SIZEOF_DISPLAY_NAME]; /* name to show on progress bar */
-	struct stat sb_fd;		 /* stat of fd symlink */
-	struct stat sb_fd_link;		 /* lstat of fd symlink */
-	off_t size;			 /* size of whole file, 0 if unknown */
-	off_t position;			 /* position last seen at */
-	struct timespec start_time;	 /* time we started watching the fd */
-	struct timespec end_time;	 /* time the fd was marked as closed */
-	pid_t watch_pid;		 /* PID the fd belongs to */
-	int watch_fd;			 /* fd to watch */
-	bool closed;			 /* true once the fd is closed */
-	bool displayable;		 /* false if not displayable */
-	bool unused;			 /* true if free for re-use */
-};
-typedef struct pvwatchfd_s *pvwatchfd_t;
 
 void pv_error(char *, ...);
 
@@ -620,6 +633,7 @@ void pv_freecontents_display(pvdisplay_t);
 void pv_freecontents_transfer(pvtransferstate_t);
 void pv_freecontents_calc(pvtransfercalc_t);
 void pv_freecontents_watchfd(pvwatchfd_t);
+void pv_freecontents_watchfd_items(struct pvwatcheditem_s *, unsigned int);
 
 void pv_write_retry(int, const char *, size_t);
 void pv_tty_write(readonly_pvtransientflags_t, const char *, size_t);

@@ -42,6 +42,8 @@
  */
 static bool filesize(pvwatchfd_t info)
 {
+	if (NULL == info)
+		return false;
 	if (S_ISBLK(info->sb_fd.st_mode)) {
 		int fd;
 
@@ -222,6 +224,9 @@ bool pv_watchfd_changed(pvwatchfd_t info)
 {
 	struct stat sb_fd, sb_fd_link;
 
+	if (NULL == info)
+		return false;
+
 	memset(&sb_fd, 0, sizeof(sb_fd));
 	memset(&sb_fd_link, 0, sizeof(sb_fd_link));
 
@@ -264,6 +269,9 @@ off_t pv_watchfd_position(pvwatchfd_t info)
 #else
 	long long pos_long;
 	FILE *fptr;
+
+	if (NULL == info)
+		return -1;
 
 	if (pv_watchfd_changed(info))
 		return -1;
@@ -489,7 +497,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 		 * Skip if this fd is already known to us.
 		 */
 		found_idx = -1;
-		for (check_idx = 0; check_idx < array_length; check_idx++) {
+		for (check_idx = 0; check_idx < array_length && NULL != info_array; check_idx++) {
 			if (info_array[check_idx].unused)
 				continue;
 			if (info_array[check_idx].watch_fd != fd)
@@ -514,7 +522,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 		 * See if there's an empty slot we can re-use.
 		 */
 		use_idx = -1;
-		for (check_idx = 0; check_idx < array_length; check_idx++) {
+		for (check_idx = 0; check_idx < array_length && NULL != info_array; check_idx++) {
 			if (info_array[check_idx].unused) {
 				use_idx = check_idx;
 				break;
@@ -531,6 +539,10 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 			info_array = *info_array_ptr;
 			use_idx = array_length - 1;
 		}
+
+		/* At this point, the array should exist. */
+		if (NULL == info_array)
+			return 2;
 
 		debug("%s: %d => index %d", "found new fd", fd, use_idx);
 
@@ -638,7 +650,12 @@ void pv_watchpid_setname(pvstate_t state, pvwatchfd_t info)
 {
 	size_t path_length, cwd_length;
 	int max_display_length;
-	char *file_fdpath = info->file_fdpath;
+	char *file_fdpath;
+
+	if (NULL == info)
+		return;
+
+	file_fdpath = info->file_fdpath;
 
 	memset(info->display_name, 0, PV_SIZEOF_DISPLAY_NAME);
 

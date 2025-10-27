@@ -258,6 +258,39 @@ void pv_freecontents_calc(pvtransfercalc_t calc)
 
 
 /*
+ * Free the contents of a watchfd watched-items array.
+ */
+void pv_freecontents_watchfd_items(struct pvwatcheditem_s *watching, unsigned int count)
+{
+	unsigned int watch_idx;
+
+	if (NULL == watching)
+		return;
+
+	/*@-compdestroy@ */
+	for (watch_idx = 0; watch_idx < count; watch_idx++) {
+		int info_idx;
+		if (NULL == watching[watch_idx].info_array)
+			continue;
+		for (info_idx = 0; info_idx < watching[watch_idx].array_length; info_idx++) {
+			pv_freecontents_watchfd(&(watching[watch_idx].info_array[info_idx]));
+		}
+		free(watching[watch_idx].info_array);
+		watching[watch_idx].info_array = NULL;
+		watching[watch_idx].array_length = 0;
+	}
+
+	return;
+	/*@+compdestroy @ */
+	/*
+	 * splint warns that watching[].info_array->transfer.transfer_buffer
+	 * and other deep structures may not be deallocated and so leak
+	 * memory, but that's what pv_freecontents_watchfd() takes care of.
+	 */
+}
+
+
+/*
  * Truncate the output file descriptor to its current position, if it's a
  * valid fd, we're in sparse output mode, and no lseek() failed.
  */
@@ -362,13 +395,10 @@ void pv_state_free(pvstate_t state)
 		state->files.filename = NULL;
 	}
 
-	if (NULL != state->watchfd.pid) {
-		free(state->watchfd.pid);
-		state->watchfd.pid = NULL;
-	}
-	if (NULL != state->watchfd.fd) {
-		free(state->watchfd.fd);
-		state->watchfd.fd = NULL;
+	if (NULL != state->watchfd.watching) {
+		pv_freecontents_watchfd_items(state->watchfd.watching, state->watchfd.count);
+		free(state->watchfd.watching);
+		state->watchfd.watching = NULL;
 	}
 
 	free(state);
@@ -788,43 +818,38 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 void pv_state_watchfds(pvstate_t state, unsigned int watchfd_count, const pid_t * pids, const int *fds)
 {
 	unsigned int item_idx;
-	/*@only@ */ pid_t *new_pid_array = NULL;
-	/*@only@ */ int *new_fd_array = NULL;
+	/*@only@ */ struct pvwatcheditem_s *new_array = NULL;
 
 	/* Free the old arrays, if there were any. */
-	if (NULL != state->watchfd.pid) {
-		free(state->watchfd.pid);
-		state->watchfd.pid = NULL;
-	}
-	if (NULL != state->watchfd.fd) {
-		free(state->watchfd.fd);
-		state->watchfd.fd = NULL;
+	if (NULL != state->watchfd.watching) {
+		/*@-compdestroy@ */
+		pv_freecontents_watchfd_items(state->watchfd.watching, state->watchfd.count);
+		free(state->watchfd.watching);
+		state->watchfd.watching = NULL;
+		/*@+compdestroy@ */
+		/*
+		 * splint warns about deep structures not being deallocated,
+		 * but that's what pv_freecontents_watchfd_items() does.
+		 */
 	}
 	state->watchfd.count = 0;
 	state->watchfd.multiple_pids = false;
 
-	/* Allocate empty new arrays of the right size. */
-	new_pid_array = calloc((size_t) (watchfd_count + 1), sizeof(pid_t));
-	if (NULL == new_pid_array) {
+	/* Allocate an empty new array of the right size. */
+	new_array = malloc((1 + state->watchfd.count) * sizeof(*new_array));
+	if (NULL == new_array) {
 		/*@-mustfreefresh@ *//* see similar _() issue above */
-		pv_error("%s: %s", _("process list allocation failed"), strerror(errno));
+		pv_error("%s: %s", _("buffer allocation failed"), strerror(errno));
 		/*@+mustfreefresh@ */
 		return;
 	}
-	state->watchfd.pid = new_pid_array;
-	new_fd_array = calloc((size_t) (watchfd_count + 1), sizeof(int));
-	if (NULL == new_fd_array) {
-		/*@-mustfreefresh@ *//* see similar _() issue above */
-		pv_error("%s: %s", _("file descriptor list allocation failed"), strerror(errno));
-		/*@+mustfreefresh@ */
-		return;
-	}
-	state->watchfd.fd = new_fd_array;
+	memset(new_array, 0, (1 + state->watchfd.count) * sizeof(*new_array));
+	state->watchfd.watching = new_array;
 
-	/* Populate the new arrays with the values supplied. */
+	/* Populate the new array with the values supplied. */
 	for (item_idx = 0; item_idx < watchfd_count; item_idx++) {
-		state->watchfd.pid[item_idx] = pids[item_idx];
-		state->watchfd.fd[item_idx] = fds[item_idx];
+		state->watchfd.watching[item_idx].pid = pids[item_idx];
+		state->watchfd.watching[item_idx].fd = fds[item_idx];
 		if ((item_idx > 0) && (pids[item_idx] != pids[item_idx - 1]))
 			state->watchfd.multiple_pids = true;
 	}
