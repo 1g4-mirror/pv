@@ -174,7 +174,6 @@ struct pvstate_s {
 		struct pvwatcheditem_s {	/* array of PID or PID:FD items */
 			pid_t pid;		 /* watched PID */
 			int fd;			 /* watched fd, or -1 for all */
-			/*@null@*/
 			pvwatchfd_t info_array;	 /* watch information for each fd */
 			int array_length;	 /* length of watch info array */
 			bool finished;		 /* "PID:FD": fd closed; or PID gone */
