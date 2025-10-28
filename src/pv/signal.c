@@ -174,6 +174,8 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 		pv_elapsedtime_add(&(pv_sig_state->signal.total_stoppage_time),
 				   &(pv_sig_state->signal.total_stoppage_time), &time_spent_stopped);
 
+		/* TODO: also update every watched fd's stopped-time count in watchfd mode (#169) */
+
 		/* reset the SIGTSTP receipt time */
 		pv_elapsedtime_zero(&(pv_sig_state->signal.when_tstp_arrived));
 	}
