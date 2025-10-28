@@ -503,6 +503,7 @@ struct pvwatchfd_s {
 	off_t position;			 /* position last seen at */
 	struct timespec start_time;	 /* time we started watching the fd */
 	struct timespec end_time;	 /* time the fd was marked as closed */
+	struct timespec total_stoppage_time;	 /* total time spent stopped */
 	pid_t watch_pid;		 /* PID the fd belongs to */
 	int watch_fd;			 /* fd to watch */
 	bool closed;			 /* true once the fd is closed */
