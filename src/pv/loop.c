@@ -1061,13 +1061,9 @@ int pv_watchfd_loop(pvstate_t state)
 					 * its position and timers.
 					 */
 					info_item->position = position_now;
-					/*
-					 * TODO: per-fd total_stoppage_time
-					 * counters (#169).
-					 */
 					info_item->transfer.elapsed_seconds =
 					    pv__elapsed_transfer_time(&(info_item->start_time), &cur_time,
-								      &(state->signal.total_stoppage_time));
+								      &(info_item->total_stoppage_time));
 				}
 
 				/*
