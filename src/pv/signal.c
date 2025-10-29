@@ -174,7 +174,35 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 		pv_elapsedtime_add(&(pv_sig_state->signal.total_stoppage_time),
 				   &(pv_sig_state->signal.total_stoppage_time), &time_spent_stopped);
 
-		/* TODO: also update every watched fd's stopped-time count in watchfd mode (#169) */
+		/* In watchfd mode, update the stoppage time of all watched fds. */
+		if (pv_sig_state->watchfd.count > 0 && NULL != pv_sig_state->watchfd.watching) {
+			unsigned int watch_idx;
+
+			for (watch_idx = 0; watch_idx < pv_sig_state->watchfd.count; watch_idx++) {
+				int info_idx;
+
+				if (pv_sig_state->watchfd.watching[watch_idx].finished)
+					continue;
+
+				if (NULL == pv_sig_state->watchfd.watching[watch_idx].info_array)
+					continue;
+
+				for (info_idx = 0; info_idx < pv_sig_state->watchfd.watching[watch_idx].array_length;
+				     info_idx++) {
+					pvwatchfd_t info_item =
+					    &(pv_sig_state->watchfd.watching[watch_idx].info_array[info_idx]);
+
+					if (info_item->unused)
+						continue;
+
+					if (!info_item->displayable)
+						continue;
+
+					pv_elapsedtime_add(&(info_item->total_stoppage_time),
+							   &(info_item->total_stoppage_time), &time_spent_stopped);
+				}
+			}
+		}
 
 		/* reset the SIGTSTP receipt time */
 		pv_elapsedtime_zero(&(pv_sig_state->signal.when_tstp_arrived));
