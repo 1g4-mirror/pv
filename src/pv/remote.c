@@ -632,7 +632,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
  * Dummy stubs for remote control when we don't have PV_REMOTE_CONTROL.
  */
 
-void pv_remote_check( /*@unused@ */  __attribute__((unused)) pvstate_t state)
+bool pv_remote_check( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 {
 }
 
@@ -648,8 +648,15 @@ int pv_remote_set(			 /*@unused@ */
 
 
 int pv_remote_transferstate_fetch(	 /*@unused@ */
-					 __attribute__((unused)) pvstate_t state,	/*@unused@ */
-					 __attribute__((unused)) pid_t query)
+					 __attribute__((unused)) pvstate_t state,
+					 /*@unused@ */
+					 __attribute__((unused)) pid_t query,
+					 /*@null@ */
+					 /*@unused@ */
+					 __attribute__((unused)) off_t * sizeptr,
+					 /*@unused@ */
+					 __attribute__((unused))
+					 bool silent)
 {
 	/*@-mustfreefresh@ *//* splint - see above */
 	fprintf(stderr, "%s\n", _("SA_SIGINFO not supported on this system"));
