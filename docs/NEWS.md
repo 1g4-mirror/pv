@@ -1,6 +1,7 @@
-### 1.9.45 - UNRELEASED
+### 1.9.46 - UNRELEASED
 
- * *feature*: new **--query** option to show the transfer status of another running **pv** ([#101](https://codeberg.org/ivarch/pv/issues/101))
+ * *feature:* new **--query** option to show the transfer status of another running **pv** ([#101](https://codeberg.org/ivarch/pv/issues/101))
+ * *fix:* make the timers work consistently in **--watchfd** if paused and resumed ([#169](https://codeberg.org/ivarch/pv/issues/169))
 
 ### 1.9.44 - 18 October 2025
 
