@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2025-10-26 13:15+0000\n"
+"POT-Creation-Date: 2025-10-31 19:47+0000\n"
 "PO-Revision-Date: 2025-10-05 20:09+0000\n"
 "Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -445,7 +445,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1053 src/pv/loop.c:800 src/pv/transfer.c:1135
+#: src/pv/display.c:1053 src/pv/state.c:842 src/pv/transfer.c:1135
 msgid "buffer allocation failed"
 msgstr "arabellek tahsisi başarısız oldu"
 
@@ -516,17 +516,17 @@ msgstr "oran min/ortalama/maks/standart sapma"
 msgid "rate not measured"
 msgstr "oran ölçülmedi"
 
-#: src/pv/loop.c:821 src/pv/loop.c:837 src/pv/loop.c:855 src/pv/watchpid.c:99
-#: src/pv/watchpid.c:108 src/pv/watchpid.c:119 src/pv/watchpid.c:127
-#: src/pv/watchpid.c:164 src/pv/watchpid.c:183 src/pv/watchpid.c:191
-#: src/pv/watchpid.c:201 src/pv/watchpid.c:299 src/pv/watchpid.c:307
-#: src/pv/watchpid.c:439 src/pv/watchpid.c:462
+#: src/pv/loop.c:802 src/pv/loop.c:818 src/pv/loop.c:836 src/pv/watchpid.c:101
+#: src/pv/watchpid.c:110 src/pv/watchpid.c:121 src/pv/watchpid.c:129
+#: src/pv/watchpid.c:166 src/pv/watchpid.c:185 src/pv/watchpid.c:193
+#: src/pv/watchpid.c:203 src/pv/watchpid.c:307 src/pv/watchpid.c:315
+#: src/pv/watchpid.c:447 src/pv/watchpid.c:470
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:855 src/pv/watchpid.c:108 src/pv/watchpid.c:120
-#: src/pv/watchpid.c:129 src/pv/watchpid.c:183 src/pv/watchpid.c:192
-#: src/pv/watchpid.c:203
+#: src/pv/loop.c:836 src/pv/watchpid.c:110 src/pv/watchpid.c:122
+#: src/pv/watchpid.c:131 src/pv/watchpid.c:185 src/pv/watchpid.c:194
+#: src/pv/watchpid.c:205
 msgid "fd"
 msgstr "fd"
 
@@ -534,7 +534,7 @@ msgstr "fd"
 msgid "message not received"
 msgstr "mesaj alınamadı"
 
-#: src/pv/remote.c:644 src/pv/remote.c:655
+#: src/pv/remote.c:644 src/pv/remote.c:662
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO bu sistemde desteklenmiyor"
 
@@ -542,17 +542,9 @@ msgstr "SA_SIGINFO bu sistemde desteklenmiyor"
 msgid "history structure allocation failed"
 msgstr "geçmiş yapısı tahsisi başarısız oldu"
 
-#: src/pv/state.c:764 src/pv/state.c:776
+#: src/pv/state.c:794 src/pv/state.c:806
 msgid "file list allocation failed"
 msgstr "dosya listesi tahsisi başarısız oldu"
-
-#: src/pv/state.c:810
-msgid "process list allocation failed"
-msgstr "işlem listesi tahsisi başarısız oldu"
-
-#: src/pv/state.c:818
-msgid "file descriptor list allocation failed"
-msgstr "dosya tanımlayıcı listesi tahsisi başarısız oldu"
 
 #: src/pv/transfer.c:490
 msgid "read failed"
@@ -598,9 +590,15 @@ msgstr "yazma başarısız"
 msgid "select call failed"
 msgstr "seçme çağrısı başarısız oldu"
 
-#: src/pv/watchpid.c:129 src/pv/watchpid.c:203
+#: src/pv/watchpid.c:131 src/pv/watchpid.c:205
 msgid "not a regular file or block device"
 msgstr "normal bir dosya veya blok aygıtı değil"
+
+#~ msgid "process list allocation failed"
+#~ msgstr "işlem listesi tahsisi başarısız oldu"
+
+#~ msgid "file descriptor list allocation failed"
+#~ msgstr "dosya tanımlayıcı listesi tahsisi başarısız oldu"
 
 #~ msgid "PID[:FD]"
 #~ msgstr "PID[:FD]"
