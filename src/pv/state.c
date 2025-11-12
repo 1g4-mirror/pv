@@ -836,14 +836,14 @@ void pv_state_watchfds(pvstate_t state, unsigned int watchfd_count, const pid_t 
 	state->watchfd.multiple_pids = false;
 
 	/* Allocate an empty new array of the right size. */
-	new_array = malloc((1 + state->watchfd.count) * sizeof(*new_array));
+	new_array = malloc((1 + watchfd_count) * sizeof(*new_array));
 	if (NULL == new_array) {
 		/*@-mustfreefresh@ *//* see similar _() issue above */
 		pv_error("%s: %s", _("buffer allocation failed"), strerror(errno));
 		/*@+mustfreefresh@ */
 		return;
 	}
-	memset(new_array, 0, (1 + state->watchfd.count) * sizeof(*new_array));
+	memset(new_array, 0, (1 + watchfd_count) * sizeof(*new_array));
 	state->watchfd.watching = new_array;
 
 	/* Populate the new array with the values supplied. */
