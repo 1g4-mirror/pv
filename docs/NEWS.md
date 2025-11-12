@@ -1,4 +1,4 @@
-### 1.10.1 - UNRELEASED
+### 1.10.1 - 12 November 2025
 
  * *fix:* correct **--watchfd** memory allocation error when given multiple arguments ([#170](https://codeberg.org/ivarch/pv/issues/170))
 
