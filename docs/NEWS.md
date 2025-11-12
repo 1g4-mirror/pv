@@ -1,3 +1,7 @@
+### 1.10.1 - UNRELEASED
+
+ * *fix:* correct **--watchfd** memory allocation error when given multiple arguments ([#170](https://codeberg.org/ivarch/pv/issues/170))
+
 ### 1.10.0 - 7 November 2025
 
  * *feature:* new **--query** option to show the transfer status of another running **pv** ([#101](https://codeberg.org/ivarch/pv/issues/101))
