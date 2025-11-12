@@ -101,6 +101,7 @@ tests/Transfer_-_--rate-limit.test \
 tests/Transfer_-_--remote.test \
 tests/Transfer_-_--stop-at-size.test \
 tests/Transfer_-_--stop-at-size_reads.test \
+tests/Watchfd_-_Multiple_arguments.test \
 tests/Watchfd_-_Multiple_descriptors.test \
 tests/Watchfd_-_Single_descriptor.test
 

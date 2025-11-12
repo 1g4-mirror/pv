@@ -65,4 +65,43 @@ pid=$!
 sleep 0.1
 { runWithValgrind -P "${workFile3}" -d "${pid}" -f -i 0.5 >/dev/null 2>&1; } 4>&1 || exit 1
 
+# Check "--watchfd PID1 PID2".
+seq 1 100 > "${workFile1}"
+seq 1 300 > "${workFile2}"
+true > "${workFile3}"
+# shellcheck disable=SC2030
+(
+while test -e "${workFile3}" && ! test -s "${workFile3}"; do sleep 0.1; done
+sleep 1
+read -r line
+exec 9<"${workFile2}"
+sleep 1
+exec 8<"${workFile1}"
+exec 7</dev/null
+sleep 1
+exec 9<&-
+# shellcheck disable=SC2034
+read -r line
+sleep 1
+) <"${workFile1}" &
+pid1=$!
+# shellcheck disable=SC2030
+(
+while test -e "${workFile3}" && ! test -s "${workFile3}"; do sleep 0.1; done
+sleep 1
+read -r line
+exec 9<"${workFile2}"
+sleep 1
+exec 8<"${workFile1}"
+exec 7</dev/null
+sleep 1
+exec 9<&-
+# shellcheck disable=SC2034
+read -r line
+sleep 1
+) <"${workFile1}" &
+pid2=$!
+sleep 0.1
+{ runWithValgrind -P "${workFile3}" -f -i 0.5 -d "${pid1}" "${pid2}" >/dev/null 2>&1; } 4>&1 || exit 1
+
 exit 0
