@@ -54,7 +54,7 @@ runWithValgrind () {
    ignore-initproctitle-leak
    Memcheck:Leak
    fun:malloc
-   fun:initproctitle
+   src:proctitle.c
    fun:main
 }
 EOF
