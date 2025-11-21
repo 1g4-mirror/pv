@@ -1,6 +1,7 @@
-### UNRELEASED
+### 1.10.2 - UNRELEASED
 
  * *i18n:* Finnish translations updated
+ * *cleanup:* adjust valgrind suppressions so memory safety tests work on LTO builds ([#174](https://codeberg.org/ivarch/pv/issues/174))
 
 ### 1.10.1 - 12 November 2025
 
