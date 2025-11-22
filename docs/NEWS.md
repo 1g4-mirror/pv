@@ -1,7 +1,7 @@
-### 1.10.2 - UNRELEASED
+### 1.10.2 - 22 November 2025
 
  * *i18n:* Finnish translations updated
- * *cleanup:* adjust valgrind suppressions so memory safety tests work on LTO builds ([#174](https://codeberg.org/ivarch/pv/issues/174))
+ * *cleanup:* adjust valgrind suppressions so memory safety tests work on LTO builds ([#174](https://codeberg.org/ivarch/pv/issues/174)/[Debian bug 1121157](https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1121157))
 
 ### 1.10.1 - 12 November 2025
 
