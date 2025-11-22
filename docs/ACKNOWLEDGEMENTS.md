@@ -116,7 +116,7 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
  * **Czech**
    * [mmatous](https://translate.codeberg.org/user/mmatous/) (135)
  * **Finnish**
-   * [artnay](https://translate.codeberg.org/user/artnay/) (36)
+   * [artnay](https://translate.codeberg.org/user/artnay/) (65)
  * **French**
    * anonymous suggestions (7)
    * [milimarg](https://codeberg.org/milimarg) (13)
