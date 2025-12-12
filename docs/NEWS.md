@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *fix:* correct **--extra-display** process title truncation
+
 ### 1.10.2 - 22 November 2025
 
  * *i18n:* Finnish translations updated

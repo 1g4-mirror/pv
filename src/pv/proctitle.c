@@ -110,7 +110,7 @@ void setproctitle(const char *format, ...)
 	if (length > space_available - 2)
 		length = space_available - 2;
 
-	(void) pv_snprintf(base_argv[0], space_available, "%s -- %s", PACKAGE_NAME, title);
+	(void) pv_snprintf(base_argv[0], space_available, "%s", title);
 	if (space_available > length)
 		memset(base_argv[0] + length, 0, space_available - length);
 }

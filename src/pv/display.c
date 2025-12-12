@@ -1339,7 +1339,7 @@ void pv_display(pvprogramstatus_t status, readonly_pvcontrol_t control, pvtransi
 	    && (NULL != extra_display)
 	    && (NULL != extra_display->display_buffer)
 	    ) {
-		setproctitle("%s", extra_display->display_buffer);
+		setproctitle("%s -- %s", PACKAGE_NAME, extra_display->display_buffer);
 		extra_display->output_produced = true;
 		debug("%s: [%s]", "processtitle display", extra_display->display_buffer);
 	}
