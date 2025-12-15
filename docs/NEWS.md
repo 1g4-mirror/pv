@@ -1,6 +1,6 @@
-### UNRELEASED
+### 1.10.3 - 15 December 2025
 
- * *fix:* correct **--extra-display** process title truncation
+ * *fix:* stop truncating the process title set by **--extra-display**
 
 ### 1.10.2 - 22 November 2025
 
