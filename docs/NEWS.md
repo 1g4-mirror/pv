@@ -1,3 +1,7 @@
+### 1.10.4 - UNRELEASED
+
+ * *fix:* when using **--size @PATH**, *PATH* can be a directory, and the total size of all files within it will be used ([#179](https://codeberg.org/ivarch/pv/issues/179))
+
 ### 1.10.3 - 15 December 2025
 
  * *fix:* stop truncating the process title set by **--extra-display**
