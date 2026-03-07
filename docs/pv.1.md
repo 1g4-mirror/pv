@@ -804,7 +804,7 @@ the [**pv** home page](https://ivarch.com/p/pv).
 
 # COPYRIGHT
 
-Copyright © 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2025 Andrew
+Copyright © 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2026 Andrew
 Wood.
 
 License GPLv3+: [GNU GPL version 3 or
