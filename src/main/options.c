@@ -31,6 +31,9 @@
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+#ifdef HAVE_FTW_H
+#include <ftw.h>
+#endif
 
 
 void display_help(void);
@@ -412,12 +415,36 @@ static bool opts_watchfd_parse(opts_t opts, const char *argument, /*@null@ */ co
 }
 
 
+#ifdef HAVE_NFTW
+/*
+ * Callback function for nftw() to add the size of the given file to the
+ * total size so far.
+ */
+static off_t dir_tree_file_size_so_far = 0;
+static int dir_tree_total_file_size( /*@unused@ */  __attribute__((unused))
+				    const char *fpath, const struct stat *sb, int typeflag, /*@unused@ */
+				    __attribute__((unused))
+				    struct FTW *ftwbuf)
+{
+	if (typeflag != FTW_F)
+		return 0;
+	if (NULL == sb)
+		return 0;
+	dir_tree_file_size_so_far += (off_t) (sb->st_size);
+	return 0;
+}
+#endif				/* HAVE_NFTW */
+
+
 /*
  * Set opts->size from the size of the file whose name is size_file,
  * returning false (and reporting the error) if there is a problem.
  *
  * If size_file points to a block device, the size of the block device is
  * used.
+ *
+ * If size_file points to a directory, opts->size is set to the sum of the
+ * sizes of all regular files under that directory, if nftw() is available.
  */
 static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 {
@@ -456,6 +483,28 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 		return true;
 	}
 
+#ifdef HAVE_NFTW
+	/* This was a directory - use the size of all files under it. */
+	if (S_ISDIR((mode_t) (sb.st_mode))) {
+		int rc_nftw;
+
+		dir_tree_file_size_so_far = 0;
+		/* TODO: get max fds rather than just using 1024. */
+		rc_nftw = nftw(size_file, dir_tree_total_file_size, 1024, 0
+#ifdef FTW_PHYS
+			       | FTW_PHYS
+#endif
+		    );
+
+		if (rc_nftw < 0) {
+			fprintf(stderr, "%s: %s: %s\n", opts->program_name, size_file, strerror(errno));
+			return false;
+		}
+
+		opts->size = dir_tree_file_size_so_far;
+		return true;
+	}
+#else				/* HAVE_NFTW */
 	/* This was a directory - report an error. */
 	if (S_ISDIR((mode_t) (sb.st_mode))) {
 		/*@-mustfreefresh@ *//* see above */
@@ -463,6 +512,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 		return false;
 		/*@+mustfreefresh@ */
 	}
+#endif				/* !HAVE_NFTW */
 
 	/* This was not a block device - just use the size and return. */
 	if (!S_ISBLK((mode_t) (sb.st_mode))) {

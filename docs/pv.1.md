@@ -164,7 +164,8 @@ are explicitly switched on will be shown.
     denote kilobytes (\*1000), megabytes, and so on instead.
 
     If *SIZE* starts with "**@**", the size of file whose name follows
-    the @ will be used.
+    the @ will be used; if that is a directory, the size of all files
+    under it will be used, like "**du \--apparent-size -b**".
 
 **-g, \--gauge**
 
@@ -629,6 +630,13 @@ To watch the progress of creating a tar.gz archive:
 
     tar cf - directory/ \
     | pv --size $(du -sb directory/ | awk '{print $1}') \
+    | gzip -9 \
+    > out.tar.gz
+
+An alternative way of doing the same thing:
+
+    tar cf - directory/ \
+    | pv --size @directory/ \
     | gzip -9 \
     > out.tar.gz
 

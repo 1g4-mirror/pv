@@ -93,6 +93,7 @@ tests/Modifiers_-_--force.test \
 tests/Modifiers_-_--interval.test \
 tests/Modifiers_-_--line-mode.test \
 tests/Modifiers_-_--size_from_file_size.test \
+tests/Modifiers_-_--size_from_dir_size.test \
 tests/Modifiers_-_--size.test \
 tests/Modifiers_-_--sync.test \
 tests/Sparse_-_Basic.test \

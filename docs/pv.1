@@ -162,7 +162,8 @@ If \*(lq\fB\-\-si\fR\*(rq appears before this option, suffixes will denote
 kilobytes (*1000), megabytes, and so on instead.
 .IP
 If \fISIZE\fR starts with \*(lq\fB@\fR\*(rq, the size of file whose name
-follows the @ will be used.
+follows the @ will be used; if that is a directory, the size of all files
+under it will be used, like \*(lq\fBdu\~\-\-apparent\-size\~\-b\fR\*(rq.
 .TP
 .B \-g, \-\-gauge
 If the progress bar is shown but the size is not known, then instead of
@@ -631,6 +632,17 @@ To watch the progress of creating a tar.gz archive:
 .EX
 tar cf \- directory/ \e
 | pv \-\-size $(du \-sb directory/ | awk '{print $1}') \e
+| gzip \-9 \e
+> out.tar.gz
+.EE
+.in
+.PP
+An alternative way of doing the same thing:
+.PP
+.in +4
+.EX
+tar cf \- directory/ \e
+| pv \-\-size @directory/ \e
 | gzip \-9 \e
 > out.tar.gz
 .EE
