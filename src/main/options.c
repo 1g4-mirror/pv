@@ -26,6 +26,7 @@
 #endif
 #endif
 #include <fcntl.h>
+#include <limits.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #ifdef HAVE_GETOPT_H
@@ -486,11 +487,18 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 #ifdef HAVE_NFTW
 	/* This was a directory - use the size of all files under it. */
 	if (S_ISDIR((mode_t) (sb.st_mode))) {
-		int rc_nftw;
+		int maxfds, rc_nftw;
+
+		maxfds = -1;
+#ifdef _POSIX_OPEN_MAX
+		maxfds = _POSIX_OPEN_MAX;
+#endif
+		if (maxfds < 1) {
+			maxfds = (int) sysconf(_SC_OPEN_MAX);
+		}
 
 		dir_tree_file_size_so_far = 0;
-		/* TODO: get max fds rather than just using 1024. */
-		rc_nftw = nftw(size_file, dir_tree_total_file_size, 1024, 0
+		rc_nftw = nftw(size_file, dir_tree_total_file_size, maxfds, 0
 #ifdef FTW_PHYS
 			       | FTW_PHYS
 #endif
