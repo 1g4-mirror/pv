@@ -86,7 +86,9 @@ size_t pv_strlcat(char *dst, const char *src, size_t dstsize)
 #ifdef HAVE_STRLCAT
 	size_t result;
 
+	/*@-unrecog@ *//* splint doesn't recognise strlcat. */
 	result = strlcat(dst, src, dstsize);
+	/*@+unrecog@ */
 
 	if ((NULL != dst) && (dstsize > 0))
 		dst[dstsize - 1] = '\0';
