@@ -423,7 +423,7 @@ static bool opts_watchfd_parse(opts_t opts, const char *argument, /*@null@ */ co
  */
 static off_t dir_tree_file_size_so_far = 0;
 static int dir_tree_total_file_size( /*@unused@ */  __attribute__((unused))
-				    const char *fpath, const struct stat *sb, int typeflag, /*@unused@ */
+				    const char *fpath, const struct stat *sb, int typeflag,	/*@unused@ */
 				    __attribute__((unused))
 				    struct FTW *ftwbuf)
 {

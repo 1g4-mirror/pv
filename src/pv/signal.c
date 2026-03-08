@@ -262,7 +262,7 @@ static void pv_sig_term( /*@unused@ */  __attribute__((unused))
  * the sending PID.
  */
 static void pv_sig_usr2( /*@unused@ */  __attribute__((unused))
-			int sig, siginfo_t * info, /*@unused@ */  __attribute__((unused))
+			int sig, siginfo_t *info, /*@unused@ */  __attribute__((unused))
 			void *ucontext)
 {
 	if (NULL == pv_sig_state)
@@ -278,7 +278,7 @@ static void pv_sig_usr2( /*@unused@ */  __attribute__((unused))
  * Return true if a SIGUSR2 signal has been received since the last time
  * this function was called, populating *pid with the sending PID if so.
  */
-bool pv_sigusr2_received(pvstate_t state, pid_t * pid)
+bool pv_sigusr2_received(pvstate_t state, pid_t *pid)
 {
 	if (NULL == state)
 		return false;
@@ -296,7 +296,7 @@ bool pv_sigusr2_received(pvstate_t state, pid_t * pid)
  * the sending PID.
  */
 static void pv_sig_usr1( /*@unused@ */  __attribute__((unused))
-			int sig, siginfo_t * info, /*@unused@ */  __attribute__((unused))
+			int sig, siginfo_t *info, /*@unused@ */  __attribute__((unused))
 			void *ucontext)
 {
 	if (NULL == pv_sig_state)
@@ -312,7 +312,7 @@ static void pv_sig_usr1( /*@unused@ */  __attribute__((unused))
  * Return true if a SIGUSR1 signal has been received since the last time
  * this function was called, populating *pid with the sending PID if so.
  */
-bool pv_sigusr1_received(pvstate_t state, pid_t * pid)
+bool pv_sigusr1_received(pvstate_t state, pid_t *pid)
 {
 	if (NULL == state)
 		return false;

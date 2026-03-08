@@ -499,7 +499,7 @@ bool pv_remote_check(pvstate_t state)
  *
  * Returns nonzero on error.  If "silent" is false, reports the error.
  */
-int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_t * sizeptr, bool silent)
+int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_t *sizeptr, bool silent)
 {
 	char control_filename[4096];	 /* flawfinder: ignore */
 	FILE *control_fptr;
@@ -653,7 +653,7 @@ int pv_remote_transferstate_fetch(	 /*@unused@ */
 					 __attribute__((unused)) pid_t query,
 					 /*@null@ */
 					 /*@unused@ */
-					 __attribute__((unused)) off_t * sizeptr,
+					 __attribute__((unused)) off_t *sizeptr,
 					 /*@unused@ */
 					 __attribute__((unused))
 					 bool silent)

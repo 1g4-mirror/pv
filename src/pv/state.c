@@ -815,7 +815,7 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 /*
  * Set the arrays of watchfd process IDs and file descriptors.
  */
-void pv_state_watchfds(pvstate_t state, unsigned int watchfd_count, const pid_t * pids, const int *fds)
+void pv_state_watchfds(pvstate_t state, unsigned int watchfd_count, const pid_t *pids, const int *fds)
 {
 	unsigned int item_idx;
 	/*@only@ */ struct pvwatcheditem_s *new_array = NULL;

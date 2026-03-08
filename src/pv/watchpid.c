@@ -336,7 +336,7 @@ static int pidfds(pvstate_t state, unsigned int pid, struct proc_fdinfo **fds, i
 /*
  * Extend the info array by one, returning false on error.
  */
-static bool extend_info_array(int *array_length_ptr, pvwatchfd_t * info_array_ptr)
+static bool extend_info_array(int *array_length_ptr, pvwatchfd_t *info_array_ptr)
 {
 	int array_length = 0;
 	struct pvwatchfd_s *info_array = NULL;
@@ -433,7 +433,7 @@ static int pv_compare_watchfd(const void *a, const void *b)
  * read, or 2 for a memory allocation error.
  */
 int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *array_length_ptr,
-			pvwatchfd_t * info_array_ptr)
+			pvwatchfd_t *info_array_ptr)
 {
 	int array_length = 0;
 	struct pvwatchfd_s *info_array = NULL;
