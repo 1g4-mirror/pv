@@ -711,7 +711,7 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
 			component_type = -1;
 			for (component_idx = 0; NULL != format_component_array[component_idx].match; component_idx++) {
 				size_t component_sequence_length = strlen(format_component_array[component_idx].match);	/* flawfinder: ignore */
-				char *component_colon_pointer =
+				const char *component_colon_pointer =
 				    strchr(format_component_array[component_idx].match, (int) ':');
 
 				/* flawfinder - static strings, guaranteed null-terminated. */
