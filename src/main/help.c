@@ -132,7 +132,7 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 	chars_remaining = wide_char_count;
 
 	/*@-unrecog@ *//* splint seems unable to see the prototype for wcswidth(). */
-	while (chars_remaining > 0 && wcswidth(&(wide_string[start_idx]), chars_remaining) > display_width) {
+	while (chars_remaining > 0 && wcswidth(&(wide_string[start_idx]), chars_remaining) > (int) display_width) {
 		/*@+unrecog@ */
 		size_t next_idx;
 
