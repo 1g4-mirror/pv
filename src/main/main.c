@@ -560,6 +560,11 @@ int main(int argc, char **argv)
 		/* Query the progress of another running pv. */
 		retcode = pv_query_loop(state, opts->query);
 		break;
+	case PV_ACTION_MONITOR:
+		/* Run a process and monitor its input and output. */
+		/* TODO: run the monitor action. */
+		retcode = 1;
+		break;
 	}
 
 	/* Clear up the PID file, if one was written. */

@@ -32,7 +32,8 @@ typedef enum {
 	PV_ACTION_STORE_AND_FORWARD,	/* store to file, then output from it */
 	PV_ACTION_WATCHFD,		/* watch process file descriptors */
 	PV_ACTION_REMOTE_CONTROL,	/* remotely control another pv */
-	PV_ACTION_QUERY			/* watch the state of another pv */
+	PV_ACTION_QUERY,		/* watch the state of another pv */
+	PV_ACTION_MONITOR		/* run a process, watch its stdin/out */
 } pvaction_t;
 
 /*

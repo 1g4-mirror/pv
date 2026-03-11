@@ -13,6 +13,8 @@ pv \- monitor and manage the progress of data through a pipe
 \fBpv\fR \fB\-R\fR|\fB\-\-remote\fR \fIPID\fR [\fIOPTION\fR]...
 .PP
 \fBpv\fR \fB\-Q\fR|\fB\-\-query\fR \fIPID\fR [\fIOPTION\fR]...
+.PP
+\fBpv\fR [\fIOPTION\fR]... \fB\-M\fR|\fB\-\-monitor\fR \-\- \fICOMMAND\fR [\fIARGS\fR]...
 .\"
 .SH DESCRIPTION
 Show the progress of data through a pipeline by giving information such as
@@ -27,6 +29,9 @@ read.
 .PP
 In \*(lq\fB\-\-watchfd\fR\*(rq mode, inspect another process and show its
 progress through the files it has open.
+.PP
+In \*(lq\fB\-\-monitor\fR\*(rq mode, run a command and display the progress
+of data through both its standard input and its standard output.
 .\"
 .SH OPTIONS
 .\"
@@ -409,6 +414,20 @@ they match those of that process - such as
 \*(lq\fB\-\-null\fR\*(rq, and
 \*(lq\fB\-\-average\-rate\-window\fR\*(rq.
 Data transfer modifiers will have no effect.
+.TP
+.B \-M, \-\-monitor
+Run the command specified by the remaining arguments, and monitor its
+standard input and standard output.
+Use \*(lq\fB\-\-\fR\*(rq after all of the \fBpv\fR options to keep the
+command's options separate.
+.IP
+For example, \*(lq\fBpv\~\-\-cursor\~\-\-monitor\~\-\-\~gzip\~\-9\fR\*(rq is
+equivalent to
+\*(lq\fBpv\~\-\-cursor\~|\~gzip\~\-9\~|\~pv\~\-\-cursor\fR\*(rq, except that
+the latter can't show the input:output ratio.
+.\"TODO: choice of displaying two progress bars (in + out) or only one
+.\"TODO: formatting option for input:output ratio
+.\"TODO: a way to specify the name of each bar, if there are two
 .\"
 .SS "Other options"
 .TP

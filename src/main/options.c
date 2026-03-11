@@ -680,6 +680,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "watchfd", 1, NULL, (int) 'd' },
 		{ "output", 1, NULL, (int) 'o' },
 		{ "average-rate-window", 1, NULL, (int) 'm' },
+		{ "monitor", 0, NULL, (int) 'M' },
 #ifdef ENABLE_DEBUGGING
 		{ "debug", 1, NULL, (int) '!' },
 #endif				/* ENABLE_DEBUGGING */
@@ -688,7 +689,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:Q:P:d:m:o:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:Q:P:d:m:o:M"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -1102,6 +1103,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'm':
 			opts->average_rate_window = pv_getnum_count(optarg, opts->decimal_units);
 			break;
+		case 'M':
+			opts->action = PV_ACTION_MONITOR;
+			break;
 #ifdef ENABLE_DEBUGGING
 		case '!':
 			debugging_output_destination(optarg);
@@ -1245,6 +1249,18 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		/*@-mustfreefresh@ *//* see above */
 		fprintf(stderr, "%s: %s: %s\n", opts->program_name, 0 != opts->remote ? "-R" : "-Q",
 			_("files cannot be specified with this option"));
+		opts_free(opts);
+		return NULL;
+		/*@+mustfreefresh@ */
+	}
+
+	/*
+	 * At least one non-option argument is required with -M.
+	 */
+	if ((PV_ACTION_MONITOR == opts->action) && (optind >= (int) argc)) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: -M: %s\n", opts->program_name,
+			_("a command to run must be specified"));
 		opts_free(opts);
 		return NULL;
 		/*@+mustfreefresh@ */
