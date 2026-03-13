@@ -14,7 +14,7 @@ pv \- monitor and manage the progress of data through a pipe
 .PP
 \fBpv\fR \fB\-Q\fR|\fB\-\-query\fR \fIPID\fR [\fIOPTION\fR]...
 .PP
-\fBpv\fR [\fIOPTION\fR]... \fB\-M\fR|\fB\-\-monitor\fR \-\- \fICOMMAND\fR [\fIARGS\fR]...
+\fBpv\fR [\fIOPTION\fR]... \fB\-M\fR|\fB\-\-monitor\fR \fISIDE\fR \-\- \fICOMMAND\fR [\fIARGS\fR]...
 .\"
 .SH DESCRIPTION
 Show the progress of data through a pipeline by giving information such as
@@ -415,19 +415,31 @@ they match those of that process - such as
 \*(lq\fB\-\-average\-rate\-window\fR\*(rq.
 Data transfer modifiers will have no effect.
 .TP
-.B \-M, \-\-monitor
+.BR \-M " \fISIDE\fR, " \-\-monitor " \fISIDE\fR"
 Run the command specified by the remaining arguments, and monitor its
-standard input and standard output.
+standard input, its standard output, or both, depending on whether
+\fISIDE\fR is \*(lq\fBin\fR\*(rq, \*(lq\fBout\fR\*(rq, or
+\*(lq\fBboth\fR\*(rq.
 Use \*(lq\fB\-\-\fR\*(rq after all of the \fBpv\fR options to keep the
 monitored command's options separate.
 .IP
-For example, \*(lq\fBpv\~\-\-cursor\~\-\-monitor\~\-\-\~gzip\~\-9\fR\*(rq is
+With a \fISIDE\fR of \*(lq\fBboth\fR\*(rq, two progress bars will be shown.
+All of \fBpv\fR's display switches, output modifiers, and data transfer
+modifiers will apply to both sides.
+The \*(lq\fB\-\-format\fR\*(rq and \*(lq\fB\-\-name\fR\*(rq options may be
+specified twice, in which case the first one applies to the input side and
+the second applies to the output side.
+.IP
+For example,
+\*(lq\fBpv\~\-\-cursor\~\-\-monitor\~both\~\-\-\~gzip\~\-9\fR\*(rq is
 equivalent to
 \*(lq\fBpv\~\-\-cursor\~|\~gzip\~\-9\~|\~pv\~\-\-cursor\fR\*(rq, except that
 the latter can't show the input:output ratio.
-.\"TODO: choice of displaying two progress bars (in + out) or only one
+.IP
+The values \*(lq\fB0\fR\*(rq, \*(lq\fB1\fR\*(rq, and \*(lq\fB2\fR\*(rq may
+be used as synonyms for \*(lq\fBin\fR\*(rq, \*(lq\fBout\fR\*(rq, and
+\*(lq\fBboth\fR\*(rq.
 .\"TODO: formatting option for input:output ratio
-.\"TODO: a way to specify the name of each bar, if there are two
 .\"
 .SS "Other options"
 .TP

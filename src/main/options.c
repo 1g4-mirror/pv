@@ -680,7 +680,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "watchfd", 1, NULL, (int) 'd' },
 		{ "output", 1, NULL, (int) 'o' },
 		{ "average-rate-window", 1, NULL, (int) 'm' },
-		{ "monitor", 0, NULL, (int) 'M' },
+		{ "monitor", 1, NULL, (int) 'M' },
 #ifdef ENABLE_DEBUGGING
 		{ "debug", 1, NULL, (int) '!' },
 #endif				/* ENABLE_DEBUGGING */
@@ -689,7 +689,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:Q:P:d:m:o:M"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:Q:P:d:m:o:M:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -996,6 +996,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->height_set_manually = opts->height == 0 ? false : true;
 			break;
 		case 'N':
+			/* TODO: preserve previous name for use with "-M both" */
 			opts->name = pv_strdup(optarg);
 			if (NULL == opts->name) {
 				fprintf(stderr, "%s: -N: %s\n", opts->program_name, strerror(errno));
@@ -1070,6 +1071,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'F':
+			/* TODO: preserve previous format for use with "-M both" */
 			opts->format = pv_strdup(optarg);
 			if (NULL == opts->format) {
 				fprintf(stderr, "%s: -F: %s\n", opts->program_name, strerror(errno));
@@ -1105,6 +1107,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'M':
 			opts->action = PV_ACTION_MONITOR;
+			/* TODO: parse optarg to set the side */
 			break;
 #ifdef ENABLE_DEBUGGING
 		case '!':
@@ -1259,8 +1262,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	 */
 	if ((PV_ACTION_MONITOR == opts->action) && (optind >= (int) argc)) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: -M: %s\n", opts->program_name,
-			_("a command to run must be specified"));
+		fprintf(stderr, "%s: -M: %s\n", opts->program_name, _("a command to run must be specified"));
 		opts_free(opts);
 		return NULL;
 		/*@+mustfreefresh@ */

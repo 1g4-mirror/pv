@@ -372,8 +372,8 @@ void display_help(void)
 		 N_("show progress of process PID"),
 		 { 0, 0, 0, 0} },
 #endif				/* PV_REMOTE_CONTROL */
-		{ "-M", "--monitor", NULL,
-		 N_("monitor the input and output of a command"),
+		{ "-M", "--monitor", N_("SIDE"),
+		 N_("run a command and monitor its standard input, output, or both"),
 		 { 0, 0, 0, 0} },
 		{ "", NULL, NULL, NULL, { 0, 0, 0, 0} },
 		{ "-P", "--pidfile", N_("FILE"),
