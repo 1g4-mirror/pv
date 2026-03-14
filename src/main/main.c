@@ -268,6 +268,25 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, bool can_have_eta
 
 
 /*
+ * Run in monitor mode: run a process and run the main transfer loop on its
+ * input, output, or both.  Returns the appropriate exit status.
+ */
+static int pv__monitor(pvstate_t state, opts_t opts)
+{
+	int retcode;
+
+	retcode = 0;
+
+	/* TODO: make appropriate pipes. */
+	/* TODO: fork and run the command to be monitored, with in/out fds set. */
+	/* TODO: fork for out monitor if monitoring both. */
+	/* TODO: monitor the appropriate side; if both, use name1/format1 for the in side. */
+
+	return retcode;
+}
+
+
+/*
  * Process command-line arguments and set option flags, then call functions
  * to initialise, and finally enter the main loop.
  */
@@ -361,6 +380,8 @@ int main(int argc, char **argv)
 
 	/*
 	 * Put our list of input files into the PV internal state.
+	 *
+	 * TODO: don't do this in monitor mode.
 	 */
 	if (NULL != opts->argv) {
 		pv_state_inputfiles(state, opts->argc, (const char **) (opts->argv));
@@ -469,6 +490,8 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/* TODO: size calculation for monitor mode. */
+
 	/* Initialise the signal handling. */
 	pv_sig_init(state);
 
@@ -562,8 +585,7 @@ int main(int argc, char **argv)
 		break;
 	case PV_ACTION_MONITOR:
 		/* Run a process and monitor its input and output. */
-		/* TODO: run the monitor action. */
-		retcode = 1;
+		retcode = pv__monitor(state, opts);
 		break;
 	}
 
