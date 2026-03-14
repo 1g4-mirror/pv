@@ -37,6 +37,15 @@ typedef enum {
 } pvaction_t;
 
 /*
+ * Sides of a monitored command to monitor with PV_ACTION_MONITOR.
+ */
+typedef enum {
+	PV_SIDE_IN,			/* monitor only the input side */
+	PV_SIDE_OUT,			/* monitor only the output side */
+	PV_SIDE_BOTH			/* monitor both sides */
+} pvside_t;
+
+/*
  * Structure describing run-time options.
  *
  * Members are ordered by size to minimise padding.
@@ -71,6 +80,7 @@ struct opts_s {
 	unsigned int watchfd_count;	       /* number of watchfd items */
 	unsigned int watchfd_length;	       /* allocated array size */
 	pvaction_t action;	       /* the program action to perform */
+	pvside_t side;		       /* which side of the monitored command to monitor */
 	bool progress;                 /* progress bar flag */
 	bool timer;                    /* timer flag */
 	bool eta;                      /* ETA flag */

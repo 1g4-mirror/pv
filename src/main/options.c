@@ -416,6 +416,27 @@ static bool opts_watchfd_parse(opts_t opts, const char *argument, /*@null@ */ co
 }
 
 
+/*
+ * Return true if the first string is at least as long as the second, and
+ * its start matches the entirety of the second.  Both strings must be
+ * null-terminated.
+ */
+static bool string_starts_with(const char *string, const char *match)
+{
+	size_t string_length, match_length;
+
+	string_length = strlen(string);	    /* flawfinder: ignore */
+	match_length = strlen(match);	    /* flawfinder: ignore */
+	/* flawfinder - these are null-terminated strings. */
+
+	if (string_length < match_length)
+		return false;
+	if (0 == strncmp(string, match, match_length))
+		return true;
+	return false;
+}
+
+
 #ifdef HAVE_NFTW
 /*
  * Callback function for nftw() to add the size of the given file to the
@@ -1107,7 +1128,30 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'M':
 			opts->action = PV_ACTION_MONITOR;
-			/* TODO: parse optarg to set the side */
+			if (string_starts_with(optarg, "0")) {
+				opts->side = PV_SIDE_IN;
+			} else if (string_starts_with(optarg, "in")) {
+				opts->side = PV_SIDE_IN;
+			} else if (string_starts_with(optarg, "stdin")) {
+				opts->side = PV_SIDE_IN;
+			} else if (string_starts_with(optarg, "1")) {
+				opts->side = PV_SIDE_OUT;
+			} else if (string_starts_with(optarg, "out")) {
+				opts->side = PV_SIDE_OUT;
+			} else if (string_starts_with(optarg, "stdout")) {
+				opts->side = PV_SIDE_OUT;
+			} else if (string_starts_with(optarg, "2")) {
+				opts->side = PV_SIDE_BOTH;
+			} else if (string_starts_with(optarg, "both")) {
+				opts->side = PV_SIDE_BOTH;
+			} else {
+				/*@-mustfreefresh@ *//* see above */
+				fprintf(stderr, "%s: -M: %s: %s\n",
+					opts->program_name, optarg, _("invalid side specification"));
+				opts_free(opts);
+				return NULL;
+				/*@+mustfreefresh@ */
+			}
 			break;
 #ifdef ENABLE_DEBUGGING
 		case '!':
