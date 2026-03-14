@@ -40,6 +40,7 @@ typedef enum {
  * Sides of a monitored command to monitor with PV_ACTION_MONITOR.
  */
 typedef enum {
+	PV_SIDE_NONE,			/* don't monitor a command */
 	PV_SIDE_IN,			/* monitor only the input side */
 	PV_SIDE_OUT,			/* monitor only the output side */
 	PV_SIDE_BOTH			/* monitor both sides */

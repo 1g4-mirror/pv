@@ -762,6 +762,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	numopts = 0;
 
 	opts->action = PV_ACTION_TRANSFER;
+	opts->side = PV_SIDE_NONE;
 	opts->interval = 1;
 	opts->delay_start = 0;
 	opts->average_rate_window = 30;
@@ -1292,6 +1293,31 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/* If -Z was given but not -E, pretend one -E was given too. */
 	if (opts->error_skip_block > 0 && 0 == opts->skip_errors)
 		opts->skip_errors = 1;
+
+	/*
+	 * Don't allow -R or -Q with -M.
+	 */
+	if ((PV_ACTION_MONITOR == opts->action) && ((0 != opts->remote) || (0 != opts->query))) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s: %s\n", opts->program_name, 0 != opts->remote ? "-R" : "-Q",
+			_("monitor mode cannot be specified with this option"));
+		opts_free(opts);
+		return NULL;
+		/*@+mustfreefresh@ */
+	}
+
+	/*
+	 * Don't allow -U with -M.
+	 */
+	if ((PV_ACTION_STORE_AND_FORWARD == opts->action && PV_SIDE_NONE != opts->side)
+	    || (PV_ACTION_MONITOR == opts->action && NULL != opts->store_and_forward_file)) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s\n", opts->program_name,
+			_("monitor mode cannot be used with store-and-forward"));
+		opts_free(opts);
+		return NULL;
+		/*@+mustfreefresh@ */
+	}
 
 	/*
 	 * Don't allow any non-option arguments with -R or -Q.
