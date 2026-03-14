@@ -29,6 +29,7 @@ extern "C" {
  */
 #define PV_ERROREXIT_REMOTE_OR_PID 1
 #define PV_ERROREXIT_SAF	   1	/* store and forward error */
+#define PV_ERROREXIT_MONITOR	   1	/* monitor mode error */
 #define PV_ERROREXIT_ACCESS        2
 #define PV_ERROREXIT_OUROBOROS     4
 #define PV_ERROREXIT_TRANSITION    8
