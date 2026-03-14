@@ -273,11 +273,41 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, bool can_have_eta
  */
 static int pv__monitor(pvstate_t state, opts_t opts)
 {
+	int pipefd_in[2];
+	int pipefd_out[2];
 	int retcode;
 
 	retcode = 0;
 
-	/* TODO: make appropriate pipes. */
+	/*
+	 * Create the pipes for communicating with the command.
+	 */
+
+	pipefd_in[0] = -1;
+	pipefd_in[1] = -1;
+	pipefd_out[0] = -1;
+	pipefd_out[1] = -1;
+
+	/* Pipe for the input side of the command, if we're monitoring it. */
+	if ((opts->side == PV_SIDE_IN) || (opts->side == PV_SIDE_BOTH)) {
+		if (0 != pipe(pipefd_in)) {
+			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			return PV_ERROREXIT_MONITOR;
+		}
+	}
+
+	/* Pipe for the output side of the command, if we're monitoring it. */
+	if ((opts->side == PV_SIDE_OUT) || (opts->side == PV_SIDE_BOTH)) {
+		if (0 != pipe(pipefd_out)) {
+			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			if (-1 != pipefd_in[0])
+				(void) close(pipefd_in[0]);
+			if (-1 != pipefd_in[1])
+				(void) close(pipefd_in[1]);
+			return PV_ERROREXIT_MONITOR;
+		}
+	}
+
 	/* TODO: fork and run the command to be monitored, with in/out fds set. */
 	/* TODO: fork for out monitor if monitoring both. */
 	/* TODO: monitor the appropriate side; if both, use name1/format1 for the in side. */
