@@ -64,8 +64,12 @@ void opts_free( /*@only@ */ opts_t opts)
 	 */
 	if (NULL != opts->name)
 		free(opts->name);
+	if (NULL != opts->name1)
+		free(opts->name1);
 	if (NULL != opts->format)
 		free(opts->format);
+	if (NULL != opts->format1)
+		free(opts->format1);
 	if (NULL != opts->pidfile)
 		free(opts->pidfile);
 	if (NULL != opts->output)
@@ -1017,7 +1021,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->height_set_manually = opts->height == 0 ? false : true;
 			break;
 		case 'N':
-			/* TODO: preserve previous name for use with "-M both" */
+			opts->name1 = opts->name;
 			opts->name = pv_strdup(optarg);
 			if (NULL == opts->name) {
 				fprintf(stderr, "%s: -N: %s\n", opts->program_name, strerror(errno));
@@ -1092,7 +1096,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'F':
-			/* TODO: preserve previous format for use with "-M both" */
+			opts->format1 = opts->format;
 			opts->format = pv_strdup(optarg);
 			if (NULL == opts->format) {
 				fprintf(stderr, "%s: -F: %s\n", opts->program_name, strerror(errno));

@@ -56,8 +56,10 @@ struct opts_s {
 	/*@keep@*/ const char *program_name; /* name the program is running as */
 	/*@keep@*/ /*@null@*/ char *output; /* fd to write output to */
 	/*@keep@*/ /*@null@*/ char *name;    /* display name, if any */
+	/*@keep@*/ /*@null@*/ char *name1;   /* first name, if two were given */
 	/*@keep@*/ /*@null@*/ char *default_bar_style; /* default bar style */
 	/*@keep@*/ /*@null@*/ char *format;  /* output format, if any */
+	/*@keep@*/ /*@null@*/ char *format1; /* first format, if two were given */
 	/*@keep@*/ /*@null@*/ char *pidfile; /* PID file, if any */
 	/*@keep@*/ /*@null@*/ char *store_and_forward_file; /* store and forward file, if any */
 	/*@keep@*/ /*@null@*/ char *extra_display; /* extra display specifier, if any */
