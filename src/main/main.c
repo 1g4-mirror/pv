@@ -276,6 +276,7 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 	int pipefd_in[2];
 	int pipefd_out[2];
 	int retcode;
+	pid_t command_pid;
 
 	retcode = 0;
 
@@ -308,7 +309,24 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 		}
 	}
 
-	/* TODO: fork and run the command to be monitored, with in/out fds set. */
+	/* Create a process to run the command. */
+	command_pid = fork();
+	if (command_pid < 0) {
+		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		if (-1 != pipefd_in[0])
+			(void) close(pipefd_in[0]);
+		if (-1 != pipefd_in[1])
+			(void) close(pipefd_in[1]);
+		if (-1 != pipefd_out[0])
+			(void) close(pipefd_out[0]);
+		if (-1 != pipefd_out[1])
+			(void) close(pipefd_out[1]);
+		return PV_ERROREXIT_MONITOR;
+	} else if (0 == command_pid) {
+		/* TODO: set up file descriptors for stdin/out */
+		/* TODO: execute the command */
+	}
+
 	/* TODO: fork for out monitor if monitoring both. */
 	/* TODO: monitor the appropriate side; if both, use name1/format1 for the in side. */
 
