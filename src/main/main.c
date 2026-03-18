@@ -323,9 +323,44 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 			(void) close(pipefd_out[1]);
 		return PV_ERROREXIT_MONITOR;
 	} else if (0 == command_pid) {
-		/* TODO: set up file descriptors for stdin/out */
+		/* Command process. */
+
+		/* Close the write end of the "in" pipe. */
+		if (-1 != pipefd_in[1])
+			(void) close(pipefd_in[1]);
+		/* Close the read end of the "out" pipe. */
+		if (-1 != pipefd_out[0])
+			(void) close(pipefd_out[0]);
+
+		/* Put the read end of the "in" pipe on stdin. */
+		if (-1 != pipefd_in[0]) {
+			if (dup2(pipefd_in[0], STDIN_FILENO) < 0) {
+				fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+				exit(1);
+			}
+			(void) close(pipefd_in[0]);
+		}
+
+		/* Put the write end of the "out" pipe on stdout. */
+		if (-1 != pipefd_out[1]) {
+			if (dup2(pipefd_out[1], STDOUT_FILENO) < 0) {
+				fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+				exit(1);
+			}
+			(void) close(pipefd_out[1]);
+		}
+
 		/* TODO: execute the command */
 	}
+
+	/* Main process, not the command process. */
+
+	/* Close the read end of the "in" pipe. */
+	if (-1 != pipefd_in[0])
+		(void) close(pipefd_in[0]);
+	/* Close the write end of the "out" pipe. */
+	if (-1 != pipefd_out[1])
+		(void) close(pipefd_out[1]);
 
 	/* TODO: fork for out monitor if monitoring both. */
 	/* TODO: monitor the appropriate side; if both, use name1/format1 for the in side. */
