@@ -278,6 +278,14 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 	int retcode;
 	pid_t command_pid;
 
+	/* Arguments check. */
+	if ((NULL == opts->argv) || (opts->argc < 1) || (NULL == opts->argv[0])) {
+		/*@-mustfreefresh@ */
+		fprintf(stderr, "%s: -M: %s\n", opts->program_name, _("a command to run must be specified"));
+		return PV_ERROREXIT_MONITOR;
+		/*@+mustfreefresh@ *//* see below about gettext _() calls. */
+	}
+
 	retcode = 0;
 
 	/*
@@ -310,7 +318,7 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 	}
 
 	/* Create a process to run the command. */
-	command_pid = fork();
+	command_pid = (pid_t) fork();
 	if (command_pid < 0) {
 		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 		if (-1 != pipefd_in[0])
@@ -336,7 +344,7 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 		if (-1 != pipefd_in[0]) {
 			if (dup2(pipefd_in[0], STDIN_FILENO) < 0) {
 				fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
-				exit(1);
+				exit(EXIT_FAILURE);
 			}
 			(void) close(pipefd_in[0]);
 		}
@@ -345,12 +353,15 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 		if (-1 != pipefd_out[1]) {
 			if (dup2(pipefd_out[1], STDOUT_FILENO) < 0) {
 				fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
-				exit(1);
+				exit(EXIT_FAILURE);
 			}
 			(void) close(pipefd_out[1]);
 		}
 
-		/* TODO: execute the command */
+		/* Execute the command. */
+		(void) execvp(opts->argv[0], (char * const *) (opts->argv));
+		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		exit(EXIT_FAILURE);
 	}
 
 	/* Main process, not the command process. */
@@ -464,9 +475,10 @@ int main(int argc, char **argv)
 	/*
 	 * Put our list of input files into the PV internal state.
 	 *
-	 * TODO: don't do this in monitor mode.
+	 * Don't do this in monitor mode, since the rest of PV won't be
+	 * using the list in that case.
 	 */
-	if (NULL != opts->argv) {
+	if ((NULL != opts->argv) && (PV_ACTION_MONITOR != opts->action)) {
 		pv_state_inputfiles(state, opts->argc, (const char **) (opts->argv));
 	}
 
