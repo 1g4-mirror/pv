@@ -46,6 +46,8 @@ typedef enum {
 	PV_SIDE_BOTH			/* monitor both sides */
 } pvside_t;
 
+typedef /*@null@*/ const char * argv_string;
+
 /*
  * Structure describing run-time options.
  *
@@ -66,7 +68,7 @@ struct opts_s {
 	/*@keep@*/ /*@null@*/ char *extra_display; /* extra display specifier, if any */
 	/*@keep@*/ /*@null@*/ pid_t *watchfd_pid;  /* array of processes to watch fds of */
 	/*@keep@*/ /*@null@*/ int *watchfd_fd;  /* array of fds to watch in each one (0=all) */
-	/*@keep@*/ /*@null@*/ const char **argv;   /* array of non-option arguments */
+	/*@keep@*/ /*@null@*/ argv_string *argv;   /* array of non-option arguments */
 	size_t lastwritten;            /* show N bytes last written */
 	off_t rate_limit;              /* rate limit, in bytes per second */
 	size_t buffer_size;            /* buffer size, in bytes (0=default) */

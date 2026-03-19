@@ -92,12 +92,13 @@ void opts_free( /*@only@ */ opts_t opts)
 
 /*
  * Add a filename to the list of non-option arguments, returning false on
- * error.  The filename is not copied - the pointer is stored.
+ * error.  The filename is not copied - the pointer is stored.  The list is
+ * guaranteed to have a NULL after the last item.
  */
 bool opts_add_file(opts_t opts, const char *filename)
 {
 	/*@-branchstate@ */
-	if ((opts->argc >= opts->argv_length) || (NULL == opts->argv)) {
+	if (((1+opts->argc) >= opts->argv_length) || (NULL == opts->argv)) {
 		opts->argv_length = opts->argc + 10;
 		/*@-keeptrans@ */
 		opts->argv = realloc(opts->argv, opts->argv_length * sizeof(char *));
@@ -121,6 +122,7 @@ bool opts_add_file(opts_t opts, const char *filename)
 	 */
 
 	opts->argv[opts->argc++] = filename;
+	opts->argv[opts->argc] = NULL;
 
 	return true;
 }
