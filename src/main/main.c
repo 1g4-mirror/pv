@@ -342,7 +342,7 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 	pipefd_out[1] = -1;
 
 	/* Pipe for the input side of the command, if we're monitoring it. */
-	if ((opts->side == PV_SIDE_IN) || (opts->side == PV_SIDE_BOTH)) {
+	if ((PV_SIDE_IN == opts->side) || (PV_SIDE_BOTH == opts->side)) {
 		if (0 != pipe(pipefd_in)) {
 			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 			return PV_ERROREXIT_MONITOR;
@@ -350,7 +350,7 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 	}
 
 	/* Pipe for the output side of the command, if we're monitoring it. */
-	if ((opts->side == PV_SIDE_OUT) || (opts->side == PV_SIDE_BOTH)) {
+	if ((PV_SIDE_OUT == opts->side) || (PV_SIDE_BOTH == opts->side)) {
 		if (0 != pipe(pipefd_out)) {
 			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 			if (-1 != pipefd_in[0])
