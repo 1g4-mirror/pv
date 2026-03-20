@@ -268,6 +268,50 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, bool can_have_eta
 
 
 /*
+ * Run the main transfer loop for the given side of monitor mode, using the
+ * "command_fd" file descriptor as the transfer loop's output (on the "in"
+ * side, it's a pipe to the command) or as its input (on the "out" side,
+ * it's a pipe from the command).  If both sides are active,
+ * "other_side_pid" is the PID of the other side.
+ *
+ * Returns the appropriate exit status.
+ *
+ * As side effect, "command_fd" is closed.
+ */
+static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t side, int command_fd, /*@unused@ */
+			   __attribute__((unused)) pid_t other_side_pid)
+{
+	switch (side) {
+	case PV_SIDE_NONE:		    /* fall through */
+	case PV_SIDE_BOTH:
+		return PV_ERROREXIT_MONITOR;
+	case PV_SIDE_IN:
+		/* Replace stdout with the pipe to the command. */
+		if (dup2(command_fd, STDOUT_FILENO) < 0) {
+			fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
+			return PV_ERROREXIT_MONITOR;
+		}
+		break;
+	case PV_SIDE_OUT:
+		/* Replace stdin with the pipe from the command. */
+		if (dup2(command_fd, STDIN_FILENO) < 0) {
+			fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
+			return PV_ERROREXIT_MONITOR;
+		}
+		break;
+	}
+
+	if (close(command_fd) < 0) {
+		fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
+	}
+
+	/* TODO: use other_side_pid, for ratio display. */
+
+	return pv_main_loop(state);
+}
+
+
+/*
  * Run in monitor mode: run a process and run the main transfer loop on its
  * input, output, or both.  Returns the appropriate exit status.
  */
@@ -276,7 +320,7 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 	int pipefd_in[2];
 	int pipefd_out[2];
 	int retcode;
-	pid_t command_pid;
+	pid_t command_pid, in_monitor_pid, out_monitor_pid;
 
 	/* Arguments check. */
 	if ((NULL == opts->argv) || (opts->argc < 1) || (NULL == opts->argv[0])) {
@@ -359,9 +403,16 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 		}
 
 		/* Execute the command. */
-		(void) execvp(opts->argv[0], (char * const *) (opts->argv));
+		(void) execvp(opts->argv[0], (char *const *) (opts->argv));	/* flawfinder: ignore */
 		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 		exit(EXIT_FAILURE);
+
+		/*
+		 * flawfinder recommends using a library call instead of
+		 * executing another program with execvp(), but that isn't
+		 * appropriate here, the whole purpose of monitor mode is to
+		 * execute a process and monitor it.
+		 */
 	}
 
 	/* Main process, not the command process. */
@@ -373,8 +424,66 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 	if (-1 != pipefd_out[1])
 		(void) close(pipefd_out[1]);
 
-	/* TODO: fork for out monitor if monitoring both. */
-	/* TODO: monitor the appropriate side; if both, use name1/format1 for the in side. */
+	/*
+	 * If monitoring both input and output, create a process for
+	 * monitoring the output side.
+	 */
+	in_monitor_pid = -1;
+	out_monitor_pid = -1;
+	if (PV_SIDE_BOTH == opts->side) {
+		in_monitor_pid = (pid_t) getpid();
+		out_monitor_pid = (pid_t) fork();
+		if (out_monitor_pid < 0) {
+			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			if (-1 != pipefd_in[1])
+				(void) close(pipefd_in[1]);
+			if (-1 != pipefd_out[0])
+				(void) close(pipefd_out[0]);
+			(void) kill(command_pid, SIGTERM);
+			return PV_ERROREXIT_MONITOR;
+		} else if (0 == out_monitor_pid) {
+			/* Output side monitoring process. */
+
+			/* Close the write end of the "in" pipe. */
+			if (-1 != pipefd_in[1])
+				(void) close(pipefd_in[1]);
+
+			return pv__run_monitor(opts->program_name, state, PV_SIDE_OUT, pipefd_out[0], in_monitor_pid);
+		}
+	}
+
+	/* Monitor the remaining side. */
+	switch (opts->side) {
+	case PV_SIDE_NONE:
+		retcode = PV_ERROREXIT_MONITOR;
+		break;
+	case PV_SIDE_BOTH:
+		/* Use name1, format1 for the "in" side. */
+		if (NULL != opts->name1) {
+			pv_state_name_set(state, opts->name1);
+		}
+		if (NULL != opts->format1) {
+			pv_state_format_string_set(state, opts->format1);
+		}
+		/* TODO: call pv_state_set_format(). */
+		/*@fallthrough@ */
+		/* falling through as "out" is in another process (above). */
+		__attribute__((fallthrough));
+	case PV_SIDE_IN:
+		/* Close the read end of the "out" pipe. */
+		if (-1 != pipefd_out[0])
+			(void) close(pipefd_out[0]);
+		pipefd_out[0] = -1;
+		retcode = pv__run_monitor(opts->program_name, state, PV_SIDE_IN, pipefd_in[1], out_monitor_pid);
+		break;
+	case PV_SIDE_OUT:
+		/* Close the write end of the "in" pipe. */
+		if (-1 != pipefd_in[1])
+			(void) close(pipefd_in[1]);
+		pipefd_in[1] = -1;
+		retcode = pv__run_monitor(opts->program_name, state, PV_SIDE_OUT, pipefd_out[0], in_monitor_pid);
+		break;
+	}
 
 	return retcode;
 }
