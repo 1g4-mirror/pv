@@ -98,7 +98,7 @@ void opts_free( /*@only@ */ opts_t opts)
 bool opts_add_file(opts_t opts, const char *filename)
 {
 	/*@-branchstate@ */
-	if (((1+opts->argc) >= opts->argv_length) || (NULL == opts->argv)) {
+	if (((1 + opts->argc) >= opts->argv_length) || (NULL == opts->argv)) {
 		opts->argv_length = opts->argc + 10;
 		/*@-keeptrans@ */
 		opts->argv = realloc(opts->argv, opts->argv_length * sizeof(char *));
