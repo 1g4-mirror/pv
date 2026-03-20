@@ -131,10 +131,12 @@ static int pv__set_output(pvstate_t state, opts_t opts, /*@null@ */ const char *
 		return 0;
 
 	if (NULL == output_file || 0 == strcmp(output_file, "-")) {
+		debug("%s", "setting output to stdout");
 		pv_state_output_set(state, STDOUT_FILENO, "(stdout)");
 		return 0;
 	}
 
+	debug("%s: %s", "setting output", output_file);
 	output_fd = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0600);	/* flawfinder: ignore */
 	/*
 	 * flawfinder rationale: the output filename has been
@@ -347,6 +349,7 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 			return PV_ERROREXIT_MONITOR;
 		}
+		debug("pipefd_in[]=(%d,%d)", pipefd_in[0], pipefd_in[1]);
 	}
 
 	/* Pipe for the output side of the command, if we're monitoring it. */
@@ -359,6 +362,7 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 				(void) close(pipefd_in[1]);
 			return PV_ERROREXIT_MONITOR;
 		}
+		debug("pipefd_out[]=(%d,%d)", pipefd_out[0], pipefd_out[1]);
 	}
 
 	/* Create a process to run the command. */
@@ -378,28 +382,38 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 		/* Command process. */
 
 		/* Close the write end of the "in" pipe. */
-		if (-1 != pipefd_in[1])
+		if (-1 != pipefd_in[1]) {
 			(void) close(pipefd_in[1]);
+			pipefd_in[1] = -1;
+		}
 		/* Close the read end of the "out" pipe. */
-		if (-1 != pipefd_out[0])
+		if (-1 != pipefd_out[0]) {
 			(void) close(pipefd_out[0]);
+			pipefd_out[0] = -1;
+		}
 
 		/* Put the read end of the "in" pipe on stdin. */
 		if (-1 != pipefd_in[0]) {
+			debug("replacing command stdin with fd %d", pipefd_in[0]);
 			if (dup2(pipefd_in[0], STDIN_FILENO) < 0) {
 				fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 			(void) close(pipefd_in[0]);
+			debug("replaced command stdin with fd %d", pipefd_in[0]);
+			pipefd_in[0] = -1;
 		}
 
 		/* Put the write end of the "out" pipe on stdout. */
 		if (-1 != pipefd_out[1]) {
+			debug("replacing command stdout with fd %d", pipefd_out[1]);
 			if (dup2(pipefd_out[1], STDOUT_FILENO) < 0) {
 				fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 			(void) close(pipefd_out[1]);
+			debug("replaced command stdout with fd %d", pipefd_out[1]);
+			pipefd_out[1] = -1;
 		}
 
 		/* Execute the command. */
@@ -418,11 +432,15 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 	/* Main process, not the command process. */
 
 	/* Close the read end of the "in" pipe. */
-	if (-1 != pipefd_in[0])
+	if (-1 != pipefd_in[0]) {
 		(void) close(pipefd_in[0]);
+		pipefd_in[0] = -1;
+	}
 	/* Close the write end of the "out" pipe. */
-	if (-1 != pipefd_out[1])
+	if (-1 != pipefd_out[1]) {
 		(void) close(pipefd_out[1]);
+		pipefd_out[1] = -1;
+	}
 
 	/*
 	 * If monitoring both input and output, create a process for

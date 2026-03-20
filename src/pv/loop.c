@@ -213,7 +213,7 @@ int pv_main_loop(pvstate_t state)
 			/*@-type@ */
 			if ((sb.st_mode & S_IFMT) == S_IFIFO) {
 				output_is_pipe = true;
-				debug("%s", "output is a pipe");
+				debug("%s (fd %d)", "output is a pipe", output_fd);
 			}
 			/*@+type@ *//* splint says st_mode is __mode_t, not mode_t */
 		} else {
