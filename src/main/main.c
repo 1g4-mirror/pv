@@ -280,15 +280,21 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, bool can_have_eta
  *
  * As side effect, "command_fd" is closed.
  */
-static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t side, int command_fd, /*@unused@ */
+static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t side, int command_fd,
+			   /*@unused@ */
 			   __attribute__((unused)) pid_t other_side_pid)
 {
+	const char *dummy_argv[1];	 /* flawfinder: ignore */
+
+	/* flawfinder - the array length is passed along with the array. */
+
 	switch (side) {
 	case PV_SIDE_NONE:		    /* fall through */
 	case PV_SIDE_BOTH:
 		return PV_ERROREXIT_MONITOR;
 	case PV_SIDE_IN:
 		/* Replace stdout with the pipe to the command. */
+		debug("replacing stdout with fd %d", command_fd);
 		if (dup2(command_fd, STDOUT_FILENO) < 0) {
 			fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
 			return PV_ERROREXIT_MONITOR;
@@ -296,6 +302,7 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 		break;
 	case PV_SIDE_OUT:
 		/* Replace stdin with the pipe from the command. */
+		debug("replacing stdin with fd %d", command_fd);
 		if (dup2(command_fd, STDIN_FILENO) < 0) {
 			fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
 			return PV_ERROREXIT_MONITOR;
@@ -308,6 +315,11 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 	}
 
 	/* TODO: use other_side_pid, for ratio display. */
+
+	/*@-observertrans@ */
+	dummy_argv[0] = "-";
+	/*@+observertrans@ */
+	pv_state_inputfiles(state, 1, dummy_argv);
 
 	return pv_main_loop(state);
 }
@@ -486,7 +498,9 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 		/* TODO: call pv_state_set_format(). */
 		/*@fallthrough@ */
 		/* falling through as "out" is in another process (above). */
+#ifndef SPLINT
 		__attribute__((fallthrough));
+#endif
 	case PV_SIDE_IN:
 		/* Close the read end of the "out" pipe. */
 		if (-1 != pipefd_out[0])
