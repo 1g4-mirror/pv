@@ -19,6 +19,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #ifdef HAVE_LANGINFO_H
 #include <langinfo.h>
 #endif
@@ -333,8 +334,8 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 {
 	int pipefd_in[2];
 	int pipefd_out[2];
-	int retcode;
-	pid_t command_pid, in_monitor_pid, out_monitor_pid;
+	int retcode, pid_status;
+	pid_t command_pid, in_monitor_pid, out_monitor_pid, waited_pid;
 
 	/* Arguments check. */
 	if ((NULL == opts->argv) || (opts->argc < 1) || (NULL == opts->argv[0])) {
@@ -515,6 +516,37 @@ static int pv__monitor(pvstate_t state, opts_t opts)
 		pipefd_in[1] = -1;
 		retcode = pv__run_monitor(opts->program_name, state, PV_SIDE_OUT, pipefd_out[0], in_monitor_pid);
 		break;
+	}
+
+	/*
+	 * If monitoring the "in" side, close stdout to signal EOF,
+	 * otherwise when we wait for the monitored command, we'll wait
+	 * forever.
+	 */
+	if (PV_SIDE_IN == opts->side || PV_SIDE_BOTH == opts->side) {
+		if (close(STDOUT_FILENO) < 0) {
+			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		}
+	}
+
+	/* Wait for the monitored command to exit. */
+	do {
+		/*@-type@ */
+		/* splint disagreement about __pid_t vs pid_t. */
+		pid_status = 0;
+		waited_pid = waitpid(command_pid, &pid_status, 0);
+		/*@+type@ */
+	} while (-1 == waited_pid && EINTR == errno);
+
+	/* If monitoring both sides, wait for the "out" side to exit. */
+	if (PV_SIDE_BOTH == opts->side && -1 != out_monitor_pid) {
+		do {
+			/*@-type@ */
+			/* splint disagreement about __pid_t vs pid_t. */
+			pid_status = 0;
+			waited_pid = waitpid(out_monitor_pid, &pid_status, 0);
+			/*@+type@ */
+		} while (-1 == waited_pid && EINTR == errno);
 	}
 
 	return retcode;
