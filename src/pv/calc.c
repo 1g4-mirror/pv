@@ -119,9 +119,6 @@ void pv_calculate_transfer_rate(pvtransfercalc_t calc, readonly_pvtransferstate_
 		calc->prev_elapsed_sec = transfer->elapsed_seconds;
 		calc->prev_trans = 0;
 
-		if (control->bits)
-			measured_rate = 8.0 * measured_rate;
-
 		if ((calc->measurements_taken < 1) || (measured_rate < calc->rate_min)) {
 			calc->rate_min = measured_rate;
 		}

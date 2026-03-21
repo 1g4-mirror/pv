@@ -111,6 +111,7 @@ is acknowledged and greatly appreciated:
  * Andriy Galetski, and also [thinrope](https://codeberg.org/thinrope) - suggested the "**--sparse**" option ([#45](https://codeberg.org/ivarch/pv/issues/45))
  * [KimHansen](https://codeberg.org/KimHansen) - suggested that "**--watchfd**" should keep its display when the process ends ([#81](https://codeberg.org/ivarch/pv/issues/81))
  * [njt](https://codeberg.org/njt) - suggested that "**--size** @*PATH*" should accept directories ([#179](https://codeberg.org/ivarch/pv/issues/179))
+ * [mojohakase](https://codeberg.org/mojohakase) - provided fix for multiplication bug when combining "**--bits**" with "**--gauge**" ([#182](https://codeberg.org/ivarch/pv/issues/182))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 

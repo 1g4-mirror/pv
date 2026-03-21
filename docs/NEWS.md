@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *fix:* when using **--bits** with **--gauge**, don't incorrectly multiply the rate twice ([#182](https://codeberg.org/ivarch/pv/issues/182))
+
 ### 1.10.4 - 8 March 2026
 
  * *fix:* when using **--size @PATH**, *PATH* can be a directory, and the total size of all files within it will be used ([#179](https://codeberg.org/ivarch/pv/issues/179))
