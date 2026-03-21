@@ -52,7 +52,9 @@ typedef bool _Bool;
 # endif
 #endif
 
+#ifndef SPLINT
 /* Remove __attribute__(()) if not using GCC. */
 #ifndef __GNUC__
 #define __attribute__(x) /* GCC-only feature */
+#endif
 #endif
