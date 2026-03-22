@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-03-08 11:20+0000\n"
+"POT-Creation-Date: 2026-03-22 14:53+0000\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
