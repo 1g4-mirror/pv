@@ -130,7 +130,7 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
    * [kre](https://translate.codeberg.org/user/kre/) (2)
    * [fnetX](https://translate.codeberg.org/user/fnetX/) (1)
  * **Polish**
-   * [coralpink](https://translate.codeberg.org/user/coralpink/) (106)
+   * [coralpink](https://translate.codeberg.org/user/coralpink/) (116)
  * **Russian**
    * [0ko](https://translate.codeberg.org/user/0ko/) (157)
  * **Turkish**
