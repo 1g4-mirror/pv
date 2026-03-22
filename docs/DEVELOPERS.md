@@ -145,6 +145,7 @@ The package maintainer should run through these steps for a new release:
    * <https://packages.gentoo.org/packages/sys-apps/pv>
    * <https://cvsweb.openbsd.org/ports/sysutils/pv/>
    * <https://packages.fedoraproject.org/pkgs/pv/pv/>
+ * Check for translation updates <https://translate.codeberg.org/projects/pv>
  * Run "`make indent; make indent indentclean check`"
  * Check that _po/POTFILES.in_ is up to date
  * Run "`make -C po update-po`"
