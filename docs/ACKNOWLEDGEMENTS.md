@@ -119,6 +119,7 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
    * [mmatous](https://translate.codeberg.org/user/mmatous/) (135)
  * **Finnish**
    * [artnay](https://translate.codeberg.org/user/artnay/) (65)
+   * [Ricky-Tigg](https://translate.codeberg.org/user/Ricky-Tigg/) (66)
  * **French**
    * anonymous suggestions (7)
    * [milimarg](https://codeberg.org/milimarg) (13)
