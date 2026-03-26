@@ -1,3 +1,8 @@
+### UNRELEASED
+
+ * *i18n:* Polish translations updated
+ * *i18n:* Finnish translations updated
+
 ### 1.10.5 - 22 March 2026
 
  * *fix:* when using **--bits** with **--gauge**, don't incorrectly multiply the rate twice ([#182](https://codeberg.org/ivarch/pv/issues/182))
