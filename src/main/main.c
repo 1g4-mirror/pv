@@ -317,6 +317,7 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 
 	/* TODO: use other_side_pid, for ratio display. */
 	/* TODO: exchange transfer information like -Q. */
+	/* TODO: ...or arrange pipes between the two PIDs. */
 
 	/*@-observertrans@ */
 	dummy_argv[0] = "-";
