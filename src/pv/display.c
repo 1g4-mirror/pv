@@ -544,6 +544,7 @@ pvdisplay_bytecount_t pv_formatter_segmentcontent(char *content, pvformatter_arg
 		{ "{sgr:colour,...}", &pv_formatter_sgr, false },
 		{ NULL, NULL, false }
 	};
+	/* TODO: formatter for ratio, for "-M both" */
 	return format_component_array;
 }
 

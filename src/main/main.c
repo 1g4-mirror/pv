@@ -286,14 +286,7 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, bool can_have_eta
  * As a side effect, "command_fd" is closed.
  */
 static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t side, int command_fd,
-			   /*@unused@ */
-			   __attribute__((unused)) pid_t othermonitor_pid,
-			   /*@unused@ */
-			   __attribute__((unused))
-			   int othermonitor_read_fd,
-			   /*@unused@ */
-			   __attribute__((unused))
-			   int othermonitor_write_fd)
+			   pid_t othermonitor_pid, int othermonitor_read_fd, int othermonitor_write_fd)
 {
 	const char *dummy_argv[1];	 /* flawfinder: ignore */
 
@@ -325,7 +318,7 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 		fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
 	}
 
-	/* TODO: pass othermonitor_* into the state for ratio display. */
+	pv_state_othermonitor_set(state, othermonitor_pid, othermonitor_read_fd, othermonitor_write_fd);
 
 	/*@-observertrans@ */
 	dummy_argv[0] = "-";

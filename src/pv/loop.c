@@ -185,6 +185,10 @@ int pv_main_loop(pvstate_t state)
 	unsigned int file_idx;
 	bool output_is_pipe;
 
+	/* TODO: treat "-F ''" as "-q" so there's no extra blank line. */
+	/* TODO: if "-q", turn off "-c", again so there's no blank line. */
+	/* May need local no_display and cursor flags for this. */
+
 	/*
 	 * "written" is ALWAYS bytes written by the last transfer.
 	 *
@@ -337,6 +341,9 @@ int pv_main_loop(pvstate_t state)
 			(void) pv_remote_check(state);
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
+
+		/* TODO: occasionally check othermonitor_read_fd, calculate ratio */
+		/* TODO: occasionally send to othermonitor_write_fd */
 
 		if (1 == state->flags.trigger_exit)
 			break;

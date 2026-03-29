@@ -191,6 +191,9 @@ pvstate_t pv_state_alloc(void)
 
 	state->watchfd.count = 0;
 	state->control.output_fd = -1;
+	state->control.othermonitor_pid = 0;
+	state->control.othermonitor_read_fd = -1;
+	state->control.othermonitor_write_fd = -1;
 #ifdef HAVE_IPC
 	state->cursor.shmid = -1;
 	state->cursor.pvcount = 1;
@@ -767,6 +770,13 @@ void pv_state_average_rate_window_set(pvstate_t state, unsigned int val)
 void pv_state_set_terminal_supports_utf8(pvstate_t state, bool val)
 {
 	state->status.terminal_supports_utf8 = val;
+}
+
+void pv_state_othermonitor_set(pvstate_t state, pid_t pid, int read_fd, int write_fd)
+{
+	state->control.othermonitor_pid = pid;
+	state->control.othermonitor_read_fd = read_fd;
+	state->control.othermonitor_write_fd = write_fd;
 }
 
 /*

@@ -201,6 +201,9 @@ struct pvstate_s {
 		off_t size;                      /* total size of data */
 		unsigned int skip_errors;        /* skip read errors counter */
 		int output_fd;                   /* fd to write output to */
+		pid_t othermonitor_pid;		 /* pid of the other monitor, in "-M both" mode */
+		int othermonitor_read_fd;	 /* fd to read transfer counts from other monitor */
+		int othermonitor_write_fd;	 /* fd to write transfer counts to other monitor */
 		unsigned int average_rate_window; /* time window in seconds for average rate calculations */
 		unsigned int history_interval;	 /* seconds between each average rate calc history entry */
 		pvdisplay_width_t width;         /* screen width */

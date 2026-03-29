@@ -1290,6 +1290,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		opts->eta = true;
 		opts->rate = true;
 		opts->bytes = true;
+		/* TODO: add ratio format if "-M both" */
 	}
 
 	/* If -Z was given but not -E, pretend one -E was given too. */

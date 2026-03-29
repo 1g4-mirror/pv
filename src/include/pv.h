@@ -239,6 +239,7 @@ extern void pv_state_extra_display_set(pvstate_t, /*@null@*/ const char *);
 extern void pv_state_output_set(pvstate_t, int, const char *);
 extern void pv_state_average_rate_window_set(pvstate_t, unsigned int);
 extern void pv_state_set_terminal_supports_utf8(pvstate_t, bool);
+extern void pv_state_othermonitor_set(pvstate_t, pid_t, int, int);
 
 extern void pv_state_inputfiles(pvstate_t, unsigned int, const char **);
 extern void pv_state_watchfds(pvstate_t, unsigned int, const pid_t *, const int *);
