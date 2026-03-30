@@ -240,6 +240,7 @@ extern void pv_state_output_set(pvstate_t, int, const char *);
 extern void pv_state_average_rate_window_set(pvstate_t, unsigned int);
 extern void pv_state_set_terminal_supports_utf8(pvstate_t, bool);
 extern void pv_state_othermonitor_set(pvstate_t, pid_t, int, int);
+extern void pv_state_cancel_output_if_empty_format_string(pvstate_t);
 
 extern void pv_state_inputfiles(pvstate_t, unsigned int, const char **);
 extern void pv_state_watchfds(pvstate_t, unsigned int, const pid_t *, const int *);

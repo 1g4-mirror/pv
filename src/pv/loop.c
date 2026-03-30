@@ -185,10 +185,6 @@ int pv_main_loop(pvstate_t state)
 	unsigned int file_idx;
 	bool output_is_pipe;
 
-	/* TODO: treat "-F ''" as "-q" so there's no extra blank line. */
-	/* TODO: if "-q", turn off "-c", again so there's no blank line. */
-	/* May need local no_display and cursor flags for this. */
-
 	/*
 	 * "written" is ALWAYS bytes written by the last transfer.
 	 *

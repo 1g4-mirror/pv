@@ -325,6 +325,7 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 	/*@+observertrans@ */
 	pv_state_inputfiles(state, 1, dummy_argv);
 
+	pv_state_cancel_output_if_empty_format_string(state);
 	return pv_main_loop(state);
 }
 
@@ -892,10 +893,12 @@ int main(int argc, char **argv)
 		break;
 	case PV_ACTION_TRANSFER:
 		/* Normal "transfer data" mode. */
+		pv_state_cancel_output_if_empty_format_string(state);
 		retcode = pv_main_loop(state);
 		break;
 	case PV_ACTION_STORE_AND_FORWARD:
 		/* Store-and-forward transfer mode. */
+		pv_state_cancel_output_if_empty_format_string(state);
 		retcode = pv__store_and_forward(state, opts, can_have_eta);
 		break;
 	case PV_ACTION_WATCHFD:

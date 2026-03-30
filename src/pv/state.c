@@ -779,6 +779,18 @@ void pv_state_othermonitor_set(pvstate_t state, pid_t pid, int read_fd, int writ
 	state->control.othermonitor_write_fd = write_fd;
 }
 
+/* If the format string is set to an empty string, stop all display output. */
+void pv_state_cancel_output_if_empty_format_string(pvstate_t state)
+{
+	if (NULL == state->control.format_string)
+		return;
+	if ('\0' != state->control.format_string[0])
+		return;
+	debug("%s", "empty format string - setting no_display and turning off cursor positioning");
+	state->control.no_display = true;
+	state->control.cursor = false;
+}
+
 /*
  * Set the array of input files.
  */
