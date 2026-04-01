@@ -7,3 +7,4 @@ Makevars.template
 Rules-quot
 stamp-po
 *~
+Makefile.in.in
