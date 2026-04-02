@@ -1290,7 +1290,8 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		opts->eta = true;
 		opts->rate = true;
 		opts->bytes = true;
-		/* TODO: add ratio format if "-M both" */
+		if (PV_SIDE_BOTH == opts->side)
+			opts->ratio = true;
 	}
 
 	/* If -Z was given but not -E, pretend one -E was given too. */

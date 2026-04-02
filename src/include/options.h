@@ -93,6 +93,7 @@ struct opts_s {
 	bool rate;                     /* rate counter flag */
 	bool average_rate;             /* average rate counter flag */
 	bool bytes;                    /* bytes transferred flag */
+	bool ratio;                    /* in:out ratio flag */
 	bool bits;                     /* report transfer size in bits */
 	bool decimal_units;            /* decimal prefix flag */
 	bool bufpercent;               /* transfer buffer percentage flag */

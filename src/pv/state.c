@@ -412,6 +412,8 @@ void pv_state_free(pvstate_t state)
 
 /*
  * Set the formatting string, given a set of old-style formatting options.
+ *
+ * TODO: allow opts->ratio to be passed here as well.
  */
 void pv_state_set_format(pvstate_t state, bool progress, bool timer, bool eta, bool fineta, bool rate, bool average_rate, bool bytes, bool bufpercent, size_t lastwritten,	/*@null@ */
 			 const char *name)
