@@ -167,6 +167,121 @@ static long double pv__elapsed_transfer_time(const struct timespec *loop_start_t
 
 
 /*
+ * Exchange information with the other side of the "-M both" monitor about
+ * the amount of data transferred.
+ */
+static void pv__monitor_exchange(pvstate_t state)
+{
+	bool written_yet = false;
+
+	while ((state->control.othermonitor_read_fd >= 0) || (state->control.othermonitor_write_fd >= 0)) {
+		struct timeval tv;
+		fd_set readfds;
+		fd_set writefds;
+		fd_set exceptfds;
+		int max_fd;
+		int result;
+
+		max_fd = -1;
+		if (state->control.othermonitor_read_fd > max_fd)
+			max_fd = state->control.othermonitor_read_fd;
+		if ((!written_yet) && (state->control.othermonitor_write_fd > max_fd))
+			max_fd = state->control.othermonitor_write_fd;
+
+		memset(&tv, 0, sizeof(tv));
+
+#if SPLINT
+		/* splint doesn't like FD_ZERO, FD_SET, FD_ISSET. */
+		/* Refer to src/pv/transfer.c for more details. */
+		memset(&readfds, 0, sizeof(readfds));
+		memset(&writefds, 0, sizeof(writefds));
+		memset(&exceptfds, 0, sizeof(exceptfds));
+#else				/* !SPLINT */
+		FD_ZERO(&readfds);
+		FD_ZERO(&writefds);
+		FD_ZERO(&exceptfds);
+		if (state->control.othermonitor_read_fd >= 0)
+			FD_SET(state->control.othermonitor_read_fd, &readfds);
+		if ((!written_yet) && (state->control.othermonitor_write_fd >= 0))
+			FD_SET(state->control.othermonitor_write_fd, &writefds);
+#endif				/* !SPLINT */
+
+		tv.tv_sec = 0;
+		tv.tv_usec = 0;
+
+		result = select(max_fd + 1, &readfds, &writefds, &exceptfds, &tv);
+
+		if (result <= 0)
+			break;
+
+		if ((state->control.othermonitor_read_fd >= 0)
+#ifndef SPLINT
+		    && (FD_ISSET(state->control.othermonitor_read_fd, &readfds))
+#endif
+		    ) {
+			off_t otherside_transferred;
+			ssize_t nread;
+
+			otherside_transferred = 0;
+
+			nread = read(state->control.othermonitor_read_fd, &otherside_transferred,	/* flawfinder: ignore */
+				     sizeof(otherside_transferred));
+			/*
+			 * flawfinder rationale: no buffer overflow possible
+			 * as we read a fixed size to a fixed point.
+			 */
+
+			if (0 == nread) {
+				/* EOF - close. */
+				debug("%d: %s", state->control.othermonitor_read_fd, "EOF - closing");
+				(void) close(state->control.othermonitor_read_fd);
+				state->control.othermonitor_read_fd = -1;
+			} else if (nread < 0) {
+				debug("%d: %s: %s", state->control.othermonitor_read_fd, "error on read",
+				      strerror(errno));
+			} else if (nread != (ssize_t) (sizeof(otherside_transferred))) {
+				debug("%d: %d: %s", state->control.othermonitor_read_fd, (int) nread,
+				      "incorrect byte count - ignoring");
+			} else {
+				debug("%s: %lu", "other side transfer amount", (unsigned long) otherside_transferred);
+				state->transfer.otherside_transferred = otherside_transferred;
+			}
+		}
+
+		if ((!written_yet) && (state->control.othermonitor_write_fd >= 0)
+#ifndef SPLINT
+		    && (FD_ISSET(state->control.othermonitor_write_fd, &writefds))
+#endif
+		    ) {
+			ssize_t nwritten;
+
+			nwritten =
+			    write(state->control.othermonitor_write_fd, &(state->transfer.transferred),
+				  sizeof(state->transfer.transferred));
+
+			if ((nwritten < 0) && ((EINTR == errno) || (EAGAIN == errno))) {
+				debug("%d: %s: %s", state->control.othermonitor_write_fd, "transient write error",
+				      strerror(errno));
+			} else if (nwritten < 0) {
+				debug("%d: %s: %s", state->control.othermonitor_write_fd, "write error - closing",
+				      strerror(errno));
+				(void) close(state->control.othermonitor_write_fd);
+				state->control.othermonitor_write_fd = -1;
+			} else if (nwritten != (ssize_t) (sizeof(state->transfer.transferred))) {
+				debug("%d: %d: %s", state->control.othermonitor_write_fd, (int) nwritten,
+				      "incorrect byte count written - closing");
+				(void) close(state->control.othermonitor_write_fd);
+				state->control.othermonitor_write_fd = -1;
+			} else {
+				written_yet = true;
+			}
+
+		}
+	}
+}
+
+
+/*
  * Pipe data from a list of files to standard output, giving information
  * about the transfer on standard error according to the given options.
  *
@@ -180,7 +295,7 @@ int pv_main_loop(pvstate_t state)
 	long double target;
 	bool eof_in, eof_out, final_update;
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
-	struct timespec next_remotecheck;
+	struct timespec next_remotecheck, next_monitor_exchange;
 	int input_fd, output_fd;
 	unsigned int file_idx;
 	bool output_is_pipe;
@@ -250,10 +365,12 @@ int pv_main_loop(pvstate_t state)
 
 	memset(&next_ratecheck, 0, sizeof(next_ratecheck));
 	memset(&next_remotecheck, 0, sizeof(next_remotecheck));
+	memset(&next_monitor_exchange, 0, sizeof(next_monitor_exchange));
 	memset(&next_update, 0, sizeof(next_update));
 
 	pv_elapsedtime_copy(&next_ratecheck, &cur_time);
 	pv_elapsedtime_copy(&next_remotecheck, &cur_time);
+	pv_elapsedtime_copy(&next_monitor_exchange, &cur_time);
 	pv_elapsedtime_copy(&next_update, &cur_time);
 	if ((state->control.delay_start > 0)
 	    && (state->control.delay_start > state->control.interval)) {
@@ -338,8 +455,15 @@ int pv_main_loop(pvstate_t state)
 			pv_elapsedtime_add_nsec(&next_remotecheck, REMOTE_INTERVAL);
 		}
 
-		/* TODO: occasionally check othermonitor_read_fd, calculate ratio */
-		/* TODO: occasionally send to othermonitor_write_fd */
+		/*
+		 * Exchange messages with the other side of the monitor
+		 * every short while, in monitor mode.
+		 */
+		if ((state->control.othermonitor_pid > 0)
+		    && (pv_elapsedtime_compare(&cur_time, &next_monitor_exchange) > 0)) {
+			pv__monitor_exchange(state);
+			pv_elapsedtime_add_nsec(&next_monitor_exchange, MONITOR_EXCHANGE_INTERVAL);
+		}
 
 		if (1 == state->flags.trigger_exit)
 			break;

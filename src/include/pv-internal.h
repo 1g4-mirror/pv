@@ -26,6 +26,7 @@ extern "C" {
 #define RATE_GRANULARITY	100000000	 /* nsec between -L rate chunks */
 #define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
 #define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R and -Q */
+#define MONITOR_EXCHANGE_INTERVAL 100000000	 /* nsec between "-M both" data exchanges */
 #define BUFFER_SIZE		(size_t) 409600	 /* default transfer buffer size */
 #define BUFFER_SIZE_MAX		(size_t) 524288	 /* max auto transfer buffer size */
 #define MAX_READ_AT_ONCE	(size_t) 524288	 /* max to read() in one go */
@@ -419,6 +420,8 @@ struct pvstate_s {
 		off_t total_bytes_read;		 /* total bytes read */
 		off_t total_written;		 /* total bytes or lines written */
 		off_t transferred;		 /* amount transferred (written - unconsumed) */
+
+		off_t otherside_transferred;	 /* amount transferred by the other side ("-M both") */
 
 		/* Keep track of line positions to backtrack written_but_not_consumed. */
 		/*@only@*/ /*@null@*/ off_t *line_positions; /* line separator write positions (circular buffer) */
