@@ -416,8 +416,6 @@ void pv_state_free(pvstate_t state)
  *
  * Call this *after* setting a name, so it can determine whether there
  * should be a name in the default format.
- *
- * TODO: allow opts->ratio to be passed here as well.
  */
 void pv_state_set_format_options(pvstate_t state, pvformatoptions_s format)
 {
@@ -481,6 +479,17 @@ void pv_state_set_format_options(pvstate_t state, pvformatoptions_s format)
 	debug("%s: [%s]", "default format set", state->control.default_format);
 
 	/* Tell pv_format() that the format has changed. */
+	state->flags.reparse_display = 1;
+}
+
+
+/*
+ * Append the given string to the default format, and trigger a format
+ * reparse.
+ */
+void pv_state_append_to_default_format(pvstate_t state, /*@null@ */ const char *val)
+{
+	PV_ADDFORMAT(NULL != val, val);
 	state->flags.reparse_display = 1;
 }
 

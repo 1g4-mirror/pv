@@ -341,7 +341,7 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
  * other side has transferred.  This is what allows the in:out ratio to be
  * displayed.
  */
-static int pv__monitor(pvstate_t state, opts_t opts)
+static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_options)
 {
 	int pipefd_cmd_in[2];		 /* pipe from the monitor to the command */
 	int pipefd_cmd_out[2];		 /* pipe from the command to the monitor */
@@ -520,6 +520,11 @@ x = 1; \
 			/* Close the read end of the out-to-in pipe. */
 			close_if_open(pipefd_out_to_in[0]);
 
+			/* Add ratio to the default format on the out side. */
+			if (PV_SIDE_BOTH == opts->side) {
+				pv_state_append_to_default_format(state, "%{ratio}");
+			}
+
 			retcode =
 			    pv__run_monitor(opts->program_name, state, PV_SIDE_OUT, pipefd_cmd_out[0], in_monitor_pid,
 					    pipefd_in_to_out[0], pipefd_out_to_in[1]);
@@ -553,7 +558,8 @@ x = 1; \
 		if (NULL != opts->format1) {
 			pv_state_format_string_set(state, opts->format1);
 		}
-		/* TODO: call pv_state_set_format_options(). */
+		/* Trigger a format reparse. */
+		pv_state_set_format_options(state, format_options);
 		/*@fallthrough@ */
 		/* falling through as "out" is in another process (above). */
 #ifndef SPLINT
@@ -925,7 +931,7 @@ int main(int argc, char **argv)
 		break;
 	case PV_ACTION_MONITOR:
 		/* Run a process and monitor its input and output. */
-		retcode = pv__monitor(state, opts);
+		retcode = pv__monitor(state, opts, format_options);
 		break;
 	}
 

@@ -209,6 +209,9 @@ typedef struct {
 } pvformatoptions_s;
 extern void pv_state_set_format_options(pvstate_t, pvformatoptions_s);
 
+/* Append a string to the default format. */
+void pv_state_append_to_default_format(pvstate_t, /*@null@ */ const char *);
+
 /*
  * Set the various options.
  */
