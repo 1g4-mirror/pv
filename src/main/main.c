@@ -163,7 +163,7 @@ static int pv__set_output(pvstate_t state, opts_t opts, /*@null@ */ const char *
  * with the input file list forced to be just the store-and-forward file. 
  * Returns nonzero on error.
  */
-static int pv__store_and_forward(pvstate_t state, opts_t opts, bool can_have_eta)
+static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s format_options)
 {
 	char tmp_filename[4096];	 /* flawfinder: ignore */
 	bool use_temporary_file;
@@ -224,11 +224,10 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, bool can_have_eta
 	if (0 != retcode)
 		goto end_store_and_forward;
 
-	/* Reset the formatting to set the displayed name to "(input)". */
+	/* Set the displayed name to "(input)" and trigger a format reparse. */
 	/*@-mustfreefresh@ */
-	pv_state_set_format(state, opts->progress, opts->timer, can_have_eta ? opts->eta : false,
-			    can_have_eta ? opts->fineta : false, opts->rate, opts->average_rate,
-			    opts->bytes, opts->bufpercent, opts->lastwritten, _("(input)"));
+	pv_state_name_set(state, _("(input)"));
+	pv_state_set_format_options(state, format_options);
 	/*@+mustfreefresh@ *//* see below about gettext _() calls. */
 
 	/* Run the main loop as normal. */
@@ -250,10 +249,12 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, bool can_have_eta
 	/* Recalculate the input size. */
 	pv_state_size_set(state, pv_calc_total_size(state));
 
+	/* Set the displayed name to whatever was requested. */
+	pv_state_name_set(state, opts->name);
 	/* Reset the format, since we might have been asked to show ETA. */
-	pv_state_set_format(state, opts->progress, opts->timer, opts->eta,
-			    opts->fineta, opts->rate, opts->average_rate,
-			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
+	format_options.eta = opts->eta;
+	format_options.fineta = opts->fineta;
+	pv_state_set_format_options(state, format_options);
 
 	/* Reset calculated values in the state. */
 	pv_state_reset(state);
@@ -552,7 +553,7 @@ x = 1; \
 		if (NULL != opts->format1) {
 			pv_state_format_string_set(state, opts->format1);
 		}
-		/* TODO: call pv_state_set_format(). */
+		/* TODO: call pv_state_set_format_options(). */
 		/*@fallthrough@ */
 		/* falling through as "out" is in another process (above). */
 #ifndef SPLINT
@@ -624,6 +625,7 @@ int main(int argc, char **argv)
 	int retcode = 0;
 	bool can_have_eta = true;
 	bool terminal_supports_utf8 = false;
+	pvformatoptions_s format_options;
 
 #if ! HAVE_SETPROCTITLE
 	initproctitle(argc, argv);
@@ -880,9 +882,17 @@ int main(int argc, char **argv)
 	pv_state_extra_display_set(state, opts->extra_display);
 	pv_state_average_rate_window_set(state, opts->average_rate_window);
 
-	pv_state_set_format(state, opts->progress, opts->timer, can_have_eta ? opts->eta : false,
-			    can_have_eta ? opts->fineta : false, opts->rate, opts->average_rate,
-			    opts->bytes, opts->bufpercent, opts->lastwritten, opts->name);
+	format_options.progress = opts->progress;
+	format_options.timer = opts->timer;
+	format_options.eta = can_have_eta ? opts->eta : false;
+	format_options.fineta = can_have_eta ? opts->fineta : false;
+	format_options.rate = opts->rate;
+	format_options.average_rate = opts->average_rate;
+	format_options.bytes = opts->bytes;
+	format_options.bufpercent = opts->bufpercent;
+	format_options.lastwritten = opts->lastwritten;
+
+	pv_state_set_format_options(state, format_options);
 
 	debug("%s: %s", "terminal_supports_utf8", terminal_supports_utf8 ? "true" : "false");
 	pv_state_set_terminal_supports_utf8(state, terminal_supports_utf8);
@@ -899,7 +909,7 @@ int main(int argc, char **argv)
 	case PV_ACTION_STORE_AND_FORWARD:
 		/* Store-and-forward transfer mode. */
 		pv_state_cancel_output_if_empty_format_string(state);
-		retcode = pv__store_and_forward(state, opts, can_have_eta);
+		retcode = pv__store_and_forward(state, opts, format_options);
 		break;
 	case PV_ACTION_WATCHFD:
 		/* "Watch file descriptor(s) of another process" mode. */

@@ -193,15 +193,21 @@ extern /*@null@*/ /*@only@*/ pvstate_t pv_state_alloc(void);
 extern void pv_state_reset(pvstate_t state);
 
 /*
- * Set the formatting string, given a set of old-style formatting options.
+ * Set the format options and use them to build a default formatting string.
+ * The default string is used if no format string is explicitly set.
  */
-extern void pv_state_set_format(pvstate_t state, bool progress,
-				bool timer, bool eta,
-				bool fineta, bool rate,
-				bool average_rate, bool bytes,
-				bool bufpercent,
-				size_t lastwritten,
-				/*@null@*/ const char *name);
+typedef struct {
+	size_t lastwritten;	  /* --last-written (amount) */
+	bool progress;		  /* --progress */
+	bool timer;		  /* --timer */
+	bool eta;		  /* --eta */
+	bool fineta;		  /* --fineta */
+	bool rate;		  /* --rate */
+	bool average_rate;	  /* --average-rate */
+	bool bytes;		  /* --bytes */
+	bool bufpercent;	  /* --buffer-percent */
+} pvformatoptions_s;
+extern void pv_state_set_format_options(pvstate_t, pvformatoptions_s);
 
 /*
  * Set the various options.

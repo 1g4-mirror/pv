@@ -209,17 +209,7 @@ struct pvstate_s {
 		pvdisplay_width_t width;         /* screen width */
 		unsigned int height;             /* screen height */
 		unsigned int extra_displays;	 /* bitmask of extra display destinations */
-		struct {			 /* old-style format options (used by -R) */
-			size_t lastwritten;	  /* --last-written (amount) */
-			bool progress;		  /* --progress */
-			bool timer;		  /* --timer */
-			bool eta;		  /* --eta */
-			bool fineta;		  /* --fineta */
-			bool rate;		  /* --rate */
-			bool average_rate;	  /* --average-rate */
-			bool bytes;		  /* --bytes */
-			bool bufpercent;	  /* --buffer-percent */
-		} format_option;
+		pvformatoptions_s format_option; /* old-style format options (used by -R) */
 		bool force;                      /* display even if not on terminal */
 		bool cursor;                     /* use cursor positioning */
 		bool numeric;                    /* numeric output only */
