@@ -426,9 +426,6 @@ monitored command's options separate.
 With a \fISIDE\fR of \*(lq\fBboth\fR\*(rq, two progress bars will be shown.
 All of \fBpv\fR's display switches, output modifiers, and data transfer
 modifiers will apply to both sides.
-The \*(lq\fB\-\-format\fR\*(rq and \*(lq\fB\-\-name\fR\*(rq options may be
-specified twice, in which case the first one applies to the input side and
-the second applies to the output side.
 .IP
 For example,
 \*(lq\fBpv\~\-\-cursor\~\-\-monitor\~both\~\-\-\~gzip\~\-9\fR\*(rq is
@@ -436,12 +433,18 @@ equivalent to
 \*(lq\fBpv\~\-\-cursor\~|\~gzip\~\-9\~|\~pv\~\-\-cursor\fR\*(rq, except that
 the latter can't show the input:output ratio.
 .IP
+The \*(lq\fB\-\-format\fR\*(rq and \*(lq\fB\-\-name\fR\*(rq options may be
+specified twice, in which case the first one applies to the input side and
+the second applies to the output side.
+If no \*(lq\fB\-\-format\fR\*(rq options are specified, the default format
+based on the other display switches is used as normal, except that the
+ratio is added to the output side when \fISIDE\fR is \*(lq\fBboth\fR\*(rq.
+.IP
 The values \*(lq\fB0\fR\*(rq, \*(lq\fB1\fR\*(rq, and \*(lq\fB2\fR\*(rq may
 be used as synonyms for \*(lq\fBin\fR\*(rq, \*(lq\fBout\fR\*(rq, and
 \*(lq\fBboth\fR\*(rq.
 .IP
 This option cannot be used with \*(lq\fB\-\-store\-and\-forward\*(rq.
-.\"TODO: formatting option for input:output ratio
 .\"
 .SS "Other options"
 .TP
@@ -530,6 +533,10 @@ Bytes transferred so far (or lines if \*(lq\fB\-\-line\-mode\fR\*(rq was specifi
 Equivalent to \*(lq\fB\-\-bytes\fR\*(rq.
 If \*(lq\fB\-\-bits\fR\*(rq was specified, \*(lq\fB%b\fR\*(rq shows the bits
 transferred so far, not bytes.
+.TP
+.B %{ratio}
+Show the ratio of bytes transferred by the other side to the bytes
+transferred by this side, in \*(lq\fB\-\-monitor\~both\fR\*(rq mode.
 .TP
 .BR %T ", " %{buffer\-percent}
 Percentage of the transfer buffer in use.
