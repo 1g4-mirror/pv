@@ -318,6 +318,7 @@ struct pvstate_s {
 
 		bool showing_timer;		 /* set if showing timer */
 		bool showing_bytes;		 /* set if showing byte/line count */
+		bool showing_ratio;		 /* set if showing monitoring in:out ratio */
 		bool showing_rate;		 /* set if showing transfer rate */
 		bool showing_last_written;	 /* set if displaying the last few bytes written */
 		bool showing_previous_line;	 /* set if displaying the previously output line */
@@ -602,6 +603,7 @@ pvdisplay_bytecount_t pv_formatter_fineta(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_rate(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_average_rate(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_bytes(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_ratio(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_buffer_percent(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_last_written(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_previous_line(pvformatter_args_t);
