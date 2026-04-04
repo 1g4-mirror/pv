@@ -640,6 +640,13 @@ int pv_main_loop(pvstate_t state)
 			    || (state->control.delay_start < 0.001)) {
 				pv_elapsedtime_copy(&next_update, &cur_time);
 			}
+			/*
+			 * In "--monitor both" mode, run a final exchange of
+			 * information with the other side.
+			 */
+			if (state->control.othermonitor_pid > 0) {
+				pv__monitor_exchange(state);
+			}
 		}
 
 		/*
