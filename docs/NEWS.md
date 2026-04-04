@@ -1,5 +1,6 @@
 ### UNRELEASED
 
+ * *feature:* new **--monitor** option to run a command and watch its input, output, or both ([#67](https://codeberg.org/ivarch/pv/issues/67))
  * *i18n:* Polish translations updated
  * *i18n:* Finnish translations updated
 
