@@ -13,6 +13,9 @@ pv - monitor and manage the progress of data through a pipe
 
 **pv** **-Q**\|**\--query** *PID* \[*OPTION*\]\...
 
+**pv** \[*OPTION*\]\... **-M**\|**\--monitor** *SIDE* \-- *COMMAND*
+[*ARGS*\]\...
+
 # DESCRIPTION
 
 Show the progress of data through a pipeline by giving information such
@@ -26,6 +29,9 @@ is "-", standard input is read.
 
 In "**\--watchfd**" mode, inspect another process and show its progress
 through the files it has open.
+
+In "**\--monitor**" mode, run a command and display the progress of data
+through both its standard input and its standard output.
 
 # OPTIONS
 
@@ -423,6 +429,34 @@ are explicitly switched on will be shown.
     "**\--line-mode**", "**\--null**", and "**\--average-rate-window**".
     Data transfer modifiers will have no effect.
 
+**-M** *SIDE*, **\--monitor** *SIDE*
+
+:   Run the command specified by the remaining arguments, and monitor
+    its standard input, its standard output, or both, depending on
+    whether *SIDE* is "**in**", "**out**", or "**both**". Use "**\--**"
+    after all of the **pv** options to keep the monitored command\'s
+    options separate.
+
+    With a *SIDE* of "**both**", two progress bars will be shown. All of
+    **pv**\'s display switches, output modifiers, and data transfer
+    modifiers will apply to both sides.
+
+    For example, "**pv \--cursor \--monitor both \-- gzip -9**" is
+    equivalent to "**pv \--cursor \| gzip -9 \| pv \--cursor**", except
+    that the latter can\'t show the input:output ratio.
+
+    The "**\--format**" and "**\--name**" options may be specified
+    twice, in which case the first one applies to the input side and the
+    second applies to the output side. If no "**\--format**" options are
+    specified, the default format based on the other display switches is
+    used as normal, except that the ratio is added to the output side
+    when *SIDE* is "**both**".
+
+    The values "**0**", "**1**", and "**2**" may be used as synonyms for
+    "**in**", "**out**", and "**both**".
+
+    This option cannot be used with "**\--store-and-forward".**
+
 ## Other options
 
 **-P FILE, \--pidfile FILE**
@@ -521,6 +555,11 @@ contain the following sequences:
 :   Bytes transferred so far (or lines if "**\--line-mode**" was
     specified). Equivalent to "**\--bytes**". If "**\--bits**" was
     specified, "**%b**" shows the bits transferred so far, not bytes.
+
+**%{ratio}**
+
+:   Show the ratio of bytes transferred by the other side to the bytes
+    transferred by this side, in "**\--monitor both**" mode.
 
 **%T**, **%{buffer-percent}**
 
@@ -684,7 +723,7 @@ Showing progress as lines of JSON data:
 # EXIT STATUS
 
 An exit status of 1 indicates a problem with the "**\--remote**",
-"**\--query**", or "**\--pidfile**" options.
+"**\--query**", "**\--pidfile**", or "**\--monitor**" options.
 
 Any other exit status is a bitmask of the following:
 
