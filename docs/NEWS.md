@@ -3,6 +3,7 @@
  * *feature:* new **--monitor** option to run a command and watch its input, output, or both ([#67](https://codeberg.org/ivarch/pv/issues/67))
  * *i18n:* Polish translations updated
  * *i18n:* Finnish translations updated
+ * *cleanup:* fix GCC warning when using glibc 2.43 ([#180](https://codeberg.org/ivarch/pv/pulls/180))
 
 ### 1.10.5 - 22 March 2026
 
