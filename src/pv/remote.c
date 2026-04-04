@@ -247,8 +247,8 @@ int pv_remote_set(pvstate_t state, pid_t remote)
  * If a message was received, update the current process's options with the
  * ones in the message.
  *
- * Note that this relies on pv_state_set_format() causing the output format
- * to be reparsed.
+ * Note that this relies on pv_state_set_format_options() causing the output
+ * format to be reparsed.
  */
 static bool pv__rxsignal_usr2(pvstate_t state)
 {
@@ -256,6 +256,7 @@ static bool pv__rxsignal_usr2(pvstate_t state)
 	char control_filename[4096];	 /* flawfinder: ignore */
 	FILE *control_fptr;
 	struct remote_msg msgbuf;
+	pvformatoptions_s format_options;
 
 	/* flawfinder rationale: as above. */
 
@@ -306,11 +307,19 @@ static bool pv__rxsignal_usr2(pvstate_t state)
 	msgbuf.format[sizeof(msgbuf.format) - 1] = '\0';
 	msgbuf.extra_display[sizeof(msgbuf.extra_display) - 1] = '\0';
 
-	pv_state_set_format(state, msgbuf.progress, msgbuf.timer,
-			    msgbuf.eta, msgbuf.fineta, msgbuf.rate,
-			    msgbuf.average_rate,
-			    msgbuf.bytes, msgbuf.bufpercent,
-			    msgbuf.lastwritten, '\0' == msgbuf.name[0] ? NULL : msgbuf.name);
+	pv_state_name_set(state, '\0' == msgbuf.name[0] ? NULL : msgbuf.name);
+
+	format_options.progress = msgbuf.progress;
+	format_options.timer = msgbuf.timer;
+	format_options.eta = msgbuf.eta;
+	format_options.fineta = msgbuf.fineta;
+	format_options.rate = msgbuf.rate;
+	format_options.average_rate = msgbuf.average_rate;
+	format_options.bytes = msgbuf.bytes;
+	format_options.bufpercent = msgbuf.bufpercent;
+	format_options.lastwritten = msgbuf.lastwritten;
+
+	pv_state_set_format_options(state, format_options);
 
 	if (msgbuf.rate_limit > 0)
 		pv_state_rate_limit_set(state, msgbuf.rate_limit);
@@ -475,8 +484,8 @@ static bool pv__rxsignal_usr1(pvstate_t state, pid_t match_sender)
  * send our transfer state to the sending process, depending on the content
  * of the message.
  *
- * NB --remote relies on pv_state_set_format() causing the output format to
- * be reparsed.
+ * NB --remote relies on pv_state_set_format_options() causing the output
+ * format to be reparsed.
  *
  * Returns true if a --remote message was received, false otherwise.
  */

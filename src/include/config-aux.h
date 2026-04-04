@@ -51,3 +51,10 @@ typedef bool _Bool;
 #define PV_REMOTE_CONTROL 1
 # endif
 #endif
+
+#ifndef SPLINT
+/* Remove __attribute__(()) if not using GCC. */
+#ifndef __GNUC__
+#define __attribute__(x) /* GCC-only feature */
+#endif
+#endif

@@ -533,6 +533,7 @@ pvdisplay_bytecount_t pv_formatter_segmentcontent(char *content, pvformatter_arg
 		{ "b", &pv_formatter_bytes, false },
 		{ "{bytes}", &pv_formatter_bytes, false },
 		{ "{transferred}", &pv_formatter_bytes, false },
+		{ "{ratio}", &pv_formatter_ratio, false },
 		{ "T", &pv_formatter_buffer_percent, false },
 		{ "{buffer-percent}", &pv_formatter_buffer_percent, false },
 		{ "A", &pv_formatter_last_written, false },
@@ -620,6 +621,7 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
 
 	display->showing_timer = false;
 	display->showing_bytes = false;
+	display->showing_ratio = false;
 	display->showing_rate = false;
 	display->showing_last_written = false;
 	display->showing_previous_line = false;

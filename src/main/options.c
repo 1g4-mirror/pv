@@ -64,8 +64,12 @@ void opts_free( /*@only@ */ opts_t opts)
 	 */
 	if (NULL != opts->name)
 		free(opts->name);
+	if (NULL != opts->name1)
+		free(opts->name1);
 	if (NULL != opts->format)
 		free(opts->format);
+	if (NULL != opts->format1)
+		free(opts->format1);
 	if (NULL != opts->pidfile)
 		free(opts->pidfile);
 	if (NULL != opts->output)
@@ -88,12 +92,13 @@ void opts_free( /*@only@ */ opts_t opts)
 
 /*
  * Add a filename to the list of non-option arguments, returning false on
- * error.  The filename is not copied - the pointer is stored.
+ * error.  The filename is not copied - the pointer is stored.  The list is
+ * guaranteed to have a NULL after the last item.
  */
 bool opts_add_file(opts_t opts, const char *filename)
 {
 	/*@-branchstate@ */
-	if ((opts->argc >= opts->argv_length) || (NULL == opts->argv)) {
+	if (((1 + opts->argc) >= opts->argv_length) || (NULL == opts->argv)) {
 		opts->argv_length = opts->argc + 10;
 		/*@-keeptrans@ */
 		opts->argv = realloc(opts->argv, opts->argv_length * sizeof(char *));
@@ -117,6 +122,7 @@ bool opts_add_file(opts_t opts, const char *filename)
 	 */
 
 	opts->argv[opts->argc++] = filename;
+	opts->argv[opts->argc] = NULL;
 
 	return true;
 }
@@ -416,6 +422,27 @@ static bool opts_watchfd_parse(opts_t opts, const char *argument, /*@null@ */ co
 }
 
 
+/*
+ * Return true if the first string is at least as long as the second, and
+ * its start matches the entirety of the second.  Both strings must be
+ * null-terminated.
+ */
+static bool string_starts_with(const char *string, const char *match)
+{
+	size_t string_length, match_length;
+
+	string_length = strlen(string);	    /* flawfinder: ignore */
+	match_length = strlen(match);	    /* flawfinder: ignore */
+	/* flawfinder - these are null-terminated strings. */
+
+	if (string_length < match_length)
+		return false;
+	if (0 == strncmp(string, match, match_length))
+		return true;
+	return false;
+}
+
+
 #ifdef HAVE_NFTW
 /*
  * Callback function for nftw() to add the size of the given file to the
@@ -680,6 +707,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "watchfd", 1, NULL, (int) 'd' },
 		{ "output", 1, NULL, (int) 'o' },
 		{ "average-rate-window", 1, NULL, (int) 'm' },
+		{ "monitor", 1, NULL, (int) 'M' },
 #ifdef ENABLE_DEBUGGING
 		{ "debug", 1, NULL, (int) '!' },
 #endif				/* ENABLE_DEBUGGING */
@@ -688,7 +716,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:Q:P:d:m:o:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:Q:P:d:m:o:M:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -736,6 +764,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	numopts = 0;
 
 	opts->action = PV_ACTION_TRANSFER;
+	opts->side = PV_SIDE_NONE;
 	opts->interval = 1;
 	opts->delay_start = 0;
 	opts->average_rate_window = 30;
@@ -995,6 +1024,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->height_set_manually = opts->height == 0 ? false : true;
 			break;
 		case 'N':
+			opts->name1 = opts->name;
 			opts->name = pv_strdup(optarg);
 			if (NULL == opts->name) {
 				fprintf(stderr, "%s: -N: %s\n", opts->program_name, strerror(errno));
@@ -1069,6 +1099,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'F':
+			opts->format1 = opts->format;
 			opts->format = pv_strdup(optarg);
 			if (NULL == opts->format) {
 				fprintf(stderr, "%s: -F: %s\n", opts->program_name, strerror(errno));
@@ -1101,6 +1132,33 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'm':
 			opts->average_rate_window = pv_getnum_count(optarg, opts->decimal_units);
+			break;
+		case 'M':
+			opts->action = PV_ACTION_MONITOR;
+			if (string_starts_with(optarg, "0")) {
+				opts->side = PV_SIDE_IN;
+			} else if (string_starts_with(optarg, "in")) {
+				opts->side = PV_SIDE_IN;
+			} else if (string_starts_with(optarg, "stdin")) {
+				opts->side = PV_SIDE_IN;
+			} else if (string_starts_with(optarg, "1")) {
+				opts->side = PV_SIDE_OUT;
+			} else if (string_starts_with(optarg, "out")) {
+				opts->side = PV_SIDE_OUT;
+			} else if (string_starts_with(optarg, "stdout")) {
+				opts->side = PV_SIDE_OUT;
+			} else if (string_starts_with(optarg, "2")) {
+				opts->side = PV_SIDE_BOTH;
+			} else if (string_starts_with(optarg, "both")) {
+				opts->side = PV_SIDE_BOTH;
+			} else {
+				/*@-mustfreefresh@ *//* see above */
+				fprintf(stderr, "%s: -M: %s: %s\n",
+					opts->program_name, optarg, _("invalid side specification"));
+				opts_free(opts);
+				return NULL;
+				/*@+mustfreefresh@ */
+			}
 			break;
 #ifdef ENABLE_DEBUGGING
 		case '!':
@@ -1239,12 +1297,48 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		opts->skip_errors = 1;
 
 	/*
+	 * Don't allow -R or -Q with -M.
+	 */
+	if ((PV_ACTION_MONITOR == opts->action) && ((0 != opts->remote) || (0 != opts->query))) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s: %s\n", opts->program_name, 0 != opts->remote ? "-R" : "-Q",
+			_("monitor mode cannot be specified with this option"));
+		opts_free(opts);
+		return NULL;
+		/*@+mustfreefresh@ */
+	}
+
+	/*
+	 * Don't allow -U with -M.
+	 */
+	if ((PV_ACTION_STORE_AND_FORWARD == opts->action && PV_SIDE_NONE != opts->side)
+	    || (PV_ACTION_MONITOR == opts->action && NULL != opts->store_and_forward_file)) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: %s\n", opts->program_name,
+			_("monitor mode cannot be used with store-and-forward"));
+		opts_free(opts);
+		return NULL;
+		/*@+mustfreefresh@ */
+	}
+
+	/*
 	 * Don't allow any non-option arguments with -R or -Q.
 	 */
 	if ((optind < (int) argc) && ((0 != opts->remote) || (0 != opts->query))) {
 		/*@-mustfreefresh@ *//* see above */
 		fprintf(stderr, "%s: %s: %s\n", opts->program_name, 0 != opts->remote ? "-R" : "-Q",
 			_("files cannot be specified with this option"));
+		opts_free(opts);
+		return NULL;
+		/*@+mustfreefresh@ */
+	}
+
+	/*
+	 * At least one non-option argument is required with -M.
+	 */
+	if ((PV_ACTION_MONITOR == opts->action) && (optind >= (int) argc)) {
+		/*@-mustfreefresh@ *//* see above */
+		fprintf(stderr, "%s: -M: %s\n", opts->program_name, _("a command to run must be specified"));
 		opts_free(opts);
 		return NULL;
 		/*@+mustfreefresh@ */

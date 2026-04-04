@@ -13,6 +13,8 @@ pv \- monitor and manage the progress of data through a pipe
 \fBpv\fR \fB\-R\fR|\fB\-\-remote\fR \fIPID\fR [\fIOPTION\fR]...
 .PP
 \fBpv\fR \fB\-Q\fR|\fB\-\-query\fR \fIPID\fR [\fIOPTION\fR]...
+.PP
+\fBpv\fR [\fIOPTION\fR]... \fB\-M\fR|\fB\-\-monitor\fR \fISIDE\fR \-\- \fICOMMAND\fR [\fIARGS\fR]...
 .\"
 .SH DESCRIPTION
 Show the progress of data through a pipeline by giving information such as
@@ -27,6 +29,9 @@ read.
 .PP
 In \*(lq\fB\-\-watchfd\fR\*(rq mode, inspect another process and show its
 progress through the files it has open.
+.PP
+In \*(lq\fB\-\-monitor\fR\*(rq mode, run a command and display the progress
+of data through both its standard input and its standard output.
 .\"
 .SH OPTIONS
 .\"
@@ -409,6 +414,37 @@ they match those of that process - such as
 \*(lq\fB\-\-null\fR\*(rq, and
 \*(lq\fB\-\-average\-rate\-window\fR\*(rq.
 Data transfer modifiers will have no effect.
+.TP
+.BR \-M " \fISIDE\fR, " \-\-monitor " \fISIDE\fR"
+Run the command specified by the remaining arguments, and monitor its
+standard input, its standard output, or both, depending on whether
+\fISIDE\fR is \*(lq\fBin\fR\*(rq, \*(lq\fBout\fR\*(rq, or
+\*(lq\fBboth\fR\*(rq.
+Use \*(lq\fB\-\-\fR\*(rq after all of the \fBpv\fR options to keep the
+monitored command's options separate.
+.IP
+With a \fISIDE\fR of \*(lq\fBboth\fR\*(rq, two progress bars will be shown.
+All of \fBpv\fR's display switches, output modifiers, and data transfer
+modifiers will apply to both sides.
+.IP
+For example,
+\*(lq\fBpv\~\-\-cursor\~\-\-monitor\~both\~\-\-\~gzip\~\-9\fR\*(rq is
+equivalent to
+\*(lq\fBpv\~\-\-cursor\~|\~gzip\~\-9\~|\~pv\~\-\-cursor\fR\*(rq, except that
+the latter can't show the input:output ratio.
+.IP
+The \*(lq\fB\-\-format\fR\*(rq and \*(lq\fB\-\-name\fR\*(rq options may be
+specified twice, in which case the first one applies to the input side and
+the second applies to the output side.
+If no \*(lq\fB\-\-format\fR\*(rq options are specified, the default format
+based on the other display switches is used as normal, except that the
+ratio is added to the output side when \fISIDE\fR is \*(lq\fBboth\fR\*(rq.
+.IP
+The values \*(lq\fB0\fR\*(rq, \*(lq\fB1\fR\*(rq, and \*(lq\fB2\fR\*(rq may
+be used as synonyms for \*(lq\fBin\fR\*(rq, \*(lq\fBout\fR\*(rq, and
+\*(lq\fBboth\fR\*(rq.
+.IP
+This option cannot be used with \*(lq\fB\-\-store\-and\-forward\*(rq.
 .\"
 .SS "Other options"
 .TP
@@ -497,6 +533,10 @@ Bytes transferred so far (or lines if \*(lq\fB\-\-line\-mode\fR\*(rq was specifi
 Equivalent to \*(lq\fB\-\-bytes\fR\*(rq.
 If \*(lq\fB\-\-bits\fR\*(rq was specified, \*(lq\fB%b\fR\*(rq shows the bits
 transferred so far, not bytes.
+.TP
+.B %{ratio}
+Show the ratio of bytes transferred by the other side to the bytes
+transferred by this side, in \*(lq\fB\-\-monitor\~both\fR\*(rq mode.
 .TP
 .BR %T ", " %{buffer\-percent}
 Percentage of the transfer buffer in use.
@@ -721,7 +761,8 @@ pv \-\-numeric \-\-format '{"elapsed":%t,"bytes":%b,"rate":%r,"percentage":%{pro
 .\"
 .SH EXIT STATUS
 An exit status of 1 indicates a problem with the \*(lq\fB\-\-remote\fR\*(rq,
-\*(lq\fB\-\-query\fR\*(rq, or \*(lq\fB\-\-pidfile\fR\*(rq options.
+\*(lq\fB\-\-query\fR\*(rq, \*(lq\fB\-\-pidfile\fR\*(rq, or
+\*(lq\fB\-\-monitor\fR\*(rq options.
 .PP
 Any other exit status is a bitmask of the following:
 .TP 5

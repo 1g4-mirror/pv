@@ -26,6 +26,7 @@ extern "C" {
 #define RATE_GRANULARITY	100000000	 /* nsec between -L rate chunks */
 #define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
 #define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R and -Q */
+#define MONITOR_EXCHANGE_INTERVAL 100000000	 /* nsec between "-M both" data exchanges */
 #define BUFFER_SIZE		(size_t) 409600	 /* default transfer buffer size */
 #define BUFFER_SIZE_MAX		(size_t) 524288	 /* max auto transfer buffer size */
 #define MAX_READ_AT_ONCE	(size_t) 524288	 /* max to read() in one go */
@@ -201,22 +202,15 @@ struct pvstate_s {
 		off_t size;                      /* total size of data */
 		unsigned int skip_errors;        /* skip read errors counter */
 		int output_fd;                   /* fd to write output to */
+		pid_t othermonitor_pid;		 /* pid of the other monitor, in "-M both" mode */
+		int othermonitor_read_fd;	 /* fd to read transfer counts from other monitor */
+		int othermonitor_write_fd;	 /* fd to write transfer counts to other monitor */
 		unsigned int average_rate_window; /* time window in seconds for average rate calculations */
 		unsigned int history_interval;	 /* seconds between each average rate calc history entry */
 		pvdisplay_width_t width;         /* screen width */
 		unsigned int height;             /* screen height */
 		unsigned int extra_displays;	 /* bitmask of extra display destinations */
-		struct {			 /* old-style format options (used by -R) */
-			size_t lastwritten;	  /* --last-written (amount) */
-			bool progress;		  /* --progress */
-			bool timer;		  /* --timer */
-			bool eta;		  /* --eta */
-			bool fineta;		  /* --fineta */
-			bool rate;		  /* --rate */
-			bool average_rate;	  /* --average-rate */
-			bool bytes;		  /* --bytes */
-			bool bufpercent;	  /* --buffer-percent */
-		} format_option;
+		pvformatoptions_s format_option; /* old-style format options (used by -R) */
 		bool force;                      /* display even if not on terminal */
 		bool cursor;                     /* use cursor positioning */
 		bool numeric;                    /* numeric output only */
@@ -324,6 +318,7 @@ struct pvstate_s {
 
 		bool showing_timer;		 /* set if showing timer */
 		bool showing_bytes;		 /* set if showing byte/line count */
+		bool showing_ratio;		 /* set if showing monitoring in:out ratio */
 		bool showing_rate;		 /* set if showing transfer rate */
 		bool showing_last_written;	 /* set if displaying the last few bytes written */
 		bool showing_previous_line;	 /* set if displaying the previously output line */
@@ -426,6 +421,8 @@ struct pvstate_s {
 		off_t total_bytes_read;		 /* total bytes read */
 		off_t total_written;		 /* total bytes or lines written */
 		off_t transferred;		 /* amount transferred (written - unconsumed) */
+
+		off_t otherside_transferred;	 /* amount transferred by the other side ("-M both") */
 
 		/* Keep track of line positions to backtrack written_but_not_consumed. */
 		/*@only@*/ /*@null@*/ off_t *line_positions; /* line separator write positions (circular buffer) */
@@ -606,6 +603,7 @@ pvdisplay_bytecount_t pv_formatter_fineta(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_rate(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_average_rate(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_bytes(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_ratio(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_buffer_percent(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_last_written(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_previous_line(pvformatter_args_t);

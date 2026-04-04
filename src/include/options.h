@@ -32,8 +32,21 @@ typedef enum {
 	PV_ACTION_STORE_AND_FORWARD,	/* store to file, then output from it */
 	PV_ACTION_WATCHFD,		/* watch process file descriptors */
 	PV_ACTION_REMOTE_CONTROL,	/* remotely control another pv */
-	PV_ACTION_QUERY			/* watch the state of another pv */
+	PV_ACTION_QUERY,		/* watch the state of another pv */
+	PV_ACTION_MONITOR		/* run a process, watch its stdin/out */
 } pvaction_t;
+
+/*
+ * Sides of a monitored command to monitor with PV_ACTION_MONITOR.
+ */
+typedef enum {
+	PV_SIDE_NONE,			/* don't monitor a command */
+	PV_SIDE_IN,			/* monitor only the input side */
+	PV_SIDE_OUT,			/* monitor only the output side */
+	PV_SIDE_BOTH			/* monitor both sides */
+} pvside_t;
+
+typedef /*@null@*/ const char * argv_string;
 
 /*
  * Structure describing run-time options.
@@ -46,14 +59,16 @@ struct opts_s {
 	/*@keep@*/ const char *program_name; /* name the program is running as */
 	/*@keep@*/ /*@null@*/ char *output; /* fd to write output to */
 	/*@keep@*/ /*@null@*/ char *name;    /* display name, if any */
+	/*@keep@*/ /*@null@*/ char *name1;   /* first name, if two were given */
 	/*@keep@*/ /*@null@*/ char *default_bar_style; /* default bar style */
 	/*@keep@*/ /*@null@*/ char *format;  /* output format, if any */
+	/*@keep@*/ /*@null@*/ char *format1; /* first format, if two were given */
 	/*@keep@*/ /*@null@*/ char *pidfile; /* PID file, if any */
 	/*@keep@*/ /*@null@*/ char *store_and_forward_file; /* store and forward file, if any */
 	/*@keep@*/ /*@null@*/ char *extra_display; /* extra display specifier, if any */
 	/*@keep@*/ /*@null@*/ pid_t *watchfd_pid;  /* array of processes to watch fds of */
 	/*@keep@*/ /*@null@*/ int *watchfd_fd;  /* array of fds to watch in each one (0=all) */
-	/*@keep@*/ /*@null@*/ const char **argv;   /* array of non-option arguments */
+	/*@keep@*/ /*@null@*/ argv_string *argv;   /* array of non-option arguments */
 	size_t lastwritten;            /* show N bytes last written */
 	off_t rate_limit;              /* rate limit, in bytes per second */
 	size_t buffer_size;            /* buffer size, in bytes (0=default) */
@@ -70,6 +85,7 @@ struct opts_s {
 	unsigned int watchfd_count;	       /* number of watchfd items */
 	unsigned int watchfd_length;	       /* allocated array size */
 	pvaction_t action;	       /* the program action to perform */
+	pvside_t side;		       /* which side of the monitored command to monitor */
 	bool progress;                 /* progress bar flag */
 	bool timer;                    /* timer flag */
 	bool eta;                      /* ETA flag */
@@ -77,6 +93,7 @@ struct opts_s {
 	bool rate;                     /* rate counter flag */
 	bool average_rate;             /* average rate counter flag */
 	bool bytes;                    /* bytes transferred flag */
+	bool ratio;                    /* in:out ratio flag */
 	bool bits;                     /* report transfer size in bits */
 	bool decimal_units;            /* decimal prefix flag */
 	bool bufpercent;               /* transfer buffer percentage flag */

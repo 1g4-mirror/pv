@@ -29,6 +29,7 @@ extern "C" {
  */
 #define PV_ERROREXIT_REMOTE_OR_PID 1
 #define PV_ERROREXIT_SAF	   1	/* store and forward error */
+#define PV_ERROREXIT_MONITOR	   1	/* monitor mode error */
 #define PV_ERROREXIT_ACCESS        2
 #define PV_ERROREXIT_OUROBOROS     4
 #define PV_ERROREXIT_TRANSITION    8
@@ -192,15 +193,24 @@ extern /*@null@*/ /*@only@*/ pvstate_t pv_state_alloc(void);
 extern void pv_state_reset(pvstate_t state);
 
 /*
- * Set the formatting string, given a set of old-style formatting options.
+ * Set the format options and use them to build a default formatting string.
+ * The default string is used if no format string is explicitly set.
  */
-extern void pv_state_set_format(pvstate_t state, bool progress,
-				bool timer, bool eta,
-				bool fineta, bool rate,
-				bool average_rate, bool bytes,
-				bool bufpercent,
-				size_t lastwritten,
-				/*@null@*/ const char *name);
+typedef struct {
+	size_t lastwritten;	  /* --last-written (amount) */
+	bool progress;		  /* --progress */
+	bool timer;		  /* --timer */
+	bool eta;		  /* --eta */
+	bool fineta;		  /* --fineta */
+	bool rate;		  /* --rate */
+	bool average_rate;	  /* --average-rate */
+	bool bytes;		  /* --bytes */
+	bool bufpercent;	  /* --buffer-percent */
+} pvformatoptions_s;
+extern void pv_state_set_format_options(pvstate_t, pvformatoptions_s);
+
+/* Append a string to the default format. */
+void pv_state_append_to_default_format(pvstate_t, /*@null@ */ const char *);
 
 /*
  * Set the various options.
@@ -238,6 +248,8 @@ extern void pv_state_extra_display_set(pvstate_t, /*@null@*/ const char *);
 extern void pv_state_output_set(pvstate_t, int, const char *);
 extern void pv_state_average_rate_window_set(pvstate_t, unsigned int);
 extern void pv_state_set_terminal_supports_utf8(pvstate_t, bool);
+extern void pv_state_othermonitor_set(pvstate_t, pid_t, int, int);
+extern void pv_state_cancel_output_if_empty_format_string(pvstate_t);
 
 extern void pv_state_inputfiles(pvstate_t, unsigned int, const char **);
 extern void pv_state_watchfds(pvstate_t, unsigned int, const pid_t *, const int *);
