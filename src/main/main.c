@@ -287,7 +287,8 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s
  * As a side effect, "command_fd" is closed.
  */
 static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t side, int command_fd,
-			   pid_t othermonitor_pid, int othermonitor_read_fd, int othermonitor_write_fd)
+			   pid_t othermonitor_pid, int othermonitor_read_fd, int othermonitor_write_fd, off_t size,
+			   pvformatoptions_s format_options)
 {
 	const char *dummy_argv[1];	 /* flawfinder: ignore */
 
@@ -325,6 +326,29 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 	dummy_argv[0] = "-";
 	/*@+observertrans@ */
 	pv_state_inputfiles(state, 1, dummy_argv);
+
+	/*
+	 * Calculate the size for this side.
+	 */
+	if (0 == size) {
+		size = pv_calc_total_size(state);
+		debug("%s: %llu", "no size given - calculated", size);
+	}
+	/*
+	 * If the size is unknown, we cannot have an ETA.
+	 */
+	if (size < 1) {
+		format_options.eta = false;
+		format_options.fineta = false;
+		pv_state_set_format_options(state, format_options);
+		debug("%s", "size unknown - ETA disabled");
+	}
+	pv_state_size_set(state, size);
+
+	/* Add ratio to the default format on the out side of a "both". */
+	if ((othermonitor_pid > 0) && (PV_SIDE_OUT == side)) {
+		pv_state_append_to_default_format(state, "%{ratio}");
+	}
 
 	pv_state_cancel_output_if_empty_format_string(state);
 	return pv_main_loop(state);
@@ -520,14 +544,9 @@ x = 1; \
 			/* Close the read end of the out-to-in pipe. */
 			close_if_open(pipefd_out_to_in[0]);
 
-			/* Add ratio to the default format on the out side. */
-			if (PV_SIDE_BOTH == opts->side) {
-				pv_state_append_to_default_format(state, "%{ratio}");
-			}
-
 			retcode =
 			    pv__run_monitor(opts->program_name, state, PV_SIDE_OUT, pipefd_cmd_out[0], in_monitor_pid,
-					    pipefd_in_to_out[0], pipefd_out_to_in[1]);
+					    pipefd_in_to_out[0], pipefd_out_to_in[1], opts->size, format_options);
 
 			/* Close the other ends of the intra-monitor pipes. */
 			close_if_open(pipefd_in_to_out[0]);
@@ -570,14 +589,14 @@ x = 1; \
 		close_if_open(pipefd_cmd_out[0]);
 		retcode =
 		    pv__run_monitor(opts->program_name, state, PV_SIDE_IN, pipefd_cmd_in[1], out_monitor_pid,
-				    pipefd_out_to_in[0], pipefd_in_to_out[1]);
+				    pipefd_out_to_in[0], pipefd_in_to_out[1], opts->size, format_options);
 		break;
 	case PV_SIDE_OUT:
 		/* Close the write end of the "in" pipe. */
 		close_if_open(pipefd_cmd_in[1]);
 		retcode =
 		    pv__run_monitor(opts->program_name, state, PV_SIDE_OUT, pipefd_cmd_out[0], in_monitor_pid,
-				    pipefd_in_to_out[0], pipefd_out_to_in[1]);
+				    pipefd_in_to_out[0], pipefd_out_to_in[1], opts->size, format_options);
 		break;
 	}
 
@@ -825,8 +844,6 @@ int main(int argc, char **argv)
 			debug("%s", "size unknown - ETA disabled");
 		}
 	}
-
-	/* TODO: size calculation for monitor mode. */
 
 	/* Initialise the signal handling. */
 	pv_sig_init(state);
