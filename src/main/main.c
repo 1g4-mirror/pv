@@ -114,6 +114,8 @@ static int pv__write_pidfile(opts_t opts)
 	if (rename(pidfile_tmp_name, opts->pidfile) < 0) {
 		fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
 		(void) remove(pidfile_tmp_name);
+		free(pidfile_tmp_name);
+		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
 	free(pidfile_tmp_name);
