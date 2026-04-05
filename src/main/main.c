@@ -59,6 +59,7 @@ static int pv__write_pidfile(opts_t opts)
 	 * that pidfile_template is \0 terminated because we've set it to a
 	 * constant value.  So we tell flawfinder to skip this check here.
 	 */
+
 	pidfile_tmp_name = malloc(pidfile_tmp_bufsize);
 	if (NULL == pidfile_tmp_name) {
 		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
@@ -157,11 +158,10 @@ static int pv__set_output(pvstate_t state, opts_t opts, /*@null@ */ const char *
 
 
 /*
- * Run in store-and-forward mode: run the main loop once with the output
- * forced to the store-and-forward file (taking care of creation and removal
- * of a temporary file if "-" was specified); then run the main loop again
- * with the input file list forced to be just the store-and-forward file. 
- * Returns nonzero on error.
+ * Store-and-forward mode: run the main loop once with the output forced to
+ * the store-and-forward file (creating and removing a temporary file if "-"
+ * was specified); then run the main loop again with the input file list
+ * forced to be just the store-and-forward file.  Returns nonzero on error.
  */
 static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s format_options)
 {
@@ -799,8 +799,8 @@ int main(int argc, char **argv)
 		opts->interval = 600;
 
 	/*
-	 * Set output file, treating no output or "-" as stdout; we have to
-	 * do this before looking at setting the size, as the size
+	 * Set the output file, treating no output or "-" as stdout; we have
+	 * to do this before looking at setting the size, as the size
 	 * calculation looks at the output file if the input size can't be
 	 * calculated (issue #91).
 	 *
@@ -817,10 +817,12 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Copy the "stop at size" option before checking the total size,
-	 * since calculating the size from the output block device size
-	 * after this may want to force this setting on, and if we set it
-	 * afterwards, we undo the override.
+	 * Copy the "stop at size" option into the main state before
+	 * checking the total size.  If pv_calc_total_size() finds that the
+	 * output is a block device, it will use the size of the block
+	 * device, and also set the stop-at-size flag.  So
+	 * pv_state_stop_at_size_set() must be called before
+	 * pv_calc_total_size(), otherwise it would undo that override.
 	 */
 	pv_state_stop_at_size_set(state, opts->stop_at_size);
 
@@ -851,8 +853,8 @@ int main(int argc, char **argv)
 	/*
 	 * Get the total size, in query mode.
 	 *
-	 * Note that this uses signals, so signal handling has to have been
-	 * set up first.
+	 * Since pv_remote_transferstate_fetch() uses signals, signal
+	 * handling has to have been set up first.
 	 */
 	if (PV_ACTION_QUERY == opts->action) {
 		opts->size = 0;
