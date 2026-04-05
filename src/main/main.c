@@ -280,9 +280,9 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s
  * it's a pipe from the command).
  *
  * If both sides are active, "othermonitor_pid" is the PID of the monitor on
- * the other side, "othermonitor_read_fd" is a pipe file descriptor to read
- * info from the other monitor, and "othermonitor_write_fd" is for writing
- * info to the other monitor.
+ * the other side, "othermonitor_read_fd" is for reading transfer progress
+ * from the other monitor, and "othermonitor_write_fd" is for writing
+ * transfer progress to the other monitor.
  *
  * Returns the appropriate exit status.
  *
@@ -318,33 +318,35 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 		break;
 	}
 
+	/* Close command_fd now it's been duplicated to the appropriate fd. */
 	if (close(command_fd) < 0) {
 		fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
 	}
 
+	/* Copy details of the other monitor into the main state. */
 	pv_state_othermonitor_set(state, othermonitor_pid, othermonitor_read_fd, othermonitor_write_fd);
 
+	/* Set the input files list to just "-". */
 	/*@-observertrans@ */
 	dummy_argv[0] = "-";
 	/*@+observertrans@ */
 	pv_state_inputfiles(state, 1, dummy_argv);
 
-	/*
-	 * Calculate the size for this side.
-	 */
+	/* Calculate the size for this side. */
 	if (0 == size) {
 		size = pv_calc_total_size(state);
 		debug("%s: %llu", "no size given - calculated", size);
 	}
-	/*
-	 * If the size is unknown, we cannot have an ETA.
-	 */
+
+	/* If the size is unknown, we cannot have an ETA. */
 	if (size < 1) {
 		format_options.eta = false;
 		format_options.fineta = false;
 		pv_state_set_format_options(state, format_options);
 		debug("%s", "size unknown - ETA disabled");
 	}
+
+	/* Copy the calculated size into the main state. */
 	pv_state_size_set(state, size);
 
 	/* Add ratio to the default format on the out side of a "both". */
@@ -352,7 +354,10 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 		pv_state_append_to_default_format(state, "%{ratio}");
 	}
 
+	/* Prevent any progress output if the format was explicitly made empty. */
 	pv_state_cancel_output_if_empty_format_string(state);
+
+	/* Run the main transfer loop. */
 	return pv_main_loop(state);
 }
 
@@ -581,6 +586,7 @@ x = 1; \
 		}
 		/* Trigger a format reparse. */
 		pv_state_set_format_options(state, format_options);
+		/* Now monitor the "in" side, as the "out" monitor was spawned above. */
 		/*@fallthrough@ */
 		/* falling through as "out" is in another process (above). */
 #ifndef SPLINT
