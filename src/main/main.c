@@ -572,12 +572,13 @@ x = 1; \
 	}
 
 	/* Monitor the remaining side. */
-	switch (opts->side) {
-	case PV_SIDE_NONE:
-		retcode = PV_ERROREXIT_MONITOR;
-		break;
-	case PV_SIDE_BOTH:
-		/* Use name1, format1 for the "in" side. */
+
+	/*
+	 * In "both" mode, the remaining side is "in", so if two sets of
+	 * name and/or format options were given, we need to switch to using
+	 * the ones given first.
+	 */
+	if (PV_SIDE_BOTH == opts->side) {
 		if (NULL != opts->name1) {
 			pv_state_name_set(state, opts->name1);
 		}
@@ -586,12 +587,13 @@ x = 1; \
 		}
 		/* Trigger a format reparse. */
 		pv_state_set_format_options(state, format_options);
-		/* Now monitor the "in" side, as the "out" monitor was spawned above. */
-		/*@fallthrough@ */
-		/* falling through as "out" is in another process (above). */
-#ifndef SPLINT
-		__attribute__((fallthrough));
-#endif
+	}
+
+	switch (opts->side) {
+	case PV_SIDE_NONE:
+		retcode = PV_ERROREXIT_MONITOR;
+		break;
+	case PV_SIDE_BOTH:
 	case PV_SIDE_IN:
 		/* Close the read end of the "out" pipe. */
 		close_if_open(pipefd_cmd_out[0]);
