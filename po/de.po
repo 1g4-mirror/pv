@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-06 13:55+0100\n"
+"POT-Creation-Date: 2026-04-06 15:52+0100\n"
 "PO-Revision-Date: 2025-01-14 20:39+0000\n"
 "Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -315,7 +315,7 @@ msgstr "(eingabe)"
 msgid "a command to run must be specified"
 msgstr ""
 
-#: src/main/main.c:711
+#: src/main/main.c:713
 msgid "state allocation failed"
 msgstr "Speicherzuweisung für `state' fehlgeschlagen"
 
@@ -575,7 +575,7 @@ msgstr "fd"
 msgid "message not received"
 msgstr "Nachricht nicht empfangen"
 
-#: src/pv/remote.c:653 src/pv/remote.c:671
+#: src/pv/remote.c:654 src/pv/remote.c:672
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO wird auf diesem System nicht unterstützt"
 

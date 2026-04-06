@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-06 13:55+0100\n"
+"POT-Creation-Date: 2026-04-06 15:52+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -295,7 +295,7 @@ msgstr ""
 msgid "a command to run must be specified"
 msgstr ""
 
-#: src/main/main.c:711
+#: src/main/main.c:713
 msgid "state allocation failed"
 msgstr ""
 
@@ -548,7 +548,7 @@ msgstr ""
 msgid "message not received"
 msgstr ""
 
-#: src/pv/remote.c:653 src/pv/remote.c:671
+#: src/pv/remote.c:654 src/pv/remote.c:672
 msgid "SA_SIGINFO not supported on this system"
 msgstr ""
 
