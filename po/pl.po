@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
 "POT-Creation-Date: 2026-04-06 13:55+0100\n"
-"PO-Revision-Date: 2026-03-22 15:50+0000\n"
+"PO-Revision-Date: 2026-04-06 15:34+0000\n"
 "Last-Translator: Coral Pink <coral.pink@disr.it>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
 "Language: pl\n"
@@ -263,7 +263,7 @@ msgstr "pokaż postęp procesu PID"
 
 #: src/main/help.c:376
 msgid "run a command and monitor its standard input, output, or both"
-msgstr ""
+msgstr "uruchom polecenie i monitoruj jego wejście i/lub wyjście standardowe"
 
 #: src/main/help.c:380
 msgid "save process ID in FILE"
@@ -291,7 +291,7 @@ msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Łączenie PLIK(ów) lub wejścia standardowego, do wyjścia standardowego z "
-"monitoringiem."
+"monitorowaniem."
 
 #: src/main/help.c:565
 msgid "Supported format sequences:"
@@ -308,7 +308,7 @@ msgstr "(wejście)"
 
 #: src/main/main.c:387 src/main/options.c:1341
 msgid "a command to run must be specified"
-msgstr ""
+msgstr "polecenie do uruchomienia musi zostać określone"
 
 #: src/main/main.c:711
 msgid "state allocation failed"
@@ -380,7 +380,7 @@ msgstr "brakująca nazwa procesu"
 
 #: src/main/options.c:1157
 msgid "invalid side specification"
-msgstr ""
+msgstr "niepoprawne określenie monitorowanych stron"
 
 #: src/main/options.c:1172
 #, c-format
@@ -432,11 +432,11 @@ msgstr "nie można użyć zdalnego sterowania i zdalnego odczytu jednocześnie"
 
 #: src/main/options.c:1305
 msgid "monitor mode cannot be specified with this option"
-msgstr ""
+msgstr "tryb monitorowania nie może być określony z tą opcją"
 
 #: src/main/options.c:1318
 msgid "monitor mode cannot be used with store-and-forward"
-msgstr ""
+msgstr "tryb monitorowania nie może być użyty z store-and-forward"
 
 #: src/main/options.c:1330
 msgid "files cannot be specified with this option"
