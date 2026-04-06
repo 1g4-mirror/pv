@@ -643,6 +643,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 
 bool pv_remote_check( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 {
+	return false;
 }
 
 
