@@ -50,7 +50,8 @@ static size_t display_width(const char *string)
  * The 7-bit ASCII version of display_word_wrap() below - does not
  * understand multi-byte characters.
  */
-static void display_word_wrap_7bit(const char *string, size_t display_width, size_t left_margin)
+static void display_word_wrap_7bit(const char *string, size_t display_width, size_t first_line_start,
+				   size_t left_margin)
 {
 	const char *start;
 	const char *end;
@@ -61,6 +62,8 @@ static void display_word_wrap_7bit(const char *string, size_t display_width, siz
 
 	start = string;
 	wrap_at_width = display_width;
+	if (wrap_at_width > first_line_start)
+		wrap_at_width -= first_line_start;
 
 	/* Wrap lines that are too long. */
 	while (strlen(start) > wrap_at_width) {	/* flawfinder: ignore */
@@ -106,13 +109,15 @@ static void display_word_wrap_7bit(const char *string, size_t display_width, siz
 
 /*
  * Output a null-terminated string to standard output, word wrapping to
- * "display_width" display character positions, and left-padding any new
- * lines after the first one with "left_margin" spaces.
+ * "display_width" display character positions, assuming that the first line
+ * starts with the cursor already at "first_line_start" display character
+ * positions from the left, and left-padding any new lines after the first
+ * one with "left_margin" spaces.
  *
  * Wide characters are handled if NLS is enabled, but if they can't be, this
  * falls back to a version which just counts bytes as characters.
  */
-static void display_word_wrap(const char *string, size_t display_width, size_t left_margin)
+static void display_word_wrap(const char *string, size_t display_width, size_t first_line_start, size_t left_margin)
 {
 #if defined(ENABLE_NLS) && defined(HAVE_WCHAR_H)
 	size_t wrap_at_width;
@@ -120,6 +125,9 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 	size_t wide_string_buffer_size;
 	wchar_t *wide_string;
 	size_t start_idx, end_idx, chars_remaining;
+
+	debug("[%s], display_width=%d, first_line_start=%d, left_margin=%d", string, (int) display_width,
+	      (int) first_line_start, (int) left_margin);
 
 	if (NULL == string)
 		return;
@@ -132,7 +140,7 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 	/*@+nullpass@ */
 	if (wide_char_count == (size_t) -1) {
 		debug("%s: %s: %s", "mbstowcs", string, strerror(errno));
-		display_word_wrap_7bit(string, display_width, left_margin);
+		display_word_wrap_7bit(string, display_width, first_line_start, left_margin);
 		return;
 	}
 
@@ -145,7 +153,7 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 	wide_string = malloc(wide_string_buffer_size);
 	if (NULL == wide_string) {
 		perror("malloc");
-		display_word_wrap_7bit(string, display_width, left_margin);
+		display_word_wrap_7bit(string, display_width, first_line_start, left_margin);
 		return;
 	}
 	memset(wide_string, 0, wide_string_buffer_size);
@@ -155,12 +163,14 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 	if (mbstowcs(wide_string, string, 1 + wide_char_count) == (size_t) -1) {
 		debug("%s: %s: %s", "mbstowcs", string, strerror(errno));
 		free(wide_string);
-		display_word_wrap_7bit(string, display_width, left_margin);
+		display_word_wrap_7bit(string, display_width, first_line_start, left_margin);
 		return;
 	}
 
 	start_idx = 0;
 	wrap_at_width = display_width;
+	if (wrap_at_width > first_line_start)
+		wrap_at_width -= first_line_start;
 	chars_remaining = wide_char_count;
 
 	/* Wrap lines that are too long. */
@@ -240,7 +250,7 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 	free(wide_string);
 
 #else				/* ! defined(ENABLE_NLS) && defined(HAVE_WCHAR_H) */
-	display_word_wrap_7bit(string, display_width, left_margin);
+	display_word_wrap_7bit(string, display_width, first_line_start, left_margin);
 #endif				/* defined(ENABLE_NLS) && defined(HAVE_WCHAR_H) */
 }
 
@@ -481,7 +491,7 @@ void display_help(void)
 	 */
 	program_description = _("Concatenate FILE(s), or standard input, to standard output, with monitoring.");
 	if (NULL != program_description) {
-		display_word_wrap(program_description, right_margin, 0);
+		display_word_wrap(program_description, right_margin, 0, 0);
 		printf("\n");
 	}
 
@@ -554,9 +564,12 @@ void display_help(void)
 	 * Set the left margin for the option descriptions, based on the
 	 * widest option width, or (right margin - min_description_width),
 	 * whichever is less, so that there is always room for
-	 * "min_description_width" characters of description.
+	 * "min_description_width" characters of description.  If there's
+	 * not even room for that, set the left margin to 2.
 	 */
-	description_left_margin = right_margin - min_description_width;
+	description_left_margin = 2;
+	if (right_margin > (min_description_width + 2))
+		description_left_margin = right_margin - min_description_width;
 	if (widest_option_width < description_left_margin) {
 		description_left_margin = widest_option_width;
 	}
@@ -597,18 +610,18 @@ void display_help(void)
 		}
 
 		/*
-		 * If the option is too wide, start a new line for the
-		 * description.  In both cases, pad with spaces up to the
-		 * description left margin.
+		 * If the option (with 2 trailing spaces) is too wide, start
+		 * a new line for the description.  In both cases, pad with
+		 * spaces up to the description left margin.
 		 */
-		if (option_width > description_left_margin) {
+		if ((option_width + 2) > description_left_margin) {
 			printf("\n%*s", (int) description_left_margin, "");
 		} else if (option_width < description_left_margin) {
 			printf("%*s", (int) (description_left_margin - option_width), "");
 		}
 
 		/* Output the description, word wrapped. */
-		display_word_wrap(definition->opt_description, right_margin - description_left_margin,
+		display_word_wrap(definition->opt_description, right_margin, description_left_margin,
 				  description_left_margin);
 
 		printf("\n");
@@ -620,11 +633,11 @@ void display_help(void)
 		format_sequence_header = _("Supported format sequences:");
 		if (NULL != format_sequence_header) {
 			printf("\n");
-			display_word_wrap(format_sequence_header, right_margin, 0);
+			display_word_wrap(format_sequence_header, right_margin, 0, 0);
 			printf("\n");
 		}
 		printf("\n  ");
-		display_word_wrap(format_sequences, right_margin, 2);
+		display_word_wrap(format_sequences, right_margin, 2, 2);
 		free(format_sequences);
 		printf("\n");
 	}
