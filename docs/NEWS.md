@@ -2,6 +2,7 @@
 
  * *feature:* new **--monitor** option to run a command and watch its input, output, or both ([#67](https://codeberg.org/ivarch/pv/issues/67))
  * *fix:* exit with an error if the PID file given to **--pidfile** cannot be replaced
+ * *fix:* correct the **--help** word wrapping on very small terminals
  * *i18n:* Polish translations updated
  * *i18n:* Finnish translations updated
  * *cleanup:* fix GCC warning when using glibc 2.43 ([#180](https://codeberg.org/ivarch/pv/pulls/180))
