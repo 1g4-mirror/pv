@@ -54,31 +54,52 @@ static void display_word_wrap_7bit(const char *string, size_t display_width, siz
 {
 	const char *start;
 	const char *end;
+	size_t wrap_at_width;
 
 	if (NULL == string)
 		return;
 
 	start = string;
+	wrap_at_width = display_width;
 
-	while (strlen(start) > display_width) {	/* flawfinder: ignore */
+	/* Wrap lines that are too long. */
+	while (strlen(start) > wrap_at_width) {	/* flawfinder: ignore */
 		/* flawfinder rationale: see above. */
 
-		end = start + display_width;
+		/*
+		 * Find the last space before the end of the display line,
+		 * or if there isn't one, behave as if there was one at the
+		 * end of the display line.
+		 */
+		end = start + wrap_at_width;
 		while ((end > start) && (end[0] != ' '))
 			end--;
 		if (end == start) {
-			end = start + display_width;
+			end = start + wrap_at_width;
 		} else {
 			end++;
 		}
+		/* Display the string up to that space. */
 		printf("%.*s", (int) (end - start), start);
 		if (end == start)
 			end++;
 		start = end;
-		if (start[0] != '\0')
+		/*
+		 * If there's more text left, start a new display line and
+		 * pad it with spaces to the left margin, and change the
+		 * wrap width to the display width minus the left margin.
+		 */
+		if (start[0] != '\0') {
 			printf("\n%*s", (int) left_margin, "");
+			if (display_width > left_margin) {
+				wrap_at_width = display_width - left_margin;
+			} else {
+				wrap_at_width = 1;
+			}
+		}
 	}
 
+	/* Display the remainder of the string. */
 	printf("%s", start);
 }
 
@@ -94,6 +115,7 @@ static void display_word_wrap_7bit(const char *string, size_t display_width, siz
 static void display_word_wrap(const char *string, size_t display_width, size_t left_margin)
 {
 #if defined(ENABLE_NLS) && defined(HAVE_WCHAR_H)
+	size_t wrap_at_width;
 	size_t wide_char_count;
 	size_t wide_string_buffer_size;
 	wchar_t *wide_string;
@@ -101,6 +123,8 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 
 	if (NULL == string)
 		return;
+
+	/* Calculate how many wide characters are in the multibyte string. */
 
 	/*@-nullpass@ */
 	/* splint note: see mbstowcs() call in pv_strwidth(). */
@@ -112,6 +136,11 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 		return;
 	}
 
+	/*
+	 * Allocate a buffer in which to convert the multibyte string to a
+	 * wide-character string, plus one character for zero padding.
+	 */
+
 	wide_string_buffer_size = sizeof(*wide_string) * (1 + wide_char_count);
 	wide_string = malloc(wide_string_buffer_size);
 	if (NULL == wide_string) {
@@ -121,6 +150,8 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 	}
 	memset(wide_string, 0, wide_string_buffer_size);
 
+	/* Convert the multibyte string to a wide-character string. */
+
 	if (mbstowcs(wide_string, string, 1 + wide_char_count) == (size_t) -1) {
 		debug("%s: %s: %s", "mbstowcs", string, strerror(errno));
 		free(wide_string);
@@ -129,18 +160,27 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 	}
 
 	start_idx = 0;
+	wrap_at_width = display_width;
 	chars_remaining = wide_char_count;
 
+	/* Wrap lines that are too long. */
+
 	/*@-unrecog@ *//* splint seems unable to see the prototype for wcswidth(). */
-	while (chars_remaining > 0 && wcswidth(&(wide_string[start_idx]), chars_remaining) > (int) display_width) {
+	while (chars_remaining > 0 && wcswidth(&(wide_string[start_idx]), chars_remaining) > (int) wrap_at_width) {
 		/*@+unrecog@ */
 		size_t next_idx;
 
-		end_idx = start_idx + display_width;
+		/*
+		 * Find the last space before the end of the display line,
+		 * or if there isn't one, behave as if there was one at the
+		 * end of the display line.
+		 */
+
+		end_idx = start_idx + wrap_at_width;
 		while ((end_idx > start_idx) && (!iswspace(wide_string[end_idx])))
 			end_idx--;
 		if (end_idx == start_idx) {
-			end_idx = start_idx + display_width;
+			end_idx = start_idx + wrap_at_width;
 		} else {
 			end_idx++;
 		}
@@ -149,6 +189,7 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 		if (end_idx == start_idx)
 			next_idx++;
 
+		/* Display the string up to that space, a character at a time. */
 		while (start_idx < end_idx && start_idx < wide_char_count) {
 			char multi_byte_string[MB_CUR_MAX + 1];	/* flawfinder: ignore */
 			/*
@@ -165,12 +206,26 @@ static void display_word_wrap(const char *string, size_t display_width, size_t l
 		}
 
 		start_idx = next_idx;
-		if (start_idx < wide_char_count)
+		/*
+		 * If there's more text left, start a new display line and
+		 * pad it with spaces to the left margin, and change the
+		 * wrap width to the display width minus the left margin.
+		 */
+		if (start_idx < wide_char_count) {
 			printf("\n%*s", (int) left_margin, "");
-
-		chars_remaining = wide_char_count - start_idx;
+			if (display_width > left_margin) {
+				wrap_at_width = display_width - left_margin;
+			} else {
+				wrap_at_width = 1;
+			}
+			chars_remaining = wide_char_count - start_idx;
+		} else {
+			/* Explicitly set to 0 to avoid underflow. */
+			chars_remaining = 0;
+		}
 	}
 
+	/* Display the remainder of the string, a character at a time. */
 	while (start_idx < wide_char_count) {
 		char multi_byte_string[MB_CUR_MAX + 1];	/* flawfinder: ignore */
 		/* flawfinder rationale as above. */
