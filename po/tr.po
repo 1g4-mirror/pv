@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-06 15:52+0100\n"
+"POT-Creation-Date: 2026-04-08 22:05+0100\n"
 "PO-Revision-Date: 2025-10-05 20:09+0000\n"
 "Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -13,279 +13,279 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.13.2\n"
 
-#: src/main/help.c:236
+#: src/main/help.c:301
 msgid "show progress bar"
 msgstr "ilerleme çubuğunu göster"
 
-#: src/main/help.c:239
+#: src/main/help.c:304
 msgid "show elapsed time"
 msgstr "geçen süreyi göster"
 
-#: src/main/help.c:242
+#: src/main/help.c:307
 msgid "show estimated time of arrival (completion)"
 msgstr "tahmini varış (tamamlanma) zamanını göster"
 
-#: src/main/help.c:245
+#: src/main/help.c:310
 msgid "show absolute estimated time of arrival (completion)"
 msgstr "mutlak tahmini varış (tamamlanma) zamanını göster"
 
-#: src/main/help.c:248
+#: src/main/help.c:313
 msgid "show data transfer rate counter"
 msgstr "veri aktarım oranı sayacını göster"
 
-#: src/main/help.c:251
+#: src/main/help.c:316
 msgid "show data transfer average rate counter"
 msgstr "veri aktarımı ortalama hız sayacını göster"
 
-#: src/main/help.c:254
+#: src/main/help.c:319
 msgid "show number of bytes transferred"
 msgstr "aktarılan bayt sayısını göster"
 
-#: src/main/help.c:257
+#: src/main/help.c:322
 msgid "show percentage of transfer buffer in use"
 msgstr "aktarım tamponunun kullanım yüzdesini göster"
 
-#: src/main/help.c:259
+#: src/main/help.c:324
 msgid "NUM"
 msgstr "NUM"
 
-#: src/main/help.c:260
+#: src/main/help.c:325
 msgid "show NUM bytes last written"
 msgstr "son yazılan NUM baytlarını göster"
 
-#: src/main/help.c:262
+#: src/main/help.c:327
 msgid "FORMAT"
 msgstr "FORMAT"
 
-#: src/main/help.c:263
+#: src/main/help.c:328
 msgid "set output format to FORMAT"
 msgstr "çıktı formatını FORMAT olarak ayarlayın"
 
-#: src/main/help.c:266
+#: src/main/help.c:331
 msgid "output percentages, not visual information"
 msgstr "görsel bilgileri değil, yüzdeleri çıktı olarak yazdır"
 
-#: src/main/help.c:269
+#: src/main/help.c:334
 msgid "do not output any transfer information at all"
 msgstr "hiçbir transfer bilgisini yazdırma"
 
-#: src/main/help.c:273
+#: src/main/help.c:338
 msgid "show number of bits transferred"
 msgstr "aktarılan bit sayısını göster"
 
-#: src/main/help.c:276
+#: src/main/help.c:341
 msgid "treat suffixes as multiples of 1000 rather than 1024"
 msgstr "ekleri 1024 yerine 1000'in katları olarak değerlendir"
 
-#: src/main/help.c:279
+#: src/main/help.c:344
 msgid "display nothing until first byte transferred"
 msgstr "ilk bayt aktarılana kadar hiçbir şey gösterme"
 
-#: src/main/help.c:281 src/main/help.c:296 src/main/help.c:299
+#: src/main/help.c:346 src/main/help.c:361 src/main/help.c:364
 msgid "SEC"
 msgstr "SEC"
 
-#: src/main/help.c:282
+#: src/main/help.c:347
 msgid "display nothing until SEC seconds have passed"
 msgstr "SEC saniye geçene kadar hiçbir şey gösterme"
 
-#: src/main/help.c:284
+#: src/main/help.c:349
 msgid "SIZE"
 msgstr "BOYUT"
 
-#: src/main/help.c:285
+#: src/main/help.c:350
 msgid "set estimated data size to SIZE bytes"
 msgstr "tahmini veri boyutunu BOYUT bayt olarak ayarlayın"
 
-#: src/main/help.c:288
+#: src/main/help.c:353
 msgid "if size unknown, show rate vs max rate"
 msgstr "boyut bilinmiyorsa, oranı maksimum oranla göster"
 
-#: src/main/help.c:291
+#: src/main/help.c:356
 msgid "count lines instead of bytes"
 msgstr "bayt yerine satır say"
 
-#: src/main/help.c:294
+#: src/main/help.c:359
 msgid "lines are null-terminated"
 msgstr "satırlar boş sonlandırılır"
 
-#: src/main/help.c:297
+#: src/main/help.c:362
 msgid "update every SEC seconds"
 msgstr "her SEC saniyede bir güncelleme"
 
-#: src/main/help.c:300
+#: src/main/help.c:365
 msgid "compute average rate over past SEC seconds (default 30s)"
 msgstr "geçmiş SEC saniyeleri üzerinden ortalama hızı hesapla (varsayılan 30s)"
 
-#: src/main/help.c:302
+#: src/main/help.c:367
 msgid "WIDTH"
 msgstr "GENİŞLİK"
 
-#: src/main/help.c:303
+#: src/main/help.c:368
 msgid "assume terminal is WIDTH characters wide"
 msgstr "terminalin GENİŞLİK karakter genişliğinde olduğunu varsayalım"
 
-#: src/main/help.c:305
+#: src/main/help.c:370
 msgid "HEIGHT"
 msgstr "YÜKSEKLİK"
 
-#: src/main/help.c:306
+#: src/main/help.c:371
 msgid "assume terminal is HEIGHT rows high"
 msgstr "terminalin YÜKSEKLİK sıraları yüksekliğinde olduğunu varsayalım"
 
-#: src/main/help.c:308
+#: src/main/help.c:373
 msgid "NAME"
 msgstr "İSİM"
 
-#: src/main/help.c:309
+#: src/main/help.c:374
 msgid "prefix visual information with NAME"
 msgstr "görsel bilgiyi İSİM ile öne ekle"
 
-#: src/main/help.c:311
+#: src/main/help.c:376
 msgid "STYLE"
 msgstr "BİÇİM"
 
-#: src/main/help.c:312
+#: src/main/help.c:377
 msgid "set default bar style to NAME"
 msgstr "öntanımlı çubuk biçimini İSİM olarak ayarla"
 
-#: src/main/help.c:314
+#: src/main/help.c:379
 msgid "SPEC"
 msgstr "BELİRT"
 
-#: src/main/help.c:315
+#: src/main/help.c:380
 msgid "also send progress to SPEC"
 msgstr "ilerlemeyi BELİRT ögesine de gönder"
 
-#: src/main/help.c:318
+#: src/main/help.c:383
 msgid "output transfer statistics at the end"
 msgstr "transfer istatistiklerini sonda göster"
 
-#: src/main/help.c:321
+#: src/main/help.c:386
 msgid "output even if standard error is not a terminal"
 msgstr "standart hata bir terminal olmasa bile çıktı yazdır"
 
-#: src/main/help.c:324
+#: src/main/help.c:389
 msgid "use cursor positioning escape sequences"
 msgstr "imleç konumlandırma kaçış dizilerini kullan"
 
-#: src/main/help.c:327 src/main/help.c:360 src/main/help.c:379
-#: src/main/help.c:389
+#: src/main/help.c:392 src/main/help.c:425 src/main/help.c:444
+#: src/main/help.c:454
 msgid "FILE"
 msgstr "DOSYA"
 
-#: src/main/help.c:328
+#: src/main/help.c:393
 msgid "write output to FILE instead of stdout"
 msgstr "çıktıyı stdout yerine DOSYA'ya yaz"
 
-#: src/main/help.c:330
+#: src/main/help.c:395
 msgid "RATE"
 msgstr "ORAN"
 
-#: src/main/help.c:331
+#: src/main/help.c:396
 msgid "limit transfer to RATE bytes per second"
 msgstr "aktarımı saniye başına ORAN bayt ile sınırlandırın"
 
-#: src/main/help.c:333 src/main/help.c:342
+#: src/main/help.c:398 src/main/help.c:407
 msgid "BYTES"
 msgstr "BAYTLAR"
 
-#: src/main/help.c:334
+#: src/main/help.c:399
 msgid "use a buffer size of BYTES"
 msgstr "BAYTLAR tampon boyutu kullanın"
 
-#: src/main/help.c:337
+#: src/main/help.c:402
 msgid "never use splice(), always use read/write"
 msgstr "splice() kullanma, her zaman read/write kullan"
 
-#: src/main/help.c:340
+#: src/main/help.c:405
 msgid "skip read errors in input"
 msgstr "girdideki okuma hatalarını atla"
 
-#: src/main/help.c:343
+#: src/main/help.c:408
 msgid "skip errors in BYTES blocks at a time"
 msgstr "BAYTLAR blokları halinde hataları atla"
 
-#: src/main/help.c:346
+#: src/main/help.c:411
 msgid "stop after --size bytes have been transferred"
 msgstr "--size bayt transfer edildikten sonra dur"
 
-#: src/main/help.c:349
+#: src/main/help.c:414
 msgid "flush cache to disk after every write"
 msgstr "her yazmadan sonra önbelleği diske boşalt"
 
-#: src/main/help.c:352
+#: src/main/help.c:417
 msgid "use direct I/O to bypass cache"
 msgstr "Önbelleği atlamak için doğrudan I/O kullan"
 
-#: src/main/help.c:355
+#: src/main/help.c:420
 msgid "try to seek instead of writing null bytes"
 msgstr ""
 
-#: src/main/help.c:358
+#: src/main/help.c:423
 msgid "discard input instead of writing to output"
 msgstr "Girdiyi çıktıya yazmak yerine yok say"
 
-#: src/main/help.c:361
+#: src/main/help.c:426
 msgid "write all input to FILE before writing to output"
 msgstr "çıktıya yazmadan önce tüm girdiyi DOSYA'ya yaz"
 
-#: src/main/help.c:364
+#: src/main/help.c:429
 msgid "PID[:FD]|=NAME|@LISTFILE"
 msgstr ""
 
-#: src/main/help.c:365
+#: src/main/help.c:430
 msgid "watch file FD opened by process PID"
 msgstr "FD izleme dosyası PID işlemi tarafından açıldı"
 
-#: src/main/help.c:368 src/main/help.c:371
+#: src/main/help.c:433 src/main/help.c:436
 msgid "PID"
 msgstr "PID"
 
-#: src/main/help.c:369
+#: src/main/help.c:434
 msgid "update settings of process PID"
 msgstr "süreç PID ayarlarını güncelle"
 
-#: src/main/help.c:372
+#: src/main/help.c:437
 msgid "show progress of process PID"
 msgstr ""
 
-#: src/main/help.c:376
+#: src/main/help.c:441
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
 
-#: src/main/help.c:380
+#: src/main/help.c:445
 msgid "save process ID in FILE"
 msgstr "FILE'da işlem kimliğini (ID) kaydet"
 
-#: src/main/help.c:383
+#: src/main/help.c:448
 msgid "show this help and exit"
 msgstr "bu yardımı göster ve çık"
 
-#: src/main/help.c:386
+#: src/main/help.c:451
 msgid "show version information and exit"
 msgstr "sürüm bilgilerini göster ve çık"
 
-#: src/main/help.c:390
+#: src/main/help.c:455
 msgid "write debug logs to FILE"
 msgstr "Hata ayıklama kayıtlarını DOSYA'ya yaz"
 
-#: src/main/help.c:416
+#: src/main/help.c:481
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Kullanım şekli: %s [AYAR] [DOSYA]..."
 
-#: src/main/help.c:427
+#: src/main/help.c:492
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "İzleme ile DOSYA(lar)ı veya standart girdiyi standart çıktı ile birleştirin."
 
-#: src/main/help.c:565
+#: src/main/help.c:633
 msgid "Supported format sequences:"
 msgstr "Desteklenen biçim dizileri:"
 
-#: src/main/help.c:579
+#: src/main/help.c:647
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Lütfen hataları şu adrese bildirin: %s"
