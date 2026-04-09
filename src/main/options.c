@@ -204,10 +204,12 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 	/* Subprocess in which to run pgrep. */
 	pid = (pid_t) fork();
 	if (pid < 0) {
+		/* Fork failure - error return. */
 		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
 		(void) close(fds[0]);
 		(void) close(fds[1]);
 		return false;
+
 	} else if (0 == pid) {
 		int nullfd;
 
