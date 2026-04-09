@@ -262,6 +262,8 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 
 	/* Read the lines of output from the child process. */
 
+	/* TODO: use getdelim() instead of fgets() to eliminate fixed buffers. */
+
 	ok = true;
 	memset(buffer, 0, sizeof(buffer));
 	while ((0 == feof(fptr)) && (NULL != fgets(buffer, (int) (sizeof(buffer) - 1), fptr))) {
@@ -328,6 +330,8 @@ static bool opts_watchfd_listfile(opts_t opts, const char *filename)
 		fprintf(stderr, "%s: -d @: %s: %s\n", opts->program_name, filename, strerror(errno));
 		return false;
 	}
+
+	/* TODO: use getdelim() instead of fgets() to eliminate fixed buffers. */
 
 	linenumber = 0;
 	memset(buffer, 0, sizeof(buffer));
