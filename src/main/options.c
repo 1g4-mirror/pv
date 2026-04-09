@@ -97,6 +97,13 @@ void opts_free( /*@only@ */ opts_t opts)
  */
 bool opts_add_file(opts_t opts, const char *filename)
 {
+	/*
+	 * If there's no array yet or there's insufficient room for both
+	 * this filename and a NULL entry after it, reallocate the array to
+	 * make room for the number of entries in it plus 10 (10 rather than
+	 * 2 to avoid reallocating too often without wasting too much
+	 * space).
+	 */
 	/*@-branchstate@ */
 	if (((1 + opts->argc) >= opts->argv_length) || (NULL == opts->argv)) {
 		opts->argv_length = opts->argc + 10;
@@ -133,6 +140,12 @@ bool opts_add_file(opts_t opts, const char *filename)
  */
 static bool opts_watchfd_add_item(opts_t opts, pid_t pid, int fd)
 {
+	/*
+	 * If there's no array yet or there's insufficient room for one more
+	 * entry, reallocate the array to make room for the number of
+	 * entries in it plus 10 (as above, to avoid reallocating too often
+	 * without wasting too much space).
+	 */
 	/*@-branchstate@ */
 	if ((opts->watchfd_count >= opts->watchfd_length) || (NULL == opts->watchfd_pid)) {
 		opts->watchfd_length = opts->watchfd_count + 10;
