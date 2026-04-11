@@ -748,12 +748,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 
 	opts = calloc(1, sizeof(*opts));
 	if (!opts) {
-		/*@-mustfreefresh@ */
-		/*
-		 * splint note: the gettext calls made by _() cause memory
-		 * leak warnings, but in this case it's unavoidable, and
-		 * mitigated by the fact we only translate each string once.
-		 */
+		/*@-mustfreefresh@ *//* see above */
 		fprintf(stderr, "%s: %s: %s\n", argv[0], _("option structure allocation failed"), strerror(errno));
 		return NULL;
 		/*@+mustfreefresh@ */
@@ -770,8 +765,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	opts->argc = 0;
 	opts->argv = calloc((size_t) (argc + 1), sizeof(char *));
 	if (NULL == opts->argv) {
-		/*@-mustfreefresh@ */
-		/* splint note: as above. */
+		/*@-mustfreefresh@ *//* see above */
 		fprintf(stderr, "%s: %s: %s\n", opts->program_name,
 			_("option structure argv allocation failed"), strerror(errno));
 		free(opts);		    /* can't call opts_free as argv is not set */
@@ -819,9 +813,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			/* falls through */
 			/*@fallthrough@ */
 		case 'L':
-			/*@fallthrough@ */
 		case 'B':
-			/*@fallthrough@ */
 		case 'Z':
 			if (!pv_getnum_check(optarg, PV_NUMTYPE_ANY_WITH_SUFFIX)) {
 				/*@-mustfreefresh@ *//* see above */
@@ -833,15 +825,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'A':
-			/*@fallthrough@ */
 		case 'w':
-			/*@fallthrough@ */
 		case 'H':
-			/*@fallthrough@ */
 		case 'R':
-			/*@fallthrough@ */
 		case 'Q':
-			/*@fallthrough@ */
 		case 'm':
 			if (!pv_getnum_check(optarg, PV_NUMTYPE_BARE_INTEGER)) {
 				/*@-mustfreefresh@ *//* see above */
@@ -853,7 +840,6 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'i':
-			/*@fallthrough@ */
 		case 'D':
 			if (!pv_getnum_check(optarg, PV_NUMTYPE_BARE_DOUBLE)) {
 				/*@-mustfreefresh@ *//* see above */
