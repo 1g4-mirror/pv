@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-08 22:05+0100\n"
+"POT-Creation-Date: 2026-04-11 13:39+0100\n"
 "PO-Revision-Date: 2025-10-05 20:09+0000\n"
 "Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -294,7 +294,7 @@ msgstr "Lütfen hataları şu adrese bildirin: %s"
 msgid "(input)"
 msgstr "(giriş)"
 
-#: src/main/main.c:387 src/main/options.c:1341
+#: src/main/main.c:387 src/main/options.c:1346
 msgid "a command to run must be specified"
 msgstr ""
 
@@ -302,85 +302,85 @@ msgstr ""
 msgid "state allocation failed"
 msgstr "durum tahsisi başarısız oldu"
 
-#: src/main/options.c:380
+#: src/main/options.c:399
 msgid "list files may not contain @ lines"
 msgstr ""
 
-#: src/main/options.c:401 src/main/options.c:403 src/main/options.c:894
+#: src/main/options.c:420 src/main/options.c:422 src/main/options.c:899
 msgid "process ID or pid:fd pair expected"
 msgstr "süreç kimliği (ID) veya pid:fd çifti bekleniyor"
 
-#: src/main/options.c:413 src/main/options.c:415 src/main/options.c:901
+#: src/main/options.c:432 src/main/options.c:434 src/main/options.c:906
 msgid "invalid process ID"
 msgstr "geçersiz süreç kimliği (ID)"
 
-#: src/main/options.c:503 src/pv/file.c:342
+#: src/main/options.c:522 src/pv/file.c:342
 msgid "failed to stat file"
 msgstr "dosya statüsünde başarısız oldu"
 
-#: src/main/options.c:546
+#: src/main/options.c:565
 msgid "is a directory"
 msgstr "bir dizindir"
 
-#: src/main/options.c:576
+#: src/main/options.c:595
 msgid "failed to generate sysfs filename"
 msgstr "sysfs dosya adı oluşturulamadı"
 
-#: src/main/options.c:598
+#: src/main/options.c:617
 msgid "failed to read sysfs size file"
 msgstr "sysfs boyut dosyası okunamadı"
 
-#: src/main/options.c:618
+#: src/main/options.c:637
 msgid "failed to open block device"
 msgstr "blok aygıtı açılamadı"
 
-#: src/main/options.c:628
+#: src/main/options.c:647
 msgid "failed to determine size of block device"
 msgstr "blok aygıtının boyutu belirlenemedi"
 
-#: src/main/options.c:738
+#: src/main/options.c:752
 msgid "option structure allocation failed"
 msgstr "seçenek yapısı tahsisi başarısız oldu"
 
-#: src/main/options.c:757
+#: src/main/options.c:770
 msgid "option structure argv allocation failed"
 msgstr "seçenek yapısı argv tahsisi başarısız oldu"
 
-#: src/main/options.c:810
+#: src/main/options.c:821
 msgid "numeric value not understood"
 msgstr "sayısal değer anlaşılmadı"
 
-#: src/main/options.c:830
+#: src/main/options.c:836
 msgid "integer argument expected"
 msgstr "tamsayı bağımsız değişkeni bekleniyor"
 
-#: src/main/options.c:842
+#: src/main/options.c:847
 msgid "numeric argument expected"
 msgstr "sayısal bağımsız değişken bekleniyor"
 
-#: src/main/options.c:854
+#: src/main/options.c:859
 msgid "missing filename"
 msgstr ""
 
-#: src/main/options.c:882
+#: src/main/options.c:887
 msgid "missing process name"
 msgstr ""
 
-#: src/main/options.c:1157
+#: src/main/options.c:1162
 msgid "invalid side specification"
 msgstr ""
 
-#: src/main/options.c:1172
+#: src/main/options.c:1177
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Daha fazla bilgi için `%s --help' seçeneğini deneyin."
 
-#: src/main/options.c:1174
+#: src/main/options.c:1179
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Daha fazla bilgi için `%s -h' seçeneğini deneyin."
 
-#: src/main/options.c:1205
+#: src/main/options.c:1210
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -388,39 +388,39 @@ msgstr ""
 "dosya tanımlayıcılarını izlerken satır modu veya aktarım değiştirici "
 "seçeneklerini kullanamaz"
 
-#: src/main/options.c:1214
+#: src/main/options.c:1219
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr "dosya tanımlayıcılarını izlerken imleç konumlandırmayı kullanamaz"
 
-#: src/main/options.c:1223
+#: src/main/options.c:1228
 msgid "cannot use remote control when watching file descriptors"
 msgstr "dosya tanımlayıcılarını izlerken uzaktan kumandayı kullanamaz"
 
-#: src/main/options.c:1232
+#: src/main/options.c:1237
 msgid "cannot use remote query when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1241
+#: src/main/options.c:1246
 msgid "cannot transfer files when watching file descriptors"
 msgstr "dosya tanımlayıcıları izlenirken dosya aktarılamıyor"
 
-#: src/main/options.c:1266
+#: src/main/options.c:1271
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "/proc/self/fdinfo olmayan sistemlerde kullanılamaz"
 
-#: src/main/options.c:1278
+#: src/main/options.c:1283
 msgid "cannot use remote control and remote query together"
 msgstr ""
 
-#: src/main/options.c:1305
+#: src/main/options.c:1310
 msgid "monitor mode cannot be specified with this option"
 msgstr ""
 
-#: src/main/options.c:1318
+#: src/main/options.c:1323
 msgid "monitor mode cannot be used with store-and-forward"
 msgstr ""
 
-#: src/main/options.c:1330
+#: src/main/options.c:1335
 msgid "files cannot be specified with this option"
 msgstr ""
 

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-08 22:05+0100\n"
+"POT-Creation-Date: 2026-04-11 13:39+0100\n"
 "PO-Revision-Date: 2026-03-24 23:25+0000\n"
 "Last-Translator: Ricky-Tigg <ricky-tigg@noreply.codeberg.org>\n"
 "Language-Team: Finnish <https://translate.codeberg.org/projects/pv/pv/fi/>\n"
@@ -295,7 +295,7 @@ msgstr "Ilmoita ongelmista: %s"
 msgid "(input)"
 msgstr "(syöte)"
 
-#: src/main/main.c:387 src/main/options.c:1341
+#: src/main/main.c:387 src/main/options.c:1346
 msgid "a command to run must be specified"
 msgstr ""
 
@@ -303,85 +303,85 @@ msgstr ""
 msgid "state allocation failed"
 msgstr "tilan allokointi epäonnistui"
 
-#: src/main/options.c:380
+#: src/main/options.c:399
 msgid "list files may not contain @ lines"
 msgstr "Listatiedostot eivät saa sisältää @-rivejä"
 
-#: src/main/options.c:401 src/main/options.c:403 src/main/options.c:894
+#: src/main/options.c:420 src/main/options.c:422 src/main/options.c:899
 msgid "process ID or pid:fd pair expected"
 msgstr "prosessitunnusta tai pid:fd-paria odotetaan"
 
-#: src/main/options.c:413 src/main/options.c:415 src/main/options.c:901
+#: src/main/options.c:432 src/main/options.c:434 src/main/options.c:906
 msgid "invalid process ID"
 msgstr "virheellinen prosessin ID"
 
-#: src/main/options.c:503 src/pv/file.c:342
+#: src/main/options.c:522 src/pv/file.c:342
 msgid "failed to stat file"
 msgstr "tiedoston tilastointi epäonnistui"
 
-#: src/main/options.c:546
+#: src/main/options.c:565
 msgid "is a directory"
 msgstr "on hakemisto"
 
-#: src/main/options.c:576
+#: src/main/options.c:595
 msgid "failed to generate sysfs filename"
 msgstr "sysfs-tiedostonimen luominen epäonnistui"
 
-#: src/main/options.c:598
+#: src/main/options.c:617
 msgid "failed to read sysfs size file"
 msgstr "sysfs-kokotiedoston lukeminen epäonnistui"
 
-#: src/main/options.c:618
+#: src/main/options.c:637
 msgid "failed to open block device"
 msgstr "lohkolaitteen avaaminen epäonnistui"
 
-#: src/main/options.c:628
+#: src/main/options.c:647
 msgid "failed to determine size of block device"
 msgstr "lohkolaitteen koon päättely epäonnistui"
 
-#: src/main/options.c:738
+#: src/main/options.c:752
 msgid "option structure allocation failed"
 msgstr "vaihtoehtorakenteen allokointi epäonnistui"
 
-#: src/main/options.c:757
+#: src/main/options.c:770
 msgid "option structure argv allocation failed"
 msgstr "vaihtoehtorakenteen argv:n allokointi epäonnistui"
 
-#: src/main/options.c:810
+#: src/main/options.c:821
 msgid "numeric value not understood"
 msgstr "numeerista arvoa ei ymmärretty"
 
-#: src/main/options.c:830
+#: src/main/options.c:836
 msgid "integer argument expected"
 msgstr "kokonaislukuargumenttia odotetaan"
 
-#: src/main/options.c:842
+#: src/main/options.c:847
 msgid "numeric argument expected"
 msgstr "numeerista argumenttia odotetaan"
 
-#: src/main/options.c:854
+#: src/main/options.c:859
 msgid "missing filename"
 msgstr "puuttuva tiedostonimi"
 
-#: src/main/options.c:882
+#: src/main/options.c:887
 msgid "missing process name"
 msgstr "puuttuva prosessinimi"
 
-#: src/main/options.c:1157
+#: src/main/options.c:1162
 msgid "invalid side specification"
 msgstr ""
 
-#: src/main/options.c:1172
+#: src/main/options.c:1177
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Suorita `%s --help' saadaksesi lisätietoja."
 
-#: src/main/options.c:1174
+#: src/main/options.c:1179
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Suorita `%s -h' saadaksesi lisätietoja."
 
-#: src/main/options.c:1205
+#: src/main/options.c:1210
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -389,40 +389,40 @@ msgstr ""
 "rivitilaa tai siirtomuokkausvaihtoehtoja ei voi käyttää tiedostokuvauksia "
 "tarkasteltaessa"
 
-#: src/main/options.c:1214
+#: src/main/options.c:1219
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "kohdistimen sijoittelua ei voi käyttää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1223
+#: src/main/options.c:1228
 msgid "cannot use remote control when watching file descriptors"
 msgstr "etäohjausta ei voi käyttää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1232
+#: src/main/options.c:1237
 msgid "cannot use remote query when watching file descriptors"
 msgstr "etäkyselyä ei voi käyttää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1241
+#: src/main/options.c:1246
 msgid "cannot transfer files when watching file descriptors"
 msgstr "tiedostoja ei voi siirtää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1266
+#: src/main/options.c:1271
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "ei saatavilla järjestelmissä, joissa ei ole /proc/self/fdinfo"
 
-#: src/main/options.c:1278
+#: src/main/options.c:1283
 msgid "cannot use remote control and remote query together"
 msgstr "etäohjausta ja etäkyselyä ei voi käyttää yhdessä"
 
-#: src/main/options.c:1305
+#: src/main/options.c:1310
 msgid "monitor mode cannot be specified with this option"
 msgstr ""
 
-#: src/main/options.c:1318
+#: src/main/options.c:1323
 msgid "monitor mode cannot be used with store-and-forward"
 msgstr ""
 
-#: src/main/options.c:1330
+#: src/main/options.c:1335
 msgid "files cannot be specified with this option"
 msgstr "tiedostoja ei voi määrittää tämän vaihtoehdon kanssa"
 
