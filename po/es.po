@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-11 13:39+0100\n"
+"POT-Creation-Date: 2026-04-11 15:52+0100\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -287,7 +287,7 @@ msgstr ""
 msgid "(input)"
 msgstr ""
 
-#: src/main/main.c:387 src/main/options.c:1346
+#: src/main/main.c:387 src/main/options.c:1372
 msgid "a command to run must be specified"
 msgstr ""
 
@@ -295,123 +295,123 @@ msgstr ""
 msgid "state allocation failed"
 msgstr ""
 
-#: src/main/options.c:399
+#: src/main/options.c:425
 msgid "list files may not contain @ lines"
 msgstr ""
 
-#: src/main/options.c:420 src/main/options.c:422 src/main/options.c:899
+#: src/main/options.c:446 src/main/options.c:448 src/main/options.c:925
 msgid "process ID or pid:fd pair expected"
 msgstr ""
 
-#: src/main/options.c:432 src/main/options.c:434 src/main/options.c:906
+#: src/main/options.c:458 src/main/options.c:460 src/main/options.c:932
 msgid "invalid process ID"
 msgstr ""
 
-#: src/main/options.c:522 src/pv/file.c:342
+#: src/main/options.c:548 src/pv/file.c:342
 msgid "failed to stat file"
 msgstr ""
 
-#: src/main/options.c:565
+#: src/main/options.c:591
 msgid "is a directory"
 msgstr ""
 
-#: src/main/options.c:595
+#: src/main/options.c:621
 msgid "failed to generate sysfs filename"
 msgstr ""
 
-#: src/main/options.c:617
+#: src/main/options.c:643
 msgid "failed to read sysfs size file"
 msgstr ""
 
-#: src/main/options.c:637
+#: src/main/options.c:663
 msgid "failed to open block device"
 msgstr ""
 
-#: src/main/options.c:647
+#: src/main/options.c:673
 msgid "failed to determine size of block device"
 msgstr ""
 
-#: src/main/options.c:752
+#: src/main/options.c:778
 msgid "option structure allocation failed"
 msgstr ""
 
-#: src/main/options.c:770
+#: src/main/options.c:796
 msgid "option structure argv allocation failed"
 msgstr ""
 
-#: src/main/options.c:821
+#: src/main/options.c:847
 msgid "numeric value not understood"
 msgstr ""
 
-#: src/main/options.c:836
+#: src/main/options.c:862
 msgid "integer argument expected"
 msgstr ""
 
-#: src/main/options.c:847
+#: src/main/options.c:873
 msgid "numeric argument expected"
 msgstr ""
 
-#: src/main/options.c:859
+#: src/main/options.c:885
 msgid "missing filename"
 msgstr ""
 
-#: src/main/options.c:887
+#: src/main/options.c:913
 msgid "missing process name"
 msgstr ""
 
-#: src/main/options.c:1162
+#: src/main/options.c:1188
 msgid "invalid side specification"
 msgstr ""
 
-#: src/main/options.c:1177
+#: src/main/options.c:1203
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr ""
 
-#: src/main/options.c:1179
+#: src/main/options.c:1205
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr ""
 
-#: src/main/options.c:1210
+#: src/main/options.c:1236
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
 msgstr ""
 
-#: src/main/options.c:1219
+#: src/main/options.c:1245
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1228
+#: src/main/options.c:1254
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1237
+#: src/main/options.c:1263
 msgid "cannot use remote query when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1246
+#: src/main/options.c:1272
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1271
+#: src/main/options.c:1297
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr ""
 
-#: src/main/options.c:1283
+#: src/main/options.c:1309
 msgid "cannot use remote control and remote query together"
 msgstr ""
 
-#: src/main/options.c:1310
+#: src/main/options.c:1336
 msgid "monitor mode cannot be specified with this option"
 msgstr ""
 
-#: src/main/options.c:1323
+#: src/main/options.c:1349
 msgid "monitor mode cannot be used with store-and-forward"
 msgstr ""
 
-#: src/main/options.c:1335
+#: src/main/options.c:1361
 msgid "files cannot be specified with this option"
 msgstr ""
 
