@@ -184,7 +184,8 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 	int fds[2];
 	pid_t pid;
 	FILE *fptr;
-	char buffer[1024];		 /* flawfinder: ignore */
+	char *linebuf_ptr = NULL;
+	size_t linebuf_size = 0;
 	pid_t waited_pid;
 	int pid_status;
 	bool ok;
@@ -262,32 +263,45 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 
 	/* Read the lines of output from the child process. */
 
-	/* TODO: use getdelim() instead of fgets() to eliminate fixed buffers. */
-
 	ok = true;
-	memset(buffer, 0, sizeof(buffer));
-	while ((0 == feof(fptr)) && (NULL != fgets(buffer, (int) (sizeof(buffer) - 1), fptr))) {
+	while (0 == feof(fptr)) {
 		unsigned int watch_pid;
+		ssize_t line_length = 0;
+
+		/* Set errno to 0 to distinguish between EOF and error. */
+		errno = 0;
+		/*@-unrecog@ *//* splint dosn't know of getline(). */
+		line_length = getline(&linebuf_ptr, &linebuf_size, fptr);
+		/*@+unrecog@ */
+		if ((line_length < 0) || (NULL == linebuf_ptr)) {
+			if (0 != errno)
+				perror("getline");
+			break;
+		}
+		if (line_length < 1)
+			continue;
 
 		/* Skip all lines if we've hit any errors. */
-		if (!ok) {
-			memset(buffer, 0, sizeof(buffer));
+		if (!ok)
 			continue;
-		}
+
+		/* Strip the newline. */
+		if ('\n' == linebuf_ptr[line_length - 1])
+			linebuf_ptr[--line_length] = '\0';
 
 		/* Skip lines without valid PID. */
 		watch_pid = 0;
-		if (sscanf(buffer, "%u", &watch_pid) < 1)
+		if (sscanf(linebuf_ptr, "%u", &watch_pid) < 1)
 			continue;
 		if (watch_pid < 1)
 			continue;
 
-		if (!opts_watchfd_parse(opts, buffer, NULL, 0))
+		if (!opts_watchfd_parse(opts, linebuf_ptr, NULL, 0))
 			ok = false;
-
-		memset(buffer, 0, sizeof(buffer));
 	}
 
+	if (NULL != linebuf_ptr)
+		free(linebuf_ptr);
 
 	/* Close the stream from the read end of the pipe. */
 	(void) fclose(fptr);
@@ -312,7 +326,8 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 static bool opts_watchfd_listfile(opts_t opts, const char *filename)
 {
 	FILE *fptr;
-	char buffer[1024];		 /* flawfinder: ignore */
+	char *linebuf_ptr = NULL;
+	size_t linebuf_size = 0;
 	unsigned int linenumber;
 
 	/*
@@ -331,49 +346,60 @@ static bool opts_watchfd_listfile(opts_t opts, const char *filename)
 		return false;
 	}
 
-	/* TODO: use getdelim() instead of fgets() to eliminate fixed buffers. */
-
 	linenumber = 0;
-	memset(buffer, 0, sizeof(buffer));
 
-	while ((0 == feof(fptr)) && (NULL != fgets(buffer, (int) (sizeof(buffer) - 1), fptr))) {
+	while (0 == feof(fptr)) {
 		char *argument;
 		char *nlptr;
+		ssize_t line_length = 0;
+
+		/* Set errno to 0 to distinguish between EOF and error. */
+		errno = 0;
+		/*@-unrecog@ *//* splint dosn't know of getline(). */
+		line_length = getline(&linebuf_ptr, &linebuf_size, fptr);
+		/*@+unrecog@ */
+		if ((line_length < 0) || (NULL == linebuf_ptr)) {
+			if (0 != errno)
+				perror("getline");
+			break;
+		}
 
 		linenumber++;
 
 		/* Remove trailing carriage returns or newlines. */
-		nlptr = strchr(buffer, '\r');
+		nlptr = strchr(linebuf_ptr, '\r');
 		if (NULL != nlptr)
 			nlptr[0] = '\0';
-		nlptr = strchr(buffer, '\n');
+		nlptr = strchr(linebuf_ptr, '\n');
 		if (NULL != nlptr)
 			nlptr[0] = '\0';
 
 		/* Ignore leading spaces. */
-		argument = buffer;
+		argument = linebuf_ptr;
 		while (argument[0] != '\0' && (argument[0] == ' ' || argument[0] == '\t'))
 			argument++;
 
 		/* Ignore blank lines or comment lines. */
 		if ((argument[0] == '\0') || (argument[0] == '#')) {
-			memset(buffer, 0, sizeof(buffer));
 			continue;
 		}
 
 		/* Reject "@" lines. */
 		if (argument[0] == '@') {
+			free(linebuf_ptr);
 			(void) fclose(fptr);
 			return false;
 		}
 
 		if (!opts_watchfd_parse(opts, argument, filename, linenumber)) {
+			free(linebuf_ptr);
 			(void) fclose(fptr);
 			return false;
 		}
-
-		memset(buffer, 0, sizeof(buffer));
 	}
+
+	if (NULL != linebuf_ptr)
+		free(linebuf_ptr);
 
 	(void) fclose(fptr);
 	return true;
