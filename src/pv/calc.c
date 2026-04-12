@@ -14,8 +14,10 @@
 /*
  * Update the current average rate, using a ring buffer of past transfer
  * positions - if this is the first entry, use the provided instantaneous
- * rate, otherwise calulate the average rate from the difference between the
- * current position + elapsed time pair, and the oldest pair in the buffer.
+ * rate, otherwise calculate the average rate from the difference between
+ * the current position + elapsed time pair, and the oldest pair in the
+ * buffer.  The current elapsed time and amount transferred (both from
+ * "transfer") are added to the buffer.
  */
 static void pv__update_average_rate_history(pvtransfercalc_t calc, readonly_pvtransferstate_t transfer,
 					    unsigned int history_interval, long double rate)
@@ -38,7 +40,7 @@ static void pv__update_average_rate_history(pvtransfercalc_t calc, readonly_pvtr
 		return;
 
 	/*
-	 * If this is not the first call, add a new entry to the circular
+	 * If this is not the first call, add a new entry to the ring
 	 * buffer.
 	 */
 	if (last_elapsed > 0.0) {
@@ -136,7 +138,7 @@ void pv_calculate_transfer_rate(pvtransfercalc_t calc, readonly_pvtransferstate_
 	average_rate = calc->current_avg_rate;
 
 	/*
-	 * If this is the final update at the end of the transfer, we
+	 * If this is the final update at the end of the transfer,
 	 * recalculate the rate - and the average rate - across the whole
 	 * period of the transfer.
 	 */
