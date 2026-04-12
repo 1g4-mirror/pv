@@ -636,7 +636,7 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
 
 	/*
 	 * Split the format string into static strings and calculated
-	 * components - a calculated component is is what replaces a
+	 * components - a calculated component is what replaces a
 	 * placeholder sequence like "%b".
 	 *
 	 * A "static string" is part of the original format string that is
