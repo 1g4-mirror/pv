@@ -53,7 +53,14 @@ static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t co
 	char *tmpdir;
 	int openflags;
 
+	/* TODO: decide whether to dynamically allocate cursor->lock_file. */
+
 	cursor->lock_fd = -1;
+
+	/*
+	 * TODO: use ttyname_r() and dynamic buffer, or copy the result of
+	 * ttyname() to a dynamic buffer, because basename() may modify it.
+	 */
 
 	ttydev = ttyname(fd);
 	if (!ttydev) {
