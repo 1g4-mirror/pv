@@ -43,7 +43,7 @@
  * We need sys/ioctl.h for ioctl() regardless of whether TIOCGWINSZ is
  * defined in termios.h, so we no longer use AC_HEADER_TIOCGWINSZ in
  * configure.in, and just include both header files if they are available.
- * (GH#74, 2023-08-06)
+ * (issue #74, 2023-08-06)
  */
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
@@ -54,6 +54,7 @@
  * set; and whether any output has been displayed yet, indicating whether
  * any errors must be preceded by a newline.
  */
+/* TODO: make pv__error_prefix a dynamic buffer. */
 static char pv__error_prefix[64];	 /* flawfinder: ignore */
 static bool pv__error_prefix_set = false;
 static bool pv__output_produced = false;
@@ -121,10 +122,8 @@ bool pv_in_foreground(void)
 		return true;
 	}
 
-	/*@-type@ *//* __pid_t vs pid_t, not significant */
-	our_process_group = getpgrp();
-	tty_process_group = tcgetpgrp(STDERR_FILENO);
-	/*@+type@ */
+	our_process_group = (pid_t) getpgrp();
+	tty_process_group = (pid_t) tcgetpgrp(STDERR_FILENO);
 
 	if (tty_process_group == -1 && errno == ENOTTY) {
 		debug("true: %s", "tty_process_group is -1, errno is ENOTTY");
@@ -147,8 +146,8 @@ bool pv_in_foreground(void)
 
 
 /*
- * Write the given buffer to the given file descriptor, retrying until all
- * bytes have been written or an error has occurred.
+ * Write a buffer to a file descriptor, retrying until all bytes have been
+ * written or an error has occurred.
  */
 void pv_write_retry(int fd, const char *buf, size_t count)
 {
@@ -173,8 +172,8 @@ void pv_write_retry(int fd, const char *buf, size_t count)
 
 
 /*
- * Write the given buffer to the terminal, like pv_write_retry(), unless
- * stderr is suspended.
+ * Write a buffer to the terminal, like pv_write_retry(), unless stderr is
+ * suspended.
  */
 void pv_tty_write(readonly_pvtransientflags_t flags, const char *buf, size_t count)
 {
@@ -243,13 +242,16 @@ long pv_seconds_remaining(const off_t so_far, const off_t total, const long doub
 
 	amount_left = (long double) (total - so_far) / rate;
 
+	/* TODO: check whether rounding would be better here. */
+
 	return (long) amount_left;
 }
 
 /*
- * Given a long double value, it is divided or multiplied by the ratio until
- * a value in the range 1.0 to 999.999... is found.  The string "prefix" to
- * is updated to the corresponding SI prefix.
+ * Given a pointer to long double value, divide or multiply it by the ratio
+ * (1000 or 1024) until it reaches the range 1.0 to 999.999.  The string
+ * "prefix" is updated to the corresponding SI prefix, and *value is
+ * modified.
  *
  * If the count type is PV_TRANSFERCOUNT_BYTES, then the second byte of
  * "prefix" is set to "i" to denote MiB etc (IEEE1541).  Thus "prefix"
