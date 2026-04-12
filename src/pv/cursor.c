@@ -524,7 +524,7 @@ void pv_crs_update(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtrans
 	/*
 	 * flawfinder rationale: the "cup_cmd" buffer is always zeroed
 	 * before each use, and is only written to by pv_snprintf() bounded
-	 * by its size; also, that function explictly zero-terminates the
+	 * by its size; also, that function explicitly zero-terminates the
 	 * string it writes.  The write() call is also bounded.
 	 */
 
