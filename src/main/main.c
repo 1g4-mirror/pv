@@ -44,20 +44,18 @@ static int pv__write_pidfile(opts_t opts)
 
 	/*
 	 * The buffer needs to be long enough to hold the pidfile with the
-	 * mkstemp template ".XXXXXX" after it.  The "%s" of our
-	 * pidfile_template adds 2 extra bytes to the length, of which we
-	 * need 1 byte for the terminating \0, so we subtract 1 byte more to
-	 * get the exact amount of space we need.
+	 * mkstemp template ".XXXXXX" after it.  The "%s" of the
+	 * pidfile_template adds 2 extra bytes to the length, of which 1
+	 * byte is used for the terminating \0, so subtract 1 byte more to
+	 * get the exact amount of space needed.
 	 */
 	pidfile_tmp_bufsize = strlen(pidfile_template) + strlen(opts->pidfile) - 1;	/* flawfinder: ignore */
 
 	/*
-	 * flawfinder rationale: flawfinder never likes strlen() in case
-	 * it's called on a string that isn't \0 terminated.  We have to use
-	 * strlen() to find the length of opts->pidfile, so have to trust
-	 * that the arguments in argv[] were \0 terminated.  We can be sure
-	 * that pidfile_template is \0 terminated because we've set it to a
-	 * constant value.  So we tell flawfinder to skip this check here.
+	 * flawfinder rationale: the warning is about strlen() being called
+	 * on a string that may not be \0 terminated.  pidfile_template is a
+	 * constant so is always \0-terminated.  opts->pidfile comes from
+	 * argv[] whose entries are \0-terminated.
 	 */
 
 	pidfile_tmp_name = malloc(pidfile_tmp_bufsize);
@@ -68,11 +66,11 @@ static int pv__write_pidfile(opts_t opts)
 	memset(pidfile_tmp_name, 0, pidfile_tmp_bufsize);
 	(void) pv_snprintf(pidfile_tmp_name, pidfile_tmp_bufsize, pidfile_template, opts->pidfile);
 
-	/*@-type@ *//* splint doesn't like mode_t */
+	/*@-type@ *//* splint doesn't like mode_t. */
 	prev_umask = umask(0000);	    /* flawfinder: ignore */
 	(void) umask(prev_umask | 0133);    /* flawfinder: ignore */
 
-	/*@-unrecog@ *//* splint doesn't know mkstemp() */
+	/*@-unrecog@ *//* splint doesn't know mkstemp(). */
 	pidfile_tmp_fd = mkstemp(pidfile_tmp_name);	/* flawfinder: ignore */
 	/*@+unrecog@ */
 	if (pidfile_tmp_fd < 0) {
@@ -85,14 +83,11 @@ static int pv__write_pidfile(opts_t opts)
 	(void) umask(prev_umask);	    /* flawfinder: ignore */
 
 	/*
-	 * flawfinder rationale (umask, mkstemp) - flawfinder
-	 * recommends setting the most restrictive umask possible
-	 * when calling mkstemp(), so this is what we have done.
-	 *
-	 * We get the original umask and OR it with 0133 to make
-	 * sure new files will be at least chmod 644.  Then we put
-	 * the umask back to what it was, after creating the
-	 * temporary file.
+	 * flawfinder rationale (umask, mkstemp) - flawfinder recommends
+	 * setting the most restrictive umask possible when calling
+	 * mkstemp().  To do this, the original umask is ORed with 0133 to
+	 * ensure that new files will be chmod 644 or more restricted.
+	 * After creating the temporary file, the old umask is restored.
 	 */
 
 	/*@+type@ */
@@ -143,11 +138,10 @@ static int pv__set_output(pvstate_t state, opts_t opts, /*@null@ */ const char *
 	debug("%s: %s", "setting output", output_file);
 	output_fd = open(output_file, O_WRONLY | O_CREAT | O_TRUNC, 0600);	/* flawfinder: ignore */
 	/*
-	 * flawfinder rationale: the output filename has been
-	 * explicitly provided, and in many cases the operator will
-	 * want to write to device files and other special
-	 * destinations, so there is no sense-checking we can do to
-	 * make this safer.
+	 * flawfinder rationale: the output filename has been explicitly
+	 * provided, and in many cases the operator will want to write to
+	 * device files and other special destinations, so there is no
+	 * checking that could be done to make this safer.
 	 */
 	if (output_fd < 0) {
 		fprintf(stderr, "%s: %s: %s\n", opts->program_name, output_file, strerror(errno));
@@ -202,7 +196,7 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s
 		 */
 
 		(void) pv_snprintf(tmp_filename, sizeof(tmp_filename), "%s/pv.XXXXXX", tmpdir);
-		/*@-unrecog@ *//* splint doesn't know mkstemp() */
+		/*@-unrecog@ *//* splint doesn't know mkstemp(). */
 		tmp_fd = mkstemp(tmp_filename);	/* flawfinder: ignore */
 		/*@+unrecog@ */
 		if (tmp_fd < 0) {
@@ -253,7 +247,7 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s
 
 	/* Set the displayed name to whatever was requested. */
 	pv_state_name_set(state, opts->name);
-	/* Reset the format, since we might have been asked to show ETA. */
+	/* Reset the format, in case ETA was originally requested. */
 	format_options.eta = opts->eta;
 	format_options.fineta = opts->fineta;
 	pv_state_set_format_options(state, format_options);
@@ -338,7 +332,7 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 		debug("%s: %llu", "no size given - calculated", size);
 	}
 
-	/* If the size is unknown, we cannot have an ETA. */
+	/* If the size is unknown, ETA cannot be displayed. */
 	if (size < 1) {
 		format_options.eta = false;
 		format_options.fineta = false;
@@ -400,7 +394,7 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 	pipefd_cmd_out[0] = -1;
 	pipefd_cmd_out[1] = -1;
 
-	/* Pipe for the input side of the command, if we're monitoring it. */
+	/* Pipe for the input side of the command, if it's to be monitored. */
 	if ((PV_SIDE_IN == opts->side) || (PV_SIDE_BOTH == opts->side)) {
 		if (0 != pipe(pipefd_cmd_in)) {
 			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
@@ -409,7 +403,7 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 		debug("pipefd_cmd_in[]=(%d,%d)", pipefd_cmd_in[0], pipefd_cmd_in[1]);
 	}
 
-	/* Pipe for the output side of the command, if we're monitoring it. */
+	/* Pipe for the output side of the command, if it's to be monitored. */
 	if ((PV_SIDE_OUT == opts->side) || (PV_SIDE_BOTH == opts->side)) {
 		if (0 != pipe(pipefd_cmd_out)) {
 			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
@@ -575,8 +569,8 @@ x = 1; \
 
 	/*
 	 * In "both" mode, the remaining side is "in", so if two sets of
-	 * name and/or format options were given, we need to switch to using
-	 * the ones given first.
+	 * name and/or format options were given, switch to using the ones
+	 * that had been given first.
 	 */
 	if (PV_SIDE_BOTH == opts->side) {
 		if (NULL != opts->name1) {
@@ -612,8 +606,7 @@ x = 1; \
 
 	/*
 	 * If monitoring the "in" side, close stdout to signal EOF,
-	 * otherwise when we wait for the monitored command, we'll wait
-	 * forever.
+	 * otherwise the wait for the monitored command would wait forever.
 	 */
 	if (PV_SIDE_IN == opts->side || PV_SIDE_BOTH == opts->side) {
 		if (close(STDOUT_FILENO) < 0) {
@@ -672,7 +665,7 @@ int main(int argc, char **argv)
 	(void) bindtextdomain(PACKAGE, LOCALEDIR);
 	(void) textdomain(PACKAGE);
 #ifdef HAVE_LANGINFO_H
-	/*@-mustfreefresh@ *//* splint thinks nl_langinfo() leaks memory */
+	/*@-mustfreefresh@ *//* splint thinks nl_langinfo() leaks memory. */
 	if (0 == strcmp(nl_langinfo(CODESET), "UTF-8"))
 		terminal_supports_utf8 = true;
 	/*@+mustfreefresh@ */
@@ -708,7 +701,8 @@ int main(int argc, char **argv)
 		/*
 		 * splint note: the gettext calls made by _() cause memory
 		 * leak warnings, but in this case it's unavoidable, and
-		 * mitigated by the fact we only translate each string once.
+		 * mitigated by the fact that each string is only translated
+		 * once.
 		 */
 		fprintf(stderr, "%s: %s: %s\n", opts->program_name, _("state allocation failed"), strerror(errno));
 		opts_free(opts);
@@ -731,7 +725,7 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * If no files were given, pretend "-" was given (stdin).
+	 * If no files were given, behave as if "-" was given (stdin).
 	 */
 	if (0 == opts->argc) {
 		debug("%s", "no files given - adding fake argument `-'");
@@ -743,7 +737,7 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Put our list of input files into the PV internal state.
+	 * Put the list of input files into the PV internal state.
 	 *
 	 * Don't do this in monitor mode, since the rest of PV won't be
 	 * using the list in that case.
@@ -760,8 +754,8 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * If stderr is not a terminal and we're neither forcing output nor
-	 * outputting numerically, we will have nothing to display at all.
+	 * If stderr is not a terminal and neither --force nor --numeric is
+	 * active, there will be nothing to display at all.
 	 */
 	if ((0 == isatty(STDERR_FILENO))
 	    && (false == opts->force)
@@ -809,14 +803,14 @@ int main(int argc, char **argv)
 		opts->interval = 600;
 
 	/*
-	 * Set the output file, treating no output or "-" as stdout; we have
-	 * to do this before looking at setting the size, as the size
+	 * Set the output file, treating no output or "-" as stdout.  This
+	 * must be done before trying to set the size, as the size
 	 * calculation looks at the output file if the input size can't be
 	 * calculated (issue #91).
 	 *
-	 * We have to set the sparse output flag before doing this, so that
-	 * in sparse mode the lseek() on O_APPEND can be done (issue #45);
-	 * see the comments in pv_state_output_set() in src/pv/state.c.
+	 * The sparse output flag before doing this, so that in sparse mode
+	 * the lseek() on O_APPEND can be done (issue #45); see the comments
+	 * in pv_state_output_set() in src/pv/state.c.
 	 */
 	pv_state_sparse_output_set(state, opts->sparse_output);
 	retcode = pv__set_output(state, opts, opts->output);
@@ -849,7 +843,7 @@ int main(int argc, char **argv)
 		}
 
 		/*
-		 * If the size is unknown, we cannot have an ETA.
+		 * If the size is unknown, ETA cannot be shown.
 		 */
 		if (opts->size < 1) {
 			can_have_eta = false;

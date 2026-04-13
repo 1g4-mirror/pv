@@ -103,8 +103,8 @@ void pv_calculate_transfer_rate(pvtransfercalc_t calc, readonly_pvtransferstate_
 	}
 
 	/*
-	 * In case the time since the last update is very small, we keep
-	 * track of amount transferred since the last update, and just keep
+	 * When the time since the last update is very small, keep track of
+	 * the amount transferred since the last update, and just keep
 	 * adding to that until a reasonable amount of time has passed to
 	 * avoid rate spikes or division by zero.
 	 */
@@ -133,7 +133,7 @@ void pv_calculate_transfer_rate(pvtransfercalc_t calc, readonly_pvtransferstate_
 	}
 	calc->prev_rate = transfer_rate;
 
-	/* Update history and current average rate for ETA. */
+	/* Update the history and current average rate. */
 	pv__update_average_rate_history(calc, transfer, control->history_interval, transfer_rate);
 	average_rate = calc->current_avg_rate;
 
@@ -158,12 +158,11 @@ void pv_calculate_transfer_rate(pvtransfercalc_t calc, readonly_pvtransferstate_
 
 	if (control->size <= 0) {
 		/*
-		 * If we don't know the total size of the incoming data,
-		 * then for a percentage, we gradually increase the
-		 * percentage completion as data arrives, to a maximum of
-		 * 200, then reset it - we use this if we can't calculate
-		 * it, so that the numeric percentage output will go
-		 * 0%-100%, 100%-0%, 0%-100%, and so on.
+		 * If the total size of the incoming data is unknown, then
+		 * for a percentage, gradually increase the percentage
+		 * completion as data arrives, to a maximum of 200, then
+		 * reset it.  This means that the numeric percentage output
+		 * will go 0%-100%, 100%-0%, 0%-100%, and so on.
 		 */
 		if (transfer_rate > 0)
 			calc->percentage += 2;

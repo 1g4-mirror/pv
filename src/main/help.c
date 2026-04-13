@@ -37,9 +37,8 @@ static size_t display_width(const char *string)
 
 	bytes = strlen(string);		    /* flawfinder: ignore */
 	/*
-	 * flawfinder rationale: we have already checked for NULL, and it is
-	 * explicitly required of the caller to provide a null-terminated
-	 * string.
+	 * flawfinder rationale: it is explicitly required of the caller to
+	 * provide a null-terminated string.
 	 */
 
 	return pv_strwidth(string, bytes);
@@ -175,7 +174,7 @@ static void display_word_wrap(const char *string, size_t display_width, size_t f
 
 	/* Wrap lines that are too long. */
 
-	/*@-unrecog@ *//* splint seems unable to see the prototype for wcswidth(). */
+	/*@-unrecog@ *//* splint doesn't see the prototype for wcswidth(). */
 	while (chars_remaining > 0 && wcswidth(&(wide_string[start_idx]), chars_remaining) > (int) wrap_at_width) {
 		/*@+unrecog@ */
 		size_t next_idx;
@@ -203,9 +202,9 @@ static void display_word_wrap(const char *string, size_t display_width, size_t f
 		while (start_idx < end_idx && start_idx < wide_char_count) {
 			char multi_byte_string[MB_CUR_MAX + 1];	/* flawfinder: ignore */
 			/*
-			 * flawfinder rationale: array is explicitly
+			 * flawfinder rationale: the array is explicitly
 			 * cleared, large enough according to the wctomb()
-			 * manual, and we explicitly terminate the string.
+			 * manual, and the string is explicitly terminated.
 			 */
 			memset(multi_byte_string, 0, MB_CUR_MAX + 1);
 			if (wctomb(multi_byte_string, wide_string[start_idx]) >= 0) {
@@ -487,7 +486,7 @@ void display_help(void)
 	/*
 	 * splint note: the gettext calls made by _() cause memory leak
 	 * warnings, but in this case it's unavoidable, and mitigated by the
-	 * fact we only translate each string once.
+	 * fact that each string is only translated once.
 	 */
 	program_description = _("Concatenate FILE(s), or standard input, to standard output, with monitoring.");
 	if (NULL != program_description) {
@@ -501,8 +500,8 @@ void display_help(void)
 	 * Translate the help text, and calculate the displayed width of
 	 * each part of each option definition.  The total display width of
 	 * the short option, long option, and option argument together form
-	 * the "option" width - we look for the widest one to calculate the
-	 * left margin for all of the descriptions to start at.
+	 * the "option" width.  The widest one is used to calculate the left
+	 * margin for all of the descriptions to start at.
 	 */
 	for (option_index = 0; NULL != option_definitions[option_index].opt_short; option_index++) {
 		struct option_definition_s *definition;
@@ -546,7 +545,8 @@ void display_help(void)
 		 *
 		 * "  <short>, <long> <arg>  <description>"
 		 *
-		 * If we don't have getopt_long() then ", <long>" is omitted.
+		 * If getopt_long() is unavailable then ", <long>" is
+		 * omitted.
 		 */
 		option_width += 2 + definition->width.opt_short;	/* "  short" */
 #ifdef HAVE_GETOPT_LONG
@@ -611,7 +611,7 @@ void display_help(void)
 
 		/*
 		 * If the option (with 2 trailing spaces) is too wide, start
-		 * a new line for the description.  In both cases, pad with
+		 * a new line for the description.  Either way, pad with
 		 * spaces up to the description left margin.
 		 */
 		if ((option_width + 2) > description_left_margin) {

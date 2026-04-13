@@ -44,16 +44,16 @@ void debugging_output(const char *function, const char *file, int line, const ch
 
 	/*
 	 * flawfinder note: tbuf is only written to by strftime() which
-	 * takes its size, and we enforce string termination.
+	 * takes its size, and string termination is enforced.
 	 */
 
 	if (false == tried_open) {
 		if (NULL != debug_filename) {
 			debugfptr = fopen(debug_filename, "a");	/* flawfinder: ignore */
 			/*
-			 * flawfinder note: caller directly controls
-			 * filename, the safest we can manage is to use
-			 * append mode.
+			 * flawfinder note: the caller directly controls the
+			 * filename, so using append mode is the safest
+			 * option.
 			 */
 		}
 		tried_open = true;
@@ -64,10 +64,9 @@ void debugging_output(const char *function, const char *file, int line, const ch
 	}
 
 	/*
-	 * Note that here we use gmtime() rather than localtime(), otherwise
-	 * we can get stuck in signal handlers - testing with "strace"
-	 * showed many cases where "pv </dev/zero | cat >/dev/null" being
-	 * paused and backgrounded would cause pv to be stuck in
+	 * Note gmtime() is used rather than localtime().  Testing with
+	 * "strace" showed many cases where "pv </dev/zero | cat >/dev/null"
+	 * being paused and backgrounded would cause pv to be stuck in
 	 * futex_wait() inside a pv_sig_alrm() inside a pv_sig_cont().  The
 	 * backtrace mentioned many time zone conversion steps, and all of
 	 * that goes away with gmtime().
@@ -79,7 +78,7 @@ void debugging_output(const char *function, const char *file, int line, const ch
 	if (0 == strftime(tbuf, sizeof(tbuf), "%Y-%m-%d %H:%M:%S", tm)) {
 		tbuf[0] = '\0';
 	}
-	tbuf[sizeof(tbuf) - 1] = '\0';	    /* enforce termination */
+	tbuf[sizeof(tbuf) - 1] = '\0';	    /* enforce termination. */
 
 	(void) fprintf(debugfptr, "[%s] (%d) %s (%s:%d): ", tbuf, getpid(), function, file, line);
 
@@ -89,7 +88,7 @@ void debugging_output(const char *function, const char *file, int line, const ch
 
 	/*
 	 * flawfinder note: vfprintf format is explicitly controlled by the
-	 * caller of this function - no mitigation possible or desirable.
+	 * caller of this function - no mitigation is possible or desirable.
 	 */
 
 	(void) fprintf(debugfptr, "\n");

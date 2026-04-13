@@ -45,7 +45,7 @@ static bool opts_watchfd_parse(opts_t, const char *, /*@null@ */ const char *, u
 /*
  * splint note about mustfreefresh: the gettext calls made by _() cause
  * memory leak warnings, but in these cases it's unavoidable, and mitigated
- * by the fact we only translate each string once.
+ * by the fact that each string is only translated once.
  */
 
 
@@ -58,9 +58,9 @@ void opts_free( /*@only@ */ opts_t opts)
 		return;
 	/*@-keeptrans@ */
 	/*
-	 * splint note: we're explicitly being handed the "opts" object to
-	 * free it, so the previously "kept" internally allocated buffers
-	 * are now ours to free.
+	 * splint note: the "opts" object was explicitly passed to be freed,
+	 * so the previously "kept" internally allocated buffers are no
+	 * longer "kept".
 	 */
 	if (NULL != opts->name)
 		free(opts->name);
@@ -120,12 +120,11 @@ bool opts_add_file(opts_t opts, const char *filename)
 	/*@+branchstate@ */
 
 	/*
-	 * splint notes: we turned off "branchstate" above because depending
-	 * on whether we have to extend the array, we change argv from
-	 * "keep" to "only", which is also why we turned off "keeptrans";
-	 * there doesn't seem to be a clean way to tell splint that everyone
-	 * else should not touch argv but we're allowed to reallocate it and
-	 * so is opts_parse.
+	 * splint notes: "branchstate" and "keeptrans" are turned off
+	 * because depending on whether the array is to be extended, argv
+	 * can change from "keep" to "only".  There doesn't seem to be a
+	 * clean way to tell splint that this function, and opts_parse(),
+	 * are allowed to reallocate argv, but nothing else should alter it.
 	 */
 
 	opts->argv[opts->argc++] = filename;
@@ -163,8 +162,8 @@ static bool opts_watchfd_add_item(opts_t opts, pid_t pid, int fd)
 	/*@+branchstate@ */
 
 	/*
-	 * splint notes: we turned off "branchstate" and "keeptrans" above
-	 * because of the same reason as in opts_add_file().
+	 * splint notes: "branchstate" and "keeptrans" were turned off
+	 * because of the same reason as for argv in opts_add_file().
 	 */
 
 	opts->watchfd_pid[opts->watchfd_count] = pid;
@@ -189,12 +188,6 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 	pid_t waited_pid;
 	int pid_status;
 	bool ok;
-
-	/*
-	 * flawfinder: buffer is zeroed before each use, and fgets() is
-	 * passed one less than its size so the string functions in the loop
-	 * always find a null byte at the end.
-	 */
 
 	/* Pipe for communicating with pgrep. */
 	if (pipe(fds) < 0) {
@@ -270,7 +263,7 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 
 		/* Set errno to 0 to distinguish between EOF and error. */
 		errno = 0;
-		/*@-unrecog@ *//* splint dosn't know of getline(). */
+		/*@-unrecog@ *//* splint doesn't know of getline(). */
 		line_length = getline(&linebuf_ptr, &linebuf_size, fptr);
 		/*@+unrecog@ */
 		if ((line_length < 0) || (NULL == linebuf_ptr)) {
@@ -281,7 +274,7 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 		if (line_length < 1)
 			continue;
 
-		/* Skip all lines if we've hit any errors. */
+		/* Skip all lines if any errors were found. */
 		if (!ok)
 			continue;
 
@@ -289,7 +282,7 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 		if ('\n' == linebuf_ptr[line_length - 1])
 			linebuf_ptr[--line_length] = '\0';
 
-		/* Skip lines without valid PID. */
+		/* Skip lines without a valid PID. */
 		watch_pid = 0;
 		if (sscanf(linebuf_ptr, "%u", &watch_pid) < 1)
 			continue;
@@ -330,16 +323,11 @@ static bool opts_watchfd_listfile(opts_t opts, const char *filename)
 	size_t linebuf_size = 0;
 	unsigned int linenumber;
 
-	/*
-	 * flawfinder: buffer is zeroed before each use, and fgets() is
-	 * passed one less than its size so the string functions in the loop
-	 * always find a null byte at the end.
-	 */
-
 	fptr = fopen(filename, "r");	    /* flawfinder: ignore */
 	/*
-	 * flawfinder note: caller directly controls filename, and we're
-	 * opening the file read-only.
+	 * flawfinder note: the caller directly controls the filename, which
+	 * here is being opened read-only, so there is no further
+	 * mitigation.
 	 */
 	if (NULL == fptr) {
 		fprintf(stderr, "%s: -d @: %s: %s\n", opts->program_name, filename, strerror(errno));
@@ -355,7 +343,7 @@ static bool opts_watchfd_listfile(opts_t opts, const char *filename)
 
 		/* Set errno to 0 to distinguish between EOF and error. */
 		errno = 0;
-		/*@-unrecog@ *//* splint dosn't know of getline(). */
+		/*@-unrecog@ *//* splint doesn't know of getline(). */
 		line_length = getline(&linebuf_ptr, &linebuf_size, fptr);
 		/*@+unrecog@ */
 		if ((line_length < 0) || (NULL == linebuf_ptr)) {
@@ -626,7 +614,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 	sysfs_fptr = fopen(sysfs_filename, "r");	/* flawfinder: ignore */
 	/*
 	 * flawfinder rationale: sysfs is trusted here, the filename is
-	 * predictable, and we are restricted to reading one number.
+	 * predictable, and only one number is being read.
 	 */
 	if (NULL != sysfs_fptr) {
 		sysfs_size = -1;
@@ -637,7 +625,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 			return true;
 		}
 		/* Read not successful - report the error and return. */
-		/* NB we must fclose() after reporting to retain errno. */
+		/* NB fclose() comes after the error report, to retain errno. */
 		/*@-mustfreefresh@ *//* see above */
 		fprintf(stderr, "%s: %s: %s: %s\n",
 			opts->program_name, size_file, _("failed to read sysfs size file"), strerror(errno));
@@ -653,8 +641,8 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 	device_fd = open(size_file, O_RDONLY);	/* flawfinder: ignore */
 	/*
 	 * flawfinder rationale: the filename is under the direct control of
-	 * the operator by its nature, so we can't refuse to open symlinks
-	 * etc as that would be counterintuitive.
+	 * the operator by its nature, so no further mitigation is possible.
+	 * For example, refusing to open symlinks would be counterintuitive.
 	 */
 
 	if (device_fd < 0) {
@@ -679,7 +667,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 
 	(void) close(device_fd);
 
-	/* Use the size we found. */
+	/* Set the size to the detected value. */
 	opts->size = device_size;
 	return true;
 }
@@ -818,10 +806,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		c = getopt((int) argc, argv, short_options);	/* flawfinder: ignore */
 #endif
 		/*
-		 * flawfinder rationale: we have to pass argv to getopt, and
-		 * limiting the argument sizes would be impractical and
-		 * cumbersome (and likely lead to more bugs); so we have to
-		 * trust the system getopt to not have internal buffer
+		 * flawfinder rationale: argv has to be passed to getopt,
+		 * and limiting the argument sizes would be impractical and
+		 * cumbersome (and likely lead to more bugs); so the system
+		 * getopt has to be trusted not to have internal buffer
 		 * overflows.
 		 */
 
@@ -888,11 +876,11 @@ opts_t opts_parse(unsigned int argc, char **argv)
 					/*@+mustfreefresh@ */
 				} else if (0 != access(optarg + 1, R_OK)) {	/* flawfinder: ignore */
 					/*
-					 * flawfinder rationale: we're not
-					 * using access() to check
-					 * permissions, only to help give a
-					 * usable error message, so there's
-					 * no TOCTOU issue.
+					 * flawfinder rationale: there is no
+					 * TOCTOU issue because access() is
+					 * only being used to inform the
+					 * error message, not to check
+					 * permissions.
 					 */
 					/*@-mustfreefresh@ *//* see above */
 					fprintf(stderr, "%s: -%c @: %s: %s\n",
@@ -946,11 +934,11 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'h':
 			display_help();
 			opts->action = PV_ACTION_NOTHING;
-			return opts;	    /* early return */
+			return opts;	    /* Early return. */
 		case 'V':
 			display_version();
 			opts->action = PV_ACTION_NOTHING;
-			return opts;	    /* early return */
+			return opts;	    /* Early return. */
 		case 'p':
 			opts->progress = true;
 			numopts++;
@@ -1221,8 +1209,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	} while (c != -1);
 
 	/*
-	 * splint thinks we can reach here after opts_free() and opts=NULL
-	 * above, so explicitly return here if opts was set to NULL.
+	 * splint thinks this point is reachable after opts_free() and
+	 * opts=NULL above, so explicitly return here if opts was set to
+	 * NULL.
 	 */
 	if (NULL == opts)
 		return NULL;
@@ -1323,7 +1312,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		opts->bytes = true;
 	}
 
-	/* If -Z was given but not -E, pretend one -E was given too. */
+	/* If -Z was given but not -E, behave as if one -E was given too. */
 	if (opts->error_skip_block > 0 && 0 == opts->skip_errors)
 		opts->skip_errors = 1;
 

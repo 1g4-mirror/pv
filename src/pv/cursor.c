@@ -7,8 +7,8 @@
  * first `pv' process.
  *
  * However, some OSes (FreeBSD and MacOS X so far) don't allow locking of a
- * terminal, so we try to use a lockfile if terminal locking doesn't work,
- * and finally abort if even that is unavailable.
+ * terminal - so if terminal locking doesn't work, a separate lock file is
+ * used, and cursor positioning is abandoned if that also fails.
  *
  * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2026 Andrew Wood
  *
@@ -44,7 +44,7 @@
 
 
 /*
- * Create a per-euid, per-tty, lockfile in ${TMPDIR:-${TMP:-/tmp}} for the
+ * Create a per-euid, per-tty, lock file in ${TMPDIR:-${TMP:-/tmp}} for the
  * tty on the given file descriptor.
  */
 static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t control, int fd)
@@ -68,8 +68,8 @@ static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t co
 			pv_error("%s: %s", _("failed to get terminal name"), strerror(errno));
 		}
 		/*
-		 * If we don't know our terminal name, we can neither do IPC
-		 * nor make a lock file, so turn off cursor positioning.
+		 * If the terminal name is unknown, then neither IPC nor a
+		 * lock file are feasible, so turn off cursor positioning.
 		 */
 		cursor->disable = true;
 		debug("%s", "ttyname failed - cursor positioning disabled");
@@ -103,10 +103,10 @@ static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t co
 	cursor->lock_fd = open(cursor->lock_file, openflags, 0600);	/* flawfinder: ignore */
 
 	/*
-	 * flawfinder rationale: we aren't truncating the lock file, we
-	 * don't change its contents, and we are attempting to use
-	 * O_NOFOLLOW where possible to avoid symlink attacks, so this
-	 * open() is as safe as we can make it.
+	 * flawfinder rationale: the file isn't being truncated and its
+	 * contents won't be changed, and O_NOFOLLOW will be used if
+	 * available (to avoid symlink attacks), so this open() has been made
+	 * as safe as possible.
 	 */
 
 	if (cursor->lock_fd < 0) {
@@ -119,7 +119,7 @@ static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t co
 
 /*
  * Lock the terminal on the given file descriptor, falling back to using a
- * lockfile if the terminal itself cannot be locked.
+ * lock file if the terminal itself cannot be locked.
  */
 static void pv_crs_lock(pvcursorstate_t cursor, readonly_pvcontrol_t control, int fd)
 {
@@ -150,7 +150,7 @@ static void pv_crs_lock(pvcursorstate_t cursor, readonly_pvcontrol_t control, in
 	}
 
 	if (cursor->lock_fd >= 0) {
-		debug("%s: %s", cursor->lock_file, "terminal lockfile acquired");
+		debug("%s: %s", cursor->lock_file, "terminal lock file acquired");
 	} else {
 		debug("%s", "terminal lock acquired");
 	}
@@ -159,7 +159,7 @@ static void pv_crs_lock(pvcursorstate_t cursor, readonly_pvcontrol_t control, in
 
 /*
  * Unlock the terminal on the given file descriptor.  If pv_crs_lock used
- * lockfile locking, unlock the lockfile.
+ * lock file locking, unlock the lock file.
  */
 static void pv_crs_unlock(pvcursorstate_t cursor, int fd)
 {
@@ -178,7 +178,7 @@ static void pv_crs_unlock(pvcursorstate_t cursor, int fd)
 	(void) fcntl(lock_fd, F_SETLK, &lock);
 
 	if (cursor->lock_fd >= 0) {
-		debug("%s: %s", cursor->lock_file, "terminal lockfile released");
+		debug("%s: %s", cursor->lock_file, "terminal lock file released");
 	} else {
 		debug("%s", "terminal lock released");
 	}
@@ -189,8 +189,8 @@ static void pv_crs_unlock(pvcursorstate_t cursor, int fd)
 /*
  * Get the current number of processes attached to our shared memory
  * segment, i.e. find out how many `pv' processes in total are running in
- * cursor mode (including us), and store it in pv_crs_pvcount. If this is
- * larger than pv_crs_pvmax, update pv_crs_pvmax.
+ * cursor mode (including this process), and store it in pv_crs_pvcount.  If
+ * this is larger than pv_crs_pvmax, update pv_crs_pvmax.
  */
 static void pv_crs_ipccount(pvcursorstate_t cursor)
 {
@@ -246,7 +246,7 @@ static int pv_crs_get_ypos(int terminalfd)
 	memset(cpr, 0, sizeof(cpr));
 
 #ifdef CURSOR_ANSWERBACK_BYTE_BY_BYTE
-	/* Read answerback byte by byte - fails on AIX */
+	/* Read answerback byte by byte - fails on AIX. */
 	for (got = 0, r = 0; got < (int) (sizeof(cpr) - 2); got += r) {
 		r = read(terminalfd, cpr + got, 1);	/* flawfinder: ignore */
 		/* flawfinder rationale: bounded to buffer size by "for" */
@@ -263,9 +263,9 @@ static int pv_crs_get_ypos(int terminalfd)
 	     terminalfd, got, cpr[0], cpr[1], cpr[2], cpr[3], cpr[4], cpr[5]);
 
 #else				/* !CURSOR_ANSWERBACK_BYTE_BY_BYTE */
-	/* Read answerback in one big lump - may fail on Solaris */
+	/* Read answerback in one big lump - may fail on Solaris. */
 	r = read(terminalfd, cpr, sizeof(cpr) - 2);	/* flawfinder: ignore */
-	/* flawfinder rationale: bounded to buffer size */
+	/* flawfinder rationale: bounded to buffer size. */
 	if (r <= 0) {
 		debug("r=%d: %s", r, strerror(errno));
 	} else {
@@ -292,23 +292,24 @@ static int pv_crs_get_ypos(int terminalfd)
 /*
  * Initialise the IPC data, returning nonzero on error.
  *
- * To do this, we attach to the shared memory segment (creating it if it
- * does not exist). If we are the only process attached to it, then we
- * initialise it with the current cursor position.
+ * Attaches to the shared memory segment (creating it if it does not exist).
+ * If this is the only process attached to it, then the memory is
+ * initialised with the current cursor position.
  *
- * There is a race condition here: another process could attach before we've
- * had a chance to check, such that no process ends up getting an "attach
- * count" of one, and so no initialisation occurs. So, we lock the terminal
- * with pv_crs_lock() while we are attaching and checking.
+ * To avoid a race condition, this function locks the terminal with
+ * pv_crs_lock() while attaching and checking.  The race condition is that
+ * another process could attach before this one checks, such that no process
+ * ends up getting an "attach count" of one, and so no initialisation
+ * occurs.
  */
 static int pv_crs_ipcinit(pvcursorstate_t cursor, readonly_pvcontrol_t control, char *ttyfile, int terminalfd)
 {
 	key_t key;
 
 	/*
-	 * Base the key for the shared memory segment on our current tty, so
-	 * we don't end up interfering in any way with instances of `pv'
-	 * running on another terminal.
+	 * Base the key for the shared memory segment on the current tty, to
+	 * avoid interfering in any way with instances of `pv' running on
+	 * another terminal.
 	 */
 	key = ftok(ttyfile, (int) 'p');
 	if (-1 == key) {
@@ -330,15 +331,15 @@ static int pv_crs_ipcinit(pvcursorstate_t cursor, readonly_pvcontrol_t control, 
 	}
 
 	/*@-nullpass@ */
-	/* splint doesn't know shmaddr can be NULL */
+	/* splint doesn't know shmaddr can be NULL. */
 	cursor->shared = shmat(cursor->shmid, NULL, 0);
 	/*@+nullpass@ */
 
 	pv_crs_ipccount(cursor);
 
 	/*
-	 * If nobody else is attached to the shared memory segment, we're
-	 * the first, so we need to initialise the shared memory with our
+	 * If no other process is attached to the shared memory segment,
+	 * this one is the first, so initialise the shared memory with the
 	 * current Y cursor co-ordinate and with an initial false value for
 	 * the TOSTOP-added flag.
 	 */
@@ -355,8 +356,8 @@ static int pv_crs_ipcinit(pvcursorstate_t cursor, readonly_pvcontrol_t control, 
 		cursor->y_offset = 0;
 
 	/*
-	 * If anyone else had attached to the shared memory segment, we need
-	 * to read the top Y co-ordinate from it.
+	 * If any other process had attached to the shared memory segment
+	 * already, read the top Y co-ordinate from it.
 	 */
 	if (cursor->pvcount > 1) {
 		cursor->y_start = cursor->shared->y_topmost;
@@ -397,10 +398,10 @@ void pv_crs_init(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 	terminalfd = open(ttyfile, O_RDWR); /* flawfinder: ignore */
 
 	/*
-	 * flawfinder rationale: the file we open won't be truncated but
-	 * could be corrupted by writes attempting to get the current Y
-	 * position; but we get the filename from ttyname() and it could be
-	 * a symbolic link, so we can't do much more than trust it.
+	 * flawfinder rationale: the file won't be truncated but could be
+	 * corrupted by writes attempting to get the current Y position; but
+	 * the filename is from ttyname() and it could be a symbolic link,
+	 * so O_NOFOLLOW isn't feasible and it has to be trusted as-is.
 	 */
 
 	if (terminalfd < 0) {
@@ -415,8 +416,8 @@ void pv_crs_init(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 	}
 
 	/*
-	 * If we have already set the terminal TOSTOP attribute, set the
-	 * flag in shared memory to let the other instances know.
+	 * If the terminal TOSTOP attribute was already set by this process,
+	 * set the flag in shared memory to let the other instances know.
 	 */
 	if ((!cursor->noipc) && (1 == flags->clear_tty_tostop_on_exit) && (NULL != cursor->shared)) {
 		debug("%s", "propagating local clear_tty_tostop_on_exit true value to shared tty_tostop_added flag");
@@ -424,9 +425,9 @@ void pv_crs_init(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 	}
 
 	/*
-	 * If we are not using IPC, then we need to get the current Y
-	 * co-ordinate. If we are using IPC, then the pv_crs_ipcinit()
-	 * function takes care of this in a more multi-process-friendly way.
+	 * If IPC is not being used, the current Y needs to be determined.
+	 * If IPC is being used, then the pv_crs_ipcinit() function takes
+	 * care of this in a more multi-process-friendly way.
 	 */
 	if (cursor->noipc) {
 #else				/* ! HAVE_IPC */
@@ -456,7 +457,7 @@ void pv_crs_init(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 
 #ifdef HAVE_IPC
 /*
- * Set the "we need to reinitialise cursor positioning" flag.
+ * Set the "need to reinitialise cursor positioning" flag.
  */
 void pv_crs_needreinit(pvcursorstate_t cursor)
 {
@@ -469,8 +470,8 @@ void pv_crs_needreinit(pvcursorstate_t cursor)
 
 #ifdef HAVE_IPC
 /*
- * Reinitialise the cursor positioning code (called if we are backgrounded
- * then foregrounded again).
+ * Reinitialise the cursor positioning code (called if the process is
+ * backgrounded then foregrounded again).
  */
 static void pv_crs_reinit(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransientflags_t flags)
 {
@@ -555,8 +556,8 @@ void pv_crs_update(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtrans
 	/*
 	 * If the screen has scrolled, or is about to scroll, due to
 	 * multiple `pv' instances taking us near the bottom of the screen,
-	 * scroll the screen (only if we're the first `pv'), and then move
-	 * our initial Y co-ordinate up.
+	 * scroll the screen (only if this is the first `pv'), and then move
+	 * the initial Y co-ordinate up.
 	 */
 	if (((cursor->y_start + cursor->pvmax) > (int) (control->height))
 	    && (!cursor->noipc)
@@ -572,7 +573,7 @@ void pv_crs_update(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtrans
 		debug("%s: %d", "scroll offset", offs);
 
 		/*
-		 * Scroll the screen if we're the first `pv'.
+		 * Scroll the screen if this is the first `pv'.
 		 */
 		if (0 == cursor->y_offset) {
 			pv_crs_lock(cursor, control, STDERR_FILENO);
@@ -596,8 +597,8 @@ void pv_crs_update(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtrans
 #endif				/* HAVE_IPC */
 
 	/*
-	 * Keep the Y co-ordinate within sensible bounds, so we can never
-	 * overflow the "cup_cmd" buffer.
+	 * Clamp the Y co-ordinate to sensible bounds, to avoid overflowing
+	 * the "cup_cmd" buffer.
 	 */
 	if ((y < 1) || (y > 999999))
 		y = 1;
@@ -630,7 +631,7 @@ void pv_crs_fini(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 	char cup_cmd[32];		 /* flawfinder: ignore */
 	unsigned int y;
 
-	/* flawfinder - "cup_cmd" is zeroed, and only written by pv_snprintf() */
+	/* flawfinder - "cup_cmd" is zeroed, and only written by pv_snprintf(). */
 
 	debug("%s", "fini");
 
@@ -645,7 +646,7 @@ void pv_crs_fini(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 		y = control->height;
 
 	/*
-	 * Absolute bounds check.
+	 * Clamp to reasonable values.
 	 */
 	if ((y < 1) || (y > 999999))
 		y = 1;
@@ -663,7 +664,7 @@ void pv_crs_fini(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 #ifdef HAVE_IPC
 	/*
 	 * If any other "pv -c" instances have set the terminal TOSTOP
-	 * attribute, set our local flag so pv_sig_fini() will know about
+	 * attribute, set the local flag so pv_sig_fini() will know about
 	 * it.
 	 */
 	if ((!cursor->noipc) && (NULL != cursor->shared) && cursor->shared->tty_tostop_added) {
@@ -681,7 +682,7 @@ void pv_crs_fini(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 	cursor->shared = NULL;
 
 	/*
-	 * If we are the last instance detaching from the shared memory,
+	 * If this is the last instance detaching from the shared memory,
 	 * delete it so it's not left lying around.
 	 */
 	if (cursor->pvcount < 2) {
@@ -697,8 +698,9 @@ void pv_crs_fini(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 	if (cursor->lock_fd >= 0) {
 		(void) close(cursor->lock_fd);
 		/*
-		 * We can get away with removing this on exit because all
-		 * the other PVs will be finishing at the same sort of time.
+		 * Since all PVs in a pipeline are likely to finish around
+		 * the same time, the lock file can be removed without
+		 * further co-ordination.
 		 */
 		(void) remove(cursor->lock_file);
 	}
