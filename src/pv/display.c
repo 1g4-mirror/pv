@@ -29,20 +29,20 @@
 #endif
 
 /*
- * If USE_POPEN_TPUTS is defined, then we call popen("tputs") if ncurses is
- * unavailable, when we need to know whether colours are supported.
+ * If ncurses is unavailable, and USE_POPEN_TPUTS is defined, then
+ * popen("tputs") if used to find out whether colours are supported.
  *
- * Since popen() is risky to call (in case $PATH has been altered), it is
- * safer to just assume colour is available if we can't check, so
- * USE_POPEN_TPUTS is undefined here by default.
+ * Calling popen() can be risky (in case $PATH has been altered), so the
+ * safer option when ncurses is unavailable is to just always assume colour
+ * is available - so USE_POPEN_TPUTS is undefined here by default.
  */
 #undef USE_POPEN_TPUTS
 
 
 /*
- * We need sys/ioctl.h for ioctl() regardless of whether TIOCGWINSZ is
- * defined in termios.h, so we no longer use AC_HEADER_TIOCGWINSZ in
- * configure.in, and just include both header files if they are available.
+ * Include sys/ioctl.h for ioctl() regardless of whether TIOCGWINSZ is
+ * defined in termios.h, so rather than using AC_HEADER_TIOCGWINSZ in
+ * configure.in, always include both header files if they are available.
  * (issue #74, 2023-08-06)
  */
 #ifdef HAVE_SYS_IOCTL_H
@@ -76,8 +76,8 @@ void pv_set_error_prefix( /*@unique@ */ const char *prefix)
 	strncpy(pv__error_prefix, prefix, sizeof(pv__error_prefix) - 1);	/* flawfinder: ignore */
 	pv__error_prefix_set = true;
 	/*
-	 * flawfinder rationale: strncpy's pointers are as valid as we can
-	 * make them since the first is a static buffer and the second is
+	 * flawfinder rationale: strncpy's pointers are as valid as they can
+	 * be since the first is a static buffer and the second is
 	 * caller-supplied.  The caller must \0-terminate the string but in
 	 * any case it is bounded to 1 less than the size of the
 	 * destination.  The destination is zeroed before use so the result
@@ -86,9 +86,9 @@ void pv_set_error_prefix( /*@unique@ */ const char *prefix)
 }
 
 /*
- * Output an error message.  If we've displayed anything to the terminal
- * already, then put a newline before our error so we don't write over what
- * we've written.
+ * Output an error message.  If anything has been sent to the terminal
+ * already, then put a newline before the message, to avoid writing over
+ * what was sent earlier.
  */
 void pv_error(char *format, ...)
 {
@@ -109,8 +109,8 @@ void pv_error(char *format, ...)
 
 
 /*
- * Return true if we are the foreground process on the terminal, or if we
- * aren't outputting to a terminal; false otherwise.
+ * Return true if either this is the foreground process on the terminal, or
+ * if the output is not a terminal; false otherwise.
  */
 bool pv_in_foreground(void)
 {
@@ -198,8 +198,7 @@ void pv_tty_write(readonly_pvtransientflags_t flags, const char *buf, size_t cou
 
 
 /*
- * Fill in *width and *height with the current terminal size,
- * if possible.
+ * Fill in *width and *height with the current terminal size, if possible.
  */
 void pv_screensize(unsigned int *width, unsigned int *height)
 {
@@ -327,11 +326,11 @@ void pv_si_prefix(long double *value, char *prefix, const long double ratio, pvt
 
 	/*
 	 * Force an empty prefix if the value is almost zero, to avoid
-	 * "0yB".  NB we don't compare directly with zero because of
-	 * potential floating-point inaccuracies.
+	 * "0yB".  Don't compare directly with zero because of potential
+	 * floating-point inaccuracies.
 	 *
-	 * See the "count_type" check below for the reason we add another
-	 * space in bytes mode.
+	 * See the "count_type" check below for the rationale behind adding
+	 * another space in bytes mode.
 	 */
 	if ((*value > -0.00000001) && (*value < 0.00000001)) {
 		if (count_type == PV_TRANSFERCOUNT_BYTES) {
@@ -414,7 +413,7 @@ void pv_si_prefix(long double *value, char *prefix, const long double ratio, pvt
  * is 1024 instead of 1000.
  *
  * The "format" string is in sprintf format and must contain exactly one %
- * parameter (a %s) which will expand to the string described above.
+ * parameter, a %s, which will expand to the string described above.
  */
 void pv_describe_amount(char *buffer, size_t bufsize, char *format,
 			long double amount, char *suffix_basic, char *suffix_bytes, pvtransfercount_t count_type)
@@ -453,7 +452,7 @@ void pv_describe_amount(char *buffer, size_t bufsize, char *format,
 
 	pv_si_prefix(&display_amount, si_prefix, divider, count_type);
 
-	/* Make sure we don't overrun our buffer. */
+	/* Clamp the value to avoid a buffer overrun. */
 	if (display_amount > 100000)
 		display_amount = 100000;
 	if (display_amount < -100000)
@@ -465,12 +464,12 @@ void pv_describe_amount(char *buffer, size_t bufsize, char *format,
 				   "%4ld%.2s%.16s", (long) display_amount, si_prefix, suffix);
 	} else {
 		/*
-		 * AIX blows up with %4.3Lg%.2s%.16s for some reason, so we
-		 * write display_amount separately first.
+		 * AIX breaks with %4.3Lg%.2s%.16s for some reason, so
+		 * instead, display_amount is written separately first.
 		 */
 		char str_disp[64];	 /* flawfinder: ignore - only used with pv_snprintf(). */
 		memset(str_disp, 0, sizeof(str_disp));
-		/* # to get 13.0GB instead of 13GB (#1477) */
+		/* Use '#' to get 13.0GB instead of 13GB for consistency (#1477). */
 		(void) pv_snprintf(str_disp, sizeof(str_disp), "%#4.3Lg", display_amount);
 		(void) pv_snprintf(sizestr_buffer, sizeof(sizestr_buffer), "%s%.2s%.16s", str_disp, si_prefix, suffix);
 	}
@@ -480,9 +479,10 @@ void pv_describe_amount(char *buffer, size_t bufsize, char *format,
 
 
 /*
- * Add a null-terminated string to the buffer if there is room for it,
- * updating the segment's offset and bytes values and returning the bytes
- * value, or treating the byte count as zero if there's insufficient space.
+ * Add a null-terminated string of content to the formatter's buffer if
+ * there is room for it, updating the segment's offset and bytes values and
+ * returning the bytes value, or treating the byte count as zero if there's
+ * insufficient space.
  */
 pvdisplay_bytecount_t pv_formatter_segmentcontent(char *content, pvformatter_args_t formatter_info)
 {
@@ -651,8 +651,8 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
 	 * first populating all the other components referenced by the
 	 * format segments.
 	 *
-	 * Then, that function generates the output string by sticking all
-	 * of these segments together.
+	 * Then, that function generates the output string by concatenating
+	 * all of these segments.
 	 */
 	segment = 0;
 	for (strpos = 0; display_format[strpos] != '\0' && segment < PV_FORMAT_ARRAY_MAX; strpos++, segment++) {
@@ -821,10 +821,10 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
 			 * buffer, to invoke its side effects such as
 			 * setting display->showing_timer.
 			 *
-			 * These side effects are required for other parts
-			 * of the program to understand what is required,
-			 * such as the transfer functions knowning to track
-			 * the previous line, or numeric mode knowing which
+			 * These side effects are used by other parts of the
+			 * program to understand what is required, such as
+			 * the transfer functions knowing to track the
+			 * previous line, or numeric mode knowing which
 			 * additional display options are enabled.
 			 */
 			memset(&formatter_info, 0, sizeof(formatter_info));
@@ -844,8 +844,8 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
 			(void) format_component_array[component_type].function(&formatter_info);
 			/*@+compmempass@ */
 			/*
-			 * splint - the buffer we point formatter_info to is
-			 * on the stack so doesn't match the "dependent"
+			 * splint - the formatter_info's buffer is on the
+			 * stack so doesn't match the "dependent"
 			 * annotation, but there's no other appropriate
 			 * annotation that doesn't make splint think there's
 			 * a leak here.
@@ -859,9 +859,9 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
 		status->checked_colour_support = true;
 #ifdef ENABLE_NCURSES
 		/*
-		 * If we have terminal info support, check whether the
-		 * current terminal supports colour - or just assume it's
-		 * supported if we're forcing output.
+		 * With terminal info support, check whether the current
+		 * terminal supports colour - or just assume it's supported,
+		 * if --force was supplied.
 		 */
 		if (true == control->force) {
 			status->terminal_supports_colour = true;
@@ -911,9 +911,9 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
 			/*@+unrecog@ */
 
 			/*
-			 * flawfinder - we acknowledge that popen() is risky
-			 * to call, though we have the mitigation that we're
-			 * calling it with a static string.
+			 * flawfinder - warns that popen() is risky to call,
+			 * though this is mitigated by calling it with a
+			 * static string.
 			 */
 
 			if (NULL == command_fptr) {
@@ -1015,7 +1015,7 @@ bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_
 	/* Populate the display's "final" flag, for formatters. */
 	display->final_update = final;
 
-	/* Reinitialise if we were asked to. */
+	/* Reinitialise if requested. */
 	if (reinitialise)
 		pv__format_init(status, control, transfer, calc, format_supplied, display);
 
@@ -1041,7 +1041,7 @@ bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_
 	}
 
 	/*
-	 * Allocate output buffer if there isn't one.
+	 * Allocate the output buffer if there isn't one.
 	 */
 	if (NULL == display->display_buffer) {
 		char *new_buffer;
@@ -1105,7 +1105,7 @@ bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_
 		formatter_info.segment = segment;
 		/*@-compmempass@ */
 		bytes_added = component->function(&formatter_info);
-		/*@+compmempass@ *//* see previous ->function() note. */
+		/*@+compmempass@ *//* see format_component_array[].function() in pv__format_init(). */
 
 		segment->width = 0;
 		if (bytes_added > 0) {
@@ -1203,7 +1203,7 @@ bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_
 		      segment->bytes, display->display_buffer + display_buffer_offset - segment->bytes);
 	}
 
-	/* If the SGR active codes flag is set, we need to emit an SGR reset. */
+	/* If the SGR active codes flag is set, emit an SGR reset. */
 	if (display->sgr_code_active) {
 		debug("%s", "SGR codes still active - adding reset");
 		(void) pv_strlcat(display->display_buffer, "\033[m", display->display_buffer_size);
@@ -1217,8 +1217,8 @@ bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_
 	debug("%s: %d", "new display string width", (int) new_display_string_width);
 
 	/*
-	 * If the width of our output shrinks, we need to keep appending
-	 * spaces at the end, so that we don't leave dangling bits behind.
+	 * If the width of the output shrinks, pad with spaces to the old
+	 * width, to avoid leaving dangling bits behind.
 	 */
 	if ((new_display_string_width < display->display_string_width)
 	    && (control->width >= display->prev_screen_width)) {
