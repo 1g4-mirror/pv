@@ -28,8 +28,9 @@
  * sizes of all input files.  If any of the input files are of indeterminate
  * size (such as if they are a pipe), the total size is set to zero.
  *
- * Any files that cannot be stat()ed or that access() says we can't read
- * will be skipped, and the total size will be set to zero.
+ * If there are any files that cannot be stat()ed, or that access() says are
+ * not readable, they will be skipped, and the total size will be set to
+ * zero.
  *
  * Returns the total size, or 0 if it is unknown.
  */
@@ -69,15 +70,16 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 			if (0 == rc) {
 				rc = access(state->files.filename[file_idx], R_OK);	/* flawfinder: ignore */
 				/*
-				 * flawfinder rationale: we're not really
-				 * using access() to do permissions checks,
-				 * but to zero the total if we might be
-				 * unable to read the file later, so if an
-				 * attacker redirected one of the input
-				 * files in between this part and the actual
-				 * reading, the outcome would be that the
-				 * total byte count would be wrong or
-				 * missing, nothing useful.
+				 * flawfinder rationale: access() can lead
+				 * to TOCTOU issues but here it isn't being
+				 * used to check permissions, only to zero
+				 * the total if the file is likely to be
+				 * unreadable later.  If an attacker
+				 * redirected one of the input files in
+				 * between this part and the actual reading,
+				 * the outcome would be that the total byte
+				 * count would be wrong or missing, nothing
+				 * otherwise exploitable.
 				 */
 			}
 		}
@@ -99,10 +101,10 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 				fd = open("/dev/stdin", O_RDONLY);	/* flawfinder: ignore */
 				/*
 				 * flawfinder rationale: "/dev/stdin" may be
-				 * a symlink, so can't use O_NOFOLLOW, and
-				 * so we have to assume that it being under
-				 * "/dev" means the path is less likely to
-				 * be under the control of someone else.
+				 * a symlink, so O_NOFOLLOW is not suitable;
+				 * in mitigation, a path under "/dev" is
+				 * unlikely to be under the control of
+				 * someone else.
 				 */
 			} else {
 				fd = open(state->files.filename[file_idx], O_RDONLY);	/* flawfinder: ignore */
@@ -127,12 +129,13 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 	}
 
 	/*
-	 * Patch from Peter Samuelson: if we cannot work out the size of the
-	 * input, but we are writing to a block device, then use the size of
-	 * the output block device.
+	 * Patch from Peter Samuelson: if the input size can't be
+	 * determined, but the output is being written to a block device,
+	 * then use the size of the output block device.
 	 *
-	 * Further modified to check that output is not in append-only mode
-	 * and that we can seek back to the start after getting the size.
+	 * Further modified to check that output is not in append-only mode,
+	 * such that it is possible to seek back to the start after getting
+	 * the size.
 	 */
 	if (total < 1) {
 		int rc;
@@ -154,10 +157,9 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			}
 			/*
-			 * If we worked out a size, then set the
-			 * stop-at-size flag to prevent a "no space left on
-			 * device" error when we reach the end of the output
-			 * device.
+			 * If a size was found, then set the stop-at-size
+			 * flag to prevent a "no space left on device" error
+			 * when the end of the output device is reached.
 			 */
 			if (total > 0) {
 				state->control.stop_at_size = true;
@@ -174,8 +176,9 @@ static off_t pv_calc_total_bytes(pvstate_t state)
  * input files.  If any of the inputs are not regular files (such as if they
  * are a pipe or a block device), the total size is set to zero.
  *
- * Any files that cannot be stat()ed or that access() says we can't read
- * will be skipped, and the total size will be set to zero.
+ * If there are any files that cannot be stat()ed, or that access() says are
+ * not readable, they will be skipped, and the total size will be set to
+ * zero.
  *
  * Returns the total size, or 0 if it is unknown.
  */
@@ -218,7 +221,7 @@ static off_t pv_calc_total_lines(pvstate_t state)
 			return total;
 		}
 #if HAVE_POSIX_FADVISE
-		/* Advise the OS that we will only be reading sequentially. */
+		/* Advise the OS that all reads will be sequential. */
 		(void) posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif
 
@@ -230,10 +233,9 @@ static off_t pv_calc_total_lines(pvstate_t state)
 
 			numread = read(fd, scanbuf, sizeof(scanbuf));	/* flawfinder: ignore */
 			/*
-			 * flawfinder rationale: each time around the loop
-			 * we are always reading into the start of the
-			 * buffer, not moving along it, so the bounding is
-			 * OK.
+			 * flawfinder rationale: every read is reading into
+			 * the start of the buffer, not moving along it, so
+			 * the bounding is OK.
 			 */
 			if (numread < 0) {
 				pv_error("%s: %s", state->files.filename[file_idx], strerror(errno));
@@ -328,8 +330,8 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		fd = open(next_filename, O_RDONLY);	/* flawfinder: ignore */
 		/*
 		 * flawfinder rationale: the input file list is under the
-		 * control of the operator by its nature, so we can't refuse
-		 * to open symlinks etc as that would be counterintuitive.
+		 * control of the operator by its nature, so refusing to
+		 * open symlinks would be counterintuitive.
 		 */
 		if (fd < 0) {
 			pv_error("%s: %s: %s", _("failed to read file"), next_filename, strerror(errno));
@@ -354,9 +356,8 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	}
 
 	/*
-	 * Check that this new input file is not the same as output's
-	 * destination. This restriction is ignored for anything other
-	 * than a regular file or block device.
+	 * If the input file is a regular file or a block device, check that
+	 * it is not the same as the output's destination.
 	 */
 	input_file_is_output = true;
 	if (isb.st_dev != osb.st_dev)
@@ -384,15 +385,15 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		/*@-compdef@ */
 		/*
 		 * splint - passed or returned storage is undefined - but at
-		 * this point we know the input file list is been populated,
-		 * so that's OK.
+		 * this point, the input file list has been populated, so
+		 * that's OK.
 		 */
 		debug("%s: %s: %s", pv_current_file_name(state), "fcntl", strerror(errno));
 		/*@+compdef@ */
 	}
 	/*
-	 * We don't clear direct_io_changed here, to avoid race conditions
-	 * that could cause the input and output settings to differ.
+	 * Don't clear direct_io_changed here, to avoid race conditions that
+	 * could cause the input and output settings to differ.
 	 */
 #endif				/* O_DIRECT */
 
@@ -417,12 +418,10 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	/*@-onlytrans@ */
 	/*@-statictrans@ */
 	/*
-	 * Here we are doing bad things with regards to whether the returned
-	 * string is an allocated string from the state->files.filename array,
-	 * a constant string, or a returned string from gettext(), but it
-	 * has no impact.  We explicitly document, above, that the returned
-	 * string expires with the state, and hence switch off the
-	 * associated splint warnings.
+	 * The returned string could be an allocated string from the
+	 * state->files.filename array, a constant string, or a returned
+	 * string from gettext().  The documentation, above, explains that
+	 * the returned string expires with the state.
 	 */
 
 	if (NULL == str_none)
@@ -455,8 +454,8 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	return input_file_name;
 	/*@+compdef@ */
 	/*
-	 * splint warns about state->files.filename being undefined, but we
-	 * know it's been populated fully by the time this function is
+	 * splint warns about state->files.filename being undefined, but it
+	 * has definitely been fully populated by the time this function is
 	 * called.
 	 */
 
@@ -530,12 +529,12 @@ FILE *pv_open_controlfile(char *filename, size_t bufsize, pid_t control_pid, int
 
 	/*
 	 * flawfinder rationale: the files are in a directory whose parents
-	 * cannot be manipulated, and we are not allowing the final
-	 * component to be a symbolic link.  We are checking that $HOME is
-	 * not NULL, and it's bounded by pv_snprintf() so it can't overshoot
-	 * the filename buffer.  When we chmod $HOME/.pv, we assume that an
-	 * attacker is unlikely to be able to manipulate $HOME's contents to
-	 * make use of us setting $HOME/.pv to mode 700.
+	 * cannot be manipulated, and the final component is not allowed to
+	 * be a symbolic link.  $HOME is checked for a NULL value, and the
+	 * filename is bounded by pv_snprintf() so it can't overshoot the
+	 * filename buffer.  When chmod() is called on $HOME/.pv, an
+	 * attacker is assumed to be unlikely to be able to manipulate
+	 * $HOME's contents to make use of $HOME/.pv's mode of 700.
 	 */
 
 	if (control_fd < 0)
