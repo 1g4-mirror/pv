@@ -25,6 +25,7 @@
  */
 void pv_elapsedtime_read(struct timespec *return_time)
 {
+	/* TODO: use pv_error() rather than fprintf(). */
 	/*@-unrecog@ *//* splint doesn't know clock_gettime. */
 	if (0 != clock_gettime(CLOCK_MONOTONIC, return_time)) {
 		fprintf(stderr, "%s: %s: %s\n", PACKAGE_NAME, "clock_gettime", strerror(errno));
