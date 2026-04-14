@@ -16,19 +16,19 @@
 
 /*
  * Read the current elapsed time, relative to an unspecified point in the
- * past, and store it in the given timespec buffer.  The time is guaranteed
- * to not go backwards and does not count time when the system was
- * suspended.  See clock_gettime(2) with CLOCK_MONOTONIC.
+ * past, and store it in "return_time".  The time is guaranteed to not go
+ * backwards and does not count time when the system was suspended.  See
+ * clock_gettime(2) with CLOCK_MONOTONIC.
  *
  * The read should not fail; if it does, the program is aborted with exit
  * status 16 (transfer error).
  */
 void pv_elapsedtime_read(struct timespec *return_time)
 {
-	/*@-unrecog@ *//* splint doesn't know clock_gettime */
+	/*@-unrecog@ *//* splint doesn't know clock_gettime. */
 	if (0 != clock_gettime(CLOCK_MONOTONIC, return_time)) {
 		fprintf(stderr, "%s: %s: %s\n", PACKAGE_NAME, "clock_gettime", strerror(errno));
-		/*@-exitarg@ *//* we explicitly want a special exit status */
+		/*@-exitarg@ *//* The special exit status is explicitly chosen. */
 		exit(PV_ERROREXIT_TRANSFER);
 		/*@+exitarg@ */
 	}
@@ -37,7 +37,7 @@ void pv_elapsedtime_read(struct timespec *return_time)
 
 
 /*
- * Set the time in the given timespec to zero.
+ * Set the time in the timespec to zero.
  */
 void pv_elapsedtime_zero(struct timespec *zero_time)
 {
@@ -132,16 +132,16 @@ void pv_elapsedtime_add(struct timespec *return_time, const struct timespec *fir
 	/*@+type@ */
 
 	/*
-	 * splint rationale: we know the types are different but should be
-	 * large enough and are relying on the compiler to do the casting
-	 * correctly, since the manual for timespec(3) states the types are
-	 * implementation-defined.
+	 * splint rationale: the manual for timespec(3) states that its
+	 * types are implementation-defined, so the best option is to use
+	 * types that are the most likely to be large enough, and let the
+	 * compiler do the casting.
 	 */
 }
 
 
 /*
- * Add a number of nanoseconds to the given timespec.
+ * Add a number of nanoseconds to a timespec.
  */
 void pv_elapsedtime_add_nsec(struct timespec *return_time, long long add_nanoseconds)
 {
@@ -156,7 +156,7 @@ void pv_elapsedtime_add_nsec(struct timespec *return_time, long long add_nanosec
 	seconds += nanoseconds / 1000000000;
 	nanoseconds = nanoseconds % 1000000000;
 
-	/*@-type@ *//* see above */
+	/*@-type@ *//* See above. */
 	return_time->tv_sec = seconds;
 	return_time->tv_nsec = nanoseconds;
 	/*@+type@ */
@@ -195,7 +195,7 @@ void pv_elapsedtime_subtract(struct timespec *return_time, const struct timespec
 		nanoseconds = 1000000000 + nanoseconds;
 	}
 
-	/*@-type@ *//* see above */
+	/*@-type@ *//* See above. */
 	return_time->tv_sec = seconds;
 	return_time->tv_nsec = nanoseconds;
 	/*@+type@ */
@@ -233,18 +233,18 @@ void pv_nanosleep(long long nanoseconds)
 	sleep_for.tv_sec = 0;
 	/*@-type@ */
 	sleep_for.tv_nsec = nanoseconds;
-	/*@+type@ *//* splint rationale - best effort */
+	/*@+type@ *//* splint rationale - best effort. */
 	/*@-unrecog@ */
 	(void) nanosleep(&sleep_for, &time_remaining);
-	/*@+unrecog@ *//* splint rationale - doesn't know of nanosleep() */
+	/*@+unrecog@ *//* splint doesn't know of nanosleep(). */
 #else
 	struct timeval tv;
 	tv.tv_sec = 0;
 	/*@-type@ */
 	tv.tv_usec = nanoseconds / 1000;
-	/*@+type@ *//* splint rationale - best effort */
+	/*@+type@ *//* splint rationale - best effort. */
 	/*@-null@ */
 	(void) select(0, NULL, NULL, NULL, &tv);
-	/*@+null@ *//* splint doesn't know about select() */
+	/*@+null@ *//* splint doesn't know about select(). */
 #endif
 }
