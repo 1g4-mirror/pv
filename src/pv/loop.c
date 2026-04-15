@@ -1,5 +1,6 @@
 /*
- * Functions providing the main transfer or file descriptor watching loop.
+ * Functions providing the main transfer loop, the file descriptor watching
+ * loop, and the query loop (watching another PV process).
  *
  * Copyright 2002-2008, 2010, 2012-2015, 2017, 2021, 2023-2026 Andrew Wood
  *
@@ -55,7 +56,7 @@ static long ldsqrt(long double value)
 
 /*
  * If the flag is set to say that a terminal resize signal was received,
- * clear the flag and resize the display, and return true.
+ * clear the flag, resize the display, and return true.
  */
 static bool pv__resize_display_on_signal(pvstate_t state)
 {
@@ -95,7 +96,7 @@ static void pv__show_stats(pvstate_t state)
 		long double rate_mean, rate_variance, rate_deviation;
 		int stats_size;
 
-		/* flawfinder: made safe by use of pv_snprintf() */
+		/* flawfinder: made safe by use of pv_snprintf(). */
 
 		rate_mean = state->calc.rate_sum / ((long double) (state->calc.measurements_taken));
 		rate_variance =
@@ -126,7 +127,7 @@ static void pv__show_stats(pvstate_t state)
 		char msg_buf[256];	 /* flawfinder: ignore */
 		int msg_size;
 
-		/* flawfinder: made safe by use of pv_snprintf() */
+		/* flawfinder: made safe by use of pv_snprintf(). */
 
 		memset(msg_buf, 0, sizeof(msg_buf));
 		msg_size = pv_snprintf(msg_buf, sizeof(msg_buf), "%s\n", _("rate not measured"));
@@ -151,8 +152,8 @@ static long double pv__elapsed_transfer_time(const struct timespec *loop_start_t
 	memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
 
 	/*
-	 * Calculate the effective start time: the time we actually started,
-	 * plus the total time we spent stopped.
+	 * Calculate the effective start time: the time the loop started,
+	 * plus the total time spent stopped.
 	 */
 	pv_elapsedtime_add(&effective_start_time, loop_start_time, total_stoppage_time);
 
@@ -211,6 +212,7 @@ static void pv__monitor_exchange(pvstate_t state)
 
 		result = select(max_fd + 1, &readfds, &writefds, &exceptfds, &tv);
 
+		/* End the loop if the select() failed or there's no action to take. */
 		if (result <= 0)
 			break;
 
@@ -222,13 +224,16 @@ static void pv__monitor_exchange(pvstate_t state)
 			off_t otherside_transferred;
 			ssize_t nread;
 
+			/* Read the position of the other monitor. */
+
 			otherside_transferred = 0;
 
 			nread = read(state->control.othermonitor_read_fd, &otherside_transferred,	/* flawfinder: ignore */
 				     sizeof(otherside_transferred));
 			/*
 			 * flawfinder rationale: no buffer overflow possible
-			 * as we read a fixed size to a fixed point.
+			 * as the read() is of a fixed size, to a fixed
+			 * position.
 			 */
 
 			if (0 == nread) {
@@ -254,6 +259,8 @@ static void pv__monitor_exchange(pvstate_t state)
 #endif
 		    ) {
 			ssize_t nwritten;
+
+			/* Write the current position to the other monitor. */
 
 			nwritten =
 			    write(state->control.othermonitor_write_fd, &(state->transfer.transferred),
@@ -282,7 +289,7 @@ static void pv__monitor_exchange(pvstate_t state)
 
 
 /*
- * Pipe data from a list of files to standard output, giving information
+ * Transfer data from a list of files to standard output, giving information
  * about the transfer on standard error according to the given options.
  *
  * Returns nonzero on error.
@@ -301,6 +308,8 @@ int pv_main_loop(pvstate_t state)
 	bool output_is_pipe;
 
 	/*
+	 * Notes on line mode:
+	 *
 	 * "written" is ALWAYS bytes written by the last transfer.
 	 *
 	 * "lineswritten" is the lines written by the last transfer,
@@ -337,15 +346,21 @@ int pv_main_loop(pvstate_t state)
 	}
 
 	/*
-	 * Note that we could reduce the size of the output pipe buffer like
-	 * this, to avoid the case where we write a load of data and it just
-	 * goes into the buffer so we think we're done, but the consumer
-	 * takes ages to process it:
+	 * There can be a problem where data is written to the output and
+	 * from the writer's point of view, it's complete, but because the
+	 * consumer is processing it slowly, the data is really sitting in
+	 * the pipe buffer between the writer and the consumer.  This gives
+	 * a misleading impression of progress.
+	 *
+	 * It could be avoided by reducing the size of the pipe buffer:
 	 *
 	 *   fcntl(output_fd, F_SETPIPE_SZ, 4096);
 	 *
-	 * If we can peek at how much has been consumed by the other end, we
-	 * don't need to.
+	 * That isn't always available, and can have side effects such as
+	 * reducing efficiency.  Instead, if the FIONREAD ioctl is
+	 * available, the amount of data waiting in the pipe buffer is
+	 * checked ("written_but_not_consumed"), and used to adjust the
+	 * reported progress.
 	 */
 
 	pv_crs_init(&(state->cursor), &(state->control), &(state->flags));
@@ -394,7 +409,7 @@ int pv_main_loop(pvstate_t state)
 	}
 
 	/*
-	 * Exit early if there was no readable input file.
+	 * Return early if there was no readable input file.
 	 */
 	if (input_fd < 0) {
 		if (state->control.cursor)
@@ -402,7 +417,7 @@ int pv_main_loop(pvstate_t state)
 		return state->status.exit_status;
 	}
 #if HAVE_POSIX_FADVISE
-	/* Advise the OS that we will only be reading sequentially. */
+	/* Advise the OS that reads will all be sequential. */
 	(void) posix_fadvise(input_fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif
 
@@ -418,8 +433,8 @@ int pv_main_loop(pvstate_t state)
 
 #if HAVE_STRUCT_STAT_ST_BLKSIZE
 	/*
-	 * Set target buffer size if the initial file's block size can be
-	 * read and we weren't given a target buffer size.
+	 * Set the target buffer size if the initial file's block size can
+	 * be read and a target buffer size wasn't explicitly set already.
 	 */
 	if (0 == state->control.target_buffer_size) {
 		struct stat sb;
@@ -485,8 +500,8 @@ int pv_main_loop(pvstate_t state)
 		}
 
 		/*
-		 * If we have to stop at "size" bytes, make sure we don't
-		 * try to write more than we're allowed to.
+		 * If stopping at "size" bytes, restrict "cansend" to keep
+		 * within that limit, and flag EOF when it is reached.
 		 */
 		if ((0 < state->control.size) && (state->control.stop_at_size)) {
 			if ((state->control.size < (state->transfer.total_written + cansend))
@@ -559,9 +574,9 @@ int pv_main_loop(pvstate_t state)
 		if (output_is_pipe && !state->control.linemode) {
 			/*
 			 * Writing bytes to a pipe - the amount transferred
-			 * to the receiver is the total amount we've
-			 * written, minus what's sitting in the pipe buffer
-			 * waiting for the receiver to consume it.
+			 * to the receiver is the total amount written,
+			 * minus what's sitting in the pipe buffer waiting
+			 * for the receiver to consume it.
 			 */
 			state->transfer.transferred -= state->transfer.written_but_not_consumed;
 
@@ -569,12 +584,12 @@ int pv_main_loop(pvstate_t state)
 			   && NULL != state->transfer.line_positions) {
 			/*
 			 * Writing lines to a pipe - similar to above, but
-			 * we have to work out how many lines the
-			 * yet-to-be-consumed data in the buffer equates to.
+			 * with the added complication of having to
+			 * determine how many lines the yet-to-be-consumed
+			 * data in the buffer equates to.
 			 *
-			 * To do this, we walk backwards through our record
-			 * of the line positions in the output we've
-			 * written.
+			 * To do this, walk backwards through the record of
+			 * the line positions in the output.
 			 */
 			off_t last_consumed_position =
 			    state->transfer.last_output_position - state->transfer.written_but_not_consumed;
@@ -586,10 +601,10 @@ int pv_main_loop(pvstate_t state)
 			 * positions[head-2] = position of second last separator written
 			 * etc
 			 *
-			 * We start at [head-1] and go backwards, wrapping
+			 * Start at [head-1] and go backwards, wrapping
 			 * around as it's a circular buffer, stopping at the
-			 * length (number of positions stored), or when we
-			 * have gone before the last consumed position.
+			 * length (number of positions stored), or after
+			 * going before the last consumed position.
 			 */
 			for (line_from_end = 0; line_from_end < state->transfer.line_positions_length; line_from_end++) {
 				size_t array_index;
@@ -620,7 +635,7 @@ int pv_main_loop(pvstate_t state)
 				eof_in = false;
 				eof_out = false;
 #if HAVE_POSIX_FADVISE
-				/* Advise the OS that we will only be reading sequentially. */
+				/* Advise the OS that reads will all be sequential. */
 				(void) posix_fadvise(input_fd, 0, 0, POSIX_FADV_SEQUENTIAL);
 #endif
 			}
@@ -630,9 +645,9 @@ int pv_main_loop(pvstate_t state)
 		pv_elapsedtime_read(&cur_time);
 
 		/*
-		 * If we've read everything and written everything, and the
-		 * output pipe buffer is empty, then set the final update
-		 * flag, and force a display update.
+		 * If everything has been read and written, and the output
+		 * pipe buffer is empty, then set the final update flag, and
+		 * force a display update.
 		 */
 		if (eof_in && eof_out && 0 == state->transfer.written_but_not_consumed) {
 			final_update = true;
@@ -650,9 +665,9 @@ int pv_main_loop(pvstate_t state)
 		}
 
 		/*
-		 * If we've read everything and written everything, and the
-		 * output pipe buffer is NOT empty, then pause a short while
-		 * so we don't spin in a tight loop waiting for the output
+		 * If everything has been read and written, and the output
+		 * pipe buffer is NOT empty, then pause a short while to
+		 * avoid spinning in a tight loop waiting for the output
 		 * buffer to empty (#164).
 		 */
 		if (eof_in && eof_out && state->transfer.written_but_not_consumed > 0) {
@@ -661,10 +676,10 @@ int pv_main_loop(pvstate_t state)
 		}
 
 		/*
-		 * If -W was given, we don't output anything until we have
-		 * written a byte (or line, in line mode), at which point
-		 * we then count time as if we started when the first byte
-		 * was received.
+		 * If -W was given, produce no display until one byte (or
+		 * line, in line mode) has been written, at which point the
+		 * transfer time is counted as if it started when that first
+		 * byte was received.
 		 */
 		if (state->control.wait) {
 			/* Restart the loop if nothing written yet. */
@@ -680,13 +695,13 @@ int pv_main_loop(pvstate_t state)
 
 			/*
 			 * Reset the timer offset counter now that data
-			 * transfer has begun, otherwise if we had been
-			 * stopped and started (with ^Z / SIGTSTOP)
-			 * previously (while waiting for data), the timers
-			 * will be wrongly offset.
+			 * transfer has begun.  Otherwise, if there had
+			 * already been a stop and start (with ^Z /
+			 * SIGTSTOP) while waiting for data, the timers
+			 * would be wrongly offset.
 			 *
-			 * While we reset the offset counter we must disable
-			 * SIGTSTOP so things don't mess up.
+			 * While this reset is being done, SIGTSTOP must be
+			 * disabled so it doesn't update the offset again.
 			 */
 			pv_sig_nopause();
 			pv_elapsedtime_read(&start_time);
@@ -706,8 +721,8 @@ int pv_main_loop(pvstate_t state)
 		    pv__elapsed_transfer_time(&start_time, &cur_time, &(state->signal.total_stoppage_time));
 
 		/*
-		 * Just go round the loop again if there's no display and
-		 * we're not reporting statistics.
+		 * Restart the loop if there's no display and statistics are
+		 * not being reported.
 		 */
 		if (state->control.no_display && !state->control.show_stats) {
 			continue;
@@ -770,20 +785,20 @@ int pv_main_loop(pvstate_t state)
 static bool format_contains_name(const char *format_string)
 {
 	while ('\0' != format_string[0]) {
-		/* If we're not on a '%' character, move on. */
+		/* If not on a '%' character, move on. */
 		if ('%' != format_string[0]) {
 			format_string++;
 			continue;
 		}
 		/* Move past the '%'. */
 		format_string++;
-		/* Early return if we've run out of string. */
+		/* Early return if the string ran out. */
 		if ('\0' == format_string[0])
 			return false;
-		/* If we've found "%N", return true. */
+		/* True result if "%N" was found. */
 		if ('N' == format_string[0])
 			return true;
-		/* If we've found "%%", move on and go back round the loop. */
+		/* If "%%" was found, move past it and go back round the loop. */
 		if ('%' == format_string[0]) {
 			format_string++;
 			continue;
@@ -833,8 +848,8 @@ static void pv_watchfd_update_format_string(pvstate_t state)
 
 	/*
 	 * Make sure there's a format string, and then insert %N into it if
-	 * it's not present AND we're either watching more than one item, or
-	 * the item we're watching is a whole PID, not a single FD.
+	 * it's not present AND either more than one item is being watched,
+	 * or the item being watched is a whole PID, not a single FD.
 	 */
 	original_format_string = state->control.format_string;
 	if (NULL == original_format_string)
@@ -1053,11 +1068,11 @@ int pv_watchfd_loop(pvstate_t state)
 			pv_elapsedtime_copy(&next_update, &cur_time);
 
 		/*
-		 * Resize the display, if a resize signal was received.
+		 * If a resize signal was received, resize the display.
 		 *
-		 * We also set a local flag to tell the display loop below
-		 * to trigger a name reset and display reparse for every FD
-		 * output line, to inherit the size change.
+		 * This also sets a local flag to tell the display loop
+		 * below to trigger a name reset and display reparse for
+		 * every FD output line, to inherit the size change.
 		 */
 		terminal_resized = pv__resize_display_on_signal(state);
 
@@ -1115,7 +1130,7 @@ int pv_watchfd_loop(pvstate_t state)
 				if (info_item->unused)
 					continue;
 
-				/* No more lines if we've filled the display. */
+				/* No more lines if the display is full. */
 				if (displayed_lines >= (int) (state->control.height))
 					break;
 
@@ -1231,9 +1246,9 @@ int pv_watchfd_loop(pvstate_t state)
 				/*@-mustfreeonly@ */
 				state->control.name = NULL;
 				/*
-				 * splint warns of a memory leak, but we'd
-				 * set name to be an alias of display_name,
-				 * so nothing is lost here.
+				 * splint warns of a memory leak, but name
+				 * was an alias of display_name, so nothing
+				 * is lost here.
 				 */
 				/*@+mustfreeonly@ */
 
@@ -1243,8 +1258,8 @@ int pv_watchfd_loop(pvstate_t state)
 		}
 
 		/*
-		 * Write blank lines if we're writing fewer lines than last
-		 * time.
+		 * Write extra blank lines if fewer lines were written than
+		 * last time around the loop.
 		 */
 		blank_lines = prev_displayed_lines - displayed_lines;
 		prev_displayed_lines = displayed_lines;
@@ -1371,8 +1386,8 @@ int pv_query_loop(pvstate_t state, pid_t query)
 		pv_elapsedtime_read(&cur_time);
 
 		/*
-		 * Just go round the loop again if there's no display and
-		 * we're not reporting statistics.
+		 * If there's no display and statistics aren't being
+		 * reported, do nothing but go round the loop again.
 		 */
 		if (state->control.no_display && !state->control.show_stats) {
 			pv_nanosleep(50000000);
@@ -1380,8 +1395,8 @@ int pv_query_loop(pvstate_t state, pid_t query)
 		}
 
 		/*
-		 * If -W was given, we don't output anything until something
-		 * has been transferred.
+		 * If -W was given, produce no display until something has
+		 * been transferred.
 		 */
 		if (state->control.wait) {
 			/* Restart the loop if nothing written yet. */
