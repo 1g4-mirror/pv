@@ -174,8 +174,9 @@ int pv_remote_set(pvstate_t state, pid_t remote)
 	}
 
 	/*
-	 * Send a SIGUSR2 signal to the remote process, to tell it a message
-	 * is ready to read, after clearing our own "SIGUSR2 received" flag.
+	 * Clear this process's "SIGUSR2 received" flag, and then send a
+	 * SIGUSR2 signal to the remote process, to tell it a message is
+	 * ready to read.
 	 */
 	signal_sender = 0;
 	(void) pv_sigusr2_received(state, &signal_sender);
@@ -232,7 +233,7 @@ int pv_remote_set(pvstate_t state, pid_t remote)
 	/*
 	 * splint note: the gettext calls made by _() cause memory leak
 	 * warnings, but in this case it's unavoidable, and mitigated by the
-	 * fact we only translate each string once.
+	 * fact that each string is only translated once.
 	 */
 	pv_error("%u: %s", remote, _("message not received"));
 	return PV_ERROREXIT_REMOTE_OR_PID;
@@ -346,8 +347,8 @@ static bool pv__rxsignal_usr2(pvstate_t state)
 /*
  * Check for a --query message (SIGUSR1).
  *
- * If a type 0 message was received (query), then write a type 1 (response)
- * message to the control file and send a SIGUSR1 to the sending process.
+ * If a type 0 message was received (query), then write a type 1 message
+ * (response) to the control file and send a SIGUSR1 to the sending process.
  *
  * If a type 1 message was received (response), update the state from the
  * message in the control file.
@@ -389,9 +390,9 @@ static bool pv__rxsignal_usr1(pvstate_t state, pid_t match_sender)
 	}
 
 	/*
-	 * Note that we use debug() rather than pv_error() here so that the
-	 * display of a running pv doesn't get interrupted by, for example,
-	 * a querying pv being terminated.
+	 * Note that errors are only reported with debug() rather than
+	 * pv_error() here so that the display of a running pv doesn't get
+	 * interrupted by, for example, a querying pv being terminated.
 	 */
 
 	memset(control_filename, 0, sizeof(control_filename));
@@ -481,8 +482,8 @@ static bool pv__rxsignal_usr1(pvstate_t state, pid_t match_sender)
  * Check for remote control messages.  For a SIGUSR2 (--remote), replace the
  * current process's options with those being passed in.  For a SIGUSR1
  * (--query), either receive transfer state from the sending process, or
- * send our transfer state to the sending process, depending on the content
- * of the message.
+ * send the current transfer state to the sending process, depending on the
+ * content of the message.
  *
  * NB --remote relies on pv_state_set_format_options() causing the output
  * format to be reparsed.
@@ -519,8 +520,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 
 	/*
 	 * flawfinder rationale: buffer is large enough, explicitly zeroed,
-	 * and always bounded properly as we are only writing to it with
-	 * pv_snprintf().
+	 * and always bounded properly, as only pv_snprintf() writes to it.
 	 */
 
 	/*
@@ -566,9 +566,9 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 	}
 
 	/*
-	 * Send a SIGUSR1 signal to the remote process, to tell it a query
-	 * message is ready, after first clearing our own SIGUSR1 received
-	 * flag.
+	 * Clear this process's "SIGUSR1 received" flag and send a SIGUSR1
+	 * signal to the remote process, to tell it a query message is
+	 * ready.
 	 */
 	signal_sender = 0;
 	(void) pv_sigusr1_received(state, &signal_sender);
@@ -625,7 +625,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 	/*
 	 * splint note: the gettext calls made by _() cause memory leak
 	 * warnings, but in this case it's unavoidable, and mitigated by the
-	 * fact we only translate each string once.
+	 * fact that each string is only translated once.
 	 */
 	if (!silent)
 		pv_error("%u: %s", query, _("message not received"));
@@ -638,7 +638,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 #else				/* !PV_REMOTE_CONTROL */
 
 /*
- * Dummy stubs for remote control when we don't have PV_REMOTE_CONTROL.
+ * Dummy stubs for remote control when PV_REMOTE_CONTROL is not set.
  */
 
 bool pv_remote_check( /*@unused@ */  __attribute__((unused)) pvstate_t state)
