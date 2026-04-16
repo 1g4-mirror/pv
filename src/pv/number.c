@@ -59,9 +59,9 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	 * If the next character is a decimal mark, skip over it and parse
 	 * the following digits as the fractional part of the number.
 	 *
-	 * Note that we hard-code the decimal mark as '.' or ',' so this
-	 * will fail if there are any locales whose decimal mark is not one
-	 * of those two characters.
+	 * Note that the decimal mark is hard-coded as being either '.' or
+	 * ',' so this will fail if there are any locales whose decimal mark
+	 * is not one of those two characters.
 	 */
 	if (('.' == str[readpos]) || (',' == str[readpos])) {
 		readpos++;
@@ -110,8 +110,9 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	}
 
 	/*
-	 * If decimal_units is false, zero decimal_multiplier; if true, zero
-	 * binary_shift.  This is so we only do one or the other.
+	 * If decimal_units is true, set binary_shift to zero; if false, set
+	 * decimal_multiplier to zero.  This is so that only one of the two
+	 * multipliers can be active.
 	 */
 	if (decimal_units) {
 		binary_shift = 0;
@@ -133,9 +134,8 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 
 		/*@-shiftimplementation@ */
 		/*
-		 * splint note: ignore the fact that the types we are
-		 * shifting are signed, because we know they are definitely
-		 * not negative.
+		 * splint note: ignore the fact that the types being shifted
+		 * are signed, because they are definitely not negative.
 		 */
 		integral_part = (off_t) (integral_part << shiftby);
 		fractional_part = (off_t) (fractional_part << shiftby);
@@ -154,8 +154,7 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 
 	/*
 	 * Add the fractional part, divided by its divisor, to the integral
-	 * part, now that we've multiplied everything by the appropriate
-	 * units.
+	 * part, now that the multiplier for the units has been applied.
 	 */
 	fractional_part = fractional_part / fractional_divisor;
 	integral_part += fractional_part;
@@ -260,7 +259,7 @@ bool pv_getnum_check(const char *str, pv_numtype type)
 	while ((' ' == str[0]) || ('\t' == str[0]))
 		str++;
 
-	/* Check the units suffix is one we know about. */
+	/* Check the units suffix is known. */
 	switch (str[0]) {
 	case 'k':
 	case 'K':
