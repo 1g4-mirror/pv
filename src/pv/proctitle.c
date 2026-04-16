@@ -21,9 +21,9 @@ static size_t space_available = 0;
 
 
 /*
- * Assuming the environment comes after the command line arguments, we make
- * a duplicate of the environment array and all its values, so we can use
- * the space the environment used to occupy for the process title.
+ * Assuming the environment comes after the command line arguments, make a
+ * duplicate of the environment array and all its values, to allow the
+ * process title to use the space the environment used to occupy.
  *
  * The logic for this was derived from util-linux-ng.
  */
@@ -54,7 +54,7 @@ void initproctitle(int argc, char **argv)
 
 	base_argv = argv;
 
-	/* Work out how much room we have. */
+	/* Work out how much room is available. */
 	if (env_index > 0) {
 		/* From argv[0] to the end of the last environment value. */
 		space_available = (size_t)
@@ -65,9 +65,8 @@ void initproctitle(int argc, char **argv)
 	}
 
 	/*
-	 * flawfinder - we have to trust that the environment and argument
-	 * strings are null-terminated, since that's what the OS is supposed
-	 * to guarantee.
+	 * flawfinder - the OS is supposed to guarantee that the environment
+	 * and argument strings are null-terminated.
 	 */
 
 	environ = new_environment;
@@ -87,7 +86,7 @@ void setproctitle(const char *format, ...)
 	size_t length;
 	va_list ap;
 
-	/* flawfinder - buffer is zeroed and users of it are bounded. */
+	/* flawfinder - buffer is zeroed and calls using it are bounded. */
 
 	if (NULL == base_argv)
 		return;
@@ -105,7 +104,7 @@ void setproctitle(const char *format, ...)
 	 */
 
 	length = strlen(title);		    /* flawfinder: ignore */
-	/* flawfinder - we left a byte at the end to force null-termination. */
+	/* flawfinder - a byte was left at the end to force null-termination. */
 
 	if (length > space_available - 2)
 		length = space_available - 2;
