@@ -26,14 +26,14 @@ void pv_crs_needreinit(pvcursorstate_t);
 
 
 /*
- * Ensure that terminal attribute TOSTOP is set.  If we have to set it,
- * record that fact by setting "clear_tty_tostop_on_exit" to 1, so that in
- * pv_sig_fini() we can turn it back off again.
+ * Check whether the terminal attribute TOSTOP is set.  If it is not, set
+ * it, and record that fact by setting "clear_tty_tostop_on_exit" to true,
+ * so that pv_sig_fini() knows to clear it again.
  *
- * In "-c" mode with IPC, then if we have to set TOSTOP, we also tell the
- * other PV instances about it via the shared "tty_tostop_added" flag, so
- * those instances can set their own on-exit flag, meaning that if any of
- * the PV instances set it, the last one to exit will clear it.
+ * In "-c" mode with IPC, that flag is propagated to other PV instances via
+ * the shared "tty_tostop_added" flag, so those instances can set their own
+ * on-exit flag, meaning that if any of the PV instances set it, the last
+ * one to exit will clear it.
  */
 static void pv_sig_ensure_tty_tostop()
 {
@@ -79,15 +79,15 @@ static void pv_sig_ensure_tty_tostop()
 
 /*
  * Handle SIGTTOU (tty output for background process) by setting the flag to
- * suspend writes to stderr, so that we can be stopped and backgrounded
- * without messing up the terminal.  On a subsequent SIGCONT we will try
- * writing to the terminal again, in case we get backgrounded and later get
- * foregrounded again.
+ * suspend writes to stderr, to stop the terminal being interfered with when
+ * pv is stopped and put into the background.  On a subsequent SIGCONT, pv
+ * will try writing to the terminal again, in case it was put into the
+ * background and later put into the foreground again.
  *
- * When we get backgrounded and cause a SIGTTOU, the rest of the pipeline
- * gets stopped too, so transfers involving pipelines need us to send a
- * SIGCONT to the rest of the process group here, otherwise backgrounding
- * stops transfers involving pipes.
+ * When a SIGTTOU is raised, the rest of the pipeline gets stopped too, so
+ * transfers involving pipelines need pv to send a SIGCONT to the rest of
+ * the process group here, otherwise backgrounding stops transfers involving
+ * pipes.
  */
 static void pv_sig_ttou( /*@unused@ */  __attribute__((unused))
 			int s)
@@ -157,8 +157,8 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 	pv_sig_state->flags.terminal_resized = 1;
 
 	/*
-	 * We can only make the time adjustments if this SIGCONT followed a
-	 * SIGTSTP such that we have a stop time.
+	 * Time adjustments can only be made if this SIGCONT followed a
+	 * SIGTSTP, such that there is a stop-time to measure from.
 	 */
 	if (0 != pv_sig_state->signal.when_tstp_arrived.tv_sec) {
 
@@ -167,10 +167,10 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 
 		pv_elapsedtime_read(&current_time);
 
-		/* time spent stopped = current time - time SIGTSTP received */
+		/* time spent stopped = current time - time SIGTSTP received. */
 		pv_elapsedtime_subtract(&time_spent_stopped, &current_time, &(pv_sig_state->signal.when_tstp_arrived));
 
-		/* add time spent stopped the total stopped-time count */
+		/* add time spent stopped to the total stopped-time count. */
 		pv_elapsedtime_add(&(pv_sig_state->signal.total_stoppage_time),
 				   &(pv_sig_state->signal.total_stoppage_time), &time_spent_stopped);
 
@@ -204,13 +204,13 @@ static void pv_sig_cont( /*@unused@ */  __attribute__((unused))
 			}
 		}
 
-		/* reset the SIGTSTP receipt time */
+		/* reset the SIGTSTP receipt time. */
 		pv_elapsedtime_zero(&(pv_sig_state->signal.when_tstp_arrived));
 	}
 
 	/*
-	 * Try resuming our use of stderr, if we had suspended it, but only
-	 * if we're now in the foreground.
+	 * Try resuming the use of stderr, if it had been suspended, but
+	 * only if pv is now in the foreground.
 	 */
 	if (1 == pv_sig_state->flags.suspend_stderr) {
 		if (pv_in_foreground()) {
@@ -258,8 +258,8 @@ static void pv_sig_term( /*@unused@ */  __attribute__((unused))
 
 #ifdef PV_REMOTE_CONTROL
 /*
- * Handle a SIGUSR2 by setting a flag to say we received it, after recording
- * the sending PID.
+ * Handle a SIGUSR2 by recording the PID that sent it, and setting a flag to
+ * say it was received.
  */
 static void pv_sig_usr2( /*@unused@ */  __attribute__((unused))
 			int sig, siginfo_t *info, /*@unused@ */  __attribute__((unused))
@@ -292,8 +292,8 @@ bool pv_sigusr2_received(pvstate_t state, pid_t *pid)
 
 
 /*
- * Handle a SIGUSR1 by setting a flag to say we received it, after recording
- * the sending PID.
+ * Handle a SIGUSR1 by recording the PID that sent it, and setting a flag to
+ * say it was received.
  */
 static void pv_sig_usr1( /*@unused@ */  __attribute__((unused))
 			int sig, siginfo_t *info, /*@unused@ */  __attribute__((unused))
@@ -330,10 +330,10 @@ bool pv_sigusr1_received(pvstate_t state, pid_t *pid)
 /*
  * Handle alarm signals by doing nothing.
  *
- * Note that we have to use a signal handler like this, instead of using
- * SIG_IGN, because if we ignore the signal entirely, it does nothing,
- * including not interrupting blocking write() calls - which is what we're
- * using alarm signals for in the first place.
+ * An empty signal handler is used, instead of SIG_IGN, because ignoring the
+ * signal with SIG_IGN prevents it from doing anything at all - meaning it
+ * would not interrupt blocking write() calls, which is what pv uses alarm
+ * signals for.
  */
 static void pv_sig_alrm( /*@unused@ */  __attribute__((unused))
 			int s)
@@ -353,10 +353,10 @@ void pv_sig_init(pvstate_t state)
 	memset(&sa, 0, sizeof(sa));
 
 	/*
-	 * Note that wherever we use a "struct sigaction", we declare it
-	 * static and explicitly zero it before use, because it may contain
-	 * deeper structures (e.g. "sigset_t") which trigger splint
-	 * warnings about potential memory leaks.
+	 * Wherever a "struct sigaction" is used, it is declared static and
+	 * explicitly zeroed before use, because it may contain deeper
+	 * structures (e.g. "sigset_t") which trigger splint warnings about
+	 * potential memory leaks.
 	 */
 
 	pv_sig_state = state;
@@ -366,14 +366,14 @@ void pv_sig_init(pvstate_t state)
 	pv_elapsedtime_zero(&(pv_sig_state->signal.total_stoppage_time));
 
 	/*
-	 * Note that we cast all sigemptyset() and sigaction() return values
-	 * to void, because there's nothing we can reasonably do about any
-	 * conceivable error they may return.
+	 * All sigemptyset() and sigaction() return values are ignored, as
+	 * there is no reasonable action to take about any error they
+	 * return.
 	 */
 
 	/*
-	 * Ignore SIGPIPE, so we don't die if the output is a pipe and the
-	 * other end closes unexpectedly.
+	 * Ignore SIGPIPE, in case the output is a pipe and the other end
+	 * closes unexpectedly.
 	 */
 	sa.sa_handler = SIG_IGN;
 	(void) sigemptyset(&(sa.sa_mask));
@@ -381,8 +381,9 @@ void pv_sig_init(pvstate_t state)
 	(void) sigaction(SIGPIPE, &sa, &(pv_sig_state->signal.old_sigpipe));
 
 	/*
-	 * Handle SIGTTOU by continuing with output switched off, so that we
-	 * can be stopped and backgrounded without messing up the terminal.
+	 * Handle SIGTTOU by continuing with the display switched off, to
+	 * allow pv to be stopped and backgrounded without messing up the
+	 * terminal.
 	 */
 	pv_sig_state->flags.skip_next_sigcont = 0;
 	sa.sa_handler = pv_sig_ttou;
@@ -469,13 +470,13 @@ void pv_sig_init(pvstate_t state)
 
 	/*
 	 * Ensure that the TOSTOP terminal attribute is set, so that a
-	 * SIGTTOU signal will be raised if we try to write to the terminal
-	 * while backgrounded (see the SIGTTOU handler above).
+	 * SIGTTOU signal will be raised if pv attempts to write to the
+	 * terminal while backgrounded (see the SIGTTOU handler above).
 	 */
 	pv_sig_ensure_tty_tostop();
 
 	/*
-	 * Handle SIGALRM by doing nothing, so we can use alarms or interval
+	 * Handle SIGALRM by doing nothing, allowing alarms or interval
 	 * timers to interrupt blocking writes (returning EINTR).
 	 */
 	sa.sa_handler = pv_sig_alrm;
@@ -486,10 +487,10 @@ void pv_sig_init(pvstate_t state)
 
 
 /*
- * Shut down signal handling.  If we had set the TOSTOP terminal attribute,
- * and we're in the foreground, also turn that off (though if we're in
- * cursor "-c" mode, only do that if we're the last PV instance, otherwise
- * leave the terminal alone).
+ * Shut down signal handling.  If this pv had set the TOSTOP terminal
+ * attribute, and is in the foreground, also turn that off (with the
+ * restriction that if in cursor "-c" mode, only do that if this is the last
+ * PV instance, otherwise leave the terminal alone).
  */
 void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 {
@@ -519,10 +520,10 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 	if (pv_sig_state->control.cursor) {
 #ifdef HAVE_IPC
 		/*
-		 * We won't clear TOSTOP if other "pv -c" instances
-		 * were still running when pv_crs_fini() ran.
+		 * Don't clear TOSTOP if other "pv -c" instances were still
+		 * running when pv_crs_fini() ran.
 		 *
-		 * TODO: we need a better way to determine if we're the last
+		 * TODO: find a better way to determine if this is the last
 		 * "pv" left.
 		 */
 		if (pv_sig_state->control.cursor && pv_sig_state->cursor.pvcount > 1) {
@@ -530,9 +531,9 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 		}
 #else				/* !HAVE_IPC */
 		/*
-		 * Without IPC we can't tell whether the other "pv -c"
-		 * instances in the pipeline have finished so we will just
-		 * have to clear TOSTOP anyway.
+		 * Without IPC there's no way to tell whether other "pv -c"
+		 * instances in the pipeline have finished, so clear TOSTOP
+		 * anyway.
 		 */
 #endif				/* !HAVE_IPC */
 	}
@@ -599,9 +600,10 @@ void pv_sig_allowpause(void)
 
 
 /*
- * If we have suspended stderr, check every second or so to see whether we
- * can write to the terminal again - this is so that if we get backgrounded,
- * then foregrounded again, we start writing to the terminal again.
+ * If output to stderr is suspended, check once a second whether it is safe
+ * to write to the terminal.  This is so that if pv is put into the
+ * background, and then brought into the foreground again, it can resume
+ * terminal output.
  */
 void pv_sig_checkbg(void)
 {
