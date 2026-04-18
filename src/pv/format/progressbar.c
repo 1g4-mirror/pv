@@ -24,8 +24,8 @@
   } \
 }
 /*
- * flawfinder - we are checking that there is room in the destination
- * buffer, given its size and our current offset.
+ * flawfinder - the byte count and offset are checked against the buffer
+ * size before memcpy() is called.
  */
 
 
@@ -87,15 +87,15 @@ static pvdisplay_bytecount_t pv_formatter_progress_knownsize(pvformatter_args_t 
 
 		/*@-mustfreefresh@ */
 		if (args->control->bits && !args->control->linemode) {
-			/* bits per second */
+			/* Bits per second. */
 			pv_describe_amount(after_bar, sizeof(after_bar), "/%s",
 					   8.0 * args->calc->rate_max, "", _("b/s"), args->display->count_type);
 		} else {
-			/* bytes or lines per second */
+			/* Bytes or lines per second. */
 			pv_describe_amount(after_bar, sizeof(after_bar),
 					   "/%s", args->calc->rate_max, _("/s"), _("B/s"), args->display->count_type);
 		}
-		/*@+mustfreefresh@ *//* splint: see above about gettext(). */
+		/*@+mustfreefresh@ *//* splint: false positives from gettext(). */
 	}
 
 	if (!include_amount)
@@ -113,7 +113,7 @@ static pvdisplay_bytecount_t pv_formatter_progress_knownsize(pvformatter_args_t 
 		if (buffer_size < after_bar_bytes)
 			return 0;
 		if (after_bar_bytes > 1) {
-			/* NB we skip the leading space. */
+			/* NB skip the leading space. */
 			memmove(buffer, after_bar + 1, after_bar_bytes - 1);
 			buffer[after_bar_bytes - 1] = '\0';
 			return after_bar_bytes - 1;
@@ -161,7 +161,7 @@ static pvdisplay_bytecount_t pv_formatter_progress_knownsize(pvformatter_args_t 
 		pad_count += style->tip.width;
 	}
 
-	/* A partial cell, if there are intermediates and we're not at 100%. */
+	/* A partial cell, if below 100% and there are intermediates. */
 	if (pad_count < bar_area_width && full_cell_index > 1 && !has_tip) {
 		double exact_width = (((double) bar_area_width) * bar_percentage) / 100.0;
 		double cell_portion = exact_width - (double) filled_bar_width;
@@ -242,8 +242,8 @@ static pvdisplay_bytecount_t pv_formatter_progress_unknownsize(pvformatter_args_
 	/*
 	 * Note that pv_calculate_transfer_rate() sets the percentage when
 	 * the size is unknown to a value that goes 0 - 200 and resets, so
-	 * here we make values above 100 send the indicator back down again,
-	 * so it moves back and forth.
+	 * here this is used make values above 100 send the indicator back
+	 * down again, so it moves back and forth.
 	 */
 	indicator_position = args->calc->percentage;
 	if (indicator_position > 200.0)
@@ -319,7 +319,7 @@ pvdisplay_bytecount_t pv_formatter_progress(pvformatter_args_t args)
 		if (NULL == default_name)
 			default_name = "plain";
 		/*@+branchstate@ */
-		/* splint - it doesn't matter that default_name may be static */
+		/* splint - it doesn't matter that default_name may be static. */
 		args->segment->parameter = 1 + pv_display_barstyle_index(args, default_name);
 	}
 
@@ -357,7 +357,7 @@ pvdisplay_bytecount_t pv_formatter_progress_bar_only(pvformatter_args_t args)
 		if (NULL == default_name)
 			default_name = "plain";
 		/*@+branchstate@ */
-		/* splint - it doesn't matter that default_name may be static */
+		/* splint - it doesn't matter that default_name may be static. */
 		args->segment->parameter = 1 + pv_display_barstyle_index(args, default_name);
 	}
 

@@ -78,7 +78,7 @@ pvdisplay_bytecount_t pv_formatter_fineta(pvformatter_args_t args)
 
 		/*@-mustfreefresh@ */
 		(void) pv_snprintf(content, sizeof(content), "%.16s ", _("FIN"));
-		/*@+mustfreefresh@ *//* splint: see above. */
+		/*@+mustfreefresh@ *//* splint: false positive from gettext(). */
 		content_bytes = strlen(content);	/* flawfinder: ignore */
 		/* flawfinder: always bounded with \0 by pv_snprintf(). */
 		(void) strftime(content + content_bytes, sizeof(content) - 1 - content_bytes, time_format, &time);

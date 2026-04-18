@@ -29,9 +29,9 @@ pvdisplay_bytecount_t pv_formatter_timer(pvformatter_args_t args)
 	elapsed_seconds = args->transfer->elapsed_seconds;
 
 	/*
-	 * Bounds check, so we don't overrun the prefix buffer.  This does
-	 * mean that the timer will stop at a 100,000 hours, but since
-	 * that's 11 years, it shouldn't be a problem.
+	 * Bounds check, to stay within the prefix buffer.  This does mean
+	 * that the timer will stop at a 100,000 hours, but since that's 11
+	 * years, it shouldn't be a problem.
 	 */
 	if (elapsed_seconds > (long double) 360000000.0L)
 		elapsed_seconds = (long double) 360000000.0L;

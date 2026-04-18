@@ -39,7 +39,7 @@ static bool pv_barstyle(pvformatter_args_t args, pvbarstyle_t style, const char 
 }
 	/*
 	 * flawfinder - strlen() on null-terminated static strings is OK,
-	 * and with the memcpy(), we check the buffer is big enough.
+	 * and with the memcpy(), the buffer size has been checked.
 	 */
 
 	memset(style, 0, sizeof(*style));
@@ -169,7 +169,7 @@ pvdisplay_bytecount_t pv_formatter_bar_default(pvformatter_args_t args)
 		if (NULL == default_name)
 			default_name = "plain";
 		/*@+branchstate@ */
-		/* splint - it doesn't matter that default_name may be static */
+		/* splint - it doesn't matter that default_name may be static. */
 		args->segment->parameter = 1 + pv_display_barstyle_index(args, default_name);
 	}
 	return pv_formatter_progress_bar_only(args);

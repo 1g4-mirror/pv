@@ -86,7 +86,7 @@ struct sgr_keyword_map_s {
 	return keywords;
 	/*@+compmempass@ */
 	/*
-	 * splint - found no other way to pass static back without a false
+	 * splint - no other way to pass static back without a false
 	 * positive warning about a memory leak.
 	 */
 }

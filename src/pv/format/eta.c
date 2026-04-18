@@ -35,8 +35,8 @@ pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t args)
 				 args->control->size - args->display->initial_offset, args->calc->current_avg_rate);
 
 	/*
-	 * Bounds check, so we don't overrun the suffix buffer.  This means
-	 * the ETA will always be less than 100,000 hours.
+	 * Bounds check, to keep within the suffix buffer.  This means the
+	 * ETA will always be less than 100,000 hours.
 	 */
 	eta = pv_bound_long(eta, 0, (long) 360000000L);
 
@@ -55,7 +55,7 @@ pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t args)
 				   sizeof(content),
 				   "%.16s %ld:%02ld:%02ld", _("ETA"), eta / 3600, (eta / 60) % 60, eta % 60);
 	}
-	/*@+mustfreefresh@ *//* splint: see above. */
+	/*@+mustfreefresh@ *//* splint: false positives from gettext(). */
 
 	/*
 	 * If this is the final update, show a blank space where the ETA
