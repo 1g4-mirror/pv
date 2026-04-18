@@ -668,9 +668,8 @@ int pv_remote_transferstate_fetch(	 /*@unused@ */
 					 __attribute__((unused))
 					 bool silent)
 {
-	/* TODO: use pv_error() rather than fprintf(). */
 	/*@-mustfreefresh@ *//* splint - see above */
-	fprintf(stderr, "%s\n", _("SA_SIGINFO not supported on this system"));
+	pv_error("%s", _("SA_SIGINFO not supported on this system"));
 	/*@+mustfreefresh@ */
 	return PV_ERROREXIT_REMOTE_OR_PID;
 }
