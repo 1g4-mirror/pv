@@ -50,40 +50,29 @@
 #endif
 
 /*
- * The error prefix for messages (the program name); whether it has been
- * set; and whether any output has been displayed yet, indicating whether
- * any errors must be preceded by a newline.
+ * The error prefix for messages (the program name); and whether any output
+ * has been displayed yet, indicating whether any errors must be preceded by
+ * a newline.
  */
-/* TODO: make pv__error_prefix a dynamic buffer. */
-static char pv__error_prefix[64];	 /* flawfinder: ignore */
-static bool pv__error_prefix_set = false;
+/*@only@ */ static /*@null@ */ char * pv__error_prefix = NULL;
 static bool pv__output_produced = false;
 
-/*
- * flawfinder rationale: zeroed before use, string copy is bounded to 1 less
- * than size so it always has \0 termination.  Not used unless initialised,
- * by checking pv__error_prefix_set.
- */
 
 /*
- * Set the error message prefix.
+ * Set the error message prefix.  If the new prefix is NULL, the current
+ * prefix is cleared.
  */
-void pv_set_error_prefix( /*@unique@ */ const char *prefix)
+void pv_set_error_prefix( /*@null@ */ const char *prefix)
 {
+	if (NULL != pv__error_prefix) {
+		free(pv__error_prefix);
+		pv__error_prefix = NULL;
+	}
 	if (NULL == prefix)
 		return;
-	memset(pv__error_prefix, 0, sizeof(pv__error_prefix));
-	strncpy(pv__error_prefix, prefix, sizeof(pv__error_prefix) - 1);	/* flawfinder: ignore */
-	pv__error_prefix_set = true;
-	/*
-	 * flawfinder rationale: strncpy's pointers are as valid as they can
-	 * be since the first is a static buffer and the second is
-	 * caller-supplied.  The caller must \0-terminate the string but in
-	 * any case it is bounded to 1 less than the size of the
-	 * destination.  The destination is zeroed before use so the result
-	 * is guaranteed to be \0-terminated.
-	 */
+	pv__error_prefix = pv_strdup(prefix);
 }
+
 
 /*
  * Output an error message.  If anything has been sent to the terminal
@@ -95,7 +84,7 @@ void pv_error(char *format, ...)
 	va_list ap;
 	if (pv__output_produced)
 		fprintf(stderr, "\n");
-	if (pv__error_prefix_set)
+	if (NULL != pv__error_prefix)
 		fprintf(stderr, "%s: ", pv__error_prefix);
 	va_start(ap, format);
 	(void) vfprintf(stderr, format, ap);	/* flawfinder: ignore */

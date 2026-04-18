@@ -707,6 +707,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "%s: %s: %s\n", opts->program_name, _("state allocation failed"), strerror(errno));
 		opts_free(opts);
 		debug("%s: %d", "exiting with status", PV_ERROREXIT_MEMORY);
+		pv_set_error_prefix(NULL);
 		return PV_ERROREXIT_MEMORY;
 		/*@+mustfreefresh@ */
 	}
@@ -720,6 +721,7 @@ int main(int argc, char **argv)
 		if (0 != pidfile_rc) {
 			pv_state_free(state);
 			opts_free(opts);
+			pv_set_error_prefix(NULL);
 			return pidfile_rc;
 		}
 	}
@@ -732,6 +734,7 @@ int main(int argc, char **argv)
 		if (!opts_add_file(opts, "-")) {
 			pv_state_free(state);
 			opts_free(opts);
+			pv_set_error_prefix(NULL);
 			return PV_ERROREXIT_MEMORY;
 		}
 	}
@@ -817,6 +820,7 @@ int main(int argc, char **argv)
 	if (0 != retcode) {
 		pv_state_free(state);
 		opts_free(opts);
+		pv_set_error_prefix(NULL);
 		return retcode;
 	}
 
@@ -867,6 +871,7 @@ int main(int argc, char **argv)
 			pv_sig_fini(state);
 			pv_state_free(state);
 			opts_free(opts);
+			pv_set_error_prefix(NULL);
 			return retcode;
 		}
 		/* As above - no ETA if the size is unknown. */
@@ -973,6 +978,9 @@ int main(int argc, char **argv)
 
 	/* Free the data from parsing the command-line arguments. */
 	opts_free(opts);
+
+	/* Clear the error message prefix. */
+	pv_set_error_prefix(NULL);
 
 	debug("%s: %d", "exiting with status", retcode);
 
