@@ -279,7 +279,7 @@ size_t pv_strwidth(const char *string, size_t bytes)
 	} else {
 		allocated_wide = malloc(wide_string_buffer_size);
 		if (NULL == allocated_wide) {
-			perror("malloc");
+			pv_perror("%s", "malloc");
 			if (NULL != allocated_raw)
 				free(allocated_raw);
 			return raw_bytes;
