@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-11 15:52+0100\n"
+"POT-Creation-Date: 2026-04-18 22:23+0100\n"
 "PO-Revision-Date: 2026-03-24 23:25+0000\n"
 "Last-Translator: Ricky-Tigg <ricky-tigg@noreply.codeberg.org>\n"
 "Language-Team: Finnish <https://translate.codeberg.org/projects/pv/pv/fi/>\n"
@@ -13,270 +13,270 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.16.2\n"
 
-#: src/main/help.c:301
+#: src/main/help.c:300
 msgid "show progress bar"
 msgstr "näytä edistymispalkki"
 
-#: src/main/help.c:304
+#: src/main/help.c:303
 msgid "show elapsed time"
 msgstr "näytä kulunut aika"
 
-#: src/main/help.c:307
+#: src/main/help.c:306
 msgid "show estimated time of arrival (completion)"
 msgstr "näytä arvioitu valmistumisaika"
 
-#: src/main/help.c:310
+#: src/main/help.c:309
 msgid "show absolute estimated time of arrival (completion)"
 msgstr "näytä absoluuttinen arvioitu valmistumisaika"
 
-#: src/main/help.c:313
+#: src/main/help.c:312
 msgid "show data transfer rate counter"
 msgstr "näytä datan siirtonopeuden laskuri"
 
-#: src/main/help.c:316
+#: src/main/help.c:315
 msgid "show data transfer average rate counter"
 msgstr "näytä datan keskimääräisen siirtonopeuden laskuri"
 
-#: src/main/help.c:319
+#: src/main/help.c:318
 msgid "show number of bytes transferred"
 msgstr "näytä siirrettyjen tavujen määrä"
 
-#: src/main/help.c:322
+#: src/main/help.c:321
 msgid "show percentage of transfer buffer in use"
 msgstr "näytä käytössä olevan siirtopuskurin prosenttiosuus"
 
-#: src/main/help.c:324
+#: src/main/help.c:323
 msgid "NUM"
 msgstr "NUM"
 
-#: src/main/help.c:325
+#: src/main/help.c:324
 msgid "show NUM bytes last written"
 msgstr "näytä NUM viimeksi kirjoitettua tavua"
 
-#: src/main/help.c:327
+#: src/main/help.c:326
 msgid "FORMAT"
 msgstr "MUOTO"
 
-#: src/main/help.c:328
+#: src/main/help.c:327
 msgid "set output format to FORMAT"
 msgstr "aseta tulostemuodoksi MUOTO"
 
-#: src/main/help.c:331
+#: src/main/help.c:330
 msgid "output percentages, not visual information"
 msgstr "tulosta prosentit, ei visuaalista tietoa"
 
-#: src/main/help.c:334
+#: src/main/help.c:333
 msgid "do not output any transfer information at all"
 msgstr "älä tulosta minkäänlaista siirtotietoa"
 
-#: src/main/help.c:338
+#: src/main/help.c:337
 msgid "show number of bits transferred"
 msgstr "näytä siirrettyjen bittien määrä"
 
-#: src/main/help.c:341
+#: src/main/help.c:340
 msgid "treat suffixes as multiples of 1000 rather than 1024"
 msgstr "käsittele päätteitä 1000:n kertoimina 1024:n sijaan"
 
-#: src/main/help.c:344
+#: src/main/help.c:343
 msgid "display nothing until first byte transferred"
 msgstr "älä näytä mitään, ennen kuin ensimmäinen tavu on siirretty"
 
-#: src/main/help.c:346 src/main/help.c:361 src/main/help.c:364
+#: src/main/help.c:345 src/main/help.c:360 src/main/help.c:363
 msgid "SEC"
 msgstr "SEK"
 
-#: src/main/help.c:347
+#: src/main/help.c:346
 msgid "display nothing until SEC seconds have passed"
 msgstr "älä näytä mitään, ennen kuin SEC sekuntia on kulunut"
 
-#: src/main/help.c:349
+#: src/main/help.c:348
 msgid "SIZE"
 msgstr "KOKO"
 
-#: src/main/help.c:350
+#: src/main/help.c:349
 msgid "set estimated data size to SIZE bytes"
 msgstr "aseta arvioiduksi datan kooksi KOKO tavua"
 
-#: src/main/help.c:353
+#: src/main/help.c:352
 msgid "if size unknown, show rate vs max rate"
 msgstr "Jos kokoa ei tiedetä, näytä nopeus vs. maksiminopeus"
 
-#: src/main/help.c:356
+#: src/main/help.c:355
 msgid "count lines instead of bytes"
 msgstr "laske rivit tavujen sijaan"
 
-#: src/main/help.c:359
+#: src/main/help.c:358
 msgid "lines are null-terminated"
 msgstr "rivit päättyvät nullilla"
 
-#: src/main/help.c:362
+#: src/main/help.c:361
 msgid "update every SEC seconds"
 msgstr "päivitä SEC sekunnin välein"
 
-#: src/main/help.c:365
+#: src/main/help.c:364
 msgid "compute average rate over past SEC seconds (default 30s)"
 msgstr "laske keskimääräinen siirtonopeus SEC sekunnin ajalta (oletus 30 s)"
 
-#: src/main/help.c:367
+#: src/main/help.c:366
 msgid "WIDTH"
 msgstr "LEVEYS"
 
-#: src/main/help.c:368
+#: src/main/help.c:367
 msgid "assume terminal is WIDTH characters wide"
 msgstr "oleta, että päätteen LEVEYS on merkkiä leveä"
 
-#: src/main/help.c:370
+#: src/main/help.c:369
 msgid "HEIGHT"
 msgstr "KORKEUS"
 
-#: src/main/help.c:371
+#: src/main/help.c:370
 msgid "assume terminal is HEIGHT rows high"
 msgstr "oleta, että päätteen KORKEUS on merkkiä korkea"
 
-#: src/main/help.c:373
+#: src/main/help.c:372
 msgid "NAME"
 msgstr "NIMI"
 
-#: src/main/help.c:374
+#: src/main/help.c:373
 msgid "prefix visual information with NAME"
 msgstr "lisää visuaalisiin tietoihin NIMI-etuliite"
 
-#: src/main/help.c:376
+#: src/main/help.c:375
 msgid "STYLE"
 msgstr "TYYLI"
 
-#: src/main/help.c:377
+#: src/main/help.c:376
 msgid "set default bar style to NAME"
 msgstr "aseta oletuspalkkityyli NIMI:lle"
 
-#: src/main/help.c:379
+#: src/main/help.c:378
 msgid "SPEC"
 msgstr ""
 
-#: src/main/help.c:380
+#: src/main/help.c:379
 msgid "also send progress to SPEC"
 msgstr "lähetä edistyminen myös SPECille"
 
-#: src/main/help.c:383
+#: src/main/help.c:382
 msgid "output transfer statistics at the end"
 msgstr "tulosta siirtotilastot lopussa"
 
-#: src/main/help.c:386
+#: src/main/help.c:385
 msgid "output even if standard error is not a terminal"
 msgstr "tuloste, vaikka vakiovirhe ei olisikaan päätelaite"
 
-#: src/main/help.c:389
+#: src/main/help.c:388
 msgid "use cursor positioning escape sequences"
 msgstr "käytä kohdistimen sijoittelun esc-sekvenssiä"
 
-#: src/main/help.c:392 src/main/help.c:425 src/main/help.c:444
-#: src/main/help.c:454
+#: src/main/help.c:391 src/main/help.c:424 src/main/help.c:443
+#: src/main/help.c:453
 msgid "FILE"
 msgstr "TIEDOSTO"
 
-#: src/main/help.c:393
+#: src/main/help.c:392
 msgid "write output to FILE instead of stdout"
 msgstr "kirjoita tuloste tiedostoon TIEDOSTO oletustulosteen (stdout) sijaan"
 
-#: src/main/help.c:395
+#: src/main/help.c:394
 msgid "RATE"
 msgstr "NOPEUS"
 
-#: src/main/help.c:396
+#: src/main/help.c:395
 msgid "limit transfer to RATE bytes per second"
 msgstr "rajoita siirron nopeudeksi NOPEUS tavua per sekunti"
 
-#: src/main/help.c:398 src/main/help.c:407
+#: src/main/help.c:397 src/main/help.c:406
 msgid "BYTES"
 msgstr "TAVUT"
 
-#: src/main/help.c:399
+#: src/main/help.c:398
 msgid "use a buffer size of BYTES"
 msgstr "käytä puskuria, jonka koko on TAVUT"
 
-#: src/main/help.c:402
+#: src/main/help.c:401
 msgid "never use splice(), always use read/write"
 msgstr "Älä koskaan käytä splice():tta, käytä aina luku-/kirjoitustoimintoa"
 
-#: src/main/help.c:405
+#: src/main/help.c:404
 msgid "skip read errors in input"
 msgstr "ohita lukuvirheet syötteessä"
 
-#: src/main/help.c:408
+#: src/main/help.c:407
 msgid "skip errors in BYTES blocks at a time"
 msgstr "ohita virheet TAVUT:ssa lohkoissa kerrallaan"
 
-#: src/main/help.c:411
+#: src/main/help.c:410
 msgid "stop after --size bytes have been transferred"
 msgstr "lopeta kun --size tavua on siirretty"
 
-#: src/main/help.c:414
+#: src/main/help.c:413
 msgid "flush cache to disk after every write"
 msgstr "tyhjennä välimuisti levylle jokaisen kirjoituksen jälkeen"
 
-#: src/main/help.c:417
+#: src/main/help.c:416
 msgid "use direct I/O to bypass cache"
 msgstr "käytä suoraa syötettä/lähtöä välimuistin ohittamiseen"
 
-#: src/main/help.c:420
+#: src/main/help.c:419
 msgid "try to seek instead of writing null bytes"
 msgstr "yritä etsiä tyhjätavujen kirjoittamisen sijaan"
 
-#: src/main/help.c:423
+#: src/main/help.c:422
 msgid "discard input instead of writing to output"
 msgstr "hylkää syöte tulosteeseen kirjoittamisen sijaan"
 
-#: src/main/help.c:426
+#: src/main/help.c:425
 msgid "write all input to FILE before writing to output"
 msgstr ""
 "kirjoita kaikki syöte tiedostoon TIEDOSTO ennen tulosteeseen kirjoittamista"
 
-#: src/main/help.c:429
+#: src/main/help.c:428
 msgid "PID[:FD]|=NAME|@LISTFILE"
 msgstr "PID[:FD]|=NIMI|@LISTATIEDOSTO"
 
-#: src/main/help.c:430
+#: src/main/help.c:429
 msgid "watch file FD opened by process PID"
 msgstr "tarkkaile tiedostoa FD, jonka prosessi PID avasi"
 
-#: src/main/help.c:433 src/main/help.c:436
+#: src/main/help.c:432 src/main/help.c:435
 msgid "PID"
 msgstr ""
 
-#: src/main/help.c:434
+#: src/main/help.c:433
 msgid "update settings of process PID"
 msgstr "päivitä prosessin PID-asetukset"
 
-#: src/main/help.c:437
+#: src/main/help.c:436
 msgid "show progress of process PID"
 msgstr "näytä prosessin PID:n edistyminen"
 
-#: src/main/help.c:441
+#: src/main/help.c:440
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
 
-#: src/main/help.c:445
+#: src/main/help.c:444
 msgid "save process ID in FILE"
 msgstr "tallenna prosessitunnus TIEDOSTO:on"
 
-#: src/main/help.c:448
+#: src/main/help.c:447
 msgid "show this help and exit"
 msgstr "näytä tämä ohje ja lopeta"
 
-#: src/main/help.c:451
+#: src/main/help.c:450
 msgid "show version information and exit"
 msgstr "näytä versiotiedot ja lopeta"
 
-#: src/main/help.c:455
+#: src/main/help.c:454
 msgid "write debug logs to FILE"
 msgstr "kirjoita vianjäljityslokit tiedostoon TIEDOSTO"
 
-#: src/main/help.c:481
+#: src/main/help.c:480
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Käyttö: %s [VALINTA] [TIEDOSTO]..."
 
-#: src/main/help.c:492
+#: src/main/help.c:491
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
@@ -291,97 +291,97 @@ msgstr "Tuetut muotosekvenssit:"
 msgid "Please report any bugs to: %s"
 msgstr "Ilmoita ongelmista: %s"
 
-#: src/main/main.c:231
+#: src/main/main.c:225
 msgid "(input)"
 msgstr "(syöte)"
 
-#: src/main/main.c:387 src/main/options.c:1372
+#: src/main/main.c:381 src/main/options.c:1341
 msgid "a command to run must be specified"
 msgstr ""
 
-#: src/main/main.c:713
+#: src/main/main.c:704
 msgid "state allocation failed"
 msgstr "tilan allokointi epäonnistui"
 
-#: src/main/options.c:425
+#: src/main/options.c:412
 msgid "list files may not contain @ lines"
 msgstr "Listatiedostot eivät saa sisältää @-rivejä"
 
-#: src/main/options.c:446 src/main/options.c:448 src/main/options.c:925
+#: src/main/options.c:432 src/main/options.c:434 src/main/options.c:902
 msgid "process ID or pid:fd pair expected"
 msgstr "prosessitunnusta tai pid:fd-paria odotetaan"
 
-#: src/main/options.c:458 src/main/options.c:460 src/main/options.c:932
+#: src/main/options.c:443 src/main/options.c:445 src/main/options.c:909
 msgid "invalid process ID"
 msgstr "virheellinen prosessin ID"
 
-#: src/main/options.c:548 src/pv/file.c:342
+#: src/main/options.c:532 src/pv/file.c:344
 msgid "failed to stat file"
 msgstr "tiedoston tilastointi epäonnistui"
 
-#: src/main/options.c:591
+#: src/main/options.c:575
 msgid "is a directory"
 msgstr "on hakemisto"
 
-#: src/main/options.c:621
+#: src/main/options.c:604
 msgid "failed to generate sysfs filename"
 msgstr "sysfs-tiedostonimen luominen epäonnistui"
 
-#: src/main/options.c:643
+#: src/main/options.c:625
 msgid "failed to read sysfs size file"
 msgstr "sysfs-kokotiedoston lukeminen epäonnistui"
 
-#: src/main/options.c:663
+#: src/main/options.c:644
 msgid "failed to open block device"
 msgstr "lohkolaitteen avaaminen epäonnistui"
 
-#: src/main/options.c:673
+#: src/main/options.c:653
 msgid "failed to determine size of block device"
 msgstr "lohkolaitteen koon päättely epäonnistui"
 
-#: src/main/options.c:778
+#: src/main/options.c:760
 msgid "option structure allocation failed"
 msgstr "vaihtoehtorakenteen allokointi epäonnistui"
 
-#: src/main/options.c:796
+#: src/main/options.c:780
 msgid "option structure argv allocation failed"
 msgstr "vaihtoehtorakenteen argv:n allokointi epäonnistui"
 
-#: src/main/options.c:847
+#: src/main/options.c:830
 msgid "numeric value not understood"
 msgstr "numeerista arvoa ei ymmärretty"
 
-#: src/main/options.c:862
+#: src/main/options.c:844
 msgid "integer argument expected"
 msgstr "kokonaislukuargumenttia odotetaan"
 
-#: src/main/options.c:873
+#: src/main/options.c:854
 msgid "numeric argument expected"
 msgstr "numeerista argumenttia odotetaan"
 
-#: src/main/options.c:885
+#: src/main/options.c:865
 msgid "missing filename"
 msgstr "puuttuva tiedostonimi"
 
-#: src/main/options.c:913
+#: src/main/options.c:891
 msgid "missing process name"
 msgstr "puuttuva prosessinimi"
 
-#: src/main/options.c:1188
+#: src/main/options.c:1164
 msgid "invalid side specification"
 msgstr ""
 
-#: src/main/options.c:1203
+#: src/main/options.c:1179
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Suorita `%s --help' saadaksesi lisätietoja."
 
-#: src/main/options.c:1205
+#: src/main/options.c:1181
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Suorita `%s -h' saadaksesi lisätietoja."
 
-#: src/main/options.c:1236
+#: src/main/options.c:1213
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -389,40 +389,40 @@ msgstr ""
 "rivitilaa tai siirtomuokkausvaihtoehtoja ei voi käyttää tiedostokuvauksia "
 "tarkasteltaessa"
 
-#: src/main/options.c:1245
+#: src/main/options.c:1221
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "kohdistimen sijoittelua ei voi käyttää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1254
+#: src/main/options.c:1229
 msgid "cannot use remote control when watching file descriptors"
 msgstr "etäohjausta ei voi käyttää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1263
+#: src/main/options.c:1237
 msgid "cannot use remote query when watching file descriptors"
 msgstr "etäkyselyä ei voi käyttää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1272
+#: src/main/options.c:1245
 msgid "cannot transfer files when watching file descriptors"
 msgstr "tiedostoja ei voi siirtää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1297
+#: src/main/options.c:1269
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "ei saatavilla järjestelmissä, joissa ei ole /proc/self/fdinfo"
 
-#: src/main/options.c:1309
+#: src/main/options.c:1280
 msgid "cannot use remote control and remote query together"
 msgstr "etäohjausta ja etäkyselyä ei voi käyttää yhdessä"
 
-#: src/main/options.c:1336
+#: src/main/options.c:1307
 msgid "monitor mode cannot be specified with this option"
 msgstr ""
 
-#: src/main/options.c:1349
+#: src/main/options.c:1319
 msgid "monitor mode cannot be used with store-and-forward"
 msgstr ""
 
-#: src/main/options.c:1361
+#: src/main/options.c:1330
 msgid "files cannot be specified with this option"
 msgstr "tiedostoja ei voi määrittää tämän vaihtoehdon kanssa"
 
@@ -444,47 +444,47 @@ msgstr "TAKUUTA EI OLE, lain sallimissa rajoissa."
 msgid "Project web site"
 msgstr "Projektin verkkosivu"
 
-#: src/pv/cursor.c:61
+#: src/pv/cursor.c:68
 msgid "failed to get terminal name"
 msgstr "päätelaitteen nimen hakeminen epäonnistui"
 
-#: src/pv/cursor.c:106
+#: src/pv/cursor.c:113
 msgid "failed to open lock file"
 msgstr "lukitustiedoston avaaminen epäonnistui"
 
-#: src/pv/cursor.c:139
+#: src/pv/cursor.c:146
 msgid "lock attempt failed"
 msgstr "lukitusyritys epäonnistui"
 
-#: src/pv/cursor.c:400
+#: src/pv/cursor.c:408
 msgid "failed to open terminal"
 msgstr "päätelaitteen avaaminen epäonnistui"
 
-#: src/pv/display.c:285
+#: src/pv/display.c:302
 msgid "yzafpnum kMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:303
+#: src/pv/display.c:320
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:1055 src/pv/state.c:868 src/pv/transfer.c:1135
+#: src/pv/display.c:1073 src/pv/state.c:879 src/pv/transfer.c:1148
 msgid "buffer allocation failed"
 msgstr "puskurin allokointi epäonnistui"
 
-#: src/pv/file.c:153
+#: src/pv/file.c:156
 msgid "failed to seek to start of output"
 msgstr "tulosteen käynnistyksen hakeminen epäonnistui"
 
-#: src/pv/file.c:303
+#: src/pv/file.c:305
 msgid "failed to close file"
 msgstr "tiedoston sulkeminen epäonnistui"
 
-#: src/pv/file.c:335
+#: src/pv/file.c:337
 msgid "failed to read file"
 msgstr "tiedoston lukeminen epäonnistui"
 
-#: src/pv/file.c:350
+#: src/pv/file.c:351
 msgid "failed to stat output file"
 msgstr "tulostiedoston tilastointi epäonnistui"
 
@@ -492,16 +492,16 @@ msgstr "tulostiedoston tilastointi epäonnistui"
 msgid "input file is output file"
 msgstr "syötetiedosto on tulostetiedosto"
 
-#: src/pv/file.c:429
+#: src/pv/file.c:427
 msgid "(none)"
 msgstr "(ei mitään)"
 
-#: src/pv/file.c:431
+#: src/pv/file.c:429
 msgid "(stdin)"
 msgstr ""
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
-#: src/pv/format/rate.c:36 src/pv/loop.c:121
+#: src/pv/format/rate.c:36 src/pv/loop.c:122
 msgid "b/s"
 msgstr ""
 
@@ -511,7 +511,7 @@ msgid "/s"
 msgstr ""
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
-#: src/pv/format/rate.c:40 src/pv/loop.c:121
+#: src/pv/format/rate.c:40 src/pv/loop.c:122
 msgid "B/s"
 msgstr "T/s"
 
@@ -519,7 +519,7 @@ msgstr "T/s"
 msgid "b"
 msgstr ""
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:620
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:618
 msgid "B"
 msgstr "T"
 
@@ -531,29 +531,30 @@ msgstr ""
 msgid "FIN"
 msgstr ""
 
-#: src/pv/loop.c:120
+#: src/pv/loop.c:121
 msgid "rate min/avg/max/mdev"
 msgstr ""
 
-#: src/pv/loop.c:132
+#: src/pv/loop.c:133
 msgid "rate not measured"
 msgstr "nopeutta ei mitattu"
 
-#: src/pv/loop.c:936 src/pv/loop.c:952 src/pv/loop.c:970 src/pv/watchpid.c:101
-#: src/pv/watchpid.c:110 src/pv/watchpid.c:121 src/pv/watchpid.c:129
-#: src/pv/watchpid.c:166 src/pv/watchpid.c:185 src/pv/watchpid.c:193
-#: src/pv/watchpid.c:203 src/pv/watchpid.c:307 src/pv/watchpid.c:315
-#: src/pv/watchpid.c:447 src/pv/watchpid.c:470
+#: src/pv/loop.c:951 src/pv/loop.c:967 src/pv/loop.c:985 src/pv/remote.c:91
+#: src/pv/remote.c:184 src/pv/remote.c:531 src/pv/remote.c:577
+#: src/pv/watchpid.c:121 src/pv/watchpid.c:130 src/pv/watchpid.c:141
+#: src/pv/watchpid.c:148 src/pv/watchpid.c:184 src/pv/watchpid.c:201
+#: src/pv/watchpid.c:209 src/pv/watchpid.c:218 src/pv/watchpid.c:329
+#: src/pv/watchpid.c:337 src/pv/watchpid.c:469 src/pv/watchpid.c:492
 msgid "pid"
 msgstr ""
 
-#: src/pv/loop.c:970 src/pv/watchpid.c:110 src/pv/watchpid.c:122
-#: src/pv/watchpid.c:131 src/pv/watchpid.c:185 src/pv/watchpid.c:194
-#: src/pv/watchpid.c:205
+#: src/pv/loop.c:985 src/pv/watchpid.c:130 src/pv/watchpid.c:141
+#: src/pv/watchpid.c:150 src/pv/watchpid.c:201 src/pv/watchpid.c:209
+#: src/pv/watchpid.c:220
 msgid "fd"
 msgstr ""
 
-#: src/pv/remote.c:237 src/pv/remote.c:631
+#: src/pv/remote.c:238 src/pv/remote.c:631
 msgid "message not received"
 msgstr "viestiä ei vastaanotettu"
 
@@ -561,58 +562,58 @@ msgstr "viestiä ei vastaanotettu"
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO ei ole tuettu tässä järjestelmässä"
 
-#: src/pv/state.c:42
+#: src/pv/state.c:45
 msgid "history structure allocation failed"
 msgstr "historiarakenteen allokointi epäonnistui"
 
-#: src/pv/state.c:820 src/pv/state.c:832
+#: src/pv/state.c:831 src/pv/state.c:843
 msgid "file list allocation failed"
 msgstr "tiedostolistan allokointi epäonnistui"
 
-#: src/pv/transfer.c:490
+#: src/pv/transfer.c:497
 msgid "read failed"
 msgstr "luku epäonnistui"
 
-#: src/pv/transfer.c:506
+#: src/pv/transfer.c:512
 msgid "warning: read errors detected"
 msgstr "varoitus: lukuvirheitä havaittu"
 
-#: src/pv/transfer.c:522
+#: src/pv/transfer.c:524
 msgid "file is not seekable"
 msgstr "tiedosto ei ole haettavissa"
 
-#: src/pv/transfer.c:599
+#: src/pv/transfer.c:601
 msgid "failed to seek past error"
 msgstr "menneen virheen hakeminen epäonnistui"
 
-#: src/pv/transfer.c:619
+#: src/pv/transfer.c:617
 msgid "skipped past read error"
 msgstr "aiempi lukuvirhe ohitettu"
 
-#: src/pv/transfer.c:663
+#: src/pv/transfer.c:662
 msgid "no transfer buffer allocated"
 msgstr "siirtopuskuria ei ole allokoitu"
 
-#: src/pv/transfer.c:751
+#: src/pv/transfer.c:750
 msgid "failed to set interval timer"
 msgstr "aikaväliajastimen asettaminen epäonnistui"
 
-#: src/pv/transfer.c:777
+#: src/pv/transfer.c:776
 msgid "failed to clear interval timer"
 msgstr "aikaväliajastimen tyhjennys epäonnistui"
 
-#: src/pv/transfer.c:822
+#: src/pv/transfer.c:823
 msgid "line position buffer allocation failed"
 msgstr "rivin sijaintipuskurin allokointi epäonnistui"
 
-#: src/pv/transfer.c:996
+#: src/pv/transfer.c:1012
 msgid "write failed"
 msgstr "kirjoittaminen epäonnistui"
 
-#: src/pv/transfer.c:1237
+#: src/pv/transfer.c:1248
 msgid "select call failed"
 msgstr "valintakutsu epäonnistui"
 
-#: src/pv/watchpid.c:131 src/pv/watchpid.c:205
+#: src/pv/watchpid.c:150 src/pv/watchpid.c:220
 msgid "not a regular file or block device"
 msgstr "ei tavallinen tiedosto tai lohkolaite"
