@@ -294,6 +294,7 @@ static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool
 	return total_written;
 }
 
+/* TODO: make pv__transfer_read() return a boolean, for easier understanding. */
 
 /*
  * Read some data from the given file descriptor, updating the state.
@@ -630,6 +631,9 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 	return 1;
 }
+
+
+/* TODO: make pv__transfer_write() return a boolean, for easier understanding. */
 
 
 /*
