@@ -3,14 +3,19 @@
 **pv** ("Pipe Viewer") is a terminal-based tool for monitoring the progress
 of data through a pipeline and modifying its flow.
 
-It can be inserted into any normal pipeline between two processes to give a
-visual indication of how quickly data is passing through, how long it has
-taken, how near to completion it is, and an estimate of how long it will be
-until completion.  Data flow rate, error handling strategy, buffer size, and
-cache interaction can all be adjusted.
+When used just like "**cat**", **pv** displays how quickly data is being
+transferred, how long it has taken, how near to completion it is, and an
+estimate of how long it will be until completion.  Data flow rate, error
+handling strategy, buffer size, and cache interaction can all be adjusted.
+
+With the "**\--cursor**" option, several **pv** instances can work together,
+showing transfer progress at different points in the same pipeline.
 
 In "**\--watchfd**" mode, **pv** will inspect another process and show its
 progress through the files it has open.
+
+In "**\--monitor**" mode, **pv** will run a command and display the progress
+of data through both its standard input and its standard output.
 
 
 # Documentation
