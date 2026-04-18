@@ -5,6 +5,7 @@
  * *fix:* correct the **--help** word wrapping on very small terminals
  * *i18n:* Polish translations updated
  * *i18n:* Finnish translations updated
+ * *i18n:* removed empty unmaintained translation catalogues for Spanish and Georgian
  * *cleanup:* fix GCC warning when using glibc 2.43 ([#180](https://codeberg.org/ivarch/pv/pulls/180))
  * *cleanup:* fix warning in pv_remote_check() stub on OpenBSD
  * *cleanup:* use dynamic line buffers for **--watchfd** process lookups
