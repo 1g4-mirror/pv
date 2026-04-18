@@ -36,9 +36,9 @@
 
 /*
  * Set info->size to the size of the file info->file_fdpath points to,
- * assuming that info->sb_fd has been populated by stat(), or to 0 if the
- * file size could not be determined or the file was opened in write mode;
- * returns false if the file was not a block device or regular file.
+ * assuming that info->sb_fd has already been populated by stat(), or to 0
+ * if the file size could not be determined or the file was opened in write
+ * mode; returns false if the file was not a block device or regular file.
  */
 static bool filesize(pvwatchfd_t info)
 {
@@ -48,13 +48,13 @@ static bool filesize(pvwatchfd_t info)
 		int fd;
 
 		/*
-		 * Get the size of block devices by opening
-		 * them and seeking to the end.
+		 * Get the size of block devices by opening them and seeking
+		 * to the end.
 		 */
 		fd = open(info->file_fdpath, O_RDONLY);	/* flawfinder: ignore */
 		/*
 		 * flawfinder: redirection check below; risk is minimal as
-		 * we are not actually reading any data here.
+		 * no reads are performed.
 		 */
 		if (fd >= 0) {
 			/*
@@ -74,10 +74,14 @@ static bool filesize(pvwatchfd_t info)
 			info->size = 0;
 		}
 	} else if (S_ISREG(info->sb_fd.st_mode)) {
+
+		/* Regular file - use its st_size. */
 		if ((info->sb_fd_link.st_mode & S_IWUSR) == 0) {
 			info->size = info->sb_fd.st_size;
 		}
 	} else {
+
+		/* Not a block device or a file, so the size is unknown. */
 		return false;
 	}
 
@@ -87,6 +91,22 @@ static bool filesize(pvwatchfd_t info)
 /*@+type@*/
 
 #ifdef __APPLE__
+/*
+ * Populate the "info" structure with the file paths and stat details of the
+ * process and file descriptor pair given within that structure.
+ *
+ * Returns nonzero on error - error codes are:
+ *
+ *  -1 - info or state were NULL
+ *   1 - process does not exist
+ *   2 - not applicable (see the alternative pv_watchfd_info() below)
+ *   3 - lookup of the file descriptor destination failed
+ *   4 - file descriptor is not opened on a regular file
+ *
+ * If "automatic" is true, then this fd was picked automatically, and so if
+ * it's not readable or not a regular file, no error is reported with
+ * pv_error() when returning the error code.
+ */
 int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 {
 	struct vnode_fdinfowithpath vnodeInfo = { };
@@ -138,9 +158,8 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 #else
 
 /*
- * Fill in the given information structure with the file paths and stat
- * details of the given file descriptor within the given process (given
- * within the info structure).
+ * Populate the "info" structure with the file paths and stat details of the
+ * process and file descriptor pair given within that structure.
  *
  * Returns nonzero on error - error codes are:
  *
@@ -151,8 +170,8 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
  *   4 - file descriptor is not opened on a regular file
  *
  * If "automatic" is true, then this fd was picked automatically, and so if
- * it's not readable or not a regular file, no error is displayed and the
- * function just returns an error code.
+ * it's not readable or not a regular file, no error is reported with
+ * pv_error() when returning the error code.
  */
 int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 {
@@ -174,11 +193,10 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 	if (readlink(info->file_fd, info->file_fdpath, PV_SIZEOF_FILE_FDPATH - 1) < 0) {	/* flawfinder: ignore */
 		/*
 		 * flawfinder: memset() has put \0 at the end already, and
-		 * we tell readlink() to use 1 byte less than the buffer
-		 * length, so \0 termination is assured.  There is no
-		 * mitigation for the risk of the link changing while we
-		 * read it, but we are only reading from the destination,
-		 * and then only if it's a block device - see filesize().
+		 * readlink() is given 1 byte less than the buffer length,
+		 * so \0 termination is assured.  See filesize() above for
+		 * the mitigation of the risk that the link could change
+		 * while it is being read.
 		 */
 		if (!automatic)
 			pv_error("%s %u: %s %d: %s",
@@ -218,7 +236,7 @@ bool pv_watchfd_changed(pvwatchfd_t info)
 #else
 /*
  * Return true if the given file descriptor has changed in some way since
- * we started looking at it (i.e. changed destination or permissions).
+ * it was first detected (i.e. changed destination or permissions).
  */
 bool pv_watchfd_changed(pvwatchfd_t info)
 {
@@ -300,6 +318,13 @@ off_t pv_watchfd_position(pvwatchfd_t info)
 
 
 #ifdef __APPLE__
+/*
+ * Allocate an array of proc_fdinfo structs containing details of the file
+ * descriptors opened by process "pid", placing the pointer to the array
+ * into *fds and the number of entries in it into *count.
+ *
+ * Returns nonzero on error, and reports the error.
+ */
 static int pidfds(pvstate_t state, unsigned int pid, struct proc_fdinfo **fds, int *count)
 {
 	int size_needed = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, 0, 0);
@@ -425,7 +450,7 @@ static int pv_compare_watchfd(const void *a, const void *b)
 
 
 /*
- * Scan the given process and update the arrays with any new file
+ * Scan the process "watch_pid" and update the arrays with any new file
  * descriptors.  If "watch_fd" is not -1, then all other file descriptor
  * numbers will be ignored,
  *
@@ -494,7 +519,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 			continue;
 
 		/*
-		 * Skip if this fd is already known to us.
+		 * Skip if this fd is already known.
 		 */
 		found_idx = -1;
 		for (check_idx = 0; check_idx < array_length && NULL != info_array; check_idx++) {
@@ -519,7 +544,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 			continue;
 
 		/*
-		 * See if there's an empty slot we can re-use.
+		 * Check for an empty slot to re-use.
 		 */
 		use_idx = -1;
 		for (check_idx = 0; check_idx < array_length && NULL != info_array; check_idx++) {
