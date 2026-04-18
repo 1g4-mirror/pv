@@ -60,7 +60,7 @@ static int pv__write_pidfile(opts_t opts)
 
 	pidfile_tmp_name = malloc(pidfile_tmp_bufsize);
 	if (NULL == pidfile_tmp_name) {
-		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		pv_perror("%s", opts->pidfile);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 	memset(pidfile_tmp_name, 0, pidfile_tmp_bufsize);
@@ -74,7 +74,7 @@ static int pv__write_pidfile(opts_t opts)
 	pidfile_tmp_fd = mkstemp(pidfile_tmp_name);	/* flawfinder: ignore */
 	/*@+unrecog@ */
 	if (pidfile_tmp_fd < 0) {
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name, pidfile_tmp_name, strerror(errno));
+		pv_perror("%s", pidfile_tmp_name);
 		(void) umask(prev_umask);   /* flawfinder: ignore */
 		free(pidfile_tmp_name);
 		return PV_ERROREXIT_REMOTE_OR_PID;
@@ -94,7 +94,7 @@ static int pv__write_pidfile(opts_t opts)
 
 	pidfile_tmp_fptr = fdopen(pidfile_tmp_fd, "w");
 	if (NULL == pidfile_tmp_fptr) {
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name, pidfile_tmp_name, strerror(errno));
+		pv_perror("%s", pidfile_tmp_name);
 		(void) close(pidfile_tmp_fd);
 		(void) remove(pidfile_tmp_name);
 		free(pidfile_tmp_name);
@@ -103,11 +103,11 @@ static int pv__write_pidfile(opts_t opts)
 
 	fprintf(pidfile_tmp_fptr, "%d\n", getpid());
 	if (0 != fclose(pidfile_tmp_fptr)) {
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
+		pv_perror("%s", pidfile_tmp_name);
 	}
 
 	if (rename(pidfile_tmp_name, opts->pidfile) < 0) {
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
+		pv_perror("%s", opts->pidfile);
 		(void) remove(pidfile_tmp_name);
 		free(pidfile_tmp_name);
 		return PV_ERROREXIT_REMOTE_OR_PID;
@@ -144,7 +144,7 @@ static int pv__set_output(pvstate_t state, opts_t opts, /*@null@ */ const char *
 	 * checking that could be done to make this safer.
 	 */
 	if (output_fd < 0) {
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name, output_file, strerror(errno));
+		pv_perror("%s", output_file);
 		return PV_ERROREXIT_ACCESS;
 	}
 
@@ -200,7 +200,7 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s
 		tmp_fd = mkstemp(tmp_filename);	/* flawfinder: ignore */
 		/*@+unrecog@ */
 		if (tmp_fd < 0) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, tmp_filename, strerror(errno));
+			pv_perror("%s", tmp_filename);
 			return PV_ERROREXIT_SAF;
 		}
 		(void) close(tmp_fd);
@@ -282,7 +282,7 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s
  *
  * As a side effect, "command_fd" is closed.
  */
-static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t side, int command_fd,
+static int pv__run_monitor(pvstate_t state, pvside_t side, int command_fd,
 			   pid_t othermonitor_pid, int othermonitor_read_fd, int othermonitor_write_fd, off_t size,
 			   pvformatoptions_s format_options)
 {
@@ -298,7 +298,7 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 		/* Replace stdout with the pipe to the command. */
 		debug("replacing stdout with fd %d", command_fd);
 		if (dup2(command_fd, STDOUT_FILENO) < 0) {
-			fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
+			pv_perror("%s", "dup2");
 			return PV_ERROREXIT_MONITOR;
 		}
 		break;
@@ -306,7 +306,7 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 		/* Replace stdin with the pipe from the command. */
 		debug("replacing stdin with fd %d", command_fd);
 		if (dup2(command_fd, STDIN_FILENO) < 0) {
-			fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
+			pv_perror("%s", "dup2");
 			return PV_ERROREXIT_MONITOR;
 		}
 		break;
@@ -314,7 +314,7 @@ static int pv__run_monitor(const char *program_name, pvstate_t state, pvside_t s
 
 	/* Close command_fd now it's been duplicated to the appropriate fd. */
 	if (close(command_fd) < 0) {
-		fprintf(stderr, "%s: %s\n", program_name, strerror(errno));
+		pv_perror("%s", "close");
 	}
 
 	/* Copy details of the other monitor into the main state. */
@@ -378,7 +378,7 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 	/* Arguments check. */
 	if ((NULL == opts->argv) || (opts->argc < 1) || (NULL == opts->argv[0])) {
 		/*@-mustfreefresh@ */
-		fprintf(stderr, "%s: -M: %s\n", opts->program_name, _("a command to run must be specified"));
+		pv_error("-M: %s", _("a command to run must be specified"));
 		return PV_ERROREXIT_MONITOR;
 		/*@+mustfreefresh@ *//* see below about gettext _() calls. */
 	}
@@ -397,7 +397,7 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 	/* Pipe for the input side of the command, if it's to be monitored. */
 	if ((PV_SIDE_IN == opts->side) || (PV_SIDE_BOTH == opts->side)) {
 		if (0 != pipe(pipefd_cmd_in)) {
-			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			pv_perror("%s", "pipe");
 			return PV_ERROREXIT_MONITOR;
 		}
 		debug("pipefd_cmd_in[]=(%d,%d)", pipefd_cmd_in[0], pipefd_cmd_in[1]);
@@ -406,7 +406,7 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 	/* Pipe for the output side of the command, if it's to be monitored. */
 	if ((PV_SIDE_OUT == opts->side) || (PV_SIDE_BOTH == opts->side)) {
 		if (0 != pipe(pipefd_cmd_out)) {
-			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			pv_perror("%s", "pipe");
 			if (-1 != pipefd_cmd_in[0])
 				(void) close(pipefd_cmd_in[0]);
 			if (-1 != pipefd_cmd_in[1])
@@ -425,7 +425,7 @@ x = 1; \
 	/* Create a process to run the command. */
 	command_pid = (pid_t) fork();
 	if (command_pid < 0) {
-		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		pv_perror("%s", "fork");
 		close_if_open(pipefd_cmd_in[0]);
 		close_if_open(pipefd_cmd_in[1]);
 		close_if_open(pipefd_cmd_out[0]);
@@ -444,7 +444,7 @@ x = 1; \
 		if (-1 != pipefd_cmd_in[0]) {
 			debug("replacing command stdin with fd %d", pipefd_cmd_in[0]);
 			if (dup2(pipefd_cmd_in[0], STDIN_FILENO) < 0) {
-				fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+				pv_perror("%s", "dup2");
 				exit(EXIT_FAILURE);
 			}
 			(void) close(pipefd_cmd_in[0]);
@@ -456,7 +456,7 @@ x = 1; \
 		if (-1 != pipefd_cmd_out[1]) {
 			debug("replacing command stdout with fd %d", pipefd_cmd_out[1]);
 			if (dup2(pipefd_cmd_out[1], STDOUT_FILENO) < 0) {
-				fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+				pv_perror("%s", "dup2");
 				exit(EXIT_FAILURE);
 			}
 			(void) close(pipefd_cmd_out[1]);
@@ -466,7 +466,7 @@ x = 1; \
 
 		/* Execute the command. */
 		(void) execvp(opts->argv[0], (char *const *) (opts->argv));	/* flawfinder: ignore */
-		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		pv_perror("%s", "exec");
 		exit(EXIT_FAILURE);
 
 		/*
@@ -495,7 +495,7 @@ x = 1; \
 	pipefd_out_to_in[1] = -1;
 	if (PV_SIDE_BOTH == opts->side) {
 		if (0 != pipe(pipefd_in_to_out)) {
-			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			pv_perror("%s", "pipe");
 			close_if_open(pipefd_cmd_in[1]);
 			close_if_open(pipefd_cmd_out[0]);
 			(void) kill(command_pid, SIGTERM);
@@ -503,7 +503,7 @@ x = 1; \
 		}
 		debug("pipefd_in_to_out[]=(%d,%d)", pipefd_in_to_out[0], pipefd_in_to_out[1]);
 		if (0 != pipe(pipefd_out_to_in)) {
-			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			pv_perror("%s", "pipe");
 			close_if_open(pipefd_in_to_out[0]);
 			close_if_open(pipefd_in_to_out[1]);
 			close_if_open(pipefd_cmd_in[1]);
@@ -524,7 +524,7 @@ x = 1; \
 		in_monitor_pid = (pid_t) getpid();
 		out_monitor_pid = (pid_t) fork();
 		if (out_monitor_pid < 0) {
-			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			pv_perror("%s", "fork");
 			close_if_open(pipefd_in_to_out[0]);
 			close_if_open(pipefd_in_to_out[1]);
 			close_if_open(pipefd_out_to_in[0]);
@@ -546,7 +546,7 @@ x = 1; \
 			close_if_open(pipefd_out_to_in[0]);
 
 			retcode =
-			    pv__run_monitor(opts->program_name, state, PV_SIDE_OUT, pipefd_cmd_out[0], in_monitor_pid,
+			    pv__run_monitor(state, PV_SIDE_OUT, pipefd_cmd_out[0], in_monitor_pid,
 					    pipefd_in_to_out[0], pipefd_out_to_in[1], opts->size, format_options);
 
 			/* Close the other ends of the intra-monitor pipes. */
@@ -592,14 +592,14 @@ x = 1; \
 		/* Close the read end of the "out" pipe. */
 		close_if_open(pipefd_cmd_out[0]);
 		retcode =
-		    pv__run_monitor(opts->program_name, state, PV_SIDE_IN, pipefd_cmd_in[1], out_monitor_pid,
+		    pv__run_monitor(state, PV_SIDE_IN, pipefd_cmd_in[1], out_monitor_pid,
 				    pipefd_out_to_in[0], pipefd_in_to_out[1], opts->size, format_options);
 		break;
 	case PV_SIDE_OUT:
 		/* Close the write end of the "in" pipe. */
 		close_if_open(pipefd_cmd_in[1]);
 		retcode =
-		    pv__run_monitor(opts->program_name, state, PV_SIDE_OUT, pipefd_cmd_out[0], in_monitor_pid,
+		    pv__run_monitor(state, PV_SIDE_OUT, pipefd_cmd_out[0], in_monitor_pid,
 				    pipefd_in_to_out[0], pipefd_out_to_in[1], opts->size, format_options);
 		break;
 	}
@@ -610,7 +610,7 @@ x = 1; \
 	 */
 	if (PV_SIDE_IN == opts->side || PV_SIDE_BOTH == opts->side) {
 		if (close(STDOUT_FILENO) < 0) {
-			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			pv_perror("%s", "close");
 		}
 	}
 
@@ -672,6 +672,9 @@ int main(int argc, char **argv)
 #endif
 #endif
 
+	/* Set an initial value for the error message prefix. */
+	pv_set_error_prefix(argv[0]);
+
 	/* Parse the command line arguments. */
 	opts = opts_parse(argc >= 0 ? (unsigned int) argc : 0, argv);
 	if (NULL == opts) {
@@ -686,12 +689,6 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	/* Set the error message prefix. */
-	/*@-keeptrans@ */
-	pv_set_error_prefix(opts->program_name);
-	/* splint - this function doesn't add an alias or release it. */
-	/*@+keeptrans@ */
-
 	/*
 	 * Allocate our internal state buffer.
 	 */
@@ -704,7 +701,7 @@ int main(int argc, char **argv)
 		 * mitigated by the fact that each string is only translated
 		 * once.
 		 */
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name, _("state allocation failed"), strerror(errno));
+		pv_perror("%s", _("state allocation failed"));
 		opts_free(opts);
 		debug("%s: %d", "exiting with status", PV_ERROREXIT_MEMORY);
 		pv_set_error_prefix(NULL);
@@ -966,7 +963,7 @@ int main(int argc, char **argv)
 	/* Clear up the PID file, if one was written. */
 	if (opts->pidfile != NULL) {
 		if (0 != remove(opts->pidfile)) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, opts->pidfile, strerror(errno));
+			pv_perror("%s", opts->pidfile);
 		}
 	}
 

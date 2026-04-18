@@ -111,7 +111,7 @@ bool opts_add_file(opts_t opts, const char *filename)
 		opts->argv = realloc(opts->argv, opts->argv_length * sizeof(char *));
 		/*@+keeptrans@ */
 		if (NULL == opts->argv) {
-			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			pv_perror("%s", "realloc");
 			opts->argv_length = 0;
 			opts->argc = 0;
 			return false;
@@ -153,7 +153,7 @@ static bool opts_watchfd_add_item(opts_t opts, pid_t pid, int fd)
 		opts->watchfd_fd = realloc(opts->watchfd_fd, opts->watchfd_length * sizeof(int));
 		/*@+keeptrans@ */
 		if ((NULL == opts->watchfd_pid) || (NULL == opts->watchfd_fd)) {
-			fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+			pv_perror("%s", "realloc");
 			opts->watchfd_length = 0;
 			opts->watchfd_count = 0;
 			return false;
@@ -191,7 +191,7 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 
 	/* Pipe for communicating with pgrep. */
 	if (pipe(fds) < 0) {
-		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		pv_perror("%s", "pipe");
 		return false;
 	}
 
@@ -199,7 +199,7 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 	pid = (pid_t) fork();
 	if (pid < 0) {
 		/* Fork failure - error return. */
-		fprintf(stderr, "%s: %s\n", opts->program_name, strerror(errno));
+		pv_perror("%s", "fork");
 		(void) close(fds[0]);
 		(void) close(fds[1]);
 		return false;
@@ -213,18 +213,18 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 		nullfd = open("/dev/null", O_RDONLY);	/* flawfinder: ignore */
 		/* flawfinder: /dev/null is trusted. */
 		if (nullfd < 0) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, "/dev/null", strerror(errno));
+			pv_perror("%s", "/dev/null");
 			exit(EXIT_FAILURE);
 		}
 		if (dup2(nullfd, STDIN_FILENO) < 0) {
-			perror("dup2");
+			pv_error("%s", "dup2");
 			exit(EXIT_FAILURE);
 		}
 		(void) close(nullfd);
 
 		/* Replace stdout with the write end of the pipe. */
 		if (dup2(fds[1], STDOUT_FILENO) < 0) {
-			perror("dup2");
+			pv_perror("%s", "dup2");
 			exit(EXIT_FAILURE);
 		}
 		(void) close(fds[1]);
@@ -234,7 +234,7 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 
 		/* Run pgrep. */
 		if (execlp("pgrep", "pgrep", process_name, NULL) < 0) {	/* flawfinder: ignore */
-			perror("pgrep");
+			pv_perror("%s", "pgrep");
 		}
 		/*
 		 * flawfinder: deliberately calling pgrep as there isn't a
@@ -249,7 +249,7 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 	/* Open a file stream on the read end of the pipe. */
 	fptr = fdopen(fds[0], "r");
 	if (NULL == fptr) {
-		perror("fdopen");
+		pv_perror("%s", "fdopen");
 		(void) close(fds[0]);
 		return false;
 	}
@@ -268,7 +268,7 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 		/*@+unrecog@ */
 		if ((line_length < 0) || (NULL == linebuf_ptr)) {
 			if (0 != errno)
-				perror("getline");
+				pv_perror("%s", "getline");
 			break;
 		}
 		if (line_length < 1)
@@ -330,7 +330,7 @@ static bool opts_watchfd_listfile(opts_t opts, const char *filename)
 	 * mitigation.
 	 */
 	if (NULL == fptr) {
-		fprintf(stderr, "%s: -d @: %s: %s\n", opts->program_name, filename, strerror(errno));
+		pv_perror("%s", filename);
 		return false;
 	}
 
@@ -348,7 +348,7 @@ static bool opts_watchfd_listfile(opts_t opts, const char *filename)
 		/*@+unrecog@ */
 		if ((line_length < 0) || (NULL == linebuf_ptr)) {
 			if (0 != errno)
-				perror("getline");
+				pv_perror("%s", filename);
 			break;
 		}
 
@@ -409,8 +409,7 @@ static bool opts_watchfd_parse(opts_t opts, const char *argument, /*@null@ */ co
 		/* Don't allow this syntax in a list file. */
 		if (NULL != filename) {
 			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: -d @: %s:%u: %s\n",
-				opts->program_name, filename, line, _("list files may not contain @ lines"));
+			pv_error("%s:%u: %s", filename, line, _("list files may not contain @ lines"));
 			return false;
 			/*@+mustfreefresh@ */
 		}
@@ -430,10 +429,9 @@ static bool opts_watchfd_parse(opts_t opts, const char *argument, /*@null@ */ co
 	if (sscanf(argument, "%u:%d", &parse_pid, &parse_fd) < 1) {
 		/*@-mustfreefresh@ *//* see above */
 		if (NULL != filename) {
-			fprintf(stderr, "%s: -d: %s:%u: %s\n",
-				opts->program_name, filename, line, _("process ID or pid:fd pair expected"));
+			pv_error("%s:%u: %s: %s", filename, line, argument, _("process ID or pid:fd pair expected"));
 		} else {
-			fprintf(stderr, "%s: -d: %s\n", opts->program_name, _("process ID or pid:fd pair expected"));
+			pv_error("%s: %s", argument, _("process ID or pid:fd pair expected"));
 		}
 		return false;
 		/*@+mustfreefresh@ */
@@ -442,10 +440,9 @@ static bool opts_watchfd_parse(opts_t opts, const char *argument, /*@null@ */ co
 	if (parse_pid < 1) {
 		/*@-mustfreefresh@ *//* see above */
 		if (NULL != filename) {
-			fprintf(stderr, "%s: -d: %s:%u: %u: %s\n",
-				opts->program_name, filename, line, parse_pid, _("invalid process ID"));
+			pv_error("%s:%u: %s: %s", filename, line, argument, _("invalid process ID"));
 		} else {
-			fprintf(stderr, "%s: -d: %u: %s\n", opts->program_name, parse_pid, _("invalid process ID"));
+			pv_error("%s: %s", argument, _("invalid process ID"));
 		}
 		return false;
 		/*@+mustfreefresh@ */
@@ -532,8 +529,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 
 	if (0 != stat_rc) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s: %s\n",
-			opts->program_name, size_file, _("failed to stat file"), strerror(errno));
+		pv_perror("%s: %s", size_file, _("failed to stat file"));
 		return false;
 		/*@+mustfreefresh@ */
 	}
@@ -565,7 +561,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 		    );
 
 		if (rc_nftw < 0) {
-			fprintf(stderr, "%s: %s: %s\n", opts->program_name, size_file, strerror(errno));
+			pv_perror("%s", size_file);
 			return false;
 		}
 
@@ -576,7 +572,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 	/* This was a directory - report an error. */
 	if (S_ISDIR((mode_t) (sb.st_mode))) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name, size_file, _("is a directory"));
+		pv_error("%s: %s", size_file, _("is a directory"));
 		return false;
 		/*@+mustfreefresh@ */
 	}
@@ -605,8 +601,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 	    (sysfs_filename, sizeof(sysfs_filename), "/sys/dev/block/%u:%u/size", major(sb.st_rdev),
 	     minor(sb.st_rdev)) < 0) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s: %s\n",
-			opts->program_name, size_file, _("failed to generate sysfs filename"), strerror(errno));
+		pv_perror("%s: %s", size_file, _("failed to generate sysfs filename"));
 		return false;
 		/*@+mustfreefresh@ */
 	}
@@ -627,8 +622,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 		/* Read not successful - report the error and return. */
 		/* NB fclose() comes after the error report, to retain errno. */
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s: %s\n",
-			opts->program_name, size_file, _("failed to read sysfs size file"), strerror(errno));
+		pv_perror("%s: %s", size_file, _("failed to read sysfs size file"));
 		(void) fclose(sysfs_fptr);
 		return false;
 		/*@+mustfreefresh@ */
@@ -647,8 +641,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 
 	if (device_fd < 0) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s: %s\n",
-			opts->program_name, size_file, _("failed to open block device"), strerror(errno));
+		pv_perror("%s: %s", size_file, _("failed to open block device"));
 		return false;
 		/*@+mustfreefresh@ */
 	}
@@ -657,8 +650,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 
 	if (device_size < 0) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s: %s\n",
-			opts->program_name, size_file, _("failed to determine size of block device"), strerror(errno));
+		pv_perror("%s: %s", size_file, _("failed to determine size of block device"));
 		/* NB close() after reporting error, to preserve errno. */
 		(void) close(device_fd);
 		return false;
@@ -682,6 +674,8 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
  * Note that the contents of *argv[] (i.e. the command line parameters)
  * aren't copied anywhere, just the pointers are copied, so make sure the
  * command line data isn't overwritten or argv[1] free()d or whatever.
+ *
+ * Calls pv_set_error_prefix() as a side effect.
  */
 /*@null@ */
 /*@only@ */
@@ -763,7 +757,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	opts = calloc(1, sizeof(*opts));
 	if (!opts) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s\n", argv[0], _("option structure allocation failed"), strerror(errno));
+		pv_perror("%s", _("option structure allocation failed"));
 		return NULL;
 		/*@+mustfreefresh@ */
 	}
@@ -776,12 +770,14 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		opts->program_name = leafptr;
 	}
 
+	/* Set the error message prefix to the parsed program name. */
+	pv_set_error_prefix(opts->program_name);
+
 	opts->argc = 0;
 	opts->argv = calloc((size_t) (argc + 1), sizeof(char *));
 	if (NULL == opts->argv) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name,
-			_("option structure argv allocation failed"), strerror(errno));
+		pv_perror("%s", _("option structure argv allocation failed"));
 		free(opts);		    /* can't call opts_free as argv is not set */
 		return NULL;
 		/*@+mustfreefresh@ */
@@ -831,8 +827,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'Z':
 			if (!pv_getnum_check(optarg, PV_NUMTYPE_ANY_WITH_SUFFIX)) {
 				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -%c: %s: %s\n", opts->program_name, c, optarg,
-					_("numeric value not understood"));
+				pv_error("-%c: %s: %s", c, optarg, _("numeric value not understood"));
 				opts_free(opts);
 				return NULL;
 				/*@+mustfreefresh@ */
@@ -846,8 +841,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'm':
 			if (!pv_getnum_check(optarg, PV_NUMTYPE_BARE_INTEGER)) {
 				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -%c: %s: %s\n", opts->program_name, c, optarg,
-					_("integer argument expected"));
+				pv_error("-%c: %s: %s", c, optarg, _("integer argument expected"));
 				opts_free(opts);
 				return NULL;
 				/*@+mustfreefresh@ */
@@ -857,8 +851,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'D':
 			if (!pv_getnum_check(optarg, PV_NUMTYPE_BARE_DOUBLE)) {
 				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -%c: %s: %s\n", opts->program_name, c, optarg,
-					_("numeric argument expected"));
+				pv_error("-%c: %s: %s", c, optarg, _("numeric argument expected"));
 				opts_free(opts);
 				return NULL;
 				/*@+mustfreefresh@ */
@@ -869,8 +862,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				/* "-d @FILE" syntax - check FILE exists. */
 				if (optarg[1] == '\0') {
 					/*@-mustfreefresh@ *//* see above */
-					fprintf(stderr, "%s: -%c @: %s\n",
-						opts->program_name, c, _("missing filename"));
+					pv_error("-%c @: %s", c, _("missing filename"));
 					opts_free(opts);
 					return NULL;
 					/*@+mustfreefresh@ */
@@ -883,8 +875,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 					 * permissions.
 					 */
 					/*@-mustfreefresh@ *//* see above */
-					fprintf(stderr, "%s: -%c @: %s: %s\n",
-						opts->program_name, c, optarg + 1, strerror(errno));
+					pv_perror("-%c @: %s", c, optarg + 1);
 					opts_free(opts);
 					return NULL;
 					/*@+mustfreefresh@ */
@@ -897,8 +888,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				 */
 				if (optarg[1] == '\0') {
 					/*@-mustfreefresh@ *//* see above */
-					fprintf(stderr, "%s: -%c %c: %s\n",
-						opts->program_name, c, optarg[0], _("missing process name"));
+					pv_error("-%c =: %s", c, _("missing process name"));
 					opts_free(opts);
 					return NULL;
 					/*@+mustfreefresh@ */
@@ -909,15 +899,14 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			    < 1) {
 				/* "-d PID[:FD]" syntax - check numbers. */
 				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -%c: %s\n",
-					opts->program_name, c, _("process ID or pid:fd pair expected"));
+				pv_error("-%c: %s", c, _("process ID or pid:fd pair expected"));
 				opts_free(opts);
 				return NULL;
 				/*@+mustfreefresh@ */
 			}
 			if (check_pid < 1) {
 				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -%c: %s\n", opts->program_name, c, _("invalid process ID"));
+				pv_error("-%c: %s", c, _("invalid process ID"));
 				opts_free(opts);
 				return NULL;
 				/*@+mustfreefresh@ */
@@ -1046,7 +1035,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->name1 = opts->name;
 			opts->name = pv_strdup(optarg);
 			if (NULL == opts->name) {
-				fprintf(stderr, "%s: -N: %s\n", opts->program_name, strerror(errno));
+				pv_perror("-%c", c);
 				opts_free(opts);
 				return NULL;
 			}
@@ -1054,7 +1043,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'u':
 			opts->default_bar_style = pv_strdup(optarg);
 			if (NULL == opts->default_bar_style) {
-				fprintf(stderr, "%s: -u: %s\n", opts->program_name, strerror(errno));
+				pv_perror("-%c", c);
 				opts_free(opts);
 				return NULL;
 			}
@@ -1095,7 +1084,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'U':
 			opts->store_and_forward_file = pv_strdup(optarg);
 			if (NULL == opts->store_and_forward_file) {
-				fprintf(stderr, "%s: -U: %s\n", opts->program_name, strerror(errno));
+				pv_perror("-%c", c);
 				opts_free(opts);
 				return NULL;
 			}
@@ -1112,7 +1101,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'P':
 			opts->pidfile = pv_strdup(optarg);
 			if (NULL == opts->pidfile) {
-				fprintf(stderr, "%s: -P: %s\n", opts->program_name, strerror(errno));
+				pv_perror("-%c", c);
 				opts_free(opts);
 				return NULL;
 			}
@@ -1121,7 +1110,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->format1 = opts->format;
 			opts->format = pv_strdup(optarg);
 			if (NULL == opts->format) {
-				fprintf(stderr, "%s: -F: %s\n", opts->program_name, strerror(errno));
+				pv_perror("-%c", c);
 				opts_free(opts);
 				return NULL;
 			}
@@ -1129,7 +1118,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'x':
 			opts->extra_display = pv_strdup(optarg);
 			if (NULL == opts->extra_display) {
-				fprintf(stderr, "%s: -x: %s\n", opts->program_name, strerror(errno));
+				pv_perror("-%c", c);
 				opts_free(opts);
 				return NULL;
 			}
@@ -1144,7 +1133,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'o':
 			opts->output = pv_strdup(optarg);
 			if (NULL == opts->output) {
-				fprintf(stderr, "%s: -o: %s\n", opts->program_name, strerror(errno));
+				pv_perror("-%c", c);
 				opts_free(opts);
 				return NULL;
 			}
@@ -1172,8 +1161,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 				opts->side = PV_SIDE_BOTH;
 			} else {
 				/*@-mustfreefresh@ *//* see above */
-				fprintf(stderr, "%s: -M: %s: %s\n",
-					opts->program_name, optarg, _("invalid side specification"));
+				pv_error("-M: %s: %s", optarg, _("invalid side specification"));
 				opts_free(opts);
 				return NULL;
 				/*@+mustfreefresh@ */
@@ -1221,8 +1209,8 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		    || (opts->skip_errors > 0) || (opts->buffer_size > 0)
 		    || (opts->rate_limit > 0)) {
 			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: %s\n", opts->program_name,
-				_("cannot use line mode or transfer modifier options when watching file descriptors"));
+			pv_error("%s",
+				 _("cannot use line mode or transfer modifier options when watching file descriptors"));
 			opts_free(opts);
 			return NULL;
 			/*@+mustfreefresh@ */
@@ -1230,8 +1218,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 
 		if (opts->cursor) {
 			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: %s\n", opts->program_name,
-				_("cannot use cursor positioning when watching file descriptors"));
+			pv_error("%s", _("cannot use cursor positioning when watching file descriptors"));
 			opts_free(opts);
 			return NULL;
 			/*@+mustfreefresh@ */
@@ -1239,8 +1226,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 
 		if (0 != opts->remote) {
 			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: %s\n", opts->program_name,
-				_("cannot use remote control when watching file descriptors"));
+			pv_error("%s", _("cannot use remote control when watching file descriptors"));
 			opts_free(opts);
 			return NULL;
 			/*@+mustfreefresh@ */
@@ -1248,8 +1234,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 
 		if (0 != opts->query) {
 			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: %s\n", opts->program_name,
-				_("cannot use remote query when watching file descriptors"));
+			pv_error("%s", _("cannot use remote query when watching file descriptors"));
 			opts_free(opts);
 			return NULL;
 			/*@+mustfreefresh@ */
@@ -1257,8 +1242,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 
 		if (NULL != opts->output) {
 			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: -o: %s\n", opts->program_name,
-				_("cannot transfer files when watching file descriptors"));
+			pv_error("-o: %s", _("cannot transfer files when watching file descriptors"));
 			opts_free(opts);
 			return NULL;
 			/*@+mustfreefresh@ */
@@ -1282,8 +1266,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			 * unlikely to be exploitable.
 			 */
 			/*@-mustfreefresh@ *//* see above */
-			fprintf(stderr, "%s: -d: %s\n", opts->program_name,
-				_("not available on systems without /proc/self/fdinfo"));
+			pv_error("-d: %s", _("not available on systems without /proc/self/fdinfo"));
 			opts_free(opts);
 			return NULL;
 			/*@+mustfreefresh@ */
@@ -1294,8 +1277,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/* Don't allow -R and -Q together. */
 	if ((0 != opts->remote) && (0 != opts->query)) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s\n", opts->program_name,
-			_("cannot use remote control and remote query together"));
+		pv_error("%s", _("cannot use remote control and remote query together"));
 		opts_free(opts);
 		return NULL;
 		/*@+mustfreefresh@ */
@@ -1321,8 +1303,8 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	 */
 	if ((PV_ACTION_MONITOR == opts->action) && ((0 != opts->remote) || (0 != opts->query))) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name, 0 != opts->remote ? "-R" : "-Q",
-			_("monitor mode cannot be specified with this option"));
+		pv_error("%s: %s", 0 != opts->remote ? "-R" : "-Q",
+			 _("monitor mode cannot be specified with this option"));
 		opts_free(opts);
 		return NULL;
 		/*@+mustfreefresh@ */
@@ -1334,8 +1316,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	if ((PV_ACTION_STORE_AND_FORWARD == opts->action && PV_SIDE_NONE != opts->side)
 	    || (PV_ACTION_MONITOR == opts->action && NULL != opts->store_and_forward_file)) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s\n", opts->program_name,
-			_("monitor mode cannot be used with store-and-forward"));
+		pv_error("%s", _("monitor mode cannot be used with store-and-forward"));
 		opts_free(opts);
 		return NULL;
 		/*@+mustfreefresh@ */
@@ -1346,8 +1327,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	 */
 	if ((optind < (int) argc) && ((0 != opts->remote) || (0 != opts->query))) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: %s: %s\n", opts->program_name, 0 != opts->remote ? "-R" : "-Q",
-			_("files cannot be specified with this option"));
+		pv_error("%s: %s", 0 != opts->remote ? "-R" : "-Q", _("files cannot be specified with this option"));
 		opts_free(opts);
 		return NULL;
 		/*@+mustfreefresh@ */
@@ -1358,7 +1338,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	 */
 	if ((PV_ACTION_MONITOR == opts->action) && (optind >= (int) argc)) {
 		/*@-mustfreefresh@ *//* see above */
-		fprintf(stderr, "%s: -M: %s\n", opts->program_name, _("a command to run must be specified"));
+		pv_error("-M: %s", _("a command to run must be specified"));
 		opts_free(opts);
 		return NULL;
 		/*@+mustfreefresh@ */

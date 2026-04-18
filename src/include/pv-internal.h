@@ -554,9 +554,6 @@ struct pvdisplay_component_s {
 	bool dynamic;			 /* whether it can scale with screen size */
 };
 
-void pv_error(char *, ...);
-void pv_perror(char *, ...);
-
 int pv_main_loop(pvstate_t);
 void pv_calculate_transfer_rate(pvtransfercalc_t, readonly_pvtransferstate_t, readonly_pvcontrol_t, readonly_pvdisplay_t, bool);
 

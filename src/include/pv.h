@@ -183,6 +183,17 @@ void pv_nanosleep(long long);
 extern void pv_set_error_prefix(/*@null@ */ const char *);
 
 /*
+ * Report an error.
+ */
+extern void pv_error(char *, ...);
+
+/*
+ * Report an error, suffixed with the system error message for errno.
+ */
+extern void pv_perror(char *, ...);
+
+
+/*
  * Create a new state structure, and return it, or 0 (NULL) on error.
  */
 extern /*@null@*/ /*@only@*/ pvstate_t pv_state_alloc(void);
