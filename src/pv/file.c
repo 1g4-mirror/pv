@@ -151,9 +151,9 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 				total = end_position;
 			}
 			if (lseek(state->control.output_fd, 0, SEEK_SET) != 0) {
-				pv_error("%s: %s: %s",
-					 NULL == state->control.output_name ? "(null)" : state->control.output_name,
-					 _("failed to seek to start of output"), strerror(errno));
+				pv_perror("%s: %s",
+					  NULL == state->control.output_name ? "(null)" : state->control.output_name,
+					  _("failed to seek to start of output"));
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			}
 			/*
@@ -238,7 +238,7 @@ static off_t pv_calc_total_lines(pvstate_t state)
 			 * the bounding is OK.
 			 */
 			if (numread < 0) {
-				pv_error("%s: %s", state->files.filename[file_idx], strerror(errno));
+				pv_perror("%s", state->files.filename[file_idx]);
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				break;
 			} else if (0 == numread) {
@@ -256,7 +256,7 @@ static off_t pv_calc_total_lines(pvstate_t state)
 		}
 
 		if (0 != lseek(fd, 0, SEEK_SET)) {
-			pv_error("%s: %s", state->files.filename[file_idx], strerror(errno));
+			pv_perror("%s", state->files.filename[file_idx]);
 			state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		}
 
@@ -302,7 +302,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 
 	if (oldfd >= 0) {
 		if (0 != close(oldfd)) {
-			pv_error("%s: %s", _("failed to close file"), strerror(errno));
+			pv_perror("%s", _("failed to close file"));
 			state->status.exit_status |= PV_ERROREXIT_TRANSITION;
 			return -1;
 		}
@@ -334,22 +334,21 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		 * open symlinks would be counterintuitive.
 		 */
 		if (fd < 0) {
-			pv_error("%s: %s: %s", _("failed to read file"), next_filename, strerror(errno));
+			pv_perror("%s: %s", next_filename, _("failed to read file"));
 			state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			return -1;
 		}
 	}
 
 	if (0 != fstat(fd, &isb)) {
-		pv_error("%s: %s: %s", _("failed to stat file"),
-			 NULL == next_filename ? "-" : next_filename, strerror(errno));
+		pv_perror("%s: %s", NULL == next_filename ? "-" : next_filename, _("failed to stat file"));
 		(void) close(fd);
 		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		return -1;
 	}
 
 	if (0 != fstat(state->control.output_fd, &osb)) {
-		pv_error("%s: %s", _("failed to stat output file"), strerror(errno));
+		pv_perror("%s", _("failed to stat output file"));
 		(void) close(fd);
 		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		return -1;

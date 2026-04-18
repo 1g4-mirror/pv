@@ -948,7 +948,7 @@ int pv_watchfd_loop(pvstate_t state)
 
 		if (kill(watching[watch_idx].pid, 0) != 0) {
 			/* Inaccessible PID - error, mark as finished. */
-			pv_error("%s %u: %s", _("pid"), watching[watch_idx].pid, strerror(errno));
+			pv_perror("%s %u", _("pid"), watching[watch_idx].pid);
 			state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			watching[watch_idx].finished = true;
 			continue;
@@ -964,7 +964,7 @@ int pv_watchfd_loop(pvstate_t state)
 						 &(watching[watch_idx].info_array));
 			if (rc != 0) {
 				/* Scan failed - error, mark as finished. */
-				pv_error("%s %u: %s", _("pid"), watching[watch_idx].pid, strerror(errno));
+				pv_perror("%s %u", _("pid"), watching[watch_idx].pid);
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 				watching[watch_idx].finished = true;
 			}

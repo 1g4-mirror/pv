@@ -555,6 +555,7 @@ struct pvdisplay_component_s {
 };
 
 void pv_error(char *, ...);
+void pv_perror(char *, ...);
 
 int pv_main_loop(pvstate_t);
 void pv_calculate_transfer_rate(pvtransfercalc_t, readonly_pvtransferstate_t, readonly_pvcontrol_t, readonly_pvdisplay_t, bool);

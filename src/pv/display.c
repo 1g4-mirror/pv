@@ -54,7 +54,7 @@
  * has been displayed yet, indicating whether any errors must be preceded by
  * a newline.
  */
-/*@only@ */ static /*@null@ */ char * pv__error_prefix = NULL;
+/*@only@ */ static /*@null@ */ char *pv__error_prefix = NULL;
 static bool pv__output_produced = false;
 
 
@@ -90,6 +90,33 @@ void pv_error(char *format, ...)
 	(void) vfprintf(stderr, format, ap);	/* flawfinder: ignore */
 	va_end(ap);
 	fprintf(stderr, "\n");
+	/*
+	 * flawfinder: this function relies on callers always having a
+	 * static format string, not directly subject to outside influences.
+	 */
+}
+
+
+/*
+ * Output an error message, like pv_error(), but following the message with
+ * a colon, a space, and the result of strerror(errno).
+ */
+void pv_perror(char *format, ...)
+{
+	va_list ap;
+	int orig_errno;
+
+	orig_errno = errno;
+
+	if (pv__output_produced)
+		fprintf(stderr, "\n");
+	if (NULL != pv__error_prefix)
+		fprintf(stderr, "%s: ", pv__error_prefix);
+	va_start(ap, format);
+	(void) vfprintf(stderr, format, ap);	/* flawfinder: ignore */
+	va_end(ap);
+
+	fprintf(stderr, ": %s\n", strerror(orig_errno));
 	/*
 	 * flawfinder: this function relies on callers always having a
 	 * static format string, not directly subject to outside influences.
@@ -1043,7 +1070,7 @@ bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_
 
 		new_buffer = malloc(new_size + 16);
 		if (NULL == new_buffer) {
-			pv_error("%s: %s", _("buffer allocation failed"), strerror(errno));
+			pv_perror("%s", _("buffer allocation failed"));
 			status->exit_status |= PV_ERROREXIT_MEMORY;
 			display->display_buffer = NULL;
 			return false;

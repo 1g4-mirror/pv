@@ -88,7 +88,7 @@ int pv_remote_set(pvstate_t state, pid_t remote)
 	 * Check that the remote process exists.
 	 */
 	if (kill((pid_t) (remote), 0) != 0) {
-		pv_error("%u: %s", remote, strerror(errno));
+		pv_perror("%s %u", _("pid"), remote);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
@@ -152,7 +152,7 @@ int pv_remote_set(pvstate_t state, pid_t remote)
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), (pid_t) getpid(), SIGUSR2, true);
 	if (NULL == control_fptr) {
-		pv_error("%s", strerror(errno));
+		pv_perror("%s", control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
@@ -161,14 +161,14 @@ int pv_remote_set(pvstate_t state, pid_t remote)
 	 * it.
 	 */
 	if (1 != fwrite(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
-		pv_error("%s", strerror(errno));
+		pv_perror("%s", control_filename);
 		(void) fclose(control_fptr);
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
 	if (0 != fclose(control_fptr)) {
-		pv_error("%s", strerror(errno));
+		pv_perror("%s", control_filename);
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
@@ -181,7 +181,7 @@ int pv_remote_set(pvstate_t state, pid_t remote)
 	signal_sender = 0;
 	(void) pv_sigusr2_received(state, &signal_sender);
 	if (kill((pid_t) (remote), SIGUSR2) != 0) {
-		pv_error("%u: %s", remote, strerror(errno));
+		pv_perror("%s %u", _("pid"), remote);
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
@@ -220,7 +220,7 @@ int pv_remote_set(pvstate_t state, pid_t remote)
 	 */
 	debug("%s: %s", "removing", control_filename);
 	if (0 != remove(control_filename)) {
-		pv_error("%s", strerror(errno));
+		pv_perror("%s", control_filename);
 	}
 
 	/*
@@ -271,7 +271,7 @@ static bool pv__rxsignal_usr2(pvstate_t state)
 	memset(control_filename, 0, sizeof(control_filename));
 	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), signal_sender, SIGUSR2, false);
 	if (NULL == control_fptr) {
-		pv_error("%s: %s", control_filename, strerror(errno));
+		pv_perror("%s", control_filename);
 		return false;
 	}
 
@@ -280,13 +280,13 @@ static bool pv__rxsignal_usr2(pvstate_t state)
 	 * it.
 	 */
 	if (1 != fread(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
-		pv_error("%s", strerror(errno));
+		pv_perror("%s", control_filename);
 		(void) fclose(control_fptr);
 		return false;
 	}
 
 	if (0 != fclose(control_fptr)) {
-		pv_error("%s", strerror(errno));
+		pv_perror("%s", control_filename);
 		return false;
 	}
 
@@ -528,7 +528,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 	 */
 	if (kill((pid_t) (query), 0) != 0) {
 		if (!silent)
-			pv_error("%u: %s", query, strerror(errno));
+			pv_perror("%s %u", _("pid"), query);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
@@ -543,7 +543,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 	control_fptr = pv_open_controlfile(control_filename, sizeof(control_filename), (pid_t) getpid(), SIGUSR1, true);
 	if (NULL == control_fptr) {
 		if (!silent)
-			pv_error("%s", strerror(errno));
+			pv_perror("%s", control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 
@@ -552,7 +552,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 	 */
 	if (1 != fwrite(&msgbuf, sizeof(msgbuf), 1, control_fptr)) {
 		if (!silent)
-			pv_error("%s", strerror(errno));
+			pv_perror("%s", control_filename);
 		(void) fclose(control_fptr);
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
@@ -560,7 +560,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 
 	if (0 != fclose(control_fptr)) {
 		if (!silent)
-			pv_error("%s", strerror(errno));
+			pv_perror("%s", control_filename);
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
@@ -574,7 +574,7 @@ int pv_remote_transferstate_fetch(pvstate_t state, pid_t query, /*@null@ */ off_
 	(void) pv_sigusr1_received(state, &signal_sender);
 	if (kill((pid_t) (query), SIGUSR1) != 0) {
 		if (!silent)
-			pv_error("%u: %s", query, strerror(errno));
+			pv_perror("%s %u", _("pid"), query);
 		(void) remove(control_filename);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}

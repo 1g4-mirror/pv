@@ -27,7 +27,7 @@ void pv_elapsedtime_read(struct timespec *return_time)
 {
 	/*@-unrecog@ *//* splint doesn't know clock_gettime. */
 	if (0 != clock_gettime(CLOCK_MONOTONIC, return_time)) {
-		pv_error("%s: %s", "clock_gettime", strerror(errno));
+		pv_perror("%s", "clock_gettime");
 		/*@-exitarg@ *//* The special exit status is explicitly chosen. */
 		exit(PV_ERROREXIT_TRANSFER);
 		/*@+exitarg@ */

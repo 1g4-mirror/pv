@@ -65,7 +65,7 @@ static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t co
 	ttydev = ttyname(fd);
 	if (!ttydev) {
 		if (!control->force) {
-			pv_error("%s: %s", _("failed to get terminal name"), strerror(errno));
+			pv_perror("%s", _("failed to get terminal name"));
 		}
 		/*
 		 * If the terminal name is unknown, then neither IPC nor a
@@ -110,7 +110,7 @@ static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t co
 	 */
 
 	if (cursor->lock_fd < 0) {
-		pv_error("%s: %s: %s", cursor->lock_file, _("failed to open lock file"), strerror(errno));
+		pv_perror("%s: %s", cursor->lock_file, _("failed to open lock file"));
 		cursor->disable = true;
 		return;
 	}
@@ -143,7 +143,7 @@ static void pv_crs_lock(pvcursorstate_t cursor, readonly_pvcontrol_t control, in
 					lock_fd = cursor->lock_fd;
 				}
 			} else {
-				pv_error("%s: %s", _("lock attempt failed"), strerror(errno));
+				pv_perror("%s", _("lock attempt failed"));
 				return;
 			}
 		}
@@ -405,7 +405,7 @@ void pv_crs_init(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 	 */
 
 	if (terminalfd < 0) {
-		pv_error("%s: %s: %s", _("failed to open terminal"), ttyfile, strerror(errno));
+		pv_perror("%s: %s", ttyfile, _("failed to open terminal"));
 		cursor->disable = true;
 		return;
 	}

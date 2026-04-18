@@ -118,7 +118,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 
 	if (kill(info->watch_pid, 0) != 0) {
 		if (!automatic)
-			pv_error("%s %u: %s", _("pid"), info->watch_pid, strerror(errno));
+			pv_perror("%s %u", _("pid"), info->watch_pid);
 		return 1;
 	}
 
@@ -127,7 +127,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 				  PROC_PIDFDVNODEPATHINFO, &vnodeInfo,
 				  PROC_PIDFDVNODEPATHINFO_SIZE);
 	if (size != PROC_PIDFDVNODEPATHINFO_SIZE) {
-		pv_error("%s %u: %s %d: %s", _("pid"), info->watch_pid, _("fd"), info->watch_fd, strerror(errno));
+		pv_perror("%s %u: %s %d", _("pid"), info->watch_pid, _("fd"), info->watch_fd);
 		return 3;
 	}
 
@@ -137,9 +137,8 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 
 	if (!(0 == stat(info->file_fdpath, &(info->sb_fd)))) {
 		if (!automatic)
-			pv_error("%s %u: %s %d: %s: %s",
-				 _("pid"),
-				 info->watch_pid, _("fd"), info->watch_fd, info->file_fdpath, strerror(errno));
+			pv_perror("%s %u: %s %d: %s",
+				  _("pid"), info->watch_pid, _("fd"), info->watch_fd, info->file_fdpath);
 		return 3;
 	}
 
@@ -182,7 +181,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 
 	if (kill(info->watch_pid, 0) != 0) {
 		if (!automatic)
-			pv_error("%s %u: %s", _("pid"), info->watch_pid, strerror(errno));
+			pv_perror("%s %u", _("pid"), info->watch_pid);
 		return 1;
 	}
 	(void) pv_snprintf(info->file_fdinfo, PV_SIZEOF_FILE_FDINFO,
@@ -199,17 +198,15 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 		 * while it is being read.
 		 */
 		if (!automatic)
-			pv_error("%s %u: %s %d: %s",
-				 _("pid"), info->watch_pid, _("fd"), info->watch_fd, strerror(errno));
+			pv_perror("%s %u: %s %d", _("pid"), info->watch_pid, _("fd"), info->watch_fd);
 		return 2;
 	}
 
 	if (!((0 == stat(info->file_fd, &(info->sb_fd)))
 	      && (0 == lstat(info->file_fd, &(info->sb_fd_link))))) {
 		if (!automatic)
-			pv_error("%s %u: %s %d: %s: %s",
-				 _("pid"),
-				 info->watch_pid, _("fd"), info->watch_fd, info->file_fdpath, strerror(errno));
+			pv_perror("%s %u: %s %d: %s",
+				  _("pid"), info->watch_pid, _("fd"), info->watch_fd, info->file_fdpath);
 		return 3;
 	}
 
@@ -329,7 +326,7 @@ static int pidfds(pvstate_t state, unsigned int pid, struct proc_fdinfo **fds, i
 {
 	int size_needed = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, 0, 0);
 	if (size_needed == -1) {
-		pv_error("%s: unable to list pid fds: %s", _("pid"), strerror(errno));
+		pv_perror("%s %u", _("pid"), pid);
 		return -1;
 	}
 
@@ -337,7 +334,7 @@ static int pidfds(pvstate_t state, unsigned int pid, struct proc_fdinfo **fds, i
 
 	*fds = (struct proc_fdinfo *) malloc(size_needed);
 	if (*fds == NULL) {
-		pv_error("%s: alloc failed: %s", _("pid"), strerror(errno));
+		pv_perror("%s %u", _("pid"), pid);
 		return -1;
 	}
 	memset(*fds, 0, size_needed);

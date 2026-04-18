@@ -42,7 +42,7 @@ static void pv_alloc_calc_history(pvtransfercalc_t calc)
 		 * unavoidable memory leak warnings, but they are mitigated
 		 * by the fact that each string is only translated once.
 		 */
-		pv_error("%s: %s", _("history structure allocation failed"), strerror(errno));
+		pv_perror("%s", _("history structure allocation failed"));
 		/*@+mustfreefresh@ */
 		return;
 	}
@@ -348,9 +348,8 @@ void pv_state_free(pvstate_t state)
 		pv_truncate_output(state);
 		if (STDOUT_FILENO != state->control.output_fd) {
 			if (close(state->control.output_fd) < 0) {
-				pv_error("%s: %s",
-					 NULL == state->control.output_name ? "(null)" : state->control.output_name,
-					 strerror(errno));
+				pv_perror("%s",
+					  NULL == state->control.output_name ? "(null)" : state->control.output_name);
 			}
 		}
 		state->control.output_fd = -1;
@@ -741,9 +740,7 @@ void pv_state_output_set(pvstate_t state, int fd, const char *name)
 	pv_truncate_output(state);
 	if (state->control.output_fd >= 0 && state->control.output_fd != STDOUT_FILENO) {
 		if (close(state->control.output_fd) < 0) {
-			pv_error("%s: %s",
-				 NULL == state->control.output_name ? "(null)" : state->control.output_name,
-				 strerror(errno));
+			pv_perror("%s", NULL == state->control.output_name ? "(null)" : state->control.output_name);
 		}
 	}
 	if (NULL != state->control.output_name)
@@ -831,7 +828,7 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 	new_array = calloc((size_t) (input_file_count + 1), sizeof(char *));
 	if (NULL == new_array) {
 		/*@-mustfreefresh@ *//* see similar _() issue above */
-		pv_error("%s: %s", _("file list allocation failed"), strerror(errno));
+		pv_perror("%s", _("file list allocation failed"));
 		/*@+mustfreefresh@ */
 		return;
 	}
@@ -843,7 +840,7 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 		new_string = pv_strdup(input_files[file_idx]);
 		if (NULL == new_string) {
 			/*@-mustfreefresh@ *//* see similar _() issue above */
-			pv_error("%s: %s", _("file list allocation failed"), strerror(errno));
+			pv_perror("%s", _("file list allocation failed"));
 			/*@+mustfreefresh@ */
 			return;
 		}
@@ -879,7 +876,7 @@ void pv_state_watchfds(pvstate_t state, unsigned int watchfd_count, const pid_t 
 	new_array = malloc((1 + watchfd_count) * sizeof(*new_array));
 	if (NULL == new_array) {
 		/*@-mustfreefresh@ *//* see similar _() issue above */
-		pv_error("%s: %s", _("buffer allocation failed"), strerror(errno));
+		pv_perror("%s", _("buffer allocation failed"));
 		/*@+mustfreefresh@ */
 		return;
 	}
