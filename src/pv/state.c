@@ -10,7 +10,10 @@
 #include "pv.h"
 #include "pv-internal.h"
 
-/* We do not set this because it breaks "dd" - see below. */
+/*
+ * Do not use non-blocking I/O, because it has caused problems with some
+ * applications, such as dd, in the past.
+ */
 /* #undef MAKE_OUTPUT_NONBLOCKING */
 
 #include <stdio.h>
@@ -35,17 +38,21 @@ static void pv_alloc_calc_history(pvtransfercalc_t calc)
 	if (NULL == calc->history) {
 		/*@-mustfreefresh@ */
 		/*
-		 * splint note: the gettext calls made by _() cause memory
-		 * leak warnings, but in this case it's unavoidable, and
-		 * mitigated by the fact we only translate each string once.
+		 * splint note: the gettext calls made by _() cause
+		 * unavoidable memory leak warnings, but they are mitigated
+		 * by the fact that each string is only translated once.
 		 */
 		pv_error("%s: %s", _("history structure allocation failed"), strerror(errno));
 		/*@+mustfreefresh@ */
 		return;
 	}
 
+	/*
+	 * Explicitly set these values to zero, as memset() is not
+	 * recommended for floating point types.
+	 */
 	calc->history_first = calc->history_last = 0;
-	calc->history[0].elapsed_sec = 0.0; /* to be safe, memset() not recommended for doubles */
+	calc->history[0].elapsed_sec = 0.0;
 }
 
 
@@ -178,7 +185,7 @@ void pv_state_reset(pvstate_t state)
 
 
 /*
- * Create a new state structure, and return it, or 0 (NULL) on error.
+ * Create a new state structure, and return it, or NULL on error.
  */
 pvstate_t pv_state_alloc(void)
 {
@@ -207,11 +214,11 @@ pvstate_t pv_state_alloc(void)
 	 * showing relative filenames with --watchfd.
 	 */
 	if (NULL == getcwd(state->status.cwd, PV_SIZEOF_CWD - 1)) {
-		/* failed - will always show full path */
+		/* failed - will always show full path. */
 		state->status.cwd[0] = '\0';
 	}
 	if ('\0' == state->status.cwd[1]) {
-		/* CWD is root directory - always show full path */
+		/* CWD is root directory - always show full path. */
 		state->status.cwd[0] = '\0';
 	}
 	state->status.cwd[PV_SIZEOF_CWD - 1] = '\0';
@@ -295,7 +302,7 @@ void pv_freecontents_watchfd_items(struct pvwatcheditem_s *watching, unsigned in
 
 /*
  * Truncate the output file descriptor to its current position, if it's a
- * valid fd, we're in sparse output mode, and no lseek() failed.
+ * valid fd, sparse output mode is active, and no lseek() failed.
  */
 static void pv_truncate_output(pvstate_t state)
 {
@@ -334,8 +341,8 @@ void pv_state_free(pvstate_t state)
 		return;
 
 	/*
-	 * Close the output file first, so we can report any errors while we
-	 * still know the program name and output filename.
+	 * Close the output file first, while the output filename is still
+	 * available to include in an error message.
 	 */
 	if (state->control.output_fd >= 0) {
 		pv_truncate_output(state);
@@ -494,6 +501,11 @@ void pv_state_append_to_default_format(pvstate_t state, /*@null@ */ const char *
 }
 
 
+/*
+ * Simple setter functions.
+ */
+
+
 void pv_state_force_set(pvstate_t state, bool val)
 {
 	state->control.force = val;
@@ -577,6 +589,7 @@ void pv_state_sync_after_write_set(pvstate_t state, bool val)
 void pv_state_direct_io_set(pvstate_t state, bool val)
 {
 	state->control.direct_io = val;
+	/* Tell pv_transfer() to take action when this value changes. */
 	state->control.direct_io_changed = true;
 }
 
@@ -721,8 +734,9 @@ void pv_state_extra_display_set(pvstate_t state, /*@null@ */ const char *val)
 void pv_state_output_set(pvstate_t state, int fd, const char *name)
 {
 	/*
-	 * Close any previous output file first, so we can report any errors
-	 * before we store the new output filename.
+	 * Close any previous output file first, before the old output
+	 * filename is replaced, so any associated error can be reported
+	 * with the right filename.
 	 */
 	pv_truncate_output(state);
 	if (state->control.output_fd >= 0 && state->control.output_fd != STDOUT_FILENO) {
@@ -740,8 +754,8 @@ void pv_state_output_set(pvstate_t state, int fd, const char *name)
 	/*
 	 * Try and make the output use non-blocking I/O.
 	 *
-	 * Note that this can cause problems with (broken) applications
-	 * such as dd when used in a pipeline.
+	 * This can cause problems with some, but not all, applications -
+	 * such as dd - when used in a pipeline.
 	 */
 	fcntl(state->control.output_fd, F_SETFL, O_NONBLOCK | fcntl(state->control.output_fd, F_GETFL));
 #endif				/* MAKE_OUTPUT_NONBLOCKING */
@@ -750,7 +764,7 @@ void pv_state_output_set(pvstate_t state, int fd, const char *name)
 	 * In sparse output mode, if the output is in append mode (>>),
 	 * explicitly lseek() to the end of the file.  Otherwise, the file
 	 * offset is not set until the first write(), which means that if
-	 * the input starts with null bytes, when we lseek() past them
+	 * the input starts with null bytes, upon lseek()ing past them
 	 * relative to the current position, the "current position" is 0
 	 * rather than the end of the file, and the file gets truncated on
 	 * exit to the wrong size.
