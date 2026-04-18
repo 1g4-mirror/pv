@@ -8,6 +8,7 @@
  * *cleanup:* fix GCC warning when using glibc 2.43 ([#180](https://codeberg.org/ivarch/pv/pulls/180))
  * *cleanup:* fix warning in pv_remote_check() stub on OpenBSD
  * *cleanup:* use dynamic line buffers for **--watchfd** process lookups
+ * *cleanup:* standardise the error reporting mechanism
  * *cleanup:* improve code comments
 
 ### 1.10.5 - 22 March 2026
