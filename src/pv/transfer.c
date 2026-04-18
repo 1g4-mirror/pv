@@ -23,20 +23,23 @@
 #include <sys/time.h>
 
 /*
- * splint note: In a few places we use "#if SPLINT" to substitute other code
- * while analysing with splint, to work around the issues it has with
+ * splint note: In a few places, "#if SPLINT" is used to substitute other
+ * code while analysing with splint, to work around the issues it has with
  * FD_ZERO, FD_SET, FD_ISSET - these macros expand to code it does not like,
  * such as using << with an fd which may be negative, or comparing an
- * unsigned integer with a size_t, and it doesn't seem to work to turn off
- * those specific warnings where these macros are used.
+ * unsigned integer with a size_t, and turning off those specific warnings
+ * where these macros are used does not work.
  */
 
 /*
  * Return >0 if data is ready to read on fd_in, or write on fd_out, before
- * "usec" microseconds have elapsed, 0 if not, or negative on error.  Either
- * or both of "fd_in" and "fd_out" may be negative to ignore that side.  If
- * fd_in_ready and/or fd_out_ready are not NULL, they will be populated with
- * true or false depending on whether data is ready on those sides.
+ * "usec" microseconds have elapsed, 0 if not, or negative on error.
+ *
+ * Either or both of "fd_in" and "fd_out" may be negative to ignore that
+ * side.
+ *
+ * If fd_in_ready and/or fd_out_ready are not NULL, they will be populated
+ * with true or false depending on whether data is ready on those sides.
  */
 static int is_data_ready(int fd_in, /*@null@ */ bool *fd_in_ready, int fd_out, /*@null@ */ bool *fd_out_ready,
 			 long usec)
@@ -104,14 +107,13 @@ static int is_data_ready(int fd_in, /*@null@ */ bool *fd_in_ready, int fd_out, /
 
 /*
  * Read up to "count" bytes from file descriptor "fd" into the buffer "buf",
- * and return the number of bytes read, like read().
+ * in chunks of no more than MAX_READ_AT_ONCE bytes at a time.
  *
- * Unlike read(), if we have read less than "count" bytes, we check to see
- * if there's any more to read, and keep trying, to make sure we fill the
- * buffer as full as we can.
+ * Keeps reading while fewer than "count" bytes were read,
+ * TRANSFER_READ_TIMEOUT seconds have not yet elapsed, and more data is
+ * available to read according to is_data_ready().
  *
- * We stop retrying if the time elapsed since this function was entered
- * reaches TRANSFER_READ_TIMEOUT seconds.
+ * Returns the total number of bytes read, or negative on error.
  */
 static ssize_t pv__transfer_read_repeated(int fd, char *buf, size_t count)
 {
@@ -132,9 +134,9 @@ static ssize_t pv__transfer_read_repeated(int fd, char *buf, size_t count)
 		nread = read(fd, buf, (size_t) (count > MAX_READ_AT_ONCE ? MAX_READ_AT_ONCE : count));	/* flawfinder: ignore */
 
 		/*
-		 * flawfinder rationale: reads stop after "count" bytes, and
-		 * we handle negative and zero results from read(), so it is
-		 * bounded to the buffer size the caller told us to use.
+		 * flawfinder rationale: reads stop after "count" bytes,
+		 * negative and zero results from read() are handled, so it
+		 * is bounded to the buffer size supplied by the caller.
 		 */
 
 		if (nread < 0)
@@ -175,23 +177,22 @@ static ssize_t pv__transfer_read_repeated(int fd, char *buf, size_t count)
 
 /*
  * Write up to "count" bytes to file descriptor "fd" from the buffer "buf",
- * and return the number of bytes written, like write().
+ * in chunks of no more than MAX_WRITE_AT_ONCE bytes at a time.
  *
- * Unlike write(), if we have written less than "count" bytes, we check to
- * see if we can write any more, and keep trying, to make sure we empty the
- * buffer as much as we can.
+ * Keeps writing while fewer than "count" bytes were written, and
+ * TRANSFER_WRITE_TIMEOUT seconds have not yet elapsed.
  *
- * While this is called after a successful write-possible select(), write() is
- * not guaranteed to succeed for _all_ sizes; we may end up returning 0 if this
- * occurs. (The first write() may return -1 / EINTR if the consumer doesn't
- * read any data before our timeout and the buffer of whatever stdout is is
- * near-full.) (see https://codeberg.org/ivarch/pv/pulls/93)
+ * Although this function is called after a successful write-possible
+ * select(), write() is not guaranteed to succeed for _all_ sizes; this
+ * function can return 0 if this occurs.  (The first write() may return -1 /
+ * EINTR if the consumer doesn't read any data before the timeout and the
+ * buffer of whatever stdout is is near-full.) (see
+ * https://codeberg.org/ivarch/pv/pulls/93)
  *
- * If "sync_after_write" is true, we call fdatasync() after each write() (or
- * fsync() if _POSIX_SYNCHRONIZED_IO is not > 0).
+ * If "sync_after_write" is true, fdatasync() is called after each write()
+ * (or fsync() if _POSIX_SYNCHRONIZED_IO is not > 0).
  *
- * We stop retrying if the time elapsed since this function was entered
- * reaches TRANSFER_WRITE_TIMEOUT seconds.
+ * Returns the total number of bytes written, or negative on error.
  */
 static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool sync_after_write)
 {
@@ -217,7 +218,7 @@ static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool
 #ifdef HAVE_FDATASYNC
 		if (sync_after_write && nwritten >= 0) {
 			/*
-			 * Ignore non IO errors, such as EBADFD (bad file
+			 * Ignore non I/O errors, such as EBADFD (bad file
 			 * descriptor), EINVAL (non syncable fd, such as a
 			 * pipe), etc - only return an error on EIO.
 			 */
@@ -236,9 +237,9 @@ static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool
 		if (nwritten < 0) {
 			if ((EINTR == errno) || (EAGAIN == errno)) {
 				/*
-				 * Interrupted by a signal - probably our
-				 * alarm or interval timer - so just return
-				 * what we've written so far.
+				 * Interrupted by a signal - probably the
+				 * alarm or interval timer - so return the
+				 * amount written so far.
 				 */
 				return total_written;
 			} else {
@@ -271,11 +272,11 @@ static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool
 		}
 
 		/*
-		 * Running the select() here seems to make PV eat a lot of
-		 * CPU in some cases, so instead we just go round the loop
-		 * again and rely on our alarm or interval timer to
-		 * interrupt us if we run out of time - also on our elapsed
-		 * time check.
+		 * Running select() here can make PV eat a lot of CPU in
+		 * some cases, so instead of using is_data_ready(), go round
+		 * the loop again and rely on the alarm or interval timer to
+		 * cause EINTR/EAGAIN, and on the elapsed time check, to
+		 * prevent endless retries.
 		 */
 		if (count > 0) {
 			debug("%s %d: %s (%ld %s, %ld %s)", "fd", fd,
@@ -295,9 +296,7 @@ static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool
 
 
 /*
- * Read some data from the given file descriptor. Returns zero if there was
- * a transient error and we need to return 0 from pv_transfer, otherwise
- * returns 1.
+ * Read some data from the given file descriptor, updating the state.
  *
  * At most, the number of bytes read will be the number of bytes remaining
  * in the input buffer, capped to the number of bytes left until
@@ -308,9 +307,9 @@ static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool
  * reads.
  *
  * If splice() was successfully used, sets state->transfer.splice_used to
- * true; if it failed, then state->transfer.splice_failed_fd is updated to
- * the current fd so splice() won't be tried again until the next input
- * file.
+ * true; if it was unsuccessfully used, then
+ * state->transfer.splice_failed_fd is updated to the current fd so splice()
+ * won't be tried again until the next input file.
  *
  * Updates state->transfer.read_position by the number of bytes read, unless
  * splice() was used, in which case it does not since there's nothing in the
@@ -321,12 +320,15 @@ static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool
  * read, regardless of whether splice() was used, since total_bytes_read is
  * what it says it is, rather than being a buffer indicator.
  *
- * On read error, updates state->status.exit_status, and if max_to_write by
- * state->control.skip_errors, tries to skip past the problem.
+ * If there is a non-transient read error, updates
+ * state->status.exit_status, and tries to skip past the problem if
+ * state->control.skip_errors is non-zero.
  *
  * If the end of the input file is reached or the error is unrecoverable,
  * sets *eof_in to true.  If all data in the buffer has been written at this
  * point, then also sets *eof_out to true.
+ *
+ * Returns zero if there was a transient error, otherwise returns 1.
  */
 static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t max_to_write)
 {
@@ -374,7 +376,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 		/*@-nullpass@ */
 		/*@-type@ */
-		/* splint doesn't know about splice */
+		/* splint doesn't know about splice. */
 		nread = splice(fd, NULL, state->control.output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
 		/*@+type@ */
 		/*@+nullpass@ */
@@ -393,12 +395,13 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 #ifdef HAVE_FDATASYNC
 			if (state->control.sync_after_write) {
 				/*
-				 * Ignore non IO errors, such as EBADFD (bad file
-				 * descriptor), EINVAL (non syncable fd, such as a
-				 * pipe), etc - only treat EIO as a failure.
-
+				 * Ignore non I/O errors, such as EBADFD
+				 * (bad file descriptor), EINVAL (non
+				 * syncable fd, such as a pipe), etc - only
+				 * treat EIO as a failure.
+				 *
 				 * Since this is a write error, not a read
-				 * error, we cannot skip it, so set
+				 * error, it can't be skipped, so set
 				 * "do_not_skip_errors".
 				 */
 				if ((fdatasync(state->control.output_fd) < 0)
@@ -409,9 +412,12 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 			}
 #endif				/* HAVE_FDATASYNC */
 		} else if ((-1 == nread) && (EAGAIN == errno)) {
-			/* nothing read yet - do nothing */
+			/* nothing read yet - do nothing. */
 		} else {
-			/* EOF might not really be EOF, it seems */
+			/*
+			 * Some other error, or splice() returned 0 - stop
+			 * using splice() on this fd.
+			 */
 			state->transfer.splice_used = false;
 		}
 	}
@@ -429,10 +435,10 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 	if (0 == nread) {
 		/*
-		 * If read returned 0, we've reached the end of this input
-		 * file.  If we've also written all the data in the transfer
-		 * buffer, we set eof_out as well, so that the main loop can
-		 * move on to the next input file.
+		 * If the read returned 0, the eof of the input fd has been
+		 * reached.  If the transfer buffer has also all been
+		 * written out, then set eof_out as well, so that the main
+		 * loop can move on to the next input file.
 		 */
 		*eof_in = true;
 		if (state->transfer.write_position >= state->transfer.read_position)
@@ -440,14 +446,14 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		return 1;
 	} else if (nread > 0) {
 		/*
-		 * Read returned >0, so we successfully read data - clear
-		 * the error counter and update our record of how much data
-		 * we've got in the buffer.
+		 * Read returned >0, so data was successfully read - clear
+		 * the error counter and update the record of how much data
+		 * is in the buffer.
 		 */
 		state->transfer.read_errors_in_a_row = 0;
 #ifdef HAVE_SPLICE
 		/*
-		 * If we used splice(), there isn't any more data in the
+		 * If splice() was used, there isn't any more data in the
 		 * buffer than there was before.
 		 */
 		if (!state->transfer.splice_used)
@@ -461,12 +467,12 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	}
 
 	/*
-	 * If we reach this point, nread<0, so there was an error.
+	 * This point is reached when nread < 0, so there was an error.
 	 */
 
 	/*
-	 * If a read error occurred but it was EINTR or EAGAIN, just wait a
-	 * bit and then return zero, since this was a transient error.
+	 * If a read error occurred but it was EINTR or EAGAIN, wait briefly
+	 * and return zero, since this was a transient error.
 	 */
 	if ((EINTR == errno) || (EAGAIN == errno)) {
 		debug("%s %d: %s: %s", "fd", fd, "transient error - waiting briefly", strerror(errno));
@@ -476,15 +482,15 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 	/*
 	 * The read error is not transient, so update the program's final
-	 * exit status, regardless of whether we're skipping errors, and
+	 * exit status, regardless of whether errors are being skipped, and
 	 * increment the error counter.
 	 */
 	state->status.exit_status |= PV_ERROREXIT_TRANSFER;
 	state->transfer.read_errors_in_a_row++;
 
 	/*
-	 * If we aren't skipping errors, show the error and pretend we
-	 * reached the end of this file.
+	 * If errors aren't being skipped, show the error, and behave as if
+	 * the end of the file was reached.
 	 */
 	if (do_not_skip_errors) {
 		pv_error("%s: %s: %s", pv_current_file_name(state), _("read failed"), strerror(errno));
@@ -502,26 +508,20 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	amount_skipped = -1;
 
 	if (!state->transfer.read_error_warning_shown) {
-		/*@-compdef@ */
 		pv_error("%s: %s: %s", pv_current_file_name(state), _("warning: read errors detected"),
 			 strerror(errno));
-		/*@+compdef@ */
-		/* splint - see previous pv_current_file_name() call. */
 		state->transfer.read_error_warning_shown = true;
 	}
 
 	orig_offset = (off_t) lseek(fd, 0, SEEK_CUR);
 
 	/*
-	 * If the file is not seekable, we can't skip past the error, so we
-	 * will have to abandon the attempt and pretend we reached the end
-	 * of the file.
+	 * If the file is not seekable, the error can't be skipped, so
+	 * report the error and behave as if the end of input had been
+	 * reached.
 	 */
 	if (0 > orig_offset) {
-		/*@-compdef@ */
 		pv_error("%s: %s: %s", pv_current_file_name(state), _("file is not seekable"), strerror(errno));
-		/*@+compdef@ */
-		/* splint - see previous pv_current_file_name() calls. */
 		*eof_in = true;
 		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;
@@ -530,7 +530,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	}
 
 	/*
-	 * If a non-zero error skip block size was given, just use that,
+	 * If a non-zero error skip block size was given, use that,
 	 * otherwise start small and ramp up based on the number of errors
 	 * in a row.
 	 */
@@ -550,7 +550,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	/*
 	 * Round the skip amount down to the start of the next block of the
 	 * skip amount size.  For instance if the skip amount is 512, but
-	 * our file offset is 257, we'll jump to 512 instead of 769.
+	 * the file offset is 257, jump to 512 instead of 769.
 	 */
 	if (amount_to_skip > 1) {
 		skip_offset = orig_offset + amount_to_skip;
@@ -561,7 +561,8 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	}
 
 	/*
-	 * Trim the skip amount so we wouldn't read too much.
+	 * Trim the skip amount to keep within bytes_can_read so as not to
+	 * read more than permitted.
 	 */
 	if (amount_to_skip > (off_t) bytes_can_read)
 		amount_to_skip = (off_t) bytes_can_read;
@@ -572,8 +573,9 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	/*@-longintegral@ */
 
 	/*
-	 * If the skip we just tried didn't work, try only skipping 1 byte
-	 * in case we were trying to go past the end of the input file.
+	 * If the skip didn't work, try only skipping 1 byte, in case the
+	 * attempt would have taken the file position past the end of the
+	 * input file.
 	 */
 	if (skip_offset < 0) {
 		amount_to_skip = 1;
@@ -590,36 +592,31 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		 */
 		*eof_in = true;
 		/*
-		 * EINVAL means the file has ended since we've tried to go
-		 * past the end of it, so we don't bother with a warning
-		 * since it just means we've reached the end anyway.
+		 * EINVAL means the file has ended due to attempting to go
+		 * past the end of it, so in that case don't report it as a
+		 * "failed to seek" error, as it just means the end of the
+		 * file was reached.
 		 */
 		if (EINVAL != errno) {
-			/*@-compdef@ */
 			pv_error("%s: %s: %s", pv_current_file_name(state), _("failed to seek past error"),
 				 strerror(errno));
-			/*@+compdef@ */
-			/* splint - see previous pv_current_file_name() calls. */
 		}
 	} else {
 		amount_skipped = skip_offset - orig_offset;
 	}
 
 	/*
-	 * If we succeeded in skipping some bytes, zero the equivalent part
+	 * If some bytes were successfully skipped, zero the equivalent part
 	 * of the transfer buffer, and update the buffer position.
 	 */
 	if (amount_skipped > 0) {
 		memset(state->transfer.transfer_buffer + state->transfer.read_position, 0, (size_t) amount_skipped);
 		state->transfer.read_position += amount_skipped;
 		if (state->control.skip_errors < 2) {
-			/*@-compdef@ */
 			pv_error("%s: %s: %ld - %ld (%ld %s)",
 				 pv_current_file_name(state),
 				 _("skipped past read error"), (long) orig_offset, (long) skip_offset,
 				 (long) amount_skipped, _("B"));
-			/*@+compdef@ */
-			/* splint - see previous pv_current_file_name() calls. */
 		}
 	} else {
 		/*
@@ -637,19 +634,19 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 /*
  * Write state->transfer.to_write bytes of data from the transfer buffer to the output.
- * Returns zero if there was a transient error and we need to return 0 from
- * pv_transfer, otherwise returns 1.
  *
  * Updates state->transfer.write_position by moving it on by the number of bytes
  * written; adds the number of bytes written to state->transfer.written; sets
  * *eof_out to true, on output EOF, or when the write position catches up
- * with the read position AND *eof_in is true (meaning we've reached the end
- * of data).
+ * with the read position AND *eof_in is true (meaning the end of data was
+ * reached).
  *
  * On error, sets *eof_out to true, sets state->transfer.written to -1, and updates
  * state->status.exit_status.
  *
  * If state->control.discard_input is true, does not actually write anything.
+ *
+ * Returns zero if there was a transient error, otherwise returns 1.
  */
 static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long *lineswritten)
 {
@@ -697,7 +694,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				 * and then ftruncate() it to its new size.
 				 *
 				 * If any step fails, mark the output not
-				 * seekable so we stop trying.
+				 * seekable, to prevent future attempts.
 				 */
 
 				/*@+longintegral@ */
@@ -722,21 +719,21 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 
 		/*
 		 * Set an interval timer or an alarm to interrupt the write
-		 * with a signal if the write takes too long, so we can
-		 * continue producing progress information.
+		 * with a signal if the write takes too long, so progress
+		 * information can continue to be produced.
 		 */
 #if HAVE_SETITIMER
 		struct itimerval new_timer;
 
 		/*@-unrecog@ */
-		/* splint doesn't know setitimer or ITIMER_REAL */
+		/* splint doesn't know setitimer or ITIMER_REAL. */
 		memset(&new_timer, 0, sizeof(new_timer));
 		new_timer.it_value.tv_sec = (time_t) (state->control.interval);
 		new_timer.it_value.tv_usec = (suseconds_t) (((long) (state->control.interval * 1000000.0)) % 1000000);
 
 		/*
-		 * We have to set the interval so that the timer continues
-		 * to repeat while writes are attempted, especially as it's
+		 * The interval has to be set so that the timer continues to
+		 * repeat while writes are attempted, especially as it's
 		 * possible that the initial timer run will expire
 		 * immediately if the period is less than 1 second.
 		 */
@@ -804,12 +801,14 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			long lines = 0;
 
 			/*
-			 * Tracking lines - either line mode, or we're
-			 * showing the last line in the display, or both.
-			 * So we need to look through what we've just
-			 * written to either count how many lines there
-			 * were, or get the content of the most recent
-			 * complete line, or both.
+			 * Tracking lines - either line mode is enabled, or
+			 * the display includes the "previous-line" format
+			 * segment ("%L"), or both.
+			 *
+			 * Look through what was just written to either
+			 * count how many lines there were, or get the
+			 * content of the most recent complete line, or
+			 * both.
 			 */
 
 			/* Allocate buffer to remember line positions. */
@@ -823,7 +822,10 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 						 strerror(errno));
 				}
 				/*@+mustfreeonly@ */
-				/* splint doesn't see we only call calloc() when line_positions is NULL. */
+				/*
+				 * splint doesn't see that calloc() is only
+				 * called when line_positions is NULL.
+				 */
 			}
 
 			if (state->control.null_terminated_lines) {
@@ -838,9 +840,8 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			     (size_t) nwritten; ptr++, state->transfer.last_output_position++) {
 				if (*ptr != separator) {
 					/*
-					 * If we're displaying the previous
-					 * line ("%L"), add to our line
-					 * buffer.
+					 * If displaying the previous line
+					 * ("%L"), add to the line buffer.
 					 */
 					if (state->display.showing_previous_line
 					    && state->display.next_line_len < PV_SIZEOF_PREVLINE_BUFFER - 1) {
@@ -854,15 +855,22 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				++lines;
 
 				/*
-				 * If we're displaying the previous line
-				 * ("%L"), update the previous-line buffer
-				 * with the line we just completed, and
-				 * start a new one.
+				 * If displaying the previous line ("%L"),
+				 * update the previous-line buffer with the
+				 * line that was just completed, and start a
+				 * new one.
 				 */
 				if (state->display.showing_previous_line) {
+					/* Clear the previous_line buffer. */
 					memset(state->display.previous_line, 0, PV_SIZEOF_PREVLINE_BUFFER);
+					/*
+					 * Limit next_line_len to the buffer
+					 * size, minus 1 for the terminating
+					 * \0.
+					 */
 					if (state->display.next_line_len > PV_SIZEOF_PREVLINE_BUFFER - 1)
 						state->display.next_line_len = PV_SIZEOF_PREVLINE_BUFFER - 1;
+					/* Update the previous_line buffer. */
 					if (state->display.next_line_len > 0) {
 						memcpy(state->display.previous_line, state->display.next_line,	/* flawfinder: ignore */
 						       state->display.next_line_len);
@@ -874,9 +882,9 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 					 * flawfinder - next_line_len is
 					 * guaranteed to be less than the
 					 * size of the previous_line buffer
-					 * since we check it just before
-					 * memcpy(), and we ensure that the
-					 * last byte in the buffer is \0.
+					 * since it's checked just before
+					 * memcpy(), and last byte in the
+					 * buffer is set to \0 by memset().
 					 */
 				}
 
@@ -907,8 +915,8 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		state->transfer.written += nwritten;
 
 		/*
-		 * If we're monitoring the output, update our copy of the
-		 * last few bytes we've written.
+		 * If displaying the bytes last written ("%A"), update the
+		 * copy of the last few bytes that were written.
 		 */
 		if (state->display.showing_last_written && (nwritten > 0)) {
 			size_t new_portion_size, old_portion_size;
@@ -947,10 +955,10 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		}
 
 		/*
-		 * If we've written all the data in the buffer, reset the
-		 * read pointer to the start, and if the input file is at
-		 * EOF, set eof_out as well to indicate that we've written
-		 * everything for this input file.
+		 * If all the data in the buffer was written, reset the read
+		 * pointer to the start, and if the input file is at EOF,
+		 * set eof_out as well to indicate that everything for this
+		 * input file has been written.
 		 */
 		if (state->transfer.write_position >= state->transfer.read_position) {
 			state->transfer.write_position = 0;
@@ -963,12 +971,13 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	}
 
 	/*
-	 * If we reach this point, nwritten<=0, so there may be an error.
+	 * This point is reached when nwritten <= 0, so there may be an
+	 * error.
 	 */
 
 	/*
 	 * If a write error occurred but it was EINTR or EAGAIN, or write(2)
-	 * blocked on first write such that nwritten == 0, just wait a bit and
+	 * blocked on first write such that nwritten == 0, wait briefly and
 	 * then return zero, since this was a transient error.
 	 */
 	if ((0 == nwritten) || (EINTR == write_errno) || (EAGAIN == write_errno)) {
@@ -982,8 +991,9 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	}
 
 	/*
-	 * SIGPIPE means we've finished. Don't output an error because it's
-	 * not really our error to report.
+	 * SIGPIPE means that no more output can be written, so behave as if
+	 * EOF was reached on input and output.  Don't output an error
+	 * because it's not an error in PV.
 	 */
 	if (EPIPE == write_errno) {
 		*eof_in = true;
@@ -992,6 +1002,11 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		debug("%s", "SIGPIPE received - setting pipe_closed");
 		return 0;
 	}
+
+	/*
+	 * Anything else should be treated as an error.  Report the error,
+	 * adjust the exit status, and mark the output as EOF.
+	 */
 
 	pv_error("%s: %s", _("write failed"), strerror(write_errno));
 	state->status.exit_status |= PV_ERROREXIT_TRANSFER;
@@ -1069,14 +1084,14 @@ static char *pv__allocate_aligned_buffer(int outfd, int infd, size_t target_size
 
 /*
  * Transfer some data from "fd" to standard output, timing out after 9/100
- * of a second.  If state->control.rate_limit is >0, and/or "allowed" is >0, only up
- * to "allowed" bytes can be written.  The variables that "eof_in" and
- * "eof_out" point to are used to flag that we've finished reading and
+ * of a second.  If state->control.rate_limit is >0, and/or "allowed" is >0,
+ * only up to "allowed" bytes can be written.  The variables that "eof_in"
+ * and "eof_out" point to are used to flag that we've finished reading and
  * writing respectively.
  *
  * Returns the number of bytes written, or negative on error (in which case
- * state->status.exit_status is updated). In line mode, the number of lines written
- * will be put into *lineswritten.
+ * state->status.exit_status is updated).  In line mode, the number of lines
+ * written will be put into *lineswritten.
  */
 ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t allowed, long *lineswritten)
 {
@@ -1095,10 +1110,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	if (state->control.direct_io_changed) {
 		if (!(*eof_in)) {
 			if (0 != fcntl(fd, F_SETFL, (state->control.direct_io ? O_DIRECT : 0) | fcntl(fd, F_GETFL))) {
-				/*@-compdef@ */
 				debug("%s: %s: %s", pv_current_file_name(state), "fcntl", strerror(errno));
-				/*@+compdef@ */
-				/* splint - see previous pv_current_file_name() calls. */
 			}
 		}
 		if (!(*eof_out)) {
@@ -1116,7 +1128,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 
 	/*
 	 * Reinitialise the error skipping variables if the file descriptor
-	 * has changed since the last time we were called.
+	 * has changed since the last time this function was called.
 	 */
 	if (fd != state->transfer.last_read_skip_fd) {
 		state->transfer.last_read_skip_fd = fd;
@@ -1141,10 +1153,10 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 
 	/*
 	 * Reallocate the buffer if the buffer size has changed
-	 * mid-transfer.  We have to do this by allocating a new buffer,
-	 * copying to it, and freeing the old one (potentially leaking
+	 * mid-transfer.  This has to be done by allocating a new buffer,
+	 * copying to it, and freeing the old one (potentially fragmenting
 	 * memory) because the buffer may need to be aligned for O_DIRECT,
-	 * and we can't realloc() an aligned buffer.
+	 * and realloc() can't guarantee the same alignment.
 	 */
 	if (state->transfer.buffer_size < state->control.target_buffer_size) {
 		char *newptr;
@@ -1152,10 +1164,11 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		    pv__allocate_aligned_buffer(state->control.output_fd, fd, state->control.target_buffer_size + 32);
 		if (NULL == newptr) {
 			/*
-			 * Reset target if realloc failed so we don't keep
-			 * trying to realloc over and over.
+			 * Reset the target buffer size to the current
+			 * buffer size if the allocation failed, to avoid
+			 * trying to reallocate repeatedly.
 			 */
-			debug("realloc: %s", strerror(errno));
+			debug("allocate aligned buffer: %s", strerror(errno));
 			state->control.target_buffer_size = state->transfer.buffer_size;
 		} else {
 			debug("%s: %ld", "buffer resized", state->transfer.buffer_size);
@@ -1167,9 +1180,8 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 				memcpy(newptr, state->transfer.transfer_buffer, state->transfer.buffer_size);	/* flawfinder: ignore */
 			}
 			/*
-			 * flawfinder rationale: number of bytes copied is
-			 * definitely always smaller than the new buffer
-			 * size.
+			 * flawfinder rationale: the number of bytes copied
+			 * is definitely always within the new buffer size.
 			 */
 			free(state->transfer.transfer_buffer);
 			state->transfer.transfer_buffer = newptr;
@@ -1197,10 +1209,9 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	}
 
 	/*
-	 * Work out how much we're allowed to write, based on the amount of
-	 * data left in the buffer.  If rate limiting is active or "allowed"
-	 * is >0, then this puts an upper limit on how much we're allowed to
-	 * write.
+	 * Calculate how much can be written this time, based on the amount
+	 * of data left in the buffer and capped based on whether rate
+	 * limiting is active or if "allowed" is > 0.
 	 */
 	state->transfer.to_write = (ssize_t) (state->transfer.read_position - state->transfer.write_position);
 	if ((state->control.rate_limit > 0) || (allowed > 0)) {
@@ -1210,8 +1221,8 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	}
 
 	/*
-	 * If we don't think we've finished writing and there's anything
-	 * we're allowed to write, look for the output becoming writable.
+	 * If there is anything waiting to be written, look for the output
+	 * becoming writable.
 	 */
 	if ((!(*eof_out)) && (state->transfer.to_write > 0)) {
 		check_write_fd = state->control.output_fd;
@@ -1231,12 +1242,9 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		}
 
 		/*
-		 * Any other error is a problem and we must report back.
+		 * Any other error is reported and causes an early return.
 		 */
-		/*@-compdef@ */
 		pv_error("%s: %s: %d: %s", pv_current_file_name(state), _("select call failed"), n, strerror(errno));
-		/*@+compdef@ */
-		/* splint - see previous pv_current_file_name() calls. */
 
 		state->status.exit_status |= PV_ERROREXIT_TRANSFER;
 
@@ -1261,8 +1269,8 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	}
 
 	/*
-	 * In line mode, only write up to and including the last newline,
-	 * so that we're writing output line-by-line.
+	 * In line mode, only write up to and including the last newline, so
+	 * that output is written line-by-line.
 	 */
 	if ((state->transfer.to_write > 0) && (state->control.linemode) && !(state->control.null_terminated_lines)) {
 		char *start;
@@ -1278,7 +1286,8 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 
 	/*
 	 * If there is data to write, and the output is ready to receive it,
-	 * and we didn't use splice() this time, write some data. 
+	 * and splice() wasn't used this time, write some data.
+	 *
 	 * Return early if there was a transient write error.
 	 */
 	if (ready_to_write
