@@ -75,7 +75,7 @@ int pv_snprintf(char *str, size_t size, const char *format, ...)
  * byte.
  *
  * Returns the intended length of the string, not including the terminating
- * '\0', i.e.  strlen(src)+strlen(dst), regardless of whether truncation
+ * '\0', i.e. strlen(src)+strlen(dst), regardless of whether truncation
  * occurred.
  *
  * Note that this implementation has the side effect that "dst" will always
@@ -110,8 +110,8 @@ size_t pv_strlcat(char *dst, const char *src, size_t dstsize)
 
 	/*
 	 * flawfinder rationale: src must explicitly be \0 terminated, so
-	 * this is up to the caller; with dst, we enforce \0 termination
-	 * before calling strlen().
+	 * this is up to the caller; with dst, \0 termination is enforced
+	 * before strlen() is called.
 	 */
 
 	available = dstsize - dstlen;
@@ -197,11 +197,12 @@ void *pv_memrchr(const void *buffer, int match, size_t length)
  * Skips ECMA-48 CSI (ESC [ ...) sequences, but any other control characters
  * are treated as printable.
  *
- * To do this, we convert it to a wide character string, and use the wide
- * character display width function "wcswidth()" on it.
+ * Internally, after skipping CSI sequences, the string is converted to a
+ * wide character string, and each wide character's width is checked with
+ * "wcswidth()".
  *
  * If NLS is disabled, or the string cannot be converted, this just returns
- * the value of "bytes".
+ * the number of bytes in the string that aren't part of CSI sequences.
  *
  * Note that this function uses internal buffers if the string is short
  * enough, otherwise it has to call malloc() and free(), so it becomes less
@@ -290,7 +291,7 @@ size_t pv_strwidth(const char *string, size_t bytes)
 	if (mbstowcs(wide_string, raw_string, 1 + wide_char_count) == (size_t) -1) {
 		debug("%s: %s: %s", "mbstowcs", raw_string, strerror(errno));
 	} else if (NULL != wide_string) {
-		/*@-unrecog@ *//* splint seems unable to see the prototype. */
+		/*@-unrecog@ *//* splint doesn't see the prototype. */
 		width = wcswidth(wide_string, wide_char_count);
 		/*@+unrecog@ */
 	} else {
@@ -309,9 +310,9 @@ size_t pv_strwidth(const char *string, size_t bytes)
 
 
 /*
- * Return true if the character is printable.  This function is used instead
- * of the macro from <ctype.h> to avoid causing versioned glibc dependencies
- * on some systems.
+ * Return true if the character is printable 7-bit ASCII.  This function is
+ * used instead of the macro from <ctype.h> to avoid causing versioned glibc
+ * dependencies on some systems.
  */
 bool pv_isprint(char c)
 {
