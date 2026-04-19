@@ -557,7 +557,6 @@ struct pvdisplay_component_s {
 int pv_main_loop(pvstate_t);
 void pv_calculate_transfer_rate(pvtransfercalc_t, readonly_pvtransferstate_t, readonly_pvcontrol_t, readonly_pvdisplay_t, bool);
 
-long pv_bound_long(long, long, long);
 long pv_seconds_remaining(const off_t, const off_t, const long double);
 void pv_si_prefix(long double *, char *, const long double, pvtransfercount_t);
 void pv_describe_amount(char *, size_t, char *, long double, char *, char *, pvtransfercount_t);

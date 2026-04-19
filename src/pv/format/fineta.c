@@ -20,7 +20,7 @@
  */
 pvdisplay_bytecount_t pv_formatter_fineta(pvformatter_args_t args)
 {
-	char content[128];		 /* flawfinder: ignore - always bounded */
+	char content[128];		 /* flawfinder: ignore - bounded by strftime(). */
 	time_t now, then;
 	struct tm *time_ptr;
 	long eta;
@@ -43,15 +43,20 @@ pvdisplay_bytecount_t pv_formatter_fineta(pvformatter_args_t args)
 	time_format = NULL;
 
 	/*
-	 * The completion clock time may be hidden by a failed localtime
-	 * lookup.
+	 * Note that the completion clock time may be hidden by a failed
+	 * localtime lookup.
 	 */
 
 	eta = pv_seconds_remaining(args->transfer->transferred - args->display->initial_offset,
 				   args->control->size - args->display->initial_offset, args->calc->current_avg_rate);
 
-	/* Bounds check - see pv_formatter_eta(). */
-	eta = pv_bound_long(eta, 0, (long) 360000000L);
+	/* The ETA must always be positive. */
+	if (eta < 0)
+		eta = 0;
+
+	/* Clamp the ETA to 7,000 years max so the date isn't too wide. */
+	if ((eta / 31536000L) > 7000L)
+		eta = 31536000L * 7000L;
 
 	/*
 	 * Only include the date if the ETA is more than 6 hours

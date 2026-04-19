@@ -234,16 +234,6 @@ void pv_screensize(unsigned int *width, unsigned int *height)
 
 
 /*
- * Return the original value x so that it has been clamped between
- * [min..max]
- */
-long pv_bound_long(long x, long min, long max)
-{
-	return x < min ? min : x > max ? max : x;
-}
-
-
-/*
  * Given how many bytes have been transferred, the total byte count to
  * transfer, and the current average transfer rate, return the estimated
  * number of seconds until completion.

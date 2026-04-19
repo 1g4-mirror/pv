@@ -16,7 +16,7 @@
  */
 pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t args)
 {
-	char content[128];		 /* flawfinder: ignore - always bounded */
+	char content[128];		 /* flawfinder: ignore - bounded in pv_snprintf(). */
 	long eta;
 
 	content[0] = '\0';
@@ -34,11 +34,13 @@ pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t args)
 	    pv_seconds_remaining((args->transfer->transferred - args->display->initial_offset),
 				 args->control->size - args->display->initial_offset, args->calc->current_avg_rate);
 
-	/*
-	 * Bounds check, to keep within the suffix buffer.  This means the
-	 * ETA will always be less than 100,000 hours.
-	 */
-	eta = pv_bound_long(eta, 0, (long) 360000000L);
+	/* The ETA must always be positive. */
+	if (eta < 0)
+		eta = 0;
+
+	/* The ETA must be under 100,000 days so it's not too wide. */
+	if ((eta / 86400L) >= 100000L)
+		eta = 100000L * 86400L - 1L;
 
 	/*
 	 * If the ETA is more than a day, include a day count as well as
