@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-19 16:49+0100\n"
+"POT-Creation-Date: 2026-04-19 17:22+0100\n"
 "PO-Revision-Date: 2026-04-06 15:34+0000\n"
 "Last-Translator: Coral Pink <coral.pink@disr.it>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -475,15 +475,15 @@ msgstr "blokada zasobów nie powiodła się"
 msgid "failed to open terminal"
 msgstr "nie udało się otworzyć terminala"
 
-#: src/pv/display.c:292
+#: src/pv/display.c:311
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnum kMGTPEZY"
 
-#: src/pv/display.c:310
+#: src/pv/display.c:329
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1063 src/pv/state.c:879 src/pv/transfer.c:1148
+#: src/pv/display.c:1082 src/pv/state.c:879 src/pv/transfer.c:1148
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 

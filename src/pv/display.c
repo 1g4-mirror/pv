@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <time.h>
 #include <unistd.h>
+#include <limits.h>
 
 #ifdef HAVE_TERMIOS_H
 #include <termios.h>
@@ -26,6 +27,10 @@
 #ifdef HAVE_TERM_H
 #include <term.h>
 #endif
+#endif
+
+#if HAVE_MATH_H
+#include <math.h>
 #endif
 
 /*
@@ -247,9 +252,23 @@ long pv_seconds_remaining(const off_t so_far, const off_t total, const long doub
 
 	amount_left = (long double) (total - so_far) / rate;
 
-	/* TODO: check whether rounding would be better here. */
+	/* Clamp the amount to a value that fits inside a long integer. */
+#ifdef LONG_MAX
+	if (amount_left > (long double) LONG_MAX)
+		amount_left = (long double) LONG_MAX;
+#endif
+#ifdef LONG_MIN
+	if (amount_left < (long double) LONG_MIN)
+		amount_left = (long double) LONG_MIN;
+#endif
 
+#if HAVE_LROUNDL
+	/*@-unrecog@ */
+	return lroundl(amount_left);
+	/*@+unrecog@ *//* splint doesn't know of lroundl(). */
+#else
 	return (long) amount_left;
+#endif
 }
 
 /*

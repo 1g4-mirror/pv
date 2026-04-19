@@ -10,6 +10,7 @@
  * *cleanup:* fix warning in pv_remote_check() stub on OpenBSD
  * *cleanup:* use dynamic line buffers for **--watchfd** process lookups
  * *cleanup:* replace the blanket 100,000-hour clamp on displayed times with a million days for timer and ETA, and 7,000 years for estimated finish time, on 64-bit systems
+ * *cleanup:* use rounding when calculating ETA, and avoid integer overflows, particularly on 32-bit systems
  * *cleanup:* standardise the error reporting mechanism
  * *cleanup:* improve code comments
 

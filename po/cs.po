@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-19 16:49+0100\n"
+"POT-Creation-Date: 2026-04-19 17:22+0100\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -455,15 +455,15 @@ msgstr "selhal pokus o uzamčení"
 msgid "failed to open terminal"
 msgstr "selhalo otevření terminálu"
 
-#: src/pv/display.c:292
+#: src/pv/display.c:311
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnum kMGTPEZY"
 
-#: src/pv/display.c:310
+#: src/pv/display.c:329
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1063 src/pv/state.c:879 src/pv/transfer.c:1148
+#: src/pv/display.c:1082 src/pv/state.c:879 src/pv/transfer.c:1148
 msgid "buffer allocation failed"
 msgstr "selhala alokace vyrovnávací paměti"
 
