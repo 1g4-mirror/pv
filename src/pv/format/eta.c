@@ -10,6 +10,8 @@
 #include "pv.h"
 #include "pv-internal.h"
 
+#include <limits.h>
+
 
 /*
  * Estimated time until completion.
@@ -17,7 +19,7 @@
 pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t args)
 {
 	char content[128];		 /* flawfinder: ignore - bounded in pv_snprintf(). */
-	long eta;
+	long eta, max_days;
 
 	content[0] = '\0';
 
@@ -39,8 +41,15 @@ pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t args)
 		eta = 0;
 
 	/* The ETA must be under 1,000,000 days so it's not too wide. */
-	if ((eta / 86400L) >= 1000000L)
-		eta = 1000000L * 86400L - 1L;
+	/* If a "long" is 32 bits, only 24,855 days will fit in it. */
+	max_days = 24855L;
+#ifdef LONG_MAX
+	if (LONG_MAX > 2147483647L)
+		max_days = 1000000;
+#endif
+
+	if ((eta / 86400L) >= max_days)
+		eta = max_days * 86400L - 1L;
 
 	/*
 	 * If the ETA is more than a day, include a day count as well as

@@ -13,6 +13,7 @@
 
 #include <string.h>
 #include <time.h>
+#include <limits.h>
 
 
 /*
@@ -23,7 +24,7 @@ pvdisplay_bytecount_t pv_formatter_fineta(pvformatter_args_t args)
 	char content[128];		 /* flawfinder: ignore - bounded by strftime(). */
 	time_t now, then;
 	struct tm *time_ptr;
-	long eta;
+	long eta, max_years;
 	const char *time_format;
 	bool show_fineta;
 
@@ -55,8 +56,15 @@ pvdisplay_bytecount_t pv_formatter_fineta(pvformatter_args_t args)
 		eta = 0;
 
 	/* Clamp the ETA to 7,000 years max so the date isn't too wide. */
-	if ((eta / 31536000L) > 7000L)
-		eta = 31536000L * 7000L;
+	/* If a "long" is 32 bits, only 68 years will fit in it. */
+	max_years = 68;
+#ifdef LONG_MAX
+	if (LONG_MAX > 2147483647L)
+		max_years = 7000;
+#endif
+
+	if ((eta / 31536000L) > max_years)
+		eta = 31536000L * max_years;
 
 	/*
 	 * Only include the date if the ETA is more than 6 hours
