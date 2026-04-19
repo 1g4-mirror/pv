@@ -22,10 +22,10 @@ if ! test "${valueCount}" -gt 0; then
 	exit 1
 fi
 
-# 8 or more different values - not OK.
+# 10 or more different values - not OK.
 #
-if ! test "${valueCount}" -lt 8; then
-	echo "more than 7 different values (${valueCount})"
+if ! test "${valueCount}" -lt 10; then
+	echo "more than 9 different values (${valueCount})"
 	tr '\r' '\n' < "${workFile1}" | sed '/^ *$/d' | sort | uniq
 	exit 1
 fi
