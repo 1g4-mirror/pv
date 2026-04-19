@@ -115,7 +115,7 @@ static int is_data_ready(int fd_in, /*@null@ */ bool *fd_in_ready, int fd_out, /
  *
  * Returns the total number of bytes read, or negative on error.
  */
-static ssize_t pv__transfer_read_repeated(int fd, char *buf, size_t count)
+static ssize_t pv__transfer__read_repeated(int fd, char *buf, size_t count)
 {
 	struct timespec start_time;
 	ssize_t total_read;
@@ -194,7 +194,7 @@ static ssize_t pv__transfer_read_repeated(int fd, char *buf, size_t count)
  *
  * Returns the total number of bytes written, or negative on error.
  */
-static ssize_t pv__transfer_write_repeated(int fd, char *buf, size_t count, bool sync_after_write)
+static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, bool sync_after_write)
 {
 	struct timespec start_time;
 	ssize_t total_written;
@@ -424,13 +424,13 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 	}
 	if (!state->transfer.splice_used) {
 		nread =
-		    pv__transfer_read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
-					       bytes_can_read);
+		    pv__transfer__read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
+						bytes_can_read);
 	}
 #else
 	nread =
-	    pv__transfer_read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
-				       bytes_can_read);
+	    pv__transfer__read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
+					bytes_can_read);
 #endif				/* HAVE_SPLICE */
 
 
@@ -755,11 +755,11 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		debug("%s", "setting alarm");
 #endif				/* HAVE_SETITIMER */
 		debug("%s: %ld %s", "beginning write attempt", (long) (state->transfer.to_write), "bytes");
-		nwritten = pv__transfer_write_repeated(state->control.output_fd,
-						       state->transfer.transfer_buffer +
-						       state->transfer.write_position,
-						       (size_t) (state->transfer.to_write),
-						       state->control.sync_after_write);
+		nwritten = pv__transfer__write_repeated(state->control.output_fd,
+							state->transfer.transfer_buffer +
+							state->transfer.write_position,
+							(size_t) (state->transfer.to_write),
+							state->control.sync_after_write);
 		if (nwritten < 0) {
 			write_errno = (int) errno;
 			debug("%s: %ld: %s", "bytes written", (long) nwritten, strerror(errno));
