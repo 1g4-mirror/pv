@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-18 22:23+0100\n"
+"POT-Creation-Date: 2026-04-19 12:59+0100\n"
 "PO-Revision-Date: 2025-10-05 20:09+0000\n"
 "Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -457,15 +457,15 @@ msgstr "kilit denemesi başarısız oldu"
 msgid "failed to open terminal"
 msgstr "terminal açılamadı"
 
-#: src/pv/display.c:302
+#: src/pv/display.c:292
 msgid "yzafpnum kMGTPEZY"
 msgstr "yzafpnum kMGTPEZY"
 
-#: src/pv/display.c:320
+#: src/pv/display.c:310
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1073 src/pv/state.c:879 src/pv/transfer.c:1148
+#: src/pv/display.c:1063 src/pv/state.c:879 src/pv/transfer.c:1148
 msgid "buffer allocation failed"
 msgstr "arabellek tahsisi başarısız oldu"
 
@@ -520,11 +520,11 @@ msgstr "b"
 msgid "B"
 msgstr "B"
 
-#: src/pv/format/eta.c:52 src/pv/format/eta.c:56
+#: src/pv/format/eta.c:54 src/pv/format/eta.c:58
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/format/fineta.c:80
+#: src/pv/format/fineta.c:85
 msgid "FIN"
 msgstr "FIN"
 
