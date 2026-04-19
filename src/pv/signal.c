@@ -522,9 +522,6 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 		/*
 		 * Don't clear TOSTOP if other "pv -c" instances were still
 		 * running when pv_crs_fini() ran.
-		 *
-		 * TODO: find a better way to determine if this is the last
-		 * "pv" left.
 		 */
 		if (pv_sig_state->control.cursor && pv_sig_state->cursor.pvcount > 1) {
 			need_to_clear_tostop = false;
