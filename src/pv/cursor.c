@@ -53,19 +53,17 @@ static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t co
 	char *tmpdir;
 	int openflags;
 
-	/* TODO: decide whether to dynamically allocate cursor->lock_file. */
-
 	cursor->lock_fd = -1;
 
 	/*
-	 * TODO: use ttyname_r() and dynamic buffer, or copy the result of
-	 * ttyname() to a dynamic buffer, because basename() may modify it.
+	 * Note that a copy is made of result of ttyname(), so it's not in a
+	 * static buffer, because basename() may modify it.
 	 */
 
-	ttydev = ttyname(fd);
-	if (!ttydev) {
+	ttydev = pv_strdup(ttyname(fd));
+	if (NULL == ttydev) {
 		if (!control->force) {
-			pv_perror("%s", _("failed to get terminal name"));
+			pv_error("%s", _("failed to get terminal name"));
 		}
 		/*
 		 * If the terminal name is unknown, then neither IPC nor a
@@ -87,9 +85,20 @@ static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t co
 	 * $TMP are rejected, and the destination buffer is bounded.
 	 */
 
-	memset(cursor->lock_file, 0, PV_SIZEOF_CRS_LOCK_FILE);
-	(void) pv_snprintf(cursor->lock_file,
-			   PV_SIZEOF_CRS_LOCK_FILE, "%s/pv-%s-%i.lock", tmpdir, basename(ttydev), (int) geteuid());
+	if (NULL != cursor->lock_file) {
+		free(cursor->lock_file);
+		cursor->lock_file = NULL;
+	}
+	(void) pv_asprintf(&(cursor->lock_file), "%s/pv-%s-%i.lock", tmpdir, basename(ttydev), (int) geteuid());
+
+	if (NULL == cursor->lock_file) {
+		pv_perror("%s: %s", ttydev, _("failed to open lock file"));
+		free(ttydev);
+		cursor->disable = true;
+		return;
+	}
+
+	free(ttydev);
 
 	/*
 	 * Pawel Piatek - not everyone has O_NOFOLLOW, e.g. AIX doesn't.
@@ -150,7 +159,8 @@ static void pv_crs_lock(pvcursorstate_t cursor, readonly_pvcontrol_t control, in
 	}
 
 	if (cursor->lock_fd >= 0) {
-		debug("%s: %s", cursor->lock_file, "terminal lock file acquired");
+		debug("%s: %s", NULL == cursor->lock_file ? "(null)" : cursor->lock_file,
+		      "terminal lock file acquired");
 	} else {
 		debug("%s", "terminal lock acquired");
 	}
@@ -178,7 +188,8 @@ static void pv_crs_unlock(pvcursorstate_t cursor, int fd)
 	(void) fcntl(lock_fd, F_SETLK, &lock);
 
 	if (cursor->lock_fd >= 0) {
-		debug("%s: %s", cursor->lock_file, "terminal lock file released");
+		debug("%s: %s", NULL == cursor->lock_file ? "(null)" : cursor->lock_file,
+		      "terminal lock file released");
 	} else {
 		debug("%s", "terminal lock released");
 	}
@@ -381,7 +392,10 @@ void pv_crs_init(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 	int terminalfd;
 
 	cursor->lock_fd = -2;
-	cursor->lock_file[0] = '\0';
+	if (NULL != cursor->lock_file) {
+		free(cursor->lock_file);
+		cursor->lock_file = NULL;
+	}
 
 	if ((!control->cursor) || (cursor->disable))
 		return;
@@ -702,6 +716,10 @@ void pv_crs_fini(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 		 * the same time, the lock file can be removed without
 		 * further co-ordination.
 		 */
-		(void) remove(cursor->lock_file);
+		if (NULL != cursor->lock_file) {
+			(void) remove(cursor->lock_file);
+			free(cursor->lock_file);
+			cursor->lock_file = NULL;
+		}
 	}
 }

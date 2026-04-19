@@ -139,7 +139,7 @@ struct pvwatchfd_s;
 typedef /*@null@*/ struct pvwatchfd_s *pvwatchfd_t;
 
 /* String pointer, that is the only pointer to this resource, that can be null. */
-typedef /*@only@*/ /*@null@*/ char * nullable_string_t;
+typedef /*@only@*/ /*@null@*/ char * nullable_only_string_t;
 
 /*
  * Structure for holding PV internal state. Opaque outside the PV library.
@@ -163,7 +163,7 @@ struct pvstate_s {
 	 * Input files *
 	 ***************/
 	struct pvinputfiles_s {
-		/*@only@*/ /*@null@*/ nullable_string_t *filename; /* input filenames */
+		/*@only@*/ /*@null@*/ nullable_only_string_t *filename; /* input filenames */
 		unsigned int file_count;	 /* number of input files */
 	} files;
 
@@ -370,7 +370,7 @@ struct pvstate_s {
 	 * Cursor/IPC state *
 	 ********************/
 	struct pvcursorstate_s {
-		char lock_file[PV_SIZEOF_CRS_LOCK_FILE];
+		/*@only@*/ /*@null@*/ char *lock_file;	/* terminal lock filename */
 #ifdef HAVE_IPC
 		/*@keep@*/ /*@null@*/ struct pvipccursorstate_s *shared; /* data shared between instances */
 		int shmid;		 /* ID of our shared memory segment */

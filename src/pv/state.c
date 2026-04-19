@@ -812,7 +812,7 @@ void pv_state_cancel_output_if_empty_format_string(pvstate_t state)
 void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const char **input_files)
 {
 	unsigned int file_idx;
-	/*@only@ */ nullable_string_t *new_array;
+	/*@only@ */ nullable_only_string_t *new_array;
 
 	/* Free the old array and its contents, if there was one. */
 	if (NULL != state->files.filename) {

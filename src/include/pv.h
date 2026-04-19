@@ -98,11 +98,26 @@ extern double pv_percentage(off_t, const off_t);
  * String handling wrappers.
  */
 
+/* String pointer that can be null. */
+typedef /*@null@*/ char * nullable_string_ptr;
+
 /*
  * Wrapper for sprintf(), falling back to sprintf() on systems without that
  * function.
  */
 extern int pv_snprintf(char *, size_t, const char *, ...);
+
+/*
+ * Wrapper for snprintf(), falling back to sprintf() on systems without that
+ * function.
+ */
+extern int pv_snprintf(char *, size_t, const char *, ...);
+
+/*
+ * Wrapper for asprintf(), providing an equivalent on systems without that
+ * function.
+ */
+extern int pv_asprintf(nullable_string_ptr *, const char *, ...);
 
 /*
  * Implementation of strlcat() where it is unavailable: append a string to a
@@ -115,7 +130,7 @@ extern size_t pv_strlcat(char *, const char *, size_t);
  * Allocate and return a duplicate of a \0-terminated string, ensuring that
  * the duplicate is also \0-terminated.  Returns NULL on error.
  */
-/*@null@ */ /*@only@ */ extern char *pv_strdup(const char *);
+/*@null@ */ /*@only@ */ extern char *pv_strdup(const /*@null@ */ char *);
 
 /*
  * Return a pointer to the last matching character in the buffer, or NULL if

@@ -22,10 +22,10 @@
 
 
 /*
- * Wrapper for sprintf(), falling back to sprintf() on systems without that
+ * Wrapper for snprintf(), falling back to sprintf() on systems without that
  * function.
  *
- * Returns -1 if "str" or "format" are NULL or if "size" is 0.
+ * Returns -1 if "format" is NULL.
  *
  * Otherwise, ensures that the buffer "str" is always terminated with a '\0'
  * byte, before returning whatever the system's vsnprintf() or vsprintf()
@@ -36,30 +36,157 @@ int pv_snprintf(char *str, size_t size, const char *format, ...)
 	va_list ap;
 	int ret;
 
-	if (NULL == str)
+	if (NULL == format) {
+		errno = EINVAL;
 		return -1;
-	if (0 == size)
-		return -1;
-	if (NULL == format)
-		return -1;
+	}
 
-	str[0] = '\0';
+	if (NULL != str && size > 0)
+		str[0] = '\0';
 
 	va_start(ap, format);
+	/*@-nullpass@ */
 #ifdef HAVE_VSNPRINTF
 	ret = vsnprintf(str, size, format, ap);	/* flawfinder: ignore */
 #else				/* ! HAVE_VSNPRINTF */
 	ret = vsprintf(str, format, ap);    /* flawfinder: ignore */
 #endif				/* HAVE_VSNPRINTF */
+	/*@+nullpass@ *//* explicitly allowing NULL to behave as vsnprintf() does. */
 	va_end(ap);
 
-	str[size - 1] = '\0';
+	if (NULL != str && size > 0)
+		str[size - 1] = '\0';
 
 	/*
 	 * flawfinder rationale: this function replaces snprintf so
 	 * explicitly takes a non-constant format; also it explicitly
 	 * \0-terminates the output buffer, as flawfinder warns that some
 	 * sprintf() variants do not.
+	 */
+
+	return ret;
+}
+
+
+/*
+ * Wrapper for asprintf(), working around it on systems without that
+ * function.
+ *
+ * Allocates a buffer large enough for the expanded format string plus a
+ * terminating '\0' byte, points *strp to it, and returns whatever the
+ * system's vasprintf() or vsprintf() returned.
+ *
+ * Returns -1 if "strp" is NULL.
+ * Returns -1 and sets *strp to NULL if "format" is NULL.
+ */
+int pv_asprintf(nullable_string_ptr *strp, const char *format, ...)
+{
+	va_list ap;
+	char *new_string = NULL;
+	size_t new_size = 0;
+	int ret;
+
+	if (NULL == strp)
+		return -1;
+	*strp = NULL;
+	if (NULL == format)
+		return -1;
+
+#ifdef HAVE_VASPRINTF
+	va_start(ap, format);
+	/*@-unrecog@ */
+	ret = vasprintf(strp, format, ap);  /* flawfinder: ignore */
+	/*@+unrecog@ *//* splint doesn't know about vasprintf(). */
+	va_end(ap);
+	if (ret < 0)
+		return ret;
+
+	new_string = *strp;
+	new_size = (size_t) ret + 1;
+#else				/* ! HAVE_VASPRINTF */
+
+#ifdef HAVE_VSNPRINTF
+	/* Find out the required size. */
+	{
+		char tmpbuf[8];		 /* flawfinder: ignore - bounded by vsnprintf(). */
+		va_start(ap, format);
+		ret = vsnprintf(tmpbuf, 7, format, ap);	/* flawfinder: ignore */
+		va_end(ap);
+		if (ret < 0)
+			return ret;
+	}
+
+	/* Allocate a buffer big enough to include a terminating \0. */
+	new_size = (size_t) ret + 1;
+	new_string = malloc(new_size);
+	if (NULL == new_string)
+		return -1;
+	new_string[0] = '\0';
+
+	/* Generate the string. */
+	va_start(ap, format);
+	ret = vsnprintf(new_string, new_size, format, ap);	/* flawfinder: ignore */
+	va_end(ap);
+	if (ret < 0) {
+		int old_errno;
+		old_errno = errno;
+		free(new_string);
+		errno = old_errno;
+		return ret;
+	}
+	*strp = new_string;
+#else				/* ! HAVE_VSNPRINTF */
+	/*
+	 * Without vsnprintf(), determining the required size is impossible
+	 * without a buffer to write to.  The best effort here is to
+	 * allocate a large buffer, write to it, then duplicate the string
+	 * afterwards.  This means there's an arbitrary upper bound on
+	 * string size and there will be some heap fragmentation.
+	 */
+
+	/* Allocate a large buffer for the string. */
+	new_size = 16384;
+	new_string = malloc(new_size);
+	if (NULL == new_string)
+		return -1;
+	new_string[0] = '\0';
+
+	/* Generate the string. */
+	va_start(ap, format);
+	ret = vsprintf(new_string, format, ap);	/* flawfinder: ignore */
+	va_end(ap);
+	if (ret < 0) {
+		int old_errno;
+		old_errno = errno;
+		free(new_string);
+		errno = old_errno;
+		return ret;
+	}
+
+	/* Duplicate the string into a buffer just long enough for it. */
+	*strp = pv_strdup(new_string);
+	if (NULL == *strp) {
+		int old_errno;
+		old_errno = errno;
+		free(new_string);
+		errno = old_errno;
+		return -1;
+	}
+
+	/* Free the original large buffer, and use the new one instead. */
+	free(new_string);
+	new_string = *strp;
+#endif				/* HAVE_VSNPRINTF */
+#endif				/* HAVE_VASPRINTF */
+
+	/* Terminate the new string. */
+	if (NULL != new_string && new_size > 0)
+		new_string[new_size - 1] = '\0';
+
+	/*
+	 * flawfinder rationale: this function replaces asprintf so
+	 * explicitly takes a non-constant format; also it explicitly
+	 * \0-terminates the output buffer.
 	 */
 
 	return ret;
@@ -129,7 +256,7 @@ size_t pv_strlcat(char *dst, const char *src, size_t dstsize)
  */
 /*@null@ */
 /*@only@ */
-char *pv_strdup(const char *original)
+char *pv_strdup(const /*@null@ */ char *original)
 {
 	size_t length;
 	char *duplicate;
