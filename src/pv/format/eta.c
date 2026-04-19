@@ -38,9 +38,9 @@ pvdisplay_bytecount_t pv_formatter_eta(pvformatter_args_t args)
 	if (eta < 0)
 		eta = 0;
 
-	/* The ETA must be under 100,000 days so it's not too wide. */
-	if ((eta / 86400L) >= 100000L)
-		eta = 100000L * 86400L - 1L;
+	/* The ETA must be under 1,000,000 days so it's not too wide. */
+	if ((eta / 86400L) >= 1000000L)
+		eta = 1000000L * 86400L - 1L;
 
 	/*
 	 * If the ETA is more than a day, include a day count as well as
