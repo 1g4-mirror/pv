@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Check that monitoring of a simple command works.
+
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
+true "${testSubject:?not set - call this from 'make check'}"
+true "${workFile1:?not set - call this from 'make check'}"
+
+seq 1 100 | "${testSubject}" -M in -f -l -b -- sed '1~2d' >/dev/null 2>"${workFile1}"
+
+counterValue=$(tr '\r' '\n' < "${workFile1}" | awk '/[0-9]/{print int($1)}' | sed -n '$p')
+if ! test "${counterValue}" = "100"; then
+	echo "in monitor: unexpected byte counter value: ${counterValue}"
+	exit 1
+fi
+
+seq 1 100 | "${testSubject}" -M out -f -l -b -- sed '1~2d' >/dev/null 2>"${workFile1}"
+
+counterValue=$(tr '\r' '\n' < "${workFile1}" | awk '/[0-9]/{print int($1)}' | sed -n '$p')
+if ! test "${counterValue}" = "50"; then
+	echo "out monitor: unexpected byte counter value: ${counterValue}"
+	exit 1
+fi
+
+exit 0

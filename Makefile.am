@@ -97,6 +97,7 @@ tests/Modifiers_-_--size_from_file_size.test \
 tests/Modifiers_-_--size_from_dir_size.test \
 tests/Modifiers_-_--size.test \
 tests/Modifiers_-_--sync.test \
+tests/Monitor_-_Basic.test \
 tests/Sparse_-_Basic.test \
 tests/Terminal_-_Detect_width.test \
 tests/Transfer_-_--rate-limit.test \
