@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-19 12:59+0100\n"
+"POT-Creation-Date: 2026-04-19 16:49+0100\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -439,19 +439,19 @@ msgstr "Na program se nevztahuje ŽÁDNÁ ZÁRUKA, v míře povolené zákonem."
 msgid "Project web site"
 msgstr "Stránka projektu"
 
-#: src/pv/cursor.c:68
+#: src/pv/cursor.c:66
 msgid "failed to get terminal name"
 msgstr "selhalo zjištění názvu terminálu"
 
-#: src/pv/cursor.c:113
+#: src/pv/cursor.c:95 src/pv/cursor.c:122
 msgid "failed to open lock file"
 msgstr "selhalo otevření zámkového souboru"
 
-#: src/pv/cursor.c:146
+#: src/pv/cursor.c:155
 msgid "lock attempt failed"
 msgstr "selhal pokus o uzamčení"
 
-#: src/pv/cursor.c:408
+#: src/pv/cursor.c:422
 msgid "failed to open terminal"
 msgstr "selhalo otevření terminálu"
 
@@ -518,11 +518,11 @@ msgstr "b"
 msgid "B"
 msgstr "B"
 
-#: src/pv/format/eta.c:54 src/pv/format/eta.c:58
+#: src/pv/format/eta.c:63 src/pv/format/eta.c:67
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/format/fineta.c:85
+#: src/pv/format/fineta.c:93
 msgid "FIN"
 msgstr "FIN"
 

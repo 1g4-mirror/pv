@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-19 12:59+0100\n"
+"POT-Creation-Date: 2026-04-19 16:49+0100\n"
 "PO-Revision-Date: 2026-04-06 15:34+0000\n"
 "Last-Translator: Coral Pink <coral.pink@disr.it>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -458,20 +458,20 @@ msgstr "Nie udziela się GWARANCJI w zakresie dozwolonym przez prawo."
 msgid "Project web site"
 msgstr "Strona projektu"
 
-#: src/pv/cursor.c:68
+#: src/pv/cursor.c:66
 msgid "failed to get terminal name"
 msgstr "nie udało się uzyskać nazwy terminala"
 
 # "Przewidywany czas ukończenia" for ETA is too long
-#: src/pv/cursor.c:113
+#: src/pv/cursor.c:95 src/pv/cursor.c:122
 msgid "failed to open lock file"
 msgstr "nie udało się otworzyć pliku blokowania zasobów"
 
-#: src/pv/cursor.c:146
+#: src/pv/cursor.c:155
 msgid "lock attempt failed"
 msgstr "blokada zasobów nie powiodła się"
 
-#: src/pv/cursor.c:408
+#: src/pv/cursor.c:422
 msgid "failed to open terminal"
 msgstr "nie udało się otworzyć terminala"
 
@@ -539,11 +539,11 @@ msgstr "b"
 msgid "B"
 msgstr "B"
 
-#: src/pv/format/eta.c:54 src/pv/format/eta.c:58
+#: src/pv/format/eta.c:63 src/pv/format/eta.c:67
 msgid "ETA"
 msgstr "ETA"
 
-#: src/pv/format/fineta.c:85
+#: src/pv/format/fineta.c:93
 msgid "FIN"
 msgstr "FIN"
 

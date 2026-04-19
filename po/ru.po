@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-19 12:59+0100\n"
+"POT-Creation-Date: 2026-04-19 16:49+0100\n"
 "PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -440,19 +440,19 @@ msgstr ""
 msgid "Project web site"
 msgstr "Веб-сайт проекта"
 
-#: src/pv/cursor.c:68
+#: src/pv/cursor.c:66
 msgid "failed to get terminal name"
 msgstr "не удалось получить имя терминала"
 
-#: src/pv/cursor.c:113
+#: src/pv/cursor.c:95 src/pv/cursor.c:122
 msgid "failed to open lock file"
 msgstr "не удалось открыть блокирующий файл"
 
-#: src/pv/cursor.c:146
+#: src/pv/cursor.c:155
 msgid "lock attempt failed"
 msgstr "попытка блокировки не удалась"
 
-#: src/pv/cursor.c:408
+#: src/pv/cursor.c:422
 msgid "failed to open terminal"
 msgstr "не удалось открыть терминал"
 
@@ -519,11 +519,11 @@ msgstr "бит"
 msgid "B"
 msgstr "байт"
 
-#: src/pv/format/eta.c:54 src/pv/format/eta.c:58
+#: src/pv/format/eta.c:63 src/pv/format/eta.c:67
 msgid "ETA"
 msgstr "ОЖИД"
 
-#: src/pv/format/fineta.c:85
+#: src/pv/format/fineta.c:93
 msgid "FIN"
 msgstr "ЗАВЕРШ"
 
