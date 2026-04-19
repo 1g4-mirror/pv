@@ -294,7 +294,6 @@ static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, boo
 	return total_written;
 }
 
-/* TODO: make pv__transfer_read() return a boolean, for easier understanding. */
 
 /*
  * Read some data from the given file descriptor, updating the state.
@@ -329,9 +328,14 @@ static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, boo
  * sets *eof_in to true.  If all data in the buffer has been written at this
  * point, then also sets *eof_out to true.
  *
- * Returns zero if there was a transient error, otherwise returns 1.
+ * Returns true if the transfer can continue normally (meaning some data was
+ * transferred, or there was an error or an EOF that has caused the state to
+ * be updated).
+ *
+ * Returns false if there was a transient error and so the transfer should
+ * not continue, but be retried shortly instead.
  */
-static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t max_to_write)
+static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t max_to_write)
 {
 	bool do_not_skip_errors;
 	size_t bytes_can_read;
@@ -444,7 +448,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		*eof_in = true;
 		if (state->transfer.write_position >= state->transfer.read_position)
 			*eof_out = true;
-		return 1;
+		return true;
 	} else if (nread > 0) {
 		/*
 		 * Read returned >0, so data was successfully read - clear
@@ -464,7 +468,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 #endif				/* HAVE_SPLICE */
 		/* Update the counter of all bytes read so far. */
 		state->transfer.total_bytes_read += nread;
-		return 1;
+		return true;
 	}
 
 	/*
@@ -473,12 +477,12 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 
 	/*
 	 * If a read error occurred but it was EINTR or EAGAIN, wait briefly
-	 * and return zero, since this was a transient error.
+	 * and return false, since this was a transient error.
 	 */
 	if ((EINTR == errno) || (EAGAIN == errno)) {
 		debug("%s %d: %s: %s", "fd", fd, "transient error - waiting briefly", strerror(errno));
 		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
-		return 0;
+		return false;
 	}
 
 	/*
@@ -499,7 +503,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;
 		}
-		return 1;
+		return true;
 	}
 
 	/*
@@ -526,7 +530,7 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;
 		}
-		return 1;
+		return true;
 	}
 
 	/*
@@ -627,11 +631,8 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
 		}
 	}
 
-	return 1;
+	return true;
 }
-
-
-/* TODO: make pv__transfer_write() return a boolean, for easier understanding. */
 
 
 /*
@@ -648,9 +649,14 @@ static int pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_ou
  *
  * If state->control.discard_input is true, does not actually write anything.
  *
- * Returns zero if there was a transient error, otherwise returns 1.
+ * Returns true if the transfer can continue normally (meaning some data was
+ * transferred, or there was an error or an EOF that has caused the state to
+ * be updated).
+ *
+ * Returns false if there was a transient error and so the transfer should
+ * not continue, but be retried shortly instead.
  */
-static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long *lineswritten)
+static bool pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long *lineswritten)
 {
 	ssize_t nwritten;
 	int write_errno;
@@ -663,7 +669,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		state->status.exit_status |= PV_ERROREXIT_MEMORY;
 		*eof_out = true;
 		state->transfer.written = -1;
-		return 1;
+		return true;
 	}
 
 	nwritten = 0;
@@ -968,7 +974,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 				*eof_out = true;
 		}
 
-		return 1;
+		return true;
 	}
 
 	/*
@@ -988,7 +994,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 			debug("%s: %s", "transient write error - waiting briefly", strerror(write_errno));
 		}
 		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
-		return 0;
+		return false;
 	}
 
 	/*
@@ -1001,7 +1007,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 		*eof_out = true;
 		state->flags.pipe_closed = 1;
 		debug("%s", "SIGPIPE received - setting pipe_closed");
-		return 0;
+		return false;
 	}
 
 	/*
@@ -1014,7 +1020,7 @@ static int pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, long
 	*eof_out = true;
 	state->transfer.written = -1;
 
-	return 1;
+	return true;
 }
 
 
@@ -1261,9 +1267,9 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * NB this can update state->transfer.written because of splice().
 	 */
 	if (ready_to_read) {
-		if (pv__transfer_read(state, fd, eof_in, eof_out, allowed) == 0) {
+		if (!pv__transfer_read(state, fd, eof_in, eof_out, allowed)) {
 			debug("%s %d: %s (%s=%s, %s=%s, %s=%lu)", "fd", fd,
-			      "early return 0 - pv__transfer_read returned 0", "eof_in", eof_in ? "true" : "false",
+			      "early return 0 - pv__transfer_read returned false", "eof_in", eof_in ? "true" : "false",
 			      "eof_out", eof_out ? "true" : "false", "allowed", (unsigned long) allowed);
 			return 0;
 		}
@@ -1298,9 +1304,9 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	    && (state->transfer.read_position > state->transfer.write_position)
 	    && (state->transfer.to_write > 0)
 	    && (NULL != lineswritten)) {
-		if (pv__transfer_write(state, eof_in, eof_out, lineswritten) == 0) {
+		if (!pv__transfer_write(state, eof_in, eof_out, lineswritten)) {
 			debug("%s %d: %s (%s=%s, %s=%s, %s=%lu)", "fd", fd,
-			      "early return 0 - pv__transfer_write returned 0", "eof_in", eof_in ? "true" : "false",
+			      "early return 0 - pv__transfer_write returned false", "eof_in", eof_in ? "true" : "false",
 			      "eof_out", eof_out ? "true" : "false", "lineswritten", (unsigned long) lineswritten);
 			return 0;
 		}
