@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-19 17:22+0100\n"
+"POT-Creation-Date: 2026-04-19 21:48+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -469,7 +469,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:1082 src/pv/state.c:879 src/pv/transfer.c:1148
+#: src/pv/display.c:1082 src/pv/state.c:879 src/pv/transfer.c:1154
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
@@ -520,7 +520,7 @@ msgstr "B/s"
 msgid "b"
 msgstr ""
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:618
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:622
 msgid "B"
 msgstr ""
 
@@ -571,47 +571,47 @@ msgstr ""
 msgid "file list allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:497
+#: src/pv/transfer.c:501
 msgid "read failed"
 msgstr "erro de leitura"
 
-#: src/pv/transfer.c:512
+#: src/pv/transfer.c:516
 msgid "warning: read errors detected"
 msgstr "aviso: erros de leitura detectados"
 
-#: src/pv/transfer.c:524
+#: src/pv/transfer.c:528
 msgid "file is not seekable"
 msgstr "não pode mover dentro do arquivo"
 
-#: src/pv/transfer.c:601
+#: src/pv/transfer.c:605
 msgid "failed to seek past error"
 msgstr "não pode ir além do erro"
 
-#: src/pv/transfer.c:617
+#: src/pv/transfer.c:621
 msgid "skipped past read error"
 msgstr "ignorado erro de leitura"
 
-#: src/pv/transfer.c:662
+#: src/pv/transfer.c:668
 msgid "no transfer buffer allocated"
 msgstr ""
 
-#: src/pv/transfer.c:750
+#: src/pv/transfer.c:756
 msgid "failed to set interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:776
+#: src/pv/transfer.c:782
 msgid "failed to clear interval timer"
 msgstr ""
 
-#: src/pv/transfer.c:823
+#: src/pv/transfer.c:829
 msgid "line position buffer allocation failed"
 msgstr ""
 
-#: src/pv/transfer.c:1012
+#: src/pv/transfer.c:1018
 msgid "write failed"
 msgstr "erro de gravação"
 
-#: src/pv/transfer.c:1248
+#: src/pv/transfer.c:1254
 msgid "select call failed"
 msgstr "erro na chamada da função select"
 
