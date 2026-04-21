@@ -831,6 +831,12 @@ that file may look like it has stopped growing if inspected with
 reports progress. This is because of the way sparse output is achieved,
 and the file will be the correct size when the transfer ends.
 
+If **pv** is writing to a pipe, and the command reading that pipe exits,
+**pv** will only know that has happened when it *next* receives some
+input data to transfer. So "**echo \| pv \| sleep 1**" will wait
+forever, but "**{ echo; sleep 3; echo; } \| pv \| sleep 1**" will end
+after 3 seconds when **pv** tries to transfer the second line of input.
+
 # REPORTING BUGS
 
 Please report bugs or feature requests via the issue tracker linked from

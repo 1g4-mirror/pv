@@ -1,4 +1,4 @@
-.TH PV 1 2026-04-19 pv-1.11.0 "User Commands"
+.TH PV 1 2026-04-21 pv-1.11.0 "User Commands"
 .\"
 .SH NAME
 pv \- monitor and manage the progress of data through a pipe
@@ -877,6 +877,14 @@ a file, that file may look like it has stopped growing if inspected with
 reports progress.
 This is because of the way sparse output is achieved, and the file will be
 the correct size when the transfer ends.
+.PP
+If \fBpv\fR is writing to a pipe, and the command reading that pipe exits,
+\fBpv\fR will only know that has happened when it \fInext\fR receives some
+input data to transfer.
+So \*(lq\fBecho\~|\~pv\~|\~sleep\~1\fR\*(rq will wait forever, but
+\*(lq\fB{\~echo;\~sleep\~3;\~echo;\~}\~|\~pv\~|\~sleep\~1\fR\*(rq will
+end after 3 seconds when \fBpv\fR tries to transfer the second line of
+input.
 .\"
 .SH REPORTING BUGS
 Please report bugs or feature requests via the issue tracker linked from the
