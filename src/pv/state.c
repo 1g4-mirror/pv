@@ -490,8 +490,7 @@ void pv_state_set_format_options(pvstate_t state, pvformatoptions_s format)
 
 
 /*
- * Append the given string to the default format, and trigger a format
- * reparse.
+ * Append a string to the default format, and trigger a format reparse.
  */
 void pv_state_append_to_default_format(pvstate_t state, /*@null@ */ const char *val)
 {

@@ -81,9 +81,9 @@ struct opts_s {
 	unsigned int width;            /* screen width */
 	unsigned int height;           /* screen height */
 	unsigned int argc;             /* number of non-option arguments */
-	unsigned int argv_length;      /* allocated array size */
+	unsigned int argv_length;      /* allocated array size for non-option arguments */
 	unsigned int watchfd_count;	       /* number of watchfd items */
-	unsigned int watchfd_length;	       /* allocated array size */
+	unsigned int watchfd_length;	       /* allocated watchfd item array size */
 	pvaction_t action;	       /* the program action to perform */
 	pvside_t side;		       /* which side of the monitored command to monitor */
 	bool progress;                 /* progress bar flag */

@@ -63,27 +63,27 @@ typedef enum {
 extern bool pv_isdigit(char);
 
 /*
- * Return the given string converted to a double, for use as a time
+ * Return the numeric value of a string representing a positive decimal time
  * interval.
  */
 extern double pv_getnum_interval(const char *);
 
 /*
- * Return the given string converted to an off_t, for use as a size,
- * optionally interpreting suffixes in decimal units (multiples of 1000)
- * instead of multiples of 1024.
+ * Return the numeric value of a string representing a size, interpreting
+ * suffixes in decimal units (multiples of 1000) instead of multiples of
+ * 1024 if the second argument is true.
  */
 extern off_t pv_getnum_size(const char *, bool);
 
 /*
- * Return the given string converted to an unsigned integer, for use as a
- * count such as screen width.
+ * Return the numeric value of a string representing a count such as screen
+ * width, interpreting it the same way as pv_getnum_size().
  */
 extern unsigned int pv_getnum_count(const char *, bool);
 
 /*
- * Return true if the given string is a number of the given type.  NB an
- * integer is both a valid integer and a valid double.
+ * Return true if the given string is a number of the given type.  Note that
+ * an integer is both a valid integer and a valid double.
  */
 extern bool pv_getnum_check(const char *, pv_numtype);
 
@@ -100,12 +100,6 @@ extern double pv_percentage(off_t, const off_t);
 
 /* String pointer that can be null. */
 typedef /*@null@*/ char * nullable_string_ptr;
-
-/*
- * Wrapper for sprintf(), falling back to sprintf() on systems without that
- * function.
- */
-extern int pv_snprintf(char *, size_t, const char *, ...);
 
 /*
  * Wrapper for snprintf(), falling back to sprintf() on systems without that
@@ -144,7 +138,7 @@ extern size_t pv_strlcat(char *, const char *, size_t);
 extern size_t pv_strwidth(const char *, size_t);
 
 /*
- * Return true if the character is printable.
+ * Return true if the character is printable 7-bit ASCII.
  */
 extern bool pv_isprint(char);
 
@@ -160,7 +154,7 @@ extern bool pv_isprint(char);
  */
 void pv_elapsedtime_read(struct timespec *);
 
-/* Set the time in the given timespec to zero. */
+/* Set the time in the timespec to zero. */
 void pv_elapsedtime_zero(struct timespec *);
 
 /* Copy the second timespec into the first.  Analogous to strcpy(3). */
@@ -175,7 +169,7 @@ int pv_elapsedtime_compare(const struct timespec *, const struct timespec *);
 /* Add the latter two timespecs and store them in the first timespec. */
 void pv_elapsedtime_add(struct timespec *, const struct timespec *, const struct timespec *);
 
-/* Add a number of nanoseconds to the given timespec. */
+/* Add a number of nanoseconds to a timespec. */
 void pv_elapsedtime_add_nsec(struct timespec *, long long);
 
 /* Set the first timespec to the second minus the third. */
@@ -193,17 +187,21 @@ void pv_nanosleep(long long);
  */
 
 /*
- * Set the prefix (program name) for any PV error messages.
+ * Set the error message prefix.  If the new prefix is NULL, the current
+ * prefix is cleared.
  */
 extern void pv_set_error_prefix(/*@null@ */ const char *);
 
 /*
- * Report an error.
+ * Output an error message.  If anything has been sent to the terminal
+ * already, then put a newline before the message, to avoid writing over
+ * what was sent earlier.
  */
 extern void pv_error(char *, ...);
 
 /*
- * Report an error, suffixed with the system error message for errno.
+ * Output an error message, like pv_error(), but following the message with
+ * a colon, a space, and the result of strerror(errno).
  */
 extern void pv_perror(char *, ...);
 
@@ -235,7 +233,7 @@ typedef struct {
 } pvformatoptions_s;
 extern void pv_state_set_format_options(pvstate_t, pvformatoptions_s);
 
-/* Append a string to the default format. */
+/* Append a string to the default format, and trigger a format reparse. */
 void pv_state_append_to_default_format(pvstate_t, /*@null@ */ const char *);
 
 /*
@@ -281,12 +279,13 @@ extern void pv_state_inputfiles(pvstate_t, unsigned int, const char **);
 extern void pv_state_watchfds(pvstate_t, unsigned int, const pid_t *, const int *);
 
 /*
- * Work out whether we are in the foreground.
+ * Return true if either this is the foreground process on the terminal, or
+ * if the output is not a terminal; false otherwise.
  */
 extern bool pv_in_foreground(void);
 
 /*
- * Work out the terminal size.
+ * Populate *width and *height with the current terminal size.
  */
 extern void pv_screensize(unsigned int *width, unsigned int *height);
 
