@@ -35,7 +35,13 @@ extern "C" {
 #define TRANSFER_WRITE_TIMEOUT	0.9L		 /* seconds to time writes out at */
 #define MAX_LINE_POSITIONS	100000		 /* number of lines to remember positions of */
 
+/*
+ * Whether to always try to use the whole transfer buffer, reducing the
+ * number of reads and writes at the expense of moving bytes around.
+ */
 #define MAXIMISE_BUFFER_FILL	1
+
+/* Sizes for various statically sized buffers. */
 
 #define PV_SIZEOF_DEFAULT_FORMAT	512
 #define PV_SIZEOF_CWD			4096
@@ -43,8 +49,6 @@ extern "C" {
 #define PV_SIZEOF_PREVLINE_BUFFER	1024
 #define PV_FORMAT_ARRAY_MAX		100
 #define PV_SIZEOF_FORMAT_SEGMENTS_BUF	4096
-#define PV_SIZEOF_CRS_LOCK_FILE		1024
-
 #define PV_SIZEOF_FILE_FDINFO		4096
 #define PV_SIZEOF_FILE_FD		4096
 #define PV_SIZEOF_FILE_FDPATH		4096
@@ -53,6 +57,8 @@ extern "C" {
 #define PV_BARSTYLE_MAX			4	/* number of different styles allowed in a format */
 #define PV_BARSTYLE_SIZEOF_STRING	10	/* max length of a bar constituent component in bytes */
 #define PV_BARSTYLE_MAX_FILLERS		10	/* max number of bar filler strings */
+
+/* Bit values for the extra displays bitmap. */
 
 #define PV_DISPLAY_WINDOWTITLE		1
 #define PV_DISPLAY_PROCESSTITLE		2
@@ -210,7 +216,7 @@ struct pvstate_s {
 		pvdisplay_width_t width;         /* screen width */
 		unsigned int height;             /* screen height */
 		unsigned int extra_displays;	 /* bitmask of extra display destinations */
-		pvformatoptions_s format_option; /* old-style format options (used by -R) */
+		pvformatoptions_s format_option; /* non "--format" format options (used by -R) */
 		bool force;                      /* display even if not on terminal */
 		bool cursor;                     /* use cursor positioning */
 		bool numeric;                    /* numeric output only */
@@ -222,11 +228,11 @@ struct pvstate_s {
 		bool null_terminated_lines;      /* lines are null-terminated */
 		bool no_display;                 /* do nothing other than pipe data */
 		bool no_splice;                  /* never use splice() */
-		bool stop_at_size;               /* set if we stop at "size" bytes */
-		bool sync_after_write;           /* set if we sync after every write */
-		bool direct_io;                  /* set if O_DIRECT is to be used */
-		bool direct_io_changed;          /* set when direct_io is changed */
-		bool sparse_output;		 /* set if we leave holes in the output */
+		bool stop_at_size;               /* transfer is to stop at "size" bytes */
+		bool sync_after_write;           /* sync after every write */
+		bool direct_io;                  /* use O_DIRECT */
+		bool direct_io_changed;          /* set when direct_io is changed mid-transfer */
+		bool sparse_output;		 /* convert runs of null bytes into holes */
 		bool discard_input;              /* write nothing to stdout */
 		bool show_stats;		 /* show statistics on exit */
 		bool width_set_manually;	 /* width was set manually, not detected */
@@ -266,8 +272,8 @@ struct pvstate_s {
 	 *******************/
 	struct pvtransientflags_s {
 		volatile sig_atomic_t reparse_display;	 /* whether to re-check format string */
-		volatile sig_atomic_t terminal_resized;	 /* whether we need to get term size again */
-		volatile sig_atomic_t trigger_exit;	 /* whether we need to abort right now */
+		volatile sig_atomic_t terminal_resized;	 /* whether terminal size needs re-reading */
+		volatile sig_atomic_t trigger_exit;	 /* whether an immediate abort is required */
 		volatile sig_atomic_t clear_tty_tostop_on_exit;	/* whether to clear tty TOSTOP on exit */
 		volatile sig_atomic_t suspend_stderr;	 /* whether writing to stderr is suspended */
 		volatile sig_atomic_t skip_next_sigcont; /* whether to ignore the next SIGCONT */
@@ -303,18 +309,18 @@ struct pvstate_s {
 
 		/*@only@*/ /*@null@*/ char *display_buffer;	/* buffer for display string */
 		off_t initial_offset;			 /* offset when first opened (when watching fds) */
-		size_t next_line_len;				 /* length of currently receiving line so far */
+		size_t next_line_len;			 /* length of currently receiving line so far */
 
 		size_t format_segment_count;	 /* number of format string segments */
 
 		pvtransfercount_t count_type;	 /* type of count for transfer, rate, etc */
 
-		pvdisplay_width_t prev_screen_width;	 /* screen width last time we were called */
+		pvdisplay_width_t prev_screen_width;	 /* screen width last time pv_display() was called */
 
 		pvdisplay_bytecount_t display_buffer_size;	/* size allocated to display buffer */
 		pvdisplay_bytecount_t display_string_bytes;	/* byte length of string in display buffer */
 		pvdisplay_width_t display_string_width;		/* displayed width of string in display buffer */
-		pvdisplay_bytecount_t lastwritten_bytes;	 /* largest number of last-written bytes to show */
+		pvdisplay_bytecount_t lastwritten_bytes;	/* largest number of last-written bytes to show */
 
 		bool showing_timer;		 /* set if showing timer */
 		bool showing_bytes;		 /* set if showing byte/line count */
@@ -373,17 +379,17 @@ struct pvstate_s {
 		/*@only@*/ /*@null@*/ char *lock_file;	/* terminal lock filename */
 #ifdef HAVE_IPC
 		/*@keep@*/ /*@null@*/ struct pvipccursorstate_s *shared; /* data shared between instances */
-		int shmid;		 /* ID of our shared memory segment */
+		int shmid;		 /* ID of the shared memory segment */
 		int pvcount;		 /* number of `pv' processes in total */
 		int pvmax;		 /* highest number of `pv's seen */
 		int y_lastread;		 /* last value of _y_top seen */
 		int y_offset;		 /* our Y offset from this top position */
-		int needreinit;		 /* counter if we need to reinit cursor pos */
+		int needreinit;		 /* counter for reinitialising cursor position */
 #endif				/* HAVE_IPC */
 		int lock_fd;		 /* fd of lockfile, -1 if none open */
 		int y_start;		 /* our initial Y coordinate */
 #ifdef HAVE_IPC
-		bool noipc;		 /* set if we can't use IPC */
+		bool noipc;		 /* set if IPC can't be used */
 #endif				/* HAVE_IPC */
 		bool disable;		 /* set if cursor positioning can't be used */
 	} cursor;
@@ -400,14 +406,14 @@ struct pvstate_s {
 	 * buffer_size equal to control.target_buffer_size.
 	 *
 	 * Data from the input files is read into the buffer; read_position
-	 * is the offset in the buffer that we've read data up to.
+	 * is the offset in the buffer that data has been read up to.
 	 *
 	 * Data is written to the output from the buffer, and write_position
-	 * is the offset in the buffer that we've written data up to.  It
+	 * is the offset in the buffer that data has been written up to.  It
 	 * will always be less than or equal to read_position.
 	 */
 	struct pvtransferstate_s {
-		long double elapsed_seconds;	 /* how long we have been transferring data for */
+		long double elapsed_seconds;	 /* how long the transfer has been running for */
 		/*@only@*/ /*@null@*/ char *transfer_buffer;	 /* data transfer buffer */
 		size_t buffer_size;		 /* size of buffer */
 		size_t read_position;		 /* amount of data in buffer */
@@ -432,19 +438,19 @@ struct pvstate_s {
 		off_t last_output_position;	 /* write position last sent to output */
 
 		/*
-		 * While reading from a file descriptor we keep track of how
-		 * many times in a row we've seen errors
-		 * (read_errors_in_a_row), and whether or not we have put a
-		 * warning on stderr about read errors on this fd
+		 * While reading from a file descriptor, a count is kept of
+		 * how many times in a row there have been errors
+		 * (read_errors_in_a_row), and whether or not a warning has
+		 * been written to stderr about read errors on this fd
 		 * (read_error_warning_shown).
 		 *
 		 * Whenever the active file descriptor changes from
-		 * last_read_skip_fd, we reset read_errors_in_a_row to 0 and
-		 * read_error_warning_shown to false for the new file
-		 * descriptor and set last_read_skip_fd to the new fd
-		 * number.
+		 * last_read_skip_fd, the read_errors_in_a_row is reset to 0
+		 * and read_error_warning_shown is set to false for the new
+		 * file descriptor, and last_read_skip_fd is set to the new
+		 * fd number.
 		 *
-		 * This way, we're treating each input file separately.
+		 * This allows each input file to be treated separately.
 		 */
 		off_t read_errors_in_a_row;
 		int last_read_skip_fd;
@@ -453,10 +459,10 @@ struct pvstate_s {
 		/*
 		 * These variables are used to keep track of whether
 		 * splice() was used; splice_failed_fd is the file
-		 * descriptor that splice() last failed on, so that we don't
-		 * keep trying to use it on an fd that doesn't support it,
-		 * and splice_used is set to true if splice() was used this
-		 * time within pv_transfer().
+		 * descriptor that splice() last failed on, to avoid
+		 * continuing to try using it on an fd that doesn't support
+		 * it, and splice_used is set to true if splice() was used
+		 * this time within pv_transfer().
 		 */
 		int splice_failed_fd;
 		bool splice_used;
@@ -498,7 +504,7 @@ struct pvwatchfd_s {
 	struct stat sb_fd_link;		 /* lstat of fd symlink */
 	off_t size;			 /* size of whole file, 0 if unknown */
 	off_t position;			 /* position last seen at */
-	struct timespec start_time;	 /* time we started watching the fd */
+	struct timespec start_time;	 /* time the watch of this fd began */
 	struct timespec end_time;	 /* time the fd was marked as closed */
 	struct timespec total_stoppage_time;	 /* total time spent stopped */
 	pid_t watch_pid;		 /* PID the fd belongs to */
