@@ -186,10 +186,11 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 	}
 	(void) pv_snprintf(info->file_fdinfo, PV_SIZEOF_FILE_FDINFO,
 			   "/proc/%u/fdinfo/%d", info->watch_pid, info->watch_fd);
-	(void) pv_snprintf(info->file_fd, PV_SIZEOF_FILE_FD, "/proc/%u/fd/%d", info->watch_pid, info->watch_fd);
+	(void) pv_snprintf(info->file_fdsymlink, PV_SIZEOF_FILE_FDSYMLINK, "/proc/%u/fd/%d", info->watch_pid,
+			   info->watch_fd);
 
 	memset(info->file_fdpath, 0, PV_SIZEOF_FILE_FDPATH);
-	if (readlink(info->file_fd, info->file_fdpath, PV_SIZEOF_FILE_FDPATH - 1) < 0) {	/* flawfinder: ignore */
+	if (readlink(info->file_fdsymlink, info->file_fdpath, PV_SIZEOF_FILE_FDPATH - 1) < 0) {	/* flawfinder: ignore */
 		/*
 		 * flawfinder: memset() has put \0 at the end already, and
 		 * readlink() is given 1 byte less than the buffer length,
@@ -202,8 +203,8 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 		return 2;
 	}
 
-	if (!((0 == stat(info->file_fd, &(info->sb_fd)))
-	      && (0 == lstat(info->file_fd, &(info->sb_fd_link))))) {
+	if (!((0 == stat(info->file_fdsymlink, &(info->sb_fd)))
+	      && (0 == lstat(info->file_fdsymlink, &(info->sb_fd_link))))) {
 		if (!automatic)
 			pv_perror("%s %u: %s %d: %s",
 				  _("pid"), info->watch_pid, _("fd"), info->watch_fd, info->file_fdpath);
@@ -245,8 +246,8 @@ bool pv_watchfd_changed(pvwatchfd_t info)
 	memset(&sb_fd, 0, sizeof(sb_fd));
 	memset(&sb_fd_link, 0, sizeof(sb_fd_link));
 
-	if ((0 == stat(info->file_fd, &sb_fd))
-	    && (0 == lstat(info->file_fd, &sb_fd_link))) {
+	if ((0 == stat(info->file_fdsymlink, &sb_fd))
+	    && (0 == lstat(info->file_fdsymlink, &sb_fd_link))) {
 		if ((sb_fd.st_dev != info->sb_fd.st_dev)
 		    || (sb_fd.st_ino != info->sb_fd.st_ino)
 		    || (sb_fd_link.st_mode != info->sb_fd_link.st_mode)

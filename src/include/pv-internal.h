@@ -50,7 +50,7 @@ extern "C" {
 #define PV_FORMAT_ARRAY_MAX		100
 #define PV_SIZEOF_FORMAT_SEGMENTS_BUF	4096
 #define PV_SIZEOF_FILE_FDINFO		4096
-#define PV_SIZEOF_FILE_FD		4096
+#define PV_SIZEOF_FILE_FDSYMLINK	4096
 #define PV_SIZEOF_FILE_FDPATH		4096
 #define PV_SIZEOF_DISPLAY_NAME		512
 
@@ -496,7 +496,7 @@ struct pvwatchfd_s {
 #ifdef __APPLE__
 #else
 	char file_fdinfo[PV_SIZEOF_FILE_FDINFO]; /* path to /proc fdinfo file */
-	char file_fd[PV_SIZEOF_FILE_FD];	 /* path to /proc fd symlink  */
+	char file_fdsymlink[PV_SIZEOF_FILE_FDSYMLINK];	 /* path to /proc fd symlink  */
 #endif
 	char file_fdpath[PV_SIZEOF_FILE_FDPATH]; /* path to file that was opened */
 	/*@keep@ */ char display_name[PV_SIZEOF_DISPLAY_NAME]; /* name to show on progress bar */
