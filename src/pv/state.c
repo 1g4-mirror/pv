@@ -190,6 +190,7 @@ void pv_state_reset(pvstate_t state)
 pvstate_t pv_state_alloc(void)
 {
 	pvstate_t state;
+	size_t try_size;
 
 	state = calloc(1, sizeof(*state));
 	if (NULL == state)
@@ -209,19 +210,35 @@ pvstate_t pv_state_alloc(void)
 
 	pv_state_reset(state);
 
+#ifdef HAVE_GETCWD
 	/*
 	 * Get the current working directory, if possible, as a base for
 	 * showing relative filenames with --watchfd.
+	 *
+	 * If this fails then --watchfd will fall back to always showing the
+	 * full path.
 	 */
-	if (NULL == getcwd(state->status.cwd, PV_SIZEOF_CWD - 1)) {
-		/* failed - will always show full path. */
-		state->status.cwd[0] = '\0';
+	for (try_size = 32; try_size <= 16384; try_size = try_size * 2) {
+		bool buffer_too_small;
+
+		/*@-mustfreeonly@ *//* splint mis-detects a memory leak here */
+		state->status.cwd = malloc(try_size);
+		/*@+mustfreeonly@ */
+		if (NULL == state->status.cwd)
+			break;
+
+		buffer_too_small = false;
+		if (NULL == getcwd(state->status.cwd, try_size)) {
+			if (errno != ERANGE)
+				buffer_too_small = true;
+			free(state->status.cwd);
+			state->status.cwd = NULL;
+		}
+
+		if (!buffer_too_small)
+			break;
 	}
-	if ('\0' == state->status.cwd[1]) {
-		/* CWD is root directory - always show full path. */
-		state->status.cwd[0] = '\0';
-	}
-	state->status.cwd[PV_SIZEOF_CWD - 1] = '\0';
+#endif	/* HAVE_GETCWD */
 
 	return state;
 }
@@ -358,6 +375,11 @@ void pv_state_free(pvstate_t state)
 	if (NULL != state->control.output_name) {
 		free(state->control.output_name);
 		state->control.output_name = NULL;
+	}
+
+	if (NULL != state->status.cwd) {
+		free(state->status.cwd);
+		state->status.cwd = NULL;
 	}
 
 	pv_freecontents_display(&(state->display));

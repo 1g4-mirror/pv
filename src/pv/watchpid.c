@@ -683,9 +683,12 @@ void pv_watchpid_setname(pvstate_t state, pvwatchfd_t info)
 	memset(info->display_name, 0, PV_SIZEOF_DISPLAY_NAME);
 
 	path_length = strlen(info->file_fdpath);	/* flawfinder: ignore */
-	cwd_length = strlen(state->status.cwd);	/* flawfinder: ignore */
+	cwd_length = 0;
+	if (NULL != state->status.cwd) {
+		cwd_length = strlen(state->status.cwd);	/* flawfinder: ignore */
+	}
 	/* flawfinder: both strings are always \0 terminated. */
-	if (cwd_length > 0 && path_length > cwd_length) {
+	if (cwd_length > 0 && path_length > cwd_length && NULL != state->status.cwd) {
 		if (0 == strncmp(info->file_fdpath, state->status.cwd, cwd_length)) {
 			file_fdpath += cwd_length + 1;
 			path_length -= cwd_length + 1;

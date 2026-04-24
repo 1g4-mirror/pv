@@ -44,7 +44,6 @@ extern "C" {
 /* Sizes for various statically sized buffers. */
 
 #define PV_SIZEOF_DEFAULT_FORMAT	512
-#define PV_SIZEOF_CWD			4096
 #define PV_SIZEOF_LASTWRITTEN_BUFFER	256
 #define PV_SIZEOF_PREVLINE_BUFFER	1024
 #define PV_FORMAT_ARRAY_MAX		100
@@ -157,7 +156,7 @@ struct pvstate_s {
 	 * Program status *
 	 ******************/
 	struct pvprogramstatus_s {
-		char cwd[PV_SIZEOF_CWD];	 /* current working directory for relative path */
+		nullable_only_string_t cwd;	 /* for relative paths in --watchfd */
 		int current_input_file;		 /* index of current file being read */
 		int exit_status; 		 /* exit status to give (0=OK) */
 		bool terminal_supports_utf8;	 /* whether the terminal supports UTF-8 */

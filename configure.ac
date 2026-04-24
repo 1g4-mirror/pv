@@ -29,6 +29,7 @@ AC_CHECK_FUNCS([getopt_long])
 AC_CHECK_FUNCS([vsnprintf vasprintf strlcat strtoul memrchr])
 AC_CHECK_FUNCS([fdatasync])
 AC_CHECK_FUNCS([fpathconf sysconf posix_memalign posix_fadvise])
+AC_CHECK_FUNCS([getcwd])
 AC_CHECK_FUNCS([nanosleep])
 AC_CHECK_FUNCS([setitimer])
 AC_CHECK_FUNCS([setproctitle])
@@ -58,7 +59,7 @@ dnl Libraries that may contain key functions.
 AC_SEARCH_LIBS([clock_gettime],[rt])
 
 dnl Items we can't do without.
-AC_CHECK_FUNCS([alarm basename clock_gettime dup2 getcwd memcpy memmove memset mkdir select setlocale strchr strerror strrchr strstr], [], [AC_MSG_ERROR([required function is missing])])
+AC_CHECK_FUNCS([alarm basename clock_gettime dup2 memcpy memmove memset mkdir select setlocale strchr strerror strrchr strstr], [], [AC_MSG_ERROR([required function is missing])])
 AC_CHECK_HEADERS([fcntl.h sys/file.h sys/time.h unistd.h], [], [AC_MSG_ERROR([required header file is missing])])
 
 dnl Make sure all the types we use are defined.
