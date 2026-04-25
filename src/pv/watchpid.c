@@ -184,11 +184,32 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 			pv_perror("%s %u", _("pid"), info->watch_pid);
 		return 1;
 	}
-	(void) pv_snprintf(info->file_fdinfo, PV_SIZEOF_FILE_FDINFO,
-			   "/proc/%u/fdinfo/%d", info->watch_pid, info->watch_fd);
-	(void) pv_snprintf(info->file_fdsymlink, PV_SIZEOF_FILE_FDSYMLINK, "/proc/%u/fd/%d", info->watch_pid,
-			   info->watch_fd);
 
+	/* Build the string containing the path to the /proc fdinfo file. */
+	if (NULL != info->file_fdinfo) {
+		free(info->file_fdinfo);
+		info->file_fdinfo = NULL;
+	}
+	if ((pv_asprintf(&(info->file_fdinfo), "/proc/%u/fdinfo/%d", info->watch_pid, info->watch_fd) < 0)
+	    || (NULL == info->file_fdinfo)) {
+		if (!automatic)
+			pv_perror("%s %u", _("pid"), info->watch_pid);
+		return 2;
+	}
+
+	/* Build the string containing the path to the /proc fd symlink. */
+	if (NULL != info->file_fdsymlink) {
+		free(info->file_fdsymlink);
+		info->file_fdsymlink = NULL;
+	}
+	if ((pv_asprintf(&(info->file_fdsymlink), "/proc/%u/fd/%d", info->watch_pid, info->watch_fd) < 0)
+	    || (NULL == info->file_fdsymlink)) {
+		if (!automatic)
+			pv_perror("%s %u", _("pid"), info->watch_pid);
+		return 2;
+	}
+
+	/* Get a string containing the path that the /proc fd symlink points to. */
 	memset(info->file_fdpath, 0, PV_SIZEOF_FILE_FDPATH);
 	if (readlink(info->file_fdsymlink, info->file_fdpath, PV_SIZEOF_FILE_FDPATH - 1) < 0) {	/* flawfinder: ignore */
 		/*
@@ -203,6 +224,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 		return 2;
 	}
 
+	/* Run stat() on the /proc fd symlink and the path it points to. */
 	if (!((0 == stat(info->file_fdsymlink, &(info->sb_fd)))
 	      && (0 == lstat(info->file_fdsymlink, &(info->sb_fd_link))))) {
 		if (!automatic)
@@ -211,8 +233,8 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 		return 3;
 	}
 
+	/* Find the size of the path pointed to. */
 	info->size = 0;
-
 	if (!filesize(info)) {
 		if (!automatic)
 			pv_error("%s %u: %s %d: %s: %s",
@@ -241,6 +263,8 @@ bool pv_watchfd_changed(pvwatchfd_t info)
 	struct stat sb_fd, sb_fd_link;
 
 	if (NULL == info)
+		return false;
+	if (NULL == info->file_fdsymlink)
 		return false;
 
 	memset(&sb_fd, 0, sizeof(sb_fd));
@@ -292,6 +316,8 @@ off_t pv_watchfd_position(pvwatchfd_t info)
 	if (pv_watchfd_changed(info))
 		return -1;
 
+	if (NULL == info->file_fdinfo)
+		return -1;
 	fptr = fopen(info->file_fdinfo, "r");	/* flawfinder: ignore */
 	/* flawfinder: trusted location (/proc). */
 	if (NULL == fptr)
@@ -422,6 +448,14 @@ void pv_freecontents_watchfd(pvwatchfd_t info)
 	pv_freecontents_calc(&(info->calc));
 	pv_freecontents_transfer(&(info->transfer));
 	pv_freecontents_display(&(info->display));
+	if (NULL != info->file_fdinfo) {
+		free(info->file_fdinfo);
+		info->file_fdinfo = NULL;
+	}
+	if (NULL != info->file_fdsymlink) {
+		free(info->file_fdsymlink);
+		info->file_fdsymlink = NULL;
+	}
 }
 
 
