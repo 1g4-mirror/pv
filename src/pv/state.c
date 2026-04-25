@@ -238,7 +238,7 @@ pvstate_t pv_state_alloc(void)
 		if (!buffer_too_small)
 			break;
 	}
-#endif	/* HAVE_GETCWD */
+#endif				/* HAVE_GETCWD */
 
 	return state;
 }
