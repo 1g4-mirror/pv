@@ -467,7 +467,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 	int fd_infos_count = 0;
 
 	if (pidfds(state, watch_pid, &fd_infos, &fd_infos_count) != 0) {
-		pv_error("%s: pidfds failed", _("pid"));
+		pv_error("%s %u: pidfds failed", _("pid"), watch_pid);
 		return -1;
 	}
 #else
@@ -497,7 +497,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 
 #ifdef __APPLE__
 	if (fd_infos_count < 1) {
-		pv_error("%s: no fds found", _("pid"));
+		pv_error("%s %u: no fds found", _("pid"), watch_pid);
 		return -1;
 	}
 	for (int i = 0; i < fd_infos_count; i++) {
