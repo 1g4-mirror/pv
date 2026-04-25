@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-25 22:05+0100\n"
+"POT-Creation-Date: 2026-04-25 22:35+0100\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -540,7 +540,7 @@ msgstr "rychlost neměřena"
 #: src/pv/watchpid.c:148 src/pv/watchpid.c:184 src/pv/watchpid.c:196
 #: src/pv/watchpid.c:208 src/pv/watchpid.c:223 src/pv/watchpid.c:232
 #: src/pv/watchpid.c:241 src/pv/watchpid.c:356 src/pv/watchpid.c:364
-#: src/pv/watchpid.c:504 src/pv/watchpid.c:513 src/pv/watchpid.c:534
+#: src/pv/watchpid.c:507 src/pv/watchpid.c:516 src/pv/watchpid.c:537
 msgid "pid"
 msgstr "pid"
 

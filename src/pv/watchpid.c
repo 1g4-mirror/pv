@@ -448,6 +448,8 @@ void pv_freecontents_watchfd(pvwatchfd_t info)
 	pv_freecontents_calc(&(info->calc));
 	pv_freecontents_transfer(&(info->transfer));
 	pv_freecontents_display(&(info->display));
+#ifdef __APPLE__
+#else
 	if (NULL != info->file_fdinfo) {
 		free(info->file_fdinfo);
 		info->file_fdinfo = NULL;
@@ -456,6 +458,7 @@ void pv_freecontents_watchfd(pvwatchfd_t info)
 		free(info->file_fdsymlink);
 		info->file_fdsymlink = NULL;
 	}
+#endif
 }
 
 
