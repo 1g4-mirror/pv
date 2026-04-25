@@ -471,16 +471,23 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 		return -1;
 	}
 #else
-	char fd_dir[512];		 /* flawfinder: ignore - zeroed, bounded with pv_snprintf(). */
+	nullable_string_ptr fd_dir = NULL;
 	DIR *dptr;
 	struct dirent *d;
 
-	memset(fd_dir, 0, sizeof(fd_dir));
-	(void) pv_snprintf(fd_dir, sizeof(fd_dir), "/proc/%u/fd", watch_pid);
+	if ((pv_asprintf(&fd_dir, "/proc/%u/fd", watch_pid) < 0) || (NULL == fd_dir)) {
+		pv_perror("%s %u", _("pid"), watch_pid);
+		return 2;
+	}
 
 	dptr = opendir(fd_dir);
-	if (NULL == dptr)
+	if (NULL == dptr) {
+		free(fd_dir);
 		return 1;
+	}
+
+	free(fd_dir);
+	fd_dir = NULL;
 #endif
 
 	array_length = *array_length_ptr;
