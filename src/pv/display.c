@@ -1373,3 +1373,14 @@ void pv_display(pvprogramstatus_t status, readonly_pvcontrol_t control, pvtransi
 		debug("%s: [%s]", "processtitle display", extra_display->display_buffer);
 	}
 }
+
+
+/*
+ * Clear the local pv__output_produced flag to indicate that the progress
+ * bar display is no longer being updated and the cursor has moved past it,
+ * so error messages don't need a preceding line any more.
+ */
+void pv_end_display(void)
+{
+	pv__output_produced = false;
+}

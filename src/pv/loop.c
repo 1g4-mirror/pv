@@ -30,6 +30,7 @@
 #endif
 
 int pv_remote_transferstate_fetch(pvstate_t, pid_t, /*@null@ */ off_t *, bool);
+void pv_end_display(void);
 
 
 #if HAVE_SQRTL
@@ -765,14 +766,19 @@ int pv_main_loop(pvstate_t state)
 			pv_tty_write(&(state->flags), "\n", 1);
 	}
 
-	if (1 == state->flags.trigger_exit)
-		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
+	/* Tell the error routines that progress bar display has finished. */
+	pv_end_display();
 
 	if (input_fd >= 0)
 		(void) close(input_fd);
 
 	/* Calculate and display the transfer statistics. */
 	pv__show_stats(state);
+
+	if (1 == state->flags.trigger_exit) {
+		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
+		pv_error("%s", _("interrupted by signal"));
+	}
 
 	return state->status.exit_status;
 }
@@ -1307,14 +1313,20 @@ int pv_watchfd_loop(pvstate_t state)
 		}
 	}
 
+      end_pv_watchfd_loop:
+
+	/* Tell the error routines that progress bar display has finished. */
+	pv_end_display();
+
 	/*
 	 * If a signal caused the end of the loop, reflect that in the
 	 * return code.
 	 */
-	if (1 == state->flags.trigger_exit)
+	if (1 == state->flags.trigger_exit) {
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
+		pv_error("%s", _("interrupted by signal"));
+	}
 
-      end_pv_watchfd_loop:
 	/* Free all allocated sub-structures. */
 	pv_freecontents_watchfd_items(watching, state->watchfd.count);
 
@@ -1448,11 +1460,16 @@ int pv_query_loop(pvstate_t state, pid_t query)
 			pv_tty_write(&(state->flags), "\n", 1);
 	}
 
-	if (1 == state->flags.trigger_exit)
-		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
+	/* Tell the error routines that progress bar display has finished. */
+	pv_end_display();
 
 	/* Calculate and display the transfer statistics. */
 	pv__show_stats(state);
+
+	if (1 == state->flags.trigger_exit) {
+		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
+		pv_error("%s", _("interrupted by signal"));
+	}
 
 	return state->status.exit_status;
 }
