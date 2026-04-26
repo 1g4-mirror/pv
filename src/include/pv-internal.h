@@ -67,6 +67,7 @@ extern "C" {
 struct pvipccursorstate_s {
 	int y_topmost;		/* terminal row of topmost "pv" instance */
 	bool tty_tostop_added;	/* whether any instance had to set TOSTOP on the terminal */
+	bool tty_echoctl_cleared;	/* whether any instance had to clear ECHOCTL on the terminal */
 };
 
 /*
@@ -272,6 +273,7 @@ struct pvstate_s {
 		volatile sig_atomic_t terminal_resized;	 /* whether terminal size needs re-reading */
 		volatile sig_atomic_t trigger_exit;	 /* whether an immediate abort is required */
 		volatile sig_atomic_t clear_tty_tostop_on_exit;	/* whether to clear tty TOSTOP on exit */
+		volatile sig_atomic_t set_tty_echoctl_on_exit;	/* whether to set tty ECHOCTL on exit */
 		volatile sig_atomic_t suspend_stderr;	 /* whether writing to stderr is suspended */
 		volatile sig_atomic_t skip_next_sigcont; /* whether to ignore the next SIGCONT */
 		volatile sig_atomic_t pipe_closed;	 /* whether the output pipe was closed */

@@ -438,6 +438,18 @@ void pv_crs_init(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 		cursor->shared->tty_tostop_added = true;
 	}
 
+#ifdef ECHOCTL
+	/*
+	 * If the terminal ECHCTL attribute was already cleared by this
+	 * process, set the flag in shared memory to let the other instances
+	 * know.
+	 */
+	if ((!cursor->noipc) && (1 == flags->set_tty_echoctl_on_exit) && (NULL != cursor->shared)) {
+		debug("%s", "propagating local set_tty_echoctl_on_exit true value to shared tty_echoctl_cleared flag");
+		cursor->shared->tty_echoctl_cleared = true;
+	}
+#endif
+
 	/*
 	 * If IPC is not being used, the current Y needs to be determined.
 	 * If IPC is being used, then the pv_crs_ipcinit() function takes
@@ -688,6 +700,21 @@ void pv_crs_fini(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 			flags->clear_tty_tostop_on_exit = 1;
 		}
 	}
+
+#ifdef ECHOCTL
+	/*
+	 * If any other "pv -c" instances have cleared the terminal ECHOCTL
+	 * attribute, set the local flag so pv_sig_fini() will know about
+	 * it.
+	 */
+	if ((!cursor->noipc) && (NULL != cursor->shared) && cursor->shared->tty_echoctl_cleared) {
+		if (0 == flags->set_tty_echoctl_on_exit) {
+			debug("%s",
+			      "propagating shared tty_echoctl_cleared true value to local set_tty_echoctl_on_exit flag");
+			flags->set_tty_echoctl_on_exit = 1;
+		}
+	}
+#endif				/* ECHOCTL */
 
 	pv_crs_ipccount(cursor);
 	if (NULL != cursor->shared) {

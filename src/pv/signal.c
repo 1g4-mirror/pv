@@ -77,6 +77,61 @@ static void pv_sig_ensure_tty_tostop()
 	}
 }
 
+
+#ifdef ECHOCTL
+/*
+ * Check whether the terminal attribute ECHOCTL is set.  If it is, clear it,
+ * and record that fact by setting "set_tty_echoctl_on_exit" to true, so
+ * that pv_sig_fini() knows to clear it again.
+ *
+ * In "-c" mode with IPC, that flag is propagated to other PV instances via
+ * the shared "tty_echoctl_cleared" flag, so those instances can set their
+ * own on-exit flag, meaning that if any of the PV instances clear it, the
+ * last one to exit will set it.
+ */
+static void pv_sig_ensure_tty_noechoctl()
+{
+	struct termios terminal_attributes;
+
+	if (NULL == pv_sig_state)
+		return;
+
+	/* Can't look at terminal flags if backgrounded. */
+	if (1 == pv_sig_state->flags.suspend_stderr)
+		return;
+
+	if (0 != tcgetattr(STDERR_FILENO, &terminal_attributes)) {
+		debug("%s: %s", "failed to read terminal attributes", strerror(errno));
+		return;
+	}
+
+	/* Can't set terminal flags if backgrounded. */
+	if (1 == pv_sig_state->flags.suspend_stderr)
+		return;
+
+	if (0 != (terminal_attributes.c_lflag & ECHOCTL)) {
+		terminal_attributes.c_lflag -= ECHOCTL;
+		if (0 == tcsetattr(STDERR_FILENO, TCSANOW, &terminal_attributes)) {
+			pv_sig_state->flags.set_tty_echoctl_on_exit = 1;
+			debug("%s", "cleared terminal ECHOCTL attribute");
+#if HAVE_IPC
+			/*
+			 * In "-c" mode with IPC, make all "pv -c" instances
+			 * aware that ECHOCTL was cleared, so the last one
+			 * can set it on exit.
+			 */
+			if (pv_sig_state->control.cursor && (NULL != pv_sig_state->cursor.shared)
+			    && (!pv_sig_state->cursor.noipc)) {
+				pv_sig_state->cursor.shared->tty_echoctl_cleared = true;
+			}
+#endif
+		} else {
+			debug("%s: %s", "failed to clear terminal ECHOCTL attribute", strerror(errno));
+		}
+	}
+}
+#endif				/* ECHOCTL */
+
 /*
  * Handle SIGTTOU (tty output for background process) by setting the flag to
  * suspend writes to stderr, to stop the terminal being interfered with when
@@ -475,6 +530,11 @@ void pv_sig_init(pvstate_t state)
 	 */
 	pv_sig_ensure_tty_tostop();
 
+#ifdef ECHOCTL
+	/* Clear the ECHOCTL terminal attribute if it's set. */
+	pv_sig_ensure_tty_noechoctl();
+#endif
+
 	/*
 	 * Handle SIGALRM by doing nothing, allowing alarms or interval
 	 * timers to interrupt blocking writes (returning EINTR).
@@ -495,6 +555,7 @@ void pv_sig_init(pvstate_t state)
 void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 {
 	bool need_to_clear_tostop = false;
+	bool need_to_set_echoctl = false;
 
 	if (NULL == pv_sig_state)
 		return;
@@ -540,7 +601,7 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 	if (need_to_clear_tostop && pv_in_foreground()) {
 		struct termios terminal_attributes;
 
-		debug("%s", "about to to clear TOSTOP terminal attribute if it is set");
+		debug("%s", "about to clear TOSTOP terminal attribute if it is set");
 
 		if (0 != tcgetattr(STDERR_FILENO, &terminal_attributes)) {
 			debug("%s: %s", "tcgetattr", strerror(errno));
@@ -555,6 +616,49 @@ void pv_sig_fini( /*@unused@ */  __attribute__((unused)) pvstate_t state)
 
 		pv_sig_state->flags.clear_tty_tostop_on_exit = 0;
 	}
+
+#ifdef ECHOCTL
+	need_to_set_echoctl = (1 == pv_sig_state->flags.set_tty_echoctl_on_exit) ? true : false;
+
+	if (pv_sig_state->control.cursor) {
+#ifdef HAVE_IPC
+		/*
+		 * Don't set ECHOCTL if other "pv -c" instances were still
+		 * running when pv_crs_fini() ran.
+		 */
+		if (pv_sig_state->control.cursor && pv_sig_state->cursor.pvcount > 1) {
+			need_to_set_echoctl = false;
+		}
+#else				/* !HAVE_IPC */
+		/*
+		 * Without IPC there's no way to tell whether other "pv -c"
+		 * instances in the pipeline have finished, so set ECHOCTL
+		 * anyway.
+		 */
+#endif				/* !HAVE_IPC */
+	}
+
+	debug("%s=%s", "need_to_set_echoctl", need_to_set_echoctl ? "true" : "false");
+
+	if (need_to_set_echoctl && pv_in_foreground()) {
+		struct termios terminal_attributes;
+
+		debug("%s", "about to set ECHOCTL terminal attribute if it is not set");
+
+		if (0 != tcgetattr(STDERR_FILENO, &terminal_attributes)) {
+			debug("%s: %s", "tcgetattr", strerror(errno));
+		} else if (0 == (terminal_attributes.c_lflag & ECHOCTL)) {
+			terminal_attributes.c_lflag |= ECHOCTL;
+			if (0 == tcsetattr(STDERR_FILENO, TCSANOW, &terminal_attributes)) {
+				debug("%s", "set TOSTOP terminal attribute");
+			} else {
+				debug("%s: %s", "failed to set TOSTOP terminal attribute", strerror(errno));
+			}
+		}
+
+		pv_sig_state->flags.clear_tty_tostop_on_exit = 0;
+	}
+#endif				/* ECHOCTL */
 }
 
 
