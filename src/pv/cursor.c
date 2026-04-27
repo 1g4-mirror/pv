@@ -44,6 +44,13 @@
 
 
 /*
+ * Flag to allow reporting of "interrupted by signal" errors - cleared in
+ * secondary instances in a pipeline, so that only one will report them.
+ */
+static bool pv__allow_signal_interrupt_reporting = true;
+
+
+/*
  * Create a per-euid, per-tty, lock file in ${TMPDIR:-${TMP:-/tmp}} for the
  * tty on the given file descriptor.
  */
@@ -360,6 +367,14 @@ static int pv_crs_ipcinit(pvcursorstate_t cursor, readonly_pvcontrol_t control, 
 		cursor->shared->tty_tostop_added = false;
 		cursor->y_lastread = cursor->y_start;
 		debug("%s", "we are the first to attach");
+	} else {
+		/*
+		 * Another process was first, so prevent the current
+		 * instance from reporting "interrupted by signal" errors
+		 * since the first one will do that.
+		 */
+		debug("%s", "not the first to attach - clearing pv__allow_signal_interrupt_reporting");
+		pv__allow_signal_interrupt_reporting = false;
 	}
 
 	cursor->y_offset = cursor->pvcount - 1;
@@ -440,7 +455,7 @@ void pv_crs_init(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 
 #ifdef ECHOCTL
 	/*
-	 * If the terminal ECHCTL attribute was already cleared by this
+	 * If the terminal ECHOCTL attribute was already cleared by this
 	 * process, set the flag in shared memory to let the other instances
 	 * know.
 	 */
@@ -749,4 +764,15 @@ void pv_crs_fini(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 			cursor->lock_file = NULL;
 		}
 	}
+}
+
+
+/*
+ * Report a signal interrupt, unless the flag allowing it has been cleared
+ * due to another instance already taking responsibility.
+ */
+void pv_report_signal_interrupt(void)
+{
+	if (pv__allow_signal_interrupt_reporting)
+		pv_error("%s", _("interrupted by signal"));
 }
