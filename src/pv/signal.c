@@ -300,14 +300,15 @@ static void pv_sig_winch( /*@unused@ */  __attribute__((unused))
 
 
 /*
- * Handle termination signals by setting the abort flag.
+ * Handle termination signals by recording which one was received, and then
+ * setting the abort flag.
  */
 static void pv_sig_term(int s)
 {
 	if (NULL == pv_sig_state)
 		return;
-	pv_sig_state->flags.trigger_exit = 1;
 	pv_sig_state->flags.terminating_signal = (sig_atomic_t) s;
+	pv_sig_state->flags.trigger_exit = 1;
 }
 
 
