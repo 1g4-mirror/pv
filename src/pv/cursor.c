@@ -771,8 +771,19 @@ void pv_crs_fini(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
  * Report a signal interrupt, unless the flag allowing it has been cleared
  * due to another instance already taking responsibility.
  */
-void pv_report_signal_interrupt(void)
+void pv_report_signal_interrupt(int signum)
 {
-	if (pv__allow_signal_interrupt_reporting)
-		pv_error("%s", _("interrupted by signal"));
+	if (pv__allow_signal_interrupt_reporting) {
+		char *signal_name = NULL;
+#ifdef HAVE_STRSIGNAL
+		/*@-unrecog @ *//* splint doesn't know strsignal(). */
+		signal_name = strsignal(signum);
+		/*@+unrecog @ */
+#endif
+		if (NULL != signal_name) {
+			pv_error("%s: %s", _("exiting due to signal"), signal_name);
+		} else {
+			pv_error("%s", _("exiting due to signal"));
+		}
+	}
 }

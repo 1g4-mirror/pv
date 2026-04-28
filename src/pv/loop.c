@@ -31,7 +31,7 @@
 
 int pv_remote_transferstate_fetch(pvstate_t, pid_t, /*@null@ */ off_t *, bool);
 void pv_end_display(void);
-void pv_report_signal_interrupt(void);
+void pv_report_signal_interrupt(int);
 
 
 #if HAVE_SQRTL
@@ -778,7 +778,7 @@ int pv_main_loop(pvstate_t state)
 
 	if (1 == state->flags.trigger_exit) {
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
-		pv_report_signal_interrupt();
+		pv_report_signal_interrupt((int) (state->flags.terminating_signal));
 	}
 
 	return state->status.exit_status;
@@ -1325,7 +1325,7 @@ int pv_watchfd_loop(pvstate_t state)
 	 */
 	if (1 == state->flags.trigger_exit) {
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
-		pv_report_signal_interrupt();
+		pv_report_signal_interrupt((int) (state->flags.terminating_signal));
 	}
 
 	/* Free all allocated sub-structures. */
@@ -1469,7 +1469,7 @@ int pv_query_loop(pvstate_t state, pid_t query)
 
 	if (1 == state->flags.trigger_exit) {
 		state->status.exit_status |= PV_ERROREXIT_SIGNAL;
-		pv_report_signal_interrupt();
+		pv_report_signal_interrupt((int) (state->flags.terminating_signal));
 	}
 
 	return state->status.exit_status;

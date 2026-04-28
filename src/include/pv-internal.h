@@ -272,6 +272,7 @@ struct pvstate_s {
 		volatile sig_atomic_t reparse_display;	 /* whether to re-check format string */
 		volatile sig_atomic_t terminal_resized;	 /* whether terminal size needs re-reading */
 		volatile sig_atomic_t trigger_exit;	 /* whether an immediate abort is required */
+		volatile sig_atomic_t terminating_signal; /* signal number that triggered an exit */
 		volatile sig_atomic_t clear_tty_tostop_on_exit;	/* whether to clear tty TOSTOP on exit */
 		volatile sig_atomic_t set_tty_echoctl_on_exit;	/* whether to set tty ECHOCTL on exit */
 		volatile sig_atomic_t suspend_stderr;	 /* whether writing to stderr is suspended */
