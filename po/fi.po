@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-25 22:35+0100\n"
+"POT-Creation-Date: 2026-04-29 19:50+0100\n"
 "PO-Revision-Date: 2026-03-24 23:25+0000\n"
 "Last-Translator: Ricky-Tigg <ricky-tigg@noreply.codeberg.org>\n"
 "Language-Team: Finnish <https://translate.codeberg.org/projects/pv/pv/fi/>\n"
@@ -444,21 +444,25 @@ msgstr "TAKUUTA EI OLE, lain sallimissa rajoissa."
 msgid "Project web site"
 msgstr "Projektin verkkosivu"
 
-#: src/pv/cursor.c:66
+#: src/pv/cursor.c:73
 msgid "failed to get terminal name"
 msgstr "päätelaitteen nimen hakeminen epäonnistui"
 
-#: src/pv/cursor.c:95 src/pv/cursor.c:122
+#: src/pv/cursor.c:102 src/pv/cursor.c:129
 msgid "failed to open lock file"
 msgstr "lukitustiedoston avaaminen epäonnistui"
 
-#: src/pv/cursor.c:155
+#: src/pv/cursor.c:162
 msgid "lock attempt failed"
 msgstr "lukitusyritys epäonnistui"
 
-#: src/pv/cursor.c:422
+#: src/pv/cursor.c:437
 msgid "failed to open terminal"
 msgstr "päätelaitteen avaaminen epäonnistui"
+
+#: src/pv/cursor.c:784 src/pv/cursor.c:786
+msgid "exiting due to signal"
+msgstr ""
 
 #: src/pv/display.c:311
 msgid "yzafpnum kMGTPEZY"
@@ -501,7 +505,7 @@ msgid "(stdin)"
 msgstr ""
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
-#: src/pv/format/rate.c:36 src/pv/loop.c:122
+#: src/pv/format/rate.c:36 src/pv/loop.c:124
 msgid "b/s"
 msgstr ""
 
@@ -511,7 +515,7 @@ msgid "/s"
 msgstr ""
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
-#: src/pv/format/rate.c:40 src/pv/loop.c:122
+#: src/pv/format/rate.c:40 src/pv/loop.c:124
 msgid "B/s"
 msgstr "T/s"
 
@@ -531,15 +535,15 @@ msgstr ""
 msgid "FIN"
 msgstr ""
 
-#: src/pv/loop.c:121
+#: src/pv/loop.c:123
 msgid "rate min/avg/max/mdev"
 msgstr ""
 
-#: src/pv/loop.c:133
+#: src/pv/loop.c:135
 msgid "rate not measured"
 msgstr "nopeutta ei mitattu"
 
-#: src/pv/loop.c:951 src/pv/loop.c:967 src/pv/loop.c:985 src/pv/remote.c:91
+#: src/pv/loop.c:958 src/pv/loop.c:974 src/pv/loop.c:992 src/pv/remote.c:91
 #: src/pv/remote.c:184 src/pv/remote.c:531 src/pv/remote.c:577
 #: src/pv/watchpid.c:121 src/pv/watchpid.c:130 src/pv/watchpid.c:141
 #: src/pv/watchpid.c:148 src/pv/watchpid.c:184 src/pv/watchpid.c:196
@@ -549,7 +553,7 @@ msgstr "nopeutta ei mitattu"
 msgid "pid"
 msgstr ""
 
-#: src/pv/loop.c:985 src/pv/watchpid.c:130 src/pv/watchpid.c:141
+#: src/pv/loop.c:992 src/pv/watchpid.c:130 src/pv/watchpid.c:141
 #: src/pv/watchpid.c:150 src/pv/watchpid.c:223 src/pv/watchpid.c:232
 #: src/pv/watchpid.c:243
 msgid "fd"
