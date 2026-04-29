@@ -48,7 +48,6 @@ extern "C" {
 #define PV_SIZEOF_PREVLINE_BUFFER	1024
 #define PV_FORMAT_ARRAY_MAX		100
 #define PV_SIZEOF_FORMAT_SEGMENTS_BUF	4096
-#define PV_SIZEOF_FILE_FDPATH		4096
 #define PV_SIZEOF_DISPLAY_NAME		512
 
 #define PV_BARSTYLE_MAX			4	/* number of different styles allowed in a format */
@@ -498,7 +497,7 @@ struct pvwatchfd_s {
 	nullable_string_ptr file_fdinfo; /* path to /proc fdinfo file */
 	nullable_string_ptr file_fdsymlink;	 /* path to /proc fd symlink  */
 #endif
-	char file_fdpath[PV_SIZEOF_FILE_FDPATH]; /* path to file that was opened */
+	nullable_string_ptr file_fdpath; /* path to file that was opened */
 	/*@keep@ */ char display_name[PV_SIZEOF_DISPLAY_NAME]; /* name to show on progress bar */
 	struct stat sb_fd;		 /* stat of fd symlink */
 	struct stat sb_fd_link;		 /* lstat of fd symlink */

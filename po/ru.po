@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-29 19:50+0100\n"
+"POT-Creation-Date: 2026-04-29 21:37+0100\n"
 "PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -468,7 +468,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:1082 src/pv/state.c:900 src/pv/transfer.c:1154
+#: src/pv/display.c:1082 src/pv/state.c:904 src/pv/transfer.c:1154
 msgid "buffer allocation failed"
 msgstr "не удалось выделить память для буфера"
 
@@ -541,17 +541,18 @@ msgstr "скорость не изменяется"
 
 #: src/pv/loop.c:958 src/pv/loop.c:974 src/pv/loop.c:992 src/pv/remote.c:91
 #: src/pv/remote.c:184 src/pv/remote.c:531 src/pv/remote.c:577
-#: src/pv/watchpid.c:121 src/pv/watchpid.c:130 src/pv/watchpid.c:141
-#: src/pv/watchpid.c:148 src/pv/watchpid.c:184 src/pv/watchpid.c:196
-#: src/pv/watchpid.c:208 src/pv/watchpid.c:223 src/pv/watchpid.c:232
-#: src/pv/watchpid.c:241 src/pv/watchpid.c:356 src/pv/watchpid.c:364
-#: src/pv/watchpid.c:507 src/pv/watchpid.c:516 src/pv/watchpid.c:537
+#: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
+#: src/pv/watchpid.c:206 src/pv/watchpid.c:218 src/pv/watchpid.c:268
+#: src/pv/watchpid.c:277 src/pv/watchpid.c:286 src/pv/watchpid.c:401
+#: src/pv/watchpid.c:409 src/pv/watchpid.c:556 src/pv/watchpid.c:565
+#: src/pv/watchpid.c:586
 msgid "pid"
 msgstr "ИДпр"
 
-#: src/pv/loop.c:992 src/pv/watchpid.c:130 src/pv/watchpid.c:141
-#: src/pv/watchpid.c:150 src/pv/watchpid.c:223 src/pv/watchpid.c:232
-#: src/pv/watchpid.c:243
+#: src/pv/loop.c:992 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
+#: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
 msgstr "дф"
 
@@ -567,7 +568,7 @@ msgstr "Этой системой не поддерживается SA_SIGINFO"
 msgid "history structure allocation failed"
 msgstr "не удалось выделить память для структуры истории"
 
-#: src/pv/state.c:852 src/pv/state.c:864
+#: src/pv/state.c:856 src/pv/state.c:868
 msgid "file list allocation failed"
 msgstr "не удалось выделить память для списка файлов"
 
@@ -615,7 +616,7 @@ msgstr "запись не удалась"
 msgid "select call failed"
 msgstr "запрос выборки не удался"
 
-#: src/pv/watchpid.c:150 src/pv/watchpid.c:243
+#: src/pv/watchpid.c:160 src/pv/watchpid.c:288
 msgid "not a regular file or block device"
 msgstr "не является обычным файлом или блочным устройством"
 

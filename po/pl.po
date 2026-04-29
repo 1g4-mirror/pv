@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-29 19:50+0100\n"
+"POT-Creation-Date: 2026-04-29 21:37+0100\n"
 "PO-Revision-Date: 2026-04-06 15:34+0000\n"
 "Last-Translator: Coral Pink <coral.pink@disr.it>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -487,7 +487,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1082 src/pv/state.c:900 src/pv/transfer.c:1154
+#: src/pv/display.c:1082 src/pv/state.c:904 src/pv/transfer.c:1154
 msgid "buffer allocation failed"
 msgstr "nie udało się zaalokować bufora"
 
@@ -561,17 +561,18 @@ msgstr "prędkość niezmierzona"
 
 #: src/pv/loop.c:958 src/pv/loop.c:974 src/pv/loop.c:992 src/pv/remote.c:91
 #: src/pv/remote.c:184 src/pv/remote.c:531 src/pv/remote.c:577
-#: src/pv/watchpid.c:121 src/pv/watchpid.c:130 src/pv/watchpid.c:141
-#: src/pv/watchpid.c:148 src/pv/watchpid.c:184 src/pv/watchpid.c:196
-#: src/pv/watchpid.c:208 src/pv/watchpid.c:223 src/pv/watchpid.c:232
-#: src/pv/watchpid.c:241 src/pv/watchpid.c:356 src/pv/watchpid.c:364
-#: src/pv/watchpid.c:507 src/pv/watchpid.c:516 src/pv/watchpid.c:537
+#: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
+#: src/pv/watchpid.c:206 src/pv/watchpid.c:218 src/pv/watchpid.c:268
+#: src/pv/watchpid.c:277 src/pv/watchpid.c:286 src/pv/watchpid.c:401
+#: src/pv/watchpid.c:409 src/pv/watchpid.c:556 src/pv/watchpid.c:565
+#: src/pv/watchpid.c:586
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:992 src/pv/watchpid.c:130 src/pv/watchpid.c:141
-#: src/pv/watchpid.c:150 src/pv/watchpid.c:223 src/pv/watchpid.c:232
-#: src/pv/watchpid.c:243
+#: src/pv/loop.c:992 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
+#: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
 msgstr "fd"
 
@@ -587,7 +588,7 @@ msgstr "SA_SIGINFO nie jest wspierane na tym systemie"
 msgid "history structure allocation failed"
 msgstr "nie udało się zaalokować struktury historii"
 
-#: src/pv/state.c:852 src/pv/state.c:864
+#: src/pv/state.c:856 src/pv/state.c:868
 msgid "file list allocation failed"
 msgstr "nie udało się zaalokować listy plików"
 
@@ -636,7 +637,7 @@ msgstr "błąd zapisu"
 msgid "select call failed"
 msgstr "nie udało się wywołać funkcji select"
 
-#: src/pv/watchpid.c:150 src/pv/watchpid.c:243
+#: src/pv/watchpid.c:160 src/pv/watchpid.c:288
 msgid "not a regular file or block device"
 msgstr "plik nie jest plikiem regularnym lub urządzeniem blokowym"
 

@@ -44,6 +44,8 @@ static bool filesize(pvwatchfd_t info)
 {
 	if (NULL == info)
 		return false;
+	if (NULL == info->file_fdpath)
+		return false;
 	if (S_ISBLK(info->sb_fd.st_mode)) {
 		int fd;
 
@@ -131,7 +133,15 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 		return 3;
 	}
 
-	strlcpy(info->file_fdpath, vnodeInfo.pvip.vip_path, PV_SIZEOF_FILE_FDPATH);
+	if (NULL != info->file_fdpath) {
+		free(info->file_fdpath);
+		info->file_fdpath = NULL;
+	}
+	info->file_fdpath = pv_strdup(vnodeInfo.pvip.vip_path);
+	if (NULL == info->file_fdpath) {
+		pv_perror("%s %u: %s %d", _("pid"), info->watch_pid, _("fd"), info->watch_fd);
+		return 3;
+	}
 
 	info->size = 0;
 
@@ -210,15 +220,50 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 	}
 
 	/* Get a string containing the path that the /proc fd symlink points to. */
-	memset(info->file_fdpath, 0, PV_SIZEOF_FILE_FDPATH);
-	if (readlink(info->file_fdsymlink, info->file_fdpath, PV_SIZEOF_FILE_FDPATH - 1) < 0) {	/* flawfinder: ignore */
-		/*
-		 * flawfinder: memset() has put \0 at the end already, and
-		 * readlink() is given 1 byte less than the buffer length,
-		 * so \0 termination is assured.  See filesize() above for
-		 * the mitigation of the risk that the link could change
-		 * while it is being read.
-		 */
+	if (NULL != info->file_fdpath) {
+		free(info->file_fdpath);
+		info->file_fdpath = NULL;
+	}
+	/* Try buffers of different sizes - see readlink(2). */
+	{
+		size_t try_size;
+
+		for (try_size = 16; try_size <= 16384; try_size = try_size * 2) {
+			ssize_t bytes_stored;
+
+			if (NULL != info->file_fdpath) {
+				free(info->file_fdpath);
+				info->file_fdpath = NULL;
+			}
+			/*@-mustfreeonly@ *//* splint mis-detects this as a memory leak. */
+			info->file_fdpath = calloc(1, try_size);
+			/*@+mustfreeonly@ */
+			if (NULL == info->file_fdpath)
+				break;
+
+			bytes_stored = readlink(info->file_fdsymlink, info->file_fdpath, try_size - 1);	/* flawfinder: ignore */
+			/*
+			 * flawfinder: the risk is minimal, as no reads are
+			 * performed.
+			 */
+			if (bytes_stored < 0) {
+				int old_errno;
+				old_errno = errno;
+				free(info->file_fdpath);
+				info->file_fdpath = NULL;
+				errno = old_errno;
+				break;
+			} else if (bytes_stored < (ssize_t) (try_size - 1)) {
+				info->file_fdpath[bytes_stored] = '\0';
+				break;
+			} else {
+				free(info->file_fdpath);
+				info->file_fdpath = NULL;
+				errno = ENAMETOOLONG;
+			}
+		}
+	}
+	if (NULL == info->file_fdpath) {
 		if (!automatic)
 			pv_perror("%s %u: %s %d", _("pid"), info->watch_pid, _("fd"), info->watch_fd);
 		return 2;
@@ -459,6 +504,10 @@ void pv_freecontents_watchfd(pvwatchfd_t info)
 		info->file_fdsymlink = NULL;
 	}
 #endif
+	if (NULL != info->file_fdpath) {
+		free(info->file_fdpath);
+		info->file_fdpath = NULL;
+	}
 }
 
 
@@ -725,6 +774,8 @@ void pv_watchpid_setname(pvstate_t state, pvwatchfd_t info)
 	file_fdpath = info->file_fdpath;
 
 	memset(info->display_name, 0, PV_SIZEOF_DISPLAY_NAME);
+	if (NULL == file_fdpath)
+		return;
 
 	path_length = strlen(info->file_fdpath);	/* flawfinder: ignore */
 	cwd_length = 0;

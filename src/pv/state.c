@@ -221,7 +221,11 @@ pvstate_t pv_state_alloc(void)
 	for (try_size = 32; try_size <= 16384; try_size = try_size * 2) {
 		bool buffer_too_small;
 
-		/*@-mustfreeonly@ *//* splint mis-detects a memory leak here */
+		if (NULL != state->status.cwd) {
+			free(state->status.cwd);
+			state->status.cwd = NULL;
+		}
+		/*@-mustfreeonly@ *//* splint mis-detects this as a memory leak. */
 		state->status.cwd = malloc(try_size);
 		/*@+mustfreeonly@ */
 		if (NULL == state->status.cwd)
