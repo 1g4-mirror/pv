@@ -3,6 +3,7 @@
  * *feature:* new **--monitor** option to run a command and watch its input, output, or both ([#67](https://codeberg.org/ivarch/pv/issues/67))
  * *fix:* exit with an error if the PID file given to **--pidfile** cannot be replaced
  * *fix:* correct the **--help** word wrapping on very small terminals
+ * *fix:* report signal interrupts on a new line, so that control-C doesn't write "^C" over the progress ([#187](https://codeberg.org/ivarch/pv/issues/187))
  * *i18n:* Polish translations updated
  * *i18n:* Finnish translations updated
  * *i18n:* removed empty unmaintained translation catalogues for Spanish and Georgian
