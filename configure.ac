@@ -45,6 +45,8 @@ AC_CHECK_HEADERS([sys/ioctl.h])
 AC_CHECK_HEADERS([libintl.h locale.h])
 AC_CHECK_HEADERS([sys/sysmacros.h])
 AC_CHECK_HEADERS([ftw.h])
+AC_CHECK_HEADERS([poll.h sys/poll.h])
+AC_CHECK_FUNCS([poll])
 AC_CHECK_MEMBERS([struct stat.st_blksize])
 AC_CHECK_DECLS([SA_SIGINFO], [], [], [[#include <signal.h>]])
 

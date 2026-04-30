@@ -82,6 +82,8 @@ tests/Integrity_-_Basic.test \
 tests/Integrity_-_Binary_data.test \
 tests/Integrity_-_From_bursty_source.test \
 tests/Integrity_-_Large_file_support.test \
+tests/Integrity_-_On_closed_output_pipe_at_EOF.test \
+tests/Integrity_-_On_failed_input_pipe_at_EOF.test \
 tests/Integrity_-_On_output_pipe_close.test \
 tests/Integrity_-_When_adjusted_remotely.test \
 tests/Memory_safety_-_Basic.test \
