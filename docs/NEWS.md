@@ -1,6 +1,7 @@
 ### 1.11.0 - UNRELEASED
 
  * *feature:* new **--monitor** option to run a command and watch its input, output, or both ([#67](https://codeberg.org/ivarch/pv/issues/67))
+ * *fix:* prevent an endless wait if there is unread data in the output pipe when its reader terminates ([#189](https://codeberg.org/ivarch/pv/issues/189))
  * *fix:* exit with an error if the PID file given to **--pidfile** cannot be replaced
  * *fix:* correct the **--help** word wrapping on very small terminals
  * *fix:* report signal interrupts on a new line, so that control-C doesn't write "^C" over the progress ([#187](https://codeberg.org/ivarch/pv/issues/187))
