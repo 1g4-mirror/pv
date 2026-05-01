@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Check that EOF does not wait forever when the upstream producer exits with
+# failure and the output pipe reader exits without consuming buffered bytes.
+
+# Allow all tests to be skipped, e.g. during a release build
+test "${SKIP_ALL_TESTS}" = "1" && exit 77
+
+true "${testSubject:?not set - call this from 'make check'}"
+
+TIMEOUT=""
+if command -v timeout >/dev/null 2>&1; then
+	TIMEOUT="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+	TIMEOUT="gtimeout"
+else
+	echo "timeout command not available"
+	exit 77
+fi
+
+if ! command -v gzip >/dev/null 2>&1; then
+	echo "gzip command not available"
+	exit 77
+fi
+
+# The producer fails immediately and writes no data.  gzip still emits a small
+# valid empty stream, so PV writes bytes to its output pipe before reaching EOF.
+# The reader keeps the pipe open briefly but consumes nothing.
+if ! "${TIMEOUT}" 4 sh <<EOF
+false | gzip -1 -c -n | "${testSubject}" -q -B 1 | sleep 1
+EOF
+then
+	echo "PV did not finish after the input producer failed and the output reader exited"
+	exit 1
+fi
+
+exit 0

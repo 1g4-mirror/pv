@@ -25,6 +25,12 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 
+#if HAVE_POLL_H
+#include <poll.h>
+#elif HAVE_SYS_POLL_H
+#include <sys/poll.h>
+#endif
+
 #if HAVE_MATH_H
 #include <math.h>
 #endif
@@ -81,6 +87,48 @@ static bool pv__resize_display_on_signal(pvstate_t state)
 		state->control.height = new_height;
 
 	return true;
+}
+
+
+/*
+ * Return true if the write end of a pipe reports that its readers have gone
+ * away.  This is only used after PV has reached EOF and is waiting for the
+ * output pipe buffer to drain; live readers still get the existing behaviour.
+ */
+static bool pv__output_pipe_has_no_reader(int output_fd)
+{
+#if HAVE_POLL && (HAVE_POLL_H || HAVE_SYS_POLL_H)
+	struct pollfd pfd;
+	int result;
+
+	memset(&pfd, 0, sizeof(pfd));
+	pfd.fd = output_fd;
+	pfd.events = POLLOUT;
+
+	result = poll(&pfd, 1, 0);
+	if (result < 0) {
+		if (EINTR != errno) {
+			debug("%s(%d): %s", "poll", output_fd, strerror(errno));
+		}
+		return false;
+	}
+	if (0 == result)
+		return false;
+
+#if defined(POLLERR)
+	if (0 != (pfd.revents & POLLERR))
+		return true;
+#endif
+#if defined(POLLHUP)
+	if (0 != (pfd.revents & POLLHUP))
+		return true;
+#endif
+
+	return false;
+#else
+	(void) output_fd;
+	return false;
+#endif
 }
 
 
@@ -673,8 +721,15 @@ int pv_main_loop(pvstate_t state)
 		 * buffer to empty (#164).
 		 */
 		if (eof_in && eof_out && state->transfer.written_but_not_consumed > 0) {
-			debug("%s", "EOF but bytes remain in output pipe - sleeping");
-			pv_nanosleep(50000000);
+			if (pv__output_pipe_has_no_reader(output_fd)) {
+				debug("%s",
+				      "EOF but output pipe readers are gone - clearing written_but_not_consumed");
+				state->flags.pipe_closed = 1;
+				state->transfer.written_but_not_consumed = 0;
+			} else {
+				debug("%s", "EOF but bytes remain in output pipe - sleeping");
+				pv_nanosleep(50000000);
+			}
 		}
 
 		/*
