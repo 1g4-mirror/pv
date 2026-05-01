@@ -114,6 +114,7 @@ is acknowledged and greatly appreciated:
  * [mojohakase](https://codeberg.org/mojohakase) - provided fix for multiplication bug when combining "**--bits**" with "**--gauge**" ([#182](https://codeberg.org/ivarch/pv/issues/182))
  * [heitbaum](https://codeberg.org/heitbaum) - fixed GCC warning when using glibc 2.43 ([#180](https://codeberg.org/ivarch/pv/pulls/180))
  * [haarp](https://codeberg.org/haarp) - reported that control-C writes "^C" over the progress, and suggested a fix ([#187](https://codeberg.org/ivarch/pv/issues/187))
+ * [Wolfgang Hoschek](https://codeberg.org/whoschek) - provided a fix for the endless wait if the output receiver exits before emptying the pipe ([#189](https://codeberg.org/ivarch/pv/issues/189))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
