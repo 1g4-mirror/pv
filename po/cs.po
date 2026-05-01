@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-04-29 21:37+0100\n"
+"POT-Creation-Date: 2026-05-01 18:47+0100\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -500,7 +500,7 @@ msgid "(stdin)"
 msgstr "(stdin)"
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
-#: src/pv/format/rate.c:36 src/pv/loop.c:124
+#: src/pv/format/rate.c:36 src/pv/loop.c:172
 msgid "b/s"
 msgstr "b/s"
 
@@ -510,7 +510,7 @@ msgid "/s"
 msgstr "/s"
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
-#: src/pv/format/rate.c:40 src/pv/loop.c:124
+#: src/pv/format/rate.c:40 src/pv/loop.c:172
 msgid "B/s"
 msgstr "B/s"
 
@@ -530,15 +530,15 @@ msgstr "ETA"
 msgid "FIN"
 msgstr "FIN"
 
-#: src/pv/loop.c:123
+#: src/pv/loop.c:171
 msgid "rate min/avg/max/mdev"
 msgstr "rychlost min/avg/max/std"
 
-#: src/pv/loop.c:135
+#: src/pv/loop.c:183
 msgid "rate not measured"
 msgstr "rychlost neměřena"
 
-#: src/pv/loop.c:958 src/pv/loop.c:974 src/pv/loop.c:992 src/pv/remote.c:91
+#: src/pv/loop.c:1013 src/pv/loop.c:1029 src/pv/loop.c:1047 src/pv/remote.c:91
 #: src/pv/remote.c:184 src/pv/remote.c:531 src/pv/remote.c:577
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
@@ -549,7 +549,7 @@ msgstr "rychlost neměřena"
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:992 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1047 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
