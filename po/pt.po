@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-01 18:47+0100\n"
+"POT-Creation-Date: 2026-05-01 19:34+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -544,7 +544,7 @@ msgstr ""
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:1013 src/pv/loop.c:1029 src/pv/loop.c:1047 src/pv/remote.c:91
+#: src/pv/loop.c:1012 src/pv/loop.c:1028 src/pv/loop.c:1046 src/pv/remote.c:91
 #: src/pv/remote.c:184 src/pv/remote.c:531 src/pv/remote.c:577
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
@@ -555,7 +555,7 @@ msgstr ""
 msgid "pid"
 msgstr ""
 
-#: src/pv/loop.c:1047 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1046 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"

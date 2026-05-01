@@ -722,8 +722,7 @@ int pv_main_loop(pvstate_t state)
 		 */
 		if (eof_in && eof_out && state->transfer.written_but_not_consumed > 0) {
 			if (pv__output_pipe_has_no_reader(output_fd)) {
-				debug("%s",
-				      "EOF but output pipe readers are gone - clearing written_but_not_consumed");
+				debug("%s", "EOF but output pipe readers are gone - clearing written_but_not_consumed");
 				state->flags.pipe_closed = 1;
 				state->transfer.written_but_not_consumed = 0;
 			} else {

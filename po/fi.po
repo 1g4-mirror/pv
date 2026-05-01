@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-01 18:47+0100\n"
+"POT-Creation-Date: 2026-05-01 19:34+0100\n"
 "PO-Revision-Date: 2026-03-24 23:25+0000\n"
 "Last-Translator: Ricky-Tigg <ricky-tigg@noreply.codeberg.org>\n"
 "Language-Team: Finnish <https://translate.codeberg.org/projects/pv/pv/fi/>\n"
@@ -543,7 +543,7 @@ msgstr ""
 msgid "rate not measured"
 msgstr "nopeutta ei mitattu"
 
-#: src/pv/loop.c:1013 src/pv/loop.c:1029 src/pv/loop.c:1047 src/pv/remote.c:91
+#: src/pv/loop.c:1012 src/pv/loop.c:1028 src/pv/loop.c:1046 src/pv/remote.c:91
 #: src/pv/remote.c:184 src/pv/remote.c:531 src/pv/remote.c:577
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
@@ -554,7 +554,7 @@ msgstr "nopeutta ei mitattu"
 msgid "pid"
 msgstr ""
 
-#: src/pv/loop.c:1047 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1046 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
