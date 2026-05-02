@@ -112,6 +112,7 @@ is acknowledged and greatly appreciated:
  * [KimHansen](https://codeberg.org/KimHansen) - suggested that "**--watchfd**" should keep its display when the process ends ([#81](https://codeberg.org/ivarch/pv/issues/81))
  * [njt](https://codeberg.org/njt) - suggested that "**--size** @*PATH*" should accept directories ([#179](https://codeberg.org/ivarch/pv/issues/179))
  * [mojohakase](https://codeberg.org/mojohakase) - provided fix for multiplication bug when combining "**--bits**" with "**--gauge**" ([#182](https://codeberg.org/ivarch/pv/issues/182))
+ * [traq6046](https://codeberg.org/traq6046) - highlighted autoreconf issues with the repository ([#185](https://codeberg.org/ivarch/pv/issues/185))
  * [heitbaum](https://codeberg.org/heitbaum) - fixed GCC warning when using glibc 2.43 ([#180](https://codeberg.org/ivarch/pv/pulls/180))
  * [haarp](https://codeberg.org/haarp) - reported that control-C writes "^C" over the progress, and suggested a fix ([#187](https://codeberg.org/ivarch/pv/issues/187))
  * [Wolfgang Hoschek](https://codeberg.org/whoschek) - provided a fix for the endless wait if the output receiver exits before emptying the pipe ([#189](https://codeberg.org/ivarch/pv/issues/189))
