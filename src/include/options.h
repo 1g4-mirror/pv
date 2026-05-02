@@ -72,6 +72,7 @@ struct opts_s {
 	size_t lastwritten;            /* show N bytes last written */
 	off_t rate_limit;              /* rate limit, in bytes per second */
 	size_t buffer_size;            /* buffer size, in bytes (0=default) */
+	size_t pipe_buffer_size;       /* pipe buffer size, in bytes (0=default) */
 	off_t size;                    /* total size of data */
 	off_t error_skip_block;        /* skip block size, 0 for adaptive */
 	pid_t remote;                  /* PID of pv to update settings of */

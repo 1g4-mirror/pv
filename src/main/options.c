@@ -721,6 +721,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "no-splice", 0, NULL, (int) 'C' },
 		{ "skip-errors", 0, NULL, (int) 'E' },
 		{ "error-skip-block", 1, NULL, (int) 'Z' },
+		{ "pipe-buffer-size", 1, NULL, (int) 'J' },
 		{ "stop-at-size", 0, NULL, (int) 'S' },
 		{ "sync", 0, NULL, (int) 'Y' },
 		{ "direct-io", 0, NULL, (int) 'K' },
@@ -743,7 +744,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:SYKOXU:R:Q:P:d:m:o:M:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:J:SYKOXU:R:Q:P:d:m:o:M:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -825,6 +826,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 'L':
 		case 'B':
 		case 'Z':
+		case 'J':
 			if (!pv_getnum_check(optarg, PV_NUMTYPE_ANY_WITH_SUFFIX)) {
 				/*@-mustfreefresh@ *//* see above */
 				pv_error("-%c: %s: %s", c, optarg, _("numeric value not understood"));
@@ -1063,6 +1065,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'Z':
 			opts->error_skip_block = pv_getnum_size(optarg, opts->decimal_units);
+			break;
+		case 'J':
+			opts->pipe_buffer_size = (size_t) pv_getnum_size(optarg, opts->decimal_units);
 			break;
 		case 'S':
 			opts->stop_at_size = true;

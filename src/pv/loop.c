@@ -503,6 +503,46 @@ int pv_main_loop(pvstate_t state)
 	if (0 == state->control.target_buffer_size)
 		state->control.target_buffer_size = BUFFER_SIZE;
 
+#ifdef F_GETPIPE_SZ
+#ifdef F_SETPIPE_SZ
+	/*
+	 * If a pipe buffer size was explicitly set, then set the output
+	 * pipe buffer size to that.
+	 *
+	 * If no pipe buffer size was set, and the first input is a pipe,
+	 * then increase the output pipe buffer size to the same as the
+	 * input pipe buffer size, if the output buffer was smaller.
+	 */
+	if (output_is_pipe) {
+		size_t target_pipe_buffer_size = state->control.pipe_buffer_size;
+
+		if (0 == target_pipe_buffer_size) {
+			int input_pipe_size;
+			input_pipe_size = fcntl(input_fd, F_GETPIPE_SZ);
+
+			debug("%s %d: %s=%d", "input fd", input_fd, "pipe size", input_pipe_size);
+			if (input_pipe_size > 0) {
+				int output_pipe_size;
+				output_pipe_size = fcntl(output_fd, F_GETPIPE_SZ);
+				debug("%s %d: %s=%d", "output fd", output_fd, "pipe size", output_pipe_size);
+				if (output_pipe_size > 0 && output_pipe_size < input_pipe_size) {
+					target_pipe_buffer_size = (size_t) input_pipe_size;
+				}
+			}
+		}
+		if (target_pipe_buffer_size > 0) {
+			int output_pipe_size;
+
+			output_pipe_size = fcntl(output_fd, F_SETPIPE_SZ, (int) target_pipe_buffer_size);
+			debug("%s %d: %s=%d", "output fd", output_fd, "updated pipe size", output_pipe_size);
+			if (output_pipe_size < 0) {
+				debug("%s: %s", "failed to set pipe buffer size", strerror(errno));
+			}
+		}
+	}
+#endif				/* F_SETPIPE_SZ */
+#endif				/* F_GETPIPE_SZ */
+
 	/*
 	 * Repeat until eof_in is true, eof_out is true, and final_update is
 	 * true.

@@ -642,6 +642,11 @@ void pv_state_no_splice_set(pvstate_t state, bool val)
 	state->control.no_splice = val;
 }
 
+void pv_state_pipe_buffer_size_set(pvstate_t state, size_t val)
+{
+	state->control.pipe_buffer_size = val;
+}
+
 void pv_state_size_set(pvstate_t state, off_t val)
 {
 	state->control.size = val;

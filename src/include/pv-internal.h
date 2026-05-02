@@ -201,7 +201,8 @@ struct pvstate_s {
 		/*@null@*/ char *default_bar_style; /* which bar style to use by default */
 		off_t error_skip_block;          /* skip block size, 0 for adaptive */
 		off_t rate_limit;                /* rate limit, in bytes per second */
-		size_t target_buffer_size;       /* buffer size (0=default) */
+		size_t target_buffer_size;       /* transfer buffer size (0=default) */
+		size_t pipe_buffer_size;         /* pipe buffer size (0=default) */
 		off_t size;                      /* total size of data */
 		unsigned int skip_errors;        /* skip read errors counter */
 		int output_fd;                   /* fd to write output to */
