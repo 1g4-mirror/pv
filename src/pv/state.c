@@ -208,6 +208,11 @@ pvstate_t pv_state_alloc(void)
 #endif				/* HAVE_IPC */
 	state->cursor.lock_fd = -1;
 
+#ifdef HAVE_SPLICE
+	state->transfer.intermediate_pipe[0] = -1;
+	state->transfer.intermediate_pipe[1] = -1;
+#endif				/* HAVE_SPLICE */
+
 	pv_state_reset(state);
 
 #ifdef HAVE_GETCWD
@@ -270,6 +275,19 @@ void pv_freecontents_transfer(pvtransferstate_t transfer)
 	transfer->transfer_buffer = NULL;
 	/*@+keeptrans@ */
 	/* splint - explicitly freeing this structure, so free() here is OK. */
+
+#ifdef HAVE_SPLICE
+	/* Close the intermediate pipe, if there was one. */
+	if (transfer->intermediate_pipe_buffer_size > 0) {
+		int idx;
+		for (idx = 0; idx < 2; idx++) {
+			if (transfer->intermediate_pipe[idx] >= 0) {
+				(void) close(transfer->intermediate_pipe[idx]);
+				transfer->intermediate_pipe[idx] = -1;
+			}
+		}
+	}
+#endif				/* HAVE_SPLICE */
 
 	if (NULL != transfer->line_positions)
 		free(transfer->line_positions);

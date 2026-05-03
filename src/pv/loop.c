@@ -355,7 +355,6 @@ int pv_main_loop(pvstate_t state)
 	struct timespec next_remotecheck, next_monitor_exchange;
 	int input_fd, output_fd;
 	unsigned int file_idx;
-	bool output_is_pipe;
 
 	/*
 	 * Notes on line mode:
@@ -379,14 +378,14 @@ int pv_main_loop(pvstate_t state)
 		output_fd = STDOUT_FILENO;
 
 	/* Determine whether the output is a pipe. */
-	output_is_pipe = false;
+	state->status.output_is_pipe = false;
 	{
 		struct stat sb;
 		memset(&sb, 0, sizeof(sb));
 		if (0 == fstat(output_fd, &sb)) {
 			/*@-type@ */
 			if ((sb.st_mode & S_IFMT) == S_IFIFO) {
-				output_is_pipe = true;
+				state->status.output_is_pipe = true;
 				debug("%s (fd %d)", "output is a pipe", output_fd);
 			}
 			/*@+type@ *//* splint says st_mode is __mode_t, not mode_t */
@@ -513,7 +512,7 @@ int pv_main_loop(pvstate_t state)
 	 * then increase the output pipe buffer size to the same as the
 	 * input pipe buffer size, if the output buffer was smaller.
 	 */
-	if (output_is_pipe) {
+	if (state->status.output_is_pipe) {
 		size_t target_pipe_buffer_size = state->control.pipe_buffer_size;
 
 		if (0 == target_pipe_buffer_size) {
@@ -636,7 +635,7 @@ int pv_main_loop(pvstate_t state)
 		 * If writing to a pipe, look at how much is sitting in the
 		 * pipe buffer waiting for the receiver to read.
 		 */
-		if (output_is_pipe) {
+		if (state->status.output_is_pipe) {
 			int nbytes;
 			nbytes = 0;
 			if (0 != state->flags.pipe_closed) {
@@ -661,7 +660,7 @@ int pv_main_loop(pvstate_t state)
 #endif
 
 		state->transfer.transferred = state->transfer.total_written;
-		if (output_is_pipe && !state->control.linemode) {
+		if (state->status.output_is_pipe && !state->control.linemode) {
 			/*
 			 * Writing bytes to a pipe - the amount transferred
 			 * to the receiver is the total amount written,
@@ -670,8 +669,8 @@ int pv_main_loop(pvstate_t state)
 			 */
 			state->transfer.transferred -= state->transfer.written_but_not_consumed;
 
-		} else if (output_is_pipe && state->control.linemode && state->transfer.written_but_not_consumed > 0
-			   && NULL != state->transfer.line_positions) {
+		} else if (state->status.output_is_pipe && state->control.linemode
+			   && state->transfer.written_but_not_consumed > 0 && NULL != state->transfer.line_positions) {
 			/*
 			 * Writing lines to a pipe - similar to above, but
 			 * with the added complication of having to
