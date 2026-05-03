@@ -451,8 +451,10 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 					if (new_size < 0)
 						target_pipe_buffer_size = target_pipe_buffer_size / 2;
 				}
+				/* If all attempts failed, read the current size. */
 				if (new_size < 0) {
 					new_size = fcntl(state->transfer.intermediate_pipe[1], F_GETPIPE_SZ);
+					/* If unable to read, assume 64KiB. */
 					if (new_size < 0) {
 						new_size = 64 * 1024;
 					}
