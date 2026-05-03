@@ -18,10 +18,71 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <sys/utsname.h>
 
 
 /*@-type@*/
 /* splint has trouble with off_t and mode_t throughout this file. */
+
+/*
+ * Check that a file descriptor is open on /dev/null, returning true if so.
+ * Otherwise return false; if the second argument is true, reports the
+ * problem with pv_error() before returning.
+ *
+ * No error is reported if the file descriptor is less than zero.
+ */
+bool pv_fd_is_dev_null(int fd, bool report_error)
+{
+	struct stat sb;
+	struct utsname uts;
+	unsigned long expected_rdev;
+	bool is_dev_null;
+
+	if (fd < 0)
+		return false;
+
+	memset(&sb, 0, sizeof(sb));
+	if (fstat(fd, &sb) < 0) {
+		if (report_error)
+			pv_perror("%s", "/dev/null");
+		return false;
+	}
+
+	expected_rdev = 0x0103;		    /* device 1,3 on Linux. */
+
+	is_dev_null = true;
+	if (!S_ISCHR(sb.st_mode)) {
+		debug("%s", "/dev/null: not a character device");
+		is_dev_null = false;
+	}
+
+	memset(&uts, 0, sizeof(uts));
+	if (uname(&uts) >= 0) {
+		if (0 == strncmp(uts.sysname, "OpenBSD", 7)) {
+			expected_rdev = 0x0202;
+		} else if (0 == strncmp(uts.sysname, "FreeBSD", 7)) {
+			expected_rdev = 0x0022;
+		} else if (0 == strncmp(uts.sysname, "NetBSD", 6)) {
+			expected_rdev = 0x0202;
+		} else if (0 == strncmp(uts.sysname, "Darwin", 6)) {
+			expected_rdev = 0x03000002;
+		}
+	}
+
+	if ((unsigned long) (sb.st_rdev) != expected_rdev) {
+		debug("/dev/null: fd is %08lx, expected %08lx", sb.st_rdev, expected_rdev);
+		is_dev_null = false;
+	}
+
+	if (is_dev_null)
+		return true;
+
+	if (report_error)
+		pv_error("%s", _("/dev/null is not usable"));
+
+	return false;
+}
+
 
 /*
  * Calculate the total number of bytes to be transferred by adding up the
@@ -478,6 +539,10 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		/* flawfinder: /dev/null is trusted. */
 		if (state->transfer.discard_fd < 0) {
 			pv_perror("%s", "/dev/null");
+			(void) close(fd);
+			fd = -1;
+		}
+		if (!pv_fd_is_dev_null(state->transfer.discard_fd, true)) {
 			(void) close(fd);
 			fd = -1;
 		}

@@ -205,6 +205,13 @@ extern void pv_error(char *, ...);
  */
 extern void pv_perror(char *, ...);
 
+/*
+ * Check that a file descriptor is open on /dev/null, returning true if so.
+ * Otherwise return false; if the second argument is true, reports the
+ * problem with pv_error() before returning.
+ */
+extern bool pv_fd_is_dev_null(int, bool);
+
 
 /*
  * Create a new state structure, and return it, or 0 (NULL) on error.

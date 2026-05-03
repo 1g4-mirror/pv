@@ -216,6 +216,9 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 			pv_perror("%s", "/dev/null");
 			exit(EXIT_FAILURE);
 		}
+		if (!pv_fd_is_dev_null(nullfd, true)) {
+			exit(EXIT_FAILURE);
+		}
 		if (dup2(nullfd, STDIN_FILENO) < 0) {
 			pv_error("%s", "dup2");
 			exit(EXIT_FAILURE);
