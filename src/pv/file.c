@@ -357,7 +357,7 @@ off_t pv_calc_total_size(pvstate_t state)
  * If the input is not a pipe, and state->status.output_is_pipe is false,
  * and state->control.no_splice is false, also creates a pipe and populates
  * state->transfer.intermediate_pipe[] with its file descriptors, if a pipe
- * had not already been created (i.e.  that array contained [-1,-1]).
+ * had not already been created (i.e. that array contained [-1,-1]).
  */
 int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 {
