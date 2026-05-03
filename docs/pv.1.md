@@ -369,8 +369,7 @@ are explicitly switched on will be shown.
 
 :   Instead of transferring input data to standard output, discard it.
     This is equivalent to redirecting standard output to */dev/null*,
-    except that **write**(2) is never called. Implies
-    "**\--no-splice**".
+    except that **write**(2) is never called.
 
 **-U FILE, \--store-and-forward FILE**
 

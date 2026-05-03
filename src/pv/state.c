@@ -133,6 +133,9 @@ void pv_reset_transfer(pvtransferstate_t transfer)
 	transfer->last_read_skip_fd = 0;
 #ifdef HAVE_SPLICE
 	transfer->splice_failed_fd = -1;
+	transfer->intermediate_pipe[0] = -1;
+	transfer->intermediate_pipe[1] = -1;
+	transfer->discard_fd = -1;
 #endif				/* HAVE_SPLICE */
 
 	transfer->line_positions_length = 0;
@@ -208,11 +211,6 @@ pvstate_t pv_state_alloc(void)
 #endif				/* HAVE_IPC */
 	state->cursor.lock_fd = -1;
 
-#ifdef HAVE_SPLICE
-	state->transfer.intermediate_pipe[0] = -1;
-	state->transfer.intermediate_pipe[1] = -1;
-#endif				/* HAVE_SPLICE */
-
 	pv_state_reset(state);
 
 #ifdef HAVE_GETCWD
@@ -286,6 +284,12 @@ void pv_freecontents_transfer(pvtransferstate_t transfer)
 				transfer->intermediate_pipe[idx] = -1;
 			}
 		}
+	}
+
+	/* Close the discard file descriptor, if there was one. */
+	if (transfer->discard_fd >= 0) {
+		(void) close(transfer->discard_fd);
+		transfer->discard_fd = -1;
 	}
 #endif				/* HAVE_SPLICE */
 

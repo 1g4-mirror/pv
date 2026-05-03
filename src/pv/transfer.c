@@ -341,6 +341,13 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	size_t bytes_can_read;
 	off_t amount_to_skip, amount_skipped, orig_offset, skip_offset;
 	ssize_t nread;
+	int output_fd;
+
+	output_fd = state->control.output_fd;
+#ifdef HAVE_SPLICE
+	if (state->control.discard_input && !state->control.no_splice)
+		output_fd = state->transfer.discard_fd;
+#endif				/* HAVE_SPLICE */
 
 	do_not_skip_errors = false;
 	if (0 == state->control.skip_errors)
@@ -437,7 +444,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 					bytes_to_splice_out = bytes_to_splice;
 
 				spliced_out =
-				    splice(state->transfer.intermediate_pipe[0], NULL, state->control.output_fd, NULL,
+				    splice(state->transfer.intermediate_pipe[0], NULL, output_fd, NULL,
 					   bytes_to_splice_out, SPLICE_F_MORE);
 				if (spliced_out > 0) {
 					state->transfer.intermediate_pipe_buffer_used -= (int) spliced_out;
@@ -446,7 +453,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 			}
 		} else {
 			/* Normal splice() from input to output. */
-			nread = splice(fd, NULL, state->control.output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
+			nread = splice(fd, NULL, output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
 		}
 		/*@+type@ */
 		/*@+nullpass@ */
@@ -474,7 +481,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 				 * error, it can't be skipped, so set
 				 * "do_not_skip_errors".
 				 */
-				if ((fdatasync(state->control.output_fd) < 0)
+				if ((fdatasync(output_fd) < 0)
 				    && (EIO == errno)) {
 					nread = -1;
 					do_not_skip_errors = true;

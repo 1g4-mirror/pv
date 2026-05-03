@@ -467,6 +467,8 @@ struct pvstate_s {
 		int intermediate_pipe[2];
 		int intermediate_pipe_buffer_size;
 		int intermediate_pipe_buffer_used;
+		/* File descriptor to /dev/null for splicing with -X. */
+		int discard_fd;
 		/*
 		 * These variables are used to keep track of whether
 		 * splice() was used; splice_failed_fd is the file

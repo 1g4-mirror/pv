@@ -1084,7 +1084,6 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'X':
 			opts->discard_input = true;
-			opts->no_splice = true;
 			break;
 		case 'U':
 			opts->store_and_forward_file = pv_strdup(optarg);

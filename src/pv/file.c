@@ -462,11 +462,25 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 
 				state->transfer.intermediate_pipe_buffer_size = new_size;
 			}
-#endif
+#endif				/* defined F_SETPIPE_SZ && defined F_GETPIPE_SZ */
 		}
 		debug("%s: [%d,%d]", "intermediate pipe fds", state->transfer.intermediate_pipe[0],
 		      state->transfer.intermediate_pipe[1]);
 		debug("%s: %d", "intermediate pipe buffer size", state->transfer.intermediate_pipe_buffer_size);
+	}
+
+	if (state->control.discard_input && !state->control.no_splice && state->transfer.discard_fd < 0) {
+		/*
+		 * Open a file descriptor to /dev/null, so that input can be
+		 * spliced to it to implement -X.
+		 */
+		state->transfer.discard_fd = open("/dev/null", O_WRONLY);	/* flawfinder: ignore */
+		/* flawfinder: /dev/null is trusted. */
+		if (state->transfer.discard_fd < 0) {
+			pv_perror("%s", "/dev/null");
+			(void) close(fd);
+			fd = -1;
+		}
 	}
 #endif				/* HAVE_SPLICE */
 
