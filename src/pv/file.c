@@ -435,9 +435,9 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 				size_t target_pipe_buffer_size = state->control.pipe_buffer_size;
 				int new_size;
 
-				/* If no pipe buffer size was set, try for 512k. */
+				/* If no pipe buffer size was set, try for 1MiB. */
 				if (0 == target_pipe_buffer_size)
-					target_pipe_buffer_size = 512 * 1024;
+					target_pipe_buffer_size = 1024 * 1024;
 
 				/*
 				 * Try to set the pipe buffer size, halving
