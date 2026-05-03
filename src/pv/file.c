@@ -290,7 +290,13 @@ off_t pv_calc_total_size(pvstate_t state)
  * error). It is an error if the next input file is the same as the file
  * the output is pointing to.
  *
- * Updates state->status.current_input_file in the process.
+ * Updates state->status.current_input_file and
+ * state->status.current_input_is_pipe.
+ *
+ * If the input is not a pipe, and state->status.output_is_pipe is false,
+ * and state->control.no_splice is false, also creates a pipe and populates
+ * state->transfer.intermediate_pipe[] with its file descriptors, if a pipe
+ * had not already been created (i.e.  that array contained [-1,-1]).
  */
 int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 {
@@ -375,6 +381,17 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		return -1;
 	}
 
+	/*
+	 * Detect whether the input file is a pipe.  This is used later, in
+	 * pv__transfer_read(), to decide whether an intermediate pipe needs
+	 * to be used with splice().
+	 */
+	state->status.current_input_is_pipe = false;
+	if ((isb.st_mode & S_IFMT) == S_IFIFO) {
+		state->status.current_input_is_pipe = true;
+		debug("%s (fd %d)", "input is a pipe", fd);
+	}
+
 	state->status.current_input_file = filenum;
 #ifdef O_DIRECT
 	/*
@@ -397,6 +414,75 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 #endif				/* O_DIRECT */
 
 	debug("%s: %d: %s: fd=%d", "next file opened", filenum, pv_current_file_name(state), fd);
+
+#ifdef HAVE_SPLICE
+	if (!(state->status.output_is_pipe || state->status.current_input_is_pipe || state->control.no_splice)
+	    && (-1 == state->transfer.intermediate_pipe[0])) {
+		/*
+		 * Create an intermediate pipe to allow the input to be used
+		 * with splice() even though neither it nor the output are
+		 * themselves pipes.
+		 */
+		state->transfer.intermediate_pipe_buffer_used = 0;
+		if (pipe(state->transfer.intermediate_pipe) < 0) {
+			debug("%s: %s", "pipe()", strerror(errno));
+			state->transfer.intermediate_pipe[0] = -1;
+			state->transfer.intermediate_pipe[1] = -1;
+		} else {
+			state->transfer.intermediate_pipe_buffer_size = 64 * 1024;
+#if defined F_SETPIPE_SZ && defined F_GETPIPE_SZ
+			{
+				size_t target_pipe_buffer_size = state->control.pipe_buffer_size;
+				int new_size;
+
+				/* If no pipe buffer size was set, try for 1MiB. */
+				if (0 == target_pipe_buffer_size)
+					target_pipe_buffer_size = 1024 * 1024;
+
+				/*
+				 * Try to set the pipe buffer size, halving
+				 * repeatedly on failure.
+				 */
+				new_size = -1;
+				while (new_size < 0 && target_pipe_buffer_size >= 4096) {
+					new_size =
+					    fcntl(state->transfer.intermediate_pipe[1], F_SETPIPE_SZ,
+						  (int) target_pipe_buffer_size);
+					if (new_size < 0)
+						target_pipe_buffer_size = target_pipe_buffer_size / 2;
+				}
+				/* If all attempts failed, read the current size. */
+				if (new_size < 0) {
+					new_size = fcntl(state->transfer.intermediate_pipe[1], F_GETPIPE_SZ);
+					/* If unable to read, assume 64KiB. */
+					if (new_size < 0) {
+						new_size = 64 * 1024;
+					}
+				}
+
+				state->transfer.intermediate_pipe_buffer_size = new_size;
+			}
+#endif				/* defined F_SETPIPE_SZ && defined F_GETPIPE_SZ */
+		}
+		debug("%s: [%d,%d]", "intermediate pipe fds", state->transfer.intermediate_pipe[0],
+		      state->transfer.intermediate_pipe[1]);
+		debug("%s: %d", "intermediate pipe buffer size", state->transfer.intermediate_pipe_buffer_size);
+	}
+
+	if (state->control.discard_input && !state->control.no_splice && state->transfer.discard_fd < 0) {
+		/*
+		 * Open a file descriptor to /dev/null, so that input can be
+		 * spliced to it to implement -X.
+		 */
+		state->transfer.discard_fd = open("/dev/null", O_WRONLY);	/* flawfinder: ignore */
+		/* flawfinder: /dev/null is trusted. */
+		if (state->transfer.discard_fd < 0) {
+			pv_perror("%s", "/dev/null");
+			(void) close(fd);
+			fd = -1;
+		}
+	}
+#endif				/* HAVE_SPLICE */
 
 	return fd;
 }

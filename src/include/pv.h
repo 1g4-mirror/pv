@@ -260,6 +260,7 @@ extern void pv_state_sparse_output_set(pvstate_t, bool);
 extern void pv_state_rate_limit_set(pvstate_t, off_t);
 extern void pv_state_target_buffer_size_set(pvstate_t, size_t);
 extern void pv_state_no_splice_set(pvstate_t, bool);
+extern void pv_state_pipe_buffer_size_set(pvstate_t, size_t);
 extern void pv_state_discard_input_set(pvstate_t, bool);
 extern void pv_state_size_set(pvstate_t, off_t);
 extern void pv_state_interval_set(pvstate_t, double);

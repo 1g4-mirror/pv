@@ -160,6 +160,8 @@ struct pvstate_s {
 		bool terminal_supports_utf8;	 /* whether the terminal supports UTF-8 */
 		bool terminal_supports_colour;	 /* whether the terminal supports colour */
 		bool checked_colour_support;	 /* whether we have checked colour support yet */
+		bool current_input_is_pipe;	 /* whether the current input file is a pipe */
+		bool output_is_pipe;		 /* whether the output is a pipe */
 	} status;
 
 	/***************
@@ -201,7 +203,8 @@ struct pvstate_s {
 		/*@null@*/ char *default_bar_style; /* which bar style to use by default */
 		off_t error_skip_block;          /* skip block size, 0 for adaptive */
 		off_t rate_limit;                /* rate limit, in bytes per second */
-		size_t target_buffer_size;       /* buffer size (0=default) */
+		size_t target_buffer_size;       /* transfer buffer size (0=default) */
+		size_t pipe_buffer_size;         /* pipe buffer size (0=default) */
 		off_t size;                      /* total size of data */
 		unsigned int skip_errors;        /* skip read errors counter */
 		int output_fd;                   /* fd to write output to */
@@ -455,6 +458,17 @@ struct pvstate_s {
 		int last_read_skip_fd;
 		/* read_error_warning_shown is defined below. */
 #ifdef HAVE_SPLICE
+		/*
+		 * File descriptors for an intermediate pipe, used when
+		 * neither input nor output are pipes; the size of the pipe
+		 * buffer; and how much input data is in the intermediate
+		 * pipe waiting to be passed to the output.
+		 */
+		int intermediate_pipe[2];
+		int intermediate_pipe_buffer_size;
+		int intermediate_pipe_buffer_used;
+		/* File descriptor to /dev/null for splicing with -X. */
+		int discard_fd;
 		/*
 		 * These variables are used to keep track of whether
 		 * splice() was used; splice_failed_fd is the file

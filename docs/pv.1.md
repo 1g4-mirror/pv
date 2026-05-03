@@ -300,6 +300,15 @@ are explicitly switched on will be shown.
     option results in a small loss of transfer efficiency. It has no
     effect on systems where **splice**(2) is unavailable.
 
+**-J BYTES, \--pipe-buffer-size BYTES**
+
+:   Attempt to set the size of the output pipe buffer to *BYTES* bytes.
+    This will only have an effect if the output is a pipe, and will
+    silently do nothing if the requested size cannot be achieved. If
+    this option is not specified, and both the output and the first
+    input are pipes, then the output pipe buffer size will automatically
+    be increased to match the input pipe buffer, if it was smaller.
+
 **-E, \--skip-errors**
 
 :   Ignore read errors by attempting to skip past the offending
@@ -360,8 +369,7 @@ are explicitly switched on will be shown.
 
 :   Instead of transferring input data to standard output, discard it.
     This is equivalent to redirecting standard output to */dev/null*,
-    except that **write**(2) is never called. Implies
-    "**\--no-splice**".
+    except that **write**(2) is never called.
 
 **-U FILE, \--store-and-forward FILE**
 
@@ -814,9 +822,10 @@ small input files, and "**%nL**" may be a few lines out due to buffering
 within the pipeline itself.
 
 Numbers passed to "**\--size**", "**\--rate-limit**",
-"**\--buffer-size**", and "**\--error-skip-block**" may all be expressed
-as decimals if followed by a suffix, so for example "*\--size 1.5G*" is
-equivalent to "*\--size 1536M*".
+"**\--buffer-size**", "**\--pipe-buffer-size**", and
+"**\--error-skip-block**" may all be expressed as decimals if followed
+by a suffix, so for example "*\--size 1.5G*" is equivalent to
+"*\--size 1536M*".
 
 Numbers passed to "**\--interval**" and "**\--delay-start**" may be
 integers or decimals, but may not have a suffix.

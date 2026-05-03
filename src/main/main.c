@@ -906,6 +906,7 @@ int main(int argc, char **argv)
 	pv_state_rate_limit_set(state, opts->rate_limit);
 	pv_state_target_buffer_size_set(state, opts->buffer_size);
 	pv_state_no_splice_set(state, opts->no_splice);
+	pv_state_pipe_buffer_size_set(state, opts->pipe_buffer_size);
 	pv_state_size_set(state, opts->size);
 	pv_state_name_set(state, opts->name);
 	pv_state_default_bar_style_set(state, opts->default_bar_style);

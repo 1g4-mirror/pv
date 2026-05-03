@@ -341,6 +341,13 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	size_t bytes_can_read;
 	off_t amount_to_skip, amount_skipped, orig_offset, skip_offset;
 	ssize_t nread;
+#ifdef HAVE_SPLICE
+	int output_fd;
+
+	output_fd = state->control.output_fd;
+	if (state->control.discard_input && !state->control.no_splice)
+		output_fd = state->transfer.discard_fd;
+#endif				/* HAVE_SPLICE */
 
 	do_not_skip_errors = false;
 	if (0 == state->control.skip_errors)
@@ -382,7 +389,72 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 		/*@-nullpass@ */
 		/*@-type@ */
 		/* splint doesn't know about splice. */
-		nread = splice(fd, NULL, state->control.output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
+
+		if (!(state->status.output_is_pipe || state->status.current_input_is_pipe)
+		    && (-1 != state->transfer.intermediate_pipe[0]) && (-1 != state->transfer.intermediate_pipe[1])) {
+			/*
+			 * Neither the input nor the output is a pipe, but
+			 * there is an intermediate pipe to use, so splice
+			 * from the input to that pipe, and from the pipe to
+			 * the output.
+			 *
+			 * This has to be done in stages so as to keep
+			 * within the size of the pipe buffer, otherwise
+			 * splicing into it will block.
+			 */
+			int room_in_pipe_buffer;
+			size_t bytes_to_splice_in;
+
+			room_in_pipe_buffer =
+			    state->transfer.intermediate_pipe_buffer_size -
+			    state->transfer.intermediate_pipe_buffer_used;
+			if (room_in_pipe_buffer < 0)
+				room_in_pipe_buffer = 0;
+
+			bytes_to_splice_in = bytes_to_splice;
+			if (bytes_to_splice_in > (size_t) room_in_pipe_buffer)
+				bytes_to_splice_in = (size_t) room_in_pipe_buffer;
+
+			/*
+			 * Read into the intermediate pipe if it has room in
+			 * its buffer.
+			 */
+			if (bytes_to_splice_in > 0) {
+				ssize_t spliced_in;
+
+				spliced_in =
+				    splice(fd, NULL, state->transfer.intermediate_pipe[1], NULL, bytes_to_splice_in,
+					   SPLICE_F_MORE);
+				if (spliced_in > 0) {
+					state->transfer.intermediate_pipe_buffer_used += (int) spliced_in;
+				}
+				nread = spliced_in;
+			}
+
+			/*
+			 * Write from the intermediate pipe if it has
+			 * anything in its buffer and the read, above, did
+			 * not produce an error.
+			 */
+			if (nread >= 0 && state->transfer.intermediate_pipe_buffer_used > 0) {
+				size_t bytes_to_splice_out = (size_t) (state->transfer.intermediate_pipe_buffer_used);
+				ssize_t spliced_out;
+
+				if (bytes_to_splice_out > bytes_to_splice)
+					bytes_to_splice_out = bytes_to_splice;
+
+				spliced_out =
+				    splice(state->transfer.intermediate_pipe[0], NULL, output_fd, NULL,
+					   bytes_to_splice_out, SPLICE_F_MORE);
+				if (spliced_out > 0) {
+					state->transfer.intermediate_pipe_buffer_used -= (int) spliced_out;
+				}
+				nread = spliced_out;
+			}
+		} else {
+			/* Normal splice() from input to output. */
+			nread = splice(fd, NULL, output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
+		}
 		/*@+type@ */
 		/*@+nullpass@ */
 
@@ -409,7 +481,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 				 * error, it can't be skipped, so set
 				 * "do_not_skip_errors".
 				 */
-				if ((fdatasync(state->control.output_fd) < 0)
+				if ((fdatasync(output_fd) < 0)
 				    && (EIO == errno)) {
 					nread = -1;
 					do_not_skip_errors = true;

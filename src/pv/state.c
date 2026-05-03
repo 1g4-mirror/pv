@@ -133,6 +133,9 @@ void pv_reset_transfer(pvtransferstate_t transfer)
 	transfer->last_read_skip_fd = 0;
 #ifdef HAVE_SPLICE
 	transfer->splice_failed_fd = -1;
+	transfer->intermediate_pipe[0] = -1;
+	transfer->intermediate_pipe[1] = -1;
+	transfer->discard_fd = -1;
 #endif				/* HAVE_SPLICE */
 
 	transfer->line_positions_length = 0;
@@ -270,6 +273,25 @@ void pv_freecontents_transfer(pvtransferstate_t transfer)
 	transfer->transfer_buffer = NULL;
 	/*@+keeptrans@ */
 	/* splint - explicitly freeing this structure, so free() here is OK. */
+
+#ifdef HAVE_SPLICE
+	/* Close the intermediate pipe, if there was one. */
+	if (transfer->intermediate_pipe_buffer_size > 0) {
+		int idx;
+		for (idx = 0; idx < 2; idx++) {
+			if (transfer->intermediate_pipe[idx] >= 0) {
+				(void) close(transfer->intermediate_pipe[idx]);
+				transfer->intermediate_pipe[idx] = -1;
+			}
+		}
+	}
+
+	/* Close the discard file descriptor, if there was one. */
+	if (transfer->discard_fd >= 0) {
+		(void) close(transfer->discard_fd);
+		transfer->discard_fd = -1;
+	}
+#endif				/* HAVE_SPLICE */
 
 	if (NULL != transfer->line_positions)
 		free(transfer->line_positions);
@@ -640,6 +662,11 @@ void pv_state_target_buffer_size_set(pvstate_t state, size_t val)
 void pv_state_no_splice_set(pvstate_t state, bool val)
 {
 	state->control.no_splice = val;
+}
+
+void pv_state_pipe_buffer_size_set(pvstate_t state, size_t val)
+{
+	state->control.pipe_buffer_size = val;
 }
 
 void pv_state_size_set(pvstate_t state, off_t val)
