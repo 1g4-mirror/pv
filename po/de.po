@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-01 19:34+0100\n"
+"POT-Creation-Date: 2026-05-03 19:24+0100\n"
 "PO-Revision-Date: 2025-01-14 20:39+0000\n"
 "Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -185,8 +185,8 @@ msgstr ""
 msgid "use cursor positioning escape sequences"
 msgstr "benutze Escape-Sequenzen zur Cursor-Positionierung"
 
-#: src/main/help.c:391 src/main/help.c:424 src/main/help.c:443
-#: src/main/help.c:453
+#: src/main/help.c:391 src/main/help.c:427 src/main/help.c:446
+#: src/main/help.c:456
 msgid "FILE"
 msgstr "DATEI"
 
@@ -202,7 +202,7 @@ msgstr "RATE"
 msgid "limit transfer to RATE bytes per second"
 msgstr "beschränke die Transferrate auf RATE Byte pro Sekunde"
 
-#: src/main/help.c:397 src/main/help.c:406
+#: src/main/help.c:397 src/main/help.c:403 src/main/help.c:409
 msgid "BYTES"
 msgstr "BYTES"
 
@@ -215,94 +215,98 @@ msgid "never use splice(), always use read/write"
 msgstr "anstelle von splice() immer read/write benutzen"
 
 #: src/main/help.c:404
+msgid "set the pipe buffer size to BYTES"
+msgstr ""
+
+#: src/main/help.c:407
 msgid "skip read errors in input"
 msgstr "Lesefehler in der Eingabe nicht beachten"
 
-#: src/main/help.c:407
+#: src/main/help.c:410
 msgid "skip errors in BYTES blocks at a time"
 msgstr "bei Fehlern BYTES am Stück überspringen"
 
-#: src/main/help.c:410
+#: src/main/help.c:413
 msgid "stop after --size bytes have been transferred"
 msgstr "anhalten, nachdem --size Bytes übertragen wurden"
 
-#: src/main/help.c:413
+#: src/main/help.c:416
 msgid "flush cache to disk after every write"
 msgstr "schreibe den Cache nach jedem Schreibvorgang auf die Festplatte"
 
-#: src/main/help.c:416
+#: src/main/help.c:419
 msgid "use direct I/O to bypass cache"
 msgstr "verwende direkte E/A, um den Cache zu umgehen"
 
-#: src/main/help.c:419
+#: src/main/help.c:422
 msgid "try to seek instead of writing null bytes"
 msgstr ""
 
-#: src/main/help.c:422
+#: src/main/help.c:425
 msgid "discard input instead of writing to output"
 msgstr "verwirf die Eingabe anstatt in die Ausgabe zu schreiben"
 
-#: src/main/help.c:425
+#: src/main/help.c:428
 msgid "write all input to FILE before writing to output"
 msgstr "Ausgabe nach FILE schrieben bevor sie ausgegeben wird"
 
-#: src/main/help.c:428
+#: src/main/help.c:431
 msgid "PID[:FD]|=NAME|@LISTFILE"
 msgstr ""
 
-#: src/main/help.c:429
+#: src/main/help.c:432
 msgid "watch file FD opened by process PID"
 msgstr "die vom Prozess PID geöffnete Datei FD beobachten"
 
-#: src/main/help.c:432 src/main/help.c:435
+#: src/main/help.c:435 src/main/help.c:438
 msgid "PID"
 msgstr "PID"
 
-#: src/main/help.c:433
+#: src/main/help.c:436
 msgid "update settings of process PID"
 msgstr "Einstellungen der Prozess-PID updaten"
 
-#: src/main/help.c:436
+#: src/main/help.c:439
 msgid "show progress of process PID"
 msgstr ""
 
-#: src/main/help.c:440
+#: src/main/help.c:443
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
 
-#: src/main/help.c:444
+#: src/main/help.c:447
 msgid "save process ID in FILE"
 msgstr "Prozess-ID in DATEI speichern"
 
-#: src/main/help.c:447
+#: src/main/help.c:450
 msgid "show this help and exit"
 msgstr "zeige diese Hilfe und beende"
 
-#: src/main/help.c:450
+#: src/main/help.c:453
 msgid "show version information and exit"
 msgstr "zeige Versionsinformationen und beende"
 
-#: src/main/help.c:454
+#: src/main/help.c:457
 msgid "write debug logs to FILE"
 msgstr "schreibe Debug-Protokolle in DATEI"
 
-#: src/main/help.c:480
+#: src/main/help.c:483
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Aufruf: %s [OPTION] [DATEI]..."
 
-#: src/main/help.c:491
+#: src/main/help.c:494
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Verbindet DATEI(en) oder den Standard-Eingabe-Kanal mit dem Standard-Ausgabe-"
 "Kanal und misst den Datenstrom."
 
-#: src/main/help.c:633
+#: src/main/help.c:636
 msgid "Supported format sequences:"
 msgstr "unterstützte Formate:"
 
-#: src/main/help.c:647
+#: src/main/help.c:650
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Bitte senden Sie Fehlerberichte an %s"
@@ -311,7 +315,7 @@ msgstr "Bitte senden Sie Fehlerberichte an %s"
 msgid "(input)"
 msgstr "(eingabe)"
 
-#: src/main/main.c:381 src/main/options.c:1341
+#: src/main/main.c:381 src/main/options.c:1348
 msgid "a command to run must be specified"
 msgstr ""
 
@@ -319,85 +323,85 @@ msgstr ""
 msgid "state allocation failed"
 msgstr "Speicherzuweisung für `state' fehlgeschlagen"
 
-#: src/main/options.c:412
+#: src/main/options.c:415
 msgid "list files may not contain @ lines"
 msgstr ""
 
-#: src/main/options.c:432 src/main/options.c:434 src/main/options.c:902
+#: src/main/options.c:435 src/main/options.c:437 src/main/options.c:907
 msgid "process ID or pid:fd pair expected"
 msgstr "Prozess-ID oder PID:FD-Paar erwartet"
 
-#: src/main/options.c:443 src/main/options.c:445 src/main/options.c:909
+#: src/main/options.c:446 src/main/options.c:448 src/main/options.c:914
 msgid "invalid process ID"
 msgstr "ungültige Prozess-ID"
 
-#: src/main/options.c:532 src/pv/file.c:344
+#: src/main/options.c:535 src/pv/file.c:411
 msgid "failed to stat file"
 msgstr "konnte Dateiinformationen nicht lesen"
 
-#: src/main/options.c:575
+#: src/main/options.c:578
 msgid "is a directory"
 msgstr "ist ein Verzeichnis"
 
-#: src/main/options.c:604
+#: src/main/options.c:607
 msgid "failed to generate sysfs filename"
 msgstr "konnte Sysfs-Dateinamen nicht erzeugen"
 
-#: src/main/options.c:625
+#: src/main/options.c:628
 msgid "failed to read sysfs size file"
 msgstr "konnte Größe der Sysfs-Datei nicht lesen"
 
-#: src/main/options.c:644
+#: src/main/options.c:647
 msgid "failed to open block device"
 msgstr "konnte Blockgerät nicht öffnen"
 
-#: src/main/options.c:653
+#: src/main/options.c:656
 msgid "failed to determine size of block device"
 msgstr "konnte Größe des Blockgeräts nicht ermitteln"
 
-#: src/main/options.c:760
+#: src/main/options.c:764
 msgid "option structure allocation failed"
 msgstr "Speicherzuweisung für `option' fehlgeschlagen"
 
-#: src/main/options.c:780
+#: src/main/options.c:784
 msgid "option structure argv allocation failed"
 msgstr "Speicherzuweisung für `argv' der Option fehlgeschlagen"
 
-#: src/main/options.c:830
+#: src/main/options.c:835
 msgid "numeric value not understood"
 msgstr "numerischen Wert nicht verstanden"
 
-#: src/main/options.c:844
+#: src/main/options.c:849
 msgid "integer argument expected"
 msgstr "Ganzzahliges Argument erwartet"
 
-#: src/main/options.c:854
+#: src/main/options.c:859
 msgid "numeric argument expected"
 msgstr "numerisches Argument erwartet"
 
-#: src/main/options.c:865
+#: src/main/options.c:870
 msgid "missing filename"
 msgstr ""
 
-#: src/main/options.c:891
+#: src/main/options.c:896
 msgid "missing process name"
 msgstr ""
 
-#: src/main/options.c:1164
+#: src/main/options.c:1171
 msgid "invalid side specification"
 msgstr ""
 
-#: src/main/options.c:1179
+#: src/main/options.c:1186
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "`%s --help' zeigt weitere Informationen an."
 
-#: src/main/options.c:1181
+#: src/main/options.c:1188
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "`%s -h' zeigt weitere Informationen an."
 
-#: src/main/options.c:1213
+#: src/main/options.c:1220
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -405,44 +409,44 @@ msgstr ""
 "Beim Beobachten von Dateideskriptoren können keine Optionen für den "
 "Zeilenmodus oder den Übertragungsmodifikator verwendet werden"
 
-#: src/main/options.c:1221
+#: src/main/options.c:1228
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "Beim Beobachten von Dateideskriptoren kann Cursor-Positionierung nicht "
 "verwendet werden"
 
-#: src/main/options.c:1229
+#: src/main/options.c:1236
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
 "Beim Beobachten von Dateideskriptoren kann die Fernbedienung nicht verwenden "
 "werden"
 
-#: src/main/options.c:1237
+#: src/main/options.c:1244
 msgid "cannot use remote query when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1245
+#: src/main/options.c:1252
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
 "Beim Beobachten von Dateideskriptoren können Dateien nicht übertragen werden"
 
-#: src/main/options.c:1269
+#: src/main/options.c:1276
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "Nicht verfügbar auf Systemen ohne /proc/self/fdinfo"
 
-#: src/main/options.c:1280
+#: src/main/options.c:1287
 msgid "cannot use remote control and remote query together"
 msgstr ""
 
-#: src/main/options.c:1307
+#: src/main/options.c:1314
 msgid "monitor mode cannot be specified with this option"
 msgstr ""
 
-#: src/main/options.c:1319
+#: src/main/options.c:1326
 msgid "monitor mode cannot be used with store-and-forward"
 msgstr ""
 
-#: src/main/options.c:1330
+#: src/main/options.c:1337
 msgid "files cannot be specified with this option"
 msgstr ""
 
@@ -490,35 +494,39 @@ msgstr "yzafpnµm kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:1082 src/pv/state.c:904 src/pv/transfer.c:1154
+#: src/pv/display.c:1082 src/pv/state.c:931 src/pv/transfer.c:1226
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
-#: src/pv/file.c:156
+#: src/pv/file.c:81
+msgid "/dev/null is not usable"
+msgstr ""
+
+#: src/pv/file.c:217
 msgid "failed to seek to start of output"
 msgstr "Konnte nicht zum Anfang der Ausgabe springen"
 
-#: src/pv/file.c:305
+#: src/pv/file.c:372
 msgid "failed to close file"
 msgstr "konnte Datei nicht schließen"
 
-#: src/pv/file.c:337
+#: src/pv/file.c:404
 msgid "failed to read file"
 msgstr "konnte Datei nicht lesen"
 
-#: src/pv/file.c:351
+#: src/pv/file.c:418
 msgid "failed to stat output file"
 msgstr "konnte Dateiinformationen für Ausgabe-Datei nicht lesen"
 
-#: src/pv/file.c:372
+#: src/pv/file.c:439
 msgid "input file is output file"
 msgstr "Eingabe-Datei ist Ausgabe-Datei"
 
-#: src/pv/file.c:427
+#: src/pv/file.c:578
 msgid "(none)"
 msgstr "(keine)"
 
-#: src/pv/file.c:429
+#: src/pv/file.c:580
 msgid "(stdin)"
 msgstr "(stdin)"
 
@@ -541,7 +549,7 @@ msgstr "B/s"
 msgid "b"
 msgstr "b"
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:622
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:694
 msgid "B"
 msgstr "B"
 
@@ -561,7 +569,7 @@ msgstr "Rate min/mittel/max/abweichung"
 msgid "rate not measured"
 msgstr "Übertragungsrate nicht gemessen"
 
-#: src/pv/loop.c:1012 src/pv/loop.c:1028 src/pv/loop.c:1046 src/pv/remote.c:91
+#: src/pv/loop.c:1051 src/pv/loop.c:1067 src/pv/loop.c:1085 src/pv/remote.c:91
 #: src/pv/remote.c:184 src/pv/remote.c:531 src/pv/remote.c:577
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
@@ -572,7 +580,7 @@ msgstr "Übertragungsrate nicht gemessen"
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:1046 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1085 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
@@ -590,51 +598,51 @@ msgstr "SA_SIGINFO wird auf diesem System nicht unterstützt"
 msgid "history structure allocation failed"
 msgstr "Speicherzuweisung für `history' fehlgeschlagen"
 
-#: src/pv/state.c:856 src/pv/state.c:868
+#: src/pv/state.c:883 src/pv/state.c:895
 msgid "file list allocation failed"
 msgstr "Speicherzuweisung für die Dateiliste fehlgeschlagen"
 
-#: src/pv/transfer.c:501
+#: src/pv/transfer.c:573
 msgid "read failed"
 msgstr "read-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:516
+#: src/pv/transfer.c:588
 msgid "warning: read errors detected"
 msgstr "warnung: lesefehler erkannt"
 
-#: src/pv/transfer.c:528
+#: src/pv/transfer.c:600
 msgid "file is not seekable"
 msgstr "Datei ist nicht durchsuchbar"
 
-#: src/pv/transfer.c:605
+#: src/pv/transfer.c:677
 msgid "failed to seek past error"
 msgstr "konnte den Fehler nicht überwinden"
 
-#: src/pv/transfer.c:621
+#: src/pv/transfer.c:693
 msgid "skipped past read error"
 msgstr "über den Lesefehler hinaus verschoben"
 
-#: src/pv/transfer.c:668
+#: src/pv/transfer.c:740
 msgid "no transfer buffer allocated"
 msgstr "Speicherzuweisung für den Transferpuffer fehlgeschlagen"
 
-#: src/pv/transfer.c:756
+#: src/pv/transfer.c:828
 msgid "failed to set interval timer"
 msgstr "konnte Intervall-Timer nicht setzen"
 
-#: src/pv/transfer.c:782
+#: src/pv/transfer.c:854
 msgid "failed to clear interval timer"
 msgstr "konnte Intervall-Timer nicht löschen"
 
-#: src/pv/transfer.c:829
+#: src/pv/transfer.c:901
 msgid "line position buffer allocation failed"
 msgstr "Zuweisung des Zeilenpuffers fehlgeschlagen"
 
-#: src/pv/transfer.c:1018
+#: src/pv/transfer.c:1090
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:1254
+#: src/pv/transfer.c:1326
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 
