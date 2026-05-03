@@ -294,20 +294,21 @@ are explicitly switched on will be shown.
     data from or to a pipe than regular **read**(2) and **write**(2),
     but means that the transfer buffer may not be used. This prevents
     "**\--buffer-percent**" and "**\--last-written**" from working,
-    cannot work with "**\--sparse**" or "**\--discard**", and makes
-    "**\--buffer-size**" redundant, so using any of those options
-    automatically switches on "**\--no-splice**". Switching on this
-    option results in a small loss of transfer efficiency. It has no
-    effect on systems where **splice**(2) is unavailable.
+    cannot work with "**\--sparse**", and makes "**\--buffer-size**"
+    redundant, so using any of those options automatically switches on
+    "**\--no-splice**". Switching on this option results in a small loss
+    of transfer efficiency. It has no effect on systems where
+    **splice**(2) is unavailable.
 
 **-J BYTES, \--pipe-buffer-size BYTES**
 
-:   Attempt to set the size of the output pipe buffer to *BYTES* bytes.
-    This will only have an effect if the output is a pipe, and will
-    silently do nothing if the requested size cannot be achieved. If
-    this option is not specified, and both the output and the first
-    input are pipes, then the output pipe buffer size will automatically
-    be increased to match the input pipe buffer, if it was smaller.
+:   Attempt to set the size of the output pipe buffer, and the
+    intermediate input pipe buffer if one is needed, to *BYTES* bytes.
+    This will silently do nothing if the requested size cannot be
+    achieved. If this option is not specified, and both the output and
+    the first input are pipes, then the output pipe buffer size will
+    automatically be increased to match the input pipe buffer, if it was
+    smaller.
 
 **-E, \--skip-errors**
 
@@ -383,10 +384,7 @@ are explicitly switched on will be shown.
     This can be useful if you have a pipeline which generates data (your
     input) quickly but you don\'t know the size, and you wish to pass it
     to some slower process, once all of the input has been generated and
-    you know its size, so you can see its progress. Note that when doing
-    this with relatively small amounts of data, "**\--no-splice**" may
-    be preferable so that pipe buffering doesn\'t affect the progress
-    display.
+    you know its size, so you can see its progress.
 
 ## Alternative operating modes
 
@@ -722,7 +720,7 @@ display:
 Sending logs to a processing script, showing the most recent line as
 part of the progress display:
 
-    pv --format '%a %p : %L' big.log | processing-script
+    pv --no-splice --format '%a %p : %L' big.log | processing-script
 
 Showing progress as lines of JSON data:
 
