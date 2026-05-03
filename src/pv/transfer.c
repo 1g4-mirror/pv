@@ -341,10 +341,10 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	size_t bytes_can_read;
 	off_t amount_to_skip, amount_skipped, orig_offset, skip_offset;
 	ssize_t nread;
+#ifdef HAVE_SPLICE
 	int output_fd;
 
 	output_fd = state->control.output_fd;
-#ifdef HAVE_SPLICE
 	if (state->control.discard_input && !state->control.no_splice)
 		output_fd = state->transfer.discard_fd;
 #endif				/* HAVE_SPLICE */
