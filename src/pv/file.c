@@ -541,10 +541,12 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 			pv_perror("%s", "/dev/null");
 			(void) close(fd);
 			fd = -1;
+			state->status.exit_status |= PV_ERROREXIT_TRANSITION;
 		}
 		if (!pv_fd_is_dev_null(state->transfer.discard_fd, true)) {
 			(void) close(fd);
 			fd = -1;
+			state->status.exit_status |= PV_ERROREXIT_TRANSITION;
 		}
 	}
 #endif				/* HAVE_SPLICE */
