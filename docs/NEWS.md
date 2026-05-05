@@ -4,9 +4,9 @@
  * *fix:* prevent an endless wait if there is unread data in the output pipe when its reader terminates ([#189](https://codeberg.org/ivarch/pv/issues/189))
  * *fix:* introduce an intermediate pipe on inputs to allow `splice()` to be used to improve performance ([#188](https://codeberg.org/ivarch/pv/issues/188))
  * *fix:* improve performance of **--discard** by splicing to /dev/null internally ([#191](https://codeberg.org/ivarch/pv/issues/191))
+ * *fix:* report signal interrupts on a new line, so that control-C doesn't write "^C" over the progress ([#187](https://codeberg.org/ivarch/pv/issues/187))
  * *fix:* exit with an error if the PID file given to **--pidfile** cannot be replaced
  * *fix:* correct the **--help** word wrapping on very small terminals
- * *fix:* report signal interrupts on a new line, so that control-C doesn't write "^C" over the progress ([#187](https://codeberg.org/ivarch/pv/issues/187))
  * *i18n:* Polish translations updated
  * *i18n:* Finnish translations updated
  * *i18n:* removed empty unmaintained translation catalogues for Spanish and Georgian
