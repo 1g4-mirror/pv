@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-03 19:24+0100\n"
+"POT-Creation-Date: 2026-05-05 21:04+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -505,11 +505,11 @@ msgstr "erro obtendo informações do arquivo de saída"
 msgid "input file is output file"
 msgstr "os arquivos de entrada e saída são o mesmo"
 
-#: src/pv/file.c:578
+#: src/pv/file.c:580
 msgid "(none)"
 msgstr ""
 
-#: src/pv/file.c:580
+#: src/pv/file.c:582
 msgid "(stdin)"
 msgstr ""
 

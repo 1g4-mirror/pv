@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-03 19:24+0100\n"
+"POT-Creation-Date: 2026-05-05 21:04+0100\n"
 "PO-Revision-Date: 2026-04-06 15:34+0000\n"
 "Last-Translator: Coral Pink <coral.pink@disr.it>\n"
 "Language-Team: Polish <https://translate.codeberg.org/projects/pv/pv/pl/>\n"
@@ -520,11 +520,11 @@ msgstr "nie udało się wykonać operacji stat na pliku wyjściowym"
 msgid "input file is output file"
 msgstr "plik wejściowy jest zarazem plikiem wyjściowym"
 
-#: src/pv/file.c:578
+#: src/pv/file.c:580
 msgid "(none)"
 msgstr "(brak)"
 
-#: src/pv/file.c:580
+#: src/pv/file.c:582
 msgid "(stdin)"
 msgstr "(stdin)"
 

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-03 19:24+0100\n"
+"POT-Creation-Date: 2026-05-05 21:04+0100\n"
 "PO-Revision-Date: 2024-10-13 20:43+0000\n"
 "Last-Translator: mmatous <mmatous@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Czech <https://translate.codeberg.org/projects/pv/pv/cs/>\n"
@@ -499,11 +499,11 @@ msgstr "selhalo zjištění informací o výstupním souboru"
 msgid "input file is output file"
 msgstr "vstupní soubor je výstupní soubor"
 
-#: src/pv/file.c:578
+#: src/pv/file.c:580
 msgid "(none)"
 msgstr "(žádný)"
 
-#: src/pv/file.c:580
+#: src/pv/file.c:582
 msgid "(stdin)"
 msgstr "(stdin)"
 
