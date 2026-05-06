@@ -70,7 +70,7 @@ struct opts_s {
 	/*@keep@*/ /*@null@*/ int *watchfd_fd;  /* array of fds to watch in each one (0=all) */
 	/*@keep@*/ /*@null@*/ argv_string *argv;   /* array of non-option arguments */
 	size_t lastwritten;            /* show N bytes last written */
-	off_t rate_limit;              /* rate limit, in bytes per second */
+	long double rate_limit;        /* rate limit, in bytes per second */
 	size_t buffer_size;            /* buffer size, in bytes (0=default) */
 	size_t pipe_buffer_size;       /* pipe buffer size, in bytes (0=default) */
 	off_t size;                    /* total size of data */
@@ -114,6 +114,7 @@ struct opts_s {
 	bool show_stats;	       /* set to write statistics at the end */
 	bool width_set_manually;       /* width was set manually, not detected */
 	bool height_set_manually;      /* height was set manually, not detected */
+	bool rate_limit_active;	       /* whether a rate limit was set */
 };
 
 /*@-exportlocal@*/

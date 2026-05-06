@@ -72,8 +72,10 @@ extern double pv_getnum_interval(const char *);
  * Return the numeric value of a string representing a size, interpreting
  * suffixes in decimal units (multiples of 1000) instead of multiples of
  * 1024 if the second argument is true.
+ *
+ * Optionally also places the result in a long double.
  */
-extern off_t pv_getnum_size(const char *, bool);
+extern off_t pv_getnum_size(const char *, bool, /*@null@ */ long double *);
 
 /*
  * Return the numeric value of a string representing a count such as screen
@@ -264,7 +266,7 @@ extern void pv_state_stop_at_size_set(pvstate_t, bool);
 extern void pv_state_sync_after_write_set(pvstate_t, bool);
 extern void pv_state_direct_io_set(pvstate_t, bool);
 extern void pv_state_sparse_output_set(pvstate_t, bool);
-extern void pv_state_rate_limit_set(pvstate_t, off_t);
+extern void pv_state_rate_limit_set(pvstate_t, long double, bool);
 extern void pv_state_target_buffer_size_set(pvstate_t, size_t);
 extern void pv_state_no_splice_set(pvstate_t, bool);
 extern void pv_state_pipe_buffer_size_set(pvstate_t, size_t);

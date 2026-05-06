@@ -29,8 +29,11 @@ bool pv_isdigit(char c)
  * a fractional part, optionally followed by a units suffix such as "K" for
  * kibibytes.  If "decimal_units" is true, suffixes are interpreted as
  * multiples of 1000, rather than multiples of 1024.
+ *
+ * If resultptr is not NULL, it is populated with the result as a long
+ * double.
  */
-off_t pv_getnum_size(const char *str, bool decimal_units)
+off_t pv_getnum_size(const char *str, bool decimal_units, /*@null@ */ long double *resultptr)
 {
 	off_t integral_part = 0;
 	off_t fractional_part = 0;
@@ -39,8 +42,11 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	off_t decimal_multiplier = 0;
 	size_t readpos = 0;
 
-	if (NULL == str)
+	if (NULL == str) {
+		if (NULL != resultptr)
+			*resultptr = 0.0;
 		return (off_t) 0;
+	}
 
 	/* Skip any non-numeric leading characters. */
 	while (str[readpos] != '\0' && (!pv_isdigit(str[readpos])))
@@ -156,10 +162,19 @@ off_t pv_getnum_size(const char *str, bool decimal_units)
 	 * Add the fractional part, divided by its divisor, to the integral
 	 * part, now that the multiplier for the units has been applied.
 	 */
+	if (NULL != resultptr) {
+		*resultptr = ((long double) fractional_part) / (long double) fractional_divisor;
+		*resultptr += (long double) integral_part;
+	}
 	fractional_part = fractional_part / fractional_divisor;
 	integral_part += fractional_part;
 
-	debug("%s [%s] = %lld", str, decimal_units ? "decimal" : "binary", (long long) integral_part);
+	if (NULL != resultptr) {
+		debug("%s [%s] = %lld = %Lf", str, decimal_units ? "decimal" : "binary", (long long) integral_part,
+		      *resultptr);
+	} else {
+		debug("%s [%s] = %lld", str, decimal_units ? "decimal" : "binary", (long long) integral_part);
+	}
 
 	return integral_part;
 }
@@ -211,7 +226,7 @@ double pv_getnum_interval(const char *str)
  */
 unsigned int pv_getnum_count(const char *str, bool decimal_units)
 {
-	return (unsigned int) pv_getnum_size(str, decimal_units);
+	return (unsigned int) pv_getnum_size(str, decimal_units, NULL);
 }
 
 

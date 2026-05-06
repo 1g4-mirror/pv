@@ -34,7 +34,7 @@ struct remote_msg {
 	bool bytes;			 /* bytes transferred flag */
 	bool bufpercent;		 /* transfer buffer percentage flag */
 	size_t lastwritten;		 /* last-written bytes count */
-	off_t rate_limit;		 /* rate limit, in bytes per second */
+	long double rate_limit;		 /* rate limit, in bytes per second */
 	size_t buffer_size;		 /* buffer size, in bytes (0=default) */
 	off_t size;			 /* total size of data */
 	double interval;		 /* interval between updates */
@@ -42,6 +42,7 @@ struct remote_msg {
 	unsigned int height;		 /* screen height */
 	bool width_set_manually;	 /* width was set manually, not detected */
 	bool height_set_manually;	 /* height was set manually, not detected */
+	bool rate_limit_active;		 /* whether rate limiting is in effect */
 	char name[256];			 /* flawfinder: ignore */
 	char format[256];		 /* flawfinder: ignore */
 	char extra_display[256];	 /* flawfinder: ignore */
@@ -106,6 +107,7 @@ int pv_remote_set(pvstate_t state, pid_t remote)
 	msgbuf.bufpercent = state->control.format_option.bufpercent;
 	msgbuf.lastwritten = state->control.format_option.lastwritten;
 	msgbuf.rate_limit = state->control.rate_limit;
+	msgbuf.rate_limit_active = state->control.rate_limit_active;
 	msgbuf.buffer_size = state->control.target_buffer_size;
 	msgbuf.size = state->control.size;
 	msgbuf.interval = state->control.interval;
@@ -322,8 +324,7 @@ static bool pv__rxsignal_usr2(pvstate_t state)
 
 	pv_state_set_format_options(state, format_options);
 
-	if (msgbuf.rate_limit > 0)
-		pv_state_rate_limit_set(state, msgbuf.rate_limit);
+	pv_state_rate_limit_set(state, msgbuf.rate_limit, msgbuf.rate_limit_active);
 	if (msgbuf.buffer_size > 0) {
 		pv_state_target_buffer_size_set(state, msgbuf.buffer_size);
 	}

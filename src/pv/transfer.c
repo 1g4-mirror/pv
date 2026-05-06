@@ -300,11 +300,11 @@ static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, boo
  *
  * At most, the number of bytes read will be the number of bytes remaining
  * in the input buffer, capped to the number of bytes left until
- * state->control.size is reached if state->control.stop_at_size is true.
- * If state->control.rate_limit is >0, and/or "max_to_write" is >0, and
- * splice() is used, then the maximum number of bytes read will be further
- * capped to the value of "max_to_write", since splice() writes as well as
- * reads.
+ * state->control.size is reached if state->control.stop_at_size is true. 
+ * If state->control.rate_limit_active is true, and/or "max_to_write" is >0,
+ * and splice() is used, then the maximum number of bytes read will be
+ * further capped to the value of "max_to_write", since splice() writes as
+ * well as reads.
  *
  * If splice() was successfully used, sets state->transfer.splice_used to
  * true; if it was unsuccessfully used, then
@@ -380,7 +380,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	    && (0 == state->transfer.to_write)) {
 		size_t bytes_to_splice;
 
-		if (state->control.rate_limit > 0 || max_to_write != 0) {
+		if (state->control.rate_limit_active || max_to_write != 0) {
 			bytes_to_splice = (size_t) max_to_write;
 		} else {
 			bytes_to_splice = bytes_can_read;
@@ -1163,10 +1163,10 @@ static char *pv__allocate_aligned_buffer(int outfd, int infd, size_t target_size
 
 /*
  * Transfer some data from "fd" to standard output, timing out after 9/100
- * of a second.  If state->control.rate_limit is >0, and/or "allowed" is >0,
- * only up to "allowed" bytes can be written.  The variables that "eof_in"
- * and "eof_out" point to are used to flag that we've finished reading and
- * writing respectively.
+ * of a second.  If state->control.rate_limit_active is true, and/or
+ * "allowed" is >0, only up to "allowed" bytes can be written.  The
+ * variables that "eof_in" and "eof_out" point to are used to flag that
+ * we've finished reading and writing respectively.
  *
  * Returns the number of bytes written, or negative on error (in which case
  * state->status.exit_status is updated).  In line mode, the number of lines
@@ -1293,7 +1293,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * limiting is active or if "allowed" is > 0.
 	 */
 	state->transfer.to_write = (ssize_t) (state->transfer.read_position - state->transfer.write_position);
-	if ((state->control.rate_limit > 0) || (allowed > 0)) {
+	if ((state->control.rate_limit_active) || (allowed > 0)) {
 		if ((off_t) (state->transfer.to_write) > allowed) {
 			state->transfer.to_write = (ssize_t) allowed;
 		}

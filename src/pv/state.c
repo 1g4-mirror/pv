@@ -649,9 +649,10 @@ void pv_state_discard_input_set(pvstate_t state, bool val)
 	state->control.discard_input = val;
 }
 
-void pv_state_rate_limit_set(pvstate_t state, off_t val)
+void pv_state_rate_limit_set(pvstate_t state, long double val, bool is_active)
 {
 	state->control.rate_limit = val;
+	state->control.rate_limit_active = is_active;
 }
 
 void pv_state_target_buffer_size_set(pvstate_t state, size_t val)

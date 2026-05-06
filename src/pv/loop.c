@@ -572,7 +572,7 @@ int pv_main_loop(pvstate_t state)
 		if (1 == state->flags.trigger_exit)
 			break;
 
-		if (state->control.rate_limit > 0) {
+		if (state->control.rate_limit_active) {
 			pv_elapsedtime_read(&cur_time);
 			if (pv_elapsedtime_compare(&cur_time, &next_ratecheck) > 0) {
 				target +=
@@ -595,7 +595,7 @@ int pv_main_loop(pvstate_t state)
 		if ((0 < state->control.size) && (state->control.stop_at_size)) {
 			if ((state->control.size < (state->transfer.total_written + cansend))
 			    || ((0 == cansend)
-				&& (0 == state->control.rate_limit))) {
+				&& (!state->control.rate_limit_active))) {
 				cansend = state->control.size - state->transfer.total_written;
 				if (0 >= cansend) {
 					debug("%s", "write limit reached (size explicitly set) - setting EOF flags");
@@ -622,11 +622,11 @@ int pv_main_loop(pvstate_t state)
 
 		if (state->control.linemode) {
 			state->transfer.total_written += lineswritten;
-			if (state->control.rate_limit > 0)
+			if (state->control.rate_limit_active)
 				target -= lineswritten;
 		} else {
 			state->transfer.total_written += written;
-			if (state->control.rate_limit > 0)
+			if (state->control.rate_limit_active)
 				target -= written;
 		}
 
