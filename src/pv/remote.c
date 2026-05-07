@@ -324,7 +324,8 @@ static bool pv__rxsignal_usr2(pvstate_t state)
 
 	pv_state_set_format_options(state, format_options);
 
-	pv_state_rate_limit_set(state, msgbuf.rate_limit, msgbuf.rate_limit_active);
+	if (msgbuf.rate_limit_active)
+		pv_state_rate_limit_set(state, msgbuf.rate_limit, msgbuf.rate_limit_active);
 	if (msgbuf.buffer_size > 0) {
 		pv_state_target_buffer_size_set(state, msgbuf.buffer_size);
 	}
