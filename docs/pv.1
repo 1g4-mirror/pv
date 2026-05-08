@@ -267,6 +267,9 @@ If the file already exists, it will be truncated.
 .BI \-L\  RATE \fR,\ \fB\-\-rate-limit\  RATE
 Limit the transfer to a maximum of \fIRATE\fR bytes per second.
 The same suffixes as \*(lq\fB\-\-size\fR\*(rq can be used.
+Decimal values are allowed.
+Specifying 0 will turn off rate limiting, which is useful with
+\*(lq\fB\-\-remote\fR\*(rq.
 .TP
 .BI \-B\  BYTES \fR,\ \fB\-\-buffer-size\  BYTES
 Use a transfer buffer size of \fIBYTES\fR bytes.

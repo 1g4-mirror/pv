@@ -801,6 +801,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 
 	opts->width_set_manually = false;
 	opts->height_set_manually = false;
+	opts->rate_limit_specified = false;
 
 	do {
 #ifdef HAVE_GETOPT_LONG
@@ -1058,6 +1059,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'L':
 			(void) pv_getnum_size(optarg, opts->decimal_units, &(opts->rate_limit));
+			opts->rate_limit_specified = true;
 #if HAVE_MATH_H
 			/*@-unrecog@ *//* splint doesn't know nextafterl(). */
 			if (opts->rate_limit < nextafterl(0, INFINITY)) {

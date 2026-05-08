@@ -237,7 +237,8 @@ struct pvstate_s {
 		bool show_stats;		 /* show statistics on exit */
 		bool width_set_manually;	 /* width was set manually, not detected */
 		bool height_set_manually;	 /* height was set manually, not detected */
-		bool rate_limit_active;		 /* whether a rate limit is in effect */
+		bool rate_limit_specified;	 /* whether a rate limit value was given */
+		bool rate_limit_active;		 /* whether a rate limit is in effect (>0) */
 	} control;
 
 	/*******************

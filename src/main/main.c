@@ -903,7 +903,7 @@ int main(int argc, char **argv)
 	pv_state_sync_after_write_set(state, opts->sync_after_write);
 	pv_state_direct_io_set(state, opts->direct_io);
 	pv_state_discard_input_set(state, opts->discard_input);
-	pv_state_rate_limit_set(state, opts->rate_limit, opts->rate_limit_active);
+	pv_state_rate_limit_set(state, opts->rate_limit, opts->rate_limit_specified, opts->rate_limit_active);
 	pv_state_target_buffer_size_set(state, opts->buffer_size);
 	pv_state_no_splice_set(state, opts->no_splice);
 	pv_state_pipe_buffer_size_set(state, opts->pipe_buffer_size);

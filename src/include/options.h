@@ -114,7 +114,8 @@ struct opts_s {
 	bool show_stats;	       /* set to write statistics at the end */
 	bool width_set_manually;       /* width was set manually, not detected */
 	bool height_set_manually;      /* height was set manually, not detected */
-	bool rate_limit_active;	       /* whether a rate limit was set */
+	bool rate_limit_specified;     /* whether a rate limit value was given */
+	bool rate_limit_active;	       /* whether rate limiting is in effect (>0) */
 };
 
 /*@-exportlocal@*/
