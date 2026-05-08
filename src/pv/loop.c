@@ -348,8 +348,8 @@ int pv_main_loop(pvstate_t state)
 {
 	long lineswritten;
 	off_t cansend;
+	long double rate_limited_target;
 	ssize_t written;
-	long double target;
 	bool eof_in, eof_out, final_update;
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
 	struct timespec next_remotecheck, next_monitor_exchange;
@@ -443,7 +443,7 @@ int pv_main_loop(pvstate_t state)
 		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
 	}
 
-	target = 0;
+	rate_limited_target = 0.0;
 	final_update = false;
 	file_idx = 0;
 
@@ -574,18 +574,24 @@ int pv_main_loop(pvstate_t state)
 
 		if (state->control.rate_limit_active) {
 			pv_elapsedtime_read(&cur_time);
-			if (pv_elapsedtime_compare(&cur_time, &next_ratecheck) > 0) {
-				target +=
+			while (pv_elapsedtime_compare(&cur_time, &next_ratecheck) > 0) {
+				rate_limited_target +=
 				    ((long double) (state->control.rate_limit)) / (long double) (1000000000.0 /
 												 (long double)
 												 (RATE_GRANULARITY));
 				long double burst_max = ((long double) (state->control.rate_limit * RATE_BURST_WINDOW));
-				if (target > burst_max) {
-					target = burst_max;
+				if (burst_max > 1.0 && rate_limited_target > burst_max) {
+					/*
+					 * If the burst max is < 1 then
+					 * capping to that will mean nothing
+					 * ever gets sent, so turn off the
+					 * burst limit at 1 and below.
+					 */
+					rate_limited_target = burst_max;
 				}
 				pv_elapsedtime_add_nsec(&next_ratecheck, RATE_GRANULARITY);
 			}
-			cansend = (off_t) target;
+			cansend = (off_t) (rate_limited_target);
 		}
 
 		/*
@@ -623,11 +629,11 @@ int pv_main_loop(pvstate_t state)
 		if (state->control.linemode) {
 			state->transfer.total_written += lineswritten;
 			if (state->control.rate_limit_active)
-				target -= lineswritten;
+				rate_limited_target -= lineswritten;
 		} else {
 			state->transfer.total_written += written;
 			if (state->control.rate_limit_active)
-				target -= written;
+				rate_limited_target -= written;
 		}
 
 #ifdef FIONREAD
