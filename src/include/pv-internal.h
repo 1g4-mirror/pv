@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 #define RATE_GRANULARITY	100000000	 /* nsec between -L rate chunks */
-#define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
+#define RATE_BURST_WINDOW	5.0	 	 /* rate burst window (multiples of rate) */
 #define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R and -Q */
 #define MONITOR_EXCHANGE_INTERVAL 100000000	 /* nsec between "-M both" data exchanges */
 #define BUFFER_SIZE		(size_t) 409600	 /* default transfer buffer size */
