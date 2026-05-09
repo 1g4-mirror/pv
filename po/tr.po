@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-09 20:03+0100\n"
+"POT-Creation-Date: 2026-05-09 20:24+0100\n"
 "PO-Revision-Date: 2025-10-05 20:09+0000\n"
 "Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -548,7 +548,7 @@ msgstr "oran min/ortalama/maks/standart sapma"
 msgid "rate not measured"
 msgstr "oran ölçülmedi"
 
-#: src/pv/loop.c:1070 src/pv/loop.c:1086 src/pv/loop.c:1104 src/pv/remote.c:93
+#: src/pv/loop.c:1080 src/pv/loop.c:1096 src/pv/loop.c:1114 src/pv/remote.c:93
 #: src/pv/remote.c:188 src/pv/remote.c:536 src/pv/remote.c:582
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
@@ -559,7 +559,7 @@ msgstr "oran ölçülmedi"
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:1104 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1114 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
