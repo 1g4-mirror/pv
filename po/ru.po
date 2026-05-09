@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-09 16:19+0100\n"
+"POT-Creation-Date: 2026-05-09 20:03+0100\n"
 "PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -547,7 +547,7 @@ msgstr "скор. мин/сред/макс/дев"
 msgid "rate not measured"
 msgstr "скорость не изменяется"
 
-#: src/pv/loop.c:1057 src/pv/loop.c:1073 src/pv/loop.c:1091 src/pv/remote.c:93
+#: src/pv/loop.c:1070 src/pv/loop.c:1086 src/pv/loop.c:1104 src/pv/remote.c:93
 #: src/pv/remote.c:188 src/pv/remote.c:536 src/pv/remote.c:582
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
@@ -558,7 +558,7 @@ msgstr "скорость не изменяется"
 msgid "pid"
 msgstr "ИДпр"
 
-#: src/pv/loop.c:1091 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1104 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
