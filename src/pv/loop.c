@@ -585,9 +585,9 @@ int pv_main_loop(pvstate_t state)
 												 (long double)
 												 (RATE_GRANULARITY));
 				/*
-				 * Cap the "target bytes amount to transfer"
-				 * so it doesn't go too high - otherwise it
-				 * just keeps going up while there is no, or
+				 * Cap the "target amount to transfer" so it
+				 * doesn't go too high - otherwise it just
+				 * keeps going up while there is no, or
 				 * slow, input data, and then when lots of
 				 * input data does arrive, the rate limit is
 				 * ineffective until the counter drops back
