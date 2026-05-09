@@ -639,6 +639,16 @@ int pv_main_loop(pvstate_t state)
 			return state->status.exit_status;
 		}
 
+		/*
+		 * Increment the total_written counter (lines or bytes
+		 * depending on line mode) by the amount written.
+		 *
+		 * If rate limiting is active, subtract the amount written
+		 * from the target amount to transfer.  Whatever
+		 * (fractional) value is left will carry over to the next
+		 * loop iteration so that the transfer rate will average out
+		 * to the requested rate.
+		 */
 		if (state->control.linemode) {
 			state->transfer.total_written += lineswritten;
 			if (state->control.rate_limit_active)
