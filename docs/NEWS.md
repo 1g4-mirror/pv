@@ -5,6 +5,7 @@
  * *fix:* introduce an intermediate pipe on inputs to allow `splice()` to be used to improve performance ([#188](https://codeberg.org/ivarch/pv/issues/188))
  * *fix:* improve performance of **--discard** by splicing to /dev/null internally ([#191](https://codeberg.org/ivarch/pv/issues/191))
  * *fix:* report signal interrupts on a new line, so that control-C doesn't write "^C" over the progress ([#187](https://codeberg.org/ivarch/pv/issues/187))
+ * *fix:* allow decimal values for **--rate-limit** ([#193](https://codeberg.org/ivarch/pv/issues/193))
  * *fix:* exit with an error if the PID file given to **--pidfile** cannot be replaced
  * *fix:* correct the **--help** word wrapping on very small terminals
  * *i18n:* Polish translations updated
