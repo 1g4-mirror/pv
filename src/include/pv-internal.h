@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 #define RATE_GRANULARITY	100000000	 /* nsec between -L rate chunks */
-#define RATE_BURST_WINDOW	5	 	 /* rate burst window (multiples of rate) */
+#define RATE_BURST_WINDOW	5.0	 	 /* rate burst window (multiples of rate) */
 #define REMOTE_INTERVAL		100000000	 /* nsec between checks for -R and -Q */
 #define MONITOR_EXCHANGE_INTERVAL 100000000	 /* nsec between "-M both" data exchanges */
 #define BUFFER_SIZE		(size_t) 409600	 /* default transfer buffer size */
@@ -202,7 +202,7 @@ struct pvstate_s {
 		/*@null@*/ char *output_name;    /* name of the output, for diagnostics */
 		/*@null@*/ char *default_bar_style; /* which bar style to use by default */
 		off_t error_skip_block;          /* skip block size, 0 for adaptive */
-		off_t rate_limit;                /* rate limit, in bytes per second */
+		long double rate_limit;          /* rate limit, in bytes per second */
 		size_t target_buffer_size;       /* transfer buffer size (0=default) */
 		size_t pipe_buffer_size;         /* pipe buffer size (0=default) */
 		off_t size;                      /* total size of data */
@@ -237,6 +237,8 @@ struct pvstate_s {
 		bool show_stats;		 /* show statistics on exit */
 		bool width_set_manually;	 /* width was set manually, not detected */
 		bool height_set_manually;	 /* height was set manually, not detected */
+		bool rate_limit_specified;	 /* whether a rate limit value was given */
+		bool rate_limit_active;		 /* whether a rate limit is in effect (>0) */
 	} control;
 
 	/*******************

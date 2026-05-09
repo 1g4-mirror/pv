@@ -348,8 +348,8 @@ int pv_main_loop(pvstate_t state)
 {
 	long lineswritten;
 	off_t cansend;
+	long double rate_limited_target;
 	ssize_t written;
-	long double target;
 	bool eof_in, eof_out, final_update;
 	struct timespec start_time, next_update, next_ratecheck, cur_time;
 	struct timespec next_remotecheck, next_monitor_exchange;
@@ -443,7 +443,7 @@ int pv_main_loop(pvstate_t state)
 		pv_elapsedtime_add_nsec(&next_update, (long long) (1000000000.0 * state->control.interval));
 	}
 
-	target = 0;
+	rate_limited_target = 0.0;
 	final_update = false;
 	file_idx = 0;
 
@@ -572,20 +572,26 @@ int pv_main_loop(pvstate_t state)
 		if (1 == state->flags.trigger_exit)
 			break;
 
-		if (state->control.rate_limit > 0) {
+		if (state->control.rate_limit_active) {
 			pv_elapsedtime_read(&cur_time);
-			if (pv_elapsedtime_compare(&cur_time, &next_ratecheck) > 0) {
-				target +=
+			while (pv_elapsedtime_compare(&cur_time, &next_ratecheck) > 0) {
+				rate_limited_target +=
 				    ((long double) (state->control.rate_limit)) / (long double) (1000000000.0 /
 												 (long double)
 												 (RATE_GRANULARITY));
 				long double burst_max = ((long double) (state->control.rate_limit * RATE_BURST_WINDOW));
-				if (target > burst_max) {
-					target = burst_max;
+				if (burst_max > 1.0 && rate_limited_target > burst_max) {
+					/*
+					 * If the burst max is < 1 then
+					 * capping to that will mean nothing
+					 * ever gets sent, so turn off the
+					 * burst limit at 1 and below.
+					 */
+					rate_limited_target = burst_max;
 				}
 				pv_elapsedtime_add_nsec(&next_ratecheck, RATE_GRANULARITY);
 			}
-			cansend = (off_t) target;
+			cansend = (off_t) (rate_limited_target);
 		}
 
 		/*
@@ -595,7 +601,7 @@ int pv_main_loop(pvstate_t state)
 		if ((0 < state->control.size) && (state->control.stop_at_size)) {
 			if ((state->control.size < (state->transfer.total_written + cansend))
 			    || ((0 == cansend)
-				&& (0 == state->control.rate_limit))) {
+				&& (!state->control.rate_limit_active))) {
 				cansend = state->control.size - state->transfer.total_written;
 				if (0 >= cansend) {
 					debug("%s", "write limit reached (size explicitly set) - setting EOF flags");
@@ -622,12 +628,12 @@ int pv_main_loop(pvstate_t state)
 
 		if (state->control.linemode) {
 			state->transfer.total_written += lineswritten;
-			if (state->control.rate_limit > 0)
-				target -= lineswritten;
+			if (state->control.rate_limit_active)
+				rate_limited_target -= lineswritten;
 		} else {
 			state->transfer.total_written += written;
-			if (state->control.rate_limit > 0)
-				target -= written;
+			if (state->control.rate_limit_active)
+				rate_limited_target -= written;
 		}
 
 #ifdef FIONREAD

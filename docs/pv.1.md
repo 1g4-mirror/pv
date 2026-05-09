@@ -276,7 +276,9 @@ are explicitly switched on will be shown.
 **-L RATE, \--rate-limit RATE**
 
 :   Limit the transfer to a maximum of *RATE* bytes per second. The same
-    suffixes as "**\--size**" can be used.
+    suffixes as "**\--size**" can be used. Decimal values are allowed.
+    Specifying 0 will turn off rate limiting, which is useful with
+    "**\--remote**".
 
 **-B BYTES, \--buffer-size BYTES**
 

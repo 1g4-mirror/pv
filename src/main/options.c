@@ -35,6 +35,9 @@
 #ifdef HAVE_FTW_H
 #include <ftw.h>
 #endif
+#if HAVE_MATH_H
+#include <math.h>
+#endif
 
 
 void display_help(void);
@@ -798,6 +801,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 
 	opts->width_set_manually = false;
 	opts->height_set_manually = false;
+	opts->rate_limit_specified = false;
 
 	do {
 #ifdef HAVE_GETOPT_LONG
@@ -1005,7 +1009,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		case 's':
 			if ('@' != *optarg) {
 				/* A number was passed, not "@<filename>". */
-				opts->size = pv_getnum_size(optarg, opts->decimal_units);
+				opts->size = pv_getnum_size(optarg, opts->decimal_units, NULL);
 			} else {
 				/* Permit "@<filename>". */
 				const char *size_file = 1 + optarg;
@@ -1054,10 +1058,24 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			}
 			break;
 		case 'L':
-			opts->rate_limit = pv_getnum_size(optarg, opts->decimal_units);
+			(void) pv_getnum_size(optarg, opts->decimal_units, &(opts->rate_limit));
+			opts->rate_limit_specified = true;
+#if HAVE_MATH_H
+			/*@-unrecog@ *//* splint doesn't know nextafterl(). */
+			if (opts->rate_limit < nextafterl(0, INFINITY)) {
+				opts->rate_limit_active = false;
+			} else {
+				opts->rate_limit_active = true;
+			}
+			/*@+unrecog@ */
+#else
+			opts->rate_limit_active = false;
+			if (opts->rate_limit > 0.00001)
+				opts->rate_limit_active = true;
+#endif
 			break;
 		case 'B':
-			opts->buffer_size = (size_t) pv_getnum_size(optarg, opts->decimal_units);
+			opts->buffer_size = (size_t) pv_getnum_size(optarg, opts->decimal_units, NULL);
 			opts->no_splice = true;
 			break;
 		case 'C':
@@ -1067,10 +1085,10 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->skip_errors++;
 			break;
 		case 'Z':
-			opts->error_skip_block = pv_getnum_size(optarg, opts->decimal_units);
+			opts->error_skip_block = pv_getnum_size(optarg, opts->decimal_units, NULL);
 			break;
 		case 'J':
-			opts->pipe_buffer_size = (size_t) pv_getnum_size(optarg, opts->decimal_units);
+			opts->pipe_buffer_size = (size_t) pv_getnum_size(optarg, opts->decimal_units, NULL);
 			break;
 		case 'S':
 			opts->stop_at_size = true;
@@ -1214,7 +1232,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	if (PV_ACTION_WATCHFD == opts->action) {
 		if (opts->linemode || opts->null_terminated_lines || opts->stop_at_size
 		    || (opts->skip_errors > 0) || (opts->buffer_size > 0)
-		    || (opts->rate_limit > 0)) {
+		    || (opts->rate_limit_active)) {
 			/*@-mustfreefresh@ *//* see above */
 			pv_error("%s",
 				 _("cannot use line mode or transfer modifier options when watching file descriptors"));
