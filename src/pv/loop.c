@@ -572,6 +572,11 @@ int pv_main_loop(pvstate_t state)
 		if (1 == state->flags.trigger_exit)
 			break;
 
+		/*
+		 * If rate limiting is active, set "cansend" to the maximum
+		 * transfer amount allowable that would maintain the
+		 * requested rate.
+		 */
 		if (state->control.rate_limit_active) {
 			pv_elapsedtime_read(&cur_time);
 			while (pv_elapsedtime_compare(&cur_time, &next_ratecheck) > 0) {
@@ -579,14 +584,22 @@ int pv_main_loop(pvstate_t state)
 				    ((long double) (state->control.rate_limit)) / (long double) (1000000000.0 /
 												 (long double)
 												 (RATE_GRANULARITY));
+				/*
+				 * Cap the "target bytes amount to transfer"
+				 * so it doesn't go too high - otherwise it
+				 * just keeps going up while there is no, or
+				 * slow, input data, and then when lots of
+				 * input data does arrive, the rate limit is
+				 * ineffective until the counter drops back
+				 * down (see PR #62).
+				 *
+				 * Only apply this cap if it is at least
+				 * 1.0, otherwise the target will always be
+				 * below 1, and nothing will ever get
+				 * transferred (see issue #193).
+				 */
 				long double burst_max = ((long double) (state->control.rate_limit * RATE_BURST_WINDOW));
 				if (burst_max > 1.0 && rate_limited_target > burst_max) {
-					/*
-					 * If the burst max is < 1 then
-					 * capping to that will mean nothing
-					 * ever gets sent, so turn off the
-					 * burst limit at 1 and below.
-					 */
 					rate_limited_target = burst_max;
 				}
 				pv_elapsedtime_add_nsec(&next_ratecheck, RATE_GRANULARITY);
