@@ -182,7 +182,7 @@
  * *feature:* new **--discard** option to discard input as if writing to */dev/null* ([#42](https://codeberg.org/ivarch/pv/issues/42))
  * *feature:* new **--error-skip-block** option to make **--skip-errors** skip whole blocks ([#37](https://codeberg.org/ivarch/pv/issues/37))
  * *feature:* use `posix_fadvise()` like `cat`(1) does, to improve efficiency ([#39](https://codeberg.org/ivarch/pv/issues/39))
- * *feature:* new **--enable-static** option to "`configure`" for static builds ([#75](https://codeberg.org/ivarch/pv/pull/75))
+ * *feature:* new **--enable-static** option to "`configure`" for static builds ([#75](https://codeberg.org/ivarch/pv/pulls/75))
 
 #### Security
 
@@ -257,15 +257,15 @@
 ### 1.7.0 - 17 July 2023
 
  * *dropped:* support for Red Hat Enterprise Linux and its derivatives has been dropped; removed the RPM spec file, and will no longer build binaries
- * *feature:* the **--size** option now accepts "`@filename`" to use the size of another file (pull request [#57](https://codeberg.org/ivarch/pv/pull/57) supplied by [Dave Beckett](https://github.com/dajobe))
- * *feature:* the **--watchfd** option is now available on OS X (pull request [#60](https://codeberg.org/ivarch/pv/pull/60) supplied by [christoph-zededa](https://github.com/christoph-zededa))
- * *feature:* new **--bits** option to show bit count instead of byte count (adapted from pull request [#63](https://codeberg.org/ivarch/pv/pull/63) supplied by [Nick Black](https://nick-black.com))
- * *feature:* new **--average-rate-window** option, to set the window over which the average rate is calculated, also used for ETA (modified from pull request [#65](https://codeberg.org/ivarch/pv/pull/65) supplied by [lemonsqueeze](https://github.com/lemonsqueeze))
- * *feature:* the **--watchfd** option will now show relative filenames, if they are under the current directory (pull request [#66](https://codeberg.org/ivarch/pv/pull/66) supplied by [ikasty](https://github.com/ikasty))
- * *fix:* correction to `pv_in_foreground()` to behave as its comment block says it should, when not on a terminal - corrects [#19 "No output in Arch Linux initcpio after 1.6.6"](https://codeberg.org/ivarch/pv/issues/19), [#31 "No output written from inside zsh <() construct"](https://codeberg.org/ivarch/pv/issues/31), [#55 "pv Stopped Working in the Background"](https://codeberg.org/ivarch/pv/issues/55) (pull request [#64](https://codeberg.org/ivarch/pv/pull/64) supplied by [Michael Weiß](https://github.com/quitschbo))
- * *fix:* workaround for OS X 11 behaviour in configure script regarding stat64 at compile time (pull request [#57](https://codeberg.org/ivarch/pv/pull/57) supplied by [Dave Beckett](https://github.com/dajobe))
+ * *feature:* the **--size** option now accepts "`@filename`" to use the size of another file (pull request [#57](https://codeberg.org/ivarch/pv/pulls/57) supplied by [Dave Beckett](https://github.com/dajobe))
+ * *feature:* the **--watchfd** option is now available on OS X (pull request [#60](https://codeberg.org/ivarch/pv/pulls/60) supplied by [christoph-zededa](https://github.com/christoph-zededa))
+ * *feature:* new **--bits** option to show bit count instead of byte count (adapted from pull request [#63](https://codeberg.org/ivarch/pv/pulls/63) supplied by [Nick Black](https://nick-black.com))
+ * *feature:* new **--average-rate-window** option, to set the window over which the average rate is calculated, also used for ETA (modified from pull request [#65](https://codeberg.org/ivarch/pv/pulls/65) supplied by [lemonsqueeze](https://github.com/lemonsqueeze))
+ * *feature:* the **--watchfd** option will now show relative filenames, if they are under the current directory (pull request [#66](https://codeberg.org/ivarch/pv/pulls/66) supplied by [ikasty](https://github.com/ikasty))
+ * *fix:* correction to `pv_in_foreground()` to behave as its comment block says it should, when not on a terminal - corrects [#19 "No output in Arch Linux initcpio after 1.6.6"](https://codeberg.org/ivarch/pv/issues/19), [#31 "No output written from inside zsh <() construct"](https://codeberg.org/ivarch/pv/issues/31), [#55 "pv Stopped Working in the Background"](https://codeberg.org/ivarch/pv/issues/55) (pull request [#64](https://codeberg.org/ivarch/pv/pulls/64) supplied by [Michael Weiß](https://github.com/quitschbo))
+ * *fix:* workaround for OS X 11 behaviour in configure script regarding stat64 at compile time (pull request [#57](https://codeberg.org/ivarch/pv/pulls/57) supplied by [Dave Beckett](https://github.com/dajobe))
  * *fix:* workaround for macOS equivalence of stat to stat64 - patches from [Filippo Valsorda](https://github.com/FiloSottile) and [Demitri Muna](https://github.com/demitri), correcting [#33 "Fix compilation problems due to `stat64()` on Apple Silicon"](https://codeberg.org/ivarch/pv/issues/33)
- * *fix:* add burst rate limit to transfer, so rate limits are not broken by bursty traffic (pull request [#62](https://codeberg.org/ivarch/pv/pull/62) supplied by [Volodymyr Bychkovyak](https://github.com/vbychkoviak))
+ * *fix:* add burst rate limit to transfer, so rate limits are not broken by bursty traffic (pull request [#62](https://codeberg.org/ivarch/pv/pulls/62) supplied by [Volodymyr Bychkovyak](https://github.com/vbychkoviak))
  * *fix:* corrected **--force** option so it will still output progress when not in the same process group as the owner of the terminal - corrects [#23 "No output with "-f" when run in background after 1.6.6"](https://codeberg.org/ivarch/pv/issues/23) and helps to correct [#31 "No output written from inside zsh <() construct"](https://codeberg.org/ivarch/pv/issues/31)
  * *fix:* corrected elapsed time display to show as D:HH:MM:SS after 1 day, like the ETA does - corrects [#16 "Show days in same format in ETA as in elapsed time"](https://codeberg.org/ivarch/pv/issues/16)
  * *fix:* corrected bug where percentages went down after 100% when in **--numeric** mode with a **--size** that was too small - corrects [#26 "Correct "-n" behaviour when going past 100% of "-s" size"](https://codeberg.org/ivarch/pv/issues/26)
