@@ -117,6 +117,7 @@ is acknowledged and greatly appreciated:
  * [haarp](https://codeberg.org/haarp) - reported that control-C writes "^C" over the progress, and suggested a fix ([#187](https://codeberg.org/ivarch/pv/issues/187))
  * [Wolfgang Hoschek](https://codeberg.org/whoschek) - provided a fix for the endless wait if the output receiver exits before emptying the pipe ([#189](https://codeberg.org/ivarch/pv/issues/189))
  * [oech3](https://codeberg.org/oech3) - suggested and tested performance improvements using `splice()` in more situations on Linux ([#188](https://codeberg.org/ivarch/pv/issues/188), [#191](https://codeberg.org/ivarch/pv/issues/191), [#192](https://codeberg.org/ivarch/pv/issues/192))
+ * [Barak A. Pearlmutter](https://codeberg.org/barak) - suggested that "**--rate-limit**" should accept non-integer values ([#193](https://codeberg.org/ivarch/pv/issues/193))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
