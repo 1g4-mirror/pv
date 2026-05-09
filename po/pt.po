@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-05 21:04+0100\n"
+"POT-Creation-Date: 2026-05-09 16:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -301,7 +301,7 @@ msgstr "Por favor, reporte quaisquer defeitos para %s"
 msgid "(input)"
 msgstr ""
 
-#: src/main/main.c:381 src/main/options.c:1348
+#: src/main/main.c:381 src/main/options.c:1366
 msgid "a command to run must be specified"
 msgstr ""
 
@@ -309,85 +309,85 @@ msgstr ""
 msgid "state allocation failed"
 msgstr "alocação de memória de status falhou"
 
-#: src/main/options.c:415
+#: src/main/options.c:418
 msgid "list files may not contain @ lines"
 msgstr ""
 
-#: src/main/options.c:435 src/main/options.c:437 src/main/options.c:907
+#: src/main/options.c:438 src/main/options.c:440 src/main/options.c:911
 msgid "process ID or pid:fd pair expected"
 msgstr "ID do processo ou par pid:fd esperado"
 
-#: src/main/options.c:446 src/main/options.c:448 src/main/options.c:914
+#: src/main/options.c:449 src/main/options.c:451 src/main/options.c:918
 msgid "invalid process ID"
 msgstr "ID de processo inválido"
 
-#: src/main/options.c:535 src/pv/file.c:411
+#: src/main/options.c:538 src/pv/file.c:411
 msgid "failed to stat file"
 msgstr "erro obtendo informações do arquivo"
 
-#: src/main/options.c:578
+#: src/main/options.c:581
 msgid "is a directory"
 msgstr ""
 
-#: src/main/options.c:607
+#: src/main/options.c:610
 msgid "failed to generate sysfs filename"
 msgstr ""
 
-#: src/main/options.c:628
+#: src/main/options.c:631
 msgid "failed to read sysfs size file"
 msgstr ""
 
-#: src/main/options.c:647
+#: src/main/options.c:650
 msgid "failed to open block device"
 msgstr ""
 
-#: src/main/options.c:656
+#: src/main/options.c:659
 msgid "failed to determine size of block device"
 msgstr ""
 
-#: src/main/options.c:764
+#: src/main/options.c:767
 msgid "option structure allocation failed"
 msgstr "erro na alocação da estrutura de opções"
 
-#: src/main/options.c:784
+#: src/main/options.c:787
 msgid "option structure argv allocation failed"
 msgstr "erro na alocação da estrutura de opções argv"
 
-#: src/main/options.c:835
+#: src/main/options.c:839
 msgid "numeric value not understood"
 msgstr ""
 
-#: src/main/options.c:849
+#: src/main/options.c:853
 msgid "integer argument expected"
 msgstr "argumento inteiro esperado"
 
-#: src/main/options.c:859
+#: src/main/options.c:863
 msgid "numeric argument expected"
 msgstr "argumento numérico esperado"
 
-#: src/main/options.c:870
+#: src/main/options.c:874
 msgid "missing filename"
 msgstr ""
 
-#: src/main/options.c:896
+#: src/main/options.c:900
 msgid "missing process name"
 msgstr ""
 
-#: src/main/options.c:1171
+#: src/main/options.c:1189
 msgid "invalid side specification"
 msgstr ""
 
-#: src/main/options.c:1186
+#: src/main/options.c:1204
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Tente `%s --help' para maiores informações."
 
-#: src/main/options.c:1188
+#: src/main/options.c:1206
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Tente `%s -h' para maiores informações."
 
-#: src/main/options.c:1220
+#: src/main/options.c:1238
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -395,41 +395,41 @@ msgstr ""
 "não pode usar o modo de linha ou opções de modificador de transferência ao "
 "assistir os descritores de arquivo"
 
-#: src/main/options.c:1228
+#: src/main/options.c:1246
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "não pode usar o posicionamento do cursor ao observar os descritores de "
 "arquivo"
 
-#: src/main/options.c:1236
+#: src/main/options.c:1254
 msgid "cannot use remote control when watching file descriptors"
 msgstr "não pode usar o controle remoto ao assistir os descritores de arquivo"
 
-#: src/main/options.c:1244
+#: src/main/options.c:1262
 msgid "cannot use remote query when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1252
+#: src/main/options.c:1270
 msgid "cannot transfer files when watching file descriptors"
 msgstr "não pode transferir arquivos ao assistir descritores de arquivo"
 
-#: src/main/options.c:1276
+#: src/main/options.c:1294
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "não disponível em sistemas sem /proc/self/fdinfo"
 
-#: src/main/options.c:1287
+#: src/main/options.c:1305
 msgid "cannot use remote control and remote query together"
 msgstr ""
 
-#: src/main/options.c:1314
+#: src/main/options.c:1332
 msgid "monitor mode cannot be specified with this option"
 msgstr ""
 
-#: src/main/options.c:1326
+#: src/main/options.c:1344
 msgid "monitor mode cannot be used with store-and-forward"
 msgstr ""
 
-#: src/main/options.c:1337
+#: src/main/options.c:1355
 msgid "files cannot be specified with this option"
 msgstr ""
 
@@ -477,7 +477,7 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:1082 src/pv/state.c:931 src/pv/transfer.c:1226
+#: src/pv/display.c:1082 src/pv/state.c:941 src/pv/transfer.c:1226
 msgid "buffer allocation failed"
 msgstr "erro alocando o buffer"
 
@@ -552,8 +552,8 @@ msgstr ""
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:1051 src/pv/loop.c:1067 src/pv/loop.c:1085 src/pv/remote.c:91
-#: src/pv/remote.c:184 src/pv/remote.c:531 src/pv/remote.c:577
+#: src/pv/loop.c:1057 src/pv/loop.c:1073 src/pv/loop.c:1091 src/pv/remote.c:93
+#: src/pv/remote.c:188 src/pv/remote.c:536 src/pv/remote.c:582
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
 #: src/pv/watchpid.c:206 src/pv/watchpid.c:218 src/pv/watchpid.c:268
@@ -563,17 +563,17 @@ msgstr ""
 msgid "pid"
 msgstr ""
 
-#: src/pv/loop.c:1085 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1091 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
 msgstr ""
 
-#: src/pv/remote.c:238 src/pv/remote.c:631
+#: src/pv/remote.c:242 src/pv/remote.c:636
 msgid "message not received"
 msgstr "mensagem não recebida"
 
-#: src/pv/remote.c:654 src/pv/remote.c:672
+#: src/pv/remote.c:659 src/pv/remote.c:677
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO não suportado neste sistema"
 
@@ -581,7 +581,7 @@ msgstr "SA_SIGINFO não suportado neste sistema"
 msgid "history structure allocation failed"
 msgstr ""
 
-#: src/pv/state.c:883 src/pv/state.c:895
+#: src/pv/state.c:893 src/pv/state.c:905
 msgid "file list allocation failed"
 msgstr ""
 
