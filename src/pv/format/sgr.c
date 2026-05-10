@@ -72,10 +72,10 @@ struct sgr_keyword_map_s {
 		{ "bg-default", 0, 49 },
 		{ NULL, 0, 0 }
 	};
-	int keyword_index;
 
 	/* Calculate the lengths of each keyword on the first call. */
 	if (0 == keywords[0].bytes) {
+		int keyword_index;
 		for (keyword_index = 0; NULL != keywords[keyword_index].keyword; keyword_index++) {
 			keywords[keyword_index].bytes = strlen(keywords[keyword_index].keyword);	/* flawfinder: ignore */
 			/* flawfinder - strlen() on a static null-terminated string is OK. */
@@ -99,6 +99,7 @@ pvdisplay_bytecount_t pv_formatter_sgr(pvformatter_args_t args)
 {
 	/*@keep@ */ static struct sgr_keyword_map_s *keywords;
 	char content[1024];		 /* flawfinder: ignore */
+	size_t content_buffer_size = sizeof(content);
 	pvdisplay_bytecount_t write_position, read_position, keyword_start, keyword_length;
 	int numeric_value, code_count, most_recent_code;
 
@@ -175,23 +176,26 @@ pvdisplay_bytecount_t pv_formatter_sgr(pvformatter_args_t args)
 			debug("code=%d", code);
 
 			if (code >= 0) {
-				if (code_count > 15) {
+				if (code_count > 15 && write_position < content_buffer_size) {
 					write_position +=
 					    pv_snprintf(content + write_position, sizeof(content) - write_position,
 							"%s", "m");
 					code_count = 0;
 				}
-				if (0 == code_count) {
+				if (0 == code_count && write_position < content_buffer_size) {
 					write_position +=
 					    pv_snprintf(content + write_position, sizeof(content) - write_position,
 							"%s", "\033[");
-				} else {
+				} else if (write_position < content_buffer_size) {
 					write_position +=
 					    pv_snprintf(content + write_position, sizeof(content) - write_position,
 							"%s", ";");
 				}
-				write_position +=
-				    pv_snprintf(content + write_position, sizeof(content) - write_position, "%d", code);
+				if (write_position < content_buffer_size) {
+					write_position +=
+					    pv_snprintf(content + write_position, sizeof(content) - write_position,
+							"%d", code);
+				}
 				code_count++;
 				most_recent_code = code;
 			}
@@ -201,7 +205,7 @@ pvdisplay_bytecount_t pv_formatter_sgr(pvformatter_args_t args)
 		}
 	}
 
-	if (code_count > 0)
+	if (code_count > 0 && write_position < content_buffer_size)
 		write_position += pv_snprintf(content + write_position, sizeof(content) - write_position, "%s", "m");
 
 	if (most_recent_code > 0) {
