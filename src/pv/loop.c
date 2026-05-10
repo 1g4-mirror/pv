@@ -371,8 +371,6 @@ int pv_main_loop(pvstate_t state)
 	 * The remaining variables are all unchanged by linemode.
 	 */
 
-	input_fd = -1;
-
 	output_fd = state->control.output_fd;
 	if (output_fd < 0)
 		output_fd = STDOUT_FILENO;
