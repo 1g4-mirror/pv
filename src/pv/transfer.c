@@ -1352,8 +1352,8 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * that output is written line-by-line.
 	 */
 	if ((state->transfer.to_write > 0) && (state->control.linemode) && !(state->control.null_terminated_lines)) {
-		char *start;
-		char *end;
+		const char *start;
+		const char *end;
 
 		start = (char *) (state->transfer.transfer_buffer + state->transfer.write_position);
 		end = pv_memrchr(start, (int) '\n', (size_t) (state->transfer.to_write));
