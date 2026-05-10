@@ -580,7 +580,7 @@ void pv_calculate_transfer_rate(pvtransfercalc_t, readonly_pvtransferstate_t, re
 
 long pv_seconds_remaining(const off_t, const off_t, const long double);
 void pv_si_prefix(long double *, char *, const long double, pvtransfercount_t);
-void pv_describe_amount(char *, size_t, char *, long double, char *, char *, pvtransfercount_t);
+void pv_describe_amount(char *, size_t, const char *, long double, char *, char *, pvtransfercount_t);
 
 int8_t pv_display_barstyle_index(pvformatter_args_t, const char *);
 

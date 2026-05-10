@@ -287,9 +287,9 @@ void pv_si_prefix(long double *value, char *prefix, const long double ratio, pvt
 	static char *pfx_024 = NULL;	 /* kibi, mibi, etc */
 	static char const *pfx_middle_000 = NULL;
 	static char const *pfx_middle_024 = NULL;
-	char *pfx;
-	char const *pfx_middle;
-	char const *pfx_ptr;
+	const char *pfx;
+	const char *pfx_middle;
+	const char *pfx_ptr;
 	long double cutoff;
 
 	prefix[0] = ' ';		    /* Make the prefix start blank. */
@@ -440,7 +440,7 @@ void pv_si_prefix(long double *value, char *prefix, const long double ratio, pvt
  * The "format" string is in sprintf format and must contain exactly one %
  * parameter, a %s, which will expand to the string described above.
  */
-void pv_describe_amount(char *buffer, size_t bufsize, char *format,
+void pv_describe_amount(char *buffer, size_t bufsize, const char *format,
 			long double amount, char *suffix_basic, char *suffix_bytes, pvtransfercount_t count_type)
 {
 	char sizestr_buffer[256];	 /* flawfinder: ignore */
