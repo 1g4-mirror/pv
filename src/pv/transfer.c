@@ -1341,8 +1341,8 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	if (ready_to_read) {
 		if (!pv__transfer_read(state, fd, eof_in, eof_out, allowed)) {
 			debug("%s %d: %s (%s=%s, %s=%s, %s=%lu)", "fd", fd,
-			      "early return 0 - pv__transfer_read returned false", "eof_in", eof_in ? "true" : "false",
-			      "eof_out", eof_out ? "true" : "false", "allowed", (unsigned long) allowed);
+			      "early return 0 - pv__transfer_read returned false", "eof_in", *eof_in ? "true" : "false",
+			      "eof_out", *eof_out ? "true" : "false", "allowed", (unsigned long) allowed);
 			return 0;
 		}
 	}
@@ -1378,8 +1378,9 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	    && (NULL != lineswritten)) {
 		if (!pv__transfer_write(state, eof_in, eof_out, lineswritten)) {
 			debug("%s %d: %s (%s=%s, %s=%s, %s=%lu)", "fd", fd,
-			      "early return 0 - pv__transfer_write returned false", "eof_in", eof_in ? "true" : "false",
-			      "eof_out", eof_out ? "true" : "false", "lineswritten", (unsigned long) lineswritten);
+			      "early return 0 - pv__transfer_write returned false", "eof_in",
+			      *eof_in ? "true" : "false", "eof_out", *eof_out ? "true" : "false", "lineswritten",
+			      (unsigned long) lineswritten);
 			return 0;
 		}
 	}
