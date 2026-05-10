@@ -123,7 +123,7 @@ static void display_word_wrap(const char *string, size_t display_width, size_t f
 	size_t wide_char_count;
 	size_t wide_string_buffer_size;
 	wchar_t *wide_string;
-	size_t start_idx, end_idx, chars_remaining;
+	size_t start_idx, chars_remaining;
 
 	debug("[%s], display_width=%d, first_line_start=%d, left_margin=%d", string, (int) display_width,
 	      (int) first_line_start, (int) left_margin);
@@ -177,7 +177,7 @@ static void display_word_wrap(const char *string, size_t display_width, size_t f
 	/*@-unrecog@ *//* splint doesn't see the prototype for wcswidth(). */
 	while (chars_remaining > 0 && wcswidth(&(wide_string[start_idx]), chars_remaining) > (int) wrap_at_width) {
 		/*@+unrecog@ */
-		size_t next_idx;
+		size_t next_idx, end_idx;
 
 		/*
 		 * Find the last space before the end of the display line,
