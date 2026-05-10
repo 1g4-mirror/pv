@@ -343,7 +343,7 @@ static bool opts_watchfd_listfile(opts_t opts, const char *filename)
 	linenumber = 0;
 
 	while (0 == feof(fptr)) {
-		char *argument;
+		const char *argument;
 		char *nlptr;
 		ssize_t line_length = 0;
 
