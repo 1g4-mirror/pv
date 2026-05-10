@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-09 20:24+0100\n"
+"POT-Creation-Date: 2026-05-10 20:40+0100\n"
 "PO-Revision-Date: 2025-01-14 20:39+0000\n"
 "Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -494,7 +494,7 @@ msgstr "yzafpnµm kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:1082 src/pv/state.c:941 src/pv/transfer.c:1226
+#: src/pv/display.c:1082 src/pv/state.c:942 src/pv/transfer.c:1226
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
@@ -569,7 +569,7 @@ msgstr "Rate min/mittel/max/abweichung"
 msgid "rate not measured"
 msgstr "Übertragungsrate nicht gemessen"
 
-#: src/pv/loop.c:1080 src/pv/loop.c:1096 src/pv/loop.c:1114 src/pv/remote.c:93
+#: src/pv/loop.c:1078 src/pv/loop.c:1094 src/pv/loop.c:1112 src/pv/remote.c:93
 #: src/pv/remote.c:188 src/pv/remote.c:536 src/pv/remote.c:582
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
@@ -580,7 +580,7 @@ msgstr "Übertragungsrate nicht gemessen"
 msgid "pid"
 msgstr "pid"
 
-#: src/pv/loop.c:1114 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1112 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
@@ -598,7 +598,7 @@ msgstr "SA_SIGINFO wird auf diesem System nicht unterstützt"
 msgid "history structure allocation failed"
 msgstr "Speicherzuweisung für `history' fehlgeschlagen"
 
-#: src/pv/state.c:893 src/pv/state.c:905
+#: src/pv/state.c:894 src/pv/state.c:906
 msgid "file list allocation failed"
 msgstr "Speicherzuweisung für die Dateiliste fehlgeschlagen"
 
