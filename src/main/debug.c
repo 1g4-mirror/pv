@@ -39,7 +39,7 @@ void debugging_output(const char *function, const char *file, int line, const ch
 	static FILE *debugfptr = NULL;
 	va_list ap;
 	time_t t;
-	struct tm *tm;
+	const struct tm *tm;
 	char tbuf[128];			 /* flawfinder: ignore */
 
 	/*
