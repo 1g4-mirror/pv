@@ -736,7 +736,6 @@ void pv_state_format_string_set(pvstate_t state, /*@null@ */ const char *val)
 void pv_state_extra_display_set(pvstate_t state, /*@null@ */ const char *val)
 {
 	const char *word_start;
-	size_t offset;
 
 	if (NULL != state->control.extra_display_spec) {
 		free(state->control.extra_display_spec);
@@ -757,6 +756,8 @@ void pv_state_extra_display_set(pvstate_t state, /*@null@ */ const char *val)
 
 	word_start = val;
 	while (NULL != word_start && '\0' != word_start[0]) {
+		size_t offset;
+
 		offset = 0;
 		while ('\0' != word_start[offset] && ',' != word_start[offset] && ':' != word_start[offset])
 			offset++;
