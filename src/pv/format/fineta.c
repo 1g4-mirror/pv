@@ -23,7 +23,7 @@ pvdisplay_bytecount_t pv_formatter_fineta(pvformatter_args_t args)
 {
 	char content[128];		 /* flawfinder: ignore - bounded by strftime(). */
 	time_t now, then;
-	struct tm *time_ptr;
+	const struct tm *time_ptr;
 	long eta, max_years;
 	const char *time_format;
 	bool show_fineta;
