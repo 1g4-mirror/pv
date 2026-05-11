@@ -559,7 +559,7 @@ int pv_watchpid_scanfds(pvstate_t state, pid_t watch_pid, int watch_fd, int *arr
 #else
 	nullable_string_ptr fd_dir = NULL;
 	DIR *dptr;
-	struct dirent *d;
+	const struct dirent *d;
 
 	if ((pv_asprintf(&fd_dir, "/proc/%u/fd", watch_pid) < 0) || (NULL == fd_dir)) {
 		pv_perror("%s %u", _("pid"), watch_pid);
