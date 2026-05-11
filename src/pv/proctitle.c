@@ -36,8 +36,7 @@ void initproctitle(int argc, char **argv)
 	size_t env_array_size, env_index;
 
 	/* Find the number of entries in the environment array. */
-	for (env_array_size = 0; environ[env_array_size] != NULL; env_array_size++)
-		continue;
+	for (env_array_size = 0; environ[env_array_size] != NULL; env_array_size++);
 
 	/* Allocate a new environment array. */
 	new_environment = (char **) malloc(sizeof(char *) * (env_array_size + 1));
