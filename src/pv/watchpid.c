@@ -109,7 +109,7 @@ static bool filesize(pvwatchfd_t info)
  * it's not readable or not a regular file, no error is reported with
  * pv_error() when returning the error code.
  */
-int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
+static int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 {
 	struct vnode_fdinfowithpath vnodeInfo = { };
 
@@ -182,7 +182,7 @@ int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
  * it's not readable or not a regular file, no error is reported with
  * pv_error() when returning the error code.
  */
-int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
+static int pv_watchfd_info(pvstate_t state, pvwatchfd_t info, bool automatic)
 {
 	if (NULL == state)
 		return -1;
@@ -472,7 +472,7 @@ static bool extend_info_array(int *array_length_ptr, pvwatchfd_t *info_array_ptr
 /*
  * Reset calculated values in the given watchfd info structure.
  */
-void pv_reset_watchfd(pvwatchfd_t info)
+static void pv_reset_watchfd(pvwatchfd_t info)
 {
 	if (NULL == info)
 		return;

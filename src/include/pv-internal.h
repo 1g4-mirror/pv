@@ -644,7 +644,6 @@ void pv_reset_calc(pvtransfercalc_t);
 void pv_reset_transfer(pvtransferstate_t);
 void pv_reset_flags(pvtransientflags_t);
 void pv_reset_display(pvdisplay_t);
-void pv_reset_watchfd(pvwatchfd_t);
 void pv_freecontents_display(pvdisplay_t);
 void pv_freecontents_transfer(pvtransferstate_t);
 void pv_freecontents_calc(pvtransfercalc_t);
@@ -667,7 +666,6 @@ void pv_sig_nopause(void);
 
 bool pv_remote_check(pvstate_t);
 
-int pv_watchfd_info(pvstate_t, pvwatchfd_t, bool);
 bool pv_watchfd_changed(pvwatchfd_t);
 off_t pv_watchfd_position(pvwatchfd_t);
 int pv_watchpid_scanfds(pvstate_t, pid_t, int, int *, pvwatchfd_t *);
