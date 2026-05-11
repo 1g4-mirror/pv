@@ -173,7 +173,7 @@ static void pv__show_stats(pvstate_t state)
 
 		if (stats_size > 0 && stats_size < (int) (sizeof(stats_buf)))
 			pv_tty_write(&(state->flags), stats_buf, (size_t) stats_size);
-	} else if (state->control.show_stats && state->calc.measurements_taken < 1) {
+	} else {
 		char msg_buf[256];	 /* flawfinder: ignore */
 		int msg_size;
 
