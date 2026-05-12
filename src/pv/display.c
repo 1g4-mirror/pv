@@ -998,9 +998,9 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
  *
  * See pv__format_init for the adjustments that may be made to "status".
  */
-bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_pvtransferstate_t transfer,
-	       readonly_pvtransfercalc_t calc, /*@null@ */ const char *format_supplied, pvdisplay_t display,
-	       bool reinitialise, bool final)
+static bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_pvtransferstate_t transfer,
+		      readonly_pvtransfercalc_t calc, /*@null@ */ const char *format_supplied, pvdisplay_t display,
+		      bool reinitialise, bool final)
 {
 	struct pvdisplay_component_s *format_component_array;
 	char display_segments[PV_SIZEOF_FORMAT_SEGMENTS_BUF];	/* flawfinder: ignore - always bounded */

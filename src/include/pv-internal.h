@@ -628,9 +628,6 @@ pvdisplay_bytecount_t pv_formatter_previous_line(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_name(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_sgr(pvformatter_args_t);
 
-bool pv_format (pvprogramstatus_t, readonly_pvcontrol_t,
-		readonly_pvtransferstate_t, readonly_pvtransfercalc_t,
-		/*@null@ */ const char *, pvdisplay_t, bool, bool);
 void pv_display (pvprogramstatus_t, readonly_pvcontrol_t, pvtransientflags_t,
 		 readonly_pvtransferstate_t, pvtransfercalc_t,
 		 pvcursorstate_t, pvdisplay_t, /*@null@ */ pvdisplay_t, bool);
