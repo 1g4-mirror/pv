@@ -295,6 +295,40 @@ static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, boo
 }
 
 
+#ifdef HAVE_SPLICE
+/*
+ * Call splice(), retrying several times with a small pause if interrupted
+ * by a signal.
+ */
+static inline ssize_t retrying_splice(int fd_in, /*@null@ */ off_t *off_in, int fd_out, /*@null@ */ off_t *off_out,
+				      size_t len, unsigned int flags)
+{
+	ssize_t result = -1;
+	int attempt;
+
+	/*@-nullpass@ */
+	/*@-type@ */
+	/* splint doesn't know about splice. */
+
+	for (attempt = 0; attempt < 10; attempt++) {
+		if (attempt > 0) {
+			debug("%s(%d->%d): %s: %s", "splice", fd_in, fd_out, "transient error - waiting briefly",
+			      strerror(errno));
+			(void) is_data_ready(-1, NULL, -1, NULL, 1000);
+		}
+		result = splice(fd_in, off_in, fd_out, off_out, len, flags);
+		if ((result >= 0) || ((EINTR != errno) && (EAGAIN != errno)))
+			break;
+	}
+
+	/*@+type@ */
+	/*@+nullpass@ */
+
+	return result;
+}
+#endif	/* HAVE_SPLICE */
+
+
 /*
  * Read some data from the given file descriptor, updating the state.
  *
@@ -423,12 +457,13 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 				ssize_t spliced_in;
 
 				spliced_in =
-				    splice(fd, NULL, state->transfer.intermediate_pipe[1], NULL, bytes_to_splice_in,
-					   SPLICE_F_MORE);
+				    retrying_splice(fd, NULL, state->transfer.intermediate_pipe[1], NULL,
+						    bytes_to_splice_in, SPLICE_F_MORE);
 				if (spliced_in > 0) {
 					state->transfer.intermediate_pipe_buffer_used += (int) spliced_in;
 				}
 				nread = spliced_in;
+				debug("%s(%d->%d): %ld", "spliced_in", fd, state->transfer.intermediate_pipe[1], spliced_in);
 			}
 
 			/*
@@ -444,12 +479,13 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 					bytes_to_splice_out = bytes_to_splice;
 
 				spliced_out =
-				    splice(state->transfer.intermediate_pipe[0], NULL, output_fd, NULL,
-					   bytes_to_splice_out, SPLICE_F_MORE);
+				    retrying_splice(state->transfer.intermediate_pipe[0], NULL, output_fd, NULL,
+						    bytes_to_splice_out, SPLICE_F_MORE);
 				if (spliced_out > 0) {
 					state->transfer.intermediate_pipe_buffer_used -= (int) spliced_out;
 				}
 				nread = spliced_out;
+				debug("%s(%d->%d): %ld", "spliced_out", state->transfer.intermediate_pipe[0], output_fd, spliced_out);
 			}
 		} else {
 			/* Normal splice() from input to output. */
@@ -489,11 +525,20 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 			}
 #endif				/* HAVE_FDATASYNC */
 		} else if ((-1 == nread) && (EAGAIN == errno)) {
-			/* nothing read yet - do nothing. */
+			/* signal interrupt - do nothing. */
+		} else if (0 == nread) {
+			/*
+			 * nothing read, turn off splice() for this fd and
+			 * fall back to read, but not that causes blocking
+			 * when ^D is pressed on stdin such that two ^Ds are
+			 * needed; TODO: rework this whole section into its
+			 * own function like pv__transfer__read_repeated(),
+			 * using is_data_ready().
+			 */
+			state->transfer.splice_used = false;
 		} else {
 			/*
-			 * Some other error, or splice() returned 0 - stop
-			 * using splice() on this fd.
+			 * Unknown error - stop using splice() on this fd.
 			 */
 			state->transfer.splice_used = false;
 		}
