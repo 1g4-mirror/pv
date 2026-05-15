@@ -428,8 +428,10 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 	bytes_to_splice = count;
 	/*@-unrecog@ */
 	if ((state->control.rate_limit_active || max_to_write != 0)
-	    && (max_to_write <= (off_t) SIZE_MAX && bytes_to_splice > (size_t) max_to_write))
+	    && (max_to_write >= 0) && ((unsigned long) max_to_write <= (unsigned long) SIZE_MAX)
+	    && ((off_t) bytes_to_splice > max_to_write)) {
 		bytes_to_splice = (size_t) max_to_write;
+	}
 	/*@+unrecog@ *//* splint doesn't know of SIZE_MAX. */
 
 	/* Early return with 0 if the transfer cap is zero. */
