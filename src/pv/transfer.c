@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 #include <errno.h>
 #include <time.h>
@@ -144,7 +145,13 @@ static ssize_t pv__transfer__read_repeated(int fd, char *buf, size_t count)
 
 		total_read += nread;
 		buf += nread;
-		count -= nread;
+
+		/* Unsigned type - guard against underflow. */
+		if (count > (size_t) nread) {
+			count -= nread;
+		} else {
+			count = 0;
+		}
 
 		if (0 == nread)
 			return total_read;
@@ -252,7 +259,13 @@ static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, boo
 
 		total_written += nwritten;
 		buf += nwritten;
-		count -= nwritten;
+
+		/* Unsigned type - guard against underflow. */
+		if (count > (size_t) nwritten) {
+			count -= nwritten;
+		} else {
+			count = 0;
+		}
 
 		if (0 == nwritten)
 			return total_written;
@@ -297,36 +310,231 @@ static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, boo
 
 #ifdef HAVE_SPLICE
 /*
- * Call splice(), retrying several times with a small pause if interrupted
- * by a signal.
+ * Splice up to "bytes_to_splice" bytes from file descriptor "input_fd" to
+ * "output_fd", via the intermediate pipe in state->transfer.
+ *
+ * Returns the total number of bytes transferred to output_fd, or negative
+ * on error.
  */
-static inline ssize_t retrying_splice(int fd_in, /*@null@ */ off_t *off_in, int fd_out, /*@null@ */ off_t *off_out,
-				      size_t len, unsigned int flags)
+static ssize_t pv__transfer__splice_via_intermediate(pvstate_t state, int input_fd, int output_fd,
+						     size_t bytes_to_splice)
 {
-	ssize_t result = -1;
-	int attempt;
+	int room_in_pipe_buffer;
+	size_t bytes_to_splice_in, bytes_to_splice_out;
+	ssize_t spliced_out;
+	ssize_t spliced_in;
 
-	/*@-nullpass@ */
-	/*@-type@ */
-	/* splint doesn't know about splice. */
+	room_in_pipe_buffer =
+	    state->transfer.intermediate_pipe_buffer_size - state->transfer.intermediate_pipe_buffer_used;
+	if (room_in_pipe_buffer < 0)
+		room_in_pipe_buffer = 0;
 
-	for (attempt = 0; attempt < 10; attempt++) {
-		if (attempt > 0) {
-			debug("%s(%d->%d): %s: %s", "splice", fd_in, fd_out, "transient error - waiting briefly",
-			      strerror(errno));
-			(void) is_data_ready(-1, NULL, -1, NULL, 1000);
-		}
-		result = splice(fd_in, off_in, fd_out, off_out, len, flags);
-		if ((result >= 0) || ((EINTR != errno) && (EAGAIN != errno)))
-			break;
+	bytes_to_splice_in = bytes_to_splice;
+	if (bytes_to_splice_in > (size_t) room_in_pipe_buffer)
+		bytes_to_splice_in = (size_t) room_in_pipe_buffer;
+
+	/* Read into the intermediate pipe if it has room in its buffer. */
+	spliced_in = 0;
+	if (bytes_to_splice_in > 0) {
+		/*@-nullpass@ *//*@-type@ *//* splint doesn't know about splice. */
+		spliced_in = splice(input_fd, NULL, state->transfer.intermediate_pipe[1], NULL,
+				    bytes_to_splice_in, SPLICE_F_MORE);
+		/*@+type@ *//*@+nullpass@ */
 	}
 
-	/*@+type@ */
-	/*@+nullpass@ */
+	/* Early return on error. */
+	if (spliced_in < 0)
+		return spliced_in;
 
-	return result;
+	state->transfer.intermediate_pipe_buffer_used += (int) spliced_in;
+
+	debug("%s(%d->%d): %ld", "spliced_in", input_fd, state->transfer.intermediate_pipe[1], spliced_in);
+
+	/* If the intermediate pipe has nothing in its buffer, return 0. */
+	if (state->transfer.intermediate_pipe_buffer_used <= 0)
+		return 0;
+
+	/* Transfer out whatever's in the intermediate pipe buffer. */
+	bytes_to_splice_out = (size_t) (state->transfer.intermediate_pipe_buffer_used);
+	if (bytes_to_splice_out > bytes_to_splice)
+		bytes_to_splice_out = bytes_to_splice;
+
+	/*@-nullpass@ *//*@-type@ *//* splint doesn't know about splice. */
+	spliced_out =
+	    splice(state->transfer.intermediate_pipe[0], NULL, output_fd, NULL, bytes_to_splice_out, SPLICE_F_MORE);
+	/*@+type@ *//*@+nullpass@ */
+
+	if (spliced_out > 0) {
+		state->transfer.intermediate_pipe_buffer_used -= (int) spliced_out;
+		debug("%s(%d->%d): %ld", "spliced_out", state->transfer.intermediate_pipe[0], output_fd, spliced_out);
+	}
+
+	return spliced_out;
 }
-#endif	/* HAVE_SPLICE */
+
+
+/*
+ * Splice bytes from file descriptor "input_fd" to "output_fd", possibly via
+ * an intermediate input pipe if one is active.
+ *
+ * The number of bytes spliced is capped to "count", or if "max_to_write" is
+ * greater than zero and less than "count", capped to "max_to_write".
+ *
+ * If state->control.rate_limit_active is true and "max_to_write" is zero,
+ * performs no action and returns zero.  Since this looks the same as EOF,
+ * the caller must trap for this condition.
+ *
+ * Keeps reading until the target amount has been spliced or until
+ * TRANSFER_READ_TIMEOUT seconds have elapsed, as long as more data is
+ * available to read according to is_data_ready().
+ *
+ * If splice() was successfully used, sets state->transfer.splice_used to
+ * true.  Does not modify it otherwise.
+ *
+ * If splice() could not be used, sets state->transfer.splice_failed_fd to
+ * fd so splice() won't be tried again until the next input file, and then
+ * calls pv__transfer__read_repeated() to read into the buffer, returning
+ * its result.
+ *
+ * Returns the total number of bytes transferred, or negative on error.
+ */
+static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int output_fd, char *buf, size_t count,
+					     off_t max_to_write)
+{
+	struct timespec start_time;
+	size_t bytes_to_splice;
+	ssize_t total_spliced;
+	bool use_intermediate_pipe;
+
+	/*
+	 * Early return via pv__transfer__read_repeated() if splice() is
+	 * turned off, or if line mode is active, or if splice() already
+	 * failed on this input file descriptor, or if there's anything
+	 * waiting in the transfer buffer.
+	 */
+	if (state->control.no_splice || state->control.linemode || (input_fd == state->transfer.splice_failed_fd)
+	    || (state->transfer.to_write > 0)) {
+		return pv__transfer__read_repeated(input_fd, buf, count);
+	}
+
+	/*
+	 * Cap the transfer amount if applicable.
+	 *
+	 * Note that max_to_write is an off_t (file size / offset), which
+	 * may not fit into a size_t (byte count), so check it against
+	 * SIZE_MAX before trying a comparison otherwise on 32-bit systems
+	 * it might appear to be 0.
+	 */
+	bytes_to_splice = count;
+	/*@-unrecog@ */
+	if ((state->control.rate_limit_active || max_to_write != 0)
+	    && (max_to_write <= (off_t) SIZE_MAX && bytes_to_splice > (size_t) max_to_write))
+		bytes_to_splice = (size_t) max_to_write;
+	/*@+unrecog@ *//* splint doesn't know of SIZE_MAX. */
+
+	/* Early return with 0 if the transfer cap is zero. */
+	if (0 == bytes_to_splice)
+		return 0;
+
+	/*
+	 * Use an intermediate pipe if one has been created already, the
+	 * input is not a pipe, and the output is not a pipe - because
+	 * splice() only works if one or both file descriptors are pipes.
+	 */
+	use_intermediate_pipe = false;
+	if (!(state->status.output_is_pipe || state->status.current_input_is_pipe)
+	    && (-1 != state->transfer.intermediate_pipe[0]) && (-1 != state->transfer.intermediate_pipe[1])) {
+		use_intermediate_pipe = true;
+	}
+
+	memset(&start_time, 0, sizeof(start_time));
+
+	pv_elapsedtime_read(&start_time);
+
+	total_spliced = 0;
+
+	while (bytes_to_splice > 0) {
+		ssize_t nspliced;
+		struct timespec cur_time, transfer_elapsed;
+		long double elapsed_seconds;
+
+		if (use_intermediate_pipe) {
+			nspliced = pv__transfer__splice_via_intermediate(state, input_fd, output_fd, bytes_to_splice);
+		} else {
+			/*@-nullpass@ *//*@-type@ *//* splint doesn't know about splice. */
+			nspliced = splice(input_fd, NULL, output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
+			/*@+type@ *//*@+nullpass@ */
+		}
+
+		/*
+		 * Early return on signal interrupt, returning -1 if nothing
+		 * was transferred yet, or the amount transferred otherwise.
+		 */
+		if (nspliced < 0 && ((EINTR == errno) || (EAGAIN == errno))) {
+			if (0 == total_spliced)
+				return -1;
+			return total_spliced;
+		}
+
+		/*
+		 * If the splice failed, turn it off for this input file
+		 * descriptor.  Then, if nothing has been spliced so far,
+		 * return the result of an ordinary read, otherwise return
+		 * the amount spliced.
+		 */
+		if (nspliced < 0) {
+			debug("%s %d: %s: %s", "fd", input_fd, "disabling splice after failure", strerror(errno));
+			state->transfer.splice_failed_fd = input_fd;
+			if (0 == total_spliced) {
+				return pv__transfer__read_repeated(input_fd, buf, count);
+			} else {
+				return total_spliced;
+			}
+		}
+
+		/* Flag the fact that splice() has been used successfully. */
+		state->transfer.splice_used = true;
+
+		total_spliced += nspliced;
+		/* Unsigned type - guard against underflow. */
+		if (bytes_to_splice > (size_t) nspliced) {
+			bytes_to_splice -= nspliced;
+		} else {
+			bytes_to_splice = 0;
+		}
+
+		/* Early return on EOF. */
+		if (0 == nspliced) {
+			debug("%s %d: %s (%ld/%ld)", "fd", input_fd, "reached EOF", total_spliced, bytes_to_splice);
+			return total_spliced;
+		}
+
+		/* Keep trying while data is ready. */
+		memset(&cur_time, 0, sizeof(cur_time));
+		memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
+		elapsed_seconds = 0.0;
+
+		pv_elapsedtime_read(&cur_time);
+		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &start_time);
+		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+
+		if (elapsed_seconds > TRANSFER_READ_TIMEOUT) {
+			debug("%s %d: %s (%f %s)", "fd", input_fd,
+			      "stopping splice - timer expired", (double) elapsed_seconds, "sec elapsed");
+			return total_spliced;
+		}
+
+		if (bytes_to_splice > 0) {
+			debug("%s %d: %s (%ld %s, %ld %s)", "fd", input_fd,
+			      "trying another splice", nspliced, "transferred this time", bytes_to_splice, "remaining");
+			if (is_data_ready(input_fd, NULL, -1, NULL, 0) < 1)
+				break;
+		}
+	}
+
+	return total_spliced;
+}
+#endif				/* HAVE_SPLICE */
 
 
 /*
@@ -372,6 +580,7 @@ static inline ssize_t retrying_splice(int fd_in, /*@null@ */ off_t *off_in, int 
 static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t max_to_write)
 {
 	bool do_not_skip_errors;
+	bool zero_transfer_cap;
 	size_t bytes_can_read;
 	off_t amount_to_skip, amount_skipped, orig_offset, skip_offset;
 	ssize_t nread;
@@ -406,165 +615,68 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	}
 
 	nread = 0;
+	zero_transfer_cap = false;
+	if (0 == bytes_can_read)
+		zero_transfer_cap = true;
 
 #ifdef HAVE_SPLICE
 	state->transfer.splice_used = false;
-	if ((!state->control.linemode) && (!state->control.no_splice)
-	    && (fd != state->transfer.splice_failed_fd)
-	    && (0 == state->transfer.to_write)) {
-		size_t bytes_to_splice;
-
-		if (state->control.rate_limit_active || max_to_write != 0) {
-			bytes_to_splice = (size_t) max_to_write;
-		} else {
-			bytes_to_splice = bytes_can_read;
-		}
-
-		/*@-nullpass@ */
-		/*@-type@ */
-		/* splint doesn't know about splice. */
-
-		if (!(state->status.output_is_pipe || state->status.current_input_is_pipe)
-		    && (-1 != state->transfer.intermediate_pipe[0]) && (-1 != state->transfer.intermediate_pipe[1])) {
-			/*
-			 * Neither the input nor the output is a pipe, but
-			 * there is an intermediate pipe to use, so splice
-			 * from the input to that pipe, and from the pipe to
-			 * the output.
-			 *
-			 * This has to be done in stages so as to keep
-			 * within the size of the pipe buffer, otherwise
-			 * splicing into it will block.
-			 */
-			int room_in_pipe_buffer;
-			size_t bytes_to_splice_in;
-
-			room_in_pipe_buffer =
-			    state->transfer.intermediate_pipe_buffer_size -
-			    state->transfer.intermediate_pipe_buffer_used;
-			if (room_in_pipe_buffer < 0)
-				room_in_pipe_buffer = 0;
-
-			bytes_to_splice_in = bytes_to_splice;
-			if (bytes_to_splice_in > (size_t) room_in_pipe_buffer)
-				bytes_to_splice_in = (size_t) room_in_pipe_buffer;
-
-			/*
-			 * Read into the intermediate pipe if it has room in
-			 * its buffer.
-			 */
-			if (bytes_to_splice_in > 0) {
-				ssize_t spliced_in;
-
-				spliced_in =
-				    retrying_splice(fd, NULL, state->transfer.intermediate_pipe[1], NULL,
-						    bytes_to_splice_in, SPLICE_F_MORE);
-				if (spliced_in > 0) {
-					state->transfer.intermediate_pipe_buffer_used += (int) spliced_in;
-				}
-				nread = spliced_in;
-				debug("%s(%d->%d): %ld", "spliced_in", fd, state->transfer.intermediate_pipe[1], spliced_in);
-			}
-
-			/*
-			 * Write from the intermediate pipe if it has
-			 * anything in its buffer and the read, above, did
-			 * not produce an error.
-			 */
-			if (nread >= 0 && state->transfer.intermediate_pipe_buffer_used > 0) {
-				size_t bytes_to_splice_out = (size_t) (state->transfer.intermediate_pipe_buffer_used);
-				ssize_t spliced_out;
-
-				if (bytes_to_splice_out > bytes_to_splice)
-					bytes_to_splice_out = bytes_to_splice;
-
-				spliced_out =
-				    retrying_splice(state->transfer.intermediate_pipe[0], NULL, output_fd, NULL,
-						    bytes_to_splice_out, SPLICE_F_MORE);
-				if (spliced_out > 0) {
-					state->transfer.intermediate_pipe_buffer_used -= (int) spliced_out;
-				}
-				nread = spliced_out;
-				debug("%s(%d->%d): %ld", "spliced_out", state->transfer.intermediate_pipe[0], output_fd, spliced_out);
-			}
-		} else {
-			/* Normal splice() from input to output. */
-			nread = splice(fd, NULL, output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
-		}
-		/*@+type@ */
-		/*@+nullpass@ */
-
-		state->transfer.splice_used = true;
-		if ((nread < 0) && (EINVAL == errno)) {
-			debug("%s %d: %s", "fd", fd, "splice failed with EINVAL - disabling");
-			state->transfer.splice_failed_fd = fd;
-			state->transfer.splice_used = false;
-			/*
-			 * Fall through to read() below.
-			 */
-		} else if (nread > 0) {
-			state->transfer.written = nread;
-			state->transfer.total_bytes_read += nread;
-#ifdef HAVE_FDATASYNC
-			if (state->control.sync_after_write) {
-				/*
-				 * Ignore non I/O errors, such as EBADFD
-				 * (bad file descriptor), EINVAL (non
-				 * syncable fd, such as a pipe), etc - only
-				 * treat EIO as a failure.
-				 *
-				 * Since this is a write error, not a read
-				 * error, it can't be skipped, so set
-				 * "do_not_skip_errors".
-				 */
-				if ((fdatasync(output_fd) < 0)
-				    && (EIO == errno)) {
-					nread = -1;
-					do_not_skip_errors = true;
-				}
-			}
-#endif				/* HAVE_FDATASYNC */
-		} else if ((-1 == nread) && (EAGAIN == errno)) {
-			/* signal interrupt - do nothing. */
-		} else if (0 == nread) {
-			/*
-			 * nothing read, turn off splice() for this fd and
-			 * fall back to read, but not that causes blocking
-			 * when ^D is pressed on stdin such that two ^Ds are
-			 * needed; TODO: rework this whole section into its
-			 * own function like pv__transfer__read_repeated(),
-			 * using is_data_ready().
-			 */
-			state->transfer.splice_used = false;
-		} else {
-			/*
-			 * Unknown error - stop using splice() on this fd.
-			 */
-			state->transfer.splice_used = false;
-		}
-	}
-	if (!state->transfer.splice_used) {
+	if (state->control.rate_limit_active && 0 == max_to_write) {
+		/*
+		 * Flag that no attempt was made to transfer because of rate
+		 * limiting, so the zero nread is not because of EOF; and
+		 * wait briefly to avoid a busy-wait when rate limiting.
+		 */
+		zero_transfer_cap = true;
+		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
+	} else {
 		nread =
-		    pv__transfer__read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
-						bytes_can_read);
+		    pv__transfer__splice_repeated(state, fd, output_fd,
+						  state->transfer.transfer_buffer + state->transfer.read_position,
+						  bytes_can_read, max_to_write);
+#ifdef HAVE_FDATASYNC
+		if (nread > 0 && state->control.sync_after_write) {
+			/*
+			 * Sync after a successful splice, if enabled.
+			 *
+			 * Ignore non I/O errors, such as EBADFD (bad file
+			 * descriptor), EINVAL (non syncable fd, such as a
+			 * pipe), etc - only treat EIO as a failure.
+			 *
+			 * Since this is a write error, not a read error, it
+			 * can't be skipped, so set "do_not_skip_errors".
+			 */
+			if ((fdatasync(output_fd) < 0)
+			    && (EIO == errno)) {
+				nread = -1;
+				do_not_skip_errors = true;
+			}
+		}
+#endif				/* HAVE_FDATASYNC */
 	}
-#else
+#else				/* !HAVE_SPLICE */
 	nread =
 	    pv__transfer__read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
 					bytes_can_read);
 #endif				/* HAVE_SPLICE */
 
-
 	if (0 == nread) {
 		/*
 		 * If the read returned 0, the eof of the input fd has been
-		 * reached.  If the transfer buffer has also all been
+		 * reached (unless the transfer amount had been capped at
+		 * zero due to rate limiting).
+		 *
+		 * If input is EOF and the transfer buffer has also all been
 		 * written out, then set eof_out as well, so that the main
 		 * loop can move on to the next input file.
 		 */
-		*eof_in = true;
-		if (state->transfer.write_position >= state->transfer.read_position)
-			*eof_out = true;
+		if (!zero_transfer_cap) {
+			debug("%s %d: %s", "fd", fd, "reached EOF");
+			*eof_in = true;
+			if (state->transfer.write_position >= state->transfer.read_position) {
+				*eof_out = true;
+			}
+		}
 		return true;
 	} else if (nread > 0) {
 		/*
@@ -575,13 +687,23 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 		state->transfer.read_errors_in_a_row = 0;
 #ifdef HAVE_SPLICE
 		/*
-		 * If splice() was used, there isn't any more data in the
-		 * buffer than there was before.
+		 * If splice() was used, the amount written was the amount
+		 * read.
 		 */
-		if (!state->transfer.splice_used)
+		if (state->transfer.splice_used) {
+			state->transfer.written = nread;
+		} else {
+			/*
+			 * When splice() wasn't used, the buffer has "nread"
+			 * more bytes in it.
+			 */
 			state->transfer.read_position += nread;
+		}
+		debug("%s %d: %s: %ld, %s=%s", "fd", fd, "transferred", nread, "splice_used",
+		      state->transfer.splice_used ? "true" : "false");
 #else
 		state->transfer.read_position += nread;
+		debug("%s %d: %s: %ld", "fd", fd, "transferred", nread);
 #endif				/* HAVE_SPLICE */
 		/* Update the counter of all bytes read so far. */
 		state->transfer.total_bytes_read += nread;
