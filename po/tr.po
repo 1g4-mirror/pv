@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-14 21:51+0100\n"
+"POT-Creation-Date: 2026-05-16 16:13+0100\n"
 "PO-Revision-Date: 2025-10-05 20:09+0000\n"
 "Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -473,7 +473,7 @@ msgstr "yzafpnum kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnum KMGTPEZY"
 
-#: src/pv/display.c:1082 src/pv/state.c:942 src/pv/transfer.c:1271
+#: src/pv/display.c:1082 src/pv/state.c:942 src/pv/transfer.c:1395
 msgid "buffer allocation failed"
 msgstr "arabellek tahsisi başarısız oldu"
 
@@ -528,7 +528,7 @@ msgstr "B/s"
 msgid "b"
 msgstr "b"
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:739
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:863
 msgid "B"
 msgstr "B"
 
@@ -581,47 +581,47 @@ msgstr "geçmiş yapısı tahsisi başarısız oldu"
 msgid "file list allocation failed"
 msgstr "dosya listesi tahsisi başarısız oldu"
 
-#: src/pv/transfer.c:618
+#: src/pv/transfer.c:742
 msgid "read failed"
 msgstr "okuma başarısız"
 
-#: src/pv/transfer.c:633
+#: src/pv/transfer.c:757
 msgid "warning: read errors detected"
 msgstr "uyarı: okuma hataları tespit edildi"
 
-#: src/pv/transfer.c:645
+#: src/pv/transfer.c:769
 msgid "file is not seekable"
 msgstr "dosya aranabilir değil"
 
-#: src/pv/transfer.c:722
+#: src/pv/transfer.c:846
 msgid "failed to seek past error"
 msgstr "geçmiş hatayı aramakta başarısız oldu"
 
-#: src/pv/transfer.c:738
+#: src/pv/transfer.c:862
 msgid "skipped past read error"
 msgstr "geçmiş okuma hatası atlandı"
 
-#: src/pv/transfer.c:785
+#: src/pv/transfer.c:909
 msgid "no transfer buffer allocated"
 msgstr "aktarım arabelleği ayrılmamış"
 
-#: src/pv/transfer.c:873
+#: src/pv/transfer.c:997
 msgid "failed to set interval timer"
 msgstr "aralık zamanlayıcısı ayarlanamadı"
 
-#: src/pv/transfer.c:899
+#: src/pv/transfer.c:1023
 msgid "failed to clear interval timer"
 msgstr "aralık zamanlayıcısı temizlenemedi"
 
-#: src/pv/transfer.c:946
+#: src/pv/transfer.c:1070
 msgid "line position buffer allocation failed"
 msgstr "satır konumu arabellek tahsisi başarısız oldu"
 
-#: src/pv/transfer.c:1135
+#: src/pv/transfer.c:1259
 msgid "write failed"
 msgstr "yazma başarısız"
 
-#: src/pv/transfer.c:1371
+#: src/pv/transfer.c:1495
 msgid "select call failed"
 msgstr "seçme çağrısı başarısız oldu"
 

@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-14 21:51+0100\n"
+"POT-Creation-Date: 2026-05-16 16:13+0100\n"
 "PO-Revision-Date: 2025-01-14 20:39+0000\n"
 "Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -494,7 +494,7 @@ msgstr "yzafpnµm kMGTPEZY"
 msgid "yzafpnum KMGTPEZY"
 msgstr "yzafpnµm KMGTPEZY"
 
-#: src/pv/display.c:1082 src/pv/state.c:942 src/pv/transfer.c:1271
+#: src/pv/display.c:1082 src/pv/state.c:942 src/pv/transfer.c:1395
 msgid "buffer allocation failed"
 msgstr "Speicherzuweisung für den Puffer fehlgeschlagen"
 
@@ -549,7 +549,7 @@ msgstr "B/s"
 msgid "b"
 msgstr "b"
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:739
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:863
 msgid "B"
 msgstr "B"
 
@@ -602,47 +602,47 @@ msgstr "Speicherzuweisung für `history' fehlgeschlagen"
 msgid "file list allocation failed"
 msgstr "Speicherzuweisung für die Dateiliste fehlgeschlagen"
 
-#: src/pv/transfer.c:618
+#: src/pv/transfer.c:742
 msgid "read failed"
 msgstr "read-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:633
+#: src/pv/transfer.c:757
 msgid "warning: read errors detected"
 msgstr "warnung: lesefehler erkannt"
 
-#: src/pv/transfer.c:645
+#: src/pv/transfer.c:769
 msgid "file is not seekable"
 msgstr "Datei ist nicht durchsuchbar"
 
-#: src/pv/transfer.c:722
+#: src/pv/transfer.c:846
 msgid "failed to seek past error"
 msgstr "konnte den Fehler nicht überwinden"
 
-#: src/pv/transfer.c:738
+#: src/pv/transfer.c:862
 msgid "skipped past read error"
 msgstr "über den Lesefehler hinaus verschoben"
 
-#: src/pv/transfer.c:785
+#: src/pv/transfer.c:909
 msgid "no transfer buffer allocated"
 msgstr "Speicherzuweisung für den Transferpuffer fehlgeschlagen"
 
-#: src/pv/transfer.c:873
+#: src/pv/transfer.c:997
 msgid "failed to set interval timer"
 msgstr "konnte Intervall-Timer nicht setzen"
 
-#: src/pv/transfer.c:899
+#: src/pv/transfer.c:1023
 msgid "failed to clear interval timer"
 msgstr "konnte Intervall-Timer nicht löschen"
 
-#: src/pv/transfer.c:946
+#: src/pv/transfer.c:1070
 msgid "line position buffer allocation failed"
 msgstr "Zuweisung des Zeilenpuffers fehlgeschlagen"
 
-#: src/pv/transfer.c:1135
+#: src/pv/transfer.c:1259
 msgid "write failed"
 msgstr "write-Aufruf fehlgeschlagen"
 
-#: src/pv/transfer.c:1371
+#: src/pv/transfer.c:1495
 msgid "select call failed"
 msgstr "select-Aufruf fehlgeschlagen"
 
