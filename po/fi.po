@@ -146,8 +146,8 @@ msgid "STYLE"
 msgstr "TYYLI"
 
 #: src/main/help.c:376
-msgid "set default bar style to NAME"
-msgstr "aseta oletuspalkkityyli NIMI:lle"
+msgid "set default bar style to STYLE"
+msgstr "aseta oletuspalkkityyli TYYLI:lle"
 
 #: src/main/help.c:378
 msgid "SPEC"

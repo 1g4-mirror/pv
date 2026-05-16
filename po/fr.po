@@ -162,8 +162,8 @@ msgid "STYLE"
 msgstr "STYLE"
 
 #: src/main/help.c:376
-msgid "set default bar style to NAME"
-msgstr "définir le style de barre par défaut à NOM"
+msgid "set default bar style to STYLE"
+msgstr "définir le style de barre par défaut à STYLE"
 
 #: src/main/help.c:378
 msgid "SPEC"

@@ -373,7 +373,7 @@ void display_help(void)
 		 N_("prefix visual information with NAME"),
 		 { 0, 0, 0, 0} },
 		{ "-u", "--bar-style", N_("STYLE"),
-		 N_("set default bar style to NAME"),
+		 N_("set default bar style to STYLE"),
 		 { 0, 0, 0, 0} },
 		{ "-x", "--extra-display", N_("SPEC"),
 		 N_("also send progress to SPEC"),

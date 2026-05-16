@@ -158,15 +158,15 @@ msgstr "setze den NAMEn für visuelle Darstellung"
 
 #: src/main/help.c:375
 msgid "STYLE"
-msgstr "Stil"
+msgstr "STIL"
 
 #: src/main/help.c:376
-msgid "set default bar style to NAME"
-msgstr "setze die voreingestellte Darstellung auf NAME"
+msgid "set default bar style to STYLE"
+msgstr "setze die voreingestellte Darstellung auf STIL"
 
 #: src/main/help.c:378
 msgid "SPEC"
-msgstr "STIL"
+msgstr "SPEC"
 
 #: src/main/help.c:379
 msgid "also send progress to SPEC"
