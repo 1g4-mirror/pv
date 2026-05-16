@@ -252,7 +252,7 @@ are explicitly switched on will be shown.
 **-v, \--stats**
 
 :   At the end of the transfer, write an additional line showing the
-    transfer rate minimum, maximum, mean, and standard deviation. The
+    transfer rate minimum, mean, maximum, and standard deviation. The
     values are always in bytes per second (or bits, with "**\--bits**").
 
 **-f, \--force**
