@@ -3,133 +3,137 @@ msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
 "POT-Creation-Date: 2026-05-14 21:51+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2026-05-16 15:05+0000\n"
+"Last-Translator: a-j-wood <a-j-wood@noreply.codeberg.org>\n"
+"Language-Team: Georgian <https://translate.codeberg.org/projects/pv/pv/ka/>\n"
 "Language: ka\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.17.1\n"
 
 #: src/main/help.c:300
 msgid "show progress bar"
-msgstr ""
+msgstr "პროგრესის ზოლის ჩვენება"
 
 #: src/main/help.c:303
 msgid "show elapsed time"
-msgstr ""
+msgstr "გასული დროის ჩვენება"
 
 #: src/main/help.c:306
 msgid "show estimated time of arrival (completion)"
-msgstr ""
+msgstr "სავარაუდო დასრულების დროის ჩვენება"
 
 #: src/main/help.c:309
 msgid "show absolute estimated time of arrival (completion)"
-msgstr ""
+msgstr "დასრულების აბსოლუტური სავარაუდო დროის ჩვენება"
 
 #: src/main/help.c:312
 msgid "show data transfer rate counter"
-msgstr ""
+msgstr "მონაცემთა გადაცემის სიჩქარის ჩვენება"
 
 #: src/main/help.c:315
 msgid "show data transfer average rate counter"
-msgstr ""
+msgstr "საშუალო მონაცემთა გადაცემის სიჩქარის ჩვენება"
 
 #: src/main/help.c:318
 msgid "show number of bytes transferred"
-msgstr ""
+msgstr "გადატანილი ბაიტების რაოდენობის ჩვენება"
 
 #: src/main/help.c:321
 msgid "show percentage of transfer buffer in use"
-msgstr ""
+msgstr "გამოყენებული გადაცემის ბუფერის პროცენტული მაჩვენებლის ჩვენება"
 
 #: src/main/help.c:323
 msgid "NUM"
-msgstr ""
+msgstr "ႬႭႫ"
 
 #: src/main/help.c:324
 msgid "show NUM bytes last written"
-msgstr ""
+msgstr "ბოლოს დაწერილი ႬႭႫ ბაიტის ჩვენება"
 
 #: src/main/help.c:326
 msgid "FORMAT"
-msgstr ""
+msgstr "ႴႭႰႫႠႲႨ"
 
 #: src/main/help.c:327
 msgid "set output format to FORMAT"
-msgstr ""
+msgstr "გამომავალი ფორმატის დაყენება ႴႭႰႫႠႲႨ"
 
 #: src/main/help.c:330
 msgid "output percentages, not visual information"
-msgstr ""
+msgstr "გამომავალი პროცენტები, არა ვიზუალური ინფორმაცია"
 
 #: src/main/help.c:333
 msgid "do not output any transfer information at all"
-msgstr ""
+msgstr "პროგრესის ინფორმაცია არ აჩვენოთ"
 
 #: src/main/help.c:337
 msgid "show number of bits transferred"
-msgstr ""
+msgstr "გადაცემული ბიტების რაოდენობის ჩვენება"
 
 #: src/main/help.c:340
 msgid "treat suffixes as multiples of 1000 rather than 1024"
-msgstr ""
+msgstr "სუფიქსების 1000-ის ჯერადად განხილვა 1024-ის ნაცვლად"
 
 #: src/main/help.c:343
 msgid "display nothing until first byte transferred"
-msgstr ""
+msgstr "არაფერი აჩვენოს პირველი ბაიტის გადატანამდე"
 
 #: src/main/help.c:345 src/main/help.c:360 src/main/help.c:363
 msgid "SEC"
-msgstr ""
+msgstr "ႼႠႫ"
 
 #: src/main/help.c:346
 msgid "display nothing until SEC seconds have passed"
-msgstr ""
+msgstr "არაფერი აჩვენოს ႼႠႫ წამების გასვლამდე"
 
 #: src/main/help.c:348
 msgid "SIZE"
-msgstr ""
+msgstr "ႦႭႫႠ"
 
 #: src/main/help.c:349
 msgid "set estimated data size to SIZE bytes"
-msgstr ""
+msgstr "მონაცემთა სავარაუდო ზომის ႦႭႫႠ ბაიტებზე დაყენება"
 
 #: src/main/help.c:352
 msgid "if size unknown, show rate vs max rate"
-msgstr ""
+msgstr "თუ ზომა უცნობია, აჩვენეთ სიჩქარე მაქსიმალურ სიჩქარესთან შედარებით"
 
 #: src/main/help.c:355
 msgid "count lines instead of bytes"
-msgstr ""
+msgstr "ბაიტების ნაცვლად ხაზების დათვლა"
 
 #: src/main/help.c:358
 msgid "lines are null-terminated"
-msgstr ""
+msgstr "ხაზები ნულით დასრულებულია"
 
 #: src/main/help.c:361
 msgid "update every SEC seconds"
-msgstr ""
+msgstr "განახლება ყოველ ႼႠႫ წამში"
 
 #: src/main/help.c:364
 msgid "compute average rate over past SEC seconds (default 30s)"
 msgstr ""
+"გამოთვალეთ საშუალო მაჩვენებელი ბოლო ႼႠႫ წამების განმავლობაში (ნაგულისხმევი "
+"30 წმ)"
 
 #: src/main/help.c:366
 msgid "WIDTH"
-msgstr ""
+msgstr "ႱႨႢႠႬႤ"
 
 #: src/main/help.c:367
 msgid "assume terminal is WIDTH characters wide"
-msgstr ""
+msgstr "ვივარაუდოთ, რომ ტერმინალი ႱႨႢႠႬႤ სიმბოლოს სიგანისაა"
 
 #: src/main/help.c:369
 msgid "HEIGHT"
-msgstr ""
+msgstr "ႱႨႫႠႶႪႤ"
 
 #: src/main/help.c:370
 msgid "assume terminal is HEIGHT rows high"
-msgstr ""
+msgstr "ვივარაუდოთ, რომ ტერმინალი ႱႨႫႠႶႪႤ რიგის სიმაღლისაა"
 
 #: src/main/help.c:372
 msgid "NAME"
