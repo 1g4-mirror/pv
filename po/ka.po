@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
 "POT-Creation-Date: 2026-05-16 16:13+0100\n"
-"PO-Revision-Date: 2026-05-16 15:05+0000\n"
+"PO-Revision-Date: 2026-05-16 19:25+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@noreply.codeberg.org>\n"
 "Language-Team: Georgian <https://translate.codeberg.org/projects/pv/pv/ka/>\n"
 "Language: ka\n"
@@ -137,167 +137,169 @@ msgstr "ვივარაუდოთ, რომ ტერმინალი �
 
 #: src/main/help.c:372
 msgid "NAME"
-msgstr ""
+msgstr "ႱႠႾႤႪႨ"
 
 #: src/main/help.c:373
 msgid "prefix visual information with NAME"
-msgstr ""
+msgstr "გამომავალი ხაზის დასაწყისში ႱႠႾႤႪႨ-ის ჩვენება"
 
 #: src/main/help.c:375
 msgid "STYLE"
-msgstr ""
+msgstr "ႱႲႨႪႨ"
 
 #: src/main/help.c:376
 msgid "set default bar style to STYLE"
-msgstr ""
+msgstr "ნაგულისხმევი ზოლის სტილი ႱႲႨႪႨ-ზე დააყენეთ"
 
 #: src/main/help.c:378
 msgid "SPEC"
-msgstr ""
+msgstr "ႱႮႤႺႨႴႨႩႠ"
 
 #: src/main/help.c:379
 msgid "also send progress to SPEC"
-msgstr ""
+msgstr "ასევე გაუგზავნეთ პროგრესი ႱႮႤႺႨႴႨႩႠ-ს"
 
 #: src/main/help.c:382
 msgid "output transfer statistics at the end"
-msgstr ""
+msgstr "სტატისტიკის ჩვენება ბოლოს"
 
 #: src/main/help.c:385
 msgid "output even if standard error is not a terminal"
-msgstr ""
+msgstr "გამომავალი მაშინაც კი, თუ სტანდარტული შეცდომა ტერმინალი არ არის"
 
 #: src/main/help.c:388
 msgid "use cursor positioning escape sequences"
-msgstr ""
+msgstr "კურსორის პოზიციონირება ტერმინალის კოდებით"
 
 #: src/main/help.c:391 src/main/help.c:427 src/main/help.c:446
 #: src/main/help.c:456
 msgid "FILE"
-msgstr ""
+msgstr "ႴႠႨႪႨ"
 
 #: src/main/help.c:392
 msgid "write output to FILE instead of stdout"
-msgstr ""
+msgstr "ჩაწერეთ გამომავალი ႴႠႨႪႨ-ში სტანდარტული გამომავალის ნაცვლად"
 
 #: src/main/help.c:394
 msgid "RATE"
-msgstr ""
+msgstr "ႱႨႹႵႠႰႤ"
 
 #: src/main/help.c:395
 msgid "limit transfer to RATE bytes per second"
-msgstr ""
+msgstr "სიჩქარის შეზღუდვა წამში ႱႨႹႵႠႰႤ ბაიტამდე"
 
 #: src/main/help.c:397 src/main/help.c:403 src/main/help.c:409
 msgid "BYTES"
-msgstr ""
+msgstr "ႡႠႨႲႤႡႨ"
 
 #: src/main/help.c:398
 msgid "use a buffer size of BYTES"
-msgstr ""
+msgstr "გამოიყენეთ ႡႠႨႲႤႡႨ ბუფერის ზომა"
 
 #: src/main/help.c:401
 msgid "never use splice(), always use read/write"
-msgstr ""
+msgstr "არასდროს გამოიყენოთ splice(), ყოველთვის გამოიყენეთ წაკითხვა/ჩაწერა"
 
 #: src/main/help.c:404
 msgid "set the pipe buffer size to BYTES"
-msgstr ""
+msgstr "მილის ბუფერის ზომა დააყენეთ ႡႠႨႲႤႡႨ ბაიტზე"
 
 #: src/main/help.c:407
 msgid "skip read errors in input"
-msgstr ""
+msgstr "შეყვანის შეცდომების გამოტოვება"
 
 #: src/main/help.c:410
 msgid "skip errors in BYTES blocks at a time"
-msgstr ""
+msgstr "შეცდომების გამოტოვება ႡႠႨႲႤႡႨ ბაიტის ბლოკებში"
 
 #: src/main/help.c:413
 msgid "stop after --size bytes have been transferred"
-msgstr ""
+msgstr "შეჩერება --size ბაიტების გადატანის შემდეგ"
 
 #: src/main/help.c:416
 msgid "flush cache to disk after every write"
-msgstr ""
+msgstr "დისკის ჩაწერის ქეშის გასუფთავება ყოველი ჩაწერის შემდეგ"
 
 #: src/main/help.c:419
 msgid "use direct I/O to bypass cache"
-msgstr ""
+msgstr "ქეშის გვერდის ავლით პირდაპირი შეყვანის/გამოყვანის გამოყენებით"
 
 #: src/main/help.c:422
 msgid "try to seek instead of writing null bytes"
-msgstr ""
+msgstr "დატოვეთ ხვრელები გამომავალში ნულოვანი ბაიტების ჩაწერის ნაცვლად"
 
 #: src/main/help.c:425
 msgid "discard input instead of writing to output"
-msgstr ""
+msgstr "შეყვანის გაუქმება გამოსავალში ჩაწერის ნაცვლად"
 
 #: src/main/help.c:428
 msgid "write all input to FILE before writing to output"
-msgstr ""
+msgstr "ყველა შემავალი მონაცემი ႴႠႨႪႨ-ში ჩაწერეთ გამოსავალში ჩაწერამდე"
 
 #: src/main/help.c:431
 msgid "PID[:FD]|=NAME|@LISTFILE"
-msgstr ""
+msgstr "ႮႨႣ[:ႴႠ]|=ႱႠႾႤႪႨ|@ႴႠႨႪႨ"
 
 #: src/main/help.c:432
 msgid "watch file FD opened by process PID"
-msgstr ""
+msgstr "ფაილის აღწერის ყურება ႴႠ გახსნილია ႮႨႣ პროცესის მიერ"
 
 #: src/main/help.c:435 src/main/help.c:438
 msgid "PID"
-msgstr ""
+msgstr "ႮႨႣ"
 
 #: src/main/help.c:436
 msgid "update settings of process PID"
-msgstr ""
+msgstr "პროცესის ႮႨႣ-ის პარამეტრების განახლება"
 
 #: src/main/help.c:439
 msgid "show progress of process PID"
-msgstr ""
+msgstr "პროცესის ႮႨႣ პროგრესის ჩვენება"
 
 #: src/main/help.c:443
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
+"ბრძანების გაშვება და მისი სტანდარტული შეყვანის, გამომავალი ან ორივეს "
+"მონიტორინგი"
 
 #: src/main/help.c:447
 msgid "save process ID in FILE"
-msgstr ""
+msgstr "პროცესის იდენტიფიკატორის შენახვა ႴႠႨႪႨ-ში"
 
 #: src/main/help.c:450
 msgid "show this help and exit"
-msgstr ""
+msgstr "აჩვენეთ ეს დახმარება და გადით"
 
 #: src/main/help.c:453
 msgid "show version information and exit"
-msgstr ""
+msgstr "ვერსიის ინფორმაციის ჩვენება და გასვლა"
 
 #: src/main/help.c:457
 msgid "write debug logs to FILE"
-msgstr ""
+msgstr "გამართვის ჟურნალების ႴႠႨႪႨ-ში ჩაწერა"
 
 #: src/main/help.c:483
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
-msgstr ""
+msgstr "გამოყენება: %s [ႠႰႹႤႥႠ] [ႴႠႨႪႨ]..."
 
 #: src/main/help.c:494
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
-msgstr ""
+msgstr "შეყვანის ფაილების გადატანა გამოსავალზე მონიტორინგით."
 
 #: src/main/help.c:636
 msgid "Supported format sequences:"
-msgstr ""
+msgstr "მხარდაჭერილი ფორმატის თანმიმდევრობები:"
 
 #: src/main/help.c:650
 #, c-format
 msgid "Please report any bugs to: %s"
-msgstr ""
+msgstr "ნებისმიერი შეცდომის შესახებ, გთხოვთ, შეატყობინოთ შემდეგ მისამართზე: %s"
 
 #: src/main/main.c:225
 msgid "(input)"
-msgstr ""
+msgstr "(შეყვანა)"
 
 #: src/main/main.c:381 src/main/options.c:1366
 msgid "a command to run must be specified"
@@ -378,12 +380,12 @@ msgstr ""
 #: src/main/options.c:1204
 #, c-format
 msgid "Try `%s --help' for more information."
-msgstr ""
+msgstr "დამატებითი ინფორმაციისთვის სცადეთ `%s --help'."
 
 #: src/main/options.c:1206
 #, c-format
 msgid "Try `%s -h' for more information."
-msgstr ""
+msgstr "დამატებითი ინფორმაციისთვის სცადეთ `%s -h'."
 
 #: src/main/options.c:1238
 msgid ""
@@ -429,19 +431,21 @@ msgstr ""
 
 #: src/main/version.c:28
 msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
-msgstr ""
+msgstr "ლიცენზია: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
 
 #: src/main/version.c:29
 msgid "This is free software: you are free to change and redistribute it."
 msgstr ""
+"ეს არის უფასო პროგრამული უზრუნველყოფა: თქვენ შეგიძლიათ შეცვალოთ და ხელახლა "
+"გაავრცელოთ იგი."
 
 #: src/main/version.c:30
 msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr ""
+msgstr "კანონით დაშვებული ფარგლებში, გარანტია არ არსებობს."
 
 #: src/main/version.c:32
 msgid "Project web site"
-msgstr ""
+msgstr "პროექტის ვებსაიტი"
 
 #: src/pv/cursor.c:73
 msgid "failed to get terminal name"
@@ -501,11 +505,11 @@ msgstr ""
 
 #: src/pv/file.c:580
 msgid "(none)"
-msgstr ""
+msgstr "(არცერთი)"
 
 #: src/pv/file.c:582
 msgid "(stdin)"
-msgstr ""
+msgstr "(სტანდარტული შეყვანა)"
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
 #: src/pv/format/rate.c:36 src/pv/loop.c:172
@@ -540,11 +544,11 @@ msgstr ""
 
 #: src/pv/loop.c:171
 msgid "rate min/avg/max/mdev"
-msgstr ""
+msgstr "სიჩქარე მინიმალური/საშუალო/მაქსიმალური/სტანდარტული გადახრა"
 
 #: src/pv/loop.c:183
 msgid "rate not measured"
-msgstr ""
+msgstr "სიჩქარე არ იზომებოდა"
 
 #: src/pv/loop.c:1078 src/pv/loop.c:1094 src/pv/loop.c:1112 src/pv/remote.c:93
 #: src/pv/remote.c:188 src/pv/remote.c:536 src/pv/remote.c:582
