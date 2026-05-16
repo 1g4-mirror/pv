@@ -212,9 +212,8 @@ static off_t pv_calc_total_bytes(pvstate_t state)
 				total = end_position;
 			}
 			if (lseek(state->control.output_fd, 0, SEEK_SET) != 0) {
-				pv_perror("%s: %s",
-					  NULL == state->control.output_name ? "(null)" : state->control.output_name,
-					  _("failed to seek to start of output"));
+				pv_perror("%s",
+					  NULL == state->control.output_name ? "(null)" : state->control.output_name);
 				state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			}
 			/*
@@ -369,7 +368,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 
 	if (oldfd >= 0) {
 		if (0 != close(oldfd)) {
-			pv_perror("%s", _("failed to close file"));
+			pv_perror("%s: %s", pv_current_file_name(state), _("error closing file"));
 			state->status.exit_status |= PV_ERROREXIT_TRANSITION;
 			return -1;
 		}
@@ -401,21 +400,21 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		 * open symlinks would be counterintuitive.
 		 */
 		if (fd < 0) {
-			pv_perror("%s: %s", next_filename, _("failed to read file"));
+			pv_perror("%s", next_filename);
 			state->status.exit_status |= PV_ERROREXIT_ACCESS;
 			return -1;
 		}
 	}
 
 	if (0 != fstat(fd, &isb)) {
-		pv_perror("%s: %s", NULL == next_filename ? "-" : next_filename, _("failed to stat file"));
+		pv_perror("%s", NULL == next_filename ? "-" : next_filename);
 		(void) close(fd);
 		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		return -1;
 	}
 
 	if (0 != fstat(state->control.output_fd, &osb)) {
-		pv_perror("%s", _("failed to stat output file"));
+		pv_perror("%s", NULL == state->control.output_name ? "(null)" : state->control.output_name);
 		(void) close(fd);
 		state->status.exit_status |= PV_ERROREXIT_ACCESS;
 		return -1;
@@ -436,7 +435,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		input_file_is_output = false;
 
 	if (input_file_is_output) {
-		pv_error("%s: %s", _("input file is output file"), NULL == next_filename ? "-" : next_filename);
+		pv_error("%s: %s", _("input file is also the output"), NULL == next_filename ? "-" : next_filename);
 		(void) close(fd);
 		state->status.exit_status |= PV_ERROREXIT_OUROBOROS;
 		return -1;

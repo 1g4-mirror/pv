@@ -534,10 +534,8 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 	stat_rc = stat(size_file, &sb);
 
 	if (0 != stat_rc) {
-		/*@-mustfreefresh@ *//* see above */
-		pv_perror("%s: %s", size_file, _("failed to stat file"));
+		pv_perror("%s", size_file);
 		return false;
-		/*@+mustfreefresh@ */
 	}
 
 	/* This was a regular file - use its size and return. */
@@ -577,10 +575,9 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 #else				/* HAVE_NFTW */
 	/* This was a directory - report an error. */
 	if (S_ISDIR((mode_t) (sb.st_mode))) {
-		/*@-mustfreefresh@ *//* see above */
-		pv_error("%s: %s", size_file, _("is a directory"));
+		errno = EISDIR;
+		pv_perror("%s", size_file);
 		return false;
-		/*@+mustfreefresh@ */
 	}
 #endif				/* !HAVE_NFTW */
 
@@ -606,10 +603,8 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 	if (pv_snprintf
 	    (sysfs_filename, sizeof(sysfs_filename), "/sys/dev/block/%u:%u/size", major(sb.st_rdev),
 	     minor(sb.st_rdev)) < 0) {
-		/*@-mustfreefresh@ *//* see above */
-		pv_perror("%s: %s", size_file, _("failed to generate sysfs filename"));
+		pv_perror("%s", size_file);
 		return false;
-		/*@+mustfreefresh@ */
 	}
 
 	sysfs_fptr = fopen(sysfs_filename, "r");	/* flawfinder: ignore */
@@ -627,11 +622,9 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 		}
 		/* Read not successful - report the error and return. */
 		/* NB fclose() comes after the error report, to retain errno. */
-		/*@-mustfreefresh@ *//* see above */
-		pv_perror("%s: %s", size_file, _("failed to read sysfs size file"));
+		pv_perror("%s: %s", size_file, sysfs_filename);
 		(void) fclose(sysfs_fptr);
 		return false;
-		/*@+mustfreefresh@ */
 	}
 #endif				/* CAN_BUILD_SYSFS_FILENAME */
 
@@ -646,21 +639,17 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 	 */
 
 	if (device_fd < 0) {
-		/*@-mustfreefresh@ *//* see above */
-		pv_perror("%s: %s", size_file, _("failed to open block device"));
+		pv_perror("%s", size_file);
 		return false;
-		/*@+mustfreefresh@ */
 	}
 
 	device_size = (off_t) lseek(device_fd, 0, SEEK_END);
 
 	if (device_size < 0) {
-		/*@-mustfreefresh@ *//* see above */
-		pv_perror("%s: %s", size_file, _("failed to determine size of block device"));
+		pv_perror("%s", size_file);
 		/* NB close() after reporting error, to preserve errno. */
 		(void) close(device_fd);
 		return false;
-		/*@+mustfreefresh@ */
 	}
 
 	(void) close(device_fd);
@@ -762,9 +751,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	char *leafptr;
 
 	opts = calloc(1, sizeof(*opts));
-	if (!opts) {
+	if (NULL == opts) {
 		/*@-mustfreefresh@ *//* see above */
-		pv_perror("%s", _("option structure allocation failed"));
+		pv_perror("%s", _("memory allocation failure"));
 		return NULL;
 		/*@+mustfreefresh@ */
 	}
@@ -784,7 +773,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	opts->argv = calloc((size_t) (argc + 1), sizeof(char *));
 	if (NULL == opts->argv) {
 		/*@-mustfreefresh@ *//* see above */
-		pv_perror("%s", _("option structure argv allocation failed"));
+		pv_perror("%s", _("memory allocation failure"));
 		free(opts);		    /* can't call opts_free as argv is not set */
 		return NULL;
 		/*@+mustfreefresh@ */

@@ -1079,7 +1079,7 @@ static bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, re
 
 		new_buffer = malloc(new_size + 16);
 		if (NULL == new_buffer) {
-			pv_perror("%s", _("buffer allocation failed"));
+			pv_perror("%s", _("memory allocation failure"));
 			status->exit_status |= PV_ERROREXIT_MEMORY;
 			display->display_buffer = NULL;
 			return false;

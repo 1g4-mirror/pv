@@ -739,7 +739,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	 * the end of the file was reached.
 	 */
 	if (do_not_skip_errors) {
-		pv_perror("%s: %s", pv_current_file_name(state), _("read failed"));
+		pv_perror("%s", pv_current_file_name(state));
 		*eof_in = true;
 		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;
@@ -765,8 +765,8 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	 * report the error and behave as if the end of input had been
 	 * reached.
 	 */
-	if (0 > orig_offset) {
-		pv_perror("%s: %s", pv_current_file_name(state), _("file is not seekable"));
+	if (orig_offset < 0) {
+		pv_perror("%s", pv_current_file_name(state));
 		*eof_in = true;
 		if (state->transfer.write_position >= state->transfer.read_position) {
 			*eof_out = true;
@@ -843,7 +843,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 		 * file was reached.
 		 */
 		if (EINVAL != errno) {
-			pv_perror("%s: %s", pv_current_file_name(state), _("failed to seek past error"));
+			pv_perror("%s", pv_current_file_name(state));
 		}
 	} else {
 		amount_skipped = skip_offset - orig_offset;
@@ -906,7 +906,12 @@ static bool pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, lon
 	size_t write_check_position, write_end_position;
 
 	if (NULL == state->transfer.transfer_buffer) {
-		pv_error("%s", _("no transfer buffer allocated"));
+		/*
+		 * Report it as a generic allocation error, since this
+		 * condition should never be reached due to checks made on
+		 * the path to this function.
+		 */
+		pv_error("%s", _("memory allocation failure"));
 		state->status.exit_status |= PV_ERROREXIT_MEMORY;
 		*eof_out = true;
 		state->transfer.written = -1;
@@ -994,7 +999,12 @@ static bool pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, lon
 		      (long) (new_timer.it_value.tv_usec));
 
 		if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
-			pv_perror("%s", _("failed to set interval timer"));
+			/*
+			 * Record failure only as debugging information,
+			 * since if this call failed, it's not actionable by
+			 * the user and would only clutter the display.
+			 */
+			debug("%s: %s", "setitimer (set) failed", strerror(errno));
 		}
 
 #else				/* ! HAVE_SETITIMER */
@@ -1020,7 +1030,8 @@ static bool pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, lon
 		new_timer.it_value.tv_sec = 0;
 		new_timer.it_value.tv_usec = 0;
 		if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
-			pv_perror("%s", _("failed to clear interval timer"));
+			/* Debug output only, as above. */
+			debug("%s: %s", "setitimer (clear) failed", strerror(errno));
 		}
 
 		/*@+unrecog@ */
@@ -1067,7 +1078,7 @@ static bool pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, lon
 				state->transfer.line_positions =
 				    calloc((size_t) (state->transfer.line_positions_capacity), sizeof(off_t));
 				if (NULL == state->transfer.line_positions) {
-					pv_perror("%s", _("line position buffer allocation failed"));
+					pv_perror("%s", _("memory allocation failure"));
 				}
 				/*@+mustfreeonly@ */
 				/*
@@ -1256,7 +1267,9 @@ static bool pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, lon
 	 * adjust the exit status, and mark the output as EOF.
 	 */
 
-	pv_error("%s: %s", _("write failed"), strerror(write_errno));
+	errno = write_errno;
+	pv_perror("%s: %s", NULL == state->control.output_name ? "(null)" : state->control.output_name,
+		  _("write error"));
 	state->status.exit_status |= PV_ERROREXIT_TRANSFER;
 	*eof_out = true;
 	state->transfer.written = -1;
@@ -1392,7 +1405,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		state->transfer.transfer_buffer =
 		    pv__allocate_aligned_buffer(state->control.output_fd, fd, state->control.target_buffer_size + 32);
 		if (NULL == state->transfer.transfer_buffer) {
-			pv_perror("%s", _("buffer allocation failed"));
+			pv_perror("%s", _("memory allocation failure"));
 			state->status.exit_status |= PV_ERROREXIT_MEMORY;
 			return -1;
 		}
@@ -1492,7 +1505,7 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 		/*
 		 * Any other error is reported and causes an early return.
 		 */
-		pv_perror("%s: %s", pv_current_file_name(state), _("select call failed"));
+		pv_perror("%s", pv_current_file_name(state));
 
 		state->status.exit_status |= PV_ERROREXIT_TRANSFER;
 

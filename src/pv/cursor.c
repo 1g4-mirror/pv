@@ -70,7 +70,13 @@ static void pv_crs_open_lockfile(pvcursorstate_t cursor, readonly_pvcontrol_t co
 	ttydev = pv_strdup(ttyname(fd));
 	if (NULL == ttydev) {
 		if (!control->force) {
-			pv_error("%s", _("failed to get terminal name"));
+			/*
+			 * Error not translated as this should never be
+			 * reached, since ttyname() will have been called
+			 * earlier, and if it failed, cursor positioning
+			 * would have been turned off.
+			 */
+			pv_perror("%s", "ttyname");
 		}
 		/*
 		 * If the terminal name is unknown, then neither IPC nor a
@@ -159,7 +165,7 @@ static void pv_crs_lock(pvcursorstate_t cursor, readonly_pvcontrol_t control, in
 					lock_fd = cursor->lock_fd;
 				}
 			} else {
-				pv_perror("%s", _("lock attempt failed"));
+				pv_perror("%s", NULL == cursor->lock_file ? "(tty)" : cursor->lock_file);
 				return;
 			}
 		}
@@ -434,7 +440,7 @@ void pv_crs_init(pvcursorstate_t cursor, readonly_pvcontrol_t control, pvtransie
 	 */
 
 	if (terminalfd < 0) {
-		pv_perror("%s: %s", ttyfile, _("failed to open terminal"));
+		pv_perror("%s", ttyfile);
 		cursor->disable = true;
 		return;
 	}
@@ -781,9 +787,9 @@ void pv_report_signal_interrupt(int signum)
 		/*@+unrecog @ */
 #endif
 		if (NULL != signal_name) {
-			pv_error("%s: %s", _("exiting due to signal"), signal_name);
+			pv_error("%s: %s", _("interrupted by a signal"), signal_name);
 		} else {
-			pv_error("%s", _("exiting due to signal"));
+			pv_error("%s", _("interrupted by a signal"));
 		}
 	}
 }

@@ -42,7 +42,7 @@ static void pv_alloc_calc_history(pvtransfercalc_t calc)
 		 * unavoidable memory leak warnings, but they are mitigated
 		 * by the fact that each string is only translated once.
 		 */
-		pv_perror("%s", _("history structure allocation failed"));
+		pv_perror("%s", _("memory allocation failure"));
 		/*@+mustfreefresh@ */
 		return;
 	}
@@ -891,7 +891,7 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 	new_array = calloc((size_t) (input_file_count + 1), sizeof(char *));
 	if (NULL == new_array) {
 		/*@-mustfreefresh@ *//* see similar _() issue above */
-		pv_perror("%s", _("file list allocation failed"));
+		pv_perror("%s", _("memory allocation failure"));
 		/*@+mustfreefresh@ */
 		return;
 	}
@@ -903,7 +903,7 @@ void pv_state_inputfiles(pvstate_t state, unsigned int input_file_count, const c
 		new_string = pv_strdup(input_files[file_idx]);
 		if (NULL == new_string) {
 			/*@-mustfreefresh@ *//* see similar _() issue above */
-			pv_perror("%s", _("file list allocation failed"));
+			pv_perror("%s", _("memory allocation failure"));
 			/*@+mustfreefresh@ */
 			return;
 		}
@@ -939,7 +939,7 @@ void pv_state_watchfds(pvstate_t state, unsigned int watchfd_count, const pid_t 
 	new_array = malloc((1 + watchfd_count) * sizeof(*new_array));
 	if (NULL == new_array) {
 		/*@-mustfreefresh@ *//* see similar _() issue above */
-		pv_perror("%s", _("buffer allocation failed"));
+		pv_perror("%s", _("memory allocation failure"));
 		/*@+mustfreefresh@ */
 		return;
 	}

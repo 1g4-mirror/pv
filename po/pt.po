@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-16 16:13+0100\n"
+"POT-Creation-Date: 2026-05-16 23:53+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -301,93 +301,64 @@ msgstr "Por favor, reporte quaisquer defeitos para %s"
 msgid "(input)"
 msgstr ""
 
-#: src/main/main.c:381 src/main/options.c:1366
+#: src/main/main.c:381 src/main/options.c:1355
 msgid "a command to run must be specified"
 msgstr ""
 
-#: src/main/main.c:704
-msgid "state allocation failed"
-msgstr "alocação de memória de status falhou"
+#: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
+#: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:894
+#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:914
+#: src/pv/transfer.c:1081 src/pv/transfer.c:1408
+msgid "memory allocation failure"
+msgstr "falha de alocação de memória"
 
 #: src/main/options.c:418
 msgid "list files may not contain @ lines"
 msgstr ""
 
-#: src/main/options.c:438 src/main/options.c:440 src/main/options.c:911
+#: src/main/options.c:438 src/main/options.c:440 src/main/options.c:900
 msgid "process ID or pid:fd pair expected"
 msgstr "ID do processo ou par pid:fd esperado"
 
-#: src/main/options.c:449 src/main/options.c:451 src/main/options.c:918
+#: src/main/options.c:449 src/main/options.c:451 src/main/options.c:907
 msgid "invalid process ID"
 msgstr "ID de processo inválido"
 
-#: src/main/options.c:538 src/pv/file.c:411
-msgid "failed to stat file"
-msgstr "erro obtendo informações do arquivo"
-
-#: src/main/options.c:581
-msgid "is a directory"
-msgstr ""
-
-#: src/main/options.c:610
-msgid "failed to generate sysfs filename"
-msgstr ""
-
-#: src/main/options.c:631
-msgid "failed to read sysfs size file"
-msgstr ""
-
-#: src/main/options.c:650
-msgid "failed to open block device"
-msgstr ""
-
-#: src/main/options.c:659
-msgid "failed to determine size of block device"
-msgstr ""
-
-#: src/main/options.c:767
-msgid "option structure allocation failed"
-msgstr "erro na alocação da estrutura de opções"
-
-#: src/main/options.c:787
-msgid "option structure argv allocation failed"
-msgstr "erro na alocação da estrutura de opções argv"
-
-#: src/main/options.c:839
+#: src/main/options.c:828
 msgid "numeric value not understood"
 msgstr ""
 
-#: src/main/options.c:853
+#: src/main/options.c:842
 msgid "integer argument expected"
 msgstr "argumento inteiro esperado"
 
-#: src/main/options.c:863
+#: src/main/options.c:852
 msgid "numeric argument expected"
 msgstr "argumento numérico esperado"
 
-#: src/main/options.c:874
+#: src/main/options.c:863
 msgid "missing filename"
 msgstr ""
 
-#: src/main/options.c:900
+#: src/main/options.c:889
 msgid "missing process name"
 msgstr ""
 
-#: src/main/options.c:1189
+#: src/main/options.c:1178
 msgid "invalid side specification"
 msgstr ""
 
-#: src/main/options.c:1204
+#: src/main/options.c:1193
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Tente `%s --help' para maiores informações."
 
-#: src/main/options.c:1206
+#: src/main/options.c:1195
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Tente `%s -h' para maiores informações."
 
-#: src/main/options.c:1238
+#: src/main/options.c:1227
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -395,41 +366,41 @@ msgstr ""
 "não pode usar o modo de linha ou opções de modificador de transferência ao "
 "assistir os descritores de arquivo"
 
-#: src/main/options.c:1246
+#: src/main/options.c:1235
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "não pode usar o posicionamento do cursor ao observar os descritores de "
 "arquivo"
 
-#: src/main/options.c:1254
+#: src/main/options.c:1243
 msgid "cannot use remote control when watching file descriptors"
 msgstr "não pode usar o controle remoto ao assistir os descritores de arquivo"
 
-#: src/main/options.c:1262
+#: src/main/options.c:1251
 msgid "cannot use remote query when watching file descriptors"
 msgstr ""
 
-#: src/main/options.c:1270
+#: src/main/options.c:1259
 msgid "cannot transfer files when watching file descriptors"
 msgstr "não pode transferir arquivos ao assistir descritores de arquivo"
 
-#: src/main/options.c:1294
+#: src/main/options.c:1283
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "não disponível em sistemas sem /proc/self/fdinfo"
 
-#: src/main/options.c:1305
+#: src/main/options.c:1294
 msgid "cannot use remote control and remote query together"
 msgstr ""
 
-#: src/main/options.c:1332
+#: src/main/options.c:1321
 msgid "monitor mode cannot be specified with this option"
 msgstr ""
 
-#: src/main/options.c:1344
+#: src/main/options.c:1333
 msgid "monitor mode cannot be used with store-and-forward"
 msgstr ""
 
-#: src/main/options.c:1355
+#: src/main/options.c:1344
 msgid "files cannot be specified with this option"
 msgstr ""
 
@@ -449,25 +420,13 @@ msgstr ""
 msgid "Project web site"
 msgstr ""
 
-#: src/pv/cursor.c:73
-msgid "failed to get terminal name"
-msgstr "erro ao ler o nome do terminal"
-
-#: src/pv/cursor.c:102 src/pv/cursor.c:129
+#: src/pv/cursor.c:108 src/pv/cursor.c:135
 msgid "failed to open lock file"
 msgstr "erro ao abrir arquivo de bloqueio"
 
-#: src/pv/cursor.c:162
-msgid "lock attempt failed"
-msgstr "tentativa de bloqueio falhou"
-
-#: src/pv/cursor.c:437
-msgid "failed to open terminal"
-msgstr "erro abrindo o terminal"
-
-#: src/pv/cursor.c:784 src/pv/cursor.c:786
-msgid "exiting due to signal"
-msgstr ""
+#: src/pv/cursor.c:790 src/pv/cursor.c:792
+msgid "interrupted by a signal"
+msgstr "interrompido por um sinal"
 
 #: src/pv/display.c:311
 msgid "yzafpnum kMGTPEZY"
@@ -477,39 +436,23 @@ msgstr ""
 msgid "yzafpnum KMGTPEZY"
 msgstr ""
 
-#: src/pv/display.c:1082 src/pv/state.c:942 src/pv/transfer.c:1395
-msgid "buffer allocation failed"
-msgstr "erro alocando o buffer"
-
 #: src/pv/file.c:81
 msgid "/dev/null is not usable"
 msgstr ""
 
-#: src/pv/file.c:217
-msgid "failed to seek to start of output"
-msgstr "não pode mover para o início da produção"
+#: src/pv/file.c:371
+msgid "error closing file"
+msgstr "erro ao fechar o ficheiro"
 
-#: src/pv/file.c:372
-msgid "failed to close file"
-msgstr "erro fechando o arquivo"
+#: src/pv/file.c:438
+msgid "input file is also the output"
+msgstr "ficheiro de entrada também é a saída"
 
-#: src/pv/file.c:404
-msgid "failed to read file"
-msgstr "erro lendo o arquivo"
-
-#: src/pv/file.c:418
-msgid "failed to stat output file"
-msgstr "erro obtendo informações do arquivo de saída"
-
-#: src/pv/file.c:439
-msgid "input file is output file"
-msgstr "os arquivos de entrada e saída são o mesmo"
-
-#: src/pv/file.c:580
+#: src/pv/file.c:579
 msgid "(none)"
 msgstr ""
 
-#: src/pv/file.c:582
+#: src/pv/file.c:581
 msgid "(stdin)"
 msgstr ""
 
@@ -577,58 +520,60 @@ msgstr "mensagem não recebida"
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO não suportado neste sistema"
 
-#: src/pv/state.c:45
-msgid "history structure allocation failed"
-msgstr ""
-
-#: src/pv/state.c:894 src/pv/state.c:906
-msgid "file list allocation failed"
-msgstr ""
-
-#: src/pv/transfer.c:742
-msgid "read failed"
-msgstr "erro de leitura"
-
 #: src/pv/transfer.c:757
 msgid "warning: read errors detected"
 msgstr "aviso: erros de leitura detectados"
-
-#: src/pv/transfer.c:769
-msgid "file is not seekable"
-msgstr "não pode mover dentro do arquivo"
-
-#: src/pv/transfer.c:846
-msgid "failed to seek past error"
-msgstr "não pode ir além do erro"
 
 #: src/pv/transfer.c:862
 msgid "skipped past read error"
 msgstr "ignorado erro de leitura"
 
-#: src/pv/transfer.c:909
-msgid "no transfer buffer allocated"
-msgstr ""
-
-#: src/pv/transfer.c:997
-msgid "failed to set interval timer"
-msgstr ""
-
-#: src/pv/transfer.c:1023
-msgid "failed to clear interval timer"
-msgstr ""
-
-#: src/pv/transfer.c:1070
-msgid "line position buffer allocation failed"
-msgstr ""
-
-#: src/pv/transfer.c:1259
-msgid "write failed"
-msgstr "erro de gravação"
-
-#: src/pv/transfer.c:1495
-msgid "select call failed"
-msgstr "erro na chamada da função select"
+#: src/pv/transfer.c:1272
+msgid "write error"
+msgstr "erro de escrita"
 
 #: src/pv/watchpid.c:160 src/pv/watchpid.c:288
 msgid "not a regular file or block device"
 msgstr "não é um arquivo regular ou dispositivo de bloqueio"
+
+#~ msgid "state allocation failed"
+#~ msgstr "alocação de memória de status falhou"
+
+#~ msgid "failed to stat file"
+#~ msgstr "erro obtendo informações do arquivo"
+
+#~ msgid "option structure allocation failed"
+#~ msgstr "erro na alocação da estrutura de opções"
+
+#~ msgid "option structure argv allocation failed"
+#~ msgstr "erro na alocação da estrutura de opções argv"
+
+#~ msgid "failed to get terminal name"
+#~ msgstr "erro ao ler o nome do terminal"
+
+#~ msgid "lock attempt failed"
+#~ msgstr "tentativa de bloqueio falhou"
+
+#~ msgid "failed to open terminal"
+#~ msgstr "erro abrindo o terminal"
+
+#~ msgid "failed to seek to start of output"
+#~ msgstr "não pode mover para o início da produção"
+
+#~ msgid "failed to read file"
+#~ msgstr "erro lendo o arquivo"
+
+#~ msgid "failed to stat output file"
+#~ msgstr "erro obtendo informações do arquivo de saída"
+
+#~ msgid "read failed"
+#~ msgstr "erro de leitura"
+
+#~ msgid "file is not seekable"
+#~ msgstr "não pode mover dentro do arquivo"
+
+#~ msgid "failed to seek past error"
+#~ msgstr "não pode ir além do erro"
+
+#~ msgid "select call failed"
+#~ msgstr "erro na chamada da função select"

@@ -701,7 +701,7 @@ int main(int argc, char **argv)
 		 * mitigated by the fact that each string is only translated
 		 * once.
 		 */
-		pv_perror("%s", _("state allocation failed"));
+		pv_perror("%s", _("memory allocation failure"));
 		opts_free(opts);
 		debug("%s: %d", "exiting with status", PV_ERROREXIT_MEMORY);
 		pv_set_error_prefix(NULL);
