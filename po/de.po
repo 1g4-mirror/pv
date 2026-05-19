@@ -216,7 +216,7 @@ msgstr "anstelle von splice() immer read/write benutzen"
 
 #: src/main/help.c:404
 msgid "set the pipe buffer size to BYTES"
-msgstr ""
+msgstr "benutze einen Pipe-Puffer in der Größe von BYTES"
 
 #: src/main/help.c:407
 msgid "skip read errors in input"
@@ -240,7 +240,7 @@ msgstr "verwende direkte E/A, um den Cache zu umgehen"
 
 #: src/main/help.c:422
 msgid "try to seek instead of writing null bytes"
-msgstr ""
+msgstr "ausgabelöcher anstelle von Nullbytes"
 
 #: src/main/help.c:425
 msgid "discard input instead of writing to output"
@@ -252,7 +252,7 @@ msgstr "Ausgabe nach FILE schrieben bevor sie ausgegeben wird"
 
 #: src/main/help.c:431
 msgid "PID[:FD]|=NAME|@LISTFILE"
-msgstr ""
+msgstr "PID[:FD]|=NAME|@LISTENDATEI"
 
 #: src/main/help.c:432
 msgid "watch file FD opened by process PID"
@@ -268,11 +268,13 @@ msgstr "Einstellungen der Prozess-PID updaten"
 
 #: src/main/help.c:439
 msgid "show progress of process PID"
-msgstr ""
+msgstr "den Fortschritt des PID-Prozesses darstellen"
 
 #: src/main/help.c:443
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
+"Ein Programm ausführen und dessen Standardeingabe, -ausgabe oder beides "
+"überwachen"
 
 #: src/main/help.c:447
 msgid "save process ID in FILE"
@@ -317,7 +319,7 @@ msgstr "(eingabe)"
 
 #: src/main/main.c:381 src/main/options.c:1355
 msgid "a command to run must be specified"
-msgstr ""
+msgstr "es muss ein auszuführendes Programm angegeben werden"
 
 #: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
 #: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:894
@@ -328,7 +330,7 @@ msgstr "Fehler bei der Speicheranforderung"
 
 #: src/main/options.c:418
 msgid "list files may not contain @ lines"
-msgstr ""
+msgstr "Listendateien dürfen keine „@“-Zeilen enthalten"
 
 #: src/main/options.c:438 src/main/options.c:440 src/main/options.c:900
 msgid "process ID or pid:fd pair expected"
@@ -352,25 +354,25 @@ msgstr "numerisches Argument erwartet"
 
 #: src/main/options.c:863
 msgid "missing filename"
-msgstr ""
+msgstr "fehlender Dateiname"
 
 #: src/main/options.c:889
 msgid "missing process name"
-msgstr ""
+msgstr "fehlender Prozessname"
 
 #: src/main/options.c:1178
 msgid "invalid side specification"
-msgstr ""
+msgstr "ungültige Seitenspezifikation"
 
 #: src/main/options.c:1193
 #, c-format
 msgid "Try `%s --help' for more information."
-msgstr "`%s --help' zeigt weitere Informationen an."
+msgstr "„%s --help“ zeigt weitere Informationen an."
 
 #: src/main/options.c:1195
 #, c-format
 msgid "Try `%s -h' for more information."
-msgstr "`%s -h' zeigt weitere Informationen an."
+msgstr "„%s -h“ zeigt weitere Informationen an."
 
 #: src/main/options.c:1227
 msgid ""
@@ -395,6 +397,8 @@ msgstr ""
 #: src/main/options.c:1251
 msgid "cannot use remote query when watching file descriptors"
 msgstr ""
+"Remote-Abfragen können beim Überwachen von Dateideskriptoren nicht verwendet "
+"werden"
 
 #: src/main/options.c:1259
 msgid "cannot transfer files when watching file descriptors"
@@ -408,18 +412,20 @@ msgstr "Nicht verfügbar auf Systemen ohne /proc/self/fdinfo"
 #: src/main/options.c:1294
 msgid "cannot use remote control and remote query together"
 msgstr ""
+"Fernsteuerung und Fernabfrage können nicht gleichzeitig verwendet werden"
 
 #: src/main/options.c:1321
 msgid "monitor mode cannot be specified with this option"
-msgstr ""
+msgstr "Der Monitormodus kann mit dieser Option nicht angegeben werden"
 
 #: src/main/options.c:1333
 msgid "monitor mode cannot be used with store-and-forward"
 msgstr ""
+"Der Monitormodus kann nicht mit Speichern-und-Weiterleiten verwendet werden"
 
 #: src/main/options.c:1344
 msgid "files cannot be specified with this option"
-msgstr ""
+msgstr "mit dieser Option können keine Dateien angegeben werden"
 
 #: src/main/version.c:28
 msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
@@ -455,7 +461,7 @@ msgstr "yzafpnµm KMGTPEZY"
 
 #: src/pv/file.c:81
 msgid "/dev/null is not usable"
-msgstr ""
+msgstr "/dev/null ist nicht verwendbar"
 
 #: src/pv/file.c:371
 msgid "error closing file"
