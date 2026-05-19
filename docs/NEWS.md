@@ -11,6 +11,8 @@
  * *fix:* correct the **--help** word wrapping on very small terminals
  * *i18n:* Polish translations updated
  * *i18n:* Finnish translations updated
+ * *i18n:* German translations updated
+ * *i18n:* French translations updated
  * *i18n:* partial draft of Georgian translations added
  * *i18n:* removed empty unmaintained translation catalogue for Spanish
  * *cleanup:* fix GCC warning when using glibc 2.43 ([#180](https://codeberg.org/ivarch/pv/pulls/180))
