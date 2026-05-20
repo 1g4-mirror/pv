@@ -621,7 +621,7 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 			return true;
 		}
 		/* Read not successful - report the error and return. */
-		/* NB fclose() comes after the error report, to retain errno. */
+		/* Report the error first, as fclose() could change errno. */
 		pv_perror("%s: %s", size_file, sysfs_filename);
 		(void) fclose(sysfs_fptr);
 		return false;
