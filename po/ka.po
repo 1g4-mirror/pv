@@ -303,7 +303,7 @@ msgstr "(შეყვანა)"
 
 #: src/main/main.c:381 src/main/options.c:1355
 msgid "a command to run must be specified"
-msgstr ""
+msgstr "შესასრულებელი ბრძანება უნდა იყოს მითითებული"
 
 #: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
 #: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:894
@@ -314,7 +314,7 @@ msgstr "მეხსიერების გამოყოფის შეც�
 
 #: src/main/options.c:418
 msgid "list files may not contain @ lines"
-msgstr ""
+msgstr "სიის ფაილები არ შეიძლება შეიცავდეს \"@\" ხაზებს"
 
 #: src/main/options.c:438 src/main/options.c:440 src/main/options.c:900
 msgid "process ID or pid:fd pair expected"
@@ -338,7 +338,7 @@ msgstr ""
 
 #: src/main/options.c:863
 msgid "missing filename"
-msgstr ""
+msgstr "ფაილის სახელი აკლია"
 
 #: src/main/options.c:889
 msgid "missing process name"
@@ -420,7 +420,7 @@ msgstr "პროექტის ვებსაიტი"
 
 #: src/pv/cursor.c:108 src/pv/cursor.c:135
 msgid "failed to open lock file"
-msgstr ""
+msgstr "დაბლოკვის ფაილის გახსნა ვერ მოხერხდა"
 
 #: src/pv/cursor.c:790 src/pv/cursor.c:792
 msgid "interrupted by a signal"
@@ -436,7 +436,7 @@ msgstr ""
 
 #: src/pv/file.c:81
 msgid "/dev/null is not usable"
-msgstr ""
+msgstr "/dev/null არ არის გამოსაყენებელი"
 
 #: src/pv/file.c:371
 msgid "error closing file"
@@ -452,7 +452,7 @@ msgstr "(არცერთი)"
 
 #: src/pv/file.c:581
 msgid "(stdin)"
-msgstr "(სტანდარტული შეყვანა)"
+msgstr "(stdin)"
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
 #: src/pv/format/rate.c:36 src/pv/loop.c:172
@@ -512,7 +512,7 @@ msgstr ""
 
 #: src/pv/remote.c:242 src/pv/remote.c:636
 msgid "message not received"
-msgstr ""
+msgstr "შეტყობინება არ არის მიღებული"
 
 #: src/pv/remote.c:659 src/pv/remote.c:677
 msgid "SA_SIGINFO not supported on this system"
@@ -520,7 +520,7 @@ msgstr ""
 
 #: src/pv/transfer.c:757
 msgid "warning: read errors detected"
-msgstr ""
+msgstr "გაფრთხილება: წაკითხვის შეცდომები აღმოჩენილია"
 
 #: src/pv/transfer.c:862
 msgid "skipped past read error"
