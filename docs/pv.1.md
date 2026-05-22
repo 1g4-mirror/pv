@@ -208,15 +208,15 @@ are explicitly switched on will be shown.
 
 **-w WIDTH, \--width WIDTH**
 
-:   Assume the terminal is *WIDTH* columns wide, instead of trying to
-    work it out (or assuming 80 if it cannot be guessed). If this option
-    is used, the output width will not be adjusted if the width of the
-    terminal changes while the transfer is running.
+:   Assume the terminal is *WIDTH* columns wide, instead of
+    autodetecting the width (or assuming 80 if detection fails). If this
+    option is used, the output width will not be adjusted if the width
+    of the terminal changes while the transfer is running.
 
 **-H HEIGHT, \--height HEIGHT**
 
-:   Assume the terminal is *HEIGHT* rows high, instead of trying to work
-    it out (or assuming 25 if it cannot be guessed). If this option is
+:   Assume the terminal is *HEIGHT* rows high, instead of autodetecting
+    the height (or assuming 25 if detection fails). If this option is
     used, the output height will not be adjusted if the height of the
     terminal changes while the transfer is running.
 

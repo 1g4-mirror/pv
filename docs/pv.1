@@ -201,14 +201,14 @@ The default is 30 seconds.
 The value must be an integer.
 .TP
 .BI \-w\  WIDTH \fR,\ \fB\-\-width\  WIDTH
-Assume the terminal is \fIWIDTH\fR columns wide, instead of trying to work
-it out (or assuming 80 if it cannot be guessed).
+Assume the terminal is \fIWIDTH\fR columns wide, instead of autodetecting
+the width (or assuming 80 if detection fails).
 If this option is used, the output width will not be adjusted if the width
 of the terminal changes while the transfer is running.
 .TP
 .BI \-H\  HEIGHT \fR,\ \fB\-\-height\  HEIGHT
-Assume the terminal is \fIHEIGHT\fR rows high, instead of trying to work it
-out (or assuming 25 if it cannot be guessed).
+Assume the terminal is \fIHEIGHT\fR rows high, instead of autodetecting
+the height (or assuming 25 if detection fails).
 If this option is used, the output height will not be adjusted if the height
 of the terminal changes while the transfer is running.
 .TP
