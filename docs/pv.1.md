@@ -297,16 +297,22 @@ are explicitly switched on will be shown.
 
 **-C, \--no-splice**
 
-:   Never use **splice**(2), even if it would normally be possible. The
-    **splice**(2) system call is a more efficient way of transferring
-    data from or to a pipe than regular **read**(2) and **write**(2),
-    but means that the transfer buffer may not be used. This prevents
-    "**\--buffer-percent**" and "**\--last-written**" from working,
-    cannot work with "**\--sparse**", and makes "**\--buffer-size**"
+:   Prevent the use of **splice**(2), a system call normally used on
+    systems that support it to improve efficiency by eliminating the
+    need for a transfer buffer.
+
+    In the default case that **splice**(2) is used, the lack of a
+    transfer buffer prevents "**\--buffer-percent**" and
+    "**\--last-written**" from working and makes "**\--buffer-size**"
     redundant, so using any of those options automatically switches on
-    "**\--no-splice**". Switching on this option results in a small loss
-    of transfer efficiency. It has no effect on systems where
-    **splice**(2) is unavailable.
+    "**\--no-splice**".
+
+    Sparse files cannot be written with **splice**(2), so using
+    "**\--sparse**" automatically switches on "**\--no-splice**".
+
+    Switching on "**\--no-splice**" results in a small loss of transfer
+    efficiency. It has no effect on systems where **splice**(2) is
+    unavailable.
 
 **-J BYTES, \--pipe-buffer-size BYTES**
 
