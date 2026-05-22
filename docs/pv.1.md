@@ -126,7 +126,7 @@ are explicitly switched on will be shown.
     output. The default format string components for "**\--numeric**"
     are "**%t %b %r %{progress-amount-only}**" in that order, each item
     being active or inactive according to the rules above (so the
-    default with no other options is "**%{progress-amount-only}**".
+    default with no other options is "**%{progress-amount-only}**").
 
 **-q, \--quiet**
 
