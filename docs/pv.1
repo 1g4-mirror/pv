@@ -214,9 +214,8 @@ of the terminal changes while the transfer is running.
 .TP
 .BI \-N\  NAME \fR,\ \fB\-\-name\  NAME
 Prefix the output information with \fINAME\fR.
-Useful in conjunction with \*(lq\fB\-\-cursor\fR\*(rq if you have a
-complicated pipeline and you want to be able to tell different parts of it
-apart.
+Often used with \*(lq\fB\-\-cursor\fR\*(rq to identify each progress bar in
+a pipeline containing more than one \fBpv\fR.
 .TP
 .BI \-u\  STYLE \fR,\ \fB\-\-bar\-style\  STYLE
 Change the default progress bar style shown by \*(lq\fB\-\-progress\fR\*(rq,
@@ -252,10 +251,20 @@ not a terminal.
 This option forces it to do so.
 .TP
 .B \-c, \-\-cursor
-Use cursor positioning escape sequences instead of just using carriage
-returns.
-This is useful in conjunction with \*(lq\fB\-\-name\fR\*(rq if you are using
-multiple \fBpv\fR invocations in a single pipeline.
+Use cursor positioning escape sequences to move to the initial terminal row
+when updating the display, instead of only using carriage returns.
+This allows multiple \fBpv\fR instances to show progress on the same
+terminal together.
+.IP
+For example:
+.IP
+.in +4
+.EX
+pv --cursor --name input file.gz | gzip -d | pv --cursor --name output > file
+.EE
+.in
+.IP
+As the example shows, this is often used with \*(lq\fB\-\-name\fR\*(rq.
 .\"
 .SS "Data transfer modifiers"
 .TP

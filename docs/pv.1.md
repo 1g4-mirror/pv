@@ -222,9 +222,9 @@ are explicitly switched on will be shown.
 
 **-N NAME, \--name NAME**
 
-:   Prefix the output information with *NAME*. Useful in conjunction
-    with "**\--cursor**" if you have a complicated pipeline and you want
-    to be able to tell different parts of it apart.
+:   Prefix the output information with *NAME*. Often used with
+    "**\--cursor**" to identify each progress bar in a pipeline
+    containing more than one **pv**.
 
 **-u STYLE, \--bar-style STYLE**
 
@@ -261,9 +261,16 @@ are explicitly switched on will be shown.
 
 **-c, \--cursor**
 
-:   Use cursor positioning escape sequences instead of just using
-    carriage returns. This is useful in conjunction with "**\--name**"
-    if you are using multiple **pv** invocations in a single pipeline.
+:   Use cursor positioning escape sequences to move to the initial
+    terminal row when updating the display, instead of only using
+    carriage returns. This allows multiple **pv** instances to show
+    progress on the same terminal together.
+
+    For example:
+
+        pv --cursor --name input file.gz | gzip -d | pv --cursor --name output > file
+
+    As the example shows, this is often used with "**\--name**".
 
 ## Data transfer modifiers
 
