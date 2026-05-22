@@ -153,8 +153,10 @@ static ssize_t pv__transfer__read_repeated(int fd, char *buf, size_t count)
 			count = 0;
 		}
 
-		if (0 == nread)
+		if (0 == nread) {
+			debug("%s %d: %s", "fd", fd, "nread=0");
 			return total_read;
+		}
 
 		memset(&cur_time, 0, sizeof(cur_time));
 		memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
@@ -315,14 +317,22 @@ static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, boo
  *
  * Returns the total number of bytes transferred to output_fd, or negative
  * on error.
+ *
+ * If a negative value is returned and the error had occurred in the second
+ * splice from the intermediate pipe to the output_fd, then
+ * *post_splice_fail_rewind will have been populated with the amount that
+ * was just now spliced in from input_fd, so the caller can rewind
+ * input_fd's position if the error was not EINTR/EAGAIN.
  */
 static ssize_t pv__transfer__splice_via_intermediate(pvstate_t state, int input_fd, int output_fd,
-						     size_t bytes_to_splice)
+						     size_t bytes_to_splice, off_t *post_splice_fail_rewind)
 {
 	int room_in_pipe_buffer;
 	size_t bytes_to_splice_in, bytes_to_splice_out;
 	ssize_t spliced_out;
 	ssize_t spliced_in;
+
+	*post_splice_fail_rewind = 0;
 
 	room_in_pipe_buffer =
 	    state->transfer.intermediate_pipe_buffer_size - state->transfer.intermediate_pipe_buffer_used;
@@ -343,16 +353,21 @@ static ssize_t pv__transfer__splice_via_intermediate(pvstate_t state, int input_
 	}
 
 	/* Early return on error. */
-	if (spliced_in < 0)
+	if (spliced_in < 0) {
+		debug("splice(in:%d->%d, %lu): %s", input_fd, state->transfer.intermediate_pipe[1],
+		      (unsigned long) bytes_to_splice_in, strerror(errno));
 		return spliced_in;
+	}
 
 	state->transfer.intermediate_pipe_buffer_used += (int) spliced_in;
 
 	debug("%s(%d->%d): %ld", "spliced_in", input_fd, state->transfer.intermediate_pipe[1], spliced_in);
 
 	/* If the intermediate pipe has nothing in its buffer, return 0. */
-	if (state->transfer.intermediate_pipe_buffer_used <= 0)
+	if (state->transfer.intermediate_pipe_buffer_used <= 0) {
+		debug("%s", "intermediate pipe buffer empty, returning 0");
 		return 0;
+	}
 
 	/* Transfer out whatever's in the intermediate pipe buffer. */
 	bytes_to_splice_out = (size_t) (state->transfer.intermediate_pipe_buffer_used);
@@ -367,6 +382,15 @@ static ssize_t pv__transfer__splice_via_intermediate(pvstate_t state, int input_
 	if (spliced_out > 0) {
 		state->transfer.intermediate_pipe_buffer_used -= (int) spliced_out;
 		debug("%s(%d->%d): %ld", "spliced_out", state->transfer.intermediate_pipe[0], output_fd, spliced_out);
+	}
+
+	if (spliced_out < 0) {
+		debug("splice(out:%d->%d, %lu): %s", state->transfer.intermediate_pipe[0], output_fd,
+		      (unsigned long) bytes_to_splice_out, strerror(errno));
+		debug("%s=%d", "intermediate_pipe_buffer_used", state->transfer.intermediate_pipe_buffer_used);
+		if (spliced_in > 0) {
+			*post_splice_fail_rewind = (off_t) spliced_in;
+		}
 	}
 
 	return spliced_out;
@@ -459,9 +483,13 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 		ssize_t nspliced;
 		struct timespec cur_time, transfer_elapsed;
 		long double elapsed_seconds;
+		off_t post_splice_fail_rewind;
 
+		post_splice_fail_rewind = 0;
 		if (use_intermediate_pipe) {
-			nspliced = pv__transfer__splice_via_intermediate(state, input_fd, output_fd, bytes_to_splice);
+			nspliced =
+			    pv__transfer__splice_via_intermediate(state, input_fd, output_fd, bytes_to_splice,
+								  &post_splice_fail_rewind);
 		} else {
 			/*@-nullpass@ *//*@-type@ *//* splint doesn't know about splice. */
 			nspliced = splice(input_fd, NULL, output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
@@ -486,6 +514,24 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 		 */
 		if (nspliced < 0) {
 			debug("%s %d: %s: %s", "fd", input_fd, "disabling splice after failure", strerror(errno));
+			if (post_splice_fail_rewind > 0) {
+				debug("%s %d: %s: %ld", "fd", input_fd, "rewinding position by amount spliced in",
+				      (long) post_splice_fail_rewind);
+				/*
+				 * If data was spliced into the intermediate
+				 * pipe but not out again, rewind by the
+				 * amount spliced in, so that subsequent
+				 * reads are coming from the right position.
+				 * If the rewind fails, report the error.
+				 */
+				/*@+longintegral@ *//* splice has issues with __off_t. */
+				if (lseek(input_fd, (off_t) (0 - post_splice_fail_rewind), SEEK_CUR) < 0) {
+					debug("%s: %s", "lseek", strerror(errno));
+					pv_perror("%s", pv_current_file_name(state));
+					state->status.exit_status |= PV_ERROREXIT_TRANSFER;
+				}
+				/*@-longintegral@ */
+			}
 			state->transfer.splice_failed_fd = input_fd;
 			if (0 == total_spliced) {
 				return pv__transfer__read_repeated(input_fd, buf, count);
@@ -544,7 +590,7 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
  *
  * At most, the number of bytes read will be the number of bytes remaining
  * in the input buffer, capped to the number of bytes left until
- * state->control.size is reached if state->control.stop_at_size is true. 
+ * state->control.size is reached if state->control.stop_at_size is true.
  * If state->control.rate_limit_active is true, and/or "max_to_write" is >0,
  * and splice() is used, then the maximum number of bytes read will be
  * further capped to the value of "max_to_write", since splice() writes as
