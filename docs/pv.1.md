@@ -157,9 +157,8 @@ are explicitly switched on will be shown.
 **-D SEC, \--delay-start SEC**
 
 :   Wait until *SEC* seconds have passed before showing any progress
-    information, for example in a script where you only want to show a
-    progress bar if it starts taking a long time. The value of *SEC* can
-    be a decimal such as "0.5".
+    information, so that a transfer that is over quickly won\'t display
+    anything. The value of *SEC* can be a decimal such as "0.5".
 
 **-s SIZE, \--size SIZE**
 
