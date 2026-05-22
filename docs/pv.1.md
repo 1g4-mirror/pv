@@ -149,10 +149,10 @@ are explicitly switched on will be shown.
 **-W, \--wait**
 
 :   Wait until the first byte has been transferred before showing any
-    progress information or calculating any ETAs. Useful if the program
-    you are piping to or from requires extra information before it
-    starts, such as when piping data into **gpg**(1) or **mcrypt**(1)
-    which require a passphrase before data can be processed.
+    progress information or calculating any ETAs. For example, use this
+    option when piping data into tools such as **gpg**(1) or
+    "**mysql -p**" so the count only starts after the password prompt
+    has been answered.
 
 **-D SEC, \--delay-start SEC**
 

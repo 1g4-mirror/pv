@@ -148,9 +148,9 @@ consistency, specify this option first.
 .B \-W, \-\-wait
 Wait until the first byte has been transferred before showing any progress
 information or calculating any ETAs.
-Useful if the program you are piping to or from requires extra information
-before it starts, such as when piping data into \fBgpg\fR(1) or
-\fBmcrypt\fR(1) which require a passphrase before data can be processed.
+For example, use this option when piping data into tools such as
+\fBgpg\fR(1) or \*(lq\fBmysql\~\-p\fR\*(rq so the count only starts after
+the password prompt has been answered.
 .TP
 .BI \-D\  SEC \fR,\ \fB\-\-delay\-start\  SEC
 Wait until \fISEC\fR seconds have passed before showing any progress
