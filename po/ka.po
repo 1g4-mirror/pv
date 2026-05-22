@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-16 23:53+0100\n"
+"POT-Creation-Date: 2026-05-23 00:18+0100\n"
 "PO-Revision-Date: 2026-05-16 19:25+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@noreply.codeberg.org>\n"
 "Language-Team: Georgian <https://translate.codeberg.org/projects/pv/pv/ka/>\n"
@@ -307,8 +307,8 @@ msgstr "შესასრულებელი ბრძანება უნ�
 
 #: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
 #: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:894
-#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:914
-#: src/pv/transfer.c:1081 src/pv/transfer.c:1408
+#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:960
+#: src/pv/transfer.c:1127 src/pv/transfer.c:1454
 msgid "memory allocation failure"
 msgstr "მეხსიერების გამოყოფის შეცდომა"
 
@@ -473,7 +473,7 @@ msgstr ""
 msgid "b"
 msgstr ""
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:863
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:909
 msgid "B"
 msgstr ""
 
@@ -518,15 +518,15 @@ msgstr "შეტყობინება არ არის მიღებუ
 msgid "SA_SIGINFO not supported on this system"
 msgstr ""
 
-#: src/pv/transfer.c:757
+#: src/pv/transfer.c:803
 msgid "warning: read errors detected"
 msgstr "გაფრთხილება: წაკითხვის შეცდომები აღმოჩენილია"
 
-#: src/pv/transfer.c:862
+#: src/pv/transfer.c:908
 msgid "skipped past read error"
 msgstr ""
 
-#: src/pv/transfer.c:1272
+#: src/pv/transfer.c:1318
 msgid "write error"
 msgstr "ჩაწერის შეცდომა"
 

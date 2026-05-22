@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-16 23:53+0100\n"
+"POT-Creation-Date: 2026-05-23 00:18+0100\n"
 "PO-Revision-Date: 2026-05-18 20:38+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@noreply.codeberg.org>\n"
 "Language-Team: French <https://translate.codeberg.org/projects/pv/pv/fr/>\n"
@@ -324,8 +324,8 @@ msgstr "une commande à exécuter doit être spécifiée"
 
 #: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
 #: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:894
-#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:914
-#: src/pv/transfer.c:1081 src/pv/transfer.c:1408
+#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:960
+#: src/pv/transfer.c:1127 src/pv/transfer.c:1454
 msgid "memory allocation failure"
 msgstr "échec d'allocation mémoire"
 
@@ -503,7 +503,7 @@ msgstr "O/s"
 msgid "b"
 msgstr "b"
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:863
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:909
 msgid "B"
 msgstr "O"
 
@@ -548,15 +548,15 @@ msgstr "message non reçu"
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO non pris en charge sur ce système"
 
-#: src/pv/transfer.c:757
+#: src/pv/transfer.c:803
 msgid "warning: read errors detected"
 msgstr "avertissement : erreurs de lecture détectées"
 
-#: src/pv/transfer.c:862
+#: src/pv/transfer.c:908
 msgid "skipped past read error"
 msgstr "erreur de lecture dépassée"
 
-#: src/pv/transfer.c:1272
+#: src/pv/transfer.c:1318
 msgid "write error"
 msgstr "erreur d'écriture"
 
