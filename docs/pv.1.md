@@ -395,10 +395,11 @@ are explicitly switched on will be shown.
     **pv** creates a temporary file for this purpose, and automatically
     removes it afterwards.
 
-    This can be useful if you have a pipeline which generates data (your
-    input) quickly but you don\'t know the size, and you wish to pass it
-    to some slower process, once all of the input has been generated and
-    you know its size, so you can see its progress.
+    A common use for this is this where one part of a pipeline generates
+    data quickly but of unknown size, and the next part processes it
+    slowly. With "*quick* **\| pv -U - \|** *slow*", a progress bar is
+    displayed with unknown size for the *quick* part, then a second is
+    shown with a known size for the *slow* part.
 
 ## Alternative operating modes
 
