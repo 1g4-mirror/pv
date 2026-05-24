@@ -399,7 +399,7 @@ are explicitly switched on will be shown.
     data quickly but of unknown size, and the next part processes it
     slowly. With "*quick* **\| pv -U - \|** *slow*", a progress bar is
     displayed with unknown size for the *quick* part, then a second is
-    shown with a known size for the *slow* part.
+    shown with a known size and ETA for the *slow* part.
 
 ## Alternative operating modes
 
