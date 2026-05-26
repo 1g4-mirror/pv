@@ -401,8 +401,10 @@ static ssize_t pv__transfer__splice_via_intermediate(pvstate_t state, int input_
  * Splice bytes from file descriptor "input_fd" to "output_fd", possibly via
  * an intermediate input pipe if one is active.
  *
- * The number of bytes spliced is capped to "count", or if "max_to_write" is
- * greater than zero and less than "count", capped to "max_to_write".
+ * The number of bytes spliced is capped to "max_to_read", or if
+ * "max_to_write" is greater than zero and less than "max_to_read", capped
+ * to "max_to_write".  A "max_to_read" of less than zero indicates no
+ * maximum.
  *
  * If state->control.rate_limit_active is true and "max_to_write" is zero,
  * performs no action and returns zero.  Since this looks the same as EOF,
@@ -417,18 +419,25 @@ static ssize_t pv__transfer__splice_via_intermediate(pvstate_t state, int input_
  *
  * If splice() could not be used, sets state->transfer.splice_failed_fd to
  * fd so splice() won't be tried again until the next input file, and then
- * calls pv__transfer__read_repeated() to read into the buffer, returning
- * its result.
+ * calls pv__transfer__read_repeated() to read into the buffer, first
+ * capping "max_to_read" to "max_buffer_available", returning its result.
  *
  * Returns the total number of bytes transferred, or negative on error.
  */
-static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int output_fd, char *buf, size_t count,
-					     off_t max_to_write)
+static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int output_fd, char *buf,
+					     size_t max_buffer_available, off_t max_to_read, off_t max_to_write)
 {
 	struct timespec start_time;
 	size_t bytes_to_splice;
 	ssize_t total_spliced;
 	bool use_intermediate_pipe;
+	size_t fallback_read_amount;
+
+	/* Amount to read_repeated() if splice() can't be used. */
+	fallback_read_amount = max_buffer_available;
+	if ((max_to_read >= 0) && (fallback_read_amount > (size_t) max_to_read)) {
+		fallback_read_amount = (size_t) max_to_read;
+	}
 
 	/*
 	 * Early return via pv__transfer__read_repeated() if splice() is
@@ -439,7 +448,7 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 	if (state->control.no_splice || state->control.linemode || (output_fd < 0)
 	    || (input_fd == state->transfer.splice_failed_fd)
 	    || (state->transfer.to_write > 0)) {
-		return pv__transfer__read_repeated(input_fd, buf, count);
+		return pv__transfer__read_repeated(input_fd, buf, fallback_read_amount);
 	}
 
 	/*
@@ -450,11 +459,16 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 	 * SIZE_MAX before trying a comparison otherwise on 32-bit systems
 	 * it might appear to be 0.
 	 */
-	bytes_to_splice = count;
 	/*@-unrecog@ */
-	if ((state->control.rate_limit_active || max_to_write != 0)
-	    && (max_to_write >= 0) && ((unsigned long) max_to_write <= (unsigned long) SIZE_MAX)
-	    && ((off_t) bytes_to_splice > max_to_write)) {
+	bytes_to_splice = SIZE_MAX;
+	if ((max_to_read >= 0) && ((unsigned long) max_to_read <= (unsigned long) SIZE_MAX)) {
+		bytes_to_splice = (size_t) max_to_read;
+	}
+	if ((state->control.rate_limit_active || max_to_write > 0)
+	    && ((unsigned long) max_to_write <= (unsigned long) SIZE_MAX)
+	    && ((max_to_read < 0) || ((unsigned long) max_to_read >= (unsigned long) SIZE_MAX)
+		|| (max_to_read > max_to_write))
+	    ) {
 		bytes_to_splice = (size_t) max_to_write;
 	}
 	/*@+unrecog@ *//* splint doesn't know of SIZE_MAX. */
@@ -535,7 +549,7 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 			}
 			state->transfer.splice_failed_fd = input_fd;
 			if (0 == total_spliced) {
-				return pv__transfer__read_repeated(input_fd, buf, count);
+				return pv__transfer__read_repeated(input_fd, buf, fallback_read_amount);
 			} else {
 				return total_spliced;
 			}
@@ -554,7 +568,7 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 
 		/* Early return on EOF. */
 		if (0 == nspliced) {
-			debug("%s %d: %s (%ld/%ld)", "fd", input_fd, "reached EOF", total_spliced, bytes_to_splice);
+			debug("%s %d: %s (%lu/%lu)", "fd", input_fd, "reached EOF", total_spliced, bytes_to_splice);
 			return total_spliced;
 		}
 
@@ -574,7 +588,7 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 		}
 
 		if (bytes_to_splice > 0) {
-			debug("%s %d: %s (%ld %s, %ld %s)", "fd", input_fd,
+			debug("%s %d: %s (%ld %s, %lu %s)", "fd", input_fd,
 			      "trying another splice", nspliced, "transferred this time", bytes_to_splice, "remaining");
 			if (is_data_ready(input_fd, NULL, -1, NULL, 0) < 1)
 				break;
@@ -630,7 +644,8 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 {
 	bool do_not_skip_errors;
 	bool zero_transfer_cap;
-	size_t bytes_can_read;
+	size_t max_buffer_available;
+	off_t max_to_read;
 	off_t amount_to_skip, amount_skipped, orig_offset, skip_offset;
 	ssize_t nread;
 #ifdef HAVE_SPLICE
@@ -645,7 +660,8 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	if (0 == state->control.skip_errors)
 		do_not_skip_errors = true;
 
-	bytes_can_read = state->transfer.buffer_size - state->transfer.read_position;
+	max_buffer_available = state->transfer.buffer_size - state->transfer.read_position;
+	max_to_read = -1;
 
 	/*
 	 * Don't read past control.size if stop_at_size is true (issue
@@ -654,18 +670,12 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	 * This isn't workable in line mode.
 	 */
 	if (state->control.stop_at_size && !state->control.linemode) {
-		off_t bytes_remaining_to_read = state->control.size - state->transfer.total_bytes_read;
-		if ((long long) bytes_can_read > (long long) bytes_remaining_to_read) {
-			debug("%lld > (%lld-%lld=%lld): %s", (long long) bytes_can_read,
-			      (long long) (state->control.size), (long long) state->transfer.total_bytes_read,
-			      (long long) bytes_remaining_to_read, "truncating for stop-at-size");
-			bytes_can_read = (size_t) bytes_remaining_to_read;
-		}
+		max_to_read = state->control.size - state->transfer.total_bytes_read;
 	}
 
 	nread = 0;
 	zero_transfer_cap = false;
-	if (0 == bytes_can_read)
+	if (0 == max_to_read)
 		zero_transfer_cap = true;
 
 #ifdef HAVE_SPLICE
@@ -682,7 +692,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 		nread =
 		    pv__transfer__splice_repeated(state, fd, output_fd,
 						  state->transfer.transfer_buffer + state->transfer.read_position,
-						  bytes_can_read, max_to_write);
+						  max_buffer_available, max_to_read, max_to_write);
 #ifdef HAVE_FDATASYNC
 		if (nread > 0 && state->control.sync_after_write) {
 			/*
@@ -704,9 +714,14 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 #endif				/* HAVE_FDATASYNC */
 	}
 #else				/* !HAVE_SPLICE */
+	if (max_to_read < 0) {
+		max_to_read = max_buffer_available;
+	}
+	if (max_to_read < 0)
+		max_to_read = 0;
 	nread =
 	    pv__transfer__read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
-					bytes_can_read);
+					(size_t) max_to_read);
 #endif				/* HAVE_SPLICE */
 
 	if (0 == nread) {
@@ -853,11 +868,16 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	}
 
 	/*
-	 * Trim the skip amount to keep within bytes_can_read so as not to
-	 * read more than permitted.
+	 * Trim the skip amount to keep within max_to_read so as not to read
+	 * more than permitted.
 	 */
-	if (amount_to_skip > (off_t) bytes_can_read)
-		amount_to_skip = (off_t) bytes_can_read;
+	if (max_to_read < 0) {
+		max_to_read = (off_t) max_buffer_available;
+	}
+	if (max_to_read < 0)
+		max_to_read = 0;
+	if (amount_to_skip > (off_t) max_to_read)
+		amount_to_skip = (off_t) max_to_read;
 
 	/*@+longintegral@ */
 	/* splint complains about __off_t vs off_t */
