@@ -533,20 +533,22 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		/*
 		 * Open a file descriptor to /dev/null, so that input can be
 		 * spliced to it to implement -X.
+		 *
+		 * If this fails, transfer.discard_fd will be left at -1,
+		 * which means the transfer functions will not use splice().
 		 */
 		state->transfer.discard_fd = open("/dev/null", O_WRONLY);	/* flawfinder: ignore */
 		/* flawfinder: /dev/null is trusted. */
 		if (state->transfer.discard_fd < 0) {
-			pv_perror("%s", "/dev/null");
-			(void) close(fd);
-			fd = -1;
-			state->status.exit_status |= PV_ERROREXIT_TRANSITION;
+			debug("%s: %s", "/dev/null", strerror(errno));
+			state->transfer.discard_fd = -1;
 		}
-		if (!pv_fd_is_dev_null(state->transfer.discard_fd, true)) {
-			(void) close(fd);
-			fd = -1;
-			state->status.exit_status |= PV_ERROREXIT_TRANSITION;
+		if (!pv_fd_is_dev_null(state->transfer.discard_fd, false)) {
+			if (state->transfer.discard_fd >= 0)
+				(void) close(state->transfer.discard_fd);
+			state->transfer.discard_fd = -1;
 		}
+		debug("%s: %d", "discard_fd", state->transfer.discard_fd);
 	}
 #endif				/* HAVE_SPLICE */
 

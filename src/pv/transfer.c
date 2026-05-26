@@ -432,11 +432,12 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 
 	/*
 	 * Early return via pv__transfer__read_repeated() if splice() is
-	 * turned off, or if line mode is active, or if splice() already
-	 * failed on this input file descriptor, or if there's anything
-	 * waiting in the transfer buffer.
+	 * turned off, or if line mode is active, or if there's no output
+	 * fd, or if splice() already failed on this input file descriptor,
+	 * or if there's anything waiting in the transfer buffer.
 	 */
-	if (state->control.no_splice || state->control.linemode || (input_fd == state->transfer.splice_failed_fd)
+	if (state->control.no_splice || state->control.linemode || (output_fd < 0)
+	    || (input_fd == state->transfer.splice_failed_fd)
 	    || (state->transfer.to_write > 0)) {
 		return pv__transfer__read_repeated(input_fd, buf, count);
 	}
