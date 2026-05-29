@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-23 00:18+0100\n"
+"POT-Creation-Date: 2026-05-29 21:09+0100\n"
 "PO-Revision-Date: 2025-01-14 20:39+0000\n"
 "Last-Translator: Benny <benny@users.noreply.translate.codeberg.org>\n"
 "Language-Team: German <https://translate.codeberg.org/projects/pv/pv/de/>\n"
@@ -323,8 +323,8 @@ msgstr "es muss ein auszuführendes Programm angegeben werden"
 
 #: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
 #: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:894
-#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:960
-#: src/pv/transfer.c:1127 src/pv/transfer.c:1454
+#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:981
+#: src/pv/transfer.c:1148 src/pv/transfer.c:1475
 msgid "memory allocation failure"
 msgstr "Fehler bei der Speicheranforderung"
 
@@ -471,11 +471,11 @@ msgstr "Fehler beim Schließen der Datei"
 msgid "input file is also the output"
 msgstr "die Eingabedatei ist auch die Ausgabedatei"
 
-#: src/pv/file.c:579
+#: src/pv/file.c:581
 msgid "(none)"
 msgstr "(keine)"
 
-#: src/pv/file.c:581
+#: src/pv/file.c:583
 msgid "(stdin)"
 msgstr "(stdin)"
 
@@ -498,7 +498,7 @@ msgstr "B/s"
 msgid "b"
 msgstr "b"
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:909
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:930
 msgid "B"
 msgstr "B"
 
@@ -543,15 +543,15 @@ msgstr "Nachricht nicht empfangen"
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO wird auf diesem System nicht unterstützt"
 
-#: src/pv/transfer.c:803
+#: src/pv/transfer.c:819
 msgid "warning: read errors detected"
 msgstr "warnung: lesefehler erkannt"
 
-#: src/pv/transfer.c:908
+#: src/pv/transfer.c:929
 msgid "skipped past read error"
 msgstr "über den Lesefehler hinaus verschoben"
 
-#: src/pv/transfer.c:1318
+#: src/pv/transfer.c:1339
 msgid "write error"
 msgstr "Schreibfehler"
 

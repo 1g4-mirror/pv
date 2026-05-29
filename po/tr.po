@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.8.14\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-23 00:18+0100\n"
+"POT-Creation-Date: 2026-05-29 21:09+0100\n"
 "PO-Revision-Date: 2025-10-05 20:09+0000\n"
 "Last-Translator: Oğuz Ersen <ersen@noreply.codeberg.org>\n"
 "Language-Team: Turkish <https://translate.codeberg.org/projects/pv/pv/tr/>\n"
@@ -304,8 +304,8 @@ msgstr ""
 
 #: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
 #: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:894
-#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:960
-#: src/pv/transfer.c:1127 src/pv/transfer.c:1454
+#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:981
+#: src/pv/transfer.c:1148 src/pv/transfer.c:1475
 msgid "memory allocation failure"
 msgstr "bellek ayırma başarısız"
 
@@ -444,11 +444,11 @@ msgstr "dosya kapatılırken hata"
 msgid "input file is also the output"
 msgstr "girdi dosyası aynı zamanda çıkış"
 
-#: src/pv/file.c:579
+#: src/pv/file.c:581
 msgid "(none)"
 msgstr "(yok)"
 
-#: src/pv/file.c:581
+#: src/pv/file.c:583
 msgid "(stdin)"
 msgstr "(stdin)"
 
@@ -471,7 +471,7 @@ msgstr "B/s"
 msgid "b"
 msgstr "b"
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:909
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:930
 msgid "B"
 msgstr "B"
 
@@ -516,15 +516,15 @@ msgstr "mesaj alınamadı"
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO bu sistemde desteklenmiyor"
 
-#: src/pv/transfer.c:803
+#: src/pv/transfer.c:819
 msgid "warning: read errors detected"
 msgstr "uyarı: okuma hataları tespit edildi"
 
-#: src/pv/transfer.c:908
+#: src/pv/transfer.c:929
 msgid "skipped past read error"
 msgstr "geçmiş okuma hatası atlandı"
 
-#: src/pv/transfer.c:1318
+#: src/pv/transfer.c:1339
 msgid "write error"
 msgstr "yazma hatası"
 
