@@ -4,7 +4,9 @@
 # multiple times, then calculate the mean and standard deviation for each
 # set of measurements.
 #
-# The report is written to stdout as tab-separated values.
+# The report is written to stdout as tab-separated values, each line
+# prefixed with an opaque system ID (based on "uname -a"), the PV version
+# expressed as an integer, and a run ID based on the start date and time.
 #
 # Takes a path to a pv binary as an argument.
 
@@ -12,8 +14,8 @@ pv="$1"
 test -n "${pv}" || pv='pv'
 
 rounds='10'		# how many rounds of measurements to take
-testFileMB='256'	# size of each of the test files in MiB
-testZeroesMB='1024'	# amount of /dev/zero data to use in MiB
+testFileMB='256'	# max size of each of the test files, in MiB
+testZeroesMB='1024'	# amount of /dev/zero data to use, in MiB
 
 # Use /dev/shm for workspace if possible to eliminate disk I/O as a factor.
 if test -d /dev/shm && mountpoint -q /dev/shm; then
@@ -26,22 +28,23 @@ while test ${testFileMB} -gt 4; do
 	testFileMB=$((testFileMB/2))
 done
 
-# Write an output line of up to 5 arguments, prefixed with a system ID and
+# Write an output line of up to 7 arguments, prefixed with a system ID and
 # the current time.
 outputLine () {
-	test -n "${sysId}" || sysId="$({ uname -a; ${pv} --version; } | md5sum | awk '{print $1}')"
-	printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "${sysId}" "$(date +%Y-%m-%dT%H:%M:%S)" "$1" "$2" "$3" "$4" "$5"
+	test -n "${sysId}" || sysId="$(uname -a | md5sum | cut -b1-7)"
+	test -n "${pvId}" || pvId="$(${pv} --version | awk 'FNR==1{print $2}' | awk -F . '{print 1000000*$1+1000*$2+$3}')"
+	test -n "${runId}" || runId="$(date '+%Y%m%d%H%M%S')"
+	printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "${sysId}" "${pvId}" "${runId}" "$1" "$2" "$3" "$4" "$5" "$6" "$7"
 }
 
-# Write a line of results with the heading $1, reading the times from
-# ${workDir}/times and deriving the rate from the elapsed time (from
-# ${workDir}/elapsed, or the real time from ${workDir}/times if that's not
-# present) and the size written in ${workDir}/size.  Removes those three
-# files in the process.
+# Write a line of results for measurement $1 (prefixed with ${thisRound} and
+# a hash of $1), reading the times from ${workDir}/times and deriving the
+# rate from the elapsed time (from ${workDir}/elapsed, or the real time from
+# ${workDir}/times if that's not present) and the size written in
+# ${workDir}/size.  Removes those three files in the process.
 #
-# The heading is prefixed with (${thisRound}) in the output (which round of
-# measurements this is), and the results without that prefix are spooled to
-# ${workDir}/results for later analysis.
+# The results without the prefix are spooled to ${workDir}/results for later
+# analysis.
 resultsLine () {
 	testTimeReal="$(awk '$1=="real" {print $2}' "${workDir}/times")"
 	testTimeUser="$(awk '$1=="user" {print $2}' "${workDir}/times")"
@@ -51,21 +54,26 @@ resultsLine () {
 	testRate="$(awk -v t="${testTimeReal}" '{if (t>0) { printf "%.3f\n", $1/t } else { print "-" }}' < "${workDir}/size")"
 	test -n "${testRate}" || testRate='-'
 	rm -f "${workDir}/elapsed" "${workDir}/times" "${workDir}/size"
-	outputLine "(${thisRound}) $1" "${testRate}" "${testTimeReal}" "${testTimeUser}" "${testTimeSystem}"
+	outputLine "${thisRound}" "$(printf '%s\n' "$1" | md5sum | cut -b1-7)" "${testRate}" "${testTimeReal}" "${testTimeUser}" "${testTimeSystem}" "$1"
 	printf '%s\t%s\t%s\t%s\t%s\n' "$1" "${testRate}" "${testTimeReal}" "${testTimeUser}" "${testTimeSystem}" >> "${workDir}/results"
 }
 
-# Run $2 in a shell under "time -p", writing $1 to ${workDir}/size and the
+# Run $2 in a shell under "time", writing $1 to ${workDir}/size and the
 # times to ${workDir}/times.  If measurable, the elapsed real time is
 # written with greater precision to ${workDir}/elapsed, otherwise that file
 # is removed.
 captureTimes () {
 	printf '%s\n' "$1" > "${workDir}/size"
 	t0="$(date '+%s.%N' 2>/dev/null)"
-	{ time -p sh -c "{ $2; } 2>&3"; } 3>&2 2>"${workDir}/times"
+	(
+	TIMEFORMAT="real %3R
+user %3U
+sys %3S"
+	time sh -c "{ $2; } 2>&3"
+	) 3>&2 2>"${workDir}/times"
 	t1="$(date '+%s.%N' 2>/dev/null)"
 	if test -n "${t0}" && test -n "${t1}"; then
-		awk -v "a=${t0}" -v b="${t1}" 'BEGIN{printf "%.6f\n", t1-t0}' < /dev/null > "${workDir}/elapsed"
+		awk -v "t0=${t0}" -v "t1=${t1}" 'BEGIN{printf "%.6f\n", t1-t0}' < /dev/null > "${workDir}/elapsed"
 	else
 		rm -f "${workDir}/elapsed"
 	fi
@@ -92,7 +100,6 @@ outputLine 'System OS' "$(uname -o)"
 outputLine 'PV path' "${pv}"
 outputLine 'PV version' "$(${pv} -V | awk 'FNR==1 {print $2}')"
 outputLine 'Test file size (MB)' "${testFileMB}"
-outputLine 'Raw measurement' 'MiB/sec' 'Real time' 'User CPU time' 'System CPU time'
 
 # Generate two files of random data.
 dd if='/dev/urandom' of="${workDir}/file1" bs=1048576 count="${testFileMB}" 2>/dev/null
@@ -185,6 +192,7 @@ gatherMeasurements () {
 }
 
 # Run several rounds of measurements.
+outputLine '#' 'ID' 'MiB/sec' 'Real time' 'User CPU time' 'System CPU time' 'Raw measurement'
 thisRound=0
 while test ${thisRound} -lt ${rounds}; do
 	thisRound=$((1+thisRound))
@@ -195,29 +203,31 @@ done
 # deviation of each field.
 awk -F "\t" '{print $1}' < "${workDir}/results" > "${workDir}/measurement-types"
 true > "${workDir}/measurement-types-used"
-outputLine 'Aggregated measurement' 'MiB/sec' 'Real time' 'User CPU time' 'System CPU time'
+outputLine 'μ/σ' 'ID' 'MiB/sec' 'Real time' 'User CPU time' 'System CPU time' 'Aggregated measurement'
 {
 while read -r measurement; do
 	# Skip this type of measurement if already processed.
 	grep -Fqx "${measurement}" "${workDir}/measurement-types-used" && continue
 	printf '%s\n' "${measurement}" >> "${workDir}/measurement-types-used"
+	# Hash the measurement name.
+	measurementHash="$(printf '%s\n' "${measurement}" | md5sum | cut -b1-7)"
 	# Separate out this measurement type's results.
 	awk -F "\t" -v "m=${measurement}" '$1==m {print}' < "${workDir}/results" \
 	> "${workDir}/measurements"
 	# Calculate the mean of each field.
-	awk -F "\t" -v fieldcount=5 \
+	awk -F "\t" -v "h=${measurementHash}" -v fieldcount=5 \
 'BEGIN { samples=0 }
 { m=$1; samples++; for (field=1; field<=fieldcount; field++) { total[field] += $(1+field) } }
-END { printf "%s %s", "μ", m; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", total[field]/samples }; printf "\n" }' \
+END { printf "%s\t%s", "μ", h; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", total[field]/samples }; printf "\t%s\n", m }' \
 	< "${workDir}/measurements" > "${workDir}/mean"
 	# Calculate the standard deviation of each field.
 	cat "${workDir}/mean" "${workDir}/measurements" \
-	| awk -F "\t" -v fieldcount=5 \
+	| awk -F "\t" -v "h=${measurementHash}" -v "m=${measurement}" -v fieldcount=5 \
 'BEGIN { samples=0 }
-FNR==1 { for (field=1; field<=fieldcount; field++) { mean[field] += $(1+field) } }
-FNR>1 { m=$1; samples++; for (field=1; field<=fieldcount; field++) { variance=$(1+field)-mean[field]; sum_variance_squared[field] += (variance*variance) } }
-END { printf "%s %s", "σ", m; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", sqrt(sum_variance_squared[field]/samples) }; printf "\n" }' \
+FNR==1 { for (field=1; field<=fieldcount; field++) { mean[field] += $(2+field) } }
+FNR>1 { samples++; for (field=1; field<=fieldcount; field++) { variance=$(1+field)-mean[field]; sum_variance_squared[field] += (variance*variance) } }
+END { printf "%s\t%s", "σ", h; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", sqrt(sum_variance_squared[field]/samples) }; printf "\t%s\n", m }' \
 	> "${workDir}/stddev"
-	sed "s!^!${sysId}\t$(date +%Y-%m-%dT%H:%M:%S)\t!" "${workDir}/mean" "${workDir}/stddev"
+	sed "s!^!${sysId}\t${pvId}\t${runId}\t!" "${workDir}/mean" "${workDir}/stddev"
 done
 } < "${workDir}/measurement-types"
