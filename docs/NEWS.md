@@ -351,7 +351,7 @@ Full changelog is below:
 
  * allow **--watchfd** to look at block devices
  * let **--watchfd PID:FD** work with **--size N**
- * moved contributors out of the manual as the list was too long (NB everyone is still listed in the README and always will be)
+ * moved contributors out of the manual as the list was too long (NB everyone is still listed in the package documentation and always will be)
 
 ### 1.5.1 - 23 January 2014
 
