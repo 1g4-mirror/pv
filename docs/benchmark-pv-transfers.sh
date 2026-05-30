@@ -15,6 +15,9 @@ pv='pv'			# pv executable to run the measurements with
 rounds='10'		# how many rounds of measurements to take
 testFileMB='256'	# max size of each of the test files, in MiB
 testZeroesMB='1024'	# amount of /dev/zero data to use, in MiB
+compareWhat='auto'	# what to compare in the analysis
+finalLineOnly='false'	# whether to only show the last measurement's analysis
+terseFormat='false'	# whether to use a terse report format
 
 # Script information for --help and --version.
 programName='benchmark-pv-transfers'
@@ -331,37 +334,50 @@ FNR>1 {
 }
 
 # Read a stream of benchmark data on stdin containing runs from a single
-# system, and report how the measurements changed across the different PV
-# versions.
-compareVersionResults () {
+# system, and report how the measurements changed across $1 - either "runs"
+# for benchmark runs, or "versions" for PV versions.
+compareResults () {
+	comparisonSelector="$1"
 	cat > "${workDir}/raw-system-data"
 	# List the measurement IDs in the order they appear in the data.
 	awk -F "\t" '$4=="σ"{print $5}' < "${workDir}/raw-system-data" > "${workDir}/measurement-ids"
-	# List all PV versions for which any data is available.
-	awk -F "\t" '$4=="PV version"{print $2,$5}' "${workDir}/raw-system-data" | sort -nu > "${workDir}/pv-versions"
+	case "${comparisonSelector}" in
+	'versions')
+		# List all PV versions for which any data is available.
+		awk -F "\t" '$4=="PV version"{print $2,$5}' "${workDir}/raw-system-data" | sort -nu > "${workDir}/comparison-items"
+		itemHeading='Version'
+		itemField=2
+		;;
+	'runs')
+		# List all runs.
+		awk -F "\t" '$4=="σ"{print $3,$3}' "${workDir}/raw-system-data" | sort -nu > "${workDir}/comparison-items"
+		itemHeading='Run'
+		itemField=3
+		;;
+	esac
 	# Report on each measurement type in turn.
 	true > "${workDir}/measurement-ids-seen"
 	{
+	measurementsCounter=0
 	while read -r measurementId; do
 		# Skip if this measurement was already processed.
 		grep -Fqx "${measurementId}" "${workDir}/measurement-ids-seen" && continue
 		printf '%s\n' "${measurementId}" >> "${workDir}/measurement-ids-seen"
 		# Collect this measurement's mean and standard deviation
-		# records for each PV version.  If there's more than one for
-		# a single version, average them.
-		# TODO: split out collection into a separate function for re-use later
+		# records for each distinct item (version or run).  If
+		# there's more than one for a single item, average them.
 		{
-		while read -r pvId pvVersion; do
+		while read -r itemId itemName; do
 			awk -F "\t" \
-			  -v "pvId=${pvId}" -v "outPrefix=${pvVersion}" \
+			  -v "itemField=${itemField}" -v "itemId=${itemId}" -v "itemName=${itemName}" \
 			  -v "mId=${measurementId}" \
 			  -v "fieldcount=${fieldsPerRecord}" \
 'BEGIN {samples=0}
-$2==pvId && $5==mId && $4=="μ" { samples++; for (field=1; field<=fieldcount; field++) { mean[field] += $(5+field) } }
-$2==pvId && $5==mId && $4=="σ" { for (field=1; field<=fieldcount; field++) { stddev[field] += $(5+field) } }
+$itemField==itemId && $5==mId && $4=="μ" { samples++; for (field=1; field<=fieldcount; field++) { mean[field] += $(5+field) } }
+$itemField==itemId && $5==mId && $4=="σ" { for (field=1; field<=fieldcount; field++) { stddev[field] += $(5+field) } }
 END {
   if (samples > 0) {
-    printf "%s", outPrefix
+    printf "%s", itemName
     for (field=1; field<=fieldcount; field++) {
       printf "\t%.3f\t%.3f", mean[field]/samples, stddev[field]/samples
     }
@@ -370,34 +386,22 @@ END {
 }' \
 < "${workDir}/raw-system-data"
 		done
-		} < "${workDir}/pv-versions" > "${workDir}/measurements-per-version"
-		# If there are not at least 2 PV versions for which this
+		} < "${workDir}/comparison-items" > "${workDir}/measurements-per-item"
+		# If there are not at least 2 items for which this
 		# measurement was available, report nothing as no comparison
 		# can be made.
-		test "$(grep -c . "${workDir}/measurements-per-version")" -lt 2 && continue
+		test "$(grep -c . "${workDir}/measurements-per-item")" -lt 2 && continue
 		# Show the measurement name and associated command.
 		# Take the measurement name from the input data.
 		measurementName="$(awk -F "\t" -v "mId=${measurementId}" '$4=="σ" && $5==mId {print $NF;exit}' "${workDir}/raw-system-data")"
-		# Take the command from the definitions.
-		templateCommand="$(printf '%s\n' "${measurementDefinitions}" | awk -F '!' -v "mId=${measurementId}" '$1==mId {print $5}')"
-		printf '\n%s\n' "${measurementName}"
-		test -n "${templateCommand}" && printf ' (%s)\n' "${templateCommand}"
-		# Report each version's measurements and how they compare to
-		# the previous version.
-		#
-		# Since the column widths are set by an awk script which
-		# doesn't support UTF-8, ASCII headings are used initially,
-		# and adjusted after formatting.
-		{
-		printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-		  'PV' \
-		  'M:Rate' 'S:Rate' 'C:Rate' \
-		  '-' \
-		  'M:tReal' 'S:tReal' 'C:tReal' \
-		  '-' \
-		  'M:tUser' 'S:tUser' 'C:tUser' \
-		  '-' \
-		  'M:tSys' 'S:tSys' 'C:tSys'
+		if ! ${terseFormat}; then
+			# Take the command from the definitions.
+			templateCommand="$(printf '%s\n' "${measurementDefinitions}" | awk -F '!' -v "mId=${measurementId}" '$1==mId {print $5}')"
+			printf '\n%s\n' "${measurementName}"
+			test -n "${templateCommand}" && printf ' (%s)\n' "${templateCommand}"
+		fi
+		# Report each item's measurements and how they compare to
+		# the previous item.
 		awk -F "\t" -v "fieldcount=${fieldsPerRecord}" \
 '{
   printf "%s", $1
@@ -433,20 +437,80 @@ END {
     pstddev[field]=stddev;
   }
   printf "\n"
-}' "${workDir}/measurements-per-version"
+}' \
+		< "${workDir}/measurements-per-item" \
+		> "${workDir}/item-report"
+		# Leave only the last line if finalLineOnly is set.
+		${finalLineOnly} && sed -i -n '$p' "${workDir}/item-report"
+		# In terse mode, prefix each line with the measurement name,
+		# having replaced spaces in it with underscores.
+		if ${terseFormat}; then
+			showName="$(printf '%s\n' "${measurementName}" | tr ' ' '_')"
+			sed -i "s!^!${showName}\t!" "${workDir}/item-report"
+		fi
+		# Format the report.
+		# Since the column widths are set by an awk script which
+		# doesn't support UTF-8, ASCII headings are used initially,
+		# and adjusted after formatting.
+		measurementsCounter=$((1+measurementsCounter))
+		{
+		# In terse mode, only print one header per system.
+		if test ${measurementsCounter} -eq 1 || ! ${terseFormat}; then
+			printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+			  "${itemHeading}" \
+			  'M:Rate' 'S:Rate' 'C:Rate' \
+			  '-' \
+			  'M:tReal' 'S:tReal' 'C:tReal' \
+			  '-' \
+			  'M:tUser' 'S:tUser' 'C:tUser' \
+			  '-' \
+			  'M:tSys' 'S:tSys' 'C:tSys' \
+			| {
+				if ${terseFormat}; then
+					sed "s!^!Measurement\t!"
+				else
+					cat
+				fi
+			}
+		fi
+		cat "${workDir}/item-report"
 		} \
-		| lineUpColumns \
-		| sed '1{s,M:,μ:,g;s,S:,σ:,g;s,C:,±:,g}'
+		> "${workDir}/item-report-with-heading"
+		if ${terseFormat}; then
+			cat "${workDir}/item-report-with-heading"
+		else
+			lineUpColumns < "${workDir}/item-report-with-heading" \
+			| sed '1{s,M:,μ:,g;s,S:,σ:,g;s,C:,±:,g}'
+		fi
 	done
-	} < "${workDir}/measurement-ids"
+	} < "${workDir}/measurement-ids" \
+	> "${workDir}/measurements-report"
+	if "${terseFormat}"; then
+		lineUpColumns < "${workDir}/measurements-report" \
+		| sed '1{s,M:,μ:,g;s,S:,σ:,g;s,C:,±:,g}'
+	else
+		cat "${workDir}/measurements-report"
+	fi
 }
 
 # Read a stream of benchmark data from stdin containing one or more runs
-# from one or more systems and multiple PV versions, and for each individual
-# system, report how the measurements changed across the different PV
-# versions.
-runVersionComparisons () {
+# from one or more systems, and for each individual system, report how the
+# measurements changed across either the different PV versions or between
+# runs, depending on whether $1 is "versions" or "runs".
+#
+# If $1 is "auto", then it will be "versions" if data for more than one PV
+# version is present, otherwise it will be "runs".
+runAnalysis () {
+	analysisSelector="$1"
 	cat > "${workDir}/raw-data"
+	# Auto-detect what to analyse.
+	if test "${analysisSelector}" = 'auto'; then
+		if test "$(awk -F "\t" '$4=="σ"{print $2}' < "${workDir}/raw-data" | sort -u | grep -c .)" -gt 1; then
+			analysisSelector='versions'
+		else
+			analysisSelector='runs'
+		fi
+	fi
 	# List the system IDs in the order they appear in the data.
 	awk -F "\t" '{print $1}' < "${workDir}/raw-data" | uniq > "${workDir}/sysids"
 	# Report on each system in turn.
@@ -466,14 +530,14 @@ runVersionComparisons () {
 		  "$(awk -F "\t" '$4=="System OS"{print $5;exit}' "${workDir}/system-data")" \
 		  "$(awk -F "\t" '$4=="System kernel type"{print $5;exit}' "${workDir}/system-data")" \
 		  "$(awk -F "\t" '$4=="System kernel release"{print $5;exit}' "${workDir}/system-data")"
-		cat <<EOF
+		${terseFormat} || cat <<EOF
 
 For each measurement type, each of its aggregate benchmark results are
 shown.  Each field's mean and standard deviation are displayed along with a
 change indicator showing how different this line's value is from the
 previous line.
 EOF
-		compareVersionResults < "${workDir}/system-data"
+		compareResults "${analysisSelector}" < "${workDir}/system-data"
 	done
 	} < "${workDir}/sysids"
 }
@@ -498,7 +562,7 @@ Actions:
 
   measurements - list all benchmark measurement definitions
   benchmark    - take several rounds of measurements
-  analyse      - analyse benchmark data on stdin from multiple pv versions
+  analyse      - analyse benchmark data on stdin from multiple runs
 
 Options:
 
@@ -507,6 +571,10 @@ Options:
   -m, --measurement ID  only run this specific measurement
   -s, --size SIZE       attempt to use a test file of SIZE MiB (${testFileMB})
   -z, --zeroes SIZE     stop at SIZE MiB for /dev/zero measurements (${testZeroesMB})
+
+  -c, --compare WHAT    analyse differences in runs, versions, or auto (${compareWhat})
+  -f, --final           show only the final item's line in each measurement analysis
+  -t, --terse           produce a terser report
 
   -h, --help            show this help
   -V, --version         show script version
@@ -537,10 +605,22 @@ EOF
 	'--size='*) testFileMB="${arg#*=}" ;;
 	'-z'|'--zeroes') testZeroesMB="$1"; test $# -gt 0 && shift ;;
 	'--zeroes='*) testZeroesMB="${arg#*=}" ;;
+	'-c'|'--compare') compareWhat="$1"; test $# -gt 0 && shift ;;
+	'--compare='*) compareWhat="${arg#*=}" ;;
+	'-f'|'--final') finalLineOnly='true' ;;
+	'-t'|'--terse') terseFormat='true' ;;
 	'-'*) die "${arg}: unknown option - try \`--help'" ;;
 	*) die "${arg}: unexpected argument - try \`--help'" ;;
 	esac
 done
+
+# Check validity of compareWhat, and normalise it.
+case "${compareWhat}" in
+'runs'|'run') compareWhat='runs' ;;
+'versions'|'version') compareWhat='versions' ;;
+'auto') ;;
+*) die "--compare: ${compareWhat}: invalid value" ;;
+esac
 
 # Use /dev/shm for workspace if possible, to eliminate disk I/O as a factor.
 if test -z "${TMPDIR}" && test -d '/dev/shm' && mountpoint -q '/dev/shm'; then
@@ -564,5 +644,5 @@ defineMeasurements
 case "${action}" in
 'measurements') showMeasurementDefinitions ;;
 'benchmark') runBenchmarks "${pv}" "${restrictMeasurementIdList}" ;;
-'analyse') runVersionComparisons ;;
+'analyse') runAnalysis "${compareWhat}" ;;
 esac
