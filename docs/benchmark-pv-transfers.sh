@@ -16,11 +16,15 @@ rounds='10'		# how many rounds of measurements to take
 testFileMB='256'	# max size of each of the test files, in MiB
 testZeroesMB='1024'	# amount of /dev/zero data to use, in MiB
 
+# Script information for --help and --version.
 programName='benchmark-pv-transfers'
 programVersion='0.1.0'
 bugReportsTo='https://codeberg.org/ivarch/pv/issues'
 copyrightYear='2026'
 copyrightHolder='Andrew Wood'
+
+# Constants.
+fieldsPerRecord='4'	# measurements taken: rate, time - real, user, sys.
 
 # Write an error message $1 to standard error, prefixed with the program
 # name.
@@ -181,7 +185,7 @@ runBenchmarks () {
 	# Check there's enough room for the test files - make them smaller,
 	# if not.
 	tmpSpaceMB="$(df -kP "${TMPDIR:-/tmp}" | awk 'FNR==2 {print int($4/1024)}')"
-	while test ${testFileMB} -gt 4; do
+	while test "${testFileMB}" -gt 4; do
 		test "${tmpSpaceMB}" -gt $((2+3*testFileMB)) && break
 		testFileMB=$((testFileMB/2))
 	done
@@ -227,14 +231,14 @@ runBenchmarks () {
 		awk -F "\t" -v "m=${measurement}" '$1==m {print}' < "${workDir}/results" \
 		> "${workDir}/measurements"
 		# Calculate the mean of each field.
-		awk -F "\t" -v "h=${measurementHash}" -v fieldcount=5 \
+		awk -F "\t" -v "h=${measurementHash}" -v "fieldcount=${fieldsPerRecord}" \
 'BEGIN { samples=0 }
 { m=$1; samples++; for (field=1; field<=fieldcount; field++) { total[field] += $(1+field) } }
 END { printf "%s\t%s", "μ", h; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", total[field]/samples }; printf "\t%s\n", m }' \
 		< "${workDir}/measurements" > "${workDir}/mean"
 		# Calculate the standard deviation of each field.
 		cat "${workDir}/mean" "${workDir}/measurements" \
-		| awk -F "\t" -v "h=${measurementHash}" -v "m=${measurement}" -v fieldcount=5 \
+		| awk -F "\t" -v "h=${measurementHash}" -v "m=${measurement}" -v "fieldcount=${fieldsPerRecord}" \
 'BEGIN { samples=0 }
 FNR==1 { for (field=1; field<=fieldcount; field++) { mean[field] += $(2+field) } }
 FNR>1 { samples++; for (field=1; field<=fieldcount; field++) { variance=$(1+field)-mean[field]; sum_variance_squared[field] += (variance*variance) } }
@@ -245,9 +249,141 @@ END { printf "%s\t%s", "σ", h; for (field=1; field<=fieldcount; field++) { prin
 	} < "${workDir}/measurement-types"
 }
 
+# Read a stream of benchmark data on stdin containing runs from a single
+# system, and report how the measurements changed across the different PV
+# versions.
+compareVersionResults () {
+	cat > "${workDir}/raw-system-data"
+	# List the measurement IDs in the order they appear in the data.
+	awk -F "\t" '$4=="σ"{print $5}' < "${workDir}/raw-system-data" > "${workDir}/measurement-ids"
+	# List all PV versions for which any data is available.
+	awk -F "\t" '$4=="PV version"{print $2,$5}' "${workDir}/raw-system-data" | sort -nu > "${workDir}/pv-versions"
+	# Report on each measurement type in turn.
+	true > "${workDir}/measurement-ids-seen"
+	{
+	while read -r measurementId; do
+		# Skip if this measurement was already processed.
+		grep -Fqx "${measurementId}" "${workDir}/measurement-ids-seen" && continue
+		printf '%s\n' "${measurementId}" >> "${workDir}/measurement-ids-seen"
+		# Collect this measurement's mean and standard deviation
+		# records for each PV version.  If there's more than one for
+		# a single version, average them.
+		# TODO: split out collection into a separate function for re-use later
+		{
+		while read -r pvId pvVersion; do
+			awk -F "\t" \
+			  -v "pvId=${pvId}" -v "pvVersion=${pvVersion}" \
+			  -v "h=${measurementId}" \
+			  -v "fieldcount=${fieldsPerRecord}" \
+'BEGIN {samples=0}
+$2==pvId && $5==h && $4=="μ" { samples++; for (field=1; field<=fieldcount; field++) { mean[field] += $(5+field) } }
+$2==pvId && $5==h && $4=="σ" { for (field=1; field<=fieldcount; field++) { stddev[field] += $(5+field) } }
+END {
+  if (samples > 0) {
+    printf "%s", pvVersion
+    for (field=1; field<=fieldcount; field++) {
+      printf "\t%.3f\t%.3f", mean[field]/samples, stddev[field]/samples
+    }
+    printf "\n"
+  }
+}' \
+< "${workDir}/raw-system-data"
+		done
+		} < "${workDir}/pv-versions" > "${workDir}/measurements-per-version"
+		# If there are not at least 2 PV versions for which this
+		# measurement was available, report nothing as no comparison
+		# can be made.
+		test "$(grep -c . "${workDir}/measurements-per-version")" -lt 2 && continue
+		# Show the measurement name.
+		measurementName="$(awk -F "\t" -v "h=${measurementId}" '$4=="σ" && $5==h {print $NF;exit}' "${workDir}/raw-system-data")"
+		printf '\n%s\n' "${measurementName}"
+		# Report each version's measurements and how they compare to
+		# the previous version.
+		printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+		  'PV' \
+		  'μ:Rate' 'σ:Rate' '±:Rate' \
+		  '-' \
+		  'μ:tReal' 'σ:tReal' '±:tReal' \
+		  '-' \
+		  'μ:tUser' 'σ:tUser' '±:tUser' \
+		  '-' \
+		  'μ:tSys' 'σ:tSys' '±:tSys'
+		awk -F "\t" -v "fieldcount=${fieldsPerRecord}" \
+'{
+  printf "%s", $1
+  for (field=0; field<fieldcount; field++) {
+    if (field > 0) {
+      printf "\t%s", "-";
+    }
+    mean=$(2+2*field)
+    stddev=$(3+2*field)
+    changescore=0
+    printf "\t%.3f\t%.3f", mean, stddev;
+    if (FNR>1) {
+      low=mean-stddev;
+      high=mean+stddev;
+      range=high-low;
+      prevlow=pmean[field]-pstddev[field];
+      prevhigh=pmean[field]+pstddev[field];
+      prevrange=prevhigh-prevlow;
+      if (prevrange < 1)
+        prevrange = 1;
+      if (high > prevhigh) {
+        changescore = (high - prevhigh) / prevrange;
+      } else if (low < prevlow) {
+        changescore = 0 - ((prevlow - low) / prevrange);
+      }
+    }
+    if (changescore < 0.01 && changescore > -0.01) {
+      printf "\t%d", 0
+    } else {
+      printf "\t%s%.2f", (changescore > 0.00 ? "+" : ""), changescore
+    }
+    pmean[field]=mean;
+    pstddev[field]=stddev;
+  }
+  printf "\n"
+}
+' "${workDir}/measurements-per-version"
+# TODO: pass through something to line up the columns in a more readable way
+	done
+	} < "${workDir}/measurement-ids"
+}
+
+# Read a stream of benchmark data from stdin containing one or more runs
+# from one or more systems and multiple PV versions, and for each individual
+# system, report how the measurements changed across the different PV
+# versions.
+runVersionComparisons () {
+	cat > "${workDir}/raw-data"
+	# List the system IDs in the order they appear in the data.
+	awk -F "\t" '{print $1}' < "${workDir}/raw-data" | uniq > "${workDir}/sysids"
+	# Report on each system in turn.
+	true > "${workDir}/sysids-seen"
+	{
+	while read -r sysId; do
+		# Skip if this system was already processed.
+		grep -Fqx "${sysId}" "${workDir}/sysids-seen" && continue
+		printf '%s\n' "${sysId}" >> "${workDir}/sysids-seen"
+		# Extract the data for just this system.
+		awk -F "\t" -v "s=${sysId}" '$1==s {print}' < "${workDir}/raw-data" > "${workDir}/system-data"
+		# Report preamble.
+		printf '%79s\n' '' | tr ' ' '-'
+		printf '%s: %s - %s - %s %s\n' \
+		  'System' \
+		  "$(awk -F "\t" '$4=="System hostname"{print $5;exit}' "${workDir}/system-data")" \
+		  "$(awk -F "\t" '$4=="System OS"{print $5;exit}' "${workDir}/system-data")" \
+		  "$(awk -F "\t" '$4=="System kernel type"{print $5;exit}' "${workDir}/system-data")" \
+		  "$(awk -F "\t" '$4=="System kernel release"{print $5;exit}' "${workDir}/system-data")"
+		compareVersionResults < "${workDir}/system-data"
+	done
+	} < "${workDir}/sysids"
+}
 
 ##############################################################################
 # Main entry point.
+
+# TODO: options to list available measurements and to run specific ones only
 
 # Process any command-line options.
 action='benchmark'
@@ -323,5 +459,5 @@ export LANG LC_ALL
 # Run the selected action.
 case "${action}" in
 'benchmark') runBenchmarks "${pv}" ;;
-'analyse') die 'TODO' ;;
+'analyse') runVersionComparisons ;;
 esac
