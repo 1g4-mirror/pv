@@ -273,21 +273,21 @@ runBenchmarks () {
 		# Get the associated measurement name.
 		measurementName="$(printf '%s\n' "${measurementDefinitions}" | awk -F '!' -v "x=${measurementId}" '$1==x{print $2}')"
 		# Separate out this measurement type's results.
-		awk -F "\t" -v "id=${measurementId}" '$1==id {print}' < "${workDir}/results" \
+		awk -F "\t" -v "mId=${measurementId}" '$1==mId {print}' < "${workDir}/results" \
 		> "${workDir}/measurements"
 		# Calculate the mean of each field.
-		awk -F "\t" -v "id=${measurementId}" -v "name=${measurementName}" -v "fieldcount=${fieldsPerRecord}" \
+		awk -F "\t" -v "mId=${measurementId}" -v "mName=${measurementName}" -v "fieldcount=${fieldsPerRecord}" \
 'BEGIN { samples=0 }
 { samples++; for (field=1; field<=fieldcount; field++) { total[field] += $(1+field) } }
-END { printf "%s\t%s", "μ", id; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", total[field]/samples }; printf "\t%s\n", name }' \
+END { printf "%s\t%s", "μ", mId; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", total[field]/samples }; printf "\t%s\n", mName }' \
 		< "${workDir}/measurements" > "${workDir}/mean"
 		# Calculate the standard deviation of each field.
 		cat "${workDir}/mean" "${workDir}/measurements" \
-		| awk -F "\t" -v "id=${measurementId}" -v "name=${measurementName}" -v "fieldcount=${fieldsPerRecord}" \
+		| awk -F "\t" -v "mId=${measurementId}" -v "mName=${measurementName}" -v "fieldcount=${fieldsPerRecord}" \
 'BEGIN { samples=0 }
 FNR==1 { for (field=1; field<=fieldcount; field++) { mean[field] += $(2+field) } }
 FNR>1 { samples++; for (field=1; field<=fieldcount; field++) { variance=$(1+field)-mean[field]; sum_variance_squared[field] += (variance*variance) } }
-END { printf "%s\t%s", "σ", id; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", sqrt(sum_variance_squared[field]/samples) }; printf "\t%s\n", name }' \
+END { printf "%s\t%s", "σ", mId; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", sqrt(sum_variance_squared[field]/samples) }; printf "\t%s\n", mName }' \
 		> "${workDir}/stddev"
 		sed "s!^!${outputPrefix}\t!" "${workDir}/mean" "${workDir}/stddev"
 	done
@@ -317,15 +317,15 @@ compareVersionResults () {
 		{
 		while read -r pvId pvVersion; do
 			awk -F "\t" \
-			  -v "pvId=${pvId}" -v "pvVersion=${pvVersion}" \
-			  -v "h=${measurementId}" \
+			  -v "pvId=${pvId}" -v "outPrefix=${pvVersion}" \
+			  -v "mId=${measurementId}" \
 			  -v "fieldcount=${fieldsPerRecord}" \
 'BEGIN {samples=0}
-$2==pvId && $5==h && $4=="μ" { samples++; for (field=1; field<=fieldcount; field++) { mean[field] += $(5+field) } }
-$2==pvId && $5==h && $4=="σ" { for (field=1; field<=fieldcount; field++) { stddev[field] += $(5+field) } }
+$2==pvId && $5==mId && $4=="μ" { samples++; for (field=1; field<=fieldcount; field++) { mean[field] += $(5+field) } }
+$2==pvId && $5==mId && $4=="σ" { for (field=1; field<=fieldcount; field++) { stddev[field] += $(5+field) } }
 END {
   if (samples > 0) {
-    printf "%s", pvVersion
+    printf "%s", outPrefix
     for (field=1; field<=fieldcount; field++) {
       printf "\t%.3f\t%.3f", mean[field]/samples, stddev[field]/samples
     }
@@ -340,7 +340,7 @@ END {
 		# can be made.
 		test "$(grep -c . "${workDir}/measurements-per-version")" -lt 2 && continue
 		# Show the measurement name.
-		measurementName="$(awk -F "\t" -v "h=${measurementId}" '$4=="σ" && $5==h {print $NF;exit}' "${workDir}/raw-system-data")"
+		measurementName="$(awk -F "\t" -v "mId=${measurementId}" '$4=="σ" && $5==mId {print $NF;exit}' "${workDir}/raw-system-data")"
 		printf '\n%s\n' "${measurementName}"
 		# Report each version's measurements and how they compare to
 		# the previous version.
