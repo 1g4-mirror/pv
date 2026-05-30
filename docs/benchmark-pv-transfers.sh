@@ -466,6 +466,13 @@ runVersionComparisons () {
 		  "$(awk -F "\t" '$4=="System OS"{print $5;exit}' "${workDir}/system-data")" \
 		  "$(awk -F "\t" '$4=="System kernel type"{print $5;exit}' "${workDir}/system-data")" \
 		  "$(awk -F "\t" '$4=="System kernel release"{print $5;exit}' "${workDir}/system-data")"
+		cat <<EOF
+
+For each measurement type, each of its aggregate benchmark results are
+shown.  Each field's mean and standard deviation are displayed along with a
+change indicator showing how different this line's value is from the
+previous line.
+EOF
 		compareVersionResults < "${workDir}/system-data"
 	done
 	} < "${workDir}/sysids"
