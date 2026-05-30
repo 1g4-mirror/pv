@@ -375,9 +375,13 @@ END {
 		# measurement was available, report nothing as no comparison
 		# can be made.
 		test "$(grep -c . "${workDir}/measurements-per-version")" -lt 2 && continue
-		# Show the measurement name.
+		# Show the measurement name and associated command.
+		# Take the measurement name from the input data.
 		measurementName="$(awk -F "\t" -v "mId=${measurementId}" '$4=="σ" && $5==mId {print $NF;exit}' "${workDir}/raw-system-data")"
+		# Take the command from the definitions.
+		templateCommand="$(printf '%s\n' "${measurementDefinitions}" | awk -F '!' -v "mId=${measurementId}" '$1==mId {print $5}')"
 		printf '\n%s\n' "${measurementName}"
+		test -n "${templateCommand}" && printf ' (%s)\n' "${templateCommand}"
 		# Report each version's measurements and how they compare to
 		# the previous version.
 		#
