@@ -26,6 +26,76 @@ copyrightHolder='Andrew Wood'
 # Constants.
 fieldsPerRecord='4'	# measurements taken: rate, time - real, user, sys.
 
+# Define the measurements. Each measurement definition contains:
+#  - The ID of the measurement
+#  - The name of the measurement
+#  - A space-separated list of single-letter options that PV must support
+#  - How many testFileMB multiples are transferred, or Z for testZeroesMB
+#  - The command to run
+# In the command to run, {PV} is replaced with the path to PV, {FILE1} and
+# {FILE2} are replaced by the random data filenames, {ZSIZE} is replaced by
+# testZeroesMB, and {OUTPUT1} and {OUTPUT2} are replaced by a temporary
+# output filenames.
+# Each definition is stored as single line, with the above parts separated
+# by "!".
+measurementDefinitions=''
+# Add a definition (name, options list, data size, command) to the
+# definitions array.
+addDefinition () {
+	measurementDefinitions="$(
+	  printf '%s\n%s!%s!%s!%s!%s\n' \
+	    "${measurementDefinitions}" \
+	    "$(printf '%s\n' "$1" | md5sum | cut -b1-7)" \
+	    "$1" "$2" "$3" "$4" \
+	  | grep .
+	)"
+}
+# Add a set of standard definitions for measurements, naming them with a
+# prefix "$1: ", each with extra options "$2".
+addStandardMeasurements () {
+	# From file via stdin to file via stdout.
+	addDefinition "$1: stdin file to file" "$2" 1 "{PV} $2 < {FILE1} > {OUTPUT1}"
+	# From file to file via stdout.
+	addDefinition "$1: file to file" "$2" 1 "{PV} $2 {FILE1} > {OUTPUT1}"
+	# From two files to file via stdout.
+	addDefinition "$1: two files to file" "$2" 2 "{PV} $2 {FILE1} {FILE2} > {OUTPUT1}"
+	# From pipe to file via stdout.
+	addDefinition "$1: pipe to file" "$2" 1 "cat {FILE1} | {PV} $2 > {OUTPUT1}"
+	# From file via stdin to pipe.
+	addDefinition "$1: stdin file to pipe" "$2" 1 "{PV} $2 < {FILE1} | cat > {OUTPUT1}"
+	# From file to pipe.
+	addDefinition "$1: file to pipe" "$2" 1 "{PV} $2 {FILE1} | cat > {OUTPUT1}"
+	# From two files to pipe.
+	addDefinition "$1: two files to pipe" "$2" 2 "{PV} $2 {FILE1} {FILE2} | cat > {OUTPUT1}"
+	# From pipe to pipe.
+	addDefinition "$1: pipe to pipe" "$2" 1 "cat {FILE1} | {PV} $2 | cat > {OUTPUT1}"
+}
+# Generate the measurement definitions, most of which are based on repeated
+# blocks of the above standard measurements, with various different options.
+defineMeasurements () {
+	addStandardMeasurements 'Default' ''
+	addStandardMeasurements 'No-splice' '-C'
+	addStandardMeasurements 'Pipe buffer 1M' '-J 1M'
+	addStandardMeasurements 'Transfer buffer 1M' '-B 1M'
+
+	addStandardMeasurements 'Directed output' '-o {OUTPUT2}'
+	addStandardMeasurements 'Directed output with no-splice' '-o {OUTPUT2} -C'
+	addStandardMeasurements 'Directed output with pipe buffer 1M' '-o {OUTPUT2} -J 1M'
+	addStandardMeasurements 'Directed output with transfer buffer 1M' '-o {OUTPUT2} -B 1M'
+
+	addStandardMeasurements 'Discard' '-X'
+	addStandardMeasurements 'Discard with no-splice' '-X -C'
+	addStandardMeasurements 'Discard with pipe buffer 1M' '-X -J 1M'
+	addStandardMeasurements 'Discard with transfer buffer 1M' '-X -B 1M'
+
+	addDefinition "Zeroes: stdout to /dev/null" '-S -s' Z "{PV} -S -s {ZSIZE}M /dev/zero > /dev/null"
+	addDefinition "Zeroes: stdout to pipe"  '-S -s' Z "{PV} -S -s {ZSIZE}M /dev/zero | cat > /dev/null"
+	addDefinition "Zeroes: discarded" '-X -S -s' Z "{PV} -X -S -s {ZSIZE}M /dev/zero"
+	addDefinition "Zeroes: stdout to /dev/null with no-splice" '-C -S -s' Z "{PV} -C -S -s {ZSIZE}M /dev/zero > /dev/null"
+	addDefinition "Zeroes: stdout to pipe with no-splice" '-C -S -s' Z "{PV} -C -S -s {ZSIZE}M /dev/zero | cat > /dev/null"
+	addDefinition "Zeroes: discarded with no-splice" '-C -X -S -s' Z "{PV} -C -X -S -s {ZSIZE}M /dev/zero"
+}
+
 # Write an error message $1 to standard error, prefixed with the program
 # name.
 error () {
@@ -38,149 +108,109 @@ die () {
 	exit 1
 }
 
-# Write an output line of up to 7 arguments, prefixed with a system ID and
-# the current time.
-outputLine () {
-	test -n "${sysId}" || sysId="$(uname -a | md5sum | cut -b1-7)"
-	test -n "${pvId}" || pvId="$(${pv} --version | awk 'FNR==1{print $2}' | awk -F . '{print 1000000*$1+1000*$2+$3}')"
-	test -n "${runId}" || runId="$(date '+%Y%m%d%H%M%S')"
-	printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "${sysId}" "${pvId}" "${runId}" "$1" "$2" "$3" "$4" "$5" "$6" "$7"
+# Show all measurement definitions.
+showMeasurementDefinitions () {
+	printf '%s\n%s\n' 'ID!Name!Opts!Size!Command' "${measurementDefinitions}" \
+	| awk -F '!' '{printf "%s\t%-60s\t%s\n", $1, $2, $5}'
 }
 
-# Write a line of results for measurement $1 (prefixed with ${thisRound} and
-# a hash of $1), reading the times from ${workDir}/times and deriving the
-# rate from the elapsed time (from ${workDir}/elapsed, or the real time from
-# ${workDir}/times if that's not present) and the size written in
-# ${workDir}/size.  Removes those three files in the process.
+# Write a line of results for the measurement with ID $1 and name $2, round
+# ${thisRound}, reading the times from ${workDir}/times and deriving the
+# rate from the elapsed time (the real time in the times file) and the size
+# written in ${workDir}/size.  Removes those two files in the process.
 #
-# The results without the prefix are spooled to ${workDir}/results for later
-# analysis.
+# The results are also spooled to ${workDir}/results for later analysis,
+# prefixed with only the ID $1.
 resultsLine () {
 	testTimeReal="$(awk '$1=="real" {print $2}' "${workDir}/times")"
 	testTimeUser="$(awk '$1=="user" {print $2}' "${workDir}/times")"
 	testTimeSystem="$(awk '$1=="sys" {print $2}' "${workDir}/times")"
-	testTimeElapsed="$(cat "${workDir}/elapsed" 2>/dev/null)"
-	test -n "${testTimeElapsed}" || testTimeElapsed="${testTimeReal}"
 	testRate="$(awk -v t="${testTimeReal}" '{if (t>0) { printf "%.3f\n", $1/t } else { print "-" }}' < "${workDir}/size")"
 	test -n "${testRate}" || testRate='-'
-	rm -f "${workDir}/elapsed" "${workDir}/times" "${workDir}/size"
-	outputLine "${thisRound}" "$(printf '%s\n' "$1" | md5sum | cut -b1-7)" "${testRate}" "${testTimeReal}" "${testTimeUser}" "${testTimeSystem}" "$1"
+	rm -f "${workDir}/times" "${workDir}/size"
+	printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "${outputPrefix}" "${thisRound}" "$1" "${testRate}" "${testTimeReal}" "${testTimeUser}" "${testTimeSystem}" "$2"
 	printf '%s\t%s\t%s\t%s\t%s\n' "$1" "${testRate}" "${testTimeReal}" "${testTimeUser}" "${testTimeSystem}" >> "${workDir}/results"
 }
 
 # Run $2 in a shell under "time", writing $1 to ${workDir}/size and the
-# times to ${workDir}/times.  If measurable, the elapsed real time is
-# written with greater precision to ${workDir}/elapsed, otherwise that file
-# is removed.
+# times to ${workDir}/times.
 captureTimes () {
 	printf '%s\n' "$1" > "${workDir}/size"
-	t0="$(date '+%s.%N' 2>/dev/null)"
 	(
 	TIMEFORMAT="real %3R
 user %3U
 sys %3S"
 	time sh -c "{ $2; } 2>&3"
 	) 3>&2 2>"${workDir}/times"
-	t1="$(date '+%s.%N' 2>/dev/null)"
-	if test -n "${t0}" && test -n "${t1}"; then
-		awk -v "t0=${t0}" -v "t1=${t1}" 'BEGIN{printf "%.6f\n", t1-t0}' < /dev/null > "${workDir}/elapsed"
-	else
-		rm -f "${workDir}/elapsed"
-	fi
+	rm -f "${workDir}/elapsed"
 }
 
-# Run various of transfer types with extra options "$2", naming them "$1".
-runTransfers () {
-	# From file via stdin to file via stdout.
-	rm -f "${workDir}/stdout"
-	captureTimes $((testFileMB)) "${pv} $2 < ${workDir}/file1 > ${workDir}/stdout"
-	resultsLine "$1: stdin file to file"
-
-	# From file to file via stdout.
-	rm -f "${workDir}/stdout"
-	captureTimes $((testFileMB)) "${pv} $2 ${workDir}/file1 > ${workDir}/stdout"
-	resultsLine "$1: file to file"
-
-	# From two files to file via stdout.
-	rm -f "${workDir}/stdout"
-	captureTimes $((2*testFileMB)) "${pv} $2 ${workDir}/file1 ${workDir}/file2 > ${workDir}/stdout"
-	resultsLine "$1: two files to file"
-
-	# From pipe to file via stdout.
-	rm -f "${workDir}/stdout"
-	captureTimes $((testFileMB)) "cat ${workDir}/file1 | ${pv} $2 > ${workDir}/stdout"
-	resultsLine "$1: pipe to file"
-
-	# From file via stdin to pipe.
-	rm -f "${workDir}/stdout"
-	captureTimes $((testFileMB)) "${pv} $2 < ${workDir}/file1 | cat > ${workDir}/stdout"
-	resultsLine "$1: stdin file to pipe"
-
-	# From file to pipe.
-	rm -f "${workDir}/stdout"
-	captureTimes $((testFileMB)) "${pv} $2 ${workDir}/file1 | cat > ${workDir}/stdout"
-	resultsLine "$1: file to pipe"
-
-	# From two files to pipe.
-	rm -f "${workDir}/stdout"
-	captureTimes $((2*testFileMB)) "${pv} $2 ${workDir}/file1 ${workDir}/file2 | cat > ${workDir}/stdout"
-	resultsLine "$1: two files to pipe"
-
-	# From pipe to pipe.
-	rm -f "${workDir}/stdout"
-	captureTimes $((testFileMB)) "cat ${workDir}/file1 | ${pv} $2 | cat > ${workDir}/stdout"
-	resultsLine "$1: pipe to pipe"
-}
-
-# Run the full set of measurements.
+# Run all defined measurements for which the required options are available.
+#
+# If "${workDir}/permitted-measurements" is not empty, only measurements
+# with IDs listed in that file will be taken.
 gatherMeasurements () {
-	runTransfers 'Default' ''
-	grep -Fq ' -C' "${workDir}/help" && runTransfers 'No-splice' '-C'
-	grep -Fq ' -J' "${workDir}/help" && runTransfers 'Pipe buffer 1M' '-J 1M'
-	grep -Fq ' -B' "${workDir}/help" && runTransfers 'Transfer buffer 1M' '-B 1M'
+	printf '%s\n' "${measurementDefinitions}" \
+	| {
+	while read -r definitionLine; do
+		measurementId="${definitionLine%%!*}"
+		measurementName="${definitionLine#*!}"
+		measurementName="${measurementName%%!*}"
+		requiredOptions="${definitionLine#*!}"
+		requiredOptions="${requiredOptions#*!}"
+		requiredOptions="${requiredOptions%%!*}"
+		dataSize="${definitionLine#*!}"
+		dataSize="${dataSize#*!}"
+		dataSize="${dataSize#*!}"
+		dataSize="${dataSize%%!*}"
+		templateCommand="${definitionLine##*!}"
 
-	if grep -Fq ' -o' "${workDir}/help"; then
-		runTransfers 'Directed output' " -o ${workDir}/stdout"
-		grep -Fq ' -C' "${workDir}/help" && runTransfers 'Directed output with no-splice' " -o ${workDir}/stdout -C"
-		grep -Fq ' -J' "${workDir}/help" && runTransfers 'Directed output with pipe buffer 1M' " -o ${workDir}/stdout -J 1M"
-		grep -Fq ' -B' "${workDir}/help" && runTransfers 'Directed output with transfer buffer 1M' " -o ${workDir}/stdout -B 1M"
-	fi
+		test -n "${templateCommand}" || continue
 
-	if grep -Fq ' -X' "${workDir}/help"; then
-		runTransfers 'Discard' '-X'
-		grep -Fq ' -C' "${workDir}/help" && runTransfers 'Discard with no-splice' '-X -C'
-		grep -Fq ' -J' "${workDir}/help" && runTransfers 'Discard with pipe buffer 1M' '-X -J 1M'
-		grep -Fq ' -B' "${workDir}/help" && runTransfers 'Discard with transfer buffer 1M' '-X -B 1M'
-	fi
+		if test -s "${workDir}/permitted-measurements"; then
+			grep -Fqx "${measurementId}" "${workDir}/permitted-measurements" || continue
+		fi
 
-	if grep -Fq ' -S' "${workDir}/help"; then
-		captureTimes $((testZeroesMB)) "${pv} -Ss ${testZeroesMB}M /dev/zero > /dev/null"
-		resultsLine "Zeroes: stdout to /dev/null"
-		captureTimes $((testZeroesMB)) "${pv} -Ss ${testZeroesMB}M /dev/zero | cat > /dev/null"
-		resultsLine "Zeroes: stdout to pipe"
-		if grep -Fq ' -X' "${workDir}/help"; then
-			captureTimes $((testZeroesMB)) "${pv} -X -Ss ${testZeroesMB}M /dev/zero"
-			resultsLine "Zeroes: discarded"
+		if test -n "${requiredOptions}"; then
+			optionLetters="$(printf 'x%s\n' "${requiredOptions}" | sed 's/-/\n-/g' | grep '^-' | cut -b 2)"
+			optionsPresent='true'
+			for pvOption in ${optionLetters}; do
+				grep -Fq " -${pvOption}" "${workDir}/help" || optionsPresent='false'
+			done
+			${optionsPresent} || continue
 		fi
-		if grep -Fq ' -C' "${workDir}/help"; then
-			captureTimes $((testZeroesMB)) "${pv} -C -Ss ${testZeroesMB}M /dev/zero > /dev/null"
-			resultsLine "Zeroes: stdout to /dev/null with no-splice"
-			captureTimes $((testZeroesMB)) "${pv} -C -Ss ${testZeroesMB}M /dev/zero | cat > /dev/null"
-			resultsLine "Zeroes: stdout to pipe with no-splice"
+
+		activeCommand="$(
+		  printf '%s\n' "${templateCommand}" | sed \
+		    -e "s!{PV}!${pv}!g" \
+		    -e "s!{FILE1}!${workDir}/file1!g" \
+		    -e "s!{FILE2}!${workDir}/file2!g" \
+		    -e "s!{ZSIZE}!${testZeroesMB}!g" \
+		    -e "s!{OUTPUT1}!${workDir}/output1!g" \
+		    -e "s!{OUTPUT2}!${workDir}/output2!g"
+		)"
+
+		if test "${dataSize}" = "Z"; then
+			dataSize="${testZeroesMB}"
+		else
+			dataSize=$((dataSize*testFileMB))
 		fi
-		if grep -Fq ' -C' "${workDir}/help" && grep -Fq ' -X' "${workDir}/help"; then
-			captureTimes $((testZeroesMB)) "${pv} -C -X -Ss ${testZeroesMB}M /dev/zero"
-			resultsLine "Zeroes: discarded with no-splice"
-		fi
-	fi
+
+		captureTimes "${dataSize}" "${activeCommand}"
+		resultsLine "${measurementId}" "${measurementName}"
+	done
+	}
 }
 
 # Run several rounds of benchmark measurements using $1 as the pv
 # executable, producing tab-separated data, including a final section
 # containing the means and standard deviations for each measurement type.
 #
+# If $2 is not blank, only run the measurements whose IDs are listed in it.
+#
 runBenchmarks () {
 	pv="$1"
+	restrictTo="$2"
 
 	# Check there's enough room for the test files - make them smaller,
 	# if not.
@@ -193,22 +223,37 @@ runBenchmarks () {
 	# Capture the help text so that capabilities can be checked.
 	${pv} -h > "${workDir}/help"
 
+	# Write a list of permitted measurement IDs, one per line.  An empty
+	# file means no restriction.
+	printf '%s\n' "${restrictTo}" \
+	| tr ',; \t' '\n\n\n\n' \
+	| sort -u \
+	| grep . \
+	> "${workDir}/permitted-measurements"
+
+	# Define identifiers for the system this is running on, the pv
+	# version being benchmarked, and this specific benchmark run.
+	sysId="$(uname -a | md5sum | cut -b1-7)"
+	pvId="$(${pv} --version | awk 'FNR==1{print $2}' | awk -F . '{print 1000000*$1+1000*$2+$3}')"
+	runId="$(date '+%Y%m%d%H%M%S')"
+	outputPrefix="$(printf '%s\t%s\t%s\n' "${sysId}" "${pvId}" "${runId}")"
+
 	# Basic system information, and a header line for the test results.
-	outputLine 'System hostname' "$(uname -n)"
-	outputLine 'System load' "$(uptime | awk '{printf "%.2f\n",$(NF-2)}')"
-	outputLine 'System kernel type' "$(uname -s)"
-	outputLine 'System kernel release' "$(uname -r)"
-	outputLine 'System OS' "$(uname -o)"
-	outputLine 'PV path' "${pv}"
-	outputLine 'PV version' "$(${pv} -V | awk 'FNR==1 {print $2}')"
-	outputLine 'Test file size (MB)' "${testFileMB}"
+	printf '%s\t%s\t%s\n' "${outputPrefix}" 'System hostname' "$(uname -n)"
+	printf '%s\t%s\t%s\n' "${outputPrefix}" 'System load' "$(uptime | awk '{printf "%.2f\n",$(NF-2)}')"
+	printf '%s\t%s\t%s\n' "${outputPrefix}" 'System kernel type' "$(uname -s)"
+	printf '%s\t%s\t%s\n' "${outputPrefix}" 'System kernel release' "$(uname -r)"
+	printf '%s\t%s\t%s\n' "${outputPrefix}" 'System OS' "$(uname -o)"
+	printf '%s\t%s\t%s\n' "${outputPrefix}" 'PV path' "${pv}"
+	printf '%s\t%s\t%s\n' "${outputPrefix}" 'PV version' "$(${pv} -V | awk 'FNR==1 {print $2}')"
+	printf '%s\t%s\t%s\n' "${outputPrefix}" 'Test file size (MB)' "${testFileMB}"
 
 	# Generate two files of random data.
 	dd if='/dev/urandom' of="${workDir}/file1" bs=1048576 count="${testFileMB}" 2>/dev/null
 	dd if='/dev/urandom' of="${workDir}/file2" bs=1048576 count="${testFileMB}" 2>/dev/null
 
 	# Run several rounds of measurements.
-	outputLine '#' 'ID' 'MiB/sec' 'Real time' 'User CPU time' 'System CPU time' 'Raw measurement'
+	printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "${outputPrefix}" '#' 'ID' 'MiB/sec' 'Real time' 'User CPU time' 'System CPU time' 'Raw measurement'
 	thisRound=0
 	while test ${thisRound} -lt "${rounds}"; do
 		thisRound=$((1+thisRound))
@@ -217,36 +262,36 @@ runBenchmarks () {
 
 	# For each of the types of measurement, report the mean and standard
 	# deviation of each field.
-	awk -F "\t" '{print $1}' < "${workDir}/results" > "${workDir}/measurement-types"
-	true > "${workDir}/measurement-types-used"
-	outputLine 'μ/σ' 'ID' 'MiB/sec' 'Real time' 'User CPU time' 'System CPU time' 'Aggregated measurement'
+	awk -F "\t" '{print $1}' < "${workDir}/results" > "${workDir}/measurement-ids"
+	true > "${workDir}/measurement-ids-used"
+	printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "${outputPrefix}" 'μ/σ' 'ID' 'MiB/sec' 'Real time' 'User CPU time' 'System CPU time' 'Aggregated measurement'
 	{
-	while read -r measurement; do
+	while read -r measurementId; do
 		# Skip this type of measurement if already processed.
-		grep -Fqx "${measurement}" "${workDir}/measurement-types-used" && continue
-		printf '%s\n' "${measurement}" >> "${workDir}/measurement-types-used"
-		# Hash the measurement name.
-		measurementHash="$(printf '%s\n' "${measurement}" | md5sum | cut -b1-7)"
+		grep -Fqx "${measurementId}" "${workDir}/measurement-ids-used" && continue
+		printf '%s\n' "${measurementId}" >> "${workDir}/measurement-ids-used"
+		# Get the associated measurement name.
+		measurementName="$(printf '%s\n' "${measurementDefinitions}" | awk -F '!' -v "x=${measurementId}" '$1==x{print $2}')"
 		# Separate out this measurement type's results.
-		awk -F "\t" -v "m=${measurement}" '$1==m {print}' < "${workDir}/results" \
+		awk -F "\t" -v "id=${measurementId}" '$1==id {print}' < "${workDir}/results" \
 		> "${workDir}/measurements"
 		# Calculate the mean of each field.
-		awk -F "\t" -v "h=${measurementHash}" -v "fieldcount=${fieldsPerRecord}" \
+		awk -F "\t" -v "id=${measurementId}" -v "name=${measurementName}" -v "fieldcount=${fieldsPerRecord}" \
 'BEGIN { samples=0 }
-{ m=$1; samples++; for (field=1; field<=fieldcount; field++) { total[field] += $(1+field) } }
-END { printf "%s\t%s", "μ", h; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", total[field]/samples }; printf "\t%s\n", m }' \
+{ samples++; for (field=1; field<=fieldcount; field++) { total[field] += $(1+field) } }
+END { printf "%s\t%s", "μ", id; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", total[field]/samples }; printf "\t%s\n", name }' \
 		< "${workDir}/measurements" > "${workDir}/mean"
 		# Calculate the standard deviation of each field.
 		cat "${workDir}/mean" "${workDir}/measurements" \
-		| awk -F "\t" -v "h=${measurementHash}" -v "m=${measurement}" -v "fieldcount=${fieldsPerRecord}" \
+		| awk -F "\t" -v "id=${measurementId}" -v "name=${measurementName}" -v "fieldcount=${fieldsPerRecord}" \
 'BEGIN { samples=0 }
 FNR==1 { for (field=1; field<=fieldcount; field++) { mean[field] += $(2+field) } }
 FNR>1 { samples++; for (field=1; field<=fieldcount; field++) { variance=$(1+field)-mean[field]; sum_variance_squared[field] += (variance*variance) } }
-END { printf "%s\t%s", "σ", h; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", sqrt(sum_variance_squared[field]/samples) }; printf "\t%s\n", m }' \
+END { printf "%s\t%s", "σ", id; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", sqrt(sum_variance_squared[field]/samples) }; printf "\t%s\n", name }' \
 		> "${workDir}/stddev"
-		sed "s!^!${sysId}\t${pvId}\t${runId}\t!" "${workDir}/mean" "${workDir}/stddev"
+		sed "s!^!${outputPrefix}\t!" "${workDir}/mean" "${workDir}/stddev"
 	done
-	} < "${workDir}/measurement-types"
+	} < "${workDir}/measurement-ids"
 }
 
 # Read a stream of benchmark data on stdin containing runs from a single
@@ -383,15 +428,14 @@ runVersionComparisons () {
 ##############################################################################
 # Main entry point.
 
-# TODO: options to list available measurements and to run specific ones only
-
 # Process any command-line options.
 action='benchmark'
+restrictMeasurementIdList=''
 while test -n "$1"; do
 	arg="$1"
 	shift
 	case "${arg}" in
-	'benchmark'|'analyse') action="${arg}" ;;
+	'measurements'|'benchmark'|'analyse') action="${arg}" ;;
 	'-h'|'--help')
 		cat - <<EOF
 Usage: ${programName} [OPTIONS] [ACTION]
@@ -399,18 +443,20 @@ Benchmark pv transfers.
 
 Actions:
 
-  benchmark  - run several rounds of measurements and produce benchmark data
-  analyse    - analyse benchmark data on stdin from multiple pv versions
+  measurements - list all benchmark measurement definitions
+  benchmark    - take several rounds of measurements
+  analyse      - analyse benchmark data on stdin from multiple pv versions
 
 Options:
 
-  -p, --program FILE   benchmark using FILE as the pv executable
-  -r, --rounds ROUNDS  run ROUNDS sets of measurements (${rounds})
-  -s, --size SIZE      attempt to use a test file of SIZE MiB (${testFileMB})
-  -z, --zeroes SIZE    stop at SIZE MiB for /dev/zero measurements (${testZeroesMB})
+  -p, --program FILE    benchmark using FILE as the pv executable
+  -r, --rounds ROUNDS   run ROUNDS sets of measurements (${rounds})
+  -m, --measurement ID  only run this specific measurement
+  -s, --size SIZE       attempt to use a test file of SIZE MiB (${testFileMB})
+  -z, --zeroes SIZE     stop at SIZE MiB for /dev/zero measurements (${testZeroesMB})
 
-  -h, --help           show this help
-  -V, --version        show script version
+  -h, --help            show this help
+  -V, --version         show script version
 
 Default values are shown in brackets.
 
@@ -432,6 +478,8 @@ EOF
 	'--program='*|'--pv='*) pv="${arg#*=}" ;;
 	'-r'|'--rounds') rounds="$1"; test $# -gt 0 && shift ;;
 	'--rounds='*) rounds="${arg#*=}" ;;
+	'-m'|'--measurement') restrictMeasurementIdList="${restrictMeasurementIdList} $1"; test $# -gt 0 && shift ;;
+	'--measurement='*) restrictMeasurementIdList="${restrictMeasurementIdList} ${arg#*=}" ;;
 	'-s'|'--size') testFileMB="$1"; test $# -gt 0 && shift ;;
 	'--size='*) testFileMB="${arg#*=}" ;;
 	'-z'|'--zeroes') testZeroesMB="$1"; test $# -gt 0 && shift ;;
@@ -456,8 +504,12 @@ LANG=C
 LC_ALL=C
 export LANG LC_ALL
 
+# Define the measurements.
+defineMeasurements
+
 # Run the selected action.
 case "${action}" in
-'benchmark') runBenchmarks "${pv}" ;;
+'measurements') showMeasurementDefinitions ;;
+'benchmark') runBenchmarks "${pv}" "${restrictMeasurementIdList}" ;;
 'analyse') runVersionComparisons ;;
 esac
