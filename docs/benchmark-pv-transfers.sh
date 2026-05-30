@@ -228,6 +228,7 @@ runBenchmarks () {
 
 	# Write a list of permitted measurement IDs, one per line.  An empty
 	# file means no restriction.
+	# shellcheck disable=SC2020 # silence the warning about "tr" here.
 	printf '%s\n' "${restrictTo}" \
 	| tr ',; \t' '\n\n\n\n' \
 	| sort -u \
