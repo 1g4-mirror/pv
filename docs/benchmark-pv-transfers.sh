@@ -294,6 +294,42 @@ END { printf "%s\t%s", "σ", mId; for (field=1; field<=fieldcount; field++) { pr
 	} < "${workDir}/measurement-ids"
 }
 
+# Reformat data on stdin so that each (whitespace-separated) column is
+# space-padded and right-aligned to a consistent width for all rows.
+#
+# Note that this can only handle ASCII, not UTF-8.
+lineUpColumns () {
+	tee "${workDir}/lineup-temp" \
+	| awk 'BEGIN {cols=0}
+/./ {
+  if (NF > cols)
+    cols=NF
+  for (col=1; col<=NF; col++) {
+    if (length($col) >= max[col])
+      max[col]=length($col)
+  }
+}
+END {
+  for (col=1; col<=cols; col++) {
+    printf "%d ", max[col]
+  }
+  printf "\n"
+}
+' > "${workDir}/lineup-colwidths"
+	cat "${workDir}/lineup-colwidths" "${workDir}/lineup-temp" \
+	| awk '
+FNR==1 { cols=NF; for (col=1; col<=NF; col++) { max[col]=$col } }
+FNR>1 {
+  for (col=1; col<=cols; col++) {
+    if (col>1)
+      printf " "
+    val=(col<=NF ? $col : "")
+    printf "%" max[col] "s", val
+  }
+  printf "\n"
+}'
+}
+
 # Read a stream of benchmark data on stdin containing runs from a single
 # system, and report how the measurements changed across the different PV
 # versions.
@@ -344,15 +380,20 @@ END {
 		printf '\n%s\n' "${measurementName}"
 		# Report each version's measurements and how they compare to
 		# the previous version.
+		#
+		# Since the column widths are set by an awk script which
+		# doesn't support UTF-8, ASCII headings are used initially,
+		# and adjusted after formatting.
+		{
 		printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
 		  'PV' \
-		  'μ:Rate' 'σ:Rate' '±:Rate' \
+		  'M:Rate' 'S:Rate' 'C:Rate' \
 		  '-' \
-		  'μ:tReal' 'σ:tReal' '±:tReal' \
+		  'M:tReal' 'S:tReal' 'C:tReal' \
 		  '-' \
-		  'μ:tUser' 'σ:tUser' '±:tUser' \
+		  'M:tUser' 'S:tUser' 'C:tUser' \
 		  '-' \
-		  'μ:tSys' 'σ:tSys' '±:tSys'
+		  'M:tSys' 'S:tSys' 'C:tSys'
 		awk -F "\t" -v "fieldcount=${fieldsPerRecord}" \
 '{
   printf "%s", $1
@@ -388,9 +429,10 @@ END {
     pstddev[field]=stddev;
   }
   printf "\n"
-}
-' "${workDir}/measurements-per-version"
-# TODO: pass through something to line up the columns in a more readable way
+}' "${workDir}/measurements-per-version"
+		} \
+		| lineUpColumns \
+		| sed '1{s,M:,μ:,g;s,S:,σ:,g;s,C:,±:,g}'
 	done
 	} < "${workDir}/measurement-ids"
 }
