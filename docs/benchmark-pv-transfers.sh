@@ -1,17 +1,21 @@
 #!/bin/bash
 #
+# Benchmark transfer rates, and analyse benchmark results.
+#
 # Measure transfer rates and CPU usage with various different options,
 # multiple times, then calculate the mean and standard deviation for each
 # set of measurements.
 #
-# The report is written to stdout as tab-separated values, each line
+# The results are written to stdout as tab-separated values, each line
 # prefixed with an opaque system ID (based on "uname -a"), the PV version
 # expressed as an integer, and a run ID based on the start date and time.
 #
-# Takes a path to a pv binary as an argument.
+# In analysis mode, read results from multiple benchmark runs on standard
+# input, and for each type of measurement, show the differences between
+# either the different PV versions or the different runs.
 
 # Defaults.
-pv='pv'			# pv executable to run the measurements with
+pv='pv'			# PV executable to run the measurements with
 rounds='10'		# how many rounds of measurements to take
 testFileMB='256'	# max size of each of the test files, in MiB
 testZeroesMB='1024'	# amount of /dev/zero data to use, in MiB
@@ -557,26 +561,28 @@ while test -n "$1"; do
 	'-h'|'--help')
 		cat - <<EOF
 Usage: ${programName} [OPTIONS] [ACTION]
-Benchmark pv transfers.
+Benchmark pv transfers - take measurements of transfer rate and CPU usage
+when calling pv in various different ways, and analyse results from multiple
+benchmark runs to show how each measurement changes over time.
 
 Actions:
-
-  measurements - list all benchmark measurement definitions
-  benchmark    - take several rounds of measurements
+  benchmark    - take several rounds of measurements (default action)
   analyse      - analyse benchmark data on stdin from multiple runs
+  measurements - list all benchmark measurement definitions
 
-Options:
-
-  -p, --program FILE    benchmark using FILE as the pv executable
+Benchmark options:
+  -p, --program FILE    benchmark using FILE as the pv executable (${pv})
   -r, --rounds ROUNDS   run ROUNDS sets of measurements (${rounds})
   -m, --measurement ID  only run this specific measurement
   -s, --size SIZE       attempt to use a test file of SIZE MiB (${testFileMB})
   -z, --zeroes SIZE     stop at SIZE MiB for /dev/zero measurements (${testZeroesMB})
 
+Analysis options:
   -c, --compare WHAT    analyse differences in runs, versions, or auto (${compareWhat})
   -f, --final           show only the final item's line in each measurement analysis
   -t, --terse           produce a terser report
 
+Other options:
   -h, --help            show this help
   -V, --version         show script version
 
