@@ -19,6 +19,7 @@ pv='pv'			# PV executable to run the measurements with
 rounds='10'		# how many rounds of measurements to take
 testFileMB='256'	# max size of each of the test files, in MiB
 testZeroesMB='1024'	# amount of /dev/zero data to use, in MiB
+sourcesDir=''		# directory containing sources to benchmark
 compareWhat='auto'	# what to compare in the analysis
 finalLineOnly='false'	# whether to only show the last measurement's analysis
 terseFormat='false'	# whether to use a terse report format
@@ -576,6 +577,7 @@ Benchmark options:
   -m, --measurement ID  only run this specific measurement
   -s, --size SIZE       attempt to use a test file of SIZE MiB (${testFileMB})
   -z, --zeroes SIZE     stop at SIZE MiB for /dev/zero measurements (${testZeroesMB})
+  -d, --dir DIR         compile and benchmark each of the tar.gz files in DIR
 
 Analysis options:
   -c, --compare WHAT    analyse differences in runs, versions, or auto (${compareWhat})
@@ -612,6 +614,8 @@ EOF
 	'--size='*) testFileMB="${arg#*=}" ;;
 	'-z'|'--zeroes') testZeroesMB="$1"; test $# -gt 0 && shift ;;
 	'--zeroes='*) testZeroesMB="${arg#*=}" ;;
+	'-d'|'--dir') sourcesDir="$1"; test $# -gt 0 && shift ;;
+	'--dir='*) sourcesDir="${arg#*=}" ;;
 	'-c'|'--compare') compareWhat="$1"; test $# -gt 0 && shift ;;
 	'--compare='*) compareWhat="${arg#*=}" ;;
 	'-f'|'--final') finalLineOnly='true' ;;
@@ -650,6 +654,26 @@ defineMeasurements
 # Run the selected action.
 case "${action}" in
 'measurements') showMeasurementDefinitions ;;
-'benchmark') runBenchmarks "${pv}" "${restrictMeasurementIdList}" ;;
+'benchmark')
+	if test -z "${sourcesDir}"; then
+		runBenchmarks "${pv}" "${restrictMeasurementIdList}"
+	else
+		find "${sourcesDir}" -type f -name "*.tar.gz" \
+		| sort -V \
+		| while read -r sourcesFile; do
+			buildDir="$(mktemp -d "${sourcesFile}.build.XXXXXX")" || continue
+			trap 'rm -rf "${workDir}" "${buildDir}"' EXIT
+			tar xzf "${sourcesFile}" -C "${buildDir}" \
+			&& (
+			cd "${buildDir}"/* \
+			&& sh ./configure 1>&2 \
+			&& make 1>&2 \
+			&& mv pv ..
+			) \
+			&& runBenchmarks "${buildDir}/pv" "${restrictMeasurementIdList}"
+			trap 'rm -rf "${workDir}"' EXIT
+		done
+	fi
+	;;
 'analyse') runAnalysis "${compareWhat}" ;;
 esac
