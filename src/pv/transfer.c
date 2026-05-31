@@ -871,7 +871,7 @@ static bool pv__transfer_read(pvstate_t state, int input_fd, bool *eof_in, bool 
 	 */
 	max_to_read_into_buffer = max_to_read;
 	/* Clamp to a maximum of available buffer space. */
-	if (max_to_read_into_buffer > 0 && (size_t) max_to_read_into_buffer > max_buffer_available)
+	if (max_to_read_into_buffer > 0 && max_to_read_into_buffer > (off_t) max_buffer_available)
 		max_to_read_into_buffer = (off_t) max_buffer_available;
 	/* If "unlimited" (-1), use the maximum buffer available. */
 	if (max_to_read_into_buffer < 0)
@@ -925,8 +925,10 @@ static bool pv__transfer_read(pvstate_t state, int input_fd, bool *eof_in, bool 
 	}
 #endif				/* HAVE_COPY_FILE_RANGE */
 
-	debug("%d->%d, max_to_write=%ld, max_to_read=%ld, max_to_read_into_buffer=%ld, method=%d", input_fd, output_fd,
-	      max_to_write, max_to_read, max_to_read_into_buffer, state->transfer.method);
+	debug
+	    ("%d->%d, max_to_write=%lld, max_to_read=%lld, max_to_read_into_buffer=%lld, max_buffer_available=%lld, method=%d",
+	     input_fd, output_fd, max_to_write, max_to_read, max_to_read_into_buffer, max_buffer_available,
+	     state->transfer.method);
 
 	/*
 	 * Transfer data using the appropriate method.
