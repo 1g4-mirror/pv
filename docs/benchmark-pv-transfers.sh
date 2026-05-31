@@ -204,6 +204,7 @@ gatherMeasurements () {
 			dataSize=$((dataSize*testFileMB))
 		fi
 
+		rm -f "${workDir}/output1" "${workDir}/output2"
 		captureTimes "${dataSize}" "${activeCommand}"
 		resultsLine "${measurementId}" "${measurementName}"
 	done
@@ -300,6 +301,7 @@ END { printf "%s\t%s", "σ", mId; for (field=1; field<=fieldcount; field++) { pr
 		sed "s!^!${outputPrefix}\t!" "${workDir}/mean" "${workDir}/stddev"
 	done
 	} < "${workDir}/measurement-ids"
+	rm -f "${workDir}/file1" "${workDir}/file2" "${workDir}/output1" "${workDir}/output2"
 }
 
 # Reformat data on stdin so that each (whitespace-separated) column is
