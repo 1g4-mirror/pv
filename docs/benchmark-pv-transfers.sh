@@ -224,7 +224,7 @@ runBenchmarks () {
 	# if not.
 	tmpSpaceMB="$(df -kP "${TMPDIR:-/tmp}" | awk 'FNR==2 {print int($4/1024)}')"
 	while test "${testFileMB}" -gt 4; do
-		test "${tmpSpaceMB}" -gt $((2+3*testFileMB)) && break
+		test "${tmpSpaceMB}" -gt $((2+4*testFileMB)) && break
 		testFileMB=$((testFileMB/2))
 	done
 
