@@ -78,6 +78,13 @@ typedef enum {
 	PV_TRANSFERCOUNT_LINES
 } pvtransfercount_t;
 
+/* Methods used to transfer bytes from input to output. */
+typedef enum {
+	PV_TRANSFERMETHOD_READWRITE,		/* read() + write() */
+	PV_TRANSFERMETHOD_SPLICE,		/* splice() */
+	PV_TRANSFERMETHOD_SPLICE_INTERMEDIATE,	/* splice() through an intermediate input pipe */
+	PV_TRANSFERMETHOD_COPY_FILE_RANGE	/* copy_file_range() */
+} pvtransfermethod_t;
 
 /*
  * Structure describing a short string used as part of a progress bar, whose
@@ -161,7 +168,9 @@ struct pvstate_s {
 		bool terminal_supports_colour;	 /* whether the terminal supports colour */
 		bool checked_colour_support;	 /* whether we have checked colour support yet */
 		bool current_input_is_pipe;	 /* whether the current input file is a pipe */
+		bool current_input_is_file;	 /* whether the current input is a regular file */
 		bool output_is_pipe;		 /* whether the output is a pipe */
+		bool output_is_file;		 /* whether the output is a regular file */
 	} status;
 
 	/***************
@@ -472,16 +481,22 @@ struct pvstate_s {
 		/* File descriptor to /dev/null for splicing with -X. */
 		int discard_fd;
 		/*
-		 * These variables are used to keep track of whether
-		 * splice() was used; splice_failed_fd is the file
-		 * descriptor that splice() last failed on, to avoid
-		 * continuing to try using it on an fd that doesn't support
-		 * it, and splice_used is set to true if splice() was used
-		 * this time within pv_transfer().
+		 * splice_failed_fd is the input file descriptor that
+		 * splice() last failed on, to avoid continuing to try using
+		 * it on a file descriptor that doesn't support it.
 		 */
 		int splice_failed_fd;
-		bool splice_used;
 #endif
+#ifdef HAVE_COPY_FILE_RANGE
+		/*
+		 * copy_file_range_failed_fd is the input file descriptor
+		 * that copy_file_range() last failed on, to avoid
+		 * continuing to try using it on a file descriptor that
+		 * doesn't support it.
+		 */
+		int copy_file_range_failed_fd;
+#endif
+		pvtransfermethod_t method;	/* method used for most recent transfer */
 		bool read_error_warning_shown;
 		bool output_not_seekable;	/* set if lseek() fails on output */
 	} transfer;

@@ -131,6 +131,9 @@ void pv_reset_transfer(pvtransferstate_t transfer)
 	transfer->written_but_not_consumed = 0;
 	transfer->read_errors_in_a_row = 0;
 	transfer->last_read_skip_fd = 0;
+#ifdef HAVE_COPY_FILE_RANGE
+	transfer->copy_file_range_failed_fd = -1;
+#endif				/* HAVE_COPY_FILE_RANGE */
 #ifdef HAVE_SPLICE
 	transfer->splice_failed_fd = -1;
 	transfer->intermediate_pipe[0] = -1;

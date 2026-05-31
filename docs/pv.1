@@ -290,23 +290,26 @@ better with specific buffer sizes such as 1024.
 Implies \*(lq\fB\-\-no\-splice\fR\*(rq.
 .TP
 .B \-C, \-\-no-splice
-Prevent the use of \fBsplice\fR(2), a system call normally used on systems
-that support it to improve efficiency by eliminating the need for a transfer
-buffer.
+Prevent the use of \fBsplice\fR(2) and \fBcopy_file_range\fR(2), which are
+normally used on systems that support it to improve efficiency by
+eliminating the need for a transfer buffer.
 .IP
-In the default case that \fBsplice\fR(2) is used, the lack of a transfer
-buffer prevents \*(lq\fB\-\-buffer\-percent\fR\*(rq and
+In the default case that \fBsplice\fR(2) or \fBcopy_file_range\fR(2) are
+used, the lack of a transfer buffer prevents
+\*(lq\fB\-\-buffer\-percent\fR\*(rq and
 \*(lq\fB\-\-last\-written\fR\*(rq from working and makes
 \*(lq\fB\-\-buffer\-size\fR\*(rq redundant, so using any of those options
 automatically switches on \*(lq\fB\-\-no\-splice\fR\*(rq.
 .IP
-Sparse files cannot be written with \fBsplice\fR(2), so using
+Sparse files cannot be written with \fBsplice\fR(2) or
+\fBcopy_file_range\fR(2), so using
 \*(lq\fB\-\-sparse\fR\*(rq automatically switches on
 \*(lq\fB\-\-no\-splice\fR\*(rq.
 .IP
 Switching on \*(lq\fB\-\-no\-splice\fR\*(rq results in a small loss of
 transfer efficiency.
-It has no effect on systems where \fBsplice\fR(2) is unavailable.
+It has no effect on systems where \fBsplice\fR(2) and
+\fBcopy_file_range\fR(2) are unavailable.
 .TP
 .BI \-J\  BYTES \fR,\ \fB\-\-pipe\-buffer\-size\  BYTES
 Attempt to set the size of the output pipe buffer, and the intermediate
@@ -349,7 +352,7 @@ end of input.
 .TP
 .B \-Y, \-\-sync
 After every write operation, synchronise the buffer caches to disk with
-\fBfdatasync\fR(2).
+\fBsync\fR(2), or \fBfdatasync\fR(2) if possible.
 This has no effect when the output is a pipe.
 Using \*(lq\fB\-\-sync\fR\*(rq may improve the accuracy of the progress bar
 when writing to a slow disk.
@@ -562,21 +565,26 @@ transferred by this side, in \*(lq\fB\-\-monitor\~both\fR\*(rq mode.
 .TP
 .BR %T ", " %{buffer\-percent}
 Percentage of the transfer buffer in use.
-Equivalent to \*(lq\fB\-\-buffer\-percent\fR\*(rq.
-Displays \*(lq{\-\-\-\-}\*(rq if the transfer is being done with
-\fBsplice\fR(2), since splicing to or from pipes does not use the buffer.
+Equivalent to \*(lq\fB\-\-buffer\-percent\fR\*(rq, but using it does not
+turn on \*(lq\fB\-\-no\-splice\fR\*(rq.
+.IP
+If the transfer is using \fBsplice\fR(2), displays \*(lq{\-\-\-\-}\*(rq; if
+the transfer is using \fBsplice\fR(2) via an intermediate input pipe,
+displays \*(lq{\-||\-}\*(rq; and if the transfer is using
+\fBcopy_file_range\fR(2), displays \*(lq{\-\-\->}\*(rq.
 .TP
 .BR %nA ", " %n{last\-written}
 Show the last \fIn\fR bytes written (for example, \*(lq\fB%16A\fR\*(rq shows
 the last 16 bytes).
-Shows only dots if the transfer is being done with \fBsplice\fR(2), since
-splicing to or from pipes does not use the buffer.
+Shows only dots if the transfer is using \fBsplice\fR(2) or
+\fBcopy_file_range\fR(2), since these transfer modes do not use the buffer.
 .TP
 .BR %nL ", " %n{previous\-line}
 Show the first \fIn\fR bytes of the most recently written line (for example,
 \*(lq\fB%40L\fR\*(rq shows the first 40 bytes).
 If no \fIn\fR is given, then this expands to fill the available space.
-Shows only spaces if the transfer is being done with \fBsplice\fR(2).
+Shows only spaces if the transfer is using \fBsplice\fR(2) or
+\fBcopy_file_range\fR(2).
 .TP
 .BR %N ", " %{name}
 Show the name prefix given by \*(lq\fB\-\-name\fR\*(rq.
@@ -912,6 +920,8 @@ Please report bugs or feature requests via the issue tracker linked from the
 .SH "SEE ALSO"
 .BR cat (1),
 .BR splice (2),
+.BR copy_file_range (2),
+.BR fsync (2),
 .BR fdatasync (2),
 .BR open (2)
 (for \fBO_DIRECT\fR),

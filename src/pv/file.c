@@ -442,14 +442,19 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	}
 
 	/*
-	 * Detect whether the input file is a pipe.  This is used later, in
-	 * pv__transfer_read(), to decide whether an intermediate pipe needs
-	 * to be used with splice().
+	 * Detect whether the input file is a pipe, a regular file, or
+	 * neither.  This is used later, in pv__transfer_read(), when
+	 * determining the transfer method - read/write, splice(),
+	 * copy_file_range().
 	 */
 	state->status.current_input_is_pipe = false;
+	state->status.current_input_is_file = false;
 	if ((isb.st_mode & S_IFMT) == S_IFIFO) {
 		state->status.current_input_is_pipe = true;
 		debug("%s (fd %d)", "input is a pipe", fd);
+	} else if ((isb.st_mode & S_IFMT) == S_IFREG) {
+		state->status.current_input_is_file = true;
+		debug("%s (fd %d)", "input is a regular file", fd);
 	}
 
 	state->status.current_input_file = filenum;
@@ -473,9 +478,41 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 	 */
 #endif				/* O_DIRECT */
 
-	debug("%s: %d: %s: fd=%d", "next file opened", filenum, pv_current_file_name(state), fd);
+	debug("%s: %d: %s: fd=%d, is_pipe=%s, is_file=%s", "next file opened", filenum, pv_current_file_name(state), fd,
+	      state->status.current_input_is_pipe ? "true" : "false",
+	      state->status.current_input_is_file ? "true" : "false");
 
 #ifdef HAVE_SPLICE
+	if (state->control.discard_input && !state->control.no_splice && state->transfer.discard_fd < 0) {
+		/*
+		 * Open a file descriptor to /dev/null, so that input can be
+		 * spliced to it to implement -X.
+		 *
+		 * If this fails, transfer.discard_fd will be left at -1,
+		 * which means the transfer functions will not use splice().
+		 */
+		state->transfer.discard_fd = open("/dev/null", O_WRONLY);	/* flawfinder: ignore */
+		/* flawfinder: /dev/null is trusted. */
+		if (state->transfer.discard_fd < 0) {
+			debug("%s: %s", "/dev/null", strerror(errno));
+			state->transfer.discard_fd = -1;
+		}
+		if (!pv_fd_is_dev_null(state->transfer.discard_fd, false)) {
+			if (state->transfer.discard_fd >= 0)
+				(void) close(state->transfer.discard_fd);
+			state->transfer.discard_fd = -1;
+		}
+		debug("%s: %d", "discard_fd", state->transfer.discard_fd);
+		/*
+		 * If discard_fd was successfully opened, it will be used as
+		 * the output, so set the output status flags appropriately.
+		 */
+		if (state->transfer.discard_fd >= 0) {
+			state->status.output_is_pipe = false;
+			state->status.output_is_file = false;
+		}
+	}
+
 	if (!(state->status.output_is_pipe || state->status.current_input_is_pipe || state->control.no_splice)
 	    && (-1 == state->transfer.intermediate_pipe[0])) {
 		/*
@@ -527,28 +564,6 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		debug("%s: [%d,%d]", "intermediate pipe fds", state->transfer.intermediate_pipe[0],
 		      state->transfer.intermediate_pipe[1]);
 		debug("%s: %d", "intermediate pipe buffer size", state->transfer.intermediate_pipe_buffer_size);
-	}
-
-	if (state->control.discard_input && !state->control.no_splice && state->transfer.discard_fd < 0) {
-		/*
-		 * Open a file descriptor to /dev/null, so that input can be
-		 * spliced to it to implement -X.
-		 *
-		 * If this fails, transfer.discard_fd will be left at -1,
-		 * which means the transfer functions will not use splice().
-		 */
-		state->transfer.discard_fd = open("/dev/null", O_WRONLY);	/* flawfinder: ignore */
-		/* flawfinder: /dev/null is trusted. */
-		if (state->transfer.discard_fd < 0) {
-			debug("%s: %s", "/dev/null", strerror(errno));
-			state->transfer.discard_fd = -1;
-		}
-		if (!pv_fd_is_dev_null(state->transfer.discard_fd, false)) {
-			if (state->transfer.discard_fd >= 0)
-				(void) close(state->transfer.discard_fd);
-			state->transfer.discard_fd = -1;
-		}
-		debug("%s: %d", "discard_fd", state->transfer.discard_fd);
 	}
 #endif				/* HAVE_SPLICE */
 

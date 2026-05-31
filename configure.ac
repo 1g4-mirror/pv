@@ -143,6 +143,15 @@ AC_ARG_ENABLE([splice],
   SPLICE_SUPPORT="yes"
 )
 
+COPY_FILE_RANGE_SUPPORT="no"
+AC_ARG_ENABLE([copy-file-range],
+  [AS_HELP_STRING([--disable-copy-file-range], [do not use copy_file_range system call])],
+  if test "$enable_copy_file_range" = "yes"; then
+    COPY_FILE_RANGE_SUPPORT="yes"
+  fi,
+  COPY_FILE_RANGE_SUPPORT="yes"
+)
+
 IPC_SUPPORT="no"
 AC_ARG_ENABLE([ipc],
   [AS_HELP_STRING([--disable-ipc], [turn off IPC messaging])],
@@ -195,6 +204,10 @@ fi
 
 if test "$SPLICE_SUPPORT" = "yes"; then
   AC_CHECK_FUNCS([splice])
+fi
+
+if test "$COPY_FILE_RANGE_SUPPORT" = "yes"; then
+  AC_CHECK_FUNCS([copy_file_range])
 fi
 
 CPPFLAGS="$CPPFLAGS -I\$(top_srcdir)/src/include"

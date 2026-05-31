@@ -114,12 +114,18 @@ static int is_data_ready(int fd_in, /*@null@ */ bool *fd_in_ready, int fd_out, /
  * TRANSFER_READ_TIMEOUT seconds have not yet elapsed, and more data is
  * available to read according to is_data_ready().
  *
+ * Sets state->transfer.method to PV_TRANSFERMETHOD_READWRITE as a side
+ * effect, so that if this is called as a fallback from another transfer
+ * method, the original caller can find out.
+ *
  * Returns the total number of bytes read, or negative on error.
  */
-static ssize_t pv__transfer__read_repeated(int fd, char *buf, size_t count)
+static ssize_t pv__transfer__read_repeated(pvstate_t state, int fd, char *buf, size_t count)
 {
 	struct timespec start_time;
 	ssize_t total_read;
+
+	state->transfer.method = PV_TRANSFERMETHOD_READWRITE;
 
 	memset(&start_time, 0, sizeof(start_time));
 
@@ -173,7 +179,7 @@ static ssize_t pv__transfer__read_repeated(int fd, char *buf, size_t count)
 		}
 
 		if (count > 0) {
-			debug("%s %d: %s (%ld %s, %ld %s)", "fd", fd,
+			debug("%s %d: %s (%ld %s, %lu %s)", "fd", fd,
 			      "trying another read after partial buffer fill", nread, "read", count, "remaining");
 			if (is_data_ready(fd, NULL, -1, NULL, 0) < 1)
 				break;
@@ -224,24 +230,22 @@ static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, boo
 
 		nwritten = write(fd, buf, asked_to_write);
 
-#ifdef HAVE_FDATASYNC
 		if (sync_after_write && nwritten >= 0) {
 			/*
 			 * Ignore non I/O errors, such as EBADFD (bad file
 			 * descriptor), EINVAL (non syncable fd, such as a
 			 * pipe), etc - only return an error on EIO.
 			 */
-#if defined(_POSIX_SYNCHRONIZED_IO) && _POSIX_SYNCHRONIZED_IO > 0
+#if defined(HAVE_FDATASYNC) && defined(_POSIX_SYNCHRONIZED_IO) && _POSIX_SYNCHRONIZED_IO > 0
 			if ((fdatasync(fd) < 0) && (EIO == errno)) {
 				return -1;
 			}
-#else
+#else				/* !HAVE_FDATASYNC et al */
 			if ((fsync(fd) < 0) && (EIO == errno)) {
 				return -1;
 			}
-#endif
+#endif				/* HAVE_FDATASYNC et al */
 		}
-#endif				/* HAVE_FDATASYNC */
 
 		if (nwritten < 0) {
 			if ((EINTR == errno) || (EAGAIN == errno)) {
@@ -294,7 +298,7 @@ static ssize_t pv__transfer__write_repeated(int fd, char *buf, size_t count, boo
 		 * prevent endless retries.
 		 */
 		if (count > 0) {
-			debug("%s %d: %s (%ld %s, %ld %s)", "fd", fd,
+			debug("%s %d: %s (%ld %s, %lu %s)", "fd", fd,
 			      "trying another write after partial buffer flush",
 			      nwritten, "written", count, "remaining");
 
@@ -414,30 +418,29 @@ static ssize_t pv__transfer__splice_via_intermediate(pvstate_t state, int input_
  * TRANSFER_READ_TIMEOUT seconds have elapsed, as long as more data is
  * available to read according to is_data_ready().
  *
- * If splice() was successfully used, sets state->transfer.splice_used to
- * true.  Does not modify it otherwise.
- *
  * If splice() could not be used, sets state->transfer.splice_failed_fd to
- * fd so splice() won't be tried again until the next input file, and then
- * calls pv__transfer__read_repeated() to read into the buffer, first
- * capping "max_to_read" to "max_buffer_available", returning its result.
+ * input_fd so splice() won't be tried again until the next input file, and
+ * then calls pv__transfer__read_repeated() to read up to
+ * "fallback_read_amount" bytes into the buffer, returning its result.
+ *
+ * Sets state->transfer.method to either PV_TRANSFERMETHOD_SPLICE or
+ * PV_TRANSFERMETHOD_SPLICE_INTERMEDIATE as a side effect; if it falls back
+ * to pv__transfer__read_repeated(), that function then sets
+ * state->transfer.method to PV_TRANSFERMETHOD_READWRITE, so the caller can
+ * check which transfer method was actually used.
  *
  * Returns the total number of bytes transferred, or negative on error.
  */
 static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int output_fd, char *buf,
-					     size_t max_buffer_available, off_t max_to_read, off_t max_to_write)
+					     size_t fallback_read_amount, off_t max_to_read, off_t max_to_write)
 {
 	struct timespec start_time;
 	size_t bytes_to_splice;
 	ssize_t total_spliced;
 	bool use_intermediate_pipe;
-	size_t fallback_read_amount;
 
-	/* Amount to read_repeated() if splice() can't be used. */
-	fallback_read_amount = max_buffer_available;
-	if ((max_to_read >= 0) && (fallback_read_amount > (size_t) max_to_read)) {
-		fallback_read_amount = (size_t) max_to_read;
-	}
+	debug("%d->%d, fallback_read_amount=%lu, max_to_read=%ld, max_to_write=%ld", input_fd, output_fd,
+	      fallback_read_amount, max_to_read, max_to_write);
 
 	/*
 	 * Early return via pv__transfer__read_repeated() if splice() is
@@ -448,7 +451,7 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 	if (state->control.no_splice || state->control.linemode || (output_fd < 0)
 	    || (input_fd == state->transfer.splice_failed_fd)
 	    || (state->transfer.to_write > 0)) {
-		return pv__transfer__read_repeated(input_fd, buf, fallback_read_amount);
+		return pv__transfer__read_repeated(state, input_fd, buf, fallback_read_amount);
 	}
 
 	/*
@@ -474,18 +477,23 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 	/*@+unrecog@ *//* splint doesn't know of SIZE_MAX. */
 
 	/* Early return with 0 if the transfer cap is zero. */
-	if (0 == bytes_to_splice)
+	if (0 == bytes_to_splice) {
+		debug("bytes_to_splice=%lu", bytes_to_splice);
 		return 0;
+	}
 
 	/*
-	 * Use an intermediate pipe if one has been created already, the
-	 * input is not a pipe, and the output is not a pipe - because
-	 * splice() only works if one or both file descriptors are pipes.
+	 * Use an intermediate pipe if one is available and that transfer
+	 * method is selected.  Either way, update state->transfer.method to
+	 * the method being used.
 	 */
 	use_intermediate_pipe = false;
-	if (!(state->status.output_is_pipe || state->status.current_input_is_pipe)
+	if ((PV_TRANSFERMETHOD_SPLICE_INTERMEDIATE == state->transfer.method)
 	    && (-1 != state->transfer.intermediate_pipe[0]) && (-1 != state->transfer.intermediate_pipe[1])) {
 		use_intermediate_pipe = true;
+		state->transfer.method = PV_TRANSFERMETHOD_SPLICE_INTERMEDIATE;
+	} else {
+		state->transfer.method = PV_TRANSFERMETHOD_SPLICE;
 	}
 
 	memset(&start_time, 0, sizeof(start_time));
@@ -493,6 +501,8 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 	pv_elapsedtime_read(&start_time);
 
 	total_spliced = 0;
+
+	debug("bytes_to_splice=%lu", bytes_to_splice);
 
 	while (bytes_to_splice > 0) {
 		ssize_t nspliced;
@@ -510,6 +520,9 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 			nspliced = splice(input_fd, NULL, output_fd, NULL, bytes_to_splice, SPLICE_F_MORE);
 			/*@+type@ *//*@+nullpass@ */
 		}
+
+		debug("bytes_to_splice=%lu, nspliced=%ld, use_intermediate_pipe=%s", bytes_to_splice, nspliced,
+		      use_intermediate_pipe ? "true" : "false");
 
 		/*
 		 * Early return on signal interrupt, returning -1 if nothing
@@ -549,14 +562,11 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 			}
 			state->transfer.splice_failed_fd = input_fd;
 			if (0 == total_spliced) {
-				return pv__transfer__read_repeated(input_fd, buf, fallback_read_amount);
+				return pv__transfer__read_repeated(state, input_fd, buf, fallback_read_amount);
 			} else {
 				return total_spliced;
 			}
 		}
-
-		/* Flag the fact that splice() has been used successfully. */
-		state->transfer.splice_used = true;
 
 		total_spliced += nspliced;
 		/* Unsigned type - guard against underflow. */
@@ -600,30 +610,202 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 #endif				/* HAVE_SPLICE */
 
 
+#ifdef HAVE_COPY_FILE_RANGE
+/*
+ * Copy bytes from file descriptor "input_fd" to "output_fd" using the
+ * in-kernel copy function copy_file_range().
+ *
+ * The number of bytes copied is capped to "max_to_read", or if
+ * "max_to_write" is greater than zero and less than "max_to_read", capped
+ * to "max_to_write".  A "max_to_read" of less than zero indicates no
+ * maximum.
+ *
+ * If state->control.rate_limit_active is true and "max_to_write" is zero,
+ * performs no action and returns zero.  Since this looks the same as EOF,
+ * the caller must trap for this condition.
+ *
+ * Keeps reading until the target amount has been copied or until
+ * TRANSFER_READ_TIMEOUT seconds have elapsed, as long as more data is
+ * available to read according to is_data_ready().
+ *
+ * If copy_file_range() could not be used, sets
+ * state->transfer.copy_file_range_failed_fd to input_fd so it won't be
+ * tried again until the next input file, and then calls
+ * pv__transfer__read_repeated() to read up to "fallback_read_amount" bytes
+ * into the buffer, returning its result.
+ *
+ * Sets state->transfer.method to PV_TRANSFERMETHOD_COPY_FILE_RANGE as a
+ * side effect; if it falls back to pv__transfer__read_repeated(), that
+ * function then sets state->transfer.method to PV_TRANSFERMETHOD_READWRITE,
+ * so the caller can check which transfer method was actually used.
+ *
+ * Returns the total number of bytes transferred, or negative on error.
+ */
+static ssize_t pv__transfer__copy_file_range_repeated(pvstate_t state, int input_fd, int output_fd, char *buf,
+						      size_t fallback_read_amount, off_t max_to_read,
+						      off_t max_to_write)
+{
+	struct timespec start_time;
+	size_t bytes_to_copy;
+	ssize_t total_copied;
+
+	debug("%d->%d, fallback_read_amount=%lu, max_to_read=%ld, max_to_write=%ld", input_fd, output_fd,
+	      fallback_read_amount, max_to_read, max_to_write);
+
+	/*
+	 * Early return via pv__transfer__read_repeated() if this feature is
+	 * turned off, or if line mode is active, or if there's no output
+	 * fd, or if it already failed on this input file descriptor, or if
+	 * there's anything waiting in the transfer buffer.
+	 */
+	if (state->control.no_splice || state->control.linemode || (output_fd < 0)
+	    || (input_fd == state->transfer.copy_file_range_failed_fd)
+	    || (state->transfer.to_write > 0)) {
+		return pv__transfer__read_repeated(state, input_fd, buf, fallback_read_amount);
+	}
+
+	/*
+	 * Cap the transfer amount if applicable.
+	 *
+	 * Note that max_to_write is an off_t (file size / offset), which
+	 * may not fit into a size_t (byte count), so check it against
+	 * SIZE_MAX before trying a comparison otherwise on 32-bit systems
+	 * it might appear to be 0.
+	 */
+	/*@-unrecog@ */
+	bytes_to_copy = SIZE_MAX;
+	if ((max_to_read >= 0) && ((unsigned long) max_to_read <= (unsigned long) SIZE_MAX)) {
+		bytes_to_copy = (size_t) max_to_read;
+	}
+	if ((state->control.rate_limit_active || max_to_write > 0)
+	    && ((unsigned long) max_to_write <= (unsigned long) SIZE_MAX)
+	    && ((max_to_read < 0) || ((unsigned long) max_to_read >= (unsigned long) SIZE_MAX)
+		|| (max_to_read > max_to_write))
+	    ) {
+		bytes_to_copy = (size_t) max_to_write;
+	}
+	/*@+unrecog@ *//* splint doesn't know of SIZE_MAX. */
+
+	/* Early return with 0 if the transfer cap is zero. */
+	if (0 == bytes_to_copy) {
+		debug("bytes_to_copy=%lu", bytes_to_copy);
+		return 0;
+	}
+
+	/* Explicitly set the transfer method being used. */
+	state->transfer.method = PV_TRANSFERMETHOD_COPY_FILE_RANGE;
+
+	memset(&start_time, 0, sizeof(start_time));
+
+	pv_elapsedtime_read(&start_time);
+
+	total_copied = 0;
+
+	debug("bytes_to_copy=%lu", bytes_to_copy);
+
+	while (bytes_to_copy > 0) {
+		ssize_t ncopied;
+		struct timespec cur_time, transfer_elapsed;
+		long double elapsed_seconds;
+
+		/*@-nullpass@ *//*@-type@ *//* splint doesn't know about copy_file_range. */
+		ncopied = copy_file_range(input_fd, NULL, output_fd, NULL, bytes_to_copy, 0);
+		/*@+type@ *//*@+nullpass@ */
+
+		debug("bytes_to_copy=%lu, ncopied=%ld", bytes_to_copy, ncopied);
+
+		/*
+		 * Early return on signal interrupt, returning -1 if nothing
+		 * was transferred yet, or the amount transferred otherwise.
+		 */
+		if (ncopied < 0 && ((EINTR == errno) || (EAGAIN == errno))) {
+			if (0 == total_copied)
+				return -1;
+			return total_copied;
+		}
+
+		/* TODO: possibly check for ENOSPC. */
+
+		/*
+		 * If the copy failed, turn it off for this input file
+		 * descriptor.  Then, if nothing has been copied so far,
+		 * return the result of an ordinary read, otherwise return
+		 * the amount copied.
+		 */
+		if (ncopied < 0) {
+			debug("%s %d: %s: %s", "fd", input_fd, "disabling copy_file_range after failure",
+			      strerror(errno));
+			state->transfer.copy_file_range_failed_fd = input_fd;
+			if (0 == total_copied) {
+				return pv__transfer__read_repeated(state, input_fd, buf, fallback_read_amount);
+			} else {
+				return total_copied;
+			}
+		}
+
+		total_copied += ncopied;
+		/* Unsigned type - guard against underflow. */
+		if (bytes_to_copy > (size_t) ncopied) {
+			bytes_to_copy -= ncopied;
+		} else {
+			bytes_to_copy = 0;
+		}
+
+		/* Early return on EOF. */
+		if (0 == ncopied) {
+			debug("%s %d: %s (%lu/%lu)", "fd", input_fd, "reached EOF", total_copied, bytes_to_copy);
+			return total_copied;
+		}
+
+		/* Keep trying while data is ready. */
+		memset(&cur_time, 0, sizeof(cur_time));
+		memset(&transfer_elapsed, 0, sizeof(transfer_elapsed));
+		elapsed_seconds = 0.0;
+
+		pv_elapsedtime_read(&cur_time);
+		pv_elapsedtime_subtract(&transfer_elapsed, &cur_time, &start_time);
+		elapsed_seconds = pv_elapsedtime_seconds(&transfer_elapsed);
+
+		if (elapsed_seconds > TRANSFER_READ_TIMEOUT) {
+			debug("%s %d: %s (%f %s)", "fd", input_fd,
+			      "stopping copy_file_range - timer expired", (double) elapsed_seconds, "sec elapsed");
+			return total_copied;
+		}
+
+		if (bytes_to_copy > 0) {
+			debug("%s %d: %s (%ld %s, %lu %s)", "fd", input_fd,
+			      "trying another copy_file_range", ncopied, "transferred this time", bytes_to_copy,
+			      "remaining");
+			if (is_data_ready(input_fd, NULL, -1, NULL, 0) < 1)
+				break;
+		}
+	}
+
+	return total_copied;
+}
+#endif				/* HAVE_COPY_FILE_RANGE */
+
+
 /*
  * Read some data from the given file descriptor, updating the state.
  *
  * At most, the number of bytes read will be the number of bytes remaining
  * in the input buffer, capped to the number of bytes left until
- * state->control.size is reached if state->control.stop_at_size is true.
+ * state->control.size is reached if state->control.stop_at_size is true. 
  * If state->control.rate_limit_active is true, and/or "max_to_write" is >0,
- * and splice() is used, then the maximum number of bytes read will be
- * further capped to the value of "max_to_write", since splice() writes as
- * well as reads.
+ * and a non-read/write transfer method (splice or copy_file_range) is used,
+ * then the maximum number of bytes read will be further capped to the value
+ * of "max_to_write", since those functions write as well as read.
  *
- * If splice() was successfully used, sets state->transfer.splice_used to
- * true; if it was unsuccessfully used, then
- * state->transfer.splice_failed_fd is updated to the current fd so splice()
- * won't be tried again until the next input file.
- *
- * Updates state->transfer.read_position by the number of bytes read, unless
- * splice() was used, in which case it does not since there's nothing in the
- * buffer (and it also adds the bytes to state->transfer.written since
- * they've been written to the output).
+ * If a read/write transfer method was used, updates
+ * state->transfer.read_position by the number of bytes read.  If not, the
+ * amount read by splice/copy_file_range is placed in
+ * state->transfer.written since that amount will have been written to the
+ * output.
  *
  * Also increases state->transfer.total_bytes_read by the number of bytes
- * read, regardless of whether splice() was used, since total_bytes_read is
- * what it says it is, rather than being a buffer indicator.
+ * read, regardless of the transfer method, since total_bytes_read is what
+ * it says it is, rather than being a buffer indicator.
  *
  * If there is a non-transient read error, updates
  * state->status.exit_status, and tries to skip past the problem if
@@ -640,18 +822,18 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
  * Returns false if there was a transient error and so the transfer should
  * not continue, but be retried shortly instead.
  */
-static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t max_to_write)
+static bool pv__transfer_read(pvstate_t state, int input_fd, bool *eof_in, bool *eof_out, off_t max_to_write)
 {
 	bool do_not_skip_errors;
 	bool zero_transfer_cap;
 	size_t max_buffer_available;
-	off_t max_to_read;
+	off_t max_to_read, max_to_read_into_buffer;
 	off_t amount_to_skip, amount_skipped, orig_offset, skip_offset;
 	ssize_t nread;
-#ifdef HAVE_SPLICE
 	int output_fd;
 
 	output_fd = state->control.output_fd;
+#ifdef HAVE_SPLICE
 	if (state->control.discard_input && !state->control.no_splice)
 		output_fd = state->transfer.discard_fd;
 #endif				/* HAVE_SPLICE */
@@ -674,55 +856,176 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	}
 
 	nread = 0;
+
+	/*
+	 * Flag if the amount to read is going to be zero, so that a
+	 * zero-sized read is not then mistakenly taken as EOF.
+	 */
 	zero_transfer_cap = false;
 	if (0 == max_to_read)
 		zero_transfer_cap = true;
 
+	/*
+	 * Restricted version of max_to_read limited to the available buffer
+	 * space, to be used by the read/write transfer method.
+	 */
+	max_to_read_into_buffer = max_to_read;
+	/* Clamp to a maximum of available buffer space. */
+	if (max_to_read_into_buffer > 0 && (size_t) max_to_read_into_buffer > max_buffer_available)
+		max_to_read_into_buffer = (off_t) max_buffer_available;
+	/* If "unlimited" (-1), use the maximum buffer available. */
+	if (max_to_read_into_buffer < 0)
+		max_to_read_into_buffer = (off_t) max_buffer_available;
+	/* Clamp to a minimum of 0 in case max_buffer_available underflowed. */
+	if (max_to_read_into_buffer < 0)
+		max_to_read_into_buffer = 0;
+
+	/* Determine which transfer method to attempt. */
+	state->transfer.method = PV_TRANSFERMETHOD_READWRITE;
+
 #ifdef HAVE_SPLICE
-	state->transfer.splice_used = false;
-	if (state->control.rate_limit_active && 0 == max_to_write) {
+	/*
+	 * Attempt to use splice() only if splice() is not turned off, and
+	 * line mode is inactive, and there's an output fd, and there's
+	 * nothing waiting to be written from the transfer buffer, and
+	 * splice() hasn't already failed on this input file descriptor.
+	 */
+	if (!(state->control.no_splice || state->control.linemode || (output_fd < 0)
+	      || (state->transfer.to_write > 0)
+	      || (input_fd == state->transfer.splice_failed_fd)
+	    )) {
+		state->transfer.method = PV_TRANSFERMETHOD_SPLICE;
 		/*
-		 * Flag that no attempt was made to transfer because of rate
-		 * limiting, so the zero nread is not because of EOF; and
-		 * wait briefly to avoid a busy-wait when rate limiting.
+		 * Splice through an intermediate input pipe if neither the
+		 * input nor the output is a pipe, and an intermediate pipe
+		 * is ready to use.
 		 */
+		if (!(state->status.output_is_pipe || state->status.current_input_is_pipe)
+		    && (-1 != state->transfer.intermediate_pipe[0]) && (-1 != state->transfer.intermediate_pipe[1])) {
+			state->transfer.method = PV_TRANSFERMETHOD_SPLICE_INTERMEDIATE;
+		}
+	}
+#endif				/* HAVE_SPLICE */
+
+#ifdef HAVE_COPY_FILE_RANGE
+	/*
+	 * Attempt to use copy_file_range() only if both the input and the
+	 * output are regular files, and splice() is not turned off (since
+	 * it's one option for both this and splice), and line mode is
+	 * inactive, and there's an output fd, and there's nothing waiting
+	 * to be written from the transfer buffer, and copy_file_range()
+	 * hasn't already failed on this input file descriptor.
+	 */
+	if (state->status.current_input_is_file && state->status.output_is_file
+	    && !(state->control.no_splice || state->control.linemode || (output_fd < 0)
+		 || (state->transfer.to_write > 0)
+		 || (input_fd == state->transfer.copy_file_range_failed_fd)
+	    )) {
+		state->transfer.method = PV_TRANSFERMETHOD_COPY_FILE_RANGE;
+	}
+#endif				/* HAVE_COPY_FILE_RANGE */
+
+	debug("%d->%d, max_to_write=%ld, max_to_read=%ld, max_to_read_into_buffer=%ld, method=%d", input_fd, output_fd,
+	      max_to_write, max_to_read, max_to_read_into_buffer, state->transfer.method);
+
+	/*
+	 * Transfer data using the appropriate method.
+	 *
+	 * If one method falls back to another, it will update
+	 * state->transfer.method, so that variable may have changed after
+	 * this block.
+	 */
+	switch (state->transfer.method) {
+	case PV_TRANSFERMETHOD_READWRITE:
+		nread =
+		    pv__transfer__read_repeated(state, input_fd,
+						state->transfer.transfer_buffer + state->transfer.read_position,
+						(size_t) max_to_read_into_buffer);
+		break;
+#ifdef HAVE_SPLICE
+	case PV_TRANSFERMETHOD_SPLICE:
+	case PV_TRANSFERMETHOD_SPLICE_INTERMEDIATE:
+		nread =
+		    pv__transfer__splice_repeated(state, input_fd, output_fd,
+						  state->transfer.transfer_buffer + state->transfer.read_position,
+						  (size_t) max_to_read_into_buffer, max_to_read, max_to_write);
+		break;
+#else				/* !HAVE_SPLICE */
+	case PV_TRANSFERMETHOD_SPLICE:
+	case PV_TRANSFERMETHOD_SPLICE_INTERMEDIATE:
+		nread =
+		    pv__transfer__read_repeated(state, input_fd,
+						state->transfer.transfer_buffer + state->transfer.read_position,
+						(size_t) max_to_read_into_buffer);
+		break;
+#endif				/* HAVE_SPLICE */
+#ifdef HAVE_COPY_FILE_RANGE
+	case PV_TRANSFERMETHOD_COPY_FILE_RANGE:
+		nread =
+		    pv__transfer__copy_file_range_repeated(state, input_fd, output_fd,
+							   state->transfer.transfer_buffer +
+							   state->transfer.read_position,
+							   (size_t) max_to_read_into_buffer, max_to_read, max_to_write);
+		break;
+#else				/* !HAVE_COPY_FILE_RANGE */
+	case PV_TRANSFERMETHOD_COPY_FILE_RANGE:
+		nread =
+		    pv__transfer__read_repeated(state, input_fd,
+						state->transfer.transfer_buffer + state->transfer.read_position,
+						(size_t) max_to_read_into_buffer);
+		break;
+#endif				/* HAVE_COPY_FILE_RANGE */
+	}
+
+	/*
+	 * If the actual transfer method (after any fallbacks) was
+	 * read/write, cap max_to_read to the amount that was left in the
+	 * buffer.
+	 */
+	if (PV_TRANSFERMETHOD_READWRITE == state->transfer.method)
+		max_to_read = max_to_read_into_buffer;
+
+	/*
+	 * If max_to_write is zero, state->control.rate_limit_active is
+	 * true, and the read/write transfer method was not used, wait
+	 * briefly to avoid a busy-wait, since non-read/write transfer
+	 * methods may not have called select() to wait for input.
+	 *
+	 * Also set zero_transfer_cap, since a write limit of zero means
+	 * nothing was read either, and this doesn't mean EOF.
+	 */
+	if (PV_TRANSFERMETHOD_READWRITE != state->transfer.method && state->control.rate_limit_active
+	    && 0 == max_to_write) {
 		zero_transfer_cap = true;
 		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
-	} else {
-		nread =
-		    pv__transfer__splice_repeated(state, fd, output_fd,
-						  state->transfer.transfer_buffer + state->transfer.read_position,
-						  max_buffer_available, max_to_read, max_to_write);
-#ifdef HAVE_FDATASYNC
-		if (nread > 0 && state->control.sync_after_write) {
-			/*
-			 * Sync after a successful splice, if enabled.
-			 *
-			 * Ignore non I/O errors, such as EBADFD (bad file
-			 * descriptor), EINVAL (non syncable fd, such as a
-			 * pipe), etc - only treat EIO as a failure.
-			 *
-			 * Since this is a write error, not a read error, it
-			 * can't be skipped, so set "do_not_skip_errors".
-			 */
-			if ((fdatasync(output_fd) < 0)
-			    && (EIO == errno)) {
-				nread = -1;
-				do_not_skip_errors = true;
-			}
+	}
+
+	/*
+	 * If the transfer wasn't a read/write type, then data has been
+	 * written, so sync if sync_after_write is true.
+	 *
+	 * Ignore non I/O errors, such as EBADFD (bad file descriptor),
+	 * EINVAL (non syncable fd, such as a pipe), etc - only treat EIO as
+	 * a failure.
+	 *
+	 * Since this is a write error, not a read error, it can't be
+	 * skipped, so set "do_not_skip_errors".
+	 */
+	if (PV_TRANSFERMETHOD_READWRITE != state->transfer.method && nread > 0 && state->control.sync_after_write) {
+#if defined(HAVE_FDATASYNC) && defined(_POSIX_SYNCHRONIZED_IO) && _POSIX_SYNCHRONIZED_IO > 0
+		if ((fdatasync(output_fd) < 0)
+		    && (EIO == errno)) {
+			nread = -1;
+			do_not_skip_errors = true;
 		}
-#endif				/* HAVE_FDATASYNC */
+#else				/* !HAVE_FDATASYNC et al */
+		if ((fsync(output_fd) < 0)
+		    && (EIO == errno)) {
+			nread = -1;
+			do_not_skip_errors = true;
+		}
+#endif				/* HAVE_FDATASYNC et al */
 	}
-#else				/* !HAVE_SPLICE */
-	if (max_to_read < 0) {
-		max_to_read = max_buffer_available;
-	}
-	if (max_to_read < 0)
-		max_to_read = 0;
-	nread =
-	    pv__transfer__read_repeated(fd, state->transfer.transfer_buffer + state->transfer.read_position,
-					(size_t) max_to_read);
-#endif				/* HAVE_SPLICE */
 
 	if (0 == nread) {
 		/*
@@ -735,7 +1038,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 		 * loop can move on to the next input file.
 		 */
 		if (!zero_transfer_cap) {
-			debug("%s %d: %s", "fd", fd, "reached EOF");
+			debug("%s %d: %s", "input_fd", input_fd, "reached EOF");
 			*eof_in = true;
 			if (state->transfer.write_position >= state->transfer.read_position) {
 				*eof_out = true;
@@ -749,26 +1052,21 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 		 * is in the buffer.
 		 */
 		state->transfer.read_errors_in_a_row = 0;
-#ifdef HAVE_SPLICE
 		/*
-		 * If splice() was used, the amount written was the amount
-		 * read.
+		 * If the transfer wasn't read/write, then the amount
+		 * written was the amount read.
 		 */
-		if (state->transfer.splice_used) {
+		if (PV_TRANSFERMETHOD_READWRITE != state->transfer.method) {
 			state->transfer.written = nread;
 		} else {
 			/*
-			 * When splice() wasn't used, the buffer has "nread"
-			 * more bytes in it.
+			 * The transfer was read/write, so the buffer
+			 * now has "nread" more bytes in it.
 			 */
 			state->transfer.read_position += nread;
 		}
-		debug("%s %d: %s: %ld, %s=%s", "fd", fd, "transferred", nread, "splice_used",
-		      state->transfer.splice_used ? "true" : "false");
-#else
-		state->transfer.read_position += nread;
-		debug("%s %d: %s: %ld", "fd", fd, "transferred", nread);
-#endif				/* HAVE_SPLICE */
+		debug("%s %d: %s: %ld, %s=%d", "input_fd", input_fd, "transferred", nread, "transfer.method",
+		      state->transfer.method);
 		/* Update the counter of all bytes read so far. */
 		state->transfer.total_bytes_read += nread;
 		return true;
@@ -783,7 +1081,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 	 * and return false, since this was a transient error.
 	 */
 	if ((EINTR == errno) || (EAGAIN == errno)) {
-		debug("%s %d: %s: %s", "fd", fd, "transient error - waiting briefly", strerror(errno));
+		debug("%s %d: %s: %s", "input_fd", input_fd, "transient error - waiting briefly", strerror(errno));
 		(void) is_data_ready(-1, NULL, -1, NULL, 10000);
 		return false;
 	}
@@ -820,7 +1118,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 		state->transfer.read_error_warning_shown = true;
 	}
 
-	orig_offset = (off_t) lseek(fd, 0, SEEK_CUR);
+	orig_offset = (off_t) lseek(input_fd, 0, SEEK_CUR);
 
 	/*
 	 * If the file is not seekable, the error can't be skipped, so
@@ -881,7 +1179,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 
 	/*@+longintegral@ */
 	/* splint complains about __off_t vs off_t */
-	skip_offset = (off_t) lseek(fd, (off_t) (orig_offset + amount_to_skip), SEEK_SET);
+	skip_offset = (off_t) lseek(input_fd, (off_t) (orig_offset + amount_to_skip), SEEK_SET);
 	/*@-longintegral@ */
 
 	/*
@@ -893,7 +1191,7 @@ static bool pv__transfer_read(pvstate_t state, int fd, bool *eof_in, bool *eof_o
 		amount_to_skip = 1;
 		/*@+longintegral@ */
 		/* see above */
-		skip_offset = (off_t) lseek(fd, (off_t) (orig_offset + amount_to_skip), SEEK_SET);
+		skip_offset = (off_t) lseek(input_fd, (off_t) (orig_offset + amount_to_skip), SEEK_SET);
 		/*@-longintegral@ */
 	}
 
@@ -1585,7 +1883,9 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 	 * If there is data to read, try to read some in. Return early if
 	 * there was a transient read error.
 	 *
-	 * NB this can update state->transfer.written because of splice().
+	 * NB this can update state->transfer.written because of
+	 * non-read/write transfer methods such as splice() or
+	 * copy_file_range().
 	 */
 	if (ready_to_read) {
 		if (!pv__transfer_read(state, fd, eof_in, eof_out, allowed)) {
@@ -1614,14 +1914,12 @@ ssize_t pv_transfer(pvstate_t state, int fd, bool *eof_in, bool *eof_out, off_t 
 
 	/*
 	 * If there is data to write, and the output is ready to receive it,
-	 * and splice() wasn't used this time, write some data.
+	 * and the transfer method is read/write rather than splice() or
+	 * copy_file_range(), write some data.
 	 *
 	 * Return early if there was a transient write error.
 	 */
-	if (ready_to_write
-#ifdef HAVE_SPLICE
-	    && (!state->transfer.splice_used)
-#endif				/* HAVE_SPLICE */
+	if (ready_to_write && (PV_TRANSFERMETHOD_READWRITE == state->transfer.method)
 	    && (state->transfer.read_position > state->transfer.write_position)
 	    && (state->transfer.to_write > 0)
 	    && (NULL != lineswritten)) {

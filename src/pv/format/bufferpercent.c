@@ -30,10 +30,19 @@ pvdisplay_bytecount_t pv_formatter_buffer_percent(pvformatter_args_t args)
 						(args->transfer->buffer_size));
 		(void) pv_snprintf(content, sizeof(content), "{%3.0f%%}", pct_used);
 	}
-#ifdef HAVE_SPLICE
-	if (args->transfer->splice_used)
+	switch (args->transfer->method) {
+	case PV_TRANSFERMETHOD_READWRITE:
+		break;
+	case PV_TRANSFERMETHOD_SPLICE:
 		(void) pv_snprintf(content, sizeof(content), "{%s}", "----");
-#endif
+		break;
+	case PV_TRANSFERMETHOD_SPLICE_INTERMEDIATE:
+		(void) pv_snprintf(content, sizeof(content), "{%s}", "-||-");
+		break;
+	case PV_TRANSFERMETHOD_COPY_FILE_RANGE:
+		(void) pv_snprintf(content, sizeof(content), "{%s}", "--->");
+		break;
+	}
 
 	return pv_formatter_segmentcontent(content, args);
 }

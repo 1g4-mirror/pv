@@ -375,8 +375,9 @@ int pv_main_loop(pvstate_t state)
 	if (output_fd < 0)
 		output_fd = STDOUT_FILENO;
 
-	/* Determine whether the output is a pipe. */
+	/* Determine whether the output is a regular file, a pipe, or neither. */
 	state->status.output_is_pipe = false;
+	state->status.output_is_file = false;
 	{
 		struct stat sb;
 		memset(&sb, 0, sizeof(sb));
@@ -385,6 +386,9 @@ int pv_main_loop(pvstate_t state)
 			if ((sb.st_mode & S_IFMT) == S_IFIFO) {
 				state->status.output_is_pipe = true;
 				debug("%s (fd %d)", "output is a pipe", output_fd);
+			} else if ((sb.st_mode & S_IFMT) == S_IFREG) {
+				state->status.output_is_file = true;
+				debug("%s (fd %d)", "output is a regular file", output_fd);
 			}
 			/*@+type@ *//* splint says st_mode is __mode_t, not mode_t */
 		} else {

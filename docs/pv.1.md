@@ -297,22 +297,23 @@ are explicitly switched on will be shown.
 
 **-C, \--no-splice**
 
-:   Prevent the use of **splice**(2), a system call normally used on
-    systems that support it to improve efficiency by eliminating the
-    need for a transfer buffer.
+:   Prevent the use of **splice**(2) and **copy_file_range**(2), which
+    are normally used on systems that support it to improve efficiency
+    by eliminating the need for a transfer buffer.
 
-    In the default case that **splice**(2) is used, the lack of a
-    transfer buffer prevents "**\--buffer-percent**" and
-    "**\--last-written**" from working and makes "**\--buffer-size**"
-    redundant, so using any of those options automatically switches on
-    "**\--no-splice**".
+    In the default case that **splice**(2) or **copy_file_range**(2) are
+    used, the lack of a transfer buffer prevents "**\--buffer-percent**"
+    and "**\--last-written**" from working and makes
+    "**\--buffer-size**" redundant, so using any of those options
+    automatically switches on "**\--no-splice**".
 
-    Sparse files cannot be written with **splice**(2), so using
-    "**\--sparse**" automatically switches on "**\--no-splice**".
+    Sparse files cannot be written with **splice**(2) or
+    **copy_file_range**(2), so using "**\--sparse**" automatically
+    switches on "**\--no-splice**".
 
     Switching on "**\--no-splice**" results in a small loss of transfer
-    efficiency. It has no effect on systems where **splice**(2) is
-    unavailable.
+    efficiency. It has no effect on systems where **splice**(2) and
+    **copy_file_range**(2) are unavailable.
 
 **-J BYTES, \--pipe-buffer-size BYTES**
 
@@ -360,9 +361,9 @@ are explicitly switched on will be shown.
 **-Y, \--sync**
 
 :   After every write operation, synchronise the buffer caches to disk
-    with **fdatasync**(2). This has no effect when the output is a pipe.
-    Using "**\--sync**" may improve the accuracy of the progress bar
-    when writing to a slow disk.
+    with **sync**(2), or **fdatasync**(2) if possible. This has no
+    effect when the output is a pipe. Using "**\--sync**" may improve
+    the accuracy of the progress bar when writing to a slow disk.
 
 **-K, \--direct-io**
 
@@ -585,23 +586,27 @@ contain the following sequences:
 **%T**, **%{buffer-percent}**
 
 :   Percentage of the transfer buffer in use. Equivalent to
-    "**\--buffer-percent**". Displays "{\-\-\--}" if the transfer is
-    being done with **splice**(2), since splicing to or from pipes does
-    not use the buffer.
+    "**\--buffer-percent**", but using it does not turn on
+    "**\--no-splice**".
+
+    If the transfer is using **splice**(2), displays "{\-\-\--}"; if the
+    transfer is using **splice**(2) via an intermediate input pipe,
+    displays "{-\|\|-}"; and if the transfer is using
+    **copy_file_range**(2), displays "{\-\--\>}".
 
 **%nA**, **%n{last-written}**
 
 :   Show the last *n* bytes written (for example, "**%16A**" shows the
-    last 16 bytes). Shows only dots if the transfer is being done with
-    **splice**(2), since splicing to or from pipes does not use the
-    buffer.
+    last 16 bytes). Shows only dots if the transfer is using
+    **splice**(2) or **copy_file_range**(2), since these transfer modes
+    do not use the buffer.
 
 **%nL**, **%n{previous-line}**
 
 :   Show the first *n* bytes of the most recently written line (for
     example, "**%40L**" shows the first 40 bytes). If no *n* is given,
     then this expands to fill the available space. Shows only spaces if
-    the transfer is being done with **splice**(2).
+    the transfer is using **splice**(2) or **copy_file_range**(2).
 
 **%N**, **%{name}**
 
@@ -862,8 +867,8 @@ the [**pv** home page](https://ivarch.com/p/pv).
 
 # SEE ALSO
 
-**cat**(1), **splice**(2), **fdatasync**(2), **open**(2) (for
-**O_DIRECT**), **console_codes**(4)
+**cat**(1), **splice**(2), **copy_file_range**(2), **fsync**(2),
+**fdatasync**(2), **open**(2) (for **O_DIRECT**), **console_codes**(4)
 
 # COPYRIGHT
 
