@@ -439,7 +439,7 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 	ssize_t total_spliced;
 	bool use_intermediate_pipe;
 
-	debug("%d->%d, fallback_read_amount=%lu, max_to_read=%ld, max_to_write=%ld", input_fd, output_fd,
+	debug("%d->%d, fallback_read_amount=%lu, max_to_read=%lld, max_to_write=%lld", input_fd, output_fd,
 	      fallback_read_amount, max_to_read, max_to_write);
 
 	/*
@@ -464,12 +464,12 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 	 */
 	/*@-unrecog@ */
 	bytes_to_splice = SIZE_MAX;
-	if ((max_to_read >= 0) && ((unsigned long) max_to_read <= (unsigned long) SIZE_MAX)) {
+	if ((max_to_read >= 0) && ((unsigned long long) max_to_read <= (unsigned long long) SIZE_MAX)) {
 		bytes_to_splice = (size_t) max_to_read;
 	}
 	if ((state->control.rate_limit_active || max_to_write > 0)
-	    && ((unsigned long) max_to_write <= (unsigned long) SIZE_MAX)
-	    && ((max_to_read < 0) || ((unsigned long) max_to_read >= (unsigned long) SIZE_MAX)
+	    && ((unsigned long long) max_to_write <= (unsigned long long) SIZE_MAX)
+	    && ((max_to_read < 0) || ((unsigned long long) max_to_read >= (unsigned long long) SIZE_MAX)
 		|| (max_to_read > max_to_write))
 	    ) {
 		bytes_to_splice = (size_t) max_to_write;
