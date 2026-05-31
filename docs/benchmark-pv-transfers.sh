@@ -2,15 +2,15 @@
 #
 # Benchmark transfer rates, and analyse benchmark results.
 #
-# Measure transfer rates and CPU usage with various different options,
-# multiple times, then calculate the mean and standard deviation for each
+# Measures transfer rates and CPU usage with various different options,
+# multiple times, then calculates the mean and standard deviation for each
 # set of measurements.
 #
 # The results are written to stdout as tab-separated values, each line
 # prefixed with an opaque system ID (based on "uname -a"), the PV version
 # expressed as an integer, and a run ID based on the start date and time.
 #
-# In analysis mode, read results from multiple benchmark runs on standard
+# In analysis mode, reads results from multiple benchmark runs on standard
 # input, and for each type of measurement, show the differences between
 # either the different PV versions or the different runs.
 
@@ -26,7 +26,7 @@ terseFormat='false'	# whether to use a terse report format
 
 # Script information for --help and --version.
 programName='benchmark-pv-transfers'
-programVersion='0.1.0'
+programVersion='1.0.0'
 bugReportsTo='https://codeberg.org/ivarch/pv/issues'
 copyrightYear='2026'
 copyrightHolder='Andrew Wood'
@@ -215,7 +215,6 @@ gatherMeasurements () {
 # containing the means and standard deviations for each measurement type.
 #
 # If $2 is not blank, only run the measurements whose IDs are listed in it.
-#
 runBenchmarks () {
 	pv="$1"
 	restrictTo="$2"
@@ -564,7 +563,7 @@ while test -n "$1"; do
 Usage: ${programName} [OPTIONS] [ACTION]
 Benchmark pv transfers - take measurements of transfer rate and CPU usage
 when calling pv in various different ways, and analyse results from multiple
-benchmark runs to show how each measurement changes over time.
+benchmark runs to show how each measurement changes between runs or versions.
 
 Actions:
   benchmark    - take several rounds of measurements (default action)
