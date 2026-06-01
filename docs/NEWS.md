@@ -1,13 +1,15 @@
 ### 1.11.0 - UNRELEASED
 
  * *feature:* new **--monitor** option to run a command and watch its input, output, or both ([#67](https://codeberg.org/ivarch/pv/issues/67))
- * *fix:* prevent an endless wait if there is unread data in the output pipe when its reader terminates ([#189](https://codeberg.org/ivarch/pv/issues/189))
- * *fix:* introduce an intermediate pipe on inputs to allow `splice()` to be used to improve performance ([#188](https://codeberg.org/ivarch/pv/issues/188))
- * *fix:* improve performance of **--discard** by splicing to /dev/null internally ([#191](https://codeberg.org/ivarch/pv/issues/191))
- * *fix:* use `copy_file_range`(2) when possible, to improve performance ([#196](https://codeberg.org/ivarch/pv/issues/196))
- * *fix:* prevent `splice()` falling back to `read()` when using **--rate-limit**, and stop spliced transfers requiring two EOFs when input is a terminal
+ * *feature:* allow decimal values for **--rate-limit** ([#193](https://codeberg.org/ivarch/pv/issues/193))
+ * *feature:* extend the **--format** string **%T**/**%{buffer-percent}** to indicate the transfer method when the buffer isn't being used
+ * *performance:* insert an intermediate input pipe where it would allow `splice()` to be used in more circumstances ([#188](https://codeberg.org/ivarch/pv/issues/188))
+ * *performance:* use `copy_file_range`(2) when the input and output are both regular files ([#196](https://codeberg.org/ivarch/pv/issues/196))
+ * *performance:* improve **--discard** performance by splicing to /dev/null internally ([#191](https://codeberg.org/ivarch/pv/issues/191))
  * *fix:* report signal interrupts on a new line, so that control-C doesn't write "^C" over the progress ([#187](https://codeberg.org/ivarch/pv/issues/187))
- * *fix:* allow decimal values for **--rate-limit** ([#193](https://codeberg.org/ivarch/pv/issues/193))
+ * *fix:* prevent an endless wait if there is unread data in the output pipe when its reader terminates ([#189](https://codeberg.org/ivarch/pv/issues/189))
+ * *fix:* prevent `splice()` falling back to `read()` when using **--rate-limit**
+ * *fix:* stop spliced transfers requiring two EOFs when the input is a terminal
  * *fix:* exit with an error if the PID file given to **--pidfile** cannot be replaced
  * *fix:* correct the **--help** word wrapping on very small terminals
  * *i18n:* Polish translations updated
