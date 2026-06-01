@@ -42,8 +42,7 @@ fieldsPerRecord='4'	# measurements taken: rate, time - real, user, sys.
 #  - The command to run
 # In the command to run, {PV} is replaced with the path to PV, {FILE1} and
 # {FILE2} are replaced by the random data filenames, {ZSIZE} is replaced by
-# testZeroesMB, and {OUTPUT1} and {OUTPUT2} are replaced by a temporary
-# output filenames.
+# testZeroesMB, and {OUTPUT} is replaced by a temporary output filename.
 # Each definition is stored as single line, with the above parts separated
 # by "!".
 measurementDefinitions=''
@@ -62,21 +61,21 @@ addDefinition () {
 # prefix "$1: ", each with extra options "$2".
 addStandardMeasurements () {
 	# From file via stdin to file via stdout.
-	addDefinition "$1: stdin file to file" "$2" 1 "{PV} $2 < {FILE1} > {OUTPUT1}"
+	addDefinition "$1: stdin file to file" "$2" 1 "{PV} $2 < {FILE1} > {OUTPUT}"
 	# From file to file via stdout.
-	addDefinition "$1: file to file" "$2" 1 "{PV} $2 {FILE1} > {OUTPUT1}"
+	addDefinition "$1: file to file" "$2" 1 "{PV} $2 {FILE1} > {OUTPUT}"
 	# From two files to file via stdout.
-	addDefinition "$1: two files to file" "$2" 2 "{PV} $2 {FILE1} {FILE2} > {OUTPUT1}"
+	addDefinition "$1: two files to file" "$2" 2 "{PV} $2 {FILE1} {FILE2} > {OUTPUT}"
 	# From pipe to file via stdout.
-	addDefinition "$1: pipe to file" "$2" 1 "cat {FILE1} | {PV} $2 > {OUTPUT1}"
+	addDefinition "$1: pipe to file" "$2" 1 "cat {FILE1} | {PV} $2 > {OUTPUT}"
 	# From file via stdin to pipe.
-	addDefinition "$1: stdin file to pipe" "$2" 1 "{PV} $2 < {FILE1} | cat > {OUTPUT1}"
+	addDefinition "$1: stdin file to pipe" "$2" 1 "{PV} $2 < {FILE1} | cat > {OUTPUT}"
 	# From file to pipe.
-	addDefinition "$1: file to pipe" "$2" 1 "{PV} $2 {FILE1} | cat > {OUTPUT1}"
+	addDefinition "$1: file to pipe" "$2" 1 "{PV} $2 {FILE1} | cat > {OUTPUT}"
 	# From two files to pipe.
-	addDefinition "$1: two files to pipe" "$2" 2 "{PV} $2 {FILE1} {FILE2} | cat > {OUTPUT1}"
+	addDefinition "$1: two files to pipe" "$2" 2 "{PV} $2 {FILE1} {FILE2} | cat > {OUTPUT}"
 	# From pipe to pipe.
-	addDefinition "$1: pipe to pipe" "$2" 1 "cat {FILE1} | {PV} $2 | cat > {OUTPUT1}"
+	addDefinition "$1: pipe to pipe" "$2" 1 "cat {FILE1} | {PV} $2 | cat > {OUTPUT}"
 }
 # Generate the measurement definitions, most of which are based on repeated
 # blocks of the above standard measurements, with various different options.
@@ -85,11 +84,6 @@ defineMeasurements () {
 	addStandardMeasurements 'No-splice' '-C'
 	addStandardMeasurements 'Pipe buffer 1M' '-J 1M'
 	addStandardMeasurements 'Transfer buffer 1M' '-B 1M'
-
-	addStandardMeasurements 'Directed output' '-o {OUTPUT2}'
-	addStandardMeasurements 'Directed output with no-splice' '-o {OUTPUT2} -C'
-	addStandardMeasurements 'Directed output with pipe buffer 1M' '-o {OUTPUT2} -J 1M'
-	addStandardMeasurements 'Directed output with transfer buffer 1M' '-o {OUTPUT2} -B 1M'
 
 	addStandardMeasurements 'Discard' '-X'
 	addStandardMeasurements 'Discard with no-splice' '-X -C'
@@ -188,14 +182,23 @@ gatherMeasurements () {
 			${optionsPresent} || continue
 		fi
 
+		# Add some display options to make more information visible
+		# on versions that support them.
+		pvExtraOptions=''
+		pvFormatString='%b %t %r %p %e %T'
+		if grep -Fq " -N" "${workDir}/help"; then
+			pvExtraOptions="${pvExtraOptions} -N '${measurementId}'"
+			pvFormatString="%N ${pvFormatString}"
+		fi
+		grep -Fq " -F" "${workDir}/help" && pvExtraOptions="${pvExtraOptions} -F '${pvFormatString}'"
+
 		activeCommand="$(
 		  printf '%s\n' "${templateCommand}" | sed \
-		    -e "s!{PV}!${pv}!g" \
+		    -e "s!{PV}!${pv}${pvExtraOptions}!g" \
 		    -e "s!{FILE1}!${workDir}/file1!g" \
 		    -e "s!{FILE2}!${workDir}/file2!g" \
 		    -e "s!{ZSIZE}!${testZeroesMB}!g" \
-		    -e "s!{OUTPUT1}!${workDir}/output1!g" \
-		    -e "s!{OUTPUT2}!${workDir}/output2!g"
+		    -e "s!{OUTPUT}!${workDir}/output!g"
 		)"
 
 		if test "${dataSize}" = "Z"; then
@@ -224,7 +227,7 @@ runBenchmarks () {
 	# if not.
 	tmpSpaceMB="$(df -kP "${TMPDIR:-/tmp}" | awk 'FNR==2 {print int($4/1024)}')"
 	while test "${testFileMB}" -gt 4; do
-		test "${tmpSpaceMB}" -gt $((2+4*testFileMB)) && break
+		test "${tmpSpaceMB}" -gt $((2+3*testFileMB)) && break
 		testFileMB=$((testFileMB/2))
 	done
 
