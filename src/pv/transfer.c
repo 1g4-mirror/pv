@@ -408,7 +408,7 @@ static ssize_t pv__transfer__splice_via_intermediate(pvstate_t state, int input_
  * The number of bytes spliced is capped to "max_to_read", or if
  * "max_to_write" is greater than zero and less than "max_to_read", capped
  * to "max_to_write".  A "max_to_read" of less than zero indicates no
- * maximum.
+ * maximum, in which case up to MAX_SPLICE_AT_ONCE bytes are spliced.
  *
  * If state->control.rate_limit_active is true and "max_to_write" is zero,
  * performs no action and returns zero.  Since this looks the same as EOF,
@@ -463,7 +463,7 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
 	 * it might appear to be 0.
 	 */
 	/*@-unrecog@ */
-	bytes_to_splice = SIZE_MAX;
+	bytes_to_splice = MAX_SPLICE_AT_ONCE;
 	if ((max_to_read >= 0) && ((unsigned long long) max_to_read <= (unsigned long long) SIZE_MAX)) {
 		bytes_to_splice = (size_t) max_to_read;
 	}
@@ -618,7 +618,7 @@ static ssize_t pv__transfer__splice_repeated(pvstate_t state, int input_fd, int 
  * The number of bytes copied is capped to "max_to_read", or if
  * "max_to_write" is greater than zero and less than "max_to_read", capped
  * to "max_to_write".  A "max_to_read" of less than zero indicates no
- * maximum.
+ * maximum, in which case up to MAX_CFR_AT_ONCE bytes are copied.
  *
  * If state->control.rate_limit_active is true and "max_to_write" is zero,
  * performs no action and returns zero.  Since this looks the same as EOF,
@@ -673,7 +673,7 @@ static ssize_t pv__transfer__copy_file_range_repeated(pvstate_t state, int input
 	 * it might appear to be 0.
 	 */
 	/*@-unrecog@ */
-	bytes_to_copy = SIZE_MAX;
+	bytes_to_copy = MAX_CFR_AT_ONCE;
 	if ((max_to_read >= 0) && ((unsigned long) max_to_read <= (unsigned long) SIZE_MAX)) {
 		bytes_to_copy = (size_t) max_to_read;
 	}

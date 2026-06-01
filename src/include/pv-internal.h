@@ -31,6 +31,8 @@ extern "C" {
 #define BUFFER_SIZE_MAX		(size_t) 524288	 /* max auto transfer buffer size */
 #define MAX_READ_AT_ONCE	(size_t) 524288	 /* max to read() in one go */
 #define MAX_WRITE_AT_ONCE	(size_t) 524288	 /* max to write() in one go */
+#define MAX_SPLICE_AT_ONCE	1048576		 /* max to splice() in one go */
+#define MAX_CFR_AT_ONCE		1073741824	 /* max to copy_file_range() in one go */
 #define TRANSFER_READ_TIMEOUT	0.09L		 /* seconds to time reads out at */
 #define TRANSFER_WRITE_TIMEOUT	0.9L		 /* seconds to time writes out at */
 #define MAX_LINE_POSITIONS	100000		 /* number of lines to remember positions of */
