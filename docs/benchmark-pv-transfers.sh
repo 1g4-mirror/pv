@@ -675,6 +675,7 @@ case "${action}" in
 			&& mv pv ..
 			) \
 			&& runBenchmarks "${buildDir}/pv" "${restrictMeasurementIdList}"
+			rm -rf "${buildDir}"
 			trap 'rm -rf "${workDir}"' EXIT
 		done
 	fi
