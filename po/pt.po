@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-29 21:09+0100\n"
+"POT-Creation-Date: 2026-05-31 22:29+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -306,9 +306,9 @@ msgid "a command to run must be specified"
 msgstr ""
 
 #: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
-#: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:894
-#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:981
-#: src/pv/transfer.c:1148 src/pv/transfer.c:1475
+#: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:897
+#: src/pv/state.c:909 src/pv/state.c:945 src/pv/transfer.c:1281
+#: src/pv/transfer.c:1448 src/pv/transfer.c:1775
 msgid "memory allocation failure"
 msgstr "falha de alocação de memória"
 
@@ -448,11 +448,11 @@ msgstr "erro ao fechar o ficheiro"
 msgid "input file is also the output"
 msgstr "ficheiro de entrada também é a saída"
 
-#: src/pv/file.c:581
+#: src/pv/file.c:596
 msgid "(none)"
 msgstr ""
 
-#: src/pv/file.c:583
+#: src/pv/file.c:598
 msgid "(stdin)"
 msgstr ""
 
@@ -475,7 +475,7 @@ msgstr "B/s"
 msgid "b"
 msgstr ""
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:930
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:1230
 msgid "B"
 msgstr ""
 
@@ -495,7 +495,7 @@ msgstr ""
 msgid "rate not measured"
 msgstr ""
 
-#: src/pv/loop.c:1078 src/pv/loop.c:1094 src/pv/loop.c:1112 src/pv/remote.c:93
+#: src/pv/loop.c:1082 src/pv/loop.c:1098 src/pv/loop.c:1116 src/pv/remote.c:93
 #: src/pv/remote.c:188 src/pv/remote.c:536 src/pv/remote.c:582
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
@@ -506,7 +506,7 @@ msgstr ""
 msgid "pid"
 msgstr ""
 
-#: src/pv/loop.c:1112 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1116 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
@@ -520,15 +520,15 @@ msgstr "mensagem não recebida"
 msgid "SA_SIGINFO not supported on this system"
 msgstr "SA_SIGINFO não suportado neste sistema"
 
-#: src/pv/transfer.c:819
+#: src/pv/transfer.c:1119
 msgid "warning: read errors detected"
 msgstr "aviso: erros de leitura detectados"
 
-#: src/pv/transfer.c:929
+#: src/pv/transfer.c:1229
 msgid "skipped past read error"
 msgstr "ignorado erro de leitura"
 
-#: src/pv/transfer.c:1339
+#: src/pv/transfer.c:1639
 msgid "write error"
 msgstr "erro de escrita"
 

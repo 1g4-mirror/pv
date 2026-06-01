@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-05-29 21:09+0100\n"
+"POT-Creation-Date: 2026-05-31 22:29+0100\n"
 "PO-Revision-Date: 2025-01-15 19:08+0000\n"
 "Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
@@ -303,9 +303,9 @@ msgid "a command to run must be specified"
 msgstr ""
 
 #: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
-#: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:894
-#: src/pv/state.c:906 src/pv/state.c:942 src/pv/transfer.c:981
-#: src/pv/transfer.c:1148 src/pv/transfer.c:1475
+#: src/pv/display.c:1082 src/pv/state.c:45 src/pv/state.c:897
+#: src/pv/state.c:909 src/pv/state.c:945 src/pv/transfer.c:1281
+#: src/pv/transfer.c:1448 src/pv/transfer.c:1775
 msgid "memory allocation failure"
 msgstr "ошибка выделения памяти"
 
@@ -443,11 +443,11 @@ msgstr "ошибка закрытия файла"
 msgid "input file is also the output"
 msgstr "файл ввода также используется и для вывода"
 
-#: src/pv/file.c:581
+#: src/pv/file.c:596
 msgid "(none)"
 msgstr "(нет)"
 
-#: src/pv/file.c:583
+#: src/pv/file.c:598
 msgid "(stdin)"
 msgstr "(стд. ввод)"
 
@@ -470,7 +470,7 @@ msgstr "байт/с"
 msgid "b"
 msgstr "бит"
 
-#: src/pv/format/bytes.c:39 src/pv/transfer.c:930
+#: src/pv/format/bytes.c:39 src/pv/transfer.c:1230
 msgid "B"
 msgstr "байт"
 
@@ -490,7 +490,7 @@ msgstr "скор. мин/сред/макс/дев"
 msgid "rate not measured"
 msgstr "скорость не изменяется"
 
-#: src/pv/loop.c:1078 src/pv/loop.c:1094 src/pv/loop.c:1112 src/pv/remote.c:93
+#: src/pv/loop.c:1082 src/pv/loop.c:1098 src/pv/loop.c:1116 src/pv/remote.c:93
 #: src/pv/remote.c:188 src/pv/remote.c:536 src/pv/remote.c:582
 #: src/pv/watchpid.c:123 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:158 src/pv/watchpid.c:194
@@ -501,7 +501,7 @@ msgstr "скорость не изменяется"
 msgid "pid"
 msgstr "ИДпр"
 
-#: src/pv/loop.c:1112 src/pv/watchpid.c:132 src/pv/watchpid.c:142
+#: src/pv/loop.c:1116 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
@@ -515,15 +515,15 @@ msgstr "сообщение не получено"
 msgid "SA_SIGINFO not supported on this system"
 msgstr "Этой системой не поддерживается SA_SIGINFO"
 
-#: src/pv/transfer.c:819
+#: src/pv/transfer.c:1119
 msgid "warning: read errors detected"
 msgstr "внимание: замечены ошибки чтения"
 
-#: src/pv/transfer.c:929
+#: src/pv/transfer.c:1229
 msgid "skipped past read error"
 msgstr ""
 
-#: src/pv/transfer.c:1339
+#: src/pv/transfer.c:1639
 msgid "write error"
 msgstr "ошибка записи"
 
