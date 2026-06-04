@@ -42,6 +42,9 @@ pvdisplay_bytecount_t pv_formatter_buffer_percent(pvformatter_args_t args)
 	case PV_TRANSFERMETHOD_COPY_FILE_RANGE:
 		(void) pv_snprintf(content, sizeof(content), "{%s}", "--->");
 		break;
+	case PV_TRANSFERMETHOD__UNSET:
+		(void) pv_snprintf(content, sizeof(content), "{%s}", "????");
+		break;
 	}
 
 	return pv_formatter_segmentcontent(content, args);

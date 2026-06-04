@@ -58,3 +58,11 @@ typedef bool _Bool;
 #define __attribute__(x) /* GCC-only feature */
 #endif
 #endif
+
+/* Support for the fallthrough attribute is not universal. */
+/* From https://stackoverflow.com/questions/45349079/how-to-use-attribute-fallthrough-correctly-in-gcc */
+#if defined(__GNUC__) && __GNUC__ >= 7
+ #define FALL_THROUGH __attribute__ ((fallthrough))
+#else
+ #define FALL_THROUGH /*@-noeffect@*/ ((void)0) /*@+noeffect@*/
+#endif /* __GNUC__ >= 7 */

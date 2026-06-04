@@ -85,7 +85,8 @@ typedef enum {
 	PV_TRANSFERMETHOD_READWRITE,		/* read() + write() */
 	PV_TRANSFERMETHOD_SPLICE,		/* splice() */
 	PV_TRANSFERMETHOD_SPLICE_INTERMEDIATE,	/* splice() through an intermediate input pipe */
-	PV_TRANSFERMETHOD_COPY_FILE_RANGE	/* copy_file_range() */
+	PV_TRANSFERMETHOD_COPY_FILE_RANGE,	/* copy_file_range() */
+	PV_TRANSFERMETHOD__UNSET
 } pvtransfermethod_t;
 
 /*
