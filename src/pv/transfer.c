@@ -107,6 +107,86 @@ static int is_data_ready(int fd_in, /*@null@ */ bool *fd_in_ready, int fd_out, /
 
 
 /*
+ * Set a timer that will raise a signal after "interval" seconds, repeating
+ * if setitimer() is available.  This is used by calling functions to ensure
+ * that progress information continues to be updated, by interrupting any
+ * subsequent write, splice, etc that takes too long.
+ */
+static void interrupter_start(double interval)
+{
+#if HAVE_SETITIMER
+	struct itimerval new_timer;
+
+	/*@-unrecog@ */
+	/* splint doesn't know setitimer or ITIMER_REAL. */
+	memset(&new_timer, 0, sizeof(new_timer));
+	new_timer.it_value.tv_sec = (time_t) (interval);
+	new_timer.it_value.tv_usec = (suseconds_t) (((long) (interval * 1000000.0)) % 1000000);
+
+	/*
+	 * The interval has to be set so that the timer continues to
+	 * repeat while writes are attempted, especially as it's
+	 * possible that the initial timer run will expire
+	 * immediately if the period is less than 1 second.
+	 */
+
+	new_timer.it_interval.tv_sec = new_timer.it_value.tv_sec;
+	new_timer.it_interval.tv_usec = new_timer.it_value.tv_usec;
+
+	debug("%s: [%lds,%ldus]", "setting interval timer", (long) (new_timer.it_value.tv_sec),
+	      (long) (new_timer.it_value.tv_usec));
+
+	if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
+		/*
+		 * Record failure only as debugging information,
+		 * since if this call failed, it's not actionable by
+		 * the user and would only clutter the display.
+		 */
+		debug("%s: %s", "setitimer (set) failed", strerror(errno));
+	}
+
+	/*@+unrecog@ */
+#else				/* ! HAVE_SETITIMER */
+	(void) alarm(1);
+	debug("%s", "setting alarm");
+#endif				/* HAVE_SETITIMER */
+}
+
+
+/*
+ * Stop the signal interrupt generation timer.  Note that errno is
+ * preserved.
+ */
+static void interrupter_stop(void)
+{
+	int old_errno = errno;
+#if HAVE_SETITIMER
+	struct itimerval new_timer;
+
+	/*@-unrecog@ */
+	/* splint doesn't know setitimer or ITIMER_REAL. */
+
+	memset(&new_timer, 0, sizeof(new_timer));
+	new_timer.it_interval.tv_sec = 0;
+	new_timer.it_interval.tv_usec = 0;
+	new_timer.it_value.tv_sec = 0;
+	new_timer.it_value.tv_usec = 0;
+	if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
+		/* Debug output only, as above. */
+		debug("%s: %s", "setitimer (clear) failed", strerror(errno));
+	}
+
+	/*@+unrecog@ */
+#else				/* ! HAVE_SETITIMER */
+	debug("%s", "cancelling alarm");
+	(void) alarm(0);
+#endif				/* HAVE_SETITIMER */
+
+	errno = old_errno;
+}
+
+
+/*
  * Read up to "count" bytes from file descriptor "fd" into the buffer "buf",
  * in chunks of no more than MAX_READ_AT_ONCE bytes at a time.
  *
@@ -920,6 +1000,8 @@ static bool pv__transfer_read(pvstate_t state, int input_fd, bool *eof_in, bool 
 		 * transfer_attempted to false, so this loop will go around
 		 * again.
 		 */
+		/* Ensure the read is interrupted if it takes too long. */
+		interrupter_start(state->control.interval);
 		transfer_attempted = true;
 		switch (state->transfer.method) {
 		case PV_TRANSFERMETHOD_COPY_FILE_RANGE:
@@ -948,6 +1030,7 @@ static bool pv__transfer_read(pvstate_t state, int input_fd, bool *eof_in, bool 
 							(size_t) max_to_read_into_buffer);
 			break;
 		}
+		interrupter_stop();
 	}
 
 	/*
@@ -1309,46 +1392,9 @@ static bool pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, lon
 			}
 		}
 
-		/*
-		 * Set an interval timer or an alarm to interrupt the write
-		 * with a signal if the write takes too long, so progress
-		 * information can continue to be produced.
-		 */
-#if HAVE_SETITIMER
-		struct itimerval new_timer;
+		/* Ensure the write is interrupted if it takes too long. */
+		interrupter_start(state->control.interval);
 
-		/*@-unrecog@ */
-		/* splint doesn't know setitimer or ITIMER_REAL. */
-		memset(&new_timer, 0, sizeof(new_timer));
-		new_timer.it_value.tv_sec = (time_t) (state->control.interval);
-		new_timer.it_value.tv_usec = (suseconds_t) (((long) (state->control.interval * 1000000.0)) % 1000000);
-
-		/*
-		 * The interval has to be set so that the timer continues to
-		 * repeat while writes are attempted, especially as it's
-		 * possible that the initial timer run will expire
-		 * immediately if the period is less than 1 second.
-		 */
-
-		new_timer.it_interval.tv_sec = new_timer.it_value.tv_sec;
-		new_timer.it_interval.tv_usec = new_timer.it_value.tv_usec;
-
-		debug("%s: [%lds,%ldus]", "setting interval timer", (long) (new_timer.it_value.tv_sec),
-		      (long) (new_timer.it_value.tv_usec));
-
-		if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
-			/*
-			 * Record failure only as debugging information,
-			 * since if this call failed, it's not actionable by
-			 * the user and would only clutter the display.
-			 */
-			debug("%s: %s", "setitimer (set) failed", strerror(errno));
-		}
-
-#else				/* ! HAVE_SETITIMER */
-		(void) alarm(1);
-		debug("%s", "setting alarm");
-#endif				/* HAVE_SETITIMER */
 		debug("%s: %ld %s", "beginning write attempt", (long) (state->transfer.to_write), "bytes");
 		nwritten = pv__transfer__write_repeated(state->control.output_fd,
 							state->transfer.transfer_buffer +
@@ -1361,22 +1407,8 @@ static bool pv__transfer_write(pvstate_t state, bool *eof_in, bool *eof_out, lon
 		} else {
 			debug("%s: %ld", "bytes written", (long) nwritten);
 		}
-#if HAVE_SETITIMER
-		memset(&new_timer, 0, sizeof(new_timer));
-		new_timer.it_interval.tv_sec = 0;
-		new_timer.it_interval.tv_usec = 0;
-		new_timer.it_value.tv_sec = 0;
-		new_timer.it_value.tv_usec = 0;
-		if (0 != setitimer(ITIMER_REAL, &new_timer, NULL)) {
-			/* Debug output only, as above. */
-			debug("%s: %s", "setitimer (clear) failed", strerror(errno));
-		}
 
-		/*@+unrecog@ */
-#else				/* ! HAVE_SETITIMER */
-		debug("%s", "cancelling alarm");
-		(void) alarm(0);
-#endif				/* HAVE_SETITIMER */
+		interrupter_stop();
 	}
 
       pv__transfer_write_completed:
