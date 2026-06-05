@@ -10,6 +10,7 @@
  * *fix:* prevent an endless wait if there is unread data in the output pipe when its reader terminates ([#189](https://codeberg.org/ivarch/pv/issues/189))
  * *fix:* prevent `splice()` falling back to `read()` when using **--rate-limit**
  * *fix:* stop spliced transfers requiring two EOFs when the input is a terminal
+ * *fix:* add timer interrupt to spliced transfers to avoid progress display lockup when the receiver stalls
  * *fix:* exit with an error if the PID file given to **--pidfile** cannot be replaced
  * *fix:* correct the **--help** word wrapping on very small terminals
  * *i18n:* Polish translations updated
