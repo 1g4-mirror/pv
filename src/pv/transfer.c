@@ -675,8 +675,6 @@ static ssize_t pv__transfer__copy_file_range_repeated(pvstate_t state, int input
 			return total_copied;
 		}
 
-		/* TODO: possibly check for ENOSPC. */
-
 		/*
 		 * If the copy failed, turn it off for this input file
 		 * descriptor.  Then, if nothing has been spliced so far,
@@ -835,6 +833,10 @@ static bool pv__transfer_read(pvstate_t state, int input_fd, bool *eof_in, bool 
 	debug
 	    ("%d->%d, max_to_write=%lld, max_to_read=%lld, max_to_read_into_buffer=%lld, max_buffer_available=%lld",
 	     input_fd, output_fd, max_to_write, max_to_read, max_to_read_into_buffer, max_buffer_available);
+	debug("%s=%s, %s=%s", "current_input_is_file", state->status.current_input_is_file ? "true" : "false",
+	      "current_input_is_pipe", state->status.current_input_is_pipe ? "true" : "false");
+	debug("%s=%s, %s=%s", "output_is_file", state->status.output_is_file ? "true" : "false", "output_is_pipe",
+	      state->status.output_is_pipe ? "true" : "false");
 
 	/* Determine which transfer method to attempt. */
 
