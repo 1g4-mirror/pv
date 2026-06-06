@@ -34,6 +34,13 @@ copyrightHolder='Andrew Wood'
 # Constants.
 fieldsPerRecord='4'	# measurements taken: rate, time - real, user, sys.
 
+# Hash function - write hex on stdout based on a hash of stdin.
+runHash () {
+	command -v md5sum >/dev/null 2>&1 && exec md5sum
+	# OpenBSD has no "md5sum" but does have "cksum -a md5".
+	cksum -a md5 2>/dev/null || cksum
+}
+
 # Define the measurements. Each measurement definition contains:
 #  - The ID of the measurement
 #  - The name of the measurement
@@ -52,7 +59,7 @@ addDefinition () {
 	measurementDefinitions="$(
 	  printf '%s\n%s!%s!%s!%s!%s\n' \
 	    "${measurementDefinitions}" \
-	    "$(printf '%s\n' "$1" | md5sum | cut -b1-7)" \
+	    "$(printf '%s\n' "$1" | runHash | cut -b1-7)" \
 	    "$1" "$2" "$3" "$4" \
 	  | grep .
 	)"
@@ -247,7 +254,7 @@ runBenchmarks () {
 
 	# Define identifiers for the system this is running on, the pv
 	# version being benchmarked, and this specific benchmark run.
-	sysId="$(uname -a | md5sum | cut -b1-7)"
+	sysId="$(uname -a | runHash | cut -b1-7)"
 	pvId="$(${pv} --version | awk 'FNR==1{print $2}' | awk -F . '{print 1000000*$1+1000*$2+$3}')"
 	runId="$(date '+%Y%m%d%H%M%S')"
 	outputPrefix="$(printf '%s\t%s\t%s\n' "${sysId}" "${pvId}" "${runId}")"
