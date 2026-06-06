@@ -38,7 +38,7 @@ fieldsPerRecord='4'	# measurements taken: rate, time - real, user, sys.
 runHash () {
 	command -v md5sum >/dev/null 2>&1 && exec md5sum
 	# OpenBSD has no "md5sum" but does have "cksum -a md5".
-	cksum -a md5 2>/dev/null || cksum
+	cksum -r -a md5 2>/dev/null || cksum
 }
 
 # Define the measurements. Each measurement definition contains:
