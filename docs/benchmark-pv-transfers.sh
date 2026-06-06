@@ -223,9 +223,11 @@ runBenchmarks () {
 	pv="$1"
 	restrictTo="$2"
 
-	# Check there's enough room for the test files - make them smaller,
-	# if not.
-	tmpSpaceMB="$(df -kP "${TMPDIR:-/tmp}" | awk 'FNR==2 {print int($4/1024)}')"
+	# Check there's enough room for the test files, meaning that 2 test
+	# files + 1 output file + 2MB doesn't add up to more than 75% of the
+	# space on the filesystem holding TMPDIR - make the test files
+	# smaller, if not.
+	tmpSpaceMB="$(df -kP "${TMPDIR:-/tmp}" | awk 'FNR==2 {print int($4*3/4096)}')"
 	while test "${testFileMB}" -gt 4; do
 		test "${tmpSpaceMB}" -gt $((2+3*testFileMB)) && break
 		testFileMB=$((testFileMB/2))
