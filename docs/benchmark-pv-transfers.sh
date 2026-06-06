@@ -189,7 +189,7 @@ gatherMeasurements () {
 		fi
 
 		if test -n "${requiredOptions}"; then
-			optionLetters="$(printf 'x%s\n' "${requiredOptions}" | sed 's/-/\n-/g' | grep '^-' | cut -b 2)"
+			optionLetters="$(printf 'x%s\n' "${requiredOptions}" | tr -d '!' | sed 's/-/!-/g' | tr '!' '\n' | grep '^-' | cut -b 2)"
 			optionsPresent='true'
 			for pvOption in ${optionLetters}; do
 				grep -Fq " -${pvOption}" "${workDir}/help" || optionsPresent='false'
