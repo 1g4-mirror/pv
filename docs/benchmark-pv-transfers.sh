@@ -123,6 +123,14 @@ showMeasurementDefinitions () {
 	| awk -F '!' '{printf "%s\t%-60s\t%s\n", $1, $2, $5}'
 }
 
+# Sort a list of version numbers on stdin, in version order.
+versionSort () {
+	# If sort has no -V, like on CentOS 5, fall back to a simplistic
+	# substitute.
+	sort -V 2>/dev/null \
+	|| perl -pe '$x=$_;$x=~s/(0*[0-9]+)/sprintf("%09d",$1)/ge;chomp $x;$_=$x." ".$_' | sort | awk '{print $2}'
+}
+
 # Write a line of results for the measurement with ID $1 and name $2, round
 # ${thisRound}, reading the times from ${workDir}/times and deriving the
 # rate from the elapsed time (the real time in the times file) and the size
@@ -672,7 +680,7 @@ case "${action}" in
 		runBenchmarks "${pv}" "${restrictMeasurementIdList}"
 	else
 		find "${sourcesDir}" -type f -name "*.tar.gz" \
-		| sort -V \
+		| versionSort \
 		| while read -r sourcesFile; do
 			buildDir="$(mktemp -d "${sourcesFile}.build.XXXXXX")" || continue
 			trap 'rm -rf "${workDir}" "${buildDir}"' EXIT
