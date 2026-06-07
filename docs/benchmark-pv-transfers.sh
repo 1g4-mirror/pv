@@ -159,7 +159,6 @@ user %3U
 sys %3S"
 	time sh -c "{ $2; } 2>&3"
 	) 3>&2 2>"${workDir}/times"
-	rm -f "${workDir}/elapsed"
 }
 
 # Run all defined measurements for which the required options are available.
