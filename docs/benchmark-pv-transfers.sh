@@ -508,14 +508,14 @@ END {
 			cat "${workDir}/item-report-with-heading"
 		else
 			lineUpColumns < "${workDir}/item-report-with-heading" \
-			| sed '1{s,M:,μ:,g;s,S:,σ:,g;s,C:,±:,g}'
+			| sed '1{s,M:,μ:,g;s,S:,σ:,g;s,C:,±:,g;}'
 		fi
 	done
 	} < "${workDir}/measurement-ids" \
 	> "${workDir}/measurements-report"
 	if "${terseFormat}"; then
 		lineUpColumns < "${workDir}/measurements-report" \
-		| sed '1{s,M:,μ:,g;s,S:,σ:,g;s,C:,±:,g}'
+		| sed '1{s,M:,μ:,g;s,S:,σ:,g;s,C:,±:,g;}'
 	else
 		cat "${workDir}/measurements-report"
 	fi
