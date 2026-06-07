@@ -318,7 +318,7 @@ FNR==1 { for (field=1; field<=fieldcount; field++) { mean[field] += $(2+field) }
 FNR>1 { samples++; for (field=1; field<=fieldcount; field++) { variance=$(1+field)-mean[field]; sum_variance_squared[field] += (variance*variance) } }
 END { printf "%s\t%s", "σ", mId; for (field=1; field<=fieldcount; field++) { printf "\t%.3f", sqrt(sum_variance_squared[field]/samples) }; printf "\t%s\n", mName }' \
 		> "${workDir}/stddev"
-		sed "s!^!${outputPrefix}\t!" "${workDir}/mean" "${workDir}/stddev"
+		sed "s,^,${outputPrefix}!," "${workDir}/mean" "${workDir}/stddev" | tr '!' '\t'
 	done
 	} < "${workDir}/measurement-ids"
 	rm -f "${workDir}/file1" "${workDir}/file2" "${workDir}/output1" "${workDir}/output2"
@@ -473,7 +473,8 @@ END {
 		# having replaced spaces in it with underscores.
 		if ${terseFormat}; then
 			showName="$(printf '%s\n' "${measurementName}" | tr ' ' '_')"
-			sed -i "s!^!${showName}\t!" "${workDir}/item-report"
+			sed "s,^,${showName}!," < "${workDir}/item-report" | tr '!' '\t' > "${workDir}/item-report.prefixed"
+			mv -f "${workDir}/item-report.prefixed" "${workDir}/item-report"
 		fi
 		# Format the report.
 		# Since the column widths are set by an awk script which
@@ -494,7 +495,7 @@ END {
 			  'M:tSys' 'S:tSys' 'C:tSys' \
 			| {
 				if ${terseFormat}; then
-					sed "s!^!Measurement\t!"
+					sed 's,^,Measurement!,' | tr '!' '\t'
 				else
 					cat
 				fi
