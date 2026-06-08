@@ -435,7 +435,7 @@ int pv_next_file(pvstate_t state, unsigned int filenum, int oldfd)
 		input_file_is_output = false;
 
 	if (input_file_is_output) {
-		pv_error("%s: %s", _("input file is also the output"), NULL == next_filename ? "-" : next_filename);
+		pv_error("%s: %s", NULL == next_filename ? "-" : next_filename, _("input file is also the output"));
 		(void) close(fd);
 		state->status.exit_status |= PV_ERROREXIT_OUROBOROS;
 		return -1;
