@@ -223,7 +223,7 @@ static bool opts_watchfd_processname(opts_t opts, const char *process_name)
 			exit(EXIT_FAILURE);
 		}
 		if (dup2(nullfd, STDIN_FILENO) < 0) {
-			pv_error("%s", "dup2");
+			pv_perror("%s", "dup2");
 			exit(EXIT_FAILURE);
 		}
 		(void) close(nullfd);
