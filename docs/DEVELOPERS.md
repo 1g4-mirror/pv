@@ -133,6 +133,50 @@ translations (empty _"msgstr"_ lines) or translations marked as "fuzzy", as
 these will need to be corrected by translators.
 
 
+## Benchmarking
+
+The "`docs/benchmark-pv-transfers.sh`" script is used to check that new
+changes to **pv** aren't making it less efficient at transferring data.
+Run it with the **--help** option for a summary of its options.
+
+In _benchmark_ mode, it takes multiple rounds of measurements of the
+transfer rate using various different transfer options.  The mean (μ) and
+standard deviation (σ) of each measurement is produced at the end of the
+run.  All data is written to the standard output - pipe to "`tee OUTPUT`" to
+write to a file _OUTPUT_ while still displaying it on the terminal.
+
+Either a specific **pv** binary can be benchmarked (with the **-p** option),
+or multiple **pv** versions can be benchmarked in a single call, each one
+counting as an individual run (with the **-d** option, pointing to a
+directory containing _tar.gz_ source archives).
+
+Transfer rate measurements use up to two test files, the size of which can
+be overridden by the **-s** option, and some measurements will transfer and
+discard zeros from _/dev/zero_, the amount of which can be overridden with
+the **-z** option.
+
+The measured rates may vary significantly due to external factors such as
+system load, so multiple measurement rounds (the **-r** option) are
+recommended per run.
+
+In _analyse_ mode, the results of multiple runs are read from standard
+input, and a report is produced that shows how each measurement differs
+between runs.
+
+If the input data is from multiple versions of **pv**, the differences
+between versions will be compared; otherwise, the differences between
+individual runs will be compared.  The **-c** option overrides this.
+
+When re-using data from multiple runs, the **-f** option causes the report
+to only show the differences between the last two runs (or versions).
+
+The **-t** option produces a terse report that is more machine-readable.
+
+In _measurements_ mode, a list of all of the measurement types is produced.
+Each type of measurement has an associated ID - these IDs can be passed to
+the benchmark mode to only run a subset of the measurements in that run.
+
+
 ## Release checklist
 
 The package maintainer should run through these steps for a new release:
