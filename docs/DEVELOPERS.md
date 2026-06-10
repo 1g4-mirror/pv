@@ -135,9 +135,10 @@ these will need to be corrected by translators.
 
 ## Benchmarking
 
-The "`docs/benchmark-pv-transfers.sh`" script is used to check that new
-changes to **pv** aren't making it less efficient at transferring data.
-Run it with the **--help** option for a summary of its options.
+The "`docs/benchmark-pv-transfers.sh`" script, introduced in
+[#198](https://codeberg.org/ivarch/pv/issues/198), is used to check that new
+changes to **pv** aren't making it less efficient at transferring data.  Run
+it with the **--help** option for a summary of its options.
 
 In _benchmark_ mode, it takes multiple rounds of measurements of the
 transfer rate using various different transfer options.  The mean (μ) and
