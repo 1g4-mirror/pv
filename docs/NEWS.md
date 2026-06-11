@@ -1,4 +1,4 @@
-### 1.11.0 - UNRELEASED
+### 1.11.0 - 11 June 2026
 
  * *feature:* new **--monitor** option to run a command and watch its input, output, or both ([#67](https://codeberg.org/ivarch/pv/issues/67))
  * *feature:* allow decimal values for **--rate-limit** ([#193](https://codeberg.org/ivarch/pv/issues/193))
