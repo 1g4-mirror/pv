@@ -1,3 +1,7 @@
+### UNRELEASED
+
+ * *cleanup:* eliminate potential for closure of standard output under a combination of error conditions when using **--monitor** mode ([#201](https://codeberg.org/ivarch/pv/pulls/201))
+
 ### 1.11.0 - 11 June 2026
 
  * *feature:* new **--monitor** option to run a command and watch its input, output, or both ([#67](https://codeberg.org/ivarch/pv/issues/67))

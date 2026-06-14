@@ -118,6 +118,7 @@ is acknowledged and greatly appreciated:
  * [Wolfgang Hoschek](https://codeberg.org/whoschek) - provided a fix for the endless wait if the output receiver exits before emptying the pipe ([#189](https://codeberg.org/ivarch/pv/issues/189))
  * [oech3](https://codeberg.org/oech3) - suggested and tested performance improvements using `splice()` in more situations on Linux ([#188](https://codeberg.org/ivarch/pv/issues/188), [#191](https://codeberg.org/ivarch/pv/issues/191), [#192](https://codeberg.org/ivarch/pv/issues/192))
  * [Barak A. Pearlmutter](https://codeberg.org/barak) - suggested that "**--rate-limit**" should accept non-integer values ([#193](https://codeberg.org/ivarch/pv/issues/193))
+ * [dirkmueller](https://codeberg.org/dirkmueller) - fixed the potential for stdout closure under a combination of error conditions in **--monitor** mode ([#201](https://codeberg.org/ivarch/pv/pulls/201))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
