@@ -419,7 +419,7 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 	/* Common idiom to close an fd, and set it to -1, if it's open. */
 #define close_if_open(x) if (-1 != x) { \
 (void) close(x); \
-x = 1; \
+x = -1; \
 }
 
 	/* Create a process to run the command. */
