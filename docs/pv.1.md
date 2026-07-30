@@ -519,6 +519,12 @@ contain the following sequences:
 :   The percentage completion (or maximum rate, with "**\--gauge**" when
     the size is unknown).
 
+**%{progress-conemu}**
+
+:   Emit the ConEmu \"progress bar\" sequences (OSC 9;4) to show the
+    progress percentage in the terminal\'s title tab, on terminals which
+    support it.
+
 **%{bar-plain}**
 
 :   Progress bar in the standard plain format, without any sides, and
@@ -678,6 +684,12 @@ Some suggested common switch combinations:
 
 :   The default behaviour: progress bar, elapsed time, estimated
     completion time, current rate, and byte counter.
+
+**pv \--format=\'%{progress-conemu}%{bytes} %{timer} %{rate} %{progress} %{eta}\'**
+
+:   Show the byte counter, elapsed time, current rate, progress bar, and
+    ETA, and show the percentage progress in the terminal\'s tab bar, on
+    terminals that support ConEmu OSC 9;4 sequences.
 
 On macOS, it may be useful to specify "**\--buffer-size 1024**" in a
 pipeline, as this may improve performance.

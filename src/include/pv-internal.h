@@ -348,6 +348,7 @@ struct pvstate_s {
 		bool format_uses_colour;	 /* set if the format string uses colours */
 		bool colour_permitted;		 /* whether colour is permitted for this display */
 		bool sgr_code_active;		 /* set while SGR code is active in a display line */
+		bool using_osc94;		 /* set if the format contains an OSC 9;4 code */
 		bool final_update;		 /* set internally on the final update */
 		bool output_produced;		 /* set once anything written to terminal */
 
@@ -628,6 +629,7 @@ pvdisplay_bytecount_t pv_formatter_segmentcontent(char *, pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_progress(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_progress_bar_only(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_progress_amount_only(pvformatter_args_t);
+pvdisplay_bytecount_t pv_formatter_progress_conemu(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_bar_default(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_bar_plain(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_bar_block(pvformatter_args_t);

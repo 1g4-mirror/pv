@@ -25,6 +25,7 @@ src/pv/format/averagerate.c \
 src/pv/format/barstyle.c \
 src/pv/format/bufferpercent.c \
 src/pv/format/bytes.c \
+src/pv/format/conemu.c \
 src/pv/format/eta.c \
 src/pv/format/fineta.c \
 src/pv/format/lastwritten.c \

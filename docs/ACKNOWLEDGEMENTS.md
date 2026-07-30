@@ -119,6 +119,7 @@ is acknowledged and greatly appreciated:
  * [oech3](https://codeberg.org/oech3) - suggested and tested performance improvements using `splice()` in more situations on Linux ([#188](https://codeberg.org/ivarch/pv/issues/188), [#191](https://codeberg.org/ivarch/pv/issues/191), [#192](https://codeberg.org/ivarch/pv/issues/192))
  * [Barak A. Pearlmutter](https://codeberg.org/barak) - suggested that "**--rate-limit**" should accept non-integer values ([#193](https://codeberg.org/ivarch/pv/issues/193))
  * [dirkmueller](https://codeberg.org/dirkmueller) - fixed the potential for stdout closure under a combination of error conditions in **--monitor** mode ([#201](https://codeberg.org/ivarch/pv/pulls/201))
+ * [InkstainTheBat](https://codeberg.org/InkstainTheBat) - suggested ConEmu OSC 9;4 support ([#202](https://codeberg.org/ivarch/pv/issues/202))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 

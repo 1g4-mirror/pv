@@ -543,6 +543,7 @@ pvdisplay_bytecount_t pv_formatter_segmentcontent(char *content, pvformatter_arg
 		{ "{progress}", &pv_formatter_progress, true },
 		{ "{progress-amount-only}", &pv_formatter_progress_amount_only, false },
 		{ "{progress-bar-only}", &pv_formatter_bar_default, true },
+		{ "{progress-conemu}", &pv_formatter_progress_conemu, false },
 		{ "{bar-plain}", &pv_formatter_bar_plain, true },
 		{ "{bar-block}", &pv_formatter_bar_block, true },
 		{ "{bar-granular}", &pv_formatter_bar_granular, true },
@@ -1092,6 +1093,9 @@ static bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, re
 
 	/* Clear the SGR active codes flag, for the SGR formatter. */
 	display->sgr_code_active = false;
+
+	/* Clear the OSC 9;4 active flag. */
+	display->using_osc94 = false;
 
 	/*
 	 * Populate the internal segments buffer with each component's

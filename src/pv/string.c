@@ -321,12 +321,12 @@ void *pv_memrchr(const void *buffer, int match, size_t length)
  * Return the number of display columns needed to show the
  * non-null-terminated string "string" whose length in bytes is "bytes".
  *
- * Skips ECMA-48 CSI (ESC [ ...) sequences, but any other control characters
- * are treated as printable.
+ * Skips ECMA-48 CSI (ESC [ ...) sequences, and OSC (ESC ] ...) sequences,
+ * but any other control characters are treated as printable.
  *
- * Internally, after skipping CSI sequences, the string is converted to a
- * wide character string, and each wide character's width is checked with
- * "wcswidth()".
+ * Internally, after skipping CSI or OSC sequences, the string is converted
+ * to a wide character string, and each wide character's width is checked
+ * with "wcswidth()".
  *
  * If NLS is disabled, or the string cannot be converted, this just returns
  * the number of bytes in the string that aren't part of CSI sequences.
@@ -364,19 +364,36 @@ size_t pv_strwidth(const char *string, size_t bytes)
 		raw_string = allocated_raw;
 	}
 
-	/* Copy the original string, skipping ECMA-48 CSI sequences. */
+	/*
+	 * Copy the original string, skipping ECMA-48 CSI and OSC sequences.
+	 */
 	for (read_pos = 0, write_pos = 0; read_pos < bytes; read_pos++) {
-		if ((string[read_pos] != '\033') || (read_pos >= bytes - 1) || (string[read_pos + 1] != '[')) {
+		if ((string[read_pos] == '\033') && (read_pos < bytes - 1) && (string[read_pos + 1] == '[')) {
+			/* Skip CSI - ends with anything other than 0-9 or ';'. */
+			read_pos += 2;
+			while ((read_pos < bytes - 1)
+			       && ((string[read_pos] >= '0' && string[read_pos] <= '9')
+				   || (';' == string[read_pos])
+			       )
+			    ) {
+				read_pos++;
+			}
+		} else if ((string[read_pos] == '\033') && (read_pos < bytes - 1) && (string[read_pos + 1] == ']')) {
+			/* Skip OSC - ends with BEL or ST (ESC \). */
+			read_pos += 2;
+			while (read_pos < bytes - 1) {
+				if (string[read_pos] == '\007') {
+					break;
+				}
+				if ((string[read_pos] == '\033') && (string[1 + read_pos] == '\\')) {
+					read_pos++;
+					break;
+				}
+				read_pos++;
+			}
+		} else {
+			/* Don't skip, copy across. */
 			raw_string[write_pos++] = string[read_pos];
-			continue;
-		}
-		read_pos += 2;
-		while ((read_pos < bytes - 1)
-		       && ((string[read_pos] >= '0' && string[read_pos] <= '9')
-			   || (';' == string[read_pos])
-		       )
-		    ) {
-			read_pos++;
 		}
 	}
 	raw_string[write_pos] = '\0';

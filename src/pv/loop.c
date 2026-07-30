@@ -63,6 +63,15 @@ static long ldsqrt(long double value)
 
 
 /*
+ * Turn off the OSC 9;4 (ConEmu) progress bar.
+ */
+static void pv_clear_osc94(pvstate_t state)
+{
+	pv_tty_write(&(state->flags), "\033]9;4;0;0\033\\", 11);
+}
+
+
+/*
  * If the flag is set to say that a terminal resize signal was received,
  * clear the flag, resize the display, and return true.
  */
@@ -465,6 +474,8 @@ int pv_main_loop(pvstate_t state)
 	if (input_fd < 0) {
 		if (state->control.cursor)
 			pv_crs_fini(&(state->cursor), &(state->control), &(state->flags));
+		if (state->display.using_osc94)
+			pv_clear_osc94(state);
 		return state->status.exit_status;
 	}
 #if HAVE_POSIX_FADVISE
@@ -638,6 +649,8 @@ int pv_main_loop(pvstate_t state)
 			debug("%s: %s", "write error from pv_transfer", strerror(errno));
 			if (state->control.cursor)
 				pv_crs_fini(&(state->cursor), &(state->control), &(state->flags));
+			if (state->display.using_osc94)
+				pv_clear_osc94(state);
 			return state->status.exit_status;
 		}
 
@@ -890,6 +903,9 @@ int pv_main_loop(pvstate_t state)
 		    && (state->display.output_produced))
 			pv_tty_write(&(state->flags), "\n", 1);
 	}
+
+	if (state->display.using_osc94)
+		pv_clear_osc94(state);
 
 	/* Tell the error routines that progress bar display has finished. */
 	pv_end_display();
@@ -1584,6 +1600,9 @@ int pv_query_loop(pvstate_t state, pid_t query)
 		    && (state->display.output_produced))
 			pv_tty_write(&(state->flags), "\n", 1);
 	}
+
+	if (state->display.using_osc94)
+		pv_clear_osc94(state);
 
 	/* Tell the error routines that progress bar display has finished. */
 	pv_end_display();

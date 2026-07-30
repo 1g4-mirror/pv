@@ -1,4 +1,4 @@
-.TH PV 1 2026-06-11 pv-1.11.0 "User Commands"
+.TH PV 1 2026-07-30 pv-1.11.0 "User Commands"
 .\"
 .SH NAME
 pv \- monitor and manage the progress of data through a pipe
@@ -505,6 +505,10 @@ Expands to fill the remaining space unless prefixed by a number.
 The percentage completion (or maximum rate, with \*(lq\fB\-\-gauge\fR\*(rq
 when the size is unknown).
 .TP
+.B %{progress-conemu}
+Emit the ConEmu "progress bar" sequences (OSC 9;4) to show the progress
+percentage in the terminal's title tab, on terminals which support it.
+.TP
 .B %{bar\-plain}
 Progress bar in the standard plain format, without any sides, and without
 any percentage displayed afterwards.
@@ -675,6 +679,11 @@ Show only the elapsed time - useful as a simple timer, such as
 .B pv \-pterb
 The default behaviour: progress bar, elapsed time, estimated completion
 time, current rate, and byte counter.
+.TP
+.B pv \-\-format='%{progress-conemu}%{bytes} %{timer} %{rate} %{progress} %{eta}'
+Show the byte counter, elapsed time, current rate, progress bar, and ETA,
+and show the percentage progress in the terminal's tab bar, on terminals
+that support ConEmu OSC 9;4 sequences.
 .PP
 On macOS, it may be useful to specify \*(lq\fB\-\-buffer\-size\~1024\fR\*(rq
 in a pipeline, as this may improve performance.
