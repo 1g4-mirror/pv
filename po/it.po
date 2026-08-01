@@ -3,13 +3,15 @@ msgstr ""
 "Project-Id-Version: pv 1.11.0\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
 "POT-Creation-Date: 2026-08-01 14:53+0100\n"
-"PO-Revision-Date: 2026-08-01 13:59+0100\n"
+"PO-Revision-Date: 2026-08-01 18:32+0000\n"
 "Last-Translator: a-j-wood <a-j-wood@noreply.codeberg.org>\n"
 "Language-Team: Italian <https://translate.codeberg.org/projects/pv/pv/it/>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.7.1\n"
 
 #: src/main/help.c:300
 msgid "show progress bar"
@@ -230,7 +232,7 @@ msgstr "prova a saltare invece di scrivere byte nulli"
 
 #: src/main/help.c:428
 msgid "discard input instead of writing to output"
-msgstr "scartare l'input invece di scrivere sull'output."
+msgstr "scartare l'input invece di scrivere sull'output"
 
 #: src/main/help.c:431
 msgid "write all input to FILE before writing to output"
@@ -259,10 +261,12 @@ msgstr "mostrare il progresso del processo PID"
 #: src/main/help.c:446
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
+"eseguire un comando e monitorare il suo ingresso standard, l'output, o "
+"entrambi"
 
 #: src/main/help.c:450
 msgid "save process ID in FILE"
-msgstr ""
+msgstr "salvare ID processo in FILE"
 
 #: src/main/help.c:453
 msgid "show this help and exit"
@@ -274,7 +278,7 @@ msgstr "stampa le informazioni sulla versione ed esce"
 
 #: src/main/help.c:460
 msgid "write debug logs to FILE"
-msgstr ""
+msgstr "scrivi i log di debug su FILE"
 
 #: src/main/help.c:486
 #, c-format
@@ -285,10 +289,12 @@ msgstr "Uso: %s [OPZIONE] [FILE]..."
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
+"Concatena i FILE, o lo standard input, allo standard output, con "
+"monitoraggio."
 
 #: src/main/help.c:639
 msgid "Supported format sequences:"
-msgstr ""
+msgstr "Sequenze di formato supportate:"
 
 #: src/main/help.c:653
 #, c-format
@@ -301,7 +307,7 @@ msgstr "(input)"
 
 #: src/main/main.c:381 src/main/options.c:1359
 msgid "a command to run must be specified"
-msgstr ""
+msgstr "un comando da eseguire deve essere specificato"
 
 #: src/main/main.c:704 src/main/options.c:757 src/main/options.c:777
 #: src/pv/display.c:1086 src/pv/state.c:45 src/pv/state.c:902
@@ -312,39 +318,39 @@ msgstr "fallimento nell'allocazione della memoria"
 
 #: src/main/options.c:418
 msgid "list files may not contain @ lines"
-msgstr ""
+msgstr "file di elenco non possono contenere linee @"
 
 #: src/main/options.c:438 src/main/options.c:440 src/main/options.c:901
 msgid "process ID or pid:fd pair expected"
-msgstr ""
+msgstr "è previsto un ID di processo o una coppia pid:fd"
 
 #: src/main/options.c:449 src/main/options.c:451 src/main/options.c:908
 msgid "invalid process ID"
-msgstr ""
+msgstr "ID processo non valido"
 
 #: src/main/options.c:829
 msgid "numeric value not understood"
-msgstr ""
+msgstr "valore numerico non compreso"
 
 #: src/main/options.c:843
 msgid "integer argument expected"
-msgstr ""
+msgstr "argomento integer previsto"
 
 #: src/main/options.c:853
 msgid "numeric argument expected"
-msgstr ""
+msgstr "argomento numerico previsto"
 
 #: src/main/options.c:864
 msgid "missing filename"
-msgstr ""
+msgstr "nome del file mancante"
 
 #: src/main/options.c:890
 msgid "missing process name"
-msgstr ""
+msgstr "nome del processo mancante"
 
 #: src/main/options.c:1182
 msgid "invalid side specification"
-msgstr ""
+msgstr "specifica del lato non valida"
 
 #: src/main/options.c:1197
 #, c-format
@@ -361,42 +367,47 @@ msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
 msgstr ""
+"non è possibile utilizzare la modalità riga o il modificatore di "
+"trasferimento durante la visualizzazione dei descrittori di file"
 
 #: src/main/options.c:1239
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
+"non può utilizzare il posizionamento del cursore durante la visualizzazione "
+"dei descrittori di file"
 
 #: src/main/options.c:1247
 msgid "cannot use remote control when watching file descriptors"
-msgstr ""
+msgstr "non può usare il telecomando quando si guarda i descrittori di file"
 
 #: src/main/options.c:1255
 msgid "cannot use remote query when watching file descriptors"
-msgstr ""
+msgstr "non può utilizzare query remoto quando si guarda i descrittori di file"
 
 #: src/main/options.c:1263
 msgid "cannot transfer files when watching file descriptors"
 msgstr ""
+"non può trasferire i file durante la visualizzazione dei descrittori di file"
 
 #: src/main/options.c:1287
 msgid "not available on systems without /proc/self/fdinfo"
-msgstr ""
+msgstr "non disponibile su sistemi senza /proc/self/fdinfo"
 
 #: src/main/options.c:1298
 msgid "cannot use remote control and remote query together"
-msgstr ""
+msgstr "non può utilizzare il telecomando e la query remota insieme"
 
 #: src/main/options.c:1325
 msgid "monitor mode cannot be specified with this option"
-msgstr ""
+msgstr "la modalità monitor non può essere specificata con questa opzione"
 
 #: src/main/options.c:1337
 msgid "monitor mode cannot be used with store-and-forward"
-msgstr ""
+msgstr "modalità monitor non può essere utilizzato con negozio e in avanti"
 
 #: src/main/options.c:1348
 msgid "files cannot be specified with this option"
-msgstr ""
+msgstr "i file non possono essere specificati con questa opzione"
 
 #: src/main/version.c:28
 msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
@@ -416,7 +427,7 @@ msgstr "Sito web del progetto"
 
 #: src/pv/cursor.c:108 src/pv/cursor.c:135
 msgid "failed to open lock file"
-msgstr ""
+msgstr "non è riuscito ad aprire il file di blocco"
 
 #: src/pv/cursor.c:790 src/pv/cursor.c:792
 msgid "interrupted by a signal"
@@ -432,7 +443,7 @@ msgstr "yzafpnum KMGTPEZY"
 
 #: src/pv/file.c:81
 msgid "/dev/null is not usable"
-msgstr ""
+msgstr "/dev/null non è utilizzabile"
 
 #: src/pv/file.c:371
 msgid "error closing file"
@@ -475,19 +486,19 @@ msgstr "B"
 
 #: src/pv/format/eta.c:63 src/pv/format/eta.c:67
 msgid "ETA"
-msgstr ""
+msgstr "ETA"
 
 #: src/pv/format/fineta.c:93
 msgid "FIN"
-msgstr ""
+msgstr "FIN"
 
 #: src/pv/loop.c:180
 msgid "rate min/avg/max/mdev"
-msgstr ""
+msgstr "tasso min/med/mas/mdev"
 
 #: src/pv/loop.c:192
 msgid "rate not measured"
-msgstr ""
+msgstr "tasso non misurato"
 
 #: src/pv/loop.c:1098 src/pv/loop.c:1114 src/pv/loop.c:1132 src/pv/remote.c:93
 #: src/pv/remote.c:188 src/pv/remote.c:536 src/pv/remote.c:582
@@ -498,21 +509,21 @@ msgstr ""
 #: src/pv/watchpid.c:409 src/pv/watchpid.c:556 src/pv/watchpid.c:565
 #: src/pv/watchpid.c:586
 msgid "pid"
-msgstr ""
+msgstr "pid"
 
 #: src/pv/loop.c:1132 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
-msgstr ""
+msgstr "fd"
 
 #: src/pv/remote.c:242 src/pv/remote.c:636
 msgid "message not received"
-msgstr ""
+msgstr "messaggio non ricevuto"
 
 #: src/pv/remote.c:659 src/pv/remote.c:677
 msgid "SA_SIGINFO not supported on this system"
-msgstr ""
+msgstr "SA_SIGINFO non supportato su questo sistema"
 
 #: src/pv/transfer.c:1173
 msgid "warning: read errors detected"
@@ -520,7 +531,7 @@ msgstr "avvertimento: errori di lettura rilevati"
 
 #: src/pv/transfer.c:1283
 msgid "skipped past read error"
-msgstr ""
+msgstr "saltato l'errore di lettura"
 
 #: src/pv/transfer.c:1642
 msgid "write error"
