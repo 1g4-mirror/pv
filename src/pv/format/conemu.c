@@ -18,25 +18,28 @@
 
 
 /*
- * Produce OSC 9;4 progress bar codes for terminal title tabs.
+ * Populate a buffer with OSC 9;4 progress bar codes for terminal title
+ * tabs, returning the length of the string.
  */
-pvdisplay_bytecount_t pv_formatter_progress_conemu(pvformatter_args_t args)
+size_t pv_osc94_format(char *buffer, size_t bufsize, readonly_pvcontrol_t control, readonly_pvtransfercalc_t calc)
 {
-	char content[128];		 /* flawfinder: ignore */
+	int formatted_size = 0;
 
-	/* flawfinder - null-terminated and bounded with pv_snprintf(). */
+	if (NULL == buffer)
+		return 0;
+	if (bufsize < 1)
+		return 0;
+	buffer[0] = '\0';
 
-	memset(content, 0, sizeof(content));
-
-	if (args->control->size > 0 || args->control->rate_gauge) {
+	if (control->size > 0 || control->rate_gauge) {
 		/* Known size or rate gauge - percentage progress. */
-		(void) pv_snprintf(content, sizeof(content), "\033]9;4;1;%.0f\033\\", args->calc->percentage);
+		formatted_size = pv_snprintf(buffer, bufsize, "\033]9;4;1;%.0f\033\\", calc->percentage);
 	} else {
 		/* Unknown size - indeterminate progress. */
 		/* See pv_formatter_progress_unknownsize() in progressbar.c. */
 		double indicator_position;
 
-		indicator_position = args->calc->percentage;
+		indicator_position = calc->percentage;
 		if (indicator_position > 200.0)
 #if HAVE_FMOD
 			indicator_position = fmod(indicator_position, 200.0);
@@ -53,8 +56,29 @@ pvdisplay_bytecount_t pv_formatter_progress_conemu(pvformatter_args_t args)
 			indicator_position = 0.0;
 		}
 
-		(void) pv_snprintf(content, sizeof(content), "\033]9;4;3;%.0f\033\\", indicator_position);
+		formatted_size = pv_snprintf(buffer, bufsize, "\033]9;4;3;%.0f\033\\", indicator_position);
 	}
+
+	if (formatted_size < 0)
+		return 0;
+	if (formatted_size >= (int) bufsize)
+		return bufsize - 1;
+	return (size_t) formatted_size;
+}
+
+
+/*
+ * Produce OSC 9;4 progress bar codes for terminal title tabs.
+ */
+pvdisplay_bytecount_t pv_formatter_progress_conemu(pvformatter_args_t args)
+{
+	char content[128];		 /* flawfinder: ignore */
+
+	/* flawfinder - null-terminated and bounded with pv_snprintf(). */
+
+	memset(content, 0, sizeof(content));
+
+	(void) pv_osc94_format(content, sizeof(content), args->control, args->calc);
 
 	args->display->using_osc94 = true;
 

@@ -709,6 +709,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 		{ "name", 1, NULL, (int) 'N' },
 		{ "bar-style", 1, NULL, (int) 'u' },
 		{ "format", 1, NULL, (int) 'F' },
+		{ "conemu", 0, NULL, (int) '9' },
 		{ "extra-display", 1, NULL, (int) 'x' },
 		{ "stats", 0, NULL, (int) 'v' },
 		{ "rate-limit", 1, NULL, (int) 'L' },
@@ -739,7 +740,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 	/*@+nullassign@ */
 	int option_index = 0;
 #endif				/* HAVE_GETOPT_LONG */
-	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:x:L:B:CEZ:J:SYKOXU:R:Q:P:d:m:o:M:"
+	char *short_options = "hVpteIrab8kTA:fvnqcWD:s:gl0i:w:H:N:u:F:9x:L:B:CEZ:J:SYKOXU:R:Q:P:d:m:o:M:"
 #ifdef ENABLE_DEBUGGING
 	    "!:"
 #endif
@@ -974,6 +975,9 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			break;
 		case 'f':
 			opts->force = true;
+			break;
+		case '9':
+			opts->use_osc94 = true;
 			break;
 		case 'v':
 			opts->show_stats = true;

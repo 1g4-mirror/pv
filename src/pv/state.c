@@ -565,6 +565,11 @@ void pv_state_cursor_set(pvstate_t state, bool val)
 	state->control.cursor = val;
 }
 
+void pv_state_use_osc94_set(pvstate_t state, bool val)
+{
+	state->control.use_osc94 = val;
+}
+
 void pv_state_show_stats_set(pvstate_t state, bool val)
 {
 	state->control.show_stats = val;

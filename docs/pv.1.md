@@ -248,6 +248,14 @@ are explicitly switched on will be shown.
     bytes transferred, and rate, in both the window title and the
     process title.
 
+**-9, \--conemu**
+
+:   As well as displaying progress to the terminal, also emit the ConEmu
+    \"progress bar\" sequences (OSC 9;4) to show the progress percentage
+    in the terminal\'s title tab, on terminals which support it. This is
+    equivalent to adding "%{progress-conemu}" to the **\--format**
+    string.
+
 **-v, \--stats**
 
 :   At the end of the transfer, write an additional line showing the

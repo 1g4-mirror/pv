@@ -989,6 +989,9 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
  * If "final" is true, this is the final update so the rate is given as an
  * an average over the whole transfer; otherwise the current rate is shown.
  *
+ * If "is_primary" is true, this is the primary display, not an extra one,
+ * which means extra terminal control codes like OSC 9;4 may be inserted.
+ *
  * Returns true if the display buffer can be used, false if not.
  *
  * When returning true, this function will have also set
@@ -1001,7 +1004,7 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
  */
 static bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, readonly_pvtransferstate_t transfer,
 		      readonly_pvtransfercalc_t calc, /*@null@ */ const char *format_supplied, pvdisplay_t display,
-		      bool reinitialise, bool final)
+		      bool reinitialise, bool final, bool is_primary)
 {
 	struct pvdisplay_component_s *format_component_array;
 	char display_segments[PV_SIZEOF_FORMAT_SEGMENTS_BUF];	/* flawfinder: ignore - always bounded */
@@ -1232,6 +1235,29 @@ static bool pv_format(pvprogramstatus_t status, readonly_pvcontrol_t control, re
 		      segment->bytes, display->display_buffer + display_buffer_offset - segment->bytes);
 	}
 
+	/*
+	 * If OSC 9;4 is enabled globally but wasn't present in the format
+	 * string, and this is the primary display, run its formatter to add
+	 * the sequences.
+	 */
+	if (is_primary && control->use_osc94 && !display->using_osc94) {
+		char content[128];	 /* flawfinder: ignore */
+		size_t bytes_added;
+
+		/* flawfinder - null-terminated and bounded with pv_snprintf(). */
+
+		memset(content, 0, sizeof(content));
+
+		debug("%s", "OSC 9;4 enabled globally but not in format string - adding sequence");
+		bytes_added = pv_osc94_format(content, sizeof(content), control, calc);
+		memmove(display->display_buffer + display_buffer_offset, content, bytes_added);
+		display_buffer_offset += bytes_added;
+		display_buffer_remaining -= bytes_added;
+		new_display_string_bytes += bytes_added;
+
+		display->using_osc94 = true;
+	}
+
 	/* If the SGR active codes flag is set, emit an SGR reset. */
 	if (display->sgr_code_active) {
 		debug("%s", "SGR codes still active - adding reset");
@@ -1324,12 +1350,13 @@ void pv_display(pvprogramstatus_t status, readonly_pvcontrol_t control, pvtransi
 		flags->reparse_display = 0;
 	}
 
-	if (!pv_format(status, control, transfer, calc, control->format_string, display, reinitialise, final))
+	if (!pv_format(status, control, transfer, calc, control->format_string, display, reinitialise, final, true))
 		return;
 
 	if ((NULL != extra_display) && (0 != control->extra_displays)) {
 		if (!pv_format
-		    (status, control, transfer, calc, control->extra_format_string, extra_display, reinitialise, final))
+		    (status, control, transfer, calc, control->extra_format_string, extra_display, reinitialise, final,
+		     false))
 			return;
 	}
 

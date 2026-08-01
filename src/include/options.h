@@ -111,6 +111,7 @@ struct opts_s {
 	bool direct_io;                /* set if O_DIRECT is to be used */
 	bool sparse_output;            /* set if we leave holes in the output */
 	bool discard_input;            /* set to write nothing to output */
+	bool use_osc94;		       /* set to enable OSC 9;4 sequences */
 	bool show_stats;	       /* set to write statistics at the end */
 	bool width_set_manually;       /* width was set manually, not detected */
 	bool height_set_manually;      /* height was set manually, not detected */

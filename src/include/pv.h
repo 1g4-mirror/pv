@@ -250,6 +250,7 @@ void pv_state_append_to_default_format(pvstate_t, /*@null@ */ const char *);
  */
 extern void pv_state_force_set(pvstate_t, bool);
 extern void pv_state_cursor_set(pvstate_t, bool);
+extern void pv_state_use_osc94_set(pvstate_t, bool);
 extern void pv_state_show_stats_set(pvstate_t, bool);
 extern void pv_state_numeric_set(pvstate_t, bool);
 extern void pv_state_wait_set(pvstate_t, bool);

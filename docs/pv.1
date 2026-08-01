@@ -238,6 +238,13 @@ For example, \*(lq\fB\-x\~'window,process:%t\~%b\~%r'\fR\*(rq will show the
 elapsed time, bytes transferred, and rate, in both the window title and the
 process title.
 .TP
+.B \-9, \-\-conemu
+As well as displaying progress to the terminal, also emit the ConEmu
+"progress bar" sequences (OSC 9;4) to show the progress percentage in the
+terminal's title tab, on terminals which support it.
+This is equivalent to adding \*(lq%{progress\-conemu}\*(rq to the
+\fB\-\-format\fR string.
+.TP
 .B \-v, \-\-stats
 At the end of the transfer, write an additional line showing the transfer
 rate minimum, mean, maximum, and standard deviation.

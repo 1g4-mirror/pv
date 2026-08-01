@@ -247,6 +247,7 @@ struct pvstate_s {
 		bool sparse_output;		 /* convert runs of null bytes into holes */
 		bool discard_input;              /* write nothing to stdout */
 		bool show_stats;		 /* show statistics on exit */
+		bool use_osc94;		         /* enable OSC 9;4 sequences */
 		bool width_set_manually;	 /* width was set manually, not detected */
 		bool height_set_manually;	 /* height was set manually, not detected */
 		bool rate_limit_specified;	 /* whether a rate limit value was given */
@@ -629,6 +630,7 @@ pvdisplay_bytecount_t pv_formatter_segmentcontent(char *, pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_progress(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_progress_bar_only(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_progress_amount_only(pvformatter_args_t);
+size_t pv_osc94_format(char *, size_t, readonly_pvcontrol_t, readonly_pvtransfercalc_t);
 pvdisplay_bytecount_t pv_formatter_progress_conemu(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_bar_default(pvformatter_args_t);
 pvdisplay_bytecount_t pv_formatter_bar_plain(pvformatter_args_t);
