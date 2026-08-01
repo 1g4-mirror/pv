@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pv 1.9.34\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
-"POT-Creation-Date: 2026-08-01 14:00+0100\n"
+"POT-Creation-Date: 2026-08-01 14:53+0100\n"
 "PO-Revision-Date: 2026-03-24 23:25+0000\n"
 "Last-Translator: Ricky-Tigg <ricky-tigg@noreply.codeberg.org>\n"
 "Language-Team: Finnish <https://translate.codeberg.org/projects/pv/pv/fi/>\n"
@@ -158,139 +158,143 @@ msgid "also send progress to SPEC"
 msgstr "lähetä edistyminen myös SPECille"
 
 #: src/main/help.c:382
+msgid "set terminal progress state with OSC 9;4 (ConEmu)"
+msgstr ""
+
+#: src/main/help.c:385
 msgid "output transfer statistics at the end"
 msgstr "tulosta siirtotilastot lopussa"
 
-#: src/main/help.c:385
+#: src/main/help.c:388
 msgid "output even if standard error is not a terminal"
 msgstr "tuloste, vaikka vakiovirhe ei olisikaan päätelaite"
 
-#: src/main/help.c:388
+#: src/main/help.c:391
 msgid "use cursor positioning escape sequences"
 msgstr "käytä kohdistimen sijoittelun esc-sekvenssiä"
 
-#: src/main/help.c:391 src/main/help.c:427 src/main/help.c:446
-#: src/main/help.c:456
+#: src/main/help.c:394 src/main/help.c:430 src/main/help.c:449
+#: src/main/help.c:459
 msgid "FILE"
 msgstr "TIEDOSTO"
 
-#: src/main/help.c:392
+#: src/main/help.c:395
 msgid "write output to FILE instead of stdout"
 msgstr "kirjoita tuloste tiedostoon TIEDOSTO oletustulosteen (stdout) sijaan"
 
-#: src/main/help.c:394
+#: src/main/help.c:397
 msgid "RATE"
 msgstr "NOPEUS"
 
-#: src/main/help.c:395
+#: src/main/help.c:398
 msgid "limit transfer to RATE bytes per second"
 msgstr "rajoita siirron nopeudeksi NOPEUS tavua per sekunti"
 
-#: src/main/help.c:397 src/main/help.c:403 src/main/help.c:409
+#: src/main/help.c:400 src/main/help.c:406 src/main/help.c:412
 msgid "BYTES"
 msgstr "TAVUT"
 
-#: src/main/help.c:398
+#: src/main/help.c:401
 msgid "use a buffer size of BYTES"
 msgstr "käytä puskuria, jonka koko on TAVUT"
 
-#: src/main/help.c:401
+#: src/main/help.c:404
 msgid "never use splice(), always use read/write"
 msgstr "Älä koskaan käytä splice():tta, käytä aina luku-/kirjoitustoimintoa"
 
-#: src/main/help.c:404
+#: src/main/help.c:407
 msgid "set the pipe buffer size to BYTES"
 msgstr ""
 
-#: src/main/help.c:407
+#: src/main/help.c:410
 msgid "skip read errors in input"
 msgstr "ohita lukuvirheet syötteessä"
 
-#: src/main/help.c:410
+#: src/main/help.c:413
 msgid "skip errors in BYTES blocks at a time"
 msgstr "ohita virheet TAVUT:ssa lohkoissa kerrallaan"
 
-#: src/main/help.c:413
+#: src/main/help.c:416
 msgid "stop after --size bytes have been transferred"
 msgstr "lopeta kun --size tavua on siirretty"
 
-#: src/main/help.c:416
+#: src/main/help.c:419
 msgid "flush cache to disk after every write"
 msgstr "tyhjennä välimuisti levylle jokaisen kirjoituksen jälkeen"
 
-#: src/main/help.c:419
+#: src/main/help.c:422
 msgid "use direct I/O to bypass cache"
 msgstr "käytä suoraa syötettä/lähtöä välimuistin ohittamiseen"
 
-#: src/main/help.c:422
+#: src/main/help.c:425
 msgid "try to seek instead of writing null bytes"
 msgstr "yritä etsiä tyhjätavujen kirjoittamisen sijaan"
 
-#: src/main/help.c:425
+#: src/main/help.c:428
 msgid "discard input instead of writing to output"
 msgstr "hylkää syöte tulosteeseen kirjoittamisen sijaan"
 
-#: src/main/help.c:428
+#: src/main/help.c:431
 msgid "write all input to FILE before writing to output"
 msgstr ""
 "kirjoita kaikki syöte tiedostoon TIEDOSTO ennen tulosteeseen kirjoittamista"
 
-#: src/main/help.c:431
+#: src/main/help.c:434
 msgid "PID[:FD]|=NAME|@LISTFILE"
 msgstr "PID[:FD]|=NIMI|@LISTATIEDOSTO"
 
-#: src/main/help.c:432
+#: src/main/help.c:435
 msgid "watch file FD opened by process PID"
 msgstr "tarkkaile tiedostoa FD, jonka prosessi PID avasi"
 
-#: src/main/help.c:435 src/main/help.c:438
+#: src/main/help.c:438 src/main/help.c:441
 msgid "PID"
 msgstr ""
 
-#: src/main/help.c:436
+#: src/main/help.c:439
 msgid "update settings of process PID"
 msgstr "päivitä prosessin PID-asetukset"
 
-#: src/main/help.c:439
+#: src/main/help.c:442
 msgid "show progress of process PID"
 msgstr "näytä prosessin PID:n edistyminen"
 
-#: src/main/help.c:443
+#: src/main/help.c:446
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
 
-#: src/main/help.c:447
+#: src/main/help.c:450
 msgid "save process ID in FILE"
 msgstr "tallenna prosessitunnus TIEDOSTO:on"
 
-#: src/main/help.c:450
+#: src/main/help.c:453
 msgid "show this help and exit"
 msgstr "näytä tämä ohje ja lopeta"
 
-#: src/main/help.c:453
+#: src/main/help.c:456
 msgid "show version information and exit"
 msgstr "näytä versiotiedot ja lopeta"
 
-#: src/main/help.c:457
+#: src/main/help.c:460
 msgid "write debug logs to FILE"
 msgstr "kirjoita vianjäljityslokit tiedostoon TIEDOSTO"
 
-#: src/main/help.c:483
+#: src/main/help.c:486
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
 msgstr "Käyttö: %s [VALINTA] [TIEDOSTO]..."
 
-#: src/main/help.c:494
+#: src/main/help.c:497
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
 "Putkita TIEDOSTO(t), tai vakiosyöte, vakiotulosteeseen, monitoroinnin kanssa."
 
-#: src/main/help.c:636
+#: src/main/help.c:639
 msgid "Supported format sequences:"
 msgstr "Tuetut muotosekvenssit:"
 
-#: src/main/help.c:650
+#: src/main/help.c:653
 #, c-format
 msgid "Please report any bugs to: %s"
 msgstr "Ilmoita ongelmista: %s"
@@ -299,13 +303,13 @@ msgstr "Ilmoita ongelmista: %s"
 msgid "(input)"
 msgstr "(syöte)"
 
-#: src/main/main.c:381 src/main/options.c:1355
+#: src/main/main.c:381 src/main/options.c:1359
 msgid "a command to run must be specified"
 msgstr ""
 
-#: src/main/main.c:704 src/main/options.c:756 src/main/options.c:776
-#: src/pv/display.c:1083 src/pv/state.c:45 src/pv/state.c:897
-#: src/pv/state.c:909 src/pv/state.c:945 src/pv/transfer.c:1335
+#: src/main/main.c:704 src/main/options.c:757 src/main/options.c:777
+#: src/pv/display.c:1086 src/pv/state.c:45 src/pv/state.c:902
+#: src/pv/state.c:914 src/pv/state.c:950 src/pv/transfer.c:1335
 #: src/pv/transfer.c:1451 src/pv/transfer.c:1778
 msgid "memory allocation failure"
 msgstr "muistinvarausvirhe"
@@ -314,49 +318,49 @@ msgstr "muistinvarausvirhe"
 msgid "list files may not contain @ lines"
 msgstr "Listatiedostot eivät saa sisältää @-rivejä"
 
-#: src/main/options.c:438 src/main/options.c:440 src/main/options.c:900
+#: src/main/options.c:438 src/main/options.c:440 src/main/options.c:901
 msgid "process ID or pid:fd pair expected"
 msgstr "prosessitunnusta tai pid:fd-paria odotetaan"
 
-#: src/main/options.c:449 src/main/options.c:451 src/main/options.c:907
+#: src/main/options.c:449 src/main/options.c:451 src/main/options.c:908
 msgid "invalid process ID"
 msgstr "virheellinen prosessin ID"
 
-#: src/main/options.c:828
+#: src/main/options.c:829
 msgid "numeric value not understood"
 msgstr "numeerista arvoa ei ymmärretty"
 
-#: src/main/options.c:842
+#: src/main/options.c:843
 msgid "integer argument expected"
 msgstr "kokonaislukuargumenttia odotetaan"
 
-#: src/main/options.c:852
+#: src/main/options.c:853
 msgid "numeric argument expected"
 msgstr "numeerista argumenttia odotetaan"
 
-#: src/main/options.c:863
+#: src/main/options.c:864
 msgid "missing filename"
 msgstr "puuttuva tiedostonimi"
 
-#: src/main/options.c:889
+#: src/main/options.c:890
 msgid "missing process name"
 msgstr "puuttuva prosessinimi"
 
-#: src/main/options.c:1178
+#: src/main/options.c:1182
 msgid "invalid side specification"
 msgstr ""
 
-#: src/main/options.c:1193
+#: src/main/options.c:1197
 #, c-format
 msgid "Try `%s --help' for more information."
 msgstr "Suorita `%s --help' saadaksesi lisätietoja."
 
-#: src/main/options.c:1195
+#: src/main/options.c:1199
 #, c-format
 msgid "Try `%s -h' for more information."
 msgstr "Suorita `%s -h' saadaksesi lisätietoja."
 
-#: src/main/options.c:1227
+#: src/main/options.c:1231
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
@@ -364,40 +368,40 @@ msgstr ""
 "rivitilaa tai siirtomuokkausvaihtoehtoja ei voi käyttää tiedostokuvauksia "
 "tarkasteltaessa"
 
-#: src/main/options.c:1235
+#: src/main/options.c:1239
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
 "kohdistimen sijoittelua ei voi käyttää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1243
+#: src/main/options.c:1247
 msgid "cannot use remote control when watching file descriptors"
 msgstr "etäohjausta ei voi käyttää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1251
+#: src/main/options.c:1255
 msgid "cannot use remote query when watching file descriptors"
 msgstr "etäkyselyä ei voi käyttää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1259
+#: src/main/options.c:1263
 msgid "cannot transfer files when watching file descriptors"
 msgstr "tiedostoja ei voi siirtää tiedostokuvauksia tarkasteltaessa"
 
-#: src/main/options.c:1283
+#: src/main/options.c:1287
 msgid "not available on systems without /proc/self/fdinfo"
 msgstr "ei saatavilla järjestelmissä, joissa ei ole /proc/self/fdinfo"
 
-#: src/main/options.c:1294
+#: src/main/options.c:1298
 msgid "cannot use remote control and remote query together"
 msgstr "etäohjausta ja etäkyselyä ei voi käyttää yhdessä"
 
-#: src/main/options.c:1321
+#: src/main/options.c:1325
 msgid "monitor mode cannot be specified with this option"
 msgstr ""
 
-#: src/main/options.c:1333
+#: src/main/options.c:1337
 msgid "monitor mode cannot be used with store-and-forward"
 msgstr ""
 
-#: src/main/options.c:1344
+#: src/main/options.c:1348
 msgid "files cannot be specified with this option"
 msgstr "tiedostoja ei voi määrittää tämän vaihtoehdon kanssa"
 
