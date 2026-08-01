@@ -13,248 +13,248 @@ msgstr ""
 
 #: src/main/help.c:300
 msgid "show progress bar"
-msgstr ""
+msgstr "mostra la barra dei progressi"
 
 #: src/main/help.c:303
 msgid "show elapsed time"
-msgstr ""
+msgstr "mostra tempo trascorso"
 
 #: src/main/help.c:306
 msgid "show estimated time of arrival (completion)"
-msgstr ""
+msgstr "mostra tempo stimato di completamento"
 
 #: src/main/help.c:309
 msgid "show absolute estimated time of arrival (completion)"
-msgstr ""
+msgstr "mostra l'orario di tempo stimato di completamento"
 
 #: src/main/help.c:312
 msgid "show data transfer rate counter"
-msgstr ""
+msgstr "mostrare il contatore della velocità di trasferimento dati"
 
 #: src/main/help.c:315
 msgid "show data transfer average rate counter"
-msgstr ""
+msgstr "mostrare la velocità media di trasferimento dati"
 
 #: src/main/help.c:318
 msgid "show number of bytes transferred"
-msgstr ""
+msgstr "mostra numero di byte trasferite"
 
 #: src/main/help.c:321
 msgid "show percentage of transfer buffer in use"
-msgstr ""
+msgstr "mostra la percentuale di buffer di trasferimento in uso"
 
 #: src/main/help.c:323
 msgid "NUM"
-msgstr ""
+msgstr "NUM"
 
 #: src/main/help.c:324
 msgid "show NUM bytes last written"
-msgstr ""
+msgstr "mostra NUM bytes ultimo scritto"
 
 #: src/main/help.c:326
 msgid "FORMAT"
-msgstr ""
+msgstr "FORMAT"
 
 #: src/main/help.c:327
 msgid "set output format to FORMAT"
-msgstr ""
+msgstr "impostare il formato di output in FORMAT"
 
 #: src/main/help.c:330
 msgid "output percentages, not visual information"
-msgstr ""
+msgstr "percentuali di output, non informazioni visive"
 
 #: src/main/help.c:333
 msgid "do not output any transfer information at all"
-msgstr ""
+msgstr "non emettono alcuna informazione di trasferimento"
 
 #: src/main/help.c:337
 msgid "show number of bits transferred"
-msgstr ""
+msgstr "mostra numero di bit trasferiti"
 
 #: src/main/help.c:340
 msgid "treat suffixes as multiples of 1000 rather than 1024"
-msgstr ""
+msgstr "trattare i suffissi come multipli di 1000 piuttosto che 1024"
 
 #: src/main/help.c:343
 msgid "display nothing until first byte transferred"
-msgstr ""
+msgstr "mostrare nulla fino al primo byte trasferito"
 
 #: src/main/help.c:345 src/main/help.c:360 src/main/help.c:363
 msgid "SEC"
-msgstr ""
+msgstr "SEC"
 
 #: src/main/help.c:346
 msgid "display nothing until SEC seconds have passed"
-msgstr ""
+msgstr "mostrare nulla fino a quando i secondi SEC sono passati"
 
 #: src/main/help.c:348
 msgid "SIZE"
-msgstr ""
+msgstr "DIM"
 
 #: src/main/help.c:349
 msgid "set estimated data size to SIZE bytes"
-msgstr ""
+msgstr "imposta la dimensione stimata dei dati per DIM bytes"
 
 #: src/main/help.c:352
 msgid "if size unknown, show rate vs max rate"
-msgstr ""
+msgstr "se dimensioni sconosciute, mostrare tasso di trasferimento vs tasso massimo"
 
 #: src/main/help.c:355
 msgid "count lines instead of bytes"
-msgstr ""
+msgstr "contare le linee invece di bytes"
 
 #: src/main/help.c:358
 msgid "lines are null-terminated"
-msgstr ""
+msgstr "le righe terminano con un carattere nullo"
 
 #: src/main/help.c:361
 msgid "update every SEC seconds"
-msgstr ""
+msgstr "aggiornamento ogni secondo SEC"
 
 #: src/main/help.c:364
 msgid "compute average rate over past SEC seconds (default 30s)"
-msgstr ""
+msgstr "calcolare il tasso medio negli ultimi secondi SEC (predefinito 30s)"
 
 #: src/main/help.c:366
 msgid "WIDTH"
-msgstr ""
+msgstr "LARGHEZZA"
 
 #: src/main/help.c:367
 msgid "assume terminal is WIDTH characters wide"
-msgstr ""
+msgstr "assumere il terminale è largo caratteri LARGHEZZA"
 
 #: src/main/help.c:369
 msgid "HEIGHT"
-msgstr ""
+msgstr "ALTEZZA"
 
 #: src/main/help.c:370
 msgid "assume terminal is HEIGHT rows high"
-msgstr ""
+msgstr "assumere terminale è ALTEZZA righe alte"
 
 #: src/main/help.c:372
 msgid "NAME"
-msgstr ""
+msgstr "NOME"
 
 #: src/main/help.c:373
 msgid "prefix visual information with NAME"
-msgstr ""
+msgstr "prefisso informazioni visive con NOME"
 
 #: src/main/help.c:375
 msgid "STYLE"
-msgstr ""
+msgstr "STILE"
 
 #: src/main/help.c:376
 msgid "set default bar style to STYLE"
-msgstr ""
+msgstr "impostare lo stile della barra predefinito a STILE"
 
 #: src/main/help.c:378
 msgid "SPEC"
-msgstr ""
+msgstr "SPEC"
 
 #: src/main/help.c:379
 msgid "also send progress to SPEC"
-msgstr ""
+msgstr "anche inviare i progressi a SPEC"
 
 #: src/main/help.c:382
 msgid "set terminal progress state with OSC 9;4 (ConEmu)"
-msgstr ""
+msgstr "impostare lo stato di avanzamento del terminale con OSC 9;4 (ConEmu)"
 
 #: src/main/help.c:385
 msgid "output transfer statistics at the end"
-msgstr ""
+msgstr "statistiche di trasferimento in uscita alla fine"
 
 #: src/main/help.c:388
 msgid "output even if standard error is not a terminal"
-msgstr ""
+msgstr "uscita anche se errore standard non è un terminale"
 
 #: src/main/help.c:391
 msgid "use cursor positioning escape sequences"
-msgstr ""
+msgstr "utilizzare le sequenze di fuga di posizionamento del cursore"
 
 #: src/main/help.c:394 src/main/help.c:430 src/main/help.c:449
 #: src/main/help.c:459
 msgid "FILE"
-msgstr ""
+msgstr "FILE"
 
 #: src/main/help.c:395
 msgid "write output to FILE instead of stdout"
-msgstr ""
+msgstr "scrivere output a FILE invece di stdout"
 
 #: src/main/help.c:397
 msgid "RATE"
-msgstr ""
+msgstr "TASSO"
 
 #: src/main/help.c:398
 msgid "limit transfer to RATE bytes per second"
-msgstr ""
+msgstr "limite di trasferimento a TASSO byte al secondo"
 
 #: src/main/help.c:400 src/main/help.c:406 src/main/help.c:412
 msgid "BYTES"
-msgstr ""
+msgstr "BYTE"
 
 #: src/main/help.c:401
 msgid "use a buffer size of BYTES"
-msgstr ""
+msgstr "utilizzare una dimensione buffer di BYTE"
 
 #: src/main/help.c:404
 msgid "never use splice(), always use read/write"
-msgstr ""
+msgstr "mai usare splice(), sempre usare lettura/scrittura"
 
 #: src/main/help.c:407
 msgid "set the pipe buffer size to BYTES"
-msgstr ""
+msgstr "impostare la dimensione del buffer del tubo a BYTE"
 
 #: src/main/help.c:410
 msgid "skip read errors in input"
-msgstr ""
+msgstr "spostare gli errori di lettura di input passati"
 
 #: src/main/help.c:413
 msgid "skip errors in BYTES blocks at a time"
-msgstr ""
+msgstr "passare errori passati in blocchi BYTE"
 
 #: src/main/help.c:416
 msgid "stop after --size bytes have been transferred"
-msgstr ""
+msgstr "si arresta dopo aver trasferito --size byte"
 
 #: src/main/help.c:419
 msgid "flush cache to disk after every write"
-msgstr ""
+msgstr "svuotare la cache sul disco dopo ogni scrittura"
 
 #: src/main/help.c:422
 msgid "use direct I/O to bypass cache"
-msgstr ""
+msgstr "utilizzare I/O diretto per bypassare la cache"
 
 #: src/main/help.c:425
 msgid "try to seek instead of writing null bytes"
-msgstr ""
+msgstr "prova a saltare invece di scrivere byte nulli"
 
 #: src/main/help.c:428
 msgid "discard input instead of writing to output"
-msgstr ""
+msgstr "scartare l'input invece di scrivere sull'output."
 
 #: src/main/help.c:431
 msgid "write all input to FILE before writing to output"
-msgstr ""
+msgstr "scrivere tutti gli input a FILE prima di scrivere a output"
 
 #: src/main/help.c:434
 msgid "PID[:FD]|=NAME|@LISTFILE"
-msgstr ""
+msgstr "PID[:FD]|=NOME|@FILE"
 
 #: src/main/help.c:435
 msgid "watch file FD opened by process PID"
-msgstr ""
+msgstr "file di orologio FD aperto dal processo PID"
 
 #: src/main/help.c:438 src/main/help.c:441
 msgid "PID"
-msgstr ""
+msgstr "PID"
 
 #: src/main/help.c:439
 msgid "update settings of process PID"
-msgstr ""
+msgstr "impostazioni di aggiornamento del processo PID"
 
 #: src/main/help.c:442
 msgid "show progress of process PID"
-msgstr ""
+msgstr "mostrare il progresso del processo PID"
 
 #: src/main/help.c:446
 msgid "run a command and monitor its standard input, output, or both"
@@ -266,11 +266,11 @@ msgstr ""
 
 #: src/main/help.c:453
 msgid "show this help and exit"
-msgstr ""
+msgstr "mostra questo aiuto ed esce"
 
 #: src/main/help.c:456
 msgid "show version information and exit"
-msgstr ""
+msgstr "stampa le informazioni sulla versione ed esce"
 
 #: src/main/help.c:460
 msgid "write debug logs to FILE"
@@ -279,7 +279,7 @@ msgstr ""
 #: src/main/help.c:486
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
-msgstr ""
+msgstr "Uso: %s [OPZIONE] [FILE]..."
 
 #: src/main/help.c:497
 msgid ""
@@ -293,11 +293,11 @@ msgstr ""
 #: src/main/help.c:653
 #, c-format
 msgid "Please report any bugs to: %s"
-msgstr ""
+msgstr "Segnalare i bug a: %s"
 
 #: src/main/main.c:225
 msgid "(input)"
-msgstr ""
+msgstr "(input)"
 
 #: src/main/main.c:381 src/main/options.c:1359
 msgid "a command to run must be specified"
@@ -308,7 +308,7 @@ msgstr ""
 #: src/pv/state.c:914 src/pv/state.c:950 src/pv/transfer.c:1335
 #: src/pv/transfer.c:1451 src/pv/transfer.c:1778
 msgid "memory allocation failure"
-msgstr ""
+msgstr "fallimento nell'allocazione della memoria"
 
 #: src/main/options.c:418
 msgid "list files may not contain @ lines"
@@ -349,12 +349,12 @@ msgstr ""
 #: src/main/options.c:1197
 #, c-format
 msgid "Try `%s --help' for more information."
-msgstr ""
+msgstr "Usare «%s --help» per ulteriori informazioni."
 
 #: src/main/options.c:1199
 #, c-format
 msgid "Try `%s -h' for more information."
-msgstr ""
+msgstr "Usare «%s -h» per ulteriori informazioni."
 
 #: src/main/options.c:1231
 msgid ""
@@ -400,19 +400,19 @@ msgstr ""
 
 #: src/main/version.c:28
 msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
-msgstr ""
+msgstr "Licenza: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
 
 #: src/main/version.c:29
 msgid "This is free software: you are free to change and redistribute it."
-msgstr ""
+msgstr "Questo è software libero: è possibile modificarlo e ridistribuirlo."
 
 #: src/main/version.c:30
 msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr ""
+msgstr "Non c'è ALCUNA GARANZIA, nei limiti permessi dalla legge."
 
 #: src/main/version.c:32
 msgid "Project web site"
-msgstr ""
+msgstr "Sito web del progetto"
 
 #: src/pv/cursor.c:108 src/pv/cursor.c:135
 msgid "failed to open lock file"
@@ -420,15 +420,15 @@ msgstr ""
 
 #: src/pv/cursor.c:790 src/pv/cursor.c:792
 msgid "interrupted by a signal"
-msgstr ""
+msgstr "interrotta da un segnale"
 
 #: src/pv/display.c:311
 msgid "yzafpnum kMGTPEZY"
-msgstr ""
+msgstr "yzafpnum kMGTPEZY"
 
 #: src/pv/display.c:329
 msgid "yzafpnum KMGTPEZY"
-msgstr ""
+msgstr "yzafpnum KMGTPEZY"
 
 #: src/pv/file.c:81
 msgid "/dev/null is not usable"
@@ -436,42 +436,42 @@ msgstr ""
 
 #: src/pv/file.c:371
 msgid "error closing file"
-msgstr ""
+msgstr "errore nel chiudere il file"
 
 #: src/pv/file.c:438
 msgid "input file is also the output"
-msgstr ""
+msgstr "il file di input coincide con quello di output"
 
 #: src/pv/file.c:596
 msgid "(none)"
-msgstr ""
+msgstr "(nessuno)"
 
 #: src/pv/file.c:598
 msgid "(stdin)"
-msgstr ""
+msgstr "(stdin)"
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
 #: src/pv/format/rate.c:36 src/pv/loop.c:181
 msgid "b/s"
-msgstr ""
+msgstr "b/s"
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
 #: src/pv/format/rate.c:40
 msgid "/s"
-msgstr ""
+msgstr "/s"
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
 #: src/pv/format/rate.c:40 src/pv/loop.c:181
 msgid "B/s"
-msgstr ""
+msgstr "B/s"
 
 #: src/pv/format/bytes.c:35
 msgid "b"
-msgstr ""
+msgstr "b"
 
 #: src/pv/format/bytes.c:39 src/pv/transfer.c:1284
 msgid "B"
-msgstr ""
+msgstr "B"
 
 #: src/pv/format/eta.c:63 src/pv/format/eta.c:67
 msgid "ETA"
@@ -516,7 +516,7 @@ msgstr ""
 
 #: src/pv/transfer.c:1173
 msgid "warning: read errors detected"
-msgstr ""
+msgstr "avvertimento: errori di lettura rilevati"
 
 #: src/pv/transfer.c:1283
 msgid "skipped past read error"
@@ -524,8 +524,8 @@ msgstr ""
 
 #: src/pv/transfer.c:1642
 msgid "write error"
-msgstr ""
+msgstr "errore di scrittura"
 
 #: src/pv/watchpid.c:160 src/pv/watchpid.c:288
 msgid "not a regular file or block device"
-msgstr ""
+msgstr "non è un file regolare o un dispositivo a blocchi"
