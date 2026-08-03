@@ -138,6 +138,8 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
    * [Benny](https://translate.codeberg.org/user/Benny/) (7)
    * [kre](https://translate.codeberg.org/user/kre/) (2)
    * [fnetX](https://translate.codeberg.org/user/fnetX/) (1)
+ * **Italian**
+   * [ldm](https://translate.codeberg.org/user/ldm/) (13)
  * **Polish**
    * [coralpink](https://translate.codeberg.org/user/coralpink/) (122)
  * **Russian**
