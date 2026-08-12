@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: pv 1.11.0\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
 "POT-Creation-Date: 2026-08-01 14:53+0100\n"
-"PO-Revision-Date: 2026-08-01 18:32+0000\n"
-"Last-Translator: a-j-wood <a-j-wood@noreply.codeberg.org>\n"
+"PO-Revision-Date: 2026-08-07 19:25+0000\n"
+"Last-Translator: ldm <ldm@noreply.codeberg.org>\n"
 "Language-Team: Italian <https://translate.codeberg.org/projects/pv/pv/it/>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
@@ -39,11 +39,11 @@ msgstr "mostrare la velocità media di trasferimento dati"
 
 #: src/main/help.c:318
 msgid "show number of bytes transferred"
-msgstr "mostra numero di byte trasferite"
+msgstr "mostra numero di byte trasferiti"
 
 #: src/main/help.c:321
 msgid "show percentage of transfer buffer in use"
-msgstr "mostra la percentuale di buffer di trasferimento in uso"
+msgstr "mostra la percentuale del buffer di trasferimento in uso"
 
 #: src/main/help.c:323
 msgid "NUM"
@@ -59,7 +59,7 @@ msgstr "FORMAT"
 
 #: src/main/help.c:327
 msgid "set output format to FORMAT"
-msgstr "impostare il formato di output in FORMAT"
+msgstr "impostare il formato output in FORMAT"
 
 #: src/main/help.c:330
 msgid "output percentages, not visual information"
@@ -67,7 +67,7 @@ msgstr "percentuali di output, non informazioni visive"
 
 #: src/main/help.c:333
 msgid "do not output any transfer information at all"
-msgstr "non emettono alcuna informazione di trasferimento"
+msgstr "non mostrare alcuna informazione di trasferimento"
 
 #: src/main/help.c:337
 msgid "show number of bits transferred"
@@ -79,7 +79,7 @@ msgstr "trattare i suffissi come multipli di 1000 piuttosto che 1024"
 
 #: src/main/help.c:343
 msgid "display nothing until first byte transferred"
-msgstr "mostrare nulla fino al primo byte trasferito"
+msgstr "non mostrare nulla fino al primo byte trasferito"
 
 #: src/main/help.c:345 src/main/help.c:360 src/main/help.c:363
 msgid "SEC"
@@ -87,7 +87,7 @@ msgstr "SEC"
 
 #: src/main/help.c:346
 msgid "display nothing until SEC seconds have passed"
-msgstr "mostrare nulla fino a quando i secondi SEC sono passati"
+msgstr "non mostrare nulla fino a quando non sono passati SEC secondi"
 
 #: src/main/help.c:348
 msgid "SIZE"
@@ -103,7 +103,7 @@ msgstr "se dimensioni sconosciute, mostrare tasso di trasferimento vs tasso mass
 
 #: src/main/help.c:355
 msgid "count lines instead of bytes"
-msgstr "contare le linee invece di bytes"
+msgstr "contare le linee invece dei bytes"
 
 #: src/main/help.c:358
 msgid "lines are null-terminated"
@@ -111,11 +111,11 @@ msgstr "le righe terminano con un carattere nullo"
 
 #: src/main/help.c:361
 msgid "update every SEC seconds"
-msgstr "aggiornamento ogni secondo SEC"
+msgstr "aggiornamento ogni SEC secondi"
 
 #: src/main/help.c:364
 msgid "compute average rate over past SEC seconds (default 30s)"
-msgstr "calcolare il tasso medio negli ultimi secondi SEC (predefinito 30s)"
+msgstr "calcolare il tasso medio negli ultimi SEC secondi (predefinito 30s)"
 
 #: src/main/help.c:366
 msgid "WIDTH"
@@ -123,7 +123,7 @@ msgstr "LARGHEZZA"
 
 #: src/main/help.c:367
 msgid "assume terminal is WIDTH characters wide"
-msgstr "assumere il terminale è largo caratteri LARGHEZZA"
+msgstr "assumere il terminale largo LARGHEZZA caratteri"
 
 #: src/main/help.c:369
 msgid "HEIGHT"
@@ -131,7 +131,7 @@ msgstr "ALTEZZA"
 
 #: src/main/help.c:370
 msgid "assume terminal is HEIGHT rows high"
-msgstr "assumere terminale è ALTEZZA righe alte"
+msgstr "assumere terminale alto ALTEZZA righe"
 
 #: src/main/help.c:372
 msgid "NAME"
@@ -139,7 +139,7 @@ msgstr "NOME"
 
 #: src/main/help.c:373
 msgid "prefix visual information with NAME"
-msgstr "prefisso informazioni visive con NOME"
+msgstr "anteponi NOME alle informazioni visive"
 
 #: src/main/help.c:375
 msgid "STYLE"
@@ -147,7 +147,7 @@ msgstr "STILE"
 
 #: src/main/help.c:376
 msgid "set default bar style to STYLE"
-msgstr "impostare lo stile della barra predefinito a STILE"
+msgstr "impostare lo stile predefinito della barra a STILE"
 
 #: src/main/help.c:378
 msgid "SPEC"
@@ -155,7 +155,7 @@ msgstr "SPEC"
 
 #: src/main/help.c:379
 msgid "also send progress to SPEC"
-msgstr "anche inviare i progressi a SPEC"
+msgstr "inviare i progressi anche a SPEC"
 
 #: src/main/help.c:382
 msgid "set terminal progress state with OSC 9;4 (ConEmu)"
@@ -163,15 +163,15 @@ msgstr "impostare lo stato di avanzamento del terminale con OSC 9;4 (ConEmu)"
 
 #: src/main/help.c:385
 msgid "output transfer statistics at the end"
-msgstr "statistiche di trasferimento in uscita alla fine"
+msgstr "mostra statistiche di trasferimento alla fine"
 
 #: src/main/help.c:388
 msgid "output even if standard error is not a terminal"
-msgstr "uscita anche se errore standard non è un terminale"
+msgstr "output anche se standard error non è un terminale"
 
 #: src/main/help.c:391
 msgid "use cursor positioning escape sequences"
-msgstr "utilizzare le sequenze di fuga di posizionamento del cursore"
+msgstr "utilizzare le sequenze escape di posizionamento del cursore"
 
 #: src/main/help.c:394 src/main/help.c:430 src/main/help.c:449
 #: src/main/help.c:459
@@ -180,7 +180,7 @@ msgstr "FILE"
 
 #: src/main/help.c:395
 msgid "write output to FILE instead of stdout"
-msgstr "scrivere output a FILE invece di stdout"
+msgstr "scrivere output su FILE invece che stdout"
 
 #: src/main/help.c:397
 msgid "RATE"
@@ -196,19 +196,19 @@ msgstr "BYTE"
 
 #: src/main/help.c:401
 msgid "use a buffer size of BYTES"
-msgstr "utilizzare una dimensione buffer di BYTE"
+msgstr "utilizzare un buffer di dimensione BYTE"
 
 #: src/main/help.c:404
 msgid "never use splice(), always use read/write"
-msgstr "mai usare splice(), sempre usare lettura/scrittura"
+msgstr "mai usare splice(), usare sempre lettura/scrittura"
 
 #: src/main/help.c:407
 msgid "set the pipe buffer size to BYTES"
-msgstr "impostare la dimensione del buffer del tubo a BYTE"
+msgstr "impostare la dimensione del pipe buffer a BYTE"
 
 #: src/main/help.c:410
 msgid "skip read errors in input"
-msgstr "spostare gli errori di lettura di input passati"
+msgstr "saltare gli errori di lettura in input"
 
 #: src/main/help.c:413
 msgid "skip errors in BYTES blocks at a time"
@@ -216,7 +216,7 @@ msgstr "passare errori passati in blocchi BYTE"
 
 #: src/main/help.c:416
 msgid "stop after --size bytes have been transferred"
-msgstr "si arresta dopo aver trasferito --size byte"
+msgstr "stop dopo aver trasferito --size byte"
 
 #: src/main/help.c:419
 msgid "flush cache to disk after every write"
@@ -224,11 +224,11 @@ msgstr "svuotare la cache sul disco dopo ogni scrittura"
 
 #: src/main/help.c:422
 msgid "use direct I/O to bypass cache"
-msgstr "utilizzare I/O diretto per bypassare la cache"
+msgstr "utilizzare direct I/O per bypassare la cache"
 
 #: src/main/help.c:425
 msgid "try to seek instead of writing null bytes"
-msgstr "prova a saltare invece di scrivere byte nulli"
+msgstr "prova a cercare invece di scrivere byte nulli"
 
 #: src/main/help.c:428
 msgid "discard input instead of writing to output"
@@ -236,7 +236,7 @@ msgstr "scartare l'input invece di scrivere sull'output"
 
 #: src/main/help.c:431
 msgid "write all input to FILE before writing to output"
-msgstr "scrivere tutti gli input a FILE prima di scrivere a output"
+msgstr "scrivere tutti gli input su FILE prima di scrivere su output"
 
 #: src/main/help.c:434
 msgid "PID[:FD]|=NAME|@LISTFILE"
@@ -244,7 +244,7 @@ msgstr "PID[:FD]|=NOME|@FILE"
 
 #: src/main/help.c:435
 msgid "watch file FD opened by process PID"
-msgstr "file di orologio FD aperto dal processo PID"
+msgstr "visualizza il file FD aperto dal processo PID"
 
 #: src/main/help.c:438 src/main/help.c:441
 msgid "PID"
@@ -261,8 +261,7 @@ msgstr "mostrare il progresso del processo PID"
 #: src/main/help.c:446
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
-"eseguire un comando e monitorare il suo ingresso standard, l'output, o "
-"entrambi"
+"eseguire un comando e monitorare il suo standard input, output, o entrambi"
 
 #: src/main/help.c:450
 msgid "save process ID in FILE"
@@ -270,7 +269,7 @@ msgstr "salvare ID processo in FILE"
 
 #: src/main/help.c:453
 msgid "show this help and exit"
-msgstr "mostra questo aiuto ed esce"
+msgstr "mostra questo help ed esce"
 
 #: src/main/help.c:456
 msgid "show version information and exit"
@@ -299,7 +298,7 @@ msgstr "Sequenze di formato supportate:"
 #: src/main/help.c:653
 #, c-format
 msgid "Please report any bugs to: %s"
-msgstr "Segnalare i bug a: %s"
+msgstr "Per favore segnalare i bug a: %s"
 
 #: src/main/main.c:225
 msgid "(input)"
