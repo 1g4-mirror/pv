@@ -4,6 +4,7 @@
  * *cleanup:* eliminate potential for closure of standard output under a combination of error conditions when using **--monitor** mode ([#201](https://codeberg.org/ivarch/pv/pulls/201))
  * *i18n:* Italian translations added
  * *i18n:* Russian translations updated
+ * *i18n:* empty Romanian message catalogue added, awaiting translations
 
 ### 1.11.0 - 11 June 2026
 
