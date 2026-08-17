@@ -144,6 +144,7 @@ Translations provided through [Codeberg Weblate](https://translate.codeberg.org/
    * [coralpink](https://translate.codeberg.org/user/coralpink/) (122)
  * **Russian**
    * [0ko](https://translate.codeberg.org/user/0ko/) (157)
+   * [some_user](https://translate.codeberg.org/user/some_user/) (7)
  * **Turkish**
    * [omerdduran](https://translate.codeberg.org/user/omerdduran/) (129)
    * [Oğuz Ersen](https://codeberg.org/ersen) (8)

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
 "POT-Creation-Date: 2026-08-01 14:53+0100\n"
-"PO-Revision-Date: 2025-01-15 19:08+0000\n"
-"Last-Translator: 0ko <0ko@users.noreply.translate.codeberg.org>\n"
+"PO-Revision-Date: 2026-08-17 12:27+0000\n"
+"Last-Translator: some_user <some_user@noreply.codeberg.org>\n"
 "Language-Team: Russian <https://translate.codeberg.org/projects/pv/pv/ru/>\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 5.9.2\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #: src/main/help.c:300
 msgid "show progress bar"
@@ -151,11 +151,11 @@ msgstr "задать стиль полоски по умолчанию как С
 
 #: src/main/help.c:378
 msgid "SPEC"
-msgstr ""
+msgstr "НАЗНАЧ"
 
 #: src/main/help.c:379
 msgid "also send progress to SPEC"
-msgstr ""
+msgstr "дополнительно выводить прогресс в НАЗНАЧ"
 
 #: src/main/help.c:382
 msgid "set terminal progress state with OSC 9;4 (ConEmu)"
@@ -257,11 +257,12 @@ msgstr "обновить настройки ИДпр процесса"
 
 #: src/main/help.c:442
 msgid "show progress of process PID"
-msgstr ""
+msgstr "показать прогресс процесса ИДпр"
 
 #: src/main/help.c:446
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
+"запустить команду и отслеживать её стандартный ввод, вывод или и то, и другое"
 
 #: src/main/help.c:450
 msgid "save process ID in FILE"
@@ -304,7 +305,7 @@ msgstr "(ввод)"
 
 #: src/main/main.c:381 src/main/options.c:1359
 msgid "a command to run must be specified"
-msgstr ""
+msgstr "необходимо указать команду для запуска"
 
 #: src/main/main.c:704 src/main/options.c:757 src/main/options.c:777
 #: src/pv/display.c:1086 src/pv/state.c:45 src/pv/state.c:902
@@ -315,7 +316,7 @@ msgstr "ошибка выделения памяти"
 
 #: src/main/options.c:418
 msgid "list files may not contain @ lines"
-msgstr ""
+msgstr "файлы списка не должны содержать строк, начинающихся с символа @"
 
 #: src/main/options.c:438 src/main/options.c:440 src/main/options.c:901
 msgid "process ID or pid:fd pair expected"
