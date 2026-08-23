@@ -5,6 +5,7 @@
  * *i18n:* Italian translations added
  * *i18n:* Russian translations updated
  * *i18n:* empty Romanian message catalogue added, awaiting translations
+ * *i18n:* empty Ukrainian message catalogue added, awaiting translations
 
 ### 1.11.0 - 11 June 2026
 
