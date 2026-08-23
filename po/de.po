@@ -174,7 +174,8 @@ msgstr "Fortschritt auch an SPEC senden"
 
 #: src/main/help.c:382
 msgid "set terminal progress state with OSC 9;4 (ConEmu)"
-msgstr "aktualisieren Sie den Terminal-Fortschrittszustand mit OSC 9;4 (ConEmu)"
+msgstr ""
+"aktualisieren Sie den Terminal-Fortschrittszustand mit OSC 9;4 (ConEmu)"
 
 #: src/main/help.c:385
 msgid "output transfer statistics at the end"

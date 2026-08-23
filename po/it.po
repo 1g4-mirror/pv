@@ -99,7 +99,8 @@ msgstr "imposta la dimensione stimata dei dati per DIM bytes"
 
 #: src/main/help.c:352
 msgid "if size unknown, show rate vs max rate"
-msgstr "se dimensioni sconosciute, mostrare tasso di trasferimento vs tasso massimo"
+msgstr ""
+"se dimensioni sconosciute, mostrare tasso di trasferimento vs tasso massimo"
 
 #: src/main/help.c:355
 msgid "count lines instead of bytes"
