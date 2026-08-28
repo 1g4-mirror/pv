@@ -3,490 +3,502 @@ msgstr ""
 "Project-Id-Version: pv 1.11.0\n"
 "Report-Msgid-Bugs-To: https://codeberg.org/ivarch/pv/issues\n"
 "POT-Creation-Date: 2026-08-01 14:53+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2026-08-28 12:31+0000\n"
 "Language-Team: Romanian <https://translate.codeberg.org/projects/pv/pv/ro/>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: koh <koh@noreply.codeberg.org>\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
+"20)) ? 1 : 2;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #: src/main/help.c:300
 msgid "show progress bar"
-msgstr ""
+msgstr "arată bara de progres"
 
 #: src/main/help.c:303
 msgid "show elapsed time"
-msgstr ""
+msgstr "arată timpul scurs"
 
 #: src/main/help.c:306
 msgid "show estimated time of arrival (completion)"
-msgstr ""
+msgstr "arată timpul estimat de completare"
 
 #: src/main/help.c:309
 msgid "show absolute estimated time of arrival (completion)"
-msgstr ""
+msgstr "arată timpul estimat de completare absolut"
 
 #: src/main/help.c:312
 msgid "show data transfer rate counter"
-msgstr ""
+msgstr "arată numărătorul rății de transferare a datelor"
 
 #: src/main/help.c:315
 msgid "show data transfer average rate counter"
-msgstr ""
+msgstr "arată numărătorul rății medii de transferare a datelor"
 
 #: src/main/help.c:318
 msgid "show number of bytes transferred"
-msgstr ""
+msgstr "arată numărul de octeți transferați"
 
 #: src/main/help.c:321
 msgid "show percentage of transfer buffer in use"
-msgstr ""
+msgstr "arată procentajul de uz al buffer-ului de transfer"
 
 #: src/main/help.c:323
 msgid "NUM"
-msgstr ""
+msgstr "NUM"
 
 #: src/main/help.c:324
 msgid "show NUM bytes last written"
-msgstr ""
+msgstr "arată NUM octeți ultimii scriși"
 
 #: src/main/help.c:326
 msgid "FORMAT"
-msgstr ""
+msgstr "FORMAT"
 
 #: src/main/help.c:327
 msgid "set output format to FORMAT"
-msgstr ""
+msgstr "setează formatul de ieșire ca FORMAT"
 
 #: src/main/help.c:330
 msgid "output percentages, not visual information"
-msgstr ""
+msgstr "procentaje de ieșire, nu informație vizuală"
 
 #: src/main/help.c:333
 msgid "do not output any transfer information at all"
-msgstr ""
+msgstr "nu trimite nici-o informație despre transfer către ieșire"
 
 #: src/main/help.c:337
 msgid "show number of bits transferred"
-msgstr ""
+msgstr "arată numărul de bits transferați"
 
 #: src/main/help.c:340
 msgid "treat suffixes as multiples of 1000 rather than 1024"
-msgstr ""
+msgstr "procesează suffixele ca multipli de 1000 în loc de 1024"
 
 #: src/main/help.c:343
 msgid "display nothing until first byte transferred"
-msgstr ""
+msgstr "nu arăta nimic până când nu a fost transferat primul octet"
 
 #: src/main/help.c:345 src/main/help.c:360 src/main/help.c:363
 msgid "SEC"
-msgstr ""
+msgstr "SEC"
 
 #: src/main/help.c:346
 msgid "display nothing until SEC seconds have passed"
-msgstr ""
+msgstr "nu arăta nimic până când nu au trecut SEC secunde"
 
 #: src/main/help.c:348
 msgid "SIZE"
-msgstr ""
+msgstr "VOLUM"
 
 #: src/main/help.c:349
 msgid "set estimated data size to SIZE bytes"
-msgstr ""
+msgstr "setează volumul estimat al datelor ca VOLUM octeți"
 
 #: src/main/help.c:352
 msgid "if size unknown, show rate vs max rate"
-msgstr ""
+msgstr "dacă volumul este necunoscut, arată rata vs. rata maximă"
 
 #: src/main/help.c:355
 msgid "count lines instead of bytes"
-msgstr ""
+msgstr "numără rânduri în loc de octeți"
 
 #: src/main/help.c:358
 msgid "lines are null-terminated"
-msgstr ""
+msgstr "rândurile sunt terminate-cu-null"
 
 #: src/main/help.c:361
 msgid "update every SEC seconds"
-msgstr ""
+msgstr "actualizează la fiecare SEC secunde"
 
 #: src/main/help.c:364
 msgid "compute average rate over past SEC seconds (default 30s)"
-msgstr ""
+msgstr "calculează rata medie asupra ultimelor SEC secunde (implicit 30s)"
 
 #: src/main/help.c:366
 msgid "WIDTH"
-msgstr ""
+msgstr "LĂȚIME"
 
 #: src/main/help.c:367
 msgid "assume terminal is WIDTH characters wide"
-msgstr ""
+msgstr "presupune că terminalul are lățimea de LĂȚIME litere"
 
 #: src/main/help.c:369
 msgid "HEIGHT"
-msgstr ""
+msgstr "ÎNĂLȚIME"
 
 #: src/main/help.c:370
 msgid "assume terminal is HEIGHT rows high"
-msgstr ""
+msgstr "presupune că terminalul are înălțimea de ÎNĂLȚIME rânduri"
 
 #: src/main/help.c:372
 msgid "NAME"
-msgstr ""
+msgstr "NUME"
 
 #: src/main/help.c:373
 msgid "prefix visual information with NAME"
-msgstr ""
+msgstr "prefixează informația vizuală cu NUME"
 
 #: src/main/help.c:375
 msgid "STYLE"
-msgstr ""
+msgstr "STIL"
 
 #: src/main/help.c:376
 msgid "set default bar style to STYLE"
-msgstr ""
+msgstr "setează stilul implicit al barei ca STIL"
 
 #: src/main/help.c:378
 msgid "SPEC"
-msgstr ""
+msgstr "SPEC"
 
 #: src/main/help.c:379
 msgid "also send progress to SPEC"
-msgstr ""
+msgstr "de-asemenea trimite progresul spre SPEC"
 
 #: src/main/help.c:382
 msgid "set terminal progress state with OSC 9;4 (ConEmu)"
-msgstr ""
+msgstr "setează starea de progres a terminalului cu OSC 9;4 (ConEmu)"
 
 #: src/main/help.c:385
 msgid "output transfer statistics at the end"
-msgstr ""
+msgstr "trimiti statistici de transfer către ieșire la final"
 
 #: src/main/help.c:388
 msgid "output even if standard error is not a terminal"
-msgstr ""
+msgstr "trimite spre ieșire chiar dacă standard error nu este un terminal"
 
 #: src/main/help.c:391
 msgid "use cursor positioning escape sequences"
-msgstr ""
+msgstr "folosește secvențe escape de poziționare a cursorului"
 
 #: src/main/help.c:394 src/main/help.c:430 src/main/help.c:449
 #: src/main/help.c:459
 msgid "FILE"
-msgstr ""
+msgstr "FIȘIER"
 
 #: src/main/help.c:395
 msgid "write output to FILE instead of stdout"
-msgstr ""
+msgstr "trimite datele de ieșire spre FIȘIER în loc de stdout"
 
 #: src/main/help.c:397
 msgid "RATE"
-msgstr ""
+msgstr "RATĂ"
 
 #: src/main/help.c:398
 msgid "limit transfer to RATE bytes per second"
-msgstr ""
+msgstr "limitează transferul la RATĂ octeți pe secundă"
 
 #: src/main/help.c:400 src/main/help.c:406 src/main/help.c:412
 msgid "BYTES"
-msgstr ""
+msgstr "OCTEȚI"
 
 #: src/main/help.c:401
 msgid "use a buffer size of BYTES"
-msgstr ""
+msgstr "felosește un buffer cu volumul de OCTEȚI"
 
 #: src/main/help.c:404
 msgid "never use splice(), always use read/write"
-msgstr ""
+msgstr "nu folosi vre-odată splice(), mereu folosește read/write"
 
 #: src/main/help.c:407
 msgid "set the pipe buffer size to BYTES"
-msgstr ""
+msgstr "setează volumul pentru pipe buffer la OCTEȚI"
 
 #: src/main/help.c:410
 msgid "skip read errors in input"
-msgstr ""
+msgstr "treci peste erorile de citire în datele de intrare"
 
 #: src/main/help.c:413
 msgid "skip errors in BYTES blocks at a time"
-msgstr ""
+msgstr "treci peste erori in OCTEȚI blocuri de-odată"
 
 #: src/main/help.c:416
 msgid "stop after --size bytes have been transferred"
-msgstr ""
+msgstr "opreștete după ce au fost transferați --size octeți"
 
 #: src/main/help.c:419
 msgid "flush cache to disk after every write"
-msgstr ""
+msgstr "scrie memoria cache pe disk după fiecare citire"
 
 #: src/main/help.c:422
 msgid "use direct I/O to bypass cache"
-msgstr ""
+msgstr "folosește I/O direct pentru a ocoli memoria cache"
 
 #: src/main/help.c:425
 msgid "try to seek instead of writing null bytes"
-msgstr ""
+msgstr "încearcă să cauți în loc de a scrie octeți nuli"
 
 #: src/main/help.c:428
 msgid "discard input instead of writing to output"
-msgstr ""
+msgstr "respinge datele de intrare în loc de a scrie către ieșire"
 
 #: src/main/help.c:431
 msgid "write all input to FILE before writing to output"
 msgstr ""
+"scrie toate datele de intrare către FIȘIER înainte de a scrie către ieșire"
 
 #: src/main/help.c:434
 msgid "PID[:FD]|=NAME|@LISTFILE"
-msgstr ""
+msgstr "PID[:FD]|=NAME|@LISTFILE"
 
 #: src/main/help.c:435
 msgid "watch file FD opened by process PID"
-msgstr ""
+msgstr "veghează fișierul FD deschis de procesul PID"
 
 #: src/main/help.c:438 src/main/help.c:441
 msgid "PID"
-msgstr ""
+msgstr "PID"
 
 #: src/main/help.c:439
 msgid "update settings of process PID"
-msgstr ""
+msgstr "actualizează setările procesului PID"
 
 #: src/main/help.c:442
 msgid "show progress of process PID"
-msgstr ""
+msgstr "arată progresul procesului PID"
 
 #: src/main/help.c:446
 msgid "run a command and monitor its standard input, output, or both"
 msgstr ""
+"execută o comandă și monitorizează-i datele de intrare, de ieșire sau ambele"
 
 #: src/main/help.c:450
 msgid "save process ID in FILE"
-msgstr ""
+msgstr "salvează procesul ID în FIȘIER"
 
 #: src/main/help.c:453
 msgid "show this help and exit"
-msgstr ""
+msgstr "arată acest mesaj de ajutor și ieși din program"
 
 #: src/main/help.c:456
 msgid "show version information and exit"
-msgstr ""
+msgstr "arată informația de versiune și ieși din program"
 
 #: src/main/help.c:460
 msgid "write debug logs to FILE"
-msgstr ""
+msgstr "scrie debug logs către FIȘIER"
 
 #: src/main/help.c:486
 #, c-format
 msgid "Usage: %s [OPTION] [FILE]..."
-msgstr ""
+msgstr "Utilizare: %s [OPȚIUNE] [FIȘIER]..."
 
 #: src/main/help.c:497
 msgid ""
 "Concatenate FILE(s), or standard input, to standard output, with monitoring."
 msgstr ""
+"Concatenează FIȘIER(e), sau datele de intrare. către ieșire, cu monitorizare."
 
 #: src/main/help.c:639
 msgid "Supported format sequences:"
-msgstr ""
+msgstr "Secvențe de format suportate:"
 
 #: src/main/help.c:653
 #, c-format
 msgid "Please report any bugs to: %s"
-msgstr ""
+msgstr "Vă rugăm să raportați bug-uri către: %s"
 
 #: src/main/main.c:225
 msgid "(input)"
-msgstr ""
+msgstr "(date de intrare)"
 
 #: src/main/main.c:381 src/main/options.c:1359
 msgid "a command to run must be specified"
-msgstr ""
+msgstr "o comandă de executat trebuie specificată"
 
 #: src/main/main.c:704 src/main/options.c:757 src/main/options.c:777
 #: src/pv/display.c:1086 src/pv/state.c:45 src/pv/state.c:902
 #: src/pv/state.c:914 src/pv/state.c:950 src/pv/transfer.c:1335
 #: src/pv/transfer.c:1451 src/pv/transfer.c:1778
 msgid "memory allocation failure"
-msgstr ""
+msgstr "eșec în alocarea memoriei"
 
 #: src/main/options.c:418
 msgid "list files may not contain @ lines"
-msgstr ""
+msgstr "fișiere de listă nu pot conține rânduri @"
 
 #: src/main/options.c:438 src/main/options.c:440 src/main/options.c:901
 msgid "process ID or pid:fd pair expected"
-msgstr ""
+msgstr "o pereche de tip process ID sau pid:fd este așteptată"
 
 #: src/main/options.c:449 src/main/options.c:451 src/main/options.c:908
 msgid "invalid process ID"
-msgstr ""
+msgstr "process ID inadecvat"
 
 #: src/main/options.c:829
 msgid "numeric value not understood"
-msgstr ""
+msgstr "valoare numerică neînțeleasă"
 
 #: src/main/options.c:843
 msgid "integer argument expected"
-msgstr ""
+msgstr "număr întreg așteptat ca argument"
 
 #: src/main/options.c:853
 msgid "numeric argument expected"
-msgstr ""
+msgstr "număr așteptat ca argument"
 
 #: src/main/options.c:864
 msgid "missing filename"
-msgstr ""
+msgstr "numele de fișier lipsește"
 
 #: src/main/options.c:890
 msgid "missing process name"
-msgstr ""
+msgstr "numele de proces lipsește"
 
 #: src/main/options.c:1182
 msgid "invalid side specification"
-msgstr ""
+msgstr "specificație de parte inadecvată"
 
 #: src/main/options.c:1197
 #, c-format
 msgid "Try `%s --help' for more information."
-msgstr ""
+msgstr "Încearcă `%s --help` pentru mai multă informație."
 
 #: src/main/options.c:1199
 #, c-format
 msgid "Try `%s -h' for more information."
-msgstr ""
+msgstr "Încearcă `%s -h` pentru mai multă informație."
 
 #: src/main/options.c:1231
 msgid ""
 "cannot use line mode or transfer modifier options when watching file "
 "descriptors"
 msgstr ""
+"nu poți folosi modul rând sau opțiuni de modificare a transferului când "
+"veghezi descriptori de fișier"
 
 #: src/main/options.c:1239
 msgid "cannot use cursor positioning when watching file descriptors"
 msgstr ""
+"nu poți folosi poziționarea cursorului când veghezi descriptori de fișier"
 
 #: src/main/options.c:1247
 msgid "cannot use remote control when watching file descriptors"
 msgstr ""
+"nu poți folosi controlul de la distanță când veghezi descriptori de fișier"
 
 #: src/main/options.c:1255
 msgid "cannot use remote query when watching file descriptors"
-msgstr ""
+msgstr "nu poți folosi query de la distanță când veghezi descriptori de fișier"
 
 #: src/main/options.c:1263
 msgid "cannot transfer files when watching file descriptors"
-msgstr ""
+msgstr "nu poți transfera fișiere când veghezi descriptori de fișier"
 
 #: src/main/options.c:1287
 msgid "not available on systems without /proc/self/fdinfo"
-msgstr ""
+msgstr "nu este disponibil(ă) pe sisteme fără /proc/self/fdinfo"
 
 #: src/main/options.c:1298
 msgid "cannot use remote control and remote query together"
 msgstr ""
+"nu poți folosi controlul de la distanță și query de la distanță împreună"
 
 #: src/main/options.c:1325
 msgid "monitor mode cannot be specified with this option"
-msgstr ""
+msgstr "modul monitorizare nu poate fi specificat cu această opțiune"
 
 #: src/main/options.c:1337
 msgid "monitor mode cannot be used with store-and-forward"
-msgstr ""
+msgstr "modul monitorizare nu poate fi folosit cu store-and-forward"
 
 #: src/main/options.c:1348
 msgid "files cannot be specified with this option"
-msgstr ""
+msgstr "fișierele nu pot fi specificate cu această opțiune"
 
 #: src/main/version.c:28
 msgid "License: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
-msgstr ""
+msgstr "Licența: GPLv3+ <https://www.gnu.org/licenses/gpl-3.0.html>"
 
 #: src/main/version.c:29
 msgid "This is free software: you are free to change and redistribute it."
-msgstr ""
+msgstr "Acesta este software liber: ai libertatea de a-l modifica și distribui."
 
 #: src/main/version.c:30
 msgid "There is NO WARRANTY, to the extent permitted by law."
-msgstr ""
+msgstr "NU ESTE NICIO GARANȚIE, până la limitele permisibile de lege."
 
 #: src/main/version.c:32
 msgid "Project web site"
-msgstr ""
+msgstr "Website-ul proiectului"
 
 #: src/pv/cursor.c:108 src/pv/cursor.c:135
 msgid "failed to open lock file"
-msgstr ""
+msgstr "eșec în deschiderea fișierului lacăt"
 
 #: src/pv/cursor.c:790 src/pv/cursor.c:792
 msgid "interrupted by a signal"
-msgstr ""
+msgstr "întrerupt de un semnal"
 
 #: src/pv/display.c:311
 msgid "yzafpnum kMGTPEZY"
-msgstr ""
+msgstr "yzafpnum kMGTPEZY"
 
 #: src/pv/display.c:329
 msgid "yzafpnum KMGTPEZY"
-msgstr ""
+msgstr "yzafpnum KMGTPEZY"
 
 #: src/pv/file.c:81
 msgid "/dev/null is not usable"
-msgstr ""
+msgstr "/dev/null nu poate fi folosit"
 
 #: src/pv/file.c:371
 msgid "error closing file"
-msgstr ""
+msgstr "eroare în închiderea fișierului"
 
 #: src/pv/file.c:438
 msgid "input file is also the output"
-msgstr ""
+msgstr "fișierul de intrare este de-asemenea fișierul de ieșire"
 
 #: src/pv/file.c:596
 msgid "(none)"
-msgstr ""
+msgstr "(nimic)"
 
 #: src/pv/file.c:598
 msgid "(stdin)"
-msgstr ""
+msgstr "(stdin)"
 
 #: src/pv/format/averagerate.c:34 src/pv/format/progressbar.c:92
 #: src/pv/format/rate.c:36 src/pv/loop.c:181
 msgid "b/s"
-msgstr ""
+msgstr "b/s"
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
 #: src/pv/format/rate.c:40
 msgid "/s"
-msgstr ""
+msgstr "/s"
 
 #: src/pv/format/averagerate.c:38 src/pv/format/progressbar.c:96
 #: src/pv/format/rate.c:40 src/pv/loop.c:181
 msgid "B/s"
-msgstr ""
+msgstr "B/s"
 
 #: src/pv/format/bytes.c:35
 msgid "b"
-msgstr ""
+msgstr "b"
 
 #: src/pv/format/bytes.c:39 src/pv/transfer.c:1284
 msgid "B"
-msgstr ""
+msgstr "B"
 
 #: src/pv/format/eta.c:63 src/pv/format/eta.c:67
 msgid "ETA"
-msgstr ""
+msgstr "ETA"
 
 #: src/pv/format/fineta.c:93
 msgid "FIN"
-msgstr ""
+msgstr "FIN"
 
 #: src/pv/loop.c:180
 msgid "rate min/avg/max/mdev"
-msgstr ""
+msgstr "rata min/med/max/mdev"
 
 #: src/pv/loop.c:192
 msgid "rate not measured"
-msgstr ""
+msgstr "rata nu este măsurată"
 
 #: src/pv/loop.c:1098 src/pv/loop.c:1114 src/pv/loop.c:1132 src/pv/remote.c:93
 #: src/pv/remote.c:188 src/pv/remote.c:536 src/pv/remote.c:582
@@ -497,34 +509,34 @@ msgstr ""
 #: src/pv/watchpid.c:409 src/pv/watchpid.c:556 src/pv/watchpid.c:565
 #: src/pv/watchpid.c:586
 msgid "pid"
-msgstr ""
+msgstr "pid"
 
 #: src/pv/loop.c:1132 src/pv/watchpid.c:132 src/pv/watchpid.c:142
 #: src/pv/watchpid.c:151 src/pv/watchpid.c:160 src/pv/watchpid.c:268
 #: src/pv/watchpid.c:277 src/pv/watchpid.c:288
 msgid "fd"
-msgstr ""
+msgstr "fd"
 
 #: src/pv/remote.c:242 src/pv/remote.c:636
 msgid "message not received"
-msgstr ""
+msgstr "mesajul nu a fost primit"
 
 #: src/pv/remote.c:659 src/pv/remote.c:677
 msgid "SA_SIGINFO not supported on this system"
-msgstr ""
+msgstr "SA_SIGINFO nu este suportat pe acest sistem"
 
 #: src/pv/transfer.c:1173
 msgid "warning: read errors detected"
-msgstr ""
+msgstr "avertizare: erori de citire detectate"
 
 #: src/pv/transfer.c:1283
 msgid "skipped past read error"
-msgstr ""
+msgstr "s-a trecut peste o eroare de citire"
 
 #: src/pv/transfer.c:1642
 msgid "write error"
-msgstr ""
+msgstr "eroare de scriere"
 
 #: src/pv/watchpid.c:160 src/pv/watchpid.c:288
 msgid "not a regular file or block device"
-msgstr ""
+msgstr "nu este un fișier sau block device obișnuit"
