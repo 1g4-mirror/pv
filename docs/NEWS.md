@@ -1,4 +1,4 @@
-### UNRELEASED
+### 1.12.0 - 17 September 2026
 
  * *feature:* new **--format** string **%{progress-conemu}**, and option **--conemu**, to show progress in the terminal title tab on terminals with ConEmu OSC 9;4 support ([#202](https://codeberg.org/ivarch/pv/issues/202))
  * *cleanup:* eliminate potential for closure of standard output under a combination of error conditions when using **--monitor** mode ([#201](https://codeberg.org/ivarch/pv/pulls/201))
