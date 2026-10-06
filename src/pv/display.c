@@ -693,7 +693,7 @@ static void pv__format_init(pvprogramstatus_t status, readonly_pvcontrol_t contr
 		chosen_size = 0;
 
 		if ('%' == display_format[strpos]) {
-			unsigned long number_prefix;
+			unsigned long number_prefix = 0;
 			size_t percent_sign_offset, sequence_start, sequence_length, sequence_colon_offset;
 #if HAVE_STRTOUL
 			char *number_end_ptr;
