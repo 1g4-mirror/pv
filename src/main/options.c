@@ -600,12 +600,13 @@ static bool opts_use_size_of_file(opts_t opts, const char *size_file)
 	 */
 
 	memset(sysfs_filename, 0, sizeof(sysfs_filename));
-	if (pv_snprintf
-	    (sysfs_filename, sizeof(sysfs_filename), "/sys/dev/block/%u:%u/size", major(sb.st_rdev),
-	     minor(sb.st_rdev)) < 0) {
+	if (pv_snprintf(sysfs_filename, sizeof(sysfs_filename), "/sys/dev/block/%u:%u/size",
+			/* cppcheck-suppress syntaxError */
+			major(sb.st_rdev), minor(sb.st_rdev)) < 0) {
 		pv_perror("%s", size_file);
 		return false;
 	}
+	/* cppcheck breaks on major() and minor(), hence the suppression. */
 
 	sysfs_fptr = fopen(sysfs_filename, "r");	/* flawfinder: ignore */
 	/*
