@@ -25,7 +25,8 @@ installation, it is in "[docs/pv.1](./docs/pv.1.md)".
 
 Changes are listed in "[docs/NEWS.md](./docs/NEWS.md)".
 
-Developers and translators, please see "[docs/DEVELOPERS.md](./docs/DEVELOPERS.md)".
+Contributors, please see "[CONTRIBUTING.md](./CONTRIBUTING.md)" and, for
+more details, "[docs/DEVELOPERS.md](./docs/DEVELOPERS.md)".
 
 Translators can use the Weblate instance hosted by Codeberg:
 [https://translate.codeberg.org/engage/pv/](https://translate.codeberg.org/engage/pv/)
@@ -33,12 +34,14 @@ Translators can use the Weblate instance hosted by Codeberg:
 [![Translation status](https://translate.codeberg.org/widget/pv/multi-auto.svg)](https://translate.codeberg.org/engage/pv/)
 
 If you don't see your language listed, raise an issue on the issue tracker
-(or just email the maintainer) asking for it to be added.
+or via Weblate, asking for it to be added.
 
 
 # Installation
 
-See "[docs/INSTALL](./docs/INSTALL)" for more about the _configure_ script.
+Before compiling and installing from source, ensure you have the build
+toolchain installed ("`sudo apt install build-essential`" on Debian or
+Ubuntu systems).
 
 The typical process for a system-wide install is:
 
@@ -46,15 +49,24 @@ The typical process for a system-wide install is:
     make
     sudo make install
 
-This requires the build toolchain ("`sudo apt install build-essential`" on
-Debian or Ubuntu systems).
+See "[docs/INSTALL](./docs/INSTALL)" for more about the _configure_ script.
 
-If this is not a packaged release, the _configure_ script is not included.
-It is generated with the GNU build system tools (_autoconf_, _aclocal_,
-_autopoint_, _automake_); _gettext_ is also needed.  On Debian or Ubuntu,
-run "`sudo apt install automake autopoint gettext`".  Once those tools are
-in place, call "`autoreconf -is`" to generate the _configure_ script, and
-run it as described above.
+## Installing from the repository
+
+Only packaged releases contain the _configure_ script.  When building from a
+clone of the repository, _configure_ first needs to be generated with the
+GNU build system tools (_autoconf_, _aclocal_, _autopoint_, _automake_), as
+well as _gettext_.
+
+On Debian or Ubuntu, run:
+
+    sudo apt install automake autopoint gettext
+
+Once those tools are in place, build _configure_ like this:
+
+    autoreconf -is
+
+Then follow the _Installation_ steps above.
 
 
 # Copyright, bug reporting, and acknowledgements
