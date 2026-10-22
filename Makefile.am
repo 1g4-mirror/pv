@@ -5,7 +5,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = po
 
 bin_PROGRAMS = pv
-dist_doc_DATA = README.md docs/INSTALL docs/COPYING docs/NEWS.md docs/ACKNOWLEDGEMENTS.md docs/DEVELOPERS.md
+dist_doc_DATA = README.md CONTRIBUTING.md docs/INSTALL docs/COPYING docs/NEWS.md docs/ACKNOWLEDGEMENTS.md docs/DEVELOPERS.md
 dist_man1_MANS = docs/pv.1
 
 EXTRA_DIST = docs/pv.1.md docs/benchmark-rw-syscalls-vs-data.sh docs/benchmark-pv-transfers.sh docs/release.cf
