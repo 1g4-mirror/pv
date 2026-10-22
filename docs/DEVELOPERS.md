@@ -185,7 +185,7 @@ have introduced new functionality, consider adding a test for it.
 
 ## Writing tests
 
-The test scripts are stored are under _/tests/_.  All test scripts must be
+The test scripts are stored are under _tests/_.  All test scripts must be
 executable ("`chmod +x`").
 
 Tests are written in POSIX.1 compliant Bourne shell (_not_ bash).
