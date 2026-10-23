@@ -114,7 +114,7 @@ tests/Watchfd_-_Multiple_arguments.test \
 tests/Watchfd_-_Multiple_descriptors.test \
 tests/Watchfd_-_Single_descriptor.test
 
-EXTRA_DIST += $(TESTS) tests/run-valgrind.sh tests/test-env.sh
+EXTRA_DIST += $(TESTS) tests/run-valgrind.sh tests/test-env.sh tests/test-functions.sh
 
 docs/pv.1.md: $(srcdir)/docs/pv.1
 	test -d docs || mkdir docs
