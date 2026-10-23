@@ -50,6 +50,9 @@ src/include/options.h \
 src/include/pv-internal.h \
 src/include/pv.h
 
+TEST_EXTENSIONS = .test
+TEST_LOG_COMPILER = sh
+
 ## Allow tests to write diagnostic info to fd 9 to reach the original
 ## stderr even when the test driver is sending test output to a file.
 AM_TESTS_FD_REDIRECT = 9>&2
