@@ -194,7 +194,9 @@ The following environment variables are available in test scripts:
 
  * **${testSubject}**: the binary being tested, e.g. "_./pv_".
  * **${sourcePath}**: the directory above this test's "_tests/_" directory.
+ * **${workDir}**: a temporary working directory, removed on exit.
  * **${workFile1}** to **${workFile5}**: temporary working files.
+ * **$f**: the test script being run.
 
 All test scripts must exit 0 for success, 1 for failure, or 77 if the test
 was skipped for some reason (such as a missing prerequisite like _tmux_).
@@ -207,7 +209,8 @@ environment variable, like this:
     make check TESTS=tests/Display_-_--bits.test
 
 After adding a new test, adjust the "**TESTS**" list in _Makefile.am_ at the
-top of the source tree (the directory containing _configure.ac_).
+top of the source tree (the directory containing _configure.ac_), or run
+"`./src/update-tests.sh`" to update "**TESTS**" automatically.
 
 
 ## Benchmarking
