@@ -22,6 +22,9 @@ workDir=$(mktemp -d 2>/dev/null) || { workDir="./.test-tmp"; mkdir -p "${workDir
 # Clean up the temporary files on exit, in case of interruption.
 trap 'rm -rf "${workDir}"' EXIT
 
+# Show the operator that the test has begun.
+test -t 2 && printf '%s: %s\r' '----' "$f" 1>&2
+
 # Temporary working files, for the test scripts to use.
 workFile1="${workDir}/temp1"
 workFile2="${workDir}/temp2"
