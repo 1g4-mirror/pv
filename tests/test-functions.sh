@@ -83,17 +83,19 @@ skipTestUnlessTmuxCanResize () {
 startSubTest () {
 	# Do nothing if not running on a terminal.
 	test -t 9 2>/dev/null || return 0
-	# If the running test's sub-test count isn't yet known, calculate it
-	# and set the exit handler.
+	# If the running test's sub-test count isn't yet known, calculate it.
 	if ! test -n "${subTestCount}"; then
 		subTestCount=$(grep -Ec '^[[:space:]]*startSubTest' "${sourcePath}/$f")
 		for addToSubTestCount in $(sed -En '/^[[:space:]]*#?[[:space:]]*subTestCount:\+([0-9]+).*$/s//\1/p' < "${sourcePath}/$f"); do
 			test -n "${addToSubTestCount}" && subTestCount=$((subTestCount+addToSubTestCount))
 		done
+	fi
+	# If the sub-test counter hasn't been set yet, initialise it, and
+	# set the exit handler.
+	if ! test -n "${thisSubTest}"; then
+		thisSubTest=0
 		trap 'endSubTests' EXIT
 	fi
-	# Initialise the counter if it hasn't been set yet.
-	test -n "${thisSubTest}" || thisSubTest=0
 	# Increment the counter.
 	thisSubTest=$((1+thisSubTest))
 	# Display progress.
