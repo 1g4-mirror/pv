@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Memory safety check counterpart for test 002.
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+runOtherTestUnderValgrind '002_Help_word_wrapping.test'

@@ -1,6 +1,10 @@
 #!/bin/sh
 #
 # Check that command-line options are parsed correctly.
+#
+# Uses "${testSubject}" to run the tes tsubject so that memory safety check
+# versions of these checks aren't generated - they would take a long time to
+# run, without covering enough ground to be worth it.
 
 error="not set - call this from 'make check'"
 true "${sourcePath:?$error}"
@@ -25,11 +29,11 @@ exitStatus=0
 # requires an argument, or false = does not).
 requiresArgument () {
 	rc1='false'
-	runTestSubject "$2" </dev/null >/dev/null 2>"${workDir}/stderr"
+	"${testSubject}" "$2" </dev/null >/dev/null 2>"${workDir}/stderr"
 	test $? -ne 0 && grep -Fq 'requires an argument' "${workDir}/stderr" && rc1='true'
 	if ${haveLongOptions} && test -n "$3"; then
 		rc2='false'
-		runTestSubject "$3" </dev/null >/dev/null 2>"${workDir}/stderr"
+		"${testSubject}" "$3" </dev/null >/dev/null 2>"${workDir}/stderr"
 		test $? -ne 0 && grep -Fq 'requires an argument' "${workDir}/stderr" && rc2='true'
 		if ! test "${rc1}" = "${rc2}"; then
 			printf '%s/%s: %s\n' "$2" "$3" 'short and long options behaved differently'
@@ -53,11 +57,11 @@ requiresArgument () {
 # argument is valid, or false = it is not).
 validArgument () {
 	rc1='true'
-	runTestSubject "$3" "$2" </dev/null >/dev/null 2>"${workDir}/stderr"
+	"${testSubject}" "$3" "$2" </dev/null >/dev/null 2>"${workDir}/stderr"
 	test $? -ne 0 && grep -Eq -e "$3: $2:" -e "$3:.*expected" "${workDir}/stderr" && rc1='false'
 	if ${haveLongOptions} && test -n "$4"; then
 		rc2='true'
-		runTestSubject "$4" "$2" </dev/null >/dev/null 2>"${workDir}/stderr"
+		"${testSubject}" "$4" "$2" </dev/null >/dev/null 2>"${workDir}/stderr"
 		test $? -ne 0 && grep -Eq -e "$3: $2:" -e "$3:.*expected" "${workDir}/stderr" && rc2='false'
 		if ! test "${rc1}" = "${rc2}"; then
 			printf '%s/%s: %s: %s\n' "$3" "$4" "$2" 'short and long options behaved differently'

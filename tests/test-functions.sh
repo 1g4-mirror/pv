@@ -33,7 +33,14 @@ test "${SKIP_ALL_TESTS}" = "1" && skipTest 'SKIP_ALL_TESTS is set'
 # skip the test if not.
 if test "${useValgrind}" = '1'; then
 	test "${SKIP_VALGRIND_TESTS}" = '1' && skipTest 'SKIP_VALGRIND_TESTS is set'
+
+	if command -v arch >/dev/null 2>&1 && arch | grep -Fq -e arm -e aarch; then
+		test "${ENABLE_VALGRIND_ARM}" = "1" \
+		|| skipTest 'skipping valgrind on ARM without ENABLE_VALGRIND_ARM'
+	fi
+
 	command -v valgrind >/dev/null 2>&1 || skipTest "test requires \`valgrind'"
+
 	valgrindHelp="$(valgrind --help 2>&1)"
 	for valgrindOption in "verbose" "show-error-list" "error-exitcode" "track-fds" "leak-check"; do
 		printf "%s\n" "${valgrindHelp}" | grep -Fq "${valgrindOption}" \
@@ -127,8 +134,20 @@ runTestSubject () {
 # immediately with status 1, otherwise return the test subject's return
 # value.
 runWithValgrind () {
+	cat > "${workDir}/valgrind.suppressions" <<EOF
+{
+   ignore-initproctitle-leak
+   Memcheck:Leak
+   fun:malloc
+   src:proctitle.c
+   fun:main
+}
+EOF
 	valgrind --tool=memcheck \
-	  --verbose --show-error-list=yes --log-file="${workDir}/valgrind.out" \
+	  --verbose \
+	  --show-error-list=yes \
+	  --suppressions="${workDir}/valgrind.suppressions" \
+	  --log-file="${workDir}/valgrind.out" \
 	  --error-exitcode=125 \
 	  --track-fds=yes \
 	  --leak-check=full \
@@ -136,17 +155,13 @@ runWithValgrind () {
 	  9<&-
 	returnValue=$?
 
+	printf "%s\n" "================================================"
+	printf "%s\n\n" "Command: ${testSubject} $*"
 	cat "${workDir}/valgrind.out"
+	printf "%s\n\n" "================================================"
 
 	if test "${returnValue}" -eq 125; then
-		{
-		printf "%s\n" "================================================"
-		date
-		printf "%s\n\n" "Command: ${testSubject} $*"
-		cat "${workDir}/valgrind.out"
-		printf "%s\n\n" "================================================"
-		} >> "${valgrindOutputFile}"
-		printf "%s %s\n" "memory check failed - see output file:" "${valgrindOutputFile}" 1>&9
+		printf "%s\n" "memory check failed - see details above."
 		exit 1
 	fi
 

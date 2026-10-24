@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Memory safety check counterpart for test 001.
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+runOtherTestUnderValgrind '001_Help_and_version.test'
