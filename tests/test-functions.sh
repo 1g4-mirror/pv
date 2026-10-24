@@ -41,6 +41,29 @@ if test "${useValgrind}" = '1'; then
 	done
 fi
 
+# Skip the current test unless tmux is available and can resize the terminal.
+skipTestUnlessTmuxCanResize () {
+	# Skip the test if `tmux' is not available.
+	command -v tmux >/dev/null 2>&1 || skipTest "test requires \`tmux'"
+
+	# Skip the test if `tmux' does not have "-C".
+	if printf '%s\n' "kill-server" | tmux -C -L pvtest 2>&1 | grep -Fq "tmux: unknown option"; then
+		skipTest "test requires a newer \`tmux'"
+	fi
+
+	# Confirm that tmux can resize its terminal.
+	currentSize="$(stty -a | tr ';' '\n' | grep col | sed -n 1p | tr -dc 0-9)"
+	checkSize="100"
+	test "${currentSize}" = "${checkSize}" && checkSize="102"
+	detectedWidth=$(runInTerminal "${checkSize}" 10 "stty -a | tr \\\";\\\" \\\"\\\\n\\\" | grep col | sed -n 1p | tr -dc 0-9")
+	if ! test "${detectedWidth}" = "${checkSize}"; then
+		printf '%s: %s\n' \
+		  "test requires a \`tmux' that can resize a detached window" \
+		  "requested width ${checkSize}, detected ${detectedWidth}"
+		skipTest "test requires a \`tmux' that can resize a detached window"
+	fi
+}
+
 # Start a sub-test - increment the sub-test counter, and if running on a
 # terminal, display the percentage progress through the sub-tests.  Assumes
 # that "$f" is the full path to the running test script.
