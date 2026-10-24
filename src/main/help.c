@@ -467,6 +467,7 @@ void display_help(void)
 	size_t description_left_margin = 0;
 	size_t min_description_width = 50;
 	size_t right_margin = 77;
+	const char *usage_note;
 	const char *program_description;
 	const char *bug_report_note;
 	char *format_sequences = NULL;
@@ -475,18 +476,20 @@ void display_help(void)
 	pv_screensize(&terminal_width, &terminal_height);
 	if (terminal_width > 5) {
 		right_margin = (size_t) (terminal_width - 3);
+	} else {
+		right_margin = 3;
 	}
 
-	/*@-formatconst@ */
-	/*
-	 * splint note: unavoidable use of %s in translated string.  Should
-	 * be hard to exploit - the message catalogue would have to be
-	 * replaced or forced to load from another location.
-	 */
-	printf(_("Usage: %s [OPTION] [FILE]..."), PACKAGE_NAME);
-	/*@+formatconst@ */
-
-	printf("\n");
+	usage_note = _("Usage: %s [OPTION] [FILE]...");
+	if (NULL != usage_note) {
+		char *string = NULL;
+		if (pv_asprintf(&string, usage_note, PACKAGE_NAME) > 0
+		    && NULL != string) {
+			display_word_wrap(string, right_margin, 0, 0);
+			free(string);
+		}
+		printf("\n");
+	}
 
 	/*@-mustfreefresh@ */
 	/*
@@ -652,14 +655,12 @@ void display_help(void)
 
 	bug_report_note = _("Please report any bugs to: %s");
 	if (NULL != bug_report_note) {
-		/*@-formatconst@ */
-		/*
-		 * splint note: see earlier "formatconst" note.
-		 * flawfinder: same reason.
-		 */
-		printf(bug_report_note, PACKAGE_BUGREPORT);	/* flawfinder: ignore */
-		/*@+formatconst@ */
+		char *string = NULL;
+		if (pv_asprintf(&string, bug_report_note, PACKAGE_BUGREPORT)
+		    > 0 && NULL != string) {
+			display_word_wrap(string, right_margin, 0, 0);
+			free(string);
+		}
+		printf("\n");
 	}
-
-	printf("\n");
 }
