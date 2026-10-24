@@ -192,5 +192,5 @@ while read shortOption longOption paramSpec; do
 done
 } \
 < "${workDir}/optionsList"
-		
+
 exit ${exitStatus}
