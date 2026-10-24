@@ -48,6 +48,34 @@ requiresArgument () {
 	fi
 }
 
+# Check whether option $3 (long option $4) allows an argument of $2, setting
+# the overall test exit status to 1 (fail) if the answer isn't $1 (true =
+# argument is valid, or false = it is not).
+validArgument () {
+	rc1='true'
+	runTestSubject "$3" "$2" </dev/null >/dev/null 2>"${workDir}/stderr"
+	test $? -ne 0 && grep -Eq -e "$3: $2:" -e "$3:.*expected" "${workDir}/stderr" && rc1='false'
+	if ${haveLongOptions} && test -n "$4"; then
+		rc2='true'
+		runTestSubject "$4" "$2" </dev/null >/dev/null 2>"${workDir}/stderr"
+		test $? -ne 0 && grep -Eq -e "$3: $2:" -e "$3:.*expected" "${workDir}/stderr" && rc2='false'
+		if ! test "${rc1}" = "${rc2}"; then
+			printf '%s/%s: %s: %s\n' "$3" "$4" "$2" 'short and long options behaved differently'
+			exitStatus=1
+			return
+		fi
+	fi
+	if ! test "${rc1}" = "$1"; then
+		cat "${workDir}/stderr"
+		if $1; then
+			printf "%s: %s: %s\n" "$3" "$2" "should have accepted this argument, but didn't"
+		else
+			printf "%s: %s: %s\n" "$3" "$2" "shouldn't have accepted this argument, but did"
+		fi
+		exitStatus=1
+	fi
+}
+
 # For each option, if the option requires no argument, make sure there's no
 # "requires an argument" error if one is not provided.  If the option does
 # require an argument, check that there's a "requires an argument" error if
@@ -111,8 +139,52 @@ while read shortOption longOption paramSpec; do
 		;;
 	esac
 
-	# TODO: special processing for --watchfd, --monitor
-	# TODO: check argument parsing.
+	if ${isInteger} || ${isDecimal}; then
+		# Restricted to numeric types.
+		validArgument false 'ABC' "${shortOption}" "${longOption}"
+		validArgument true '987654321' "${shortOption}" "${longOption}"
+		if ${isDecimal}; then
+			# Decimals are allowed.
+			if ${suffixMandatoryIfDecimal}; then
+				# Must have a suffix, if decimal.
+				validArgument true '12.34M' "${shortOption}" "${longOption}"
+				# Note that this is not enforced - instead
+				# the number is just truncated to an
+				# integer, if there's no suffix.  Hence this
+				# check expects "true" rather than "false".
+				# validArgument false '12.34' "${shortOption}" "${longOption}"
+				validArgument true '12.34' "${shortOption}" "${longOption}"
+			else
+				# Decimal with no suffix is allowed.
+				validArgument true '12.34' "${shortOption}" "${longOption}"
+				if ${suffixOptional}; then
+					# Decimal with a suffix is allowed.
+					validArgument true '12.34M' "${shortOption}" "${longOption}"
+				else
+					# Suffix is not allowed.
+					validArgument false '12.34M' "${shortOption}" "${longOption}"
+				fi
+			fi
+		fi
+	elif test "x${shortOption}" = 'x-d'; then
+		# --watchfd: PID, PID:FD, =NAME, or @LISTFILE.
+		validArgument false 'ABC' "${shortOption}" "${longOption}"
+		validArgument true '987654321' "${shortOption}" "${longOption}"
+		validArgument true '987654321:123' "${shortOption}" "${longOption}"
+		validArgument true '=ABC' "${shortOption}" "${longOption}"
+		validArgument true '@ABC' "${shortOption}" "${longOption}"
+	elif test "x${shortOption}" = 'x-M'; then
+		# --monitor: any of 0,in,1,out,2,both.
+		validArgument false 'ABC' "${shortOption}" "${longOption}"
+		validArgument true 0 "${shortOption}" "${longOption}"
+		validArgument true in "${shortOption}" "${longOption}"
+		validArgument true stdin "${shortOption}" "${longOption}"
+		validArgument true 1 "${shortOption}" "${longOption}"
+		validArgument true out "${shortOption}" "${longOption}"
+		validArgument true stdout "${shortOption}" "${longOption}"
+		validArgument true 2 "${shortOption}" "${longOption}"
+		validArgument true both "${shortOption}" "${longOption}"
+	fi
 done
 } \
 < "${workDir}/optionsList"
