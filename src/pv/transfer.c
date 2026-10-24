@@ -883,7 +883,7 @@ static bool pv__transfer_read(pvstate_t state, int input_fd, bool *eof_in, bool 
 	 *
 	 * This isn't workable in line mode.
 	 */
-	if (state->control.stop_at_size && !state->control.linemode) {
+	if (state->control.stop_at_size && state->control.size > 0 && !state->control.linemode) {
 		max_to_read = state->control.size - state->transfer.total_bytes_read;
 	}
 
