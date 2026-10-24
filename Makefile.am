@@ -63,6 +63,7 @@ AM_TESTS_ENVIRONMENT = \
 TESTS = \
 tests/001_Help_and_version.test \
 tests/002_Help_word_wrapping.test \
+tests/003_Option_parsing.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Bug_-_Install_all_files.test \

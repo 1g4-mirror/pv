@@ -1,0 +1,120 @@
+#!/bin/sh
+#
+# Check that command-line options are parsed correctly.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# List the available options, one per line, in the form "-f --foo PARAM".
+"${testSubject}" -h 2>/dev/null \
+| sed -n '/^  -/{s//-/;s/  .*$//;s/,//;p}' \
+> "${workDir}/optionsList"
+
+# Check whether long options are available ("--help" vs "-h").
+haveLongOptions='false'
+grep -Fqe ' --help' < "${workDir}/optionsList" && haveLongOptions='true'
+
+# There will be one sub-test for each option.
+subTestCount="$(grep -c . < "${workDir}/optionsList")"
+
+exitStatus=0
+
+# Check whether option $2 (long option $3) requires an argument, setting the
+# overall test exit status to 1 (fail) if the answer isn't $1 (true =
+# requires an argument, or false = does not).
+requiresArgument () {
+	rc1='false'
+	runTestSubject "$2" </dev/null >/dev/null 2>"${workDir}/stderr"
+	test $? -ne 0 && grep -Fq 'requires an argument' "${workDir}/stderr" && rc1='true'
+	if ${haveLongOptions} && test -n "$3"; then
+		rc2='false'
+		runTestSubject "$3" </dev/null >/dev/null 2>"${workDir}/stderr"
+		test $? -ne 0 && grep -Fq 'requires an argument' "${workDir}/stderr" && rc2='true'
+		if ! test "${rc1}" = "${rc2}"; then
+			printf '%s/%s: %s\n' "$2" "$3" 'short and long options behaved differently'
+			exitStatus=1
+			return
+		fi
+	fi
+	if ! test "${rc1}" = "$1"; then
+		cat "${workDir}/stderr"
+		if $1; then
+			printf "%s: %s\n" "$2" "should have required an argument, but didn't"
+		else
+			printf "%s: %s\n" "$2" "shouldn't have required an argument, but did"
+		fi
+		exitStatus=1
+	fi
+}
+
+# For each option, if the option requires no argument, make sure there's no
+# "requires an argument" error if one is not provided.  If the option does
+# require an argument, check that there's a "requires an argument" error if
+# one is not provided; and if the argument must be of a specific type (such
+# as integer), check that an error is reported if the type is wrong, and no
+# error is reported otherwise.
+#
+# If long options are available, run the same test with the long option
+# variant.
+#
+{
+while read shortOption longOption paramSpec; do
+	# If there are no long options, the second arg is the paramSpec.
+	${haveLongOptions} || { paramSpec="${longOption}"; longOption=''; }
+
+	test -n "${shortOption}" || continue
+
+	startSubTest
+
+	if test -z "${paramSpec}"; then
+		# No argument required for this option.
+		requiresArgument false "${shortOption}" "${longOption}"
+		continue
+	fi
+
+	# An argument is required for this option.
+	requiresArgument true "${shortOption}" "${longOption}"
+
+	# Determine the type of argument this option requires, so its
+	# parsing can be checked.
+	isInteger='false'			# an integer like 123
+	isDecimal='false'			# a decimal 1.23 or integer
+	suffixOptional='false'			# suffix K,M,G etc allowed
+	suffixMandatoryIfDecimal='false'	# if decimal, must be suffixed
+	case "${paramSpec}" in
+	'NUM'|'WIDTH'|'HEIGHT'|'PID')
+		# --last-written, --width, --height, --remote, --query:
+		# integer with no suffix.
+		isInteger='true'
+		;;
+	'SEC')
+		# --delay-start, --interval: decimal with no suffix.
+		isDecimal='true'
+		# --average-rate-window: integer with no suffix.
+		if test "x${shortOption}" = 'x-m'; then
+			isInteger='true'
+			isDecimal='false'
+		fi
+		;;
+	'SIZE'|'BYTES')
+		# --size, --buffer-size, --pipe-buffer-size,
+		# --error-skip-block: decimal with suffix.
+		isDecimal='true'
+		suffixOptional='true'
+		suffixMandatoryIfDecimal='true'
+		;;
+	'RATE')
+		# --rate-limit: decimal, with or without a suffix.
+		isDecimal='true'
+		suffixOptional='true'
+		;;
+	esac
+
+	# TODO: special processing for --watchfd, --monitor
+	# TODO: check argument parsing.
+done
+} \
+< "${workDir}/optionsList"
+		
+exit ${exitStatus}
