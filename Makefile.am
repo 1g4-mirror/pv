@@ -101,8 +101,8 @@ tests/Modifiers_-_--direct-io.test \
 tests/Modifiers_-_--force.test \
 tests/Modifiers_-_--interval.test \
 tests/Modifiers_-_--line-mode.test \
-tests/Modifiers_-_--size_from_file_size.test \
 tests/Modifiers_-_--size_from_dir_size.test \
+tests/Modifiers_-_--size_from_file_size.test \
 tests/Modifiers_-_--size.test \
 tests/Modifiers_-_--sync.test \
 tests/Monitor_-_Basic.test \
@@ -110,8 +110,8 @@ tests/Sparse_-_Basic.test \
 tests/Terminal_-_Detect_width.test \
 tests/Transfer_-_--rate-limit.test \
 tests/Transfer_-_--remote.test \
-tests/Transfer_-_--stop-at-size.test \
 tests/Transfer_-_--stop-at-size_reads.test \
+tests/Transfer_-_--stop-at-size.test \
 tests/Watchfd_-_Multiple_arguments.test \
 tests/Watchfd_-_Multiple_descriptors.test \
 tests/Watchfd_-_Single_descriptor.test
