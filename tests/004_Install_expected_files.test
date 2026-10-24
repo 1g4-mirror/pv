@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# Check that "make install" installs the expected minimum set of files.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+test "${XCTEST}" = "1" && skipTest 'cross-compile flag set - skipping as local make will not run'
+
+makeDir="${testSubject%/*}"
+test -d "${makeDir}" || skipTest "could not find the directory to run \`make' in"
+
+makeCommand=$(command -v gmake 2>/dev/null)
+test -z "${makeCommand}" && makeCommand="make"
+
+testInstallDir="${workDir}"
+
+export DESTDIR="${testInstallDir}"
+${makeCommand} -C "${makeDir}" install DESTDIR="${testInstallDir}" >"${workDir}/output" 2>&1
+rc=$?
+if ! test "${rc}" -eq 0; then
+	if ! test "${makeCommand}" = "make"; then
+		# Retry with plain "make".
+		makeCommand="make"
+		${makeCommand} -C "${makeDir}" install DESTDIR="${testInstallDir}" >>"${workDir}/output" 2>&1
+		rc=$?
+	fi
+fi
+if ! test ${rc} -eq 0; then
+	printf '%s\n' "\`make install' exited ${rc}"
+	printf '%s: %s\n' 'command' "${makeCommand} -C '${makeDir}' install DESTDIR='${testInstallDir}'"
+	cat "${workDir}/output"
+	exit 1
+fi
+
+exitStatus=0
+
+find "${testInstallDir}" -type f > "${workDir}/output"
+
+find "${testInstallDir}" -type f -name 'pv.1*' | grep -Fq 'pv.1' \
+|| reportFailure 'installation of man page failed'
+
+find "${testInstallDir}" -type f -name 'pv*' | grep -Fv -e 'pv.mo' | grep -Fq 'pv' \
+|| reportFailure 'installation of binary failed'
+
+exit ${exitStatus}
