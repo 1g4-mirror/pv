@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Check that --help and --version work.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+startSubTest
+runTestSubject -h > "${workDir}/stdout" 2>"${workDir}/stderr"
+test -s "${workDir}/stdout" || { printf "%s\n" "-h produced no output"; exit 1; }
+test -s "${workDir}/stderr" && { printf "%s\n" "-h produced an error"; exit 1; }
+
+startSubTest
+runTestSubject -V > "${workDir}/stdout" 2>"${workDir}/stderr"
+test -s "${workDir}/stdout" || { printf "%s\n" "-V produced no output"; exit 1; }
+test -s "${workDir}/stderr" && { printf "%s\n" "-V produced an error"; exit 1; }
+
+exit 0

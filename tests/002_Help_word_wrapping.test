@@ -1,0 +1,121 @@
+#!/bin/sh
+#
+# Check that -h wraps words correctly on different terminal sizes.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Skip the test if `script' is not available.
+command -v script >/dev/null 2>&1 || skipTest "test requires \`script'"
+
+exitStatus=0
+
+# Run the given command $3 inside a terminal of the given width $1, waiting
+# up to $2 seconds, and output the results.
+#
+runInTerminal () {
+	terminalWidth="$1"
+	secondsToWait="$2"
+	commandToRun="$3"
+
+	rm -f "${workDir}/tmuxOutput" "${workDir}/tmuxEnd"
+	{
+	printf '%s\n' "set remain-on-exit on"
+	printf '%s\n' "set default-shell /bin/sh"
+	printf '%s\n' "new-session -d -x ${terminalWidth} -y 5"
+	# starting the session doesn't always correctly set the size
+	printf '%s\n' "resize-window -x ${terminalWidth} -y 5"
+	# tmux 1.8 doesn't have "resize-window"
+	printf '%s\n' "resize-pane -x ${terminalWidth} -y 5"
+	printf '%s\n' "pipe-pane 'cat > ${workDir}/tmuxOutput'"
+	sleep 0.5
+	# On some systems, tmuxOutput ends up with the shell prompt in it
+	# before the command below is run, so output a marker to show where
+	# the output really starts.
+	printf '%s\n' "respawn-pane -k \"echo; echo START; ${commandToRun}; true > ${workDir}/tmuxEnd\""
+	# Wait until either tmuxEnd is created (when the command finishes)
+	# or the max wait time has elapsed.
+	maxWait=$((10*secondsToWait))
+	waitCount=0
+	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxEnd"; do
+		sleep 0.1
+		waitCount=$((1+waitCount))
+	done
+	printf '%s\n' "kill-server"
+	sleep 0.2
+	} \
+	| tmux -C -L pucatest >/dev/null
+
+	tr -d '\r' < "${workDir}/tmuxOutput" | sed '1,/^START$/d'
+}
+
+# Perform a test run of the given width and exit on failure.
+#
+widthTest () {
+	terminalWidth="$1"
+
+	rm -f "${workDir}/message" "${workDir}/failed"
+	helpOutput="$(runInTerminal "${terminalWidth}" 20 ". \"${sourcePath}/tests/test-functions.sh\" && ( runTestSubject -h 9>\"${workDir}/message\" ) || true > \"${workDir}/failed\"")"
+
+	# If under valgrind, strip the valgrind output.
+	if test "${useValgrind}" = '1'; then
+		helpOutput="$(printf '%s\n' "${helpOutput}" | sed '/^==/,$d')"
+	fi
+
+	printf '%s: %d\n----\n%s\n----\n' 'width' "${terminalWidth}" "${helpOutput}"
+
+	if test -e "${workDir}/failed"; then
+		test -e "${workDir}/message" && cat "${workDir}/message" 1>&9
+		exitStatus=1
+		return
+	fi
+
+	if ! test -n "${helpOutput}"; then
+		printf '%s %d: %s\n' 'width' "${terminalWidth}" '-h produced no output'
+		exitStatus=1
+		return
+	elif ! printf '%s\n' "${helpOutput}" | grep -q '^U'; then
+		printf '%s %d: %s\n' 'width' "${terminalWidth}" '-h did not produce a Usage line'
+		exitStatus=1
+		return
+	fi
+
+	# Check that lines aren't too long, but for the smaller terminal
+	# sizes, omit the "  -x, --long-x" lines from this check because of
+	# the way word wrapping has been constrained to not wrap those parts
+	# as it would make them unreadable.
+	if test "${terminalWidth}" -gt 20; then
+		longest="$(printf '%s\n' "${helpOutput}" | awk 'BEGIN{m=0} {x=length($0); if (x>m) m=x} END{print m}')"
+	else
+		longest="$(printf '%s\n' "${helpOutput}" | grep -v '^  -' | awk 'BEGIN{m=0} {x=length($0); if (x>m) m=x} END{print m}')"
+	fi
+	# The word wrapping is limited to a minimum of 5 terminal columns,
+	# so accept lines that wide as valid on smaller terminals.
+	maxAcceptable="${terminalWidth}"
+	test "${terminalWidth}" -lt 5 && maxAcceptable=5
+	if test "${longest}" -gt "${maxAcceptable}"; then
+		printf '%s:\n' 'Line lengths'
+		printf '%s\n' "${helpOutput}" | awk '{printf "%10d %s\n", length($0), $0}'
+		printf '%s %d: %s (%s: %d)\n' 'width' "${terminalWidth}" '-h produced a line that was too long' 'longest' "${longest}"
+		exitStatus=1
+		return
+	fi
+}
+
+
+skipTestUnlessTmuxCanResize
+
+# Test -h's word wrapping at various terminal sizes.
+
+startSubTest; widthTest 80
+startSubTest; widthTest 120
+startSubTest; widthTest 400
+startSubTest; widthTest 60
+startSubTest; widthTest 50
+startSubTest; widthTest 40
+startSubTest; widthTest 20
+startSubTest; widthTest 5
+startSubTest; widthTest 1
+
+exit ${exitStatus}
