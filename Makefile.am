@@ -61,13 +61,13 @@ AM_TESTS_ENVIRONMENT = \
   . $(srcdir)/tests/test-env.sh \
   ;
 TESTS = \
-tests/001_Help_and_version.test \
-tests/002_Help_word_wrapping.test \
-tests/003_Option_parsing.test \
-tests/004_Install_expected_files.test \
+tests/001_Install_expected_files.test \
+tests/002_Help_and_version.test \
+tests/003_Help_word_wrapping.test \
+tests/004_Option_parsing.test \
 tests/005_Detect_terminal_width.test \
-tests/501_Memory_safety_-_Help_and_version.test \
-tests/502_Memory_safety_-_Help_word_wrapping.test \
+tests/502_Memory_safety_-_Help_and_version.test \
+tests/503_Memory_safety_-_Help_word_wrapping.test \
 tests/505_Memory_safety_-_Detect_terminal_width.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
