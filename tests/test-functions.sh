@@ -17,9 +17,6 @@ true "${testSubject:?$error}"
 true "${sourcePath:?$error}"
 true "${workDir:?$error}"
 
-# Output file for valgrind failures.
-valgrindOutputFile="valgrind.out"
-
 # Skip the test, writing a message in the process.
 skipTest () {
 	printf "%-70s\n" "$*" 1>&9
