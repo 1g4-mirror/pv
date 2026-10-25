@@ -6,9 +6,6 @@ error="not set - call this from 'make check'"
 true "${sourcePath:?$error}"
 test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
 
-# Skip the test if `script' is not available.
-command -v script >/dev/null 2>&1 || skipTest "test requires \`script'"
-
 exitStatus=0
 
 # Run the given command $3 inside a terminal of the given width $1, waiting
