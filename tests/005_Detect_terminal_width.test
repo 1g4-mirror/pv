@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+# Check that the terminal width is detected on startup.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# Run a progress meter inside a terminal of the given width, and write the
+# longest number of characters seen between "[" and "]" to the file "width"
+# under workDir.
+#
+runWidthTest () {
+	rm -f "${workDir}/message" "${workDir}/failed"
+	
+	runInTerminal "$1" "$2" ". \"${sourcePath}/tests/test-functions.sh\" && ( runTestSubject -pSs 1K </dev/zero >/dev/null 9>\"${workDir}/message\" ) || true > \"${workDir}/failed\"" \
+	> "${workDir}/testOutput"
+
+	if test -e "${workDir}/failed"; then
+		test -e "${workDir}/message" && cat "${workDir}/message" 1>&9
+		exitStatus=1
+		return
+	fi
+
+	# If under valgrind, strip the valgrind output.
+	if test "${useValgrind}" = '1'; then
+		sed '/^==/,$d' < "${workDir}/testOutput" > "${workDir}/testOutput.new"
+		mv -f "${workDir}/testOutput.new" "${workDir}/testOutput"
+	fi
+
+	tr '\r' '\n' < "${workDir}/testOutput" \
+	| sed -n 's/^.*\[//;s/\].*$//p' \
+	| awk 'BEGIN {m=0} {n=length($0); m=(n>m?n:m)} END {print m}' \
+	> "${workDir}/width"
+}
+
+# Perform a test run of the given width and exit on failure.  The longest
+# bar found by runWidthTest() should be the width of the terminal minus the
+# "[] 100%" characters, i.e. 7 less.
+#
+widthTest () {
+	terminalWidth="$1"
+	true > "${workDir}/width"
+	runWidthTest "${terminalWidth}" 1
+	longestBar=$(cat "${workDir}/width")
+	# Retry test with longer delay, if null result.
+	if test -z "${longestBar}" || test "${longestBar}" -eq 0; then
+		true > "${workDir}/width"
+		runWidthTest "${terminalWidth}" 5
+		longestBar=$(cat "${workDir}/width")
+	fi
+	if test -z "${longestBar}"; then
+		reportFailure "no output from test at width=${terminalWidth}"
+	elif ! test "${longestBar}" -eq $((terminalWidth-7)); then
+		reportFailure "bar size incorrect (${longestBar}) at width=${terminalWidth}"
+	fi
+}
+
+skipTestUnlessTmuxCanResize
+
+# Test the progress bar width at various terminal sizes.
+startSubTest; widthTest 80
+startSubTest; widthTest 120
+startSubTest; widthTest 400
+startSubTest; widthTest 20
+
+exit ${exitStatus}

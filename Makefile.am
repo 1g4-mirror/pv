@@ -65,8 +65,10 @@ tests/001_Help_and_version.test \
 tests/002_Help_word_wrapping.test \
 tests/003_Option_parsing.test \
 tests/004_Install_expected_files.test \
+tests/005_Detect_terminal_width.test \
 tests/501_Memory_safety_-_Help_and_version.test \
 tests/502_Memory_safety_-_Help_word_wrapping.test \
+tests/505_Memory_safety_-_Detect_terminal_width.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--average-rate.test \
@@ -110,7 +112,6 @@ tests/Modifiers_-_--size.test \
 tests/Modifiers_-_--sync.test \
 tests/Monitor_-_Basic.test \
 tests/Sparse_-_Basic.test \
-tests/Terminal_-_Detect_width.test \
 tests/Transfer_-_--rate-limit.test \
 tests/Transfer_-_--remote.test \
 tests/Transfer_-_--stop-at-size_reads.test \
