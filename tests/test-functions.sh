@@ -93,7 +93,7 @@ runInTerminal () {
 	# On some systems, tmuxOutput ends up with the shell prompt in it
 	# before the command below is run, so output a marker to show where
 	# the output really starts.
-	printf '%s\n' "respawn-pane -k \"echo; echo START; ${commandToRun}; true > ${workDir}/tmuxEnd\""
+	printf '%s\n' "respawn-pane -k \"echo; exec 8>>${workDir}/subprocessValgrind; echo START; ${commandToRun}; true > ${workDir}/tmuxEnd\""
 	# Wait until either tmuxEnd is created (when the command finishes)
 	# or the max wait time has elapsed.
 	maxWait=$((10*secondsToWait))
@@ -108,6 +108,9 @@ runInTerminal () {
 	| tmux -C -L pvtest >/dev/null
 
 	tr -d '\r' < "${workDir}/tmuxOutput" | sed '1,/^START$/d'
+
+	# Send the valgrind output to file descriptor 8, if that fd is open.
+	{ true >&8; } 2>/dev/null && cat "${workDir}/subprocessValgrind" >&8
 }
 
 # Start a sub-test - increment the sub-test counter, and if running on a
@@ -171,7 +174,7 @@ runTestSubject () {
 # Run the test subject under valgrind, with the given parameters passed to
 # the test subject; if valgrind reports an error, exit the script
 # immediately with status 1, otherwise return the test subject's return
-# value.
+# value.  The valgrind output is sent to file descriptor 8.
 runWithValgrind () {
 	cat > "${workDir}/valgrind.suppressions" <<EOF
 {
@@ -191,16 +194,18 @@ EOF
 	  --track-fds=yes \
 	  --leak-check=full \
 	  "${testSubject}" "$@" \
-	  9<&-
+	  8<&- 9<&-
 	returnValue=$?
 
+	{
 	printf "%s\n" "================================================"
 	printf "%s\n\n" "Command: ${testSubject} $*"
 	cat "${workDir}/valgrind.out"
 	printf "%s\n\n" "================================================"
+	} >&8
 
 	if test "${returnValue}" -eq 125; then
-		printf "%s\n" "memory check failed - see details above."
+		printf "%s\n" "memory check failed - see details above." >&8
 		exit 1
 	fi
 
@@ -208,13 +213,15 @@ EOF
 }
 
 # Run the test with the given basename (such as "001_Basic.test") in place
-# of this one, under valgrind.
+# of this one, under valgrind, with file descriptor 8 opened as a copy of
+# stdout so valgrind's output can be sent to it independently of any
+# redirection being performed on the test subject.
 runOtherTestUnderValgrind () {
 	useValgrind='1'
 	orig_f="$f"
 	export useValgrind orig_f
 	f="${f%/*}/$1"
-	exec sh "${sourcePath}/$f"
+	exec sh "${sourcePath}/$f" 8>&1
 	exit 1
 }
 
