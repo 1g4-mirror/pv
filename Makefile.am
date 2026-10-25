@@ -5,6 +5,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = po
 
 bin_PROGRAMS = pv
+check_PROGRAMS = checkvalgrind
 dist_doc_DATA = README.md CONTRIBUTING.md docs/INSTALL docs/COPYING docs/NEWS.md docs/ACKNOWLEDGEMENTS.md docs/DEVELOPERS.md
 dist_man1_MANS = docs/pv.1
 
@@ -50,6 +51,8 @@ src/include/options.h \
 src/include/pv-internal.h \
 src/include/pv.h
 
+checkvalgrind_SOURCES = src/tests/checkvalgrind.c
+
 TEST_EXTENSIONS = .test
 TEST_LOG_COMPILER = sh
 
@@ -66,6 +69,10 @@ tests/002_Help_and_version.test \
 tests/003_Help_word_wrapping.test \
 tests/004_Option_parsing.test \
 tests/005_Detect_terminal_width.test \
+tests/500a_Detect_memory_leak.test \
+tests/500b_Detect_file_descriptor_leak.test \
+tests/500c_Detect_buffer_overflow.test \
+tests/500d_Confirm_checkvalgrind_runs.test \
 tests/502_Memory_safety_-_Help_and_version.test \
 tests/503_Memory_safety_-_Help_word_wrapping.test \
 tests/505_Memory_safety_-_Detect_terminal_width.test \
@@ -119,6 +126,11 @@ tests/Transfer_-_--stop-at-size.test \
 tests/Watchfd_-_Multiple_arguments.test \
 tests/Watchfd_-_Multiple_descriptors.test \
 tests/Watchfd_-_Single_descriptor.test
+
+XFAIL_TESTS = \
+tests/500a_Detect_memory_leak.test \
+tests/500b_Detect_file_descriptor_leak.test \
+tests/500c_Detect_buffer_overflow.test
 
 EXTRA_DIST += $(TESTS) tests/run-valgrind.sh tests/test-env.sh tests/test-functions.sh
 

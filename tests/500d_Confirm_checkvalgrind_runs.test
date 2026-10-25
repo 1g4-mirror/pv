@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# Check that the checkvalgrind test program runs.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+
+testSubject='./checkvalgrind'
+useValgrind='1'
+orig_f="$f"
+export useValgrind orig_f
+exec 8>&1
+
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+runWithValgrind do-nothing
