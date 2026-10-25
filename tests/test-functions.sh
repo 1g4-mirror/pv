@@ -71,6 +71,48 @@ skipTestUnlessTmuxCanResize () {
 	fi
 }
 
+# Run the given command $3 inside a terminal of the given width $1, waiting
+# up to $2 seconds, and output the results.
+#
+# The calling script must run skipTestUnlessTmuxCanResize before any calls
+# to this function.
+#
+runInTerminal () {
+	terminalWidth="$1"
+	secondsToWait="$2"
+	commandToRun="$3"
+
+	rm -f "${workDir}/tmuxOutput" "${workDir}/tmuxEnd"
+	{
+	printf '%s\n' "set remain-on-exit on"
+	printf '%s\n' "set default-shell /bin/sh"
+	printf '%s\n' "new-session -d -x ${terminalWidth} -y 5"
+	# starting the session doesn't always correctly set the size
+	printf '%s\n' "resize-window -x ${terminalWidth} -y 5"
+	# tmux 1.8 doesn't have "resize-window"
+	printf '%s\n' "resize-pane -x ${terminalWidth} -y 5"
+	printf '%s\n' "pipe-pane 'cat > ${workDir}/tmuxOutput'"
+	sleep 0.5
+	# On some systems, tmuxOutput ends up with the shell prompt in it
+	# before the command below is run, so output a marker to show where
+	# the output really starts.
+	printf '%s\n' "respawn-pane -k \"echo; echo START; ${commandToRun}; true > ${workDir}/tmuxEnd\""
+	# Wait until either tmuxEnd is created (when the command finishes)
+	# or the max wait time has elapsed.
+	maxWait=$((10*secondsToWait))
+	waitCount=0
+	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxEnd"; do
+		sleep 0.1
+		waitCount=$((1+waitCount))
+	done
+	printf '%s\n' "kill-server"
+	sleep 0.2
+	} \
+	| tmux -C -L pvtest >/dev/null
+
+	tr -d '\r' < "${workDir}/tmuxOutput" | sed '1,/^START$/d'
+}
+
 # Start a sub-test - increment the sub-test counter, and if running on a
 # terminal, display the percentage progress through the sub-tests.  Assumes
 # that "$f" is the full path to the running test script.
