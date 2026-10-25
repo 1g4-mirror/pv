@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# Check that valgrind detects memory leaks when running the test subject
+# inside a tmux session - this test should fail.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+
+testSubject='./checkvalgrind'
+useValgrind='1'
+orig_f="$f"
+export useValgrind orig_f
+exec 8>&1
+
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+skipTestUnlessTmuxCanResize
+
+rm -f "${workDir}/message" "${workDir}/failed"
+runInTerminal 80 1 ". \"${sourcePath}/tests/test-functions.sh\" && ( runWithValgrind leak_memory 9>\"${workDir}/message\" ) || true > \"${workDir}/failed\"" \
+> "${workDir}/testOutput"
+
+if test -e "${workDir}/failed"; then
+	test -e "${workDir}/message" && cat "${workDir}/message" 1>&9
+	exit 1
+fi
+
+exit 0
