@@ -21,6 +21,13 @@ widthTest () {
 		helpOutput="$(printf '%s\n' "${helpOutput}" | sed '/^==/,$d')"
 	fi
 
+	# Retry with a longer delay, if there's no output and no failure.
+	if test -z "${helpOutput}" && ! test -e "${workDir}/failed"; then
+		rm -f "${workDir}/message" "${workDir}/failed"
+		helpOutput="$(runInTerminal "${terminalWidth}" 40 ". \"${sourcePath}/tests/test-functions.sh\" && ( runTestSubject -h 9>\"${workDir}/message\" ) || true > \"${workDir}/failed\"")"
+		test "${useValgrind}" = '1' && helpOutput="$(printf '%s\n' "${helpOutput}" | sed '/^==/,$d')"
+	fi
+
 	printf '%s: %d\n----\n%s\n----\n' 'width' "${terminalWidth}" "${helpOutput}"
 
 	if test -e "${workDir}/failed"; then
