@@ -201,6 +201,10 @@ All test scripts must exit 0 for success, 1 for failure, or 77 if the test
 was skipped for some reason (such as a missing prerequisite like _tmux_).
 The test launcher, _tests/test-env.sh_, removes the working files on exit.
 
+Test scripts which load _"tests/test-functions.sh"_ should not trap EXIT,
+because that file already sets an exit trap.  A test script can define a
+function "**onExit**" instead, which will be called on exit.
+
 The tests are called via "`make check`" (see the "Tests" section of the GNU
 Automake manual).  Run a specific test by setting the "**TESTS**"
 environment variable, like this:

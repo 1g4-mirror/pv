@@ -11,6 +11,10 @@
 # exits with status 77 (skip test) as soon as this file is sourced.
 #
 # If $SKIP_ALL_TESTS is 1, exits with status 77 immediately.
+#
+# Sourcing this file sets an EXIT trap, so the calling script shouldn't trap
+# EXIT.  Instead, it can define a function "onExit" which will be called by
+# the exit handler.
 
 error="not set - call this from 'make check'"
 true "${testSubject:?$error}"
@@ -45,15 +49,19 @@ if test "${useValgrind}" = '1'; then
 	done
 fi
 
+# Set an exit trap to run appropriate cleanups.
+trap 'testCleanup' EXIT
+
 # Skip the current test unless tmux is available and can resize the terminal.
 skipTestUnlessTmuxCanResize () {
 	# Skip the test if `tmux' is not available.
 	command -v tmux >/dev/null 2>&1 || skipTest "test requires \`tmux'"
 
 	# Skip the test if `tmux' does not have "-C".
-	if printf '%s\n' "kill-server" | tmux -C -L pvtest$$ 2>&1 | grep -Fq "tmux: unknown option"; then
+	if printf '%s\n' "kill-server" | tmux -C -S "${workDir}/tmuxCheckForDashC" 2>&1 | grep -Fq "tmux: unknown option"; then
 		skipTest "test requires a newer \`tmux'"
 	fi
+	rm -f "${workDir}/tmuxCheckForDashC"
 
 	# Confirm that tmux can resize its terminal.
 	currentSize="$(stty -a 2>/dev/null | tr ';' '\n' | grep col | sed -n 1p | tr -dc 0-9)"
@@ -79,7 +87,17 @@ runInTerminal () {
 	secondsToWait="$2"
 	commandToRun="$3"
 
-	rm -f "${workDir}/tmuxOutput" "${workDir}/tmuxEnd"
+	test -n "${tmuxCounter}" || tmuxCounter=0
+	tmuxCounter=$((1+tmuxCounter))
+	tmuxTestSocket="${workDir}/runInTerminal-${f##*/}.${tmuxCounter}"
+
+	# The total number of 0.1-second waits allowed before the
+	# seconds-to-wait time has elapsed.  The wait is cut short when the
+	# command finishes (when tmuxEnd is created).
+	maxWait=$((10*secondsToWait))
+
+	rm -f "${workDir}/tmuxOutput" "${workDir}/tmuxEnd" "${workDir}/subprocessValgrind"
+
 	{
 	printf '%s\n' "set remain-on-exit on"
 	printf '%s\n' "set default-shell /bin/sh"
@@ -89,23 +107,31 @@ runInTerminal () {
 	# tmux 1.8 doesn't have "resize-window"
 	printf '%s\n' "resize-pane -x ${terminalWidth} -y 5"
 	printf '%s\n' "pipe-pane 'cat > ${workDir}/tmuxOutput'"
-	sleep 0.5
+	waitCount=0
+	# First, wait for the pipe-pane "cat" to be started.
+	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxOutput"; do
+		sleep 0.1
+		waitCount=$((1+waitCount))
+	done
+	# Now start the command.
 	# On some systems, tmuxOutput ends up with the shell prompt in it
 	# before the command below is run, so output a marker to show where
 	# the output really starts.
 	printf '%s\n' "respawn-pane -k \"echo; exec 8>>${workDir}/subprocessValgrind; echo START; ${commandToRun}; true > ${workDir}/tmuxEnd\""
-	# Wait until either tmuxEnd is created (when the command finishes)
-	# or the max wait time has elapsed.
-	maxWait=$((10*secondsToWait))
-	waitCount=0
+	# Wait for the process started by "respawn-pane" to end.
 	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxEnd"; do
 		sleep 0.1
 		waitCount=$((1+waitCount))
 	done
+	# Terminate the tmux server.
 	printf '%s\n' "kill-server"
+	# Wait a short time to allow for a clean exit.
 	sleep 0.2
 	} \
-	| tmux -C -L pvtest$$ >/dev/null
+	| tmux -C -S "${tmuxTestSocket}" >/dev/null
+
+	rm -f "${tmuxTestSocket}"
+	tmuxTestSocket=''
 
 	tr -d '\r' < "${workDir}/tmuxOutput" | sed '1,/^START$/d'
 
@@ -125,10 +151,10 @@ runInTerminal () {
 # to the count.  Use this if running startSubTest in a loop that always has
 # the same number of iterations.
 #
-# Sets an exit trap to run endSubTests on script exit.
-#
 # When running under valgrind (useValgrind=1), uses $orig_f instead of $f
 # for the displayed test name.
+#
+# The endSubTests function will be called on exit if any sub-tests ran.
 startSubTest () {
 	# Do nothing if not running on a terminal.
 	test -t 9 2>/dev/null || return 0
@@ -139,12 +165,10 @@ startSubTest () {
 			test -n "${addToSubTestCount}" && subTestCount=$((subTestCount+addToSubTestCount))
 		done
 	fi
-	# If the sub-test counter hasn't been set yet, initialise it, and
-	# set the exit handler.
-	if ! test -n "${thisSubTest}"; then
-		thisSubTest=0
-		trap 'endSubTests' EXIT
-	fi
+	# If the sub-test counter hasn't been set yet, initialise it.
+	# The exit handler (testCleanup) will call endSubTests if
+	# thisSubTest isn't blank.
+	test -n "${thisSubTest}" || thisSubTest=0
 	# Increment the counter.
 	thisSubTest=$((1+thisSubTest))
 	# Display progress.
@@ -311,4 +335,14 @@ checkOutput () {
 	fi
 
 	return 0
+}
+
+# Perform cleanups on exit.
+testCleanup () {
+	# Tidy up the display if any sub-tests ran.
+	test -n "${thisSubTest}" && endSubTests
+	# If a tmux server was started, terminate it.
+	test -n "${tmuxTestSocket}" && test -e "${tmuxTestSocket}" && printf '%s\n' "kill-server" >> "${tmuxTestSocket}"
+	# Run any optional cleanup the test script has defined.
+	type onExit >/dev/null 2>&1 && onExit
 }
