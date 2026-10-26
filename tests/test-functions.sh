@@ -51,15 +51,15 @@ skipTestUnlessTmuxCanResize () {
 	command -v tmux >/dev/null 2>&1 || skipTest "test requires \`tmux'"
 
 	# Skip the test if `tmux' does not have "-C".
-	if printf '%s\n' "kill-server" | tmux -C -L pvtest 2>&1 | grep -Fq "tmux: unknown option"; then
+	if printf '%s\n' "kill-server" | tmux -C -L pvtest$$ 2>&1 | grep -Fq "tmux: unknown option"; then
 		skipTest "test requires a newer \`tmux'"
 	fi
 
 	# Confirm that tmux can resize its terminal.
-	currentSize="$(stty -a | tr ';' '\n' | grep col | sed -n 1p | tr -dc 0-9)"
+	currentSize="$(stty -a 2>/dev/null | tr ';' '\n' | grep col | sed -n 1p | tr -dc 0-9)"
 	checkSize="100"
 	test "${currentSize}" = "${checkSize}" && checkSize="102"
-	detectedWidth=$(runInTerminal "${checkSize}" 10 "stty -a | tr \\\";\\\" \\\"\\\\n\\\" | grep col | sed -n 1p | tr -dc 0-9")
+	detectedWidth=$(runInTerminal "${checkSize}" 10 "stty -a 2>/dev/null | tr \\\";\\\" \\\"\\\\n\\\" | grep col | sed -n 1p | tr -dc 0-9")
 	if ! test "${detectedWidth}" = "${checkSize}"; then
 		printf '%s: %s\n' \
 		  "test requires a \`tmux' that can resize a detached window" \
@@ -105,7 +105,7 @@ runInTerminal () {
 	printf '%s\n' "kill-server"
 	sleep 0.2
 	} \
-	| tmux -C -L pvtest >/dev/null
+	| tmux -C -L pvtest$$ >/dev/null
 
 	tr -d '\r' < "${workDir}/tmuxOutput" | sed '1,/^START$/d'
 
