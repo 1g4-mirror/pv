@@ -17,7 +17,7 @@ test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
 skipTestUnlessTmuxCanResize
 
 rm -f "${workDir}/message" "${workDir}/failed"
-runInTerminal 80 1 ". \"${sourcePath}/tests/test-functions.sh\" && ( runWithValgrind leak_memory 9>\"${workDir}/message\" ) || true > \"${workDir}/failed\"" \
+runInTerminal 80 10 ". \"${sourcePath}/tests/test-functions.sh\" && ( runWithValgrind leak_memory 9>\"${workDir}/message\" ) || true > \"${workDir}/failed\"" \
 > "${workDir}/testOutput"
 
 if test -e "${workDir}/failed"; then

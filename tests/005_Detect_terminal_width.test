@@ -43,12 +43,12 @@ runWidthTest () {
 widthTest () {
 	terminalWidth="$1"
 	true > "${workDir}/width"
-	runWidthTest "${terminalWidth}" 1
+	runWidthTest "${terminalWidth}" 10
 	longestBar=$(cat "${workDir}/width")
 	# Retry test with longer delay, if null result.
 	if test -z "${longestBar}" || test "${longestBar}" -eq 0; then
 		true > "${workDir}/width"
-		runWidthTest "${terminalWidth}" 5
+		runWidthTest "${terminalWidth}" 20
 		longestBar=$(cat "${workDir}/width")
 	fi
 	if test -z "${longestBar}"; then
