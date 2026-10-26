@@ -13,4 +13,11 @@ exec 8>&1
 
 test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
 
+# Valgrind earlier than 3.24.0 doesn't treat a leaking file descriptor as an
+# error that affects the exit status.
+valgrindVersion="$(valgrind --version | cut -d - -f 2 | awk -F . '{print 1000*$1+$2}')"
+if test -z "${valgrindVersion}" || ! test "${valgrindVersion}" -gt 3023; then
+	skipTest "this valgrind ($(valgrind --version)) may not report leaking file descriptors as an error"
+fi
+
 runWithValgrind leak_fd
