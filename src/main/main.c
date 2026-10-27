@@ -30,7 +30,7 @@
  * all.  This is done by writing to a temporary file in the same directory
  * first, and then renaming the temporary file to the target name.
  */
-static int pv__write_pidfile(opts_t opts)
+static int pv__write_pidfile( /*@null@ */ char *pidfile_name)
 {
 	char *pidfile_tmp_name;
 	size_t pidfile_tmp_bufsize;
@@ -39,7 +39,7 @@ static int pv__write_pidfile(opts_t opts)
 	mode_t prev_umask;
 	const char *pidfile_template = "%s.XXXXXX";
 
-	if (NULL == opts->pidfile)
+	if (NULL == pidfile_name)
 		return 0;
 
 	/*
@@ -49,22 +49,22 @@ static int pv__write_pidfile(opts_t opts)
 	 * byte is used for the terminating \0, so subtract 1 byte more to
 	 * get the exact amount of space needed.
 	 */
-	pidfile_tmp_bufsize = strlen(pidfile_template) + strlen(opts->pidfile) - 1;	/* flawfinder: ignore */
+	pidfile_tmp_bufsize = strlen(pidfile_template) + strlen(pidfile_name) - 1;	/* flawfinder: ignore */
 
 	/*
 	 * flawfinder rationale: the warning is about strlen() being called
 	 * on a string that may not be \0 terminated.  pidfile_template is a
-	 * constant so is always \0-terminated.  opts->pidfile comes from
+	 * constant so is always \0-terminated.  pidfile_name comes from
 	 * argv[] whose entries are \0-terminated.
 	 */
 
 	pidfile_tmp_name = malloc(pidfile_tmp_bufsize);
 	if (NULL == pidfile_tmp_name) {
-		pv_perror("%s", opts->pidfile);
+		pv_perror("%s", pidfile_name);
 		return PV_ERROREXIT_REMOTE_OR_PID;
 	}
 	memset(pidfile_tmp_name, 0, pidfile_tmp_bufsize);
-	(void) pv_snprintf(pidfile_tmp_name, pidfile_tmp_bufsize, pidfile_template, opts->pidfile);
+	(void) pv_snprintf(pidfile_tmp_name, pidfile_tmp_bufsize, pidfile_template, pidfile_name);
 
 	/*@-type@ *//* splint doesn't like mode_t. */
 	prev_umask = umask(0000);	    /* flawfinder: ignore */
@@ -106,8 +106,8 @@ static int pv__write_pidfile(opts_t opts)
 		pv_perror("%s", pidfile_tmp_name);
 	}
 
-	if (rename(pidfile_tmp_name, opts->pidfile) < 0) {
-		pv_perror("%s", opts->pidfile);
+	if (rename(pidfile_tmp_name, pidfile_name) < 0) {
+		pv_perror("%s", pidfile_name);
 		(void) remove(pidfile_tmp_name);
 		free(pidfile_tmp_name);
 		return PV_ERROREXIT_REMOTE_OR_PID;
@@ -374,6 +374,8 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 	int pipefd_out_to_in[2];	 /* from out monitor to in monitor */
 	int retcode, pid_status;
 	pid_t command_pid, in_monitor_pid, out_monitor_pid, waited_pid;
+	char *pidfile_main;
+	char *pidfile_sub;
 
 	/* Arguments check. */
 	if ((NULL == opts->argv) || (opts->argc < 1) || (NULL == opts->argv[0])) {
@@ -384,6 +386,34 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 	}
 
 	retcode = 0;
+
+	/*
+	 * Select the PID files to write for the main process and, if
+	 * monitoring both sides, for the sub-process monitoring the other
+	 * side.
+	 */
+	pidfile_main = NULL;
+	pidfile_sub = NULL;
+	if (NULL != opts->pidfile1) {
+		/* Two "-P" options were passed. */
+		pidfile_main = opts->pidfile1;	/* PID of main side to first -P. */
+		pidfile_sub = opts->pidfile;	/* PID of "out" side to second -P. */
+	} else {
+		/* One "-P" option, so only write the main process PID. */
+		pidfile_main = opts->pidfile;
+	}
+
+	/*
+	 * Write the PID file for the main monitoring process, if
+	 * applicable, returning immediately on failure.
+	 */
+	if (NULL != pidfile_main) {
+		int pidfile_rc;
+		pidfile_rc = pv__write_pidfile(pidfile_main);
+		if (0 != pidfile_rc) {
+			return pidfile_rc;
+		}
+	}
 
 	/*
 	 * Create the pipes for communicating with the command.
@@ -398,6 +428,9 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 	if ((PV_SIDE_IN == opts->side) || (PV_SIDE_BOTH == opts->side)) {
 		if (0 != pipe(pipefd_cmd_in)) {
 			pv_perror("%s", "pipe");
+			if ((NULL != pidfile_main) && (0 != remove(pidfile_main))) {
+				pv_perror("%s", pidfile_main);
+			}
 			return PV_ERROREXIT_MONITOR;
 		}
 		debug("pipefd_cmd_in[]=(%d,%d)", pipefd_cmd_in[0], pipefd_cmd_in[1]);
@@ -411,6 +444,9 @@ static int pv__monitor(pvstate_t state, opts_t opts, pvformatoptions_s format_op
 				(void) close(pipefd_cmd_in[0]);
 			if (-1 != pipefd_cmd_in[1])
 				(void) close(pipefd_cmd_in[1]);
+			if ((NULL != pidfile_main) && (0 != remove(pidfile_main))) {
+				pv_perror("%s", pidfile_main);
+			}
 			return PV_ERROREXIT_MONITOR;
 		}
 		debug("pipefd_cmd_out[]=(%d,%d)", pipefd_cmd_out[0], pipefd_cmd_out[1]);
@@ -430,6 +466,9 @@ x = -1; \
 		close_if_open(pipefd_cmd_in[1]);
 		close_if_open(pipefd_cmd_out[0]);
 		close_if_open(pipefd_cmd_out[1]);
+		if ((NULL != pidfile_main) && (0 != remove(pidfile_main))) {
+			pv_perror("%s", pidfile_main);
+		}
 		return PV_ERROREXIT_MONITOR;
 	} else if (0 == command_pid) {
 		/* Command process. */
@@ -499,6 +538,9 @@ x = -1; \
 			close_if_open(pipefd_cmd_in[1]);
 			close_if_open(pipefd_cmd_out[0]);
 			(void) kill(command_pid, SIGTERM);
+			if ((NULL != pidfile_main) && (0 != remove(pidfile_main))) {
+				pv_perror("%s", pidfile_main);
+			}
 			return PV_ERROREXIT_MONITOR;
 		}
 		debug("pipefd_in_to_out[]=(%d,%d)", pipefd_in_to_out[0], pipefd_in_to_out[1]);
@@ -509,6 +551,9 @@ x = -1; \
 			close_if_open(pipefd_cmd_in[1]);
 			close_if_open(pipefd_cmd_out[0]);
 			(void) kill(command_pid, SIGTERM);
+			if ((NULL != pidfile_main) && (0 != remove(pidfile_main))) {
+				pv_perror("%s", pidfile_main);
+			}
 			return PV_ERROREXIT_MONITOR;
 		}
 		debug("pipefd_out_to_in[]=(%d,%d)", pipefd_out_to_in[0], pipefd_out_to_in[1]);
@@ -532,6 +577,9 @@ x = -1; \
 			close_if_open(pipefd_cmd_in[1]);
 			close_if_open(pipefd_cmd_out[0]);
 			(void) kill(command_pid, SIGTERM);
+			if ((NULL != pidfile_main) && (0 != remove(pidfile_main))) {
+				pv_perror("%s", pidfile_main);
+			}
 			return PV_ERROREXIT_MONITOR;
 		} else if (0 == out_monitor_pid) {
 			/* Output side monitoring process. */
@@ -545,6 +593,14 @@ x = -1; \
 			/* Close the read end of the out-to-in pipe. */
 			close_if_open(pipefd_out_to_in[0]);
 
+			/* Write the PID file for the subprocess, if applicable. */
+			if (NULL != pidfile_sub) {
+				if (0 != pv__write_pidfile(pidfile_sub)) {
+					/* Not written, so don't delete it. */
+					pidfile_sub = NULL;
+				}
+			}
+
 			retcode =
 			    pv__run_monitor(state, PV_SIDE_OUT, pipefd_cmd_out[0], in_monitor_pid,
 					    pipefd_in_to_out[0], pipefd_out_to_in[1], opts->size, format_options);
@@ -552,6 +608,13 @@ x = -1; \
 			/* Close the other ends of the intra-monitor pipes. */
 			close_if_open(pipefd_in_to_out[0]);
 			close_if_open(pipefd_out_to_in[1]);
+
+			/* Remove the PID file, if applicable. */
+			if (NULL != pidfile_sub) {
+				if (0 != remove(pidfile_sub)) {
+					pv_perror("%s", pidfile_sub);
+				}
+			}
 
 			return retcode;
 		}
@@ -638,6 +701,11 @@ x = -1; \
 		} while (-1 == waited_pid && EINTR == errno);
 	}
 
+	/* Remove the main monitoring process PID file, if applicable. */
+	if ((NULL != pidfile_main) && (0 != remove(pidfile_main))) {
+		pv_perror("%s", pidfile_main);
+	}
+
 	return retcode;
 }
 
@@ -710,20 +778,6 @@ int main(int argc, char **argv)
 	}
 
 	/*
-	 * Write a PID file if -P was specified.
-	 */
-	if (opts->pidfile != NULL) {
-		int pidfile_rc;
-		pidfile_rc = pv__write_pidfile(opts);
-		if (0 != pidfile_rc) {
-			pv_state_free(state);
-			opts_free(opts);
-			pv_set_error_prefix(NULL);
-			return pidfile_rc;
-		}
-	}
-
-	/*
 	 * If no files were given, behave as if "-" was given (stdin).
 	 */
 	if (0 == opts->argc) {
@@ -751,6 +805,24 @@ int main(int argc, char **argv)
 	 */
 	if ((opts->watchfd_count > 0) && (NULL != opts->watchfd_pid) && (NULL != opts->watchfd_fd)) {
 		pv_state_watchfds(state, opts->watchfd_count, opts->watchfd_pid, opts->watchfd_fd);
+	}
+
+	/*
+	 * Write a PID file if -P was specified and monitor mode is not
+	 * active.  When monitor mode is active, this is deferred until
+	 * within pv__monitor() so that the correct PID file can be written
+	 * depending on the monitoring side and how many -P arguments were
+	 * given.
+	 */
+	if ((NULL != opts->pidfile) && (PV_ACTION_MONITOR != opts->action)) {
+		int pidfile_rc;
+		pidfile_rc = pv__write_pidfile(opts->pidfile);
+		if (0 != pidfile_rc) {
+			pv_state_free(state);
+			opts_free(opts);
+			pv_set_error_prefix(NULL);
+			return pidfile_rc;
+		}
 	}
 
 	/*
@@ -962,8 +1034,12 @@ int main(int argc, char **argv)
 		break;
 	}
 
-	/* Clear up the PID file, if one was written. */
-	if (opts->pidfile != NULL) {
+	/*
+	 * Remove the PID file, if one was written.  In monitor mode, this
+	 * is instead handled within pv__monitor() so that the right PID
+	 * file for the running side is removed.
+	 */
+	if ((NULL != opts->pidfile) && (PV_ACTION_MONITOR != opts->action)) {
 		if (0 != remove(opts->pidfile)) {
 			pv_perror("%s", opts->pidfile);
 		}

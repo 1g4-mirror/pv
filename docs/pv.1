@@ -1,4 +1,4 @@
-.TH PV 1 2026-09-17 pv-1.12.0 "User Commands"
+.TH PV 1 2026-10-27 pv-1.12.0 "User Commands"
 .\"
 .SH NAME
 pv \- monitor and manage the progress of data through a pipe
@@ -465,12 +465,16 @@ equivalent to
 \*(lq\fBpv\~\-\-cursor\~|\~gzip\~\-9\~|\~pv\~\-\-cursor\fR\*(rq, except that
 the latter can't show the input:output ratio.
 .IP
-The \*(lq\fB\-\-format\fR\*(rq and \*(lq\fB\-\-name\fR\*(rq options may be
-specified twice, in which case the first one applies to the input side and
-the second applies to the output side.
-If no \*(lq\fB\-\-format\fR\*(rq options are specified, the default format
-based on the other display switches is used as normal, except that the
-ratio is added to the output side when \fISIDE\fR is \*(lq\fBboth\fR\*(rq.
+When \fISIDE\fR is \*(lq\fBboth\fR\*(rq, the \*(lq\fB\-\-format\fR\*(rq,
+\*(lq\fB\-\-name\fR\*(rq, and \*(lq\fB\-\-pidfile\fR\*(rq options may be
+specified twice.
+Each option's first appearance applies to the input side, and the second
+applies to the output side.
+.IP
+The default format, when \fISIDE\fR is \*(lq\fBboth\fR\*(rq and no
+\*(lq\fB\-\-format\fR\*(rq options are specified, is based on the other
+display switches as normal, except that the ratio (\*(lq\fB%{ratio}\fR\*(rq)
+is added to the output side.
 .IP
 The values \*(lq\fB0\fR\*(rq, \*(lq\fB1\fR\*(rq, and \*(lq\fB2\fR\*(rq may
 be used as synonyms for \*(lq\fBin\fR\*(rq, \*(lq\fBout\fR\*(rq, and
@@ -486,6 +490,11 @@ The file will be replaced if it already exists, and will be removed when
 \fBpv\fR exits.
 While \fBpv\fR is running, \fIFILE\fR will contain a single number - the
 process ID of \fBpv\fR - followed by a newline.
+.IP
+With \*(lq\fB\-\-monitor\fR\*(rq, the first \*(lq\fB\-\-pidfile\fR\*(rq
+always specifies the file to write the main monitor's process ID to, and the
+second is only used in \*(lq\fB\-\-monitor\~both\fR\*(rq mode to store the
+process ID of the monitor watching the output side.
 .TP
 .B \-h, \-\-help
 Print a usage message on standard output and exit successfully.
