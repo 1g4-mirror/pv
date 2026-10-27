@@ -475,12 +475,15 @@ are explicitly switched on will be shown.
     equivalent to "**pv \--cursor \| gzip -9 \| pv \--cursor**", except
     that the latter can\'t show the input:output ratio.
 
-    The "**\--format**" and "**\--name**" options may be specified
-    twice, in which case the first one applies to the input side and the
-    second applies to the output side. If no "**\--format**" options are
-    specified, the default format based on the other display switches is
-    used as normal, except that the ratio is added to the output side
-    when *SIDE* is "**both**".
+    When *SIDE* is "**both**", the "**\--format**", "**\--name**", and
+    "**\--pidfile**" options may be specified twice. Each option\'s
+    first appearance applies to the input side, and the second applies
+    to the output side.
+
+    The default format, when *SIDE* is "**both**" and no "**\--format**"
+    options are specified, is based on the other display switches as
+    normal, except that the ratio ("**%{ratio}**") is added to the
+    output side.
 
     The values "**0**", "**1**", and "**2**" may be used as synonyms for
     "**in**", "**out**", and "**both**".
@@ -495,6 +498,11 @@ are explicitly switched on will be shown.
     if it already exists, and will be removed when **pv** exits. While
     **pv** is running, *FILE* will contain a single number - the process
     ID of **pv** - followed by a newline.
+
+    With "**\--monitor**", the first "**\--pidfile**" always specifies
+    the file to write the main monitor\'s process ID to, and the second
+    is only used in "**\--monitor both**" mode to store the process ID
+    of the monitor watching the output side.
 
 **-h, \--help**
 

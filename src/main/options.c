@@ -75,6 +75,8 @@ void opts_free( /*@only@ */ opts_t opts)
 		free(opts->format1);
 	if (NULL != opts->pidfile)
 		free(opts->pidfile);
+	if (NULL != opts->pidfile1)
+		free(opts->pidfile1);
 	if (NULL != opts->output)
 		free(opts->output);
 	if (NULL != opts->default_bar_style)
@@ -1118,6 +1120,7 @@ opts_t opts_parse(unsigned int argc, char **argv)
 			opts->action = PV_ACTION_QUERY;
 			break;
 		case 'P':
+			opts->pidfile1 = opts->pidfile;
 			opts->pidfile = pv_strdup(optarg);
 			if (NULL == opts->pidfile) {
 				pv_perror("-%c", c);

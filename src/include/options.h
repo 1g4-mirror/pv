@@ -64,6 +64,7 @@ struct opts_s {
 	/*@keep@*/ /*@null@*/ char *format;  /* output format, if any */
 	/*@keep@*/ /*@null@*/ char *format1; /* first format, if two were given */
 	/*@keep@*/ /*@null@*/ char *pidfile; /* PID file, if any */
+	/*@keep@*/ /*@null@*/ char *pidfile1; /* first PID file, if two were given */
 	/*@keep@*/ /*@null@*/ char *store_and_forward_file; /* store and forward file, if any */
 	/*@keep@*/ /*@null@*/ char *extra_display; /* extra display specifier, if any */
 	/*@keep@*/ /*@null@*/ pid_t *watchfd_pid;  /* array of processes to watch fds of */
