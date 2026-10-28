@@ -5,6 +5,9 @@
 # Uses "${testSubject}" to run the tes tsubject so that memory safety check
 # versions of these checks aren't generated - they would take a long time to
 # run, without covering enough ground to be worth it.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 
 error="not set - call this from 'make check'"
 true "${sourcePath:?$error}"

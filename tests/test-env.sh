@@ -5,6 +5,9 @@
 #
 # Tests must exit with 0 for success, 1 for failure, 77 to skip the test, or
 # 99 for a fatal error with the test framework.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 
 # Parameters.
 testSubject="./pv"

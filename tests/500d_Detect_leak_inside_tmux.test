@@ -2,6 +2,9 @@
 #
 # Check that valgrind detects memory leaks when running the test subject
 # inside a tmux session - this test should fail.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 
 error="not set - call this from 'make check'"
 true "${sourcePath:?$error}"

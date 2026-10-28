@@ -3,6 +3,9 @@
 # Check that data passes from input to output without modification, even
 # when various data transfer options are set, or when in line mode, with
 # various types of data and using both files and pipes.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 
 error="not set - call this from 'make check'"
 true "${sourcePath:?$error}"

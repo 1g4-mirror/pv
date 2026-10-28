@@ -15,6 +15,9 @@
 # Sourcing this file sets an EXIT trap, so the calling script shouldn't trap
 # EXIT.  Instead, it can define a function "onExit" which will be called by
 # the exit handler.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 
 error="not set - call this from 'make check'"
 true "${testSubject:?$error}"

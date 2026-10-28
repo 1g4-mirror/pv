@@ -16,6 +16,9 @@
 # new tests are added.
 #
 # Run it from the directory containing the configure.ac file.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 
 topDir='.'
 

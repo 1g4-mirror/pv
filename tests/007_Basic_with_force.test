@@ -2,6 +2,9 @@
 #
 # Check that a basic invocation with no options other than --force (so it
 # can produce output when not on a terminal) behaves as expected.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
 
 error="not set - call this from 'make check'"
 true "${sourcePath:?$error}"
