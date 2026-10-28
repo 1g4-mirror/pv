@@ -191,6 +191,26 @@ void pv_state_reset(pvstate_t state)
 
 
 /*
+ * Prepare an already-used state structure for re-use with another transfer,
+ * by closing any open intermediate file descriptors within it, freeing
+ * display, transfer, and calculated rate buffers, and resetting all
+ * calculated parts.
+ */
+void pv_state_reuse(pvstate_t state)
+{
+	if (NULL == state)
+		return;
+
+	pv_freecontents_display(&(state->display));
+	pv_freecontents_display(&(state->extra_display));
+	pv_freecontents_transfer(&(state->transfer));
+	pv_freecontents_calc(&(state->calc));
+
+	pv_state_reset(state);
+}
+
+
+/*
  * Create a new state structure, and return it, or NULL on error.
  */
 pvstate_t pv_state_alloc(void)

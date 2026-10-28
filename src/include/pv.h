@@ -223,7 +223,15 @@ extern /*@null@*/ /*@only@*/ pvstate_t pv_state_alloc(void);
 /*
  * Clear the calculated parts of a state structure.
  */
-extern void pv_state_reset(pvstate_t state);
+extern void pv_state_reset(pvstate_t);
+
+/*
+ * Prepare an already-used state structure for re-use with another transfer,
+ * by closing any open intermediate file descriptors within it, freeing
+ * display, transfer, and calculated rate buffers, and resetting all
+ * calculated parts.
+ */
+void pv_state_reuse(pvstate_t);
 
 /*
  * Set the format options and use them to build a default formatting string.
