@@ -226,6 +226,9 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s
 	pv_state_set_format_options(state, format_options);
 	/*@+mustfreefresh@ *//* see below about gettext _() calls. */
 
+	/* Ensure the discard option (-X) is not set. */
+	pv_state_discard_input_set(state, false);
+
 	/* Run the main loop as normal. */
 	debug("%s", "running store-and-forward receiver");
 	retcode = pv_main_loop(state);
@@ -251,6 +254,9 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s
 	format_options.eta = opts->eta;
 	format_options.fineta = opts->fineta;
 	pv_state_set_format_options(state, format_options);
+
+	/* Reset the discard option to whatever the original option value was. */
+	pv_state_discard_input_set(state, opts->discard_input);
 
 	/* Prepare the state for re-use. */
 	pv_state_reuse(state);
