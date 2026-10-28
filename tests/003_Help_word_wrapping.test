@@ -4,7 +4,14 @@
 
 error="not set - call this from 'make check'"
 true "${sourcePath:?$error}"
+true "${workDir:?$error}"
 test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Timeout for each individual test.
+generalTimeout='10'
+
+# These tests require a tmux that can resize its terminal.
+skipTestUnlessTmuxCanResize
 
 exitStatus=0
 
@@ -13,34 +20,22 @@ exitStatus=0
 widthTest () {
 	terminalWidth="$1"
 
-	rm -f "${workDir}/message" "${workDir}/failed"
-	helpOutput="$(runInTerminal "${terminalWidth}" 20 ". \"${sourcePath}/tests/test-functions.sh\" && ( runTestSubject -h 9>\"${workDir}/message\" ) || true > \"${workDir}/failed\"")"
-
-	# If under valgrind, strip the valgrind output.
-	if test "${useValgrind}" = '1'; then
-		helpOutput="$(printf '%s\n' "${helpOutput}" | sed '/^==/,$d')"
+	testInTerminal "${terminalWidth}" ${generalTimeout} "runTestSubject -h" || return
+	# Retry after a short delay, if there's no output and no failure.
+	if ! test -s "${workDir}/testOutput"; then
+		sleep 1
+		testInTerminal "${terminalWidth}" ${generalTimeout} "runTestSubject -h" || return
 	fi
 
-	# Retry with a longer delay, if there's no output and no failure.
-	if test -z "${helpOutput}" && ! test -e "${workDir}/failed"; then
-		rm -f "${workDir}/message" "${workDir}/failed"
-		helpOutput="$(runInTerminal "${terminalWidth}" 40 ". \"${sourcePath}/tests/test-functions.sh\" && ( runTestSubject -h 9>\"${workDir}/message\" ) || true > \"${workDir}/failed\"")"
-		test "${useValgrind}" = '1' && helpOutput="$(printf '%s\n' "${helpOutput}" | sed '/^==/,$d')"
-	fi
+	printf '%s: %d\n----\n' 'width' "${terminalWidth}"
+	cat "${workDir}/testOutput"
+	printf '\n----\n'
 
-	printf '%s: %d\n----\n%s\n----\n' 'width' "${terminalWidth}" "${helpOutput}"
-
-	if test -e "${workDir}/failed"; then
-		test -e "${workDir}/message" && cat "${workDir}/message" 1>&9
-		exitStatus=1
-		return
-	fi
-
-	if ! test -n "${helpOutput}"; then
+	if ! test -s "${workDir}/testOutput"; then
 		printf '%s %d: %s\n' 'width' "${terminalWidth}" '-h produced no output'
 		exitStatus=1
 		return
-	elif ! printf '%s\n' "${helpOutput}" | grep -q '^U'; then
+	elif ! grep -Eq '^U' < "${workDir}/testOutput"; then
 		printf '%s %d: %s\n' 'width' "${terminalWidth}" '-h did not produce a Usage line'
 		exitStatus=1
 		return
@@ -51,9 +46,9 @@ widthTest () {
 	# the way word wrapping has been constrained to not wrap those parts
 	# as it would make them unreadable.
 	if test "${terminalWidth}" -gt 20; then
-		longest="$(printf '%s\n' "${helpOutput}" | awk 'BEGIN{m=0} {x=length($0); if (x>m) m=x} END{print m}')"
+		longest="$(awk 'BEGIN{m=0} {x=length($0); if (x>m) m=x} END{print m}' < "${workDir}/testOutput")"
 	else
-		longest="$(printf '%s\n' "${helpOutput}" | grep -v '^  -' | awk 'BEGIN{m=0} {x=length($0); if (x>m) m=x} END{print m}')"
+		longest="$(grep -Ev '^  -' < "${workDir}/testOutput" | awk 'BEGIN{m=0} {x=length($0); if (x>m) m=x} END{print m}')"
 	fi
 	# The word wrapping is limited to a minimum of 5 terminal columns,
 	# so accept lines that wide as valid on smaller terminals.
@@ -61,17 +56,12 @@ widthTest () {
 	test "${terminalWidth}" -lt 5 && maxAcceptable=5
 	if test "${longest}" -gt "${maxAcceptable}"; then
 		printf '%s:\n' 'Line lengths'
-		printf '%s\n' "${helpOutput}" | awk '{printf "%10d %s\n", length($0), $0}'
+		awk '{printf "%10d %s\n", length($0), $0}' < "${workDir}/testOutput"
 		printf '%s %d: %s (%s: %d)\n' 'width' "${terminalWidth}" '-h produced a line that was too long' 'longest' "${longest}"
 		exitStatus=1
 		return
 	fi
 }
-
-
-skipTestUnlessTmuxCanResize
-
-# Test -h's word wrapping at various terminal sizes.
 
 startSubTest; widthTest 80
 startSubTest; widthTest 120

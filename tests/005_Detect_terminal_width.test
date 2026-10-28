@@ -4,7 +4,14 @@
 
 error="not set - call this from 'make check'"
 true "${sourcePath:?$error}"
+true "${workDir:?$error}"
 test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Timeout for each individual test.
+generalTimeout='10'
+
+# These tests require a tmux that can resize its terminal.
+skipTestUnlessTmuxCanResize
 
 exitStatus=0
 
@@ -13,23 +20,16 @@ exitStatus=0
 # under workDir.
 #
 runWidthTest () {
-	rm -f "${workDir}/message" "${workDir}/failed"
-	
-	runInTerminal "$1" "$2" ". \"${sourcePath}/tests/test-functions.sh\" && ( runTestSubject -pSs 1K </dev/zero >/dev/null 9>\"${workDir}/message\" ) || true > \"${workDir}/failed\"" \
-	> "${workDir}/testOutput"
+	terminalWidth="$1"
 
-	if test -e "${workDir}/failed"; then
-		test -e "${workDir}/message" && cat "${workDir}/message" 1>&9
-		exitStatus=1
-		return
+	testInTerminal "${terminalWidth}" ${generalTimeout} "runTestSubject -pSs 1K </dev/zero >/dev/null" || return
+	# Retry after a short delay, if there's no output and no failure.
+	if ! test -s "${workDir}/testOutput"; then
+		sleep 1
+		testInTerminal "${terminalWidth}" ${generalTimeout} "runTestSubject -pSs 1K </dev/zero >/dev/null" || return
 	fi
 
-	# If under valgrind, strip the valgrind output.
-	if test "${useValgrind}" = '1'; then
-		sed '/^==/,$d' < "${workDir}/testOutput" > "${workDir}/testOutput.new"
-		mv -f "${workDir}/testOutput.new" "${workDir}/testOutput"
-	fi
-
+	# Write the length of the longest output line to file "width".
 	tr '\r' '\n' < "${workDir}/testOutput" \
 	| sed -n 's/^.*\[//;s/\].*$//p' \
 	| awk 'BEGIN {m=0} {n=length($0); m=(n>m?n:m)} END {print m}' \
@@ -43,22 +43,14 @@ runWidthTest () {
 widthTest () {
 	terminalWidth="$1"
 	true > "${workDir}/width"
-	runWidthTest "${terminalWidth}" 10
+	runWidthTest "${terminalWidth}"
 	longestBar=$(cat "${workDir}/width")
-	# Retry test with longer delay, if null result.
-	if test -z "${longestBar}" || test "${longestBar}" -eq 0; then
-		true > "${workDir}/width"
-		runWidthTest "${terminalWidth}" 20
-		longestBar=$(cat "${workDir}/width")
-	fi
 	if test -z "${longestBar}"; then
 		reportFailure "no output from test at width=${terminalWidth}"
 	elif ! test "${longestBar}" -eq $((terminalWidth-7)); then
 		reportFailure "bar size incorrect (${longestBar}) at width=${terminalWidth}"
 	fi
 }
-
-skipTestUnlessTmuxCanResize
 
 # Test the progress bar width at various terminal sizes.
 startSubTest; widthTest 80
