@@ -290,17 +290,24 @@ runOtherTestUnderValgrind () {
 }
 
 # Output message $* and set exitStatus to 1, preceding the message with the
-# contents of "expected" under workDir if the file exists, and of "stdout"
-# if that exists, and of "stderr" if it exists and isn't empty.
+# contents of "expectedOutput" under workDir if the file exists, and of
+# "testOutput" if that exists and isn't empty, and of "stderr" if it exists
+# and isn't empty.
 #
 # If the function "failureAdditionalInfo" exists, it is called just before
 # the final message line.
 reportFailure () {
-	if test -e "${workDir}/expected" && test -e "${workDir}/output" && command -v diff >/dev/null 2>&1 && ! cmp -s "${workDir}/expected" "${workDir}/output"; then
-		diff -u "${workDir}/expected" "${workDir}/output"
+	if test -e "${workDir}/expectedOutput" \
+	  && test -e "${workDir}/testOutput" \
+	  && command -v diff >/dev/null 2>&1 \
+	  && ! cmp -s "${workDir}/expectedOutput" "${workDir}/testOutput" \
+	; then
+		diff -u "${workDir}/expectedOutput" "${workDir}/testOutput"
 	else
-		test -e "${workDir}/expected" && { printf "%s\n" 'expected:'; sed 's,^,> ,' "${workDir}/expected"; }
-		test -e "${workDir}/stdout" && { printf "%s\n" 'program output:'; sed 's,^,> ,' "${workDir}/stdout"; }
+		test -e "${workDir}/expectedOutput" \
+		&& { printf "%s\n" 'expected:'; sed 's,^,> ,' "${workDir}/expectedOutput"; }
+		test -s "${workDir}/testOutput" \
+		&& { printf "%s\n" 'test output:'; sed 's,^,> ,' "${workDir}/testOutput"; }
 	fi
 	test -s "${workDir}/stderr" && { printf "%s\n" 'stderr:'; sed 's,^,> ,' "${workDir}/stderr"; }
 	type failureAdditionalInfo >/dev/null 2>&1 && failureAdditionalInfo
