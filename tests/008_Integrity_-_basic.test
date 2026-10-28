@@ -54,10 +54,9 @@ cat > "${workDir}/testOptions" <<LIST
 -C
 -E
 -Y
+-U ${workDir}/intermediate
+-U -
 LIST
-# TODO: add these - first, their fd leaks need to be fixed:
-# -U ${workDir}/intermediate
-# -U -
 
 # Unless EXHAUSTIVE_TESTS is set to 1, reduce the list of command-line
 # options to a bare minimum, since otherwise the total number of sub-tests
