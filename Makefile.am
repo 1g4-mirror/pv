@@ -69,6 +69,8 @@ tests/002_Help_and_version.test \
 tests/003_Help_word_wrapping.test \
 tests/004_Option_parsing.test \
 tests/005_Detect_terminal_width.test \
+tests/006_Basic_invocation.test \
+tests/007_Basic_with_force.test \
 tests/500a_Detect_memory_leak.test \
 tests/500b_Detect_file_descriptor_leak.test \
 tests/500c_Detect_buffer_overflow.test \
@@ -77,6 +79,8 @@ tests/500e_Confirm_checkvalgrind_runs.test \
 tests/502_Memory_safety_-_Help_and_version.test \
 tests/503_Memory_safety_-_Help_word_wrapping.test \
 tests/505_Memory_safety_-_Detect_terminal_width.test \
+tests/506_Memory_safety_-_Basic_invocation.test \
+tests/507_Memory_safety_-_Basic_with_force.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--average-rate.test \

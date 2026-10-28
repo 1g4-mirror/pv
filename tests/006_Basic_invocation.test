@@ -1,0 +1,105 @@
+#!/bin/sh
+#
+# Check that a basic invocation with no options behaves as expected.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Timeout for each individual test.
+generalTimeout='30'
+
+# These tests require a tmux that can resize its terminal.
+skipTestUnlessTmuxCanResize
+
+exitStatus=0
+
+# Write 10MB of random data to a file, to use as input.
+dd if=/dev/urandom of="${workDir}/input" bs=1024 count=10240 2>/dev/null
+
+# Checksum the file for later comparison; use "cksum" since that's likely to
+# be available on every supported system.
+inputChecksum=$(cksum "${workDir}/input" | awk '{print $1}')
+
+# Transferring from a file should show the amount transferred, the time
+# elapsed, the transfer rate, and if the terminal is wide enough, a progress
+# bar, percentage completion, and ETA.
+# subTestCount:+3  - this loop runs 4 times, so add 3 to the sub-test count.
+for tryWidth in 80 50 30 140; do
+	startSubTest
+	testInTerminal \
+	  ${tryWidth} \
+	  ${generalTimeout} \
+	  "runTestSubject \"${workDir}/input\" >\"${workDir}/output\"" \
+	|| continue
+
+	barWidth="$(tail -n 1 < "${workDir}/testOutput" | awk '{if (sub(/^.*\[=/,"=")>0 && sub(/\].*$/,"")>0) print length($0)}')"
+	test -n "${barWidth}" || barWidth=0
+
+	# The expected width of the progress bar will be the terminal width
+	# minus the initial segment of bytes, elapsed, rate (28 characters),
+	# such as "10.0MiB 0:00:00 [1.36GiB/s] "; also minus the percentage
+	# and space " 100%", another 5 characters; blank spaces at the end
+	# where " ETA 0:00:00" would have been, another 12 characters; and 2
+	# more characters for the [ ] surrounding the bar.
+	expectedBarWidth=0
+	test ${tryWidth} -ge 50 && \
+	expectedBarWidth=$((tryWidth-28-5-12-2))
+
+	test -n "${barWidth}" || barWidth=0
+	if ! grep -qE '^10.0MiB .:..:.. \[......B/s\]' < "${workDir}/testOutput"; then
+		reportFailure "(width=${tryWidth}) missing fixed initial segment showing bytes, elapsed, rate"
+	elif test "${tryWidth}" -ge 50 && ! grep -qE ' 100% *$' < "${workDir}/testOutput"; then
+		reportFailure "(width=${tryWidth}) missing percentage segment"
+	elif test "${tryWidth}" -lt 50 && grep -qE ' 100% *$' < "${workDir}/testOutput"; then
+		reportFailure "(width=${tryWidth}) unexpected percentage segment"
+	elif test "${tryWidth}" -ge 50 && ! test "${barWidth}" -eq "${expectedBarWidth}"; then
+		reportFailure "(width=${tryWidth}) wrong width of progress bar - expected ${expectedBarWidth}, got ${barWidth}"
+	fi
+
+	# Check that the data was transferred intact.
+	outputChecksum=$(cksum "${workDir}/output" | awk '{print $1}')
+	test "${inputChecksum}" = "${outputChecksum}" \
+	|| reportFailure "(width=${tryWidth}) input data not transferred - input/output checksum mismatch"
+done
+
+# Transferring from a pipe should show the amount transferred, the time
+# elapsed, the transfer rate, and if the terminal is wide enough, a progress
+# bar.
+# subTestCount:+4  - this loop runs 5 times.
+for tryWidth in 80 50 35 30 140; do
+	startSubTest
+	testInTerminal \
+	  ${tryWidth} \
+	  ${generalTimeout} \
+	  "cat \"${workDir}/input\" | runTestSubject >\"${workDir}/output\"" \
+	|| continue
+
+	barWidth="$(tail -n 1 < "${workDir}/testOutput" | awk '{if (sub(/^10.0MiB .:..:.. \[......B.s\] \[/,"")>0 && sub(/\].*$/,"")>0) print length($0)}')"
+	test -n "${barWidth}" || barWidth=0
+
+	# The expected width of the progress bar will be the terminal width
+	# minus the initial segment of bytes, elapsed, rate (28 characters),
+	# such as "10.0MiB 0:00:00 [1.36GiB/s] ", minus 2 more characters
+	# for the [ ] surrounding the bar.
+	expectedBarWidth=0
+	test ${tryWidth} -ge 35 && \
+	expectedBarWidth=$((tryWidth-28-2))
+
+	test -n "${barWidth}" || barWidth=0
+	if ! grep -qE '^10.0MiB .:..:.. \[......B/s\]' < "${workDir}/testOutput"; then
+		reportFailure "(width=${tryWidth}) missing fixed initial segment showing bytes, elapsed, rate"
+	elif grep -qE ' 100% *$' < "${workDir}/testOutput"; then
+		reportFailure "(width=${tryWidth}) unexpected percentage segment"
+	elif test "${tryWidth}" -ge 50 && ! test "${barWidth}" -eq "${expectedBarWidth}"; then
+		reportFailure "(width=${tryWidth}) wrong width of progress bar - expected ${expectedBarWidth}, got ${barWidth}"
+	fi
+
+	# Check that the data was transferred intact.
+	outputChecksum=$(cksum "${workDir}/output" | awk '{print $1}')
+	test "${inputChecksum}" = "${outputChecksum}" \
+	|| reportFailure "(width=${tryWidth}) input data not transferred - input/output checksum mismatch"
+done
+
+exit ${exitStatus}
