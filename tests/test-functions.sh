@@ -136,7 +136,9 @@ runInTerminal () {
 	tr -d '\r' < "${workDir}/tmuxOutput.${tmuxCounter}" | sed '1,/^START$/d'
 
 	# Send the valgrind output to file descriptor 8, if that fd is open.
-	{ true >&8; } 2>/dev/null && cat "${workDir}/subprocessValgrind.${tmuxCounter}" >&8
+	{ true >&8; } 2>/dev/null \
+	&& test -e "${workDir}/subprocessValgrind.${tmuxCounter}" \
+	&& cat "${workDir}/subprocessValgrind.${tmuxCounter}" >&8
 }
 
 # Call runInTerminal(), except that the command $3 runs in a () subshell
