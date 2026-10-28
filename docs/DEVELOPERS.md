@@ -11,6 +11,7 @@ These _Makefile_ targets are available:
  * "`make analyse`": run _splint_ and _flawfinder_ on all C source files
  * "`make check`": run the test suite
  * "`make check SKIP_VALGRIND_TESTS=1`": skip the memory safety tests
+ * "`make check EXHAUSTIVE_TESTS=1`": run more in-depth tests
 
 This project uses the GNU General Public License (GPL) version 3.  If you
 contribute, your contribution must be your own work, and it is expected to

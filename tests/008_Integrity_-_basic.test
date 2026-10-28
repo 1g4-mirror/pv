@@ -56,6 +56,16 @@ LIST
 # -U ${workDir}/intermediate
 # -U -
 
+# Unless EXHAUSTIVE_TESTS is set to 1, reduce the list of command-line
+# options to a bare minimum, since otherwise the total number of sub-tests
+# is very large and can use too many resources in a test environment.
+if ! test "${EXHAUSTIVE_TESTS}" = '1'; then
+	cat > "${workDir}/testOptions" <<'LIST'
+
+-f
+LIST
+fi
+
 # For each combination of input file and command-line options, these tests
 # will be run:
 #  1. Named file input directed to output:  pv OPTIONS in > out
