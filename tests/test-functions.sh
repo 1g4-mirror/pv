@@ -96,7 +96,7 @@ runInTerminal () {
 	# command finishes (when tmuxEnd is created).
 	maxWait=$((10*secondsToWait))
 
-	rm -f "${workDir}/tmuxOutput" "${workDir}/tmuxEnd" "${workDir}/subprocessValgrind"
+	rm -f "${workDir}/tmuxOutput.${tmuxCounter}" "${workDir}/tmuxEnd.${tmuxCounter}" "${workDir}/subprocessValgrind.${tmuxCounter}"
 
 	{
 	printf '%s\n' "set remain-on-exit on"
@@ -106,10 +106,10 @@ runInTerminal () {
 	printf '%s\n' "resize-window -x ${terminalWidth} -y 5"
 	# tmux 1.8 doesn't have "resize-window"
 	printf '%s\n' "resize-pane -x ${terminalWidth} -y 5"
-	printf '%s\n' "pipe-pane 'cat > ${workDir}/tmuxOutput'"
+	printf '%s\n' "pipe-pane 'cat > ${workDir}/tmuxOutput.${tmuxCounter}'"
 	waitCount=0
 	# First, wait for the pipe-pane "cat" to be started.
-	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxOutput"; do
+	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxOutput.${tmuxCounter}"; do
 		sleep 0.1
 		waitCount=$((1+waitCount))
 	done
@@ -117,9 +117,9 @@ runInTerminal () {
 	# On some systems, tmuxOutput ends up with the shell prompt in it
 	# before the command below is run, so output a marker to show where
 	# the output really starts.
-	printf '%s\n' "respawn-pane -k \"echo; exec 8>>${workDir}/subprocessValgrind; echo START; ${commandToRun}; true > ${workDir}/tmuxEnd\""
+	printf '%s\n' "respawn-pane -k \"echo; exec 8>>${workDir}/subprocessValgrind.${tmuxCounter}; echo START; ${commandToRun}; true > ${workDir}/tmuxEnd.${tmuxCounter}\""
 	# Wait for the process started by "respawn-pane" to end.
-	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxEnd"; do
+	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxEnd.${tmuxCounter}"; do
 		sleep 0.1
 		waitCount=$((1+waitCount))
 	done
@@ -133,10 +133,10 @@ runInTerminal () {
 	rm -f "${tmuxTestSocket}"
 	tmuxTestSocket=''
 
-	tr -d '\r' < "${workDir}/tmuxOutput" | sed '1,/^START$/d'
+	tr -d '\r' < "${workDir}/tmuxOutput.${tmuxCounter}" | sed '1,/^START$/d'
 
 	# Send the valgrind output to file descriptor 8, if that fd is open.
-	{ true >&8; } 2>/dev/null && cat "${workDir}/subprocessValgrind" >&8
+	{ true >&8; } 2>/dev/null && cat "${workDir}/subprocessValgrind.${tmuxCounter}" >&8
 }
 
 # Call runInTerminal(), except that the command $3 runs in a () subshell
@@ -174,17 +174,17 @@ testInTerminal () {
 		testAttempt=$((1+testAttempt))
 		test "${testAttempt}" -gt 1 && sleep "${testAttempt}"
 
-		rm -f "${workDir}/operatorMessage" "${workDir}/testFailed" "${workDir}/testOutput"
+		rm -f "${workDir}/operatorMessage.${testAttempt}" "${workDir}/testFailed.${testAttempt}" "${workDir}/testOutput"
 
 		runInTerminal \
 		  "${terminalWidth}" \
 		  "${secondsToWait}" \
-		  ". \"${sourcePath}/tests/test-functions.sh\" && ( ${commandToRun} ) 9>\"${workDir}/operatorMessage\" || true > \"${workDir}/testFailed\"" \
+		  ". \"${sourcePath}/tests/test-functions.sh\" && ( ${commandToRun} ) 9>\"${workDir}/operatorMessage.${testAttempt}\" || true > \"${workDir}/testFailed.${testAttempt}\"" \
 		> "${workDir}/testOutput"
 
-		if test -e "${workDir}/testFailed"; then
-			if test -s "${workDir}/operatorMessage"; then
-				cat "${workDir}/operatorMessage" 1>&9
+		if test -e "${workDir}/testFailed.${testAttempt}"; then
+			if test -s "${workDir}/operatorMessage.${testAttempt}"; then
+				cat "${workDir}/operatorMessage.${testAttempt}" 1>&9
 			else
 				reportFailure "non-zero exit status for: ${commandToRun}"
 			fi
