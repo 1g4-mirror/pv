@@ -224,8 +224,13 @@ testInTerminal () {
 #
 # The endSubTests function will be called on exit if any sub-tests ran.
 startSubTest () {
-	# Do nothing if not running on a terminal.
-	test -t 9 2>/dev/null || return 0
+	# Do nothing other than increment the counter if not running on a
+	# terminal.
+	if ! test -t 9 2>/dev/null; then
+		test -n "${thisSubTest}" || thisSubTest=0
+		thisSubTest=$((1+thisSubTest))
+		return 0
+	fi
 	# If the running test's sub-test count isn't yet known, calculate it.
 	if ! test -n "${subTestCount}"; then
 		subTestCount=$(grep -Ec '^[[:space:]]*startSubTest' "${sourcePath}/$f")
@@ -245,8 +250,9 @@ startSubTest () {
 	printf '%3d%%: %s (%s: %d/%d)\r' $((100*(thisSubTest-1)/subTestCount)) "${display_f}" 'sub-test' "${thisSubTest}" "${subTestCount}" >&9
 }
 
-# Show a final sub-test count on exit, for a tidier display.
+# Show a final sub-test count on exit, for a tidier display, if on a terminal.
 endSubTests () {
+	test -t 9 2>/dev/null || return 0
 	display_f="$f"
 	test "${useValgrind}" = '1' && test -n "${orig_f}" && display_f="${orig_f}"
 	printf '%3d%%: %s (%s: %d)        \r' 100 "${display_f}" 'sub-tests' "${subTestCount}" >&9
