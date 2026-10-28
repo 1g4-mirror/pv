@@ -252,8 +252,8 @@ static int pv__store_and_forward(pvstate_t state, opts_t opts, pvformatoptions_s
 	format_options.fineta = opts->fineta;
 	pv_state_set_format_options(state, format_options);
 
-	/* Reset calculated values in the state. */
-	pv_state_reset(state);
+	/* Prepare the state for re-use. */
+	pv_state_reuse(state);
 
 	/* Run the main loop again. */
 	debug("%s", "running store-and-forward transmitter");
