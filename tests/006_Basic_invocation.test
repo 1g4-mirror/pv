@@ -8,7 +8,7 @@ true "${workDir:?$error}"
 test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
 
 # Timeout for each individual test.
-generalTimeout='30'
+generalTimeout='10'
 
 # These tests require a tmux that can resize its terminal.
 skipTestUnlessTmuxCanResize
@@ -33,6 +33,16 @@ for tryWidth in 80 50 30 140; do
 	  ${generalTimeout} \
 	  "runTestSubject \"${workDir}/input\" >\"${workDir}/output\"" \
 	|| continue
+
+	# Retry after a short delay, if there's no output and no failure.
+	if ! test -s "${workDir}/testOutput"; then
+		sleep 1
+		testInTerminal \
+		  ${tryWidth} \
+		  ${generalTimeout} \
+		  "runTestSubject \"${workDir}/input\" >\"${workDir}/output\"" \
+		|| continue
+	fi
 
 	barWidth="$(tail -n 1 < "${workDir}/testOutput" | awk '{if (sub(/^.*\[=/,"=")>0 && sub(/\].*$/,"")>0) print length($0)}')"
 	test -n "${barWidth}" || barWidth=0
@@ -75,6 +85,16 @@ for tryWidth in 80 50 35 30 140; do
 	  ${generalTimeout} \
 	  "cat \"${workDir}/input\" | runTestSubject >\"${workDir}/output\"" \
 	|| continue
+
+	# Retry after a short delay, if there's no output and no failure.
+	if ! test -s "${workDir}/testOutput"; then
+		sleep 1
+		testInTerminal \
+		  ${tryWidth} \
+		  ${generalTimeout} \
+		  "cat \"${workDir}/input\" | runTestSubject >\"${workDir}/output\"" \
+		|| continue
+	fi
 
 	barWidth="$(tail -n 1 < "${workDir}/testOutput" | awk '{if (sub(/^10.0MiB .:..:.. \[......B.s\] \[/,"")>0 && sub(/\].*$/,"")>0) print length($0)}')"
 	test -n "${barWidth}" || barWidth=0
