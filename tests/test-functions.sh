@@ -314,69 +314,6 @@ fatalError () {
 	exit 1
 }
 
-# Run the test subject, expecting exit status $1 and, if the exit status is
-# 0, stdout contents $2.  A discrepancy is reported with message "$3" and
-# exitStatus set to 1.  The remaining parameters are passed to the test
-# subject.
-#
-# If the variable $noCheckOptions is 1, the test subject is run with only
-# the provided arguments - "-c ${workDir}/etc" is not prepended.
-#
-# If the processExpected function exists, it is run after writing $2 to the
-# file "expected" under workDir.
-#
-# If the processStdout function exists, it is run after running the test
-# subject, which will have written to file "stdout" under workDir.
-#
-# If the additionalCheck function exists, it is run (with argument $3) if no
-# discrepancies were found; that function should report anything else it
-# finds, via reportFailure.
-checkOutput () {
-	expectedStatus="$1"; shift
-	expectedStdout="$1"; shift
-	discrepancyMessage="$1"; shift
-
-	true > "${workDir}/expected"
-	test -n "${expectedStdout}" && printf '%s\n' "${expectedStdout}" > "${workDir}/expected"
-
-	type processExpected >/dev/null 2>&1 && processExpected
-
-	if test "${noCheckOptions}" = "1"; then
-		runTestSubject "$@" >"${workDir}/stdout" 2>"${workDir}/stderr"
-		actualStatus=$?
-	else
-		runTestSubject -c "${workDir}/etc" "$@" >"${workDir}/stdout" 2>"${workDir}/stderr"
-		actualStatus=$?
-	fi
-
-	if test "${actualStatus}" -ne "${expectedStatus}"; then
-		reportFailure "${discrepancyMessage}: exit status was ${actualStatus}, expected ${expectedStatus}"
-		exitStatus=1
-		return 1
-	fi
-
-	test "${actualStatus}" -eq 1 && return 0
-
-	# Strip valgrind output.
-	if test "${useValgrind}" = "1"; then
-		sed -i '/^-- *[0-9]/d' "${workDir}/stdout"
-		sed -i '/^== *[0-9]/d' "${workDir}/stdout"
-	fi
-
-	type processStdout >/dev/null 2>&1 && processStdout
-
-	if ! cmp -s "${workDir}/expected" "${workDir}/stdout"; then
-		reportFailure "${discrepancyMessage}: output is not as expected"
-		return 1
-	fi
-
-	if type additionalCheck >/dev/null 2>&1; then
-		additionalCheck "${discrepancyMessage}" || return 1
-	fi
-
-	return 0
-}
-
 # Perform cleanups on exit.
 testCleanup () {
 	# Tidy up the display if any sub-tests ran.
