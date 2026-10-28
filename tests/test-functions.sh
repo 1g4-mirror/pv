@@ -166,7 +166,7 @@ testInTerminal () {
 	test -e "${workDir}/testInput" && commandToRun="exec <\"${workDir}/testInput\"; ${commandToRun}"
 
 	# By default, retry up to 3 times if the output is empty.
-	test -n "${attemptTestsInTerminal}" && attemptTestsInTerminal='3'
+	test -n "${attemptTestsInTerminal}" || attemptTestsInTerminal='3'
 
 	# Ensure there's a valid number in the variable.
 	test "${attemptTestsInTerminal}" -gt 0 || attemptTestsInTerminal=1
