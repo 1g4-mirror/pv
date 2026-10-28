@@ -71,6 +71,7 @@ tests/004_Option_parsing.test \
 tests/005_Detect_terminal_width.test \
 tests/006_Basic_invocation.test \
 tests/007_Basic_with_force.test \
+tests/008_Integrity_-_basic.test \
 tests/500a_Detect_memory_leak.test \
 tests/500b_Detect_file_descriptor_leak.test \
 tests/500c_Detect_buffer_overflow.test \
@@ -81,6 +82,7 @@ tests/503_Memory_safety_-_Help_word_wrapping.test \
 tests/505_Memory_safety_-_Detect_terminal_width.test \
 tests/506_Memory_safety_-_Basic_invocation.test \
 tests/507_Memory_safety_-_Basic_with_force.test \
+tests/508_Memory_safety_-_Integrity_-_basic.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--average-rate.test \
@@ -101,8 +103,6 @@ tests/Display_-_--rate_-_displayed_value_changes.test \
 tests/Display_-_--timer_-_displayed_value_changes.test \
 tests/General_-_--pidfile.test \
 tests/General_-_--size_argument_handling.test \
-tests/Integrity_-_Basic.test \
-tests/Integrity_-_Binary_data.test \
 tests/Integrity_-_From_bursty_source.test \
 tests/Integrity_-_Large_file_support.test \
 tests/Integrity_-_On_closed_output_pipe_at_EOF.test \

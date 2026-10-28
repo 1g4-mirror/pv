@@ -1,0 +1,146 @@
+#!/bin/sh
+#
+# Check that data passes from input to output without modification, even
+# when various data transfer options are set, or when in line mode, with
+# various types of data and using both files and pipes.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+command -v hexdump >/dev/null 2>&1 || skipTest "test requires \`hexdump'"
+
+exitStatus=0
+
+# Write a short string to a file.
+printf '%s' 'Short, no newline' > "${workDir}/shortString"
+
+# Write 10MB of random data to a file.
+dd if=/dev/urandom of="${workDir}/randomData" bs=1024 count=10240 2>/dev/null
+
+# Write a hex-dump of 5MB of random data to a file.
+dd if=/dev/urandom bs=1024 count=5120 2>/dev/null \
+| hexdump -e '"%07.7_ax" 16/1 " %02x" "\n"' -v > "${workDir}/hexDump"
+
+# Write a very wide hex-dump of 5MB of random data to a file.
+dd if=/dev/urandom bs=1024 count=5120 2>/dev/null \
+| hexdump -e '"%07.7_ax" 512/1 " %02x" "\n"' -v > "${workDir}/wideHexDump"
+
+# The input files to use, under $workDir.
+cat > "${workDir}/inputFiles" <<'LIST'
+shortString
+randomData
+hexDump
+wideHexDump
+LIST
+
+# The command-line options to try transferring each file with.
+cat > "${workDir}/testOptions" <<LIST
+
+-f
+-q
+-f -q
+-0
+-l
+-l -0
+-L 10M
+-l -L 10M
+-B 1M
+-l -B 1M
+-C
+-E
+-Y
+LIST
+# TODO: add these - first, their fd leaks need to be fixed:
+# -U ${workDir}/intermediate
+# -U -
+
+# For each combination of input file and command-line options, these tests
+# will be run:
+#  1. Named file input directed to output:  pv OPTIONS in > out
+#  2. Stdin from file to named file output: pv OPTIONS -o out < in
+#  3. Stdin from file to pipe to output:    pv OPTIONS < in | cat > out
+#  4. Stdin from pipe directed to output:   cat in | pv OPTIONS > out
+#  5. Stdin from pipe to pipe to output:    cat in | pv OPTIONS | cat > out
+# So the total sub-test count is (input files) * (number of options) * 5.
+subTestCount=$(( $(wc -l < "${workDir}/inputFiles") * $(wc -l < "${workDir}/testOptions") * 5))
+
+mismatchMessage='output does not match input'
+{
+while read -r testInputFile; do
+	{
+	while read -r testOptions; do
+		# End the tests early if there's a failure, since there are
+		# lot of sub-tests in total.
+		test "${exitStatus}" -eq 0 || break
+
+		testType="pv OPTIONS in > out"
+		startSubTest
+		printf '%s %d: %s: %s: %s\n' 'sub-test' "${thisSubTest}" "${testInputFile}" "${testOptions}" "${testType}"
+		if runTestSubject ${testOptions} "${workDir}/${testInputFile}" > "${workDir}/rawOutput"; then
+			cmp -s "${workDir}/${testInputFile}" "${workDir}/rawOutput" \
+			|| reportFailure "${testInputFile}: ${testOptions}: ${testType}: ${mismatchMessage}"
+		fi
+
+		testType="pv OPTIONS -o out < in"
+		startSubTest
+		printf '%s %d: %s: %s: %s\n' 'sub-test' "${thisSubTest}" "${testInputFile}" "${testOptions}" "${testType}"
+		if runTestSubject ${testOptions} -o "${workDir}/rawOutput" < "${workDir}/${testInputFile}"; then
+			cmp -s "${workDir}/${testInputFile}" "${workDir}/rawOutput" \
+			|| reportFailure "${testInputFile}: ${testOptions}: ${testType}: ${mismatchMessage}"
+		fi
+
+		# NB the tests involving pipes have to use a marker file to
+		# detect a failure of the test subject (or a valgrind error)
+		# since the exit status of a pipeline is that of the *last*
+		# thing in it, and also they'll run in a subshell so
+		# exitStatus changes made by runTestSubject will be lost.
+
+		testType="pv OPTIONS < in | cat > out"
+		startSubTest
+		printf '%s %d: %s: %s: %s\n' 'sub-test' "${thisSubTest}" "${testInputFile}" "${testOptions}" "${testType}"
+		rm -f "${workDir}/failed"
+		if \
+		 { runTestSubject ${testOptions} < "${workDir}/${testInputFile}" || true > "${workDir}/failed"; } | cat > "${workDir}/rawOutput" \
+		 && ! test -e "${workDir}/failed" \
+		; then
+			cmp -s "${workDir}/${testInputFile}" "${workDir}/rawOutput" \
+			|| reportFailure "${testInputFile}: ${testOptions}: ${testType}: ${mismatchMessage}"
+		elif test -e "${workDir}/failed"; then
+			reportFailure "${testInputFile}: ${testOptions}: ${testType}: process exited non-zero"
+		fi
+
+		testType="cat in | pv OPTIONS > out"
+		startSubTest
+		printf '%s %d: %s: %s: %s\n' 'sub-test' "${thisSubTest}" "${testInputFile}" "${testOptions}" "${testType}"
+		rm -f "${workDir}/failed"
+		if \
+		 cat "${workDir}/${testInputFile}" | { runTestSubject ${testOptions} || true > "${workDir}/failed"; } > "${workDir}/rawOutput" \
+		 && ! test -e "${workDir}/failed" \
+		; then
+			cmp -s "${workDir}/${testInputFile}" "${workDir}/rawOutput" \
+			|| reportFailure "${testInputFile}: ${testOptions}: ${testType}: ${mismatchMessage}"
+		elif test -e "${workDir}/failed"; then
+			reportFailure "${testInputFile}: ${testOptions}: ${testType}: process exited non-zero"
+		fi
+
+		testType="cat in | pv OPTIONS | cat > out"
+		startSubTest
+		printf '%s %d: %s: %s: %s\n' 'sub-test' "${thisSubTest}" "${testInputFile}" "${testOptions}" "${testType}"
+		rm -f "${workDir}/failed"
+		if \
+		 cat "${workDir}/${testInputFile}" | { runTestSubject ${testOptions} || true > "${workDir}/failed"; } | cat > "${workDir}/rawOutput" \
+		 && ! test -e "${workDir}/failed" \
+		; then
+			cmp -s "${workDir}/${testInputFile}" "${workDir}/rawOutput" \
+			|| reportFailure "${testInputFile}: ${testOptions}: ${testType}: ${mismatchMessage}"
+		elif test -e "${workDir}/failed"; then
+			reportFailure "${testInputFile}: ${testOptions}: ${testType}: process exited non-zero"
+		fi
+	done
+	} < "${workDir}/testOptions"
+done
+} < "${workDir}/inputFiles"
+
+exit ${exitStatus}
