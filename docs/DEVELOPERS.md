@@ -10,6 +10,7 @@ These _Makefile_ targets are available:
 
  * "`make analyse`": run _splint_ and _flawfinder_ on all C source files
  * "`make check`": run the test suite
+ * "`make check SKIP_VALGRIND_TESTS=1`": skip the memory safety tests
 
 This project uses the GNU General Public License (GPL) version 3.  If you
 contribute, your contribution must be your own work, and it is expected to
@@ -185,9 +186,38 @@ have introduced new functionality, consider adding a test for it.
 
 ## Writing tests
 
-The test scripts are stored are under _tests/_ named _"*.test"_.
+The test scripts are stored under _tests/_.  All test scripts should be
+named "**123_Name.test**" where 123 is a zero-padded 3-digit number below
+500 and "name" is any valid filename portion that doesn't contain a newline.
 
-Tests are written in POSIX.1 compliant Bourne shell (_not_ bash).
+There are memory safety counterparts for many tests.  These run the original
+test but replace calls to **runTestSubject** with a version that runs the
+test subject under _valgrind_, and causes the test to fail if any memory
+safety issues, memory leaks, or file descriptor leaks are detected.  The
+memory safety tests are automatically skipped if _valgrind_ is missing or if
+the environment variable "`SKIP_VALGRIND_TESTS`" is set to 1.
+
+All test scripts are written in POSIX.1 compliant Bourne shell (_not_ bash)
+and they are generally structured like this:
+
+    #!/bin/sh
+    #
+    # Description of what this test is for.
+    
+    error="not set - call this from 'make check'"
+    true "${sourcePath:?$error}"
+    true "${workDir:?$error}"
+    test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+    
+    exitStatus=0
+    
+    startSubTest
+    runTestSubject ... || reportFailure "describe this sub-test failure"
+    
+    startSubTest
+    # ... more tests go here ...
+    
+    exit ${exitStatus}
 
 The following environment variables are available in test scripts:
 
@@ -195,25 +225,84 @@ The following environment variables are available in test scripts:
  * **${sourcePath}**: the directory above this test's "_tests/_" directory.
  * **${workDir}**: a temporary working directory, removed on exit.
  * **${workFile1}** to **${workFile5}**: temporary working files.
- * **$f**: the test script being run.
+ * **$f**: the test script being run (but see below).
+
+Avoid using **$f** because the memory safety counterparts of each test call
+their original versions and that means **$f** may refer to the wrong script.
+
+Only run the test subject as "**${testSubject}**" where it's _not_ part of
+the test, such as when using it to set up a situation to be tested later.
+This is because calls to "**${testSubject}**" are always run as-is, but
+calls to **runTestSubject** are run via _valgrind_ when running the memory
+safety counterpart to a test.
+
+These functions from "_shared/test-functions.sh_" are available:
+
+ * **runTestSubject**: run the test subject with the given parameters,
+   possibly under _valgrind_ when appropriate.
+ * **reportFailure**: report a failed test and set _exitStatus_ to 1.
+ * **fatalError**: call **reportFailure** and immediately exit with 1.
+ * **startSubTest**: start a sub-test.  See the note on sub-tests below.
+ * **skipTest**: skip this test, reporting the reason why.
+ * **skipTestUnlessTmuxCanResize**, **runInTerminal**,
+   and **testInTerminal**: functions relating to running the test subject
+   inside a _tmux_ virtual terminal - refer to the comment block above each
+   function definition for full details.
+
+The convention when calling **runTestSubject** is to always redirect
+human-readable output to _${workDir}/testOutput_ and errors to
+_${workDir}/stderr_.
+
+Localisation variables are set to the "C" locale for predictable output.
+
+The **reportFailure** function will output the given message, preceded by
+the contents of various files under **${workDir}** if they are present:
+_expectedOutput_ for the output that the test expected to see, _testOutput_
+for the output that was seen, and _stderr_ for the error output from the
+test subject.
+
+A test script can define the function "**failureAdditionalInfo**", in which
+case **reportFailure** will call that just before writing the last message
+line, to allow each test script to add custom failure reporting.
+
+Sub-tests are separate sections within the test.  Use these if the overall
+test may take a long time, so that the operator can see that progress is
+being made.  Call "**startSubTest**" before each section; make sure the line
+starts with that, so the test functions can count the total number of
+sub-tests.
+
+If calling "**startSubTest**" from within a loop that always has the same
+number of iterations, the sub-test count calculator can be directed to
+increase the count by the appropriate amount by adding a comment like this:
+
+    # subTestCount:+5
+    for subtestIndex in 1 2 3 4 5 6; do
+        startSubTest
+        # ... do the test ...
+    done
+
+The number added should be one less than the iteration count, as above.
+Alternatively, in more complex situations, the caller can set the
+"**subTestCount**" variable before calling _startSubTest_ for the first
+time, and auto-calculation will be cancelled in favour of using that number.
 
 All test scripts must exit 0 for success, 1 for failure, or 77 if the test
 was skipped for some reason (such as a missing prerequisite like _tmux_).
 The test launcher, _tests/test-env.sh_, removes the working files on exit.
 
-Test scripts which load _"tests/test-functions.sh"_ should not trap EXIT,
-because that file already sets an exit trap.  A test script can define a
-function "**onExit**" instead, which will be called on exit.
+Test scripts should not trap EXIT, because _"tests/test-functions.sh"_
+already sets an exit trap.  A test script can define a function "**onExit**"
+instead, which will be called on exit.
 
 The tests are called via "`make check`" (see the "Tests" section of the GNU
 Automake manual).  Run a specific test by setting the "**TESTS**"
 environment variable, like this:
 
-    make check TESTS=tests/Display_-_--bits.test
+    make check TESTS=tests/003_Help_word_wrapping.test
 
-After adding a new test, adjust the "**TESTS**" list in _Makefile.am_ at the
-top of the source tree (the directory containing _configure.ac_), or run
-"`./src/update-tests.sh`" to update "**TESTS**" automatically.
+After adding a new test, run "`./src/update-tests.sh`".  This creates the
+memory safety counterparts for any eligible tests, and updates the
+"**TESTS**" definition in _Makefile.am_.
 
 
 ## Benchmarking
