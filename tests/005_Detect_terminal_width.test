@@ -23,11 +23,6 @@ runWidthTest () {
 	terminalWidth="$1"
 
 	testInTerminal "${terminalWidth}" ${generalTimeout} "runTestSubject -pSs 1K </dev/zero >/dev/null" || return
-	# Retry after a short delay, if there's no output and no failure.
-	if ! test -s "${workDir}/testOutput"; then
-		sleep 1
-		testInTerminal "${terminalWidth}" ${generalTimeout} "runTestSubject -pSs 1K </dev/zero >/dev/null" || return
-	fi
 
 	# Write the length of the longest output line to file "width".
 	tr '\r' '\n' < "${workDir}/testOutput" \

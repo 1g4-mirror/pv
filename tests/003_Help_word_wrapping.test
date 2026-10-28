@@ -21,11 +21,6 @@ widthTest () {
 	terminalWidth="$1"
 
 	testInTerminal "${terminalWidth}" ${generalTimeout} "runTestSubject -h" || return
-	# Retry after a short delay, if there's no output and no failure.
-	if ! test -s "${workDir}/testOutput"; then
-		sleep 1
-		testInTerminal "${terminalWidth}" ${generalTimeout} "runTestSubject -h" || return
-	fi
 
 	printf '%s: %d\n----\n' 'width' "${terminalWidth}"
 	cat "${workDir}/testOutput"

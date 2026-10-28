@@ -149,36 +149,58 @@ runInTerminal () {
 #
 # Returns 0 (true) if the command succeeded.  If the command failed, return
 # 1 (false), and also sets exitStatus to 1.
+#
+# Running a process under tmux involves a lot more resource consumption than
+# running it normally, particularly in terms of number of running processes.
+# Local resource limits can cause transient failures where the process never
+# gets run and so there's no output and no failure.  For that reason, if
+# there is no failure but no output was written, this function will wait a
+# short time and try again, up to $attemptTestsInTerminal times.
 testInTerminal () {
 	terminalWidth="$1"
 	secondsToWait="$2"
 	commandToRun="$3"
 
-	rm -f "${workDir}/operatorMessage" "${workDir}/testFailed" "${workDir}/testOutput"
-
 	test -e "${workDir}/testInput" && commandToRun="exec <\"${workDir}/testInput\"; ${commandToRun}"
 
-	runInTerminal \
-	  "${terminalWidth}" \
-	  "${secondsToWait}" \
-	  ". \"${sourcePath}/tests/test-functions.sh\" && ( ${commandToRun} ) 9>\"${workDir}/operatorMessage\" || true > \"${workDir}/testFailed\"" \
-	> "${workDir}/testOutput"
+	# By default, retry up to 3 times if the output is empty.
+	test -n "${attemptTestsInTerminal}" && attemptTestsInTerminal='3'
 
-	if test -e "${workDir}/testFailed"; then
-		if test -s "${workDir}/operatorMessage"; then
-			cat "${workDir}/operatorMessage" 1>&9
-		else
-			reportFailure "non-zero exit status for: ${commandToRun}"
+	# Ensure there's a valid number in the variable.
+	test "${attemptTestsInTerminal}" -gt 0 || attemptTestsInTerminal=1
+
+	testAttempt=0
+	while test "${testAttempt}" -lt "${attemptTestsInTerminal}"; do
+		testAttempt=$((1+testAttempt))
+		test "${testAttempt}" -gt 1 && sleep "${testAttempt}"
+
+		rm -f "${workDir}/operatorMessage" "${workDir}/testFailed" "${workDir}/testOutput"
+
+		runInTerminal \
+		  "${terminalWidth}" \
+		  "${secondsToWait}" \
+		  ". \"${sourcePath}/tests/test-functions.sh\" && ( ${commandToRun} ) 9>\"${workDir}/operatorMessage\" || true > \"${workDir}/testFailed\"" \
+		> "${workDir}/testOutput"
+
+		if test -e "${workDir}/testFailed"; then
+			if test -s "${workDir}/operatorMessage"; then
+				cat "${workDir}/operatorMessage" 1>&9
+			else
+				reportFailure "non-zero exit status for: ${commandToRun}"
+			fi
+			exitStatus=1
+			return 1
 		fi
-		exitStatus=1
-		return 1
-	fi
 
-	# If under valgrind, strip the valgrind output.
-	if test "${useValgrind}" = '1'; then
-		sed '/^==/,$d' < "${workDir}/testOutput" > "${workDir}/testOutput.new"
-		mv -f "${workDir}/testOutput.new" "${workDir}/testOutput"
-	fi
+		# If under valgrind, strip the valgrind output.
+		if test "${useValgrind}" = '1'; then
+			sed '/^==/,$d' < "${workDir}/testOutput" > "${workDir}/testOutput.new"
+			mv -f "${workDir}/testOutput.new" "${workDir}/testOutput"
+		fi
+
+		# No more retries are needed, if there is any output.
+		test -s "${workDir}/testOutput" && break
+	done
 
 	return 0
 }
