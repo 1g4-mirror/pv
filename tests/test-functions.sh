@@ -139,6 +139,46 @@ runInTerminal () {
 	{ true >&8; } 2>/dev/null && cat "${workDir}/subprocessValgrind" >&8
 }
 
+# Call runInTerminal(), except that the command $3 runs in a () subshell
+# after sourcing this file, so that the command can use these functions.
+#
+# If $workDir/testInput exists, the command's stdin is redirected from it.
+#
+# Output is written to the file testOutput under $workDir.  If the command
+# succeeded, output from valgrind is removed from testOutput.
+#
+# Returns 0 (true) if the command succeeded.  If the command failed, return
+# 1 (false), and also sets exitStatus to 1.
+testInTerminal () {
+	terminalWidth="$1"
+	secondsToWait="$2"
+	commandToRun="$3"
+
+	rm -f "${workDir}/operatorMessage" "${workDir}/testFailed" "${workDir}/testOutput"
+
+	test -e "${workDir}/testInput" && commandToRun="exec <\"${workDir}/testInput\"; ${commandToRun}"
+
+	runInTerminal \
+	  "${terminalWidth}" \
+	  "${secondsToWait}" \
+	  ". \"${sourcePath}/tests/test-functions.sh\" && ( ${commandToRun} ) 9>\"${workDir}/operatorMessage\" || true > \"${workDir}/testFailed\"" \
+	> "${workDir}/testOutput"
+
+	if test -e "${workDir}/testFailed"; then
+		test -e "${workDir}/operatorMessage" && cat "${workDir}/operatorMessage" 1>&9
+		exitStatus=1
+		return 1
+	fi
+
+	# If under valgrind, strip the valgrind output.
+	if test "${useValgrind}" = '1'; then
+		sed '/^==/,$d' < "${workDir}/testOutput" > "${workDir}/testOutput.new"
+		mv -f "${workDir}/testOutput.new" "${workDir}/testOutput"
+	fi
+
+	return 0
+}
+
 # Start a sub-test - increment the sub-test counter, and if running on a
 # terminal, display the percentage progress through the sub-tests.  Assumes
 # that "$f" is the full path to the running test script.
