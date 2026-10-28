@@ -165,7 +165,11 @@ testInTerminal () {
 	> "${workDir}/testOutput"
 
 	if test -e "${workDir}/testFailed"; then
-		test -e "${workDir}/operatorMessage" && cat "${workDir}/operatorMessage" 1>&9
+		if test -s "${workDir}/operatorMessage"; then
+			cat "${workDir}/operatorMessage" 1>&9
+		else
+			reportFailure "non-zero exit status for: ${commandToRun}"
+		fi
 		exitStatus=1
 		return 1
 	fi
