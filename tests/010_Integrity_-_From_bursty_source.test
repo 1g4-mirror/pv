@@ -1,0 +1,132 @@
+#!/bin/sh
+#
+# Transfer data through pv using pipes, sending it in a bursty fashion, and
+# check data correctness afterwards.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+command -v hexdump >/dev/null 2>&1 || skipTest "test requires \`hexdump'"
+
+exitStatus=0
+
+# Write 10MB of random data to a file.
+dd if=/dev/urandom of="${workDir}/randomData" bs=1024 count=10240 2>/dev/null
+
+# Write a hex-dump of 5MB of random data to a file.
+dd if=/dev/urandom bs=1024 count=5120 2>/dev/null \
+| hexdump -e '"%07.7_ax" 16/1 " %02x" "\n"' -v > "${workDir}/hexDump"
+
+# Write a very wide hex-dump of 5MB of random data to a file.
+dd if=/dev/urandom bs=1024 count=5120 2>/dev/null \
+| hexdump -e '"%07.7_ax" 512/1 " %02x" "\n"' -v > "${workDir}/wideHexDump"
+
+# The input files to use, under $workDir.
+cat > "${workDir}/inputFiles" <<'LIST'
+randomData
+hexDump
+wideHexDump
+LIST
+
+# The command-line options to try transferring each file with.
+cat > "${workDir}/testOptions" <<LIST
+-f
+-q
+-l
+-l -0
+-L 10M
+-l -L 10M
+-B 1M
+-l -B 1M
+-C
+-E
+-Y
+-U -
+LIST
+
+# Unless EXHAUSTIVE_TESTS is set to 1, reduce the list of command-line
+# options to a bare minimum, since otherwise the large number of sub-tests
+# can use too many resources in a test environment and take too long.
+if ! test "${EXHAUSTIVE_TESTS}" = '1'; then
+	cat > "${workDir}/testOptions" <<'LIST'
+-f
+LIST
+fi
+
+# For each combination of input file and command-line options, these tests
+# will be run with the file piped in a bursty fashion to pv's stdin:
+#  1. Straight to an output file:  | pv OPTIONS > out
+#  2. Output through a pipe:       | pv OPTIONS | cat > out
+# So the total sub-test count is (input files) * (number of options) * 2.
+subTestCount=$(( $(wc -l < "${workDir}/inputFiles") * $(wc -l < "${workDir}/testOptions") * 2))
+
+# Write the contents of file $1 to stdout in uneven bursts.  The file is
+# assumed to be >2MiB.
+burstyWrite () {
+	outputBurst="$1"
+	test -f "${outputBurst}" || return 1
+
+	{
+	dd if="${outputBurst}" bs=1 count=9000
+	sleep 0.3
+	dd if="${outputBurst}" bs=1 skip=9000 count=1240
+	sleep 0.3
+	dd if="${outputBurst}" bs=1024 skip=10 count=1014
+	sleep 0.3
+	dd if="${outputBurst}" bs=1024 skip=1024 count=1024
+	sleep 0.3
+	dd if="${outputBurst}" bs=1024 skip=2048
+	} 2>/dev/null
+
+	return 0
+}
+
+mismatchMessage='output does not match input'
+{
+while read -r testInputFile; do
+	{
+	while read -r testOptions; do
+		# End the tests early if there's a failure, since there are
+		# lot of sub-tests in total.
+		test "${exitStatus}" -eq 0 || break
+
+		testType="| pv OPTIONS > out"
+		startSubTest
+		printf '%s %d: %s: %s: %s\n' 'sub-test' "${thisSubTest}" "${testInputFile}" "${testOptions}" "${testType}"
+		if burstyWrite "${workDir}/${testInputFile}" | runTestSubject ${testOptions} >"${workDir}/rawOutput" 2>"${workDir}/stderr"; then
+			cmp -s "${workDir}/${testInputFile}" "${workDir}/rawOutput" \
+			|| reportFailure "${testInputFile}: ${testOptions}: ${testType}: ${mismatchMessage}"
+		else
+			reportFailure "${testInputFile}: ${testOptions}: ${testType}: process exited non-zero"
+		fi
+
+		# NB a test that pipes runTestSubject to another command has
+		# to use a marker file to detect a failure of the test
+		# subject (or a valgrind error) since the exit status of a
+		# pipeline is that of the *last* thing in it.
+
+		testType="| pv OPTIONS | cat > out"
+		startSubTest
+		printf '%s %d: %s: %s: %s\n' 'sub-test' "${thisSubTest}" "${testInputFile}" "${testOptions}" "${testType}"
+		rm -f "${workDir}/failed"
+		if \
+		 burstyWrite "${workDir}/${testInputFile}" \
+		 | { runTestSubject ${testOptions} 2>"${workDir}/stderr" || true > "${workDir}/failed"; } | cat > "${workDir}/rawOutput" \
+		 && ! test -e "${workDir}/failed" \
+		; then
+			cmp -s "${workDir}/${testInputFile}" "${workDir}/rawOutput" \
+			|| reportFailure "${testInputFile}: ${testOptions}: ${testType}: ${mismatchMessage}"
+		elif test -e "${workDir}/failed"; then
+			reportFailure "${testInputFile}: ${testOptions}: ${testType}: process exited non-zero"
+		fi
+	done
+	} < "${workDir}/testOptions"
+done
+} < "${workDir}/inputFiles"
+
+exit ${exitStatus}
