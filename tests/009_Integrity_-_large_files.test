@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+# Make sure that files larger than 2GB are supported.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Don't run the memory safety variant by default, as it's very slow.
+if test "${useValgrind}" = '1' && ! test "${EXHAUSTIVE_TESTS}" = '1'; then
+	skipTest 'ignoring slow test without EXHAUSTIVE_TESTS=1'
+fi
+
+exitStatus=0
+
+# Check there is enough free space for this test.
+freeKiB=$(df -kP "${workDir}" | sed -n '$p' | awk '{print $(NF-2)}')
+test -n "${freeKiB}" || freeKiB=0
+test "${freeKiB}" -gt 5242880 2>/dev/null || skipTest "test requires at least 5GB free on ${workDir}"
+
+# Generate a 2.5GB sparse file.
+true > "${workDir}/largeFile"
+dd if="/dev/zero" of="${workDir}/largeFile" count=1 bs=1048576 seek=2560 2>"${workDir}/stderr" \
+|| reportFailure "failed to create 2.5GB specimen file"
+
+# NB the "stat" command is not portable - BSD stat(1) has a different syntax
+# to GNU stat(1) - so instead, parse the output of ls(1).
+# shellcheck disable=SC2012
+fileSize=$(ls -nl "${workDir}/largeFile" 2>"${workDir}/stderr" | awk '{print $5}')
+test -n "${fileSize}" || fileSize=0
+test "${fileSize}" -gt 2500000 2>>"${workDir}/stderr" \
+|| reportFailure "failed to validate specimen file size"
+
+# Transfer the file, and count how many bytes came through.
+startSubTest
+runTestSubject -O -n -b "${workDir}/largeFile" >"${workDir}/rawOutput" 2>"${workDir}/stderr"
+bytesTransferred=$(wc -c <"${workDir}/rawOutput" 2>/dev/null | tr -dc '0-9')
+test -n "${bytesTransferred}" || bytesTransferred=0
+bytesReported=$(sed -n '$p' "${workDir}/stderr" | tr -dc '0-9')
+test -n "${bytesReported}" || bytesReported=0
+
+test "${bytesTransferred}" -eq "${fileSize}" \
+|| reportFailure "transferred ${bytesTransferred} of ${fileSize} bytes"
+test "${bytesReported}" -eq "${fileSize}" \
+|| reportFailure "counted ${bytesReported} of ${fileSize} bytes"
+
+# Transfer the file from stdin, and count how many bytes came through.
+startSubTest
+runTestSubject -O -n -b < "${workDir}/largeFile" >"${workDir}/rawOutput" 2>"${workDir}/stderr"
+bytesTransferred=$(wc -c <"${workDir}/rawOutput" 2>/dev/null | tr -dc '0-9')
+test -n "${bytesTransferred}" || bytesTransferred=0
+bytesReported=$(sed -n '$p' "${workDir}/stderr" | tr -dc '0-9')
+test -n "${bytesReported}" || bytesReported=0
+
+test "${bytesTransferred}" -eq "${fileSize}" \
+|| reportFailure "stdin - transferred ${bytesTransferred} of ${fileSize} bytes"
+test "${bytesReported}" -eq "${fileSize}" \
+|| reportFailure "stdin - counted ${bytesReported} of ${fileSize} bytes"
+
+# Use the file as a size value and transfer its size of bytes from
+# /dev/zero, and count how many bytes came through.
+startSubTest
+runTestSubject -O -n -b -S -s "@${workDir}/largeFile" /dev/zero >"${workDir}/rawOutput" 2>"${workDir}/stderr"
+bytesTransferred=$(wc -c <"${workDir}/rawOutput" 2>/dev/null | tr -dc '0-9')
+test -n "${bytesTransferred}" || bytesTransferred=0
+bytesReported=$(sed -n '$p' "${workDir}/stderr" | tr -dc '0-9')
+test -n "${bytesReported}" || bytesReported=0
+
+test "${bytesTransferred}" -eq "${fileSize}" \
+|| reportFailure "size read - transferred ${bytesTransferred} of ${fileSize} bytes"
+test "${bytesReported}" -eq "${fileSize}" \
+|| reportFailure "size read - counted ${bytesReported} of ${fileSize} bytes"
+
+exit ${exitStatus}
