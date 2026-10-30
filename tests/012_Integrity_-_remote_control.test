@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# Check that data is still transferred without corruption when the transfer
+# process is repeatedly adjusted with the --remote option.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Skip the test if -R is unavailable on this system.
+"${testSubject}" -h 2>/dev/null | grep -Eq "^  -R," \
+|| skipTest 'cannot use pv -R, it is not supported on this system'
+
+exitStatus=0
+
+# Write 10MB of random data to a file.
+dd if=/dev/urandom of="${workDir}/randomData" bs=1024 count=10240 2>/dev/null
+
+# Run a few remote control commands in the background.
+printf '%s\n' 'FAIL' > "${workDir}/backgroundStatus"
+true > "${workDir}/transferPid"
+(
+set +e
+# Don't start doing anything until the main transfer process, started below,
+# has begun.
+while test -e "${workDir}/transferPid" && ! test -s "${workDir}/transferPid"; do sleep 0.1; done
+sleep 2
+transferPid="$(cat "${workDir}/transferPid")"
+# shellcheck disable=SC2034 # loopCount is deliberately unused.
+for loopCount in 1 2 3; do
+	"${testSubject}" -R "${transferPid}" -apterb || exit 1
+	sleep 0.2
+	"${testSubject}" -R "${transferPid}" -p	|| exit 1
+	sleep 0.2
+	"${testSubject}" -R "${transferPid}" -L 500k || exit 1
+	sleep 0.2
+	"${testSubject}" -R "${transferPid}" -N "test" || exit 1
+	sleep 0.2
+	"${testSubject}" -R "${transferPid}" -F "%e" || exit 1
+	sleep 0.2
+	"${testSubject}" -R "${transferPid}" -x "window:%b" || exit 1
+	sleep 0.2
+	"${testSubject}" -R "${transferPid}" -L 400k || exit 1
+	sleep 0.2
+	"${testSubject}" -R "${transferPid}" -N "." || exit 1
+	sleep 0.2
+done
+"${testSubject}" -R "${transferPid}" -L 10M || true
+printf '%s\n' 'OK' > "${workDir}/backgroundStatus"
+) 2>"${workDir}/stderr" &
+
+# Run a data transfer.
+runTestSubject -L 200k -i 0.1 -f -P "${workDir}/transferPid" "${workDir}/randomData" >"${workDir}/rawOutput" 2>>"${workDir}/stderr" \
+|| reportFailure 'data transfer exited non-zero'
+
+# Check the data arrived intact.
+cmp -s "${workDir}/randomData" "${workDir}/rawOutput" \
+|| reportFailure 'data did not transfer intact'
+
+# Check the remote control calls ran OK.
+backgroundStatus=$(cat "${workDir}/backgroundStatus")
+test "${backgroundStatus}" = 'OK' || reportFailure 'remote control calls failed'
+
+exit ${exitStatus}

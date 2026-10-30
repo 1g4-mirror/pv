@@ -75,6 +75,7 @@ tests/008_Integrity_-_basic.test \
 tests/009_Integrity_-_large_files.test \
 tests/010_Integrity_-_from_bursty_source.test \
 tests/011_Integrity_-_on_pipe_closure.test \
+tests/012_Integrity_-_remote_control.test \
 tests/500a_Detect_memory_leak.test \
 tests/500b_Detect_file_descriptor_leak.test \
 tests/500c_Detect_buffer_overflow.test \
@@ -89,6 +90,7 @@ tests/508_Memory_safety_-_Integrity_-_basic.test \
 tests/509_Memory_safety_-_Integrity_-_large_files.test \
 tests/510_Memory_safety_-_Integrity_-_from_bursty_source.test \
 tests/511_Memory_safety_-_Integrity_-_on_pipe_closure.test \
+tests/512_Memory_safety_-_Integrity_-_remote_control.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--average-rate.test \
@@ -109,7 +111,6 @@ tests/Display_-_--rate_-_displayed_value_changes.test \
 tests/Display_-_--timer_-_displayed_value_changes.test \
 tests/General_-_--pidfile.test \
 tests/General_-_--size_argument_handling.test \
-tests/Integrity_-_When_adjusted_remotely.test \
 tests/Memory_safety_-_Basic.test \
 tests/Memory_safety_-_Process_title.test \
 tests/Memory_safety_-_Remote_control_receiver.test \
