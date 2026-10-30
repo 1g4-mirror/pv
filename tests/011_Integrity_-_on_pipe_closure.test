@@ -1,0 +1,85 @@
+#!/bin/sh
+#
+# Check that data is transferred correctly, without hanging indefinitely,
+# when reading or writing pipes that are closed unexpectedly.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# The "timeout" command is required.  On some platforms it is named
+# "gtimeout".
+TIMEOUT=""
+if command -v timeout >/dev/null 2>&1; then
+	TIMEOUT="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+	TIMEOUT="gtimeout"
+else
+	skipTest "test requires \`timeout'"
+fi
+
+# GNU "head" is required, to be able to output the first N bytes of a file. 
+# On some platforms it is named "ghead" instead of "head".
+HEAD="head"
+for checkPath in $(echo "${PATH}" | tr ':' '\n')
+do
+        if test -x "${checkPath}/ghead"
+        then
+                HEAD="${checkPath}/ghead"
+                break
+        fi
+done
+# Check that it really is GNU head, and skip the test if not.
+echo | "${HEAD}" -c 10 >/dev/null 2>&1 || skipTest "test requires GNU \`head'"
+
+exitStatus=0
+
+# Check that EOF does not wait forever when the output pipe reader exits
+# without consuming bytes already written into the pipe.
+
+# The reader keeps the pipe open briefly but reads nothing.  When it exits,
+# PV has no further input, so it must notice the closed reader without
+# relying on a later write returning EPIPE.
+startSubTest
+if ! "${TIMEOUT}" 20 sh <<'EOF'
+. "${sourcePath}/tests/test-functions.sh"
+printf "x" | { runTestSubject -q -B 1 || kill $$; } | sleep 1
+EOF
+then
+	reportFailure 'PV did not finish after the output pipe reader exited'
+fi
+
+# Check that EOF does not wait forever when the upstream producer exits with
+# failure and the output pipe reader exits without consuming buffered bytes.
+
+# The producer fails immediately and writes no data.  gzip still emits a small
+# valid empty stream, so PV writes bytes to its output pipe before reaching EOF.
+# The reader keeps the pipe open briefly but consumes nothing.
+startSubTest
+if ! "${TIMEOUT}" 20 sh <<EOF
+. "\${sourcePath}/tests/test-functions.sh"
+false | gzip -1 -c -n | { runTestSubject -q -B 1 2>"${workDir}/stderr" || kill $$; } | sleep 1
+EOF
+then
+	reportFailure 'PV did not finish after the input producer failed and the output reader exited'
+fi
+
+# Check that there is no SIGPIPE or dropped data on bigger data transfers.
+
+stopAtByteCount="100000000"
+startSubTest
+rm -f "${workDir}/failed"
+# Don't use dd. See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=324308
+# On AIX a "\n" appears in the pipeline, hence the "tr -d".
+bytesTransferred=$({ runTestSubject -B 100000 -q /dev/zero 2>"${workDir}/stderr" || true >"${workDir}/failed"; } | "${HEAD}" -c "${stopAtByteCount}" | tr -d '\n' | wc -c | tr -dc '0-9')
+if test -e "${workDir}/failed"; then
+	reportFailure "on output truncation, PV exited non-zero"
+elif ! test "${stopAtByteCount}" = "${bytesTransferred}"; then
+	reportFailure "on output truncation, transferred ${bytesTransferred}, but expected ${stopAtByteCount}"
+fi
+
+exit ${exitStatus}
