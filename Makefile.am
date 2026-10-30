@@ -73,7 +73,7 @@ tests/006_Basic_invocation.test \
 tests/007_Basic_with_force.test \
 tests/008_Integrity_-_basic.test \
 tests/009_Integrity_-_large_files.test \
-tests/010_Integrity_-_From_bursty_source.test \
+tests/010_Integrity_-_from_bursty_source.test \
 tests/500a_Detect_memory_leak.test \
 tests/500b_Detect_file_descriptor_leak.test \
 tests/500c_Detect_buffer_overflow.test \
@@ -86,7 +86,7 @@ tests/506_Memory_safety_-_Basic_invocation.test \
 tests/507_Memory_safety_-_Basic_with_force.test \
 tests/508_Memory_safety_-_Integrity_-_basic.test \
 tests/509_Memory_safety_-_Integrity_-_large_files.test \
-tests/510_Memory_safety_-_Integrity_-_From_bursty_source.test \
+tests/510_Memory_safety_-_Integrity_-_from_bursty_source.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--average-rate.test \
