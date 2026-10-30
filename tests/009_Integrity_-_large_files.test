@@ -12,7 +12,7 @@ test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
 
 # Don't run the memory safety variant by default, as it's very slow.
 if test "${useValgrind}" = '1' && ! test "${EXHAUSTIVE_TESTS}" = '1'; then
-	skipTest 'ignoring slow test without EXHAUSTIVE_TESTS=1'
+	skipTest 'skipping this slow test without EXHAUSTIVE_TESTS=1'
 fi
 
 exitStatus=0
