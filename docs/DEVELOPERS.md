@@ -198,27 +198,8 @@ safety issues, memory leaks, or file descriptor leaks are detected.  The
 memory safety tests are automatically skipped if _valgrind_ is missing or if
 the environment variable "`SKIP_VALGRIND_TESTS`" is set to 1.
 
-All test scripts are written in POSIX.1 compliant Bourne shell (_not_ bash)
-and they are generally structured like this:
-
-    #!/bin/sh
-    #
-    # Description of what this test is for.
-    
-    error="not set - call this from 'make check'"
-    true "${sourcePath:?$error}"
-    true "${workDir:?$error}"
-    test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
-    
-    exitStatus=0
-    
-    startSubTest
-    runTestSubject ... || reportFailure "describe this sub-test failure"
-    
-    startSubTest
-    # ... more tests go here ...
-    
-    exit ${exitStatus}
+All test scripts are written in POSIX.1 compliant Bourne shell (_not_ bash).
+Use _tests/test-template.sh_ as a basis for writing new tests.
 
 The following environment variables are available in test scripts:
 

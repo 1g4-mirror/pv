@@ -140,7 +140,7 @@ tests/500b_Detect_file_descriptor_leak.test \
 tests/500c_Detect_buffer_overflow.test \
 tests/500d_Detect_leak_inside_tmux.test
 
-EXTRA_DIST += $(TESTS) tests/run-valgrind.sh tests/test-env.sh tests/test-functions.sh
+EXTRA_DIST += $(TESTS) tests/run-valgrind.sh tests/test-env.sh tests/test-functions.sh tests/test-template.sh
 
 docs/pv.1.md: $(srcdir)/docs/pv.1
 	test -d docs || mkdir docs
