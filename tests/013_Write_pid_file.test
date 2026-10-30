@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# Check that --pidfile behaves as the manual describes.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Skip if "kill -s 0", for checking whether a process exists, doesn't work.
+kill -s 0 $$ >/dev/null 2>&1 || skipTest "cannot check process existence with \`kill -s 0'"
+
+# Write 200 bytes to a file.
+"${testSubject}" -qSs 200 /dev/zero > "${workDir}/zeroes"
+
+exitStatus=0
+
+# Wait up to 2 seconds for $workDir/pidFile to appear, and when it does,
+# check that it contains a PID, and that the PID exists.  If anything fails,
+# report the failure and create file $1.
+watchForPidFile () {
+	waitMax=20
+	waitCount=0
+	while test ${waitCount} -lt ${waitMax}; do
+		test ${waitCount} -gt 0 && sleep 0.1
+		waitCount=$((1+waitCount))
+
+		test -s "${workDir}/pidFile" || continue
+		storedPid="$(cat "${workDir}/pidFile")"
+
+		if ! test -n "${storedPid}"; then
+			reportFailure 'empty PID file'
+			true > "$1"
+		elif ! kill -s 0 "${storedPid}"; then
+			reportFailure "stored PID (${storedPid}) did not exist"
+			true > "$1"
+		fi
+		return
+	done
+	reportFailure 'timed out waiting for PID file'
+	true > "$1"
+}
+
+# Check that a PID file gets written, and removed afterwards.
+startSubTest
+watchForPidFile "${workDir}/failed.${thisSubTest}" &
+runTestSubject -qXP "${workDir}/pidFile" -L 50 "${workDir}/zeroes" 2>"${workDir}/stderr" \
+|| reportFailure 'non-zero exit from transfer with --pidfile'
+wait
+test -e "${workDir}/failed.${thisSubTest}" && exitStatus=1
+test -e "${workDir}/pidFile" && reportFailure 'the PID file was not removed on exit'
+
+# Check that a PID file gets written, and removed afterwards, even if the
+# PID file already existed beforehand.
+startSubTest
+true > "${workDir}/pidFile"
+watchForPidFile "${workDir}/failed.${thisSubTest}" &
+runTestSubject -qXP "${workDir}/pidFile" -L 50 "${workDir}/zeroes" 2>"${workDir}/stderr" \
+|| reportFailure 'non-zero exit from transfer with --pidfile'
+wait
+test -e "${workDir}/failed.${thisSubTest}" && exitStatus=1
+test -e "${workDir}/pidFile" && reportFailure 'the PID file was not removed on exit'
+
+# Check that no PID file is left over after exit even for empty transfers.
+startSubTest
+runTestSubject -qXP "${workDir}/pidFile" /dev/null 2>"${workDir}/stderr"
+test -e "${workDir}/pidFile" && reportFailure 'the PID file was not removed after an empty transfer'
+
+exit ${exitStatus}
