@@ -1,0 +1,77 @@
+#!/bin/sh
+#
+# Check that changes in terminal size during a transfer cause the display to
+# resize to the new width and don't affect the data being transferred.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Timeout for each individual test.
+generalTimeout='30'
+
+# Widths to test.
+testWidths='80 50 20 200 1000 2000'
+
+# This test requires a tmux that can resize its emulated terminal.
+skipTestUnlessTmuxCanResize
+
+# Write 5MB of random data to a file, to use as input.
+dd if=/dev/urandom of="${workDir}/randomData" bs=1024 count=5120 2>/dev/null
+
+# In test-resize mode, send various resize commands to the running tmux
+# session.
+sendTmuxCommands () {
+	test "${testResizeMode}" = '1' || return
+	startWaitsLeft=50
+	# Wait until pv starts.
+	while test "${startWaitsLeft}" -gt 1 && ! test -s "${workDir}/pidFile"; do
+		sleep 0.1
+		startWaitsLeft=$((startWaitsLeft-1))
+	done
+	# Resize the terminal width to each testing size, with a delay in
+	# between.
+	for xSize in ${testWidths}; do
+		printf '%s\n' "resize-window -x ${xSize} -y 5"
+		sleep 0.4
+	done
+}
+
+exitStatus=0
+
+testResizeMode='1'
+if testInTerminal ${testWidths%% *} "${generalTimeout}" "runTestSubject -i 0.1 -L 1M -P \"${workDir}/pidFile\" \"${workDir}/randomData\" >\"${workDir}/output\""; then
+	# Take the raw tmux output, put each redraw on a separate line, and
+	# strip blank lines; then remove the text before the START marker
+	# (which runInTerminal normally takes caree of) and strip any
+	# valgrind output (which testInTerminal would normally do).
+	tr '\r' '\n' < "${workDir}/tmuxOutput.${tmuxCounter}" \
+	| grep . \
+	| sed '1,/^START/d' | sed '/^==/,$d' > "${workDir}/testOutput"
+
+	# Check that the data was transferred intact.
+	if ! cmp -s "${workDir}/randomData" "${workDir}/output"; then
+		reportFailure 'data was not transferred intact'
+	fi
+
+	# List the length of each line.
+	awk '{print length($0)}' < "${workDir}/testOutput" > "${workDir}/lengths"
+
+	for xSize in ${testWidths}; do
+		# If the terminal is <40 wide, pv's default output would
+		# overflow, so there won't be any line lengths shorter than
+		# this.
+		test "${xSize}" -lt 40 && continue
+
+		# Check that at least 1 line of output was this long.
+		grep -qFx "${xSize}" "${workDir}/lengths" && continue
+
+		reportFailure "no output lines of length ${xSize} appear in the output"
+	done
+fi
+
+exit ${exitStatus}
