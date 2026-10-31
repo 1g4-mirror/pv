@@ -17,6 +17,11 @@ generalTimeout='30'
 # Widths to test.
 testWidths='80 50 20 200 1000 2000'
 
+# Don't run this test by default, because on a loaded system it sometimes
+# fails due to not seeing any output from the tmux session at all.
+test "${EXHAUSTIVE_TESTS}" = '1' \
+|| skipTest 'skipping this time-sensitive test without EXHAUSTIVE_TESTS=1'
+
 # This test requires a tmux that can resize its emulated terminal.
 skipTestUnlessTmuxCanResize
 
