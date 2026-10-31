@@ -85,6 +85,10 @@ skipTestUnlessTmuxCanResize () {
 # The calling script must run skipTestUnlessTmuxCanResize before any calls
 # to this function.
 #
+# The function "sendTmuxCommands", if it exists, is called after the command
+# has been started inside the terminal; its stdout is sent to the tmux
+# control socket, so it can control the tmux session.
+#
 runInTerminal () {
 	terminalWidth="$1"
 	secondsToWait="$2"
@@ -126,6 +130,8 @@ runInTerminal () {
 		sleep 0.1
 		waitCount=$((1+waitCount))
 	done
+	# Allow the caller to send arbitrary commands to the tmux socket.
+	type sendTmuxCommands >/dev/null 2>&1 && sendTmuxCommands
 	# Wait for the process started by "respawn-pane" to end.
 	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxEnd.${tmuxCounter}"; do
 		sleep 0.1
