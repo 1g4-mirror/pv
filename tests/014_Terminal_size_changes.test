@@ -44,7 +44,7 @@ sendTmuxCommands () {
 exitStatus=0
 
 testResizeMode='1'
-if testInTerminal ${testWidths%% *} "${generalTimeout}" "runTestSubject -i 0.1 -L 1M -P \"${workDir}/pidFile\" \"${workDir}/randomData\" >\"${workDir}/output\""; then
+if testInTerminal ${testWidths%% *} "${generalTimeout}" "runTestSubject -i 0.1 -L 1M -P \"${workDir}/pidFile\" \"${workDir}/randomData\" >\"${workDir}/transferOutput\""; then
 	# Take the raw tmux output, put each redraw on a separate line, and
 	# strip blank lines; then remove the text before the START marker
 	# (which runInTerminal normally takes caree of) and strip any
@@ -54,7 +54,7 @@ if testInTerminal ${testWidths%% *} "${generalTimeout}" "runTestSubject -i 0.1 -
 	| sed '1,/^START/d' | sed '/^==/,$d' > "${workDir}/testOutput"
 
 	# Check that the data was transferred intact.
-	if ! cmp -s "${workDir}/randomData" "${workDir}/output"; then
+	if ! cmp -s "${workDir}/randomData" "${workDir}/transferOutput"; then
 		reportFailure 'data was not transferred intact'
 	fi
 
