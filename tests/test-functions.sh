@@ -121,6 +121,11 @@ runInTerminal () {
 	# before the command below is run, so output a marker to show where
 	# the output really starts.
 	printf '%s\n' "respawn-pane -k \"echo; exec 8>>${workDir}/subprocessValgrind.${tmuxCounter}; echo START; ${commandToRun}; true > ${workDir}/tmuxEnd.${tmuxCounter}\""
+	# Wait for the process started by "respawn-pane" to start.
+	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/subprocessValgrind.${tmuxCounter}"; do
+		sleep 0.1
+		waitCount=$((1+waitCount))
+	done
 	# Wait for the process started by "respawn-pane" to end.
 	while test ${waitCount} -lt ${maxWait} && ! test -e "${workDir}/tmuxEnd.${tmuxCounter}"; do
 		sleep 0.1
