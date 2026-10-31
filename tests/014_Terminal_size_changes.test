@@ -29,7 +29,7 @@ sendTmuxCommands () {
 	test "${testResizeMode}" = '1' || return
 	startWaitsLeft=50
 	# Wait until pv starts.
-	while test "${startWaitsLeft}" -gt 1 && ! test -s "${workDir}/pidFile"; do
+	while test "${startWaitsLeft}" -gt 1 && ! test -s "${workDir}/pidFile.${tmuxCounter}"; do
 		sleep 0.1
 		startWaitsLeft=$((startWaitsLeft-1))
 	done
@@ -44,22 +44,23 @@ sendTmuxCommands () {
 exitStatus=0
 
 testResizeMode='1'
-if testInTerminal ${testWidths%% *} "${generalTimeout}" "runTestSubject -i 0.1 -L 1M -P \"${workDir}/pidFile\" \"${workDir}/randomData\" >\"${workDir}/transferOutput\""; then
+if testInTerminal ${testWidths%% *} "${generalTimeout}" "runTestSubject -i 0.1 -L 1M -P \"${workDir}/pidFile.\${tmuxCounter}\" \"${workDir}/randomData\" >\"${workDir}/transferOutput.\${tmuxCounter}\""; then
 	# Take the raw tmux output, put each redraw on a separate line, and
 	# strip blank lines; then remove the text before the START marker
-	# (which runInTerminal normally takes caree of) and strip any
-	# valgrind output (which testInTerminal would normally do).
+	# (which runInTerminal normally takes care of) and strip any
+	# valgrind output (which testInTerminal would normally do); then
+	# prefix each line with its length.
 	tr '\r' '\n' < "${workDir}/tmuxOutput.${tmuxCounter}" \
 	| grep . \
-	| sed '1,/^START/d' | sed '/^==/,$d' > "${workDir}/testOutput"
+	| sed '1,/^START/d' \
+	| sed '/^==/,$d' \
+	| awk '{print length($0), $0}' \
+	> "${workDir}/testOutput"
 
 	# Check that the data was transferred intact.
-	if ! cmp -s "${workDir}/randomData" "${workDir}/transferOutput"; then
+	if ! cmp -s "${workDir}/randomData" "${workDir}/transferOutput.${tmuxCounter}"; then
 		reportFailure 'data was not transferred intact'
 	fi
-
-	# List the length of each line.
-	awk '{print length($0)}' < "${workDir}/testOutput" > "${workDir}/lengths"
 
 	for xSize in ${testWidths}; do
 		# If the terminal is <40 wide, pv's default output would
@@ -68,7 +69,7 @@ if testInTerminal ${testWidths%% *} "${generalTimeout}" "runTestSubject -i 0.1 -
 		test "${xSize}" -lt 40 && continue
 
 		# Check that at least 1 line of output was this long.
-		grep -qFx "${xSize}" "${workDir}/lengths" && continue
+		awk '{print $1}' < "${workDir}/testOutput" | grep -qFx "${xSize}" && continue
 
 		reportFailure "no output lines of length ${xSize} appear in the output"
 	done
