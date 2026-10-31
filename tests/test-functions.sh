@@ -26,7 +26,7 @@ true "${workDir:?$error}"
 
 # Skip the test, writing a message in the process.
 skipTest () {
-	printf "%-70s\n" "$*" 1>&9
+	printf '%-77s\n' "$f: $*" 1>&9
 	exit 77
 }
 
