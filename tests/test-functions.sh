@@ -105,6 +105,14 @@ runInTerminal () {
 
 	rm -f "${workDir}/tmuxOutput.${tmuxCounter}" "${workDir}/tmuxEnd.${tmuxCounter}" "${workDir}/subprocessValgrind.${tmuxCounter}"
 
+	# Export tmuxCounter so it's available to tmux, meaning that the
+	# caller can use it in supplied commands, for instance when telling
+	# pv to use a PID file - this would further isolate tmux runs from
+	# each other, which is needed if for instance a tmux pane spawn
+	# fails once and succeeds on a retry, potentially causing 2 of the
+	# same test commands to bump into each other.
+	export tmuxCounter
+
 	{
 	printf '%s\n' "set remain-on-exit on"
 	printf '%s\n' "set default-shell /bin/sh"
