@@ -1,7 +1,7 @@
 ### UNRELEASED
 
  * *fix:* support **--pidfile** with **--monitor** ([#205](https://codeberg.org/ivarch/pv/issues/205))
- * *fix:* don't run forever of **--stop-at-size** is active but the size is zero or unknown ([#203](https://codeberg.org/ivarch/pv/issues/203))
+ * *fix:* don't run forever if **--stop-at-size** is active but the size is zero or unknown ([#203](https://codeberg.org/ivarch/pv/issues/203))
  * *cleanup:* support **--discard** with **--store-and-forward** ([#207](https://codeberg.org/ivarch/pv/issues/207))
  * *cleanup:* fix a one-off file descriptor leak in **--store-and-forward**
  * *cleanup:* improve word wrapping of help text on small displays
