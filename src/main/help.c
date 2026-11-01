@@ -483,8 +483,7 @@ void display_help(void)
 	usage_note = _("Usage: %s [OPTION] [FILE]...");
 	if (NULL != usage_note) {
 		char *string = NULL;
-		if (pv_asprintf(&string, usage_note, PACKAGE_NAME) > 0
-		    && NULL != string) {
+		if (pv_asprintf(&string, usage_note, PACKAGE_NAME) > 0 && NULL != string) {
 			display_word_wrap(string, right_margin, 0, 0);
 			free(string);
 		}
