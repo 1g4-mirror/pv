@@ -352,6 +352,9 @@ runOtherTestUnderValgrind () {
 #
 # If the function "failureAdditionalInfo" exists, it is called just before
 # the final message line.
+#
+# The message line is prefixed with the current sub-test number, if any
+# startSubTest has been called at any point.
 reportFailure () {
 	if test -e "${workDir}/expectedOutput" \
 	  && test -e "${workDir}/testOutput" \
@@ -367,6 +370,7 @@ reportFailure () {
 	fi
 	test -s "${workDir}/stderr" && { printf "%s\n" 'stderr:'; sed 's,^,> ,' "${workDir}/stderr"; }
 	type failureAdditionalInfo >/dev/null 2>&1 && failureAdditionalInfo
+	test -n "${thisSubTest}" && printf '(%s %d): ' 'sub-test' "${thisSubTest}"
 	printf "%s\n" "$*"
 	exitStatus=1
 }
