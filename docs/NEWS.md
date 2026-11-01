@@ -1,3 +1,13 @@
+### UNRELEASED
+
+ * *fix:* support **--pidfile** with **--monitor** ([#205](https://codeberg.org/ivarch/pv/issues/205))
+ * *fix:* don't run forever of **--stop-at-size** is active but the size is zero or unknown ([#203](https://codeberg.org/ivarch/pv/issues/203))
+ * *cleanup:* support **--discard** with **--store-and-forward** ([#207](https://codeberg.org/ivarch/pv/issues/207))
+ * *cleanup:* fix a one-off file descriptor leak in **--store-and-forward**
+ * *cleanup:* improve word wrapping of help text on small displays
+ * *cleanup:* address cppcheck warnings
+ * *docs:* improve instructions for first-time readers, add [CONTRIBUTING.md](./CONTRIBUTING.md), and document "make check", the LLM policy, and coding conventions
+
 ### 1.12.0 - 17 September 2026
 
  * *feature:* new **--format** string **%{progress-conemu}**, and option **--conemu**, to show progress in the terminal title tab on terminals with ConEmu OSC 9;4 support ([#202](https://codeberg.org/ivarch/pv/issues/202))
