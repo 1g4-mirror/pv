@@ -1,4 +1,4 @@
-### UNRELEASED
+### 1.12.7 - 1 November 2026
 
  * *fix:* support **--pidfile** with **--monitor** ([#205](https://codeberg.org/ivarch/pv/issues/205))
  * *fix:* don't run forever if **--stop-at-size** is active but the size is zero or unknown ([#203](https://codeberg.org/ivarch/pv/issues/203))
