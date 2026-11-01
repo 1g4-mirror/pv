@@ -120,6 +120,7 @@ is acknowledged and greatly appreciated:
  * [Barak A. Pearlmutter](https://codeberg.org/barak) - suggested that "**--rate-limit**" should accept non-integer values ([#193](https://codeberg.org/ivarch/pv/issues/193))
  * [dirkmueller](https://codeberg.org/dirkmueller) - fixed the potential for stdout closure under a combination of error conditions in **--monitor** mode ([#201](https://codeberg.org/ivarch/pv/pulls/201))
  * [InkstainTheBat](https://codeberg.org/InkstainTheBat) - suggested ConEmu OSC 9;4 support ([#202](https://codeberg.org/ivarch/pv/issues/202))
+ * [lezsakdomi](https://codeberg.org/lezsakdomi) - reported the issue with using "**--monitor**" and "**--pidfile**" together ([#205](https://codeberg.org/ivarch/pv/issues/205))
 
 Translations provided through [Codeberg Weblate](https://translate.codeberg.org/projects/pv/):
 
