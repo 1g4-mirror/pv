@@ -78,6 +78,7 @@ tests/011_Integrity_-_on_pipe_closure.test \
 tests/012_Integrity_-_remote_control.test \
 tests/013_Write_pid_file.test \
 tests/014_Terminal_size_changes.test \
+tests/015_Display_-_--progress.test \
 tests/500a_Detect_memory_leak.test \
 tests/500b_Detect_file_descriptor_leak.test \
 tests/500c_Detect_buffer_overflow.test \
@@ -95,6 +96,7 @@ tests/511_Memory_safety_-_Integrity_-_on_pipe_closure.test \
 tests/512_Memory_safety_-_Integrity_-_remote_control.test \
 tests/513_Memory_safety_-_Write_pid_file.test \
 tests/514_Memory_safety_-_Terminal_size_changes.test \
+tests/515_Memory_safety_-_Display_-_--progress.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--average-rate.test \
@@ -108,8 +110,6 @@ tests/Display_-_--numeric_--bytes_--line-mode.test \
 tests/Display_-_--numeric_--bytes.test \
 tests/Display_-_--numeric.test \
 tests/Display_-_--numeric_--timer.test \
-tests/Display_-_--progress_-_basic_movement.test \
-tests/Display_-_--progress_-_increasing.test \
 tests/Display_-_--quiet.test \
 tests/Display_-_--rate_-_displayed_value_changes.test \
 tests/Display_-_--timer_-_displayed_value_changes.test \

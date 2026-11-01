@@ -1,0 +1,100 @@
+#!/bin/sh
+#
+# Check that --progress behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# Write 10MB of null bytes to a file.
+"${testSubject}" -qSs 10M < /dev/zero > "${workDir}/zeroes"
+
+# Check that a progress bar, with percentage, is drawn when the input is a
+# file.
+startSubTest
+runTestSubject -pfX -w 50 -i 0.1 -L 3M "${workDir}/zeroes" 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+progressUpdatesCount="$(grep -Ec '^\[=*>* *\] +[0-9]+%$' "${workDir}/testOutput")"
+progressNonUpdatesCount="$(grep -vEc '^\[=*>* *\] +[0-9]+%$' "${workDir}/testOutput")"
+if ! test "${progressUpdatesCount}" -gt 20; then
+	reportFailure "fewer progress bar updates (${progressUpdatesCount}) than expected"
+elif ! test "${progressNonUpdatesCount}" -eq 0; then
+	reportFailure "detected at least one progress bar line of the wrong format"
+elif ! grep -Eqx '^\[=+> +\] +[0-9]+%' "${workDir}/testOutput"; then
+	reportFailure "no partial progress bar line found"
+elif ! grep -Eqx '^\[=+>\] 100%' "${workDir}/testOutput"; then
+	reportFailure "no 100% progress bar line found"
+fi
+
+# Check that a progress indicator moves around when the input is not a file
+# and the total size is unknown.
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -pfX -w 50 -i 0.1 -L 3M 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+progressUpdatesCount="$(grep -Ec '^\[ *<=> *\]$' "${workDir}/testOutput")"
+progressNonUpdatesCount="$(grep -vEc '^\[ *<=> *\]$' "${workDir}/testOutput")"
+uniqueLines="$(sort < "${workDir}/testOutput" | uniq | grep -c .)"
+if ! test "${progressUpdatesCount}" -gt 20; then
+	reportFailure "fewer progress indicator updates (${progressUpdatesCount}) than expected"
+elif ! test "${progressNonUpdatesCount}" -eq 0; then
+	reportFailure "detected at least one progress indicator line of the wrong format"
+elif ! test "${uniqueLines}" -gt 20; then
+	reportFailure "fewer unique progress indicator lines (${uniqueLines}) than expected"
+fi
+
+# Check that a rate gauge is shown when the total size is unknown and the
+# --gauge option has been provided.
+startSubTest
+{
+"${testSubject}" -qSs 1M /dev/zero -L 5M
+"${testSubject}" -qSs 1M /dev/zero -L 1M
+"${testSubject}" -qSs 1M /dev/zero -L 5M
+} | runTestSubject -Xfgp -w 50 -i 0.1 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+gaugeUpdatesCount="$(grep -Ec '^\[=*>* *\]/[0-9.]+..B/s$' "${workDir}/testOutput")"
+gaugeNonUpdatesCount="$(grep -vEc '^\[=*>* *\]/[0-9.]+..B/s$' "${workDir}/testOutput")"
+uniqueLines="$(sort < "${workDir}/testOutput" | uniq | grep -c .)"
+if ! test "${gaugeUpdatesCount}" -gt 5; then
+	reportFailure "fewer gauge bar updates (${gaugeUpdatesCount}) than expected"
+elif ! test "${gaugeNonUpdatesCount}" -eq 0; then
+	reportFailure "detected at least one gauge bar line of the wrong format"
+elif ! grep -Eq '^\[=+> +\]' "${workDir}/testOutput"; then
+	reportFailure "no partial gauge bar line found"
+elif ! grep -Eq '^\[=+>\]' "${workDir}/testOutput"; then
+	reportFailure "no 100% gauge bar line found"
+elif ! test "${uniqueLines}" -gt 3; then
+	reportFailure "fewer unique gauge indicator lines (${uniqueLines}) than expected"
+fi
+
+# Check that a progress bar, with percentage, is shown even if --gauge was
+# passed, when the input is a pipe but the total size was provided.
+startSubTest
+{
+"${testSubject}" -qSs 1M /dev/zero -L 5M
+"${testSubject}" -qSs 1M /dev/zero -L 1M
+"${testSubject}" -qSs 1M /dev/zero -L 5M
+} | runTestSubject -Xfgp -w 50 -i 0.1 -s 3M 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+progressUpdatesCount="$(grep -Ec '^\[=*>* *\] +[0-9]+%$' "${workDir}/testOutput")"
+progressNonUpdatesCount="$(grep -vEc '^\[=*>* *\] +[0-9]+%$' "${workDir}/testOutput")"
+if ! test "${progressUpdatesCount}" -gt 5; then
+	reportFailure "fewer progress bar updates (${progressUpdatesCount}) than expected"
+elif ! test "${progressNonUpdatesCount}" -eq 0; then
+	reportFailure "detected at least one progress bar line of the wrong format"
+elif ! grep -Eqx '^\[=+> +\] +[0-9]+%' "${workDir}/testOutput"; then
+	reportFailure "no partial progress bar line found"
+elif ! grep -Eqx '^\[=+>\] 100%' "${workDir}/testOutput"; then
+	reportFailure "no 100% progress bar line found"
+fi
+
+exit ${exitStatus}
