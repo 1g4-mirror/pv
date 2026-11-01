@@ -6,7 +6,7 @@
  * *cleanup:* fix a one-off file descriptor leak in **--store-and-forward**
  * *cleanup:* improve word wrapping of help text on small displays
  * *cleanup:* address cppcheck warnings
- * *docs:* improve instructions for first-time readers, add [CONTRIBUTING.md](./CONTRIBUTING.md), and document "make check", the LLM policy, and coding conventions
+ * *docs:* improve instructions for first-time readers, add [CONTRIBUTING.md](../CONTRIBUTING.md), and document "make check", the LLM policy, and coding conventions
 
 ### 1.12.0 - 17 September 2026
 
