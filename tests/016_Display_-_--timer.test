@@ -1,0 +1,22 @@
+#!/bin/sh
+#
+# Check that --timer behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+sleep 3 | runTestSubject -Xft -i 0.2 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+
+tr '\r' '\n' < "${workDir}/stderr" | grep . | sort -u > "${workDir}/testOutput"
+test "$(grep -Ec '^0:00:0[0123]$' < "${workDir}/testOutput")" -gt 1 \
+|| reportFailure 'the timer value did not change'
+
+exit ${exitStatus}
