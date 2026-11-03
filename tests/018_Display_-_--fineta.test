@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+# Check that --fineta behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Write 90 null bytes to a file, to use as input.
+"${testSubject}" -qSs 90 /dev/zero > "${workDir}/zeroes"
+
+exitStatus=0
+
+# Check that an expected time of day of completion is displayed when the
+# input size is known.
+startSubTest
+runTestSubject -XfI -i 0.2 -L 30 "${workDir}/zeroes" 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+uniqueValueCount="$(sort < "${workDir}/testOutput" | uniq | grep -Ec '^FIN +[0-9]+:[0-9][0-9]:[0-9][0-9]$')"
+if ! grep -Eq '^FIN +[0-9]+:[0-9][0-9]:[0-9][0-9]$' < "${workDir}/testOutput"; then
+	reportFailure 'no expected finish time was shown'
+elif ! test "${uniqueValueCount}" -lt 10; then
+	reportFailure 'an unexpectedly large number of different finish times was shown'
+elif ! test "${uniqueValueCount}" -gt 0; then
+	reportFailure 'no expected finish time was shown'
+fi
+
+# Check that no finish time is displayed when the input size is not known.
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -XfI -i 0.2 -L 30 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+test -s "${workDir}/testOutput" \
+&& reportFailure 'unexpected output detected'
+
+# Check that a finish time is displayed when the input size is explicitly
+# provided.
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -XfI -i 0.2 -s 90 -L 30 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+uniqueValueCount="$(sort < "${workDir}/testOutput" | uniq | grep -Ec '^FIN +[0-9]+:[0-9][0-9]:[0-9][0-9]$')"
+if ! grep -Eq '^FIN +[0-9]+:[0-9][0-9]:[0-9][0-9]$' < "${workDir}/testOutput"; then
+	reportFailure 'no expected finish time was shown'
+elif ! test "${uniqueValueCount}" -lt 10; then
+	reportFailure 'an unexpectedly large number of different finish times was shown'
+elif ! test "${uniqueValueCount}" -gt 0; then
+	reportFailure 'no expected finish time was shown'
+fi
+
+exit ${exitStatus}
