@@ -63,11 +63,26 @@ cat "${workDir}/zeroes" | runTestSubject -XfI -i 0.2 -s $((90*8*3600)) -L 90 2>"
 tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
 uniqueValueCount="$(sort < "${workDir}/testOutput" | uniq | grep -Ec '^FIN +[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] +[0-9]+:[0-9][0-9]:[0-9][0-9]$')"
 if ! grep -Eq '^FIN +[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] +[0-9]+:[0-9][0-9]:[0-9][0-9]$' < "${workDir}/testOutput"; then
-	reportFailure 'no expected finish time was shown'
+	reportFailure 'no expected finish date/time was shown'
 elif ! test "${uniqueValueCount}" -lt 10; then
-	reportFailure 'an unexpectedly large number of different finish times was shown'
+	reportFailure 'an unexpectedly large number of different finish date/times was shown'
 elif ! test "${uniqueValueCount}" -gt 0; then
-	reportFailure 'no expected finish time was shown'
+	reportFailure 'no expected finish date/time was shown'
+fi
+
+# Check that the finish time includes the date, if it is so far in the
+# future it could overflow.
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -XfI -i 0.2 -s 100T -L 90 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+uniqueValueCount="$(sort < "${workDir}/testOutput" | uniq | grep -Ec '^FIN +[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] +[0-9]+:[0-9][0-9]:[0-9][0-9]$')"
+if ! grep -Eq '^FIN +[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] +[0-9]+:[0-9][0-9]:[0-9][0-9]$' < "${workDir}/testOutput"; then
+	reportFailure 'no expected finish date/time was shown'
+elif ! test "${uniqueValueCount}" -lt 10; then
+	reportFailure 'an unexpectedly large number of different finish date/times was shown'
+elif ! test "${uniqueValueCount}" -gt 0; then
+	reportFailure 'no expected finish date/time was shown'
 fi
 
 exit ${exitStatus}
