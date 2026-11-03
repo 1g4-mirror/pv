@@ -53,4 +53,40 @@ tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
 cmp -s "${workDir}/testOutput" "${workDir}/expectedOutput" \
 || reportFailure 'ETA did not count down as expected'
 
+# Check that ETAs of over 10 hours are displayed as HH:MM:SS.
+rm -f "${workDir}/expectedOutput"
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -L 45 -s $((45*10*3600)) 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+grep -qE '^ETA 1[0-9]:[0-9][0-9]:[0-9][0-9]$' "${workDir}/testOutput" \
+|| reportFailure 'ETA of ~10 hours was not displayed as expected'
+
+# Check that ETAs of over 25 hours are displayed as D:HH:MM:SS.
+rm -f "${workDir}/expectedOutput"
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -L 45 -s $((45*25*3600)) 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+grep -qE '^ETA 1:[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$' "${workDir}/testOutput" \
+|| reportFailure 'ETA of ~25 hours was not displayed as expected'
+
+# Check that very large ETAs are displayed as DDD:HH:MM:SS.
+rm -f "${workDir}/expectedOutput"
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -L 45 -s 10G 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+grep -qE '^ETA [0-9]+:[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$' "${workDir}/testOutput" \
+|| reportFailure 'ETA of thousands of days was not displayed as expected'
+
+# Check that extremely large (overflow) ETAs are displayed sensibly.
+rm -f "${workDir}/expectedOutput"
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -L 45 -s 10T 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+grep -qxF 'ETA 999999:23:59:59' "${workDir}/testOutput" \
+|| reportFailure 'ETA overflow was not displayed as expected'
+
 exit ${exitStatus}
