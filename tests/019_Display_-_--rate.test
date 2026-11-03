@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+# Check that --rate behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+# Write 90 null bytes to a file, to use as input.
+"${testSubject}" -qSs 90 /dev/zero > "${workDir}/zeroes"
+
+exitStatus=0
+
+# Check that a transfer rate of 50 bytes per second is reported as roughly
+# that.
+startSubTest
+runTestSubject -Xfr -i 0.2 -Ss 100 -L 50 /dev/zero 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" > "${workDir}/testOutput"
+averageRate="$(grep -F ' B/s' < "${workDir}/testOutput" | tr -dc '0-9.\n' | awk '/^[0-9.]+/{n++;t+=$1} END{printf "%.0f\n",t/(n==0?1:n)}')"
+test -n "${averageRate}" || { averageRate=0; reportFailure 'failed to calculate average reported rate'; }
+if ! test "${averageRate}" -gt 30; then
+	reportFailure "average rate of ${averageRate} is too far below 50 B/s"
+elif ! test "${averageRate}" -lt 70; then
+	reportFailure "average rate of ${averageRate} is too far above 50 B/s"
+fi
+
+# Check that a transfer rate of 50 kibibytes per second is reported as
+# roughly that.
+startSubTest
+runTestSubject -Xfr -i 0.2 -Ss 100k -L 50k /dev/zero 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" > "${workDir}/testOutput"
+averageRate="$(grep -F 'KiB/s' < "${workDir}/testOutput" | tr -dc '0-9.\n' | awk '/^[0-9.]+/{n++;t+=$1} END{printf "%.0f\n",t/(n==0?1:n)}')"
+test -n "${averageRate}" || { averageRate=0; reportFailure 'failed to calculate average reported rate'; }
+if ! test "${averageRate}" -gt 30; then
+	reportFailure "average rate of ${averageRate} is too far below 50 KiB/s"
+elif ! test "${averageRate}" -lt 70; then
+	reportFailure "average rate of ${averageRate} is too far above 50 KiB/s"
+fi
+
+# Check that a transfer with a pause in it results in multiple different
+# rates being reported.
+startSubTest
+# Transfer 200 bytes as two 100-byte blocks with a 2-second gap between.
+(dd if=/dev/zero bs=100 count=1 2>/dev/null;
+ sleep 2;
+ dd if=/dev/zero bs=100 count=1 2>/dev/null;
+) | runTestSubject -Xfr -i 0.5 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" > "${workDir}/testOutput"
+# Count the number of different rates output.
+rateCount="$(sort < "${workDir}/testOutput" | uniq -u | wc -l | tr -dc '0-9')"
+# There should be more than 2 different rates counted (around 100 bytes/sec
+# for the each block, 0 bytes/sec for the gap in the middle, and around 50
+# bytes/sec for the average time reported at the end).
+test "${rateCount}" -gt 2 \
+|| reportFailure "fewer than 3 different rates detected (${rateCount})"
+
+exit ${exitStatus}
