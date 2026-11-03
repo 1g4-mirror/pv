@@ -53,4 +53,21 @@ elif ! test "${uniqueValueCount}" -gt 0; then
 	reportFailure 'no expected finish time was shown'
 fi
 
+# Check that the finish time includes the date, if it is more than 8 hours
+# in the future.  The manual says 6 hours, but this test adds another 2 to
+# avoid a false failure if it happens to run over a daylight savings
+# boundary.
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -XfI -i 0.2 -s $((90*8*3600)) -L 90 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+uniqueValueCount="$(sort < "${workDir}/testOutput" | uniq | grep -Ec '^FIN +[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] +[0-9]+:[0-9][0-9]:[0-9][0-9]$')"
+if ! grep -Eq '^FIN +[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9] +[0-9]+:[0-9][0-9]:[0-9][0-9]$' < "${workDir}/testOutput"; then
+	reportFailure 'no expected finish time was shown'
+elif ! test "${uniqueValueCount}" -lt 10; then
+	reportFailure 'an unexpectedly large number of different finish times was shown'
+elif ! test "${uniqueValueCount}" -gt 0; then
+	reportFailure 'no expected finish time was shown'
+fi
+
 exit ${exitStatus}
