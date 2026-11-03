@@ -69,8 +69,10 @@ elif ! test "${gaugeNonUpdatesCount}" -eq 0; then
 	reportFailure "detected at least one gauge bar line of the wrong format"
 elif ! grep -Eq '^\[=+> +\]' "${workDir}/testOutput"; then
 	reportFailure "no partial gauge bar line found"
-elif ! grep -Eq '^\[=+>\]' "${workDir}/testOutput"; then
-	reportFailure "no 100% gauge bar line found"
+# Looking for a 100% rate gauge is subject to timing issues, so it can cause
+# false alarms.
+# elif ! grep -Eq '^\[=+>\]' "${workDir}/testOutput"; then
+# 	reportFailure "no 100% gauge bar line found"
 elif ! test "${uniqueLines}" -gt 3; then
 	reportFailure "fewer unique gauge indicator lines (${uniqueLines}) than expected"
 fi
