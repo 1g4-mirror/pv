@@ -80,6 +80,7 @@ tests/013_Write_pid_file.test \
 tests/014_Terminal_size_changes.test \
 tests/015_Display_-_--progress.test \
 tests/016_Display_-_--timer.test \
+tests/017_Display_-_--eta.test \
 tests/500a_Detect_memory_leak.test \
 tests/500b_Detect_file_descriptor_leak.test \
 tests/500c_Detect_buffer_overflow.test \
@@ -99,13 +100,13 @@ tests/513_Memory_safety_-_Write_pid_file.test \
 tests/514_Memory_safety_-_Terminal_size_changes.test \
 tests/515_Memory_safety_-_Display_-_--progress.test \
 tests/516_Memory_safety_-_Display_-_--timer.test \
+tests/517_Memory_safety_-_Display_-_--eta.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--average-rate.test \
 tests/Display_-_--bits.test \
 tests/Display_-_--buffer-percent.test \
 tests/Display_-_--bytes.test \
-tests/Display_-_--eta_-_plausible_values.test \
 tests/Display_-_--fineta_-_plausible_values.test \
 tests/Display_-_--last-written.test \
 tests/Display_-_--numeric_--bytes_--line-mode.test \
