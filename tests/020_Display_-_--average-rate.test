@@ -1,0 +1,71 @@
+#!/bin/sh
+#
+# Check that --average-rate behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# Check that some fast data for a while and then some slow data for a short
+# while is reported as a high average transfer rate, then a slightly lower
+# one, and at the end the overall average rate is shown.
+startSubTest
+{
+"${testSubject}" -qSs 10000 -L 5000 /dev/zero
+"${testSubject}" -qSs 200 -L 50 /dev/zero
+} | runTestSubject -Xfa -i 0.2 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+# Convert the rates to integer bytes per second.
+tr '\r' '\n' < "${workDir}/stderr" \
+| awk '/[0-9]/ { s=$0; sub(/\(/,"",s); r=0+s; if (match($0,/KiB/)) r=r*1024; printf "%.0f\t%s\n", r, $0 }' \
+> "${workDir}/testOutput"
+# There should be at least 10 measurements showing a rate of at least 4000
+# bytes per second.
+numFound="$(awk 'BEGIN {t=0} $1>=4000 {t++} END {print t}' < "${workDir}/testOutput")"
+test "${numFound}" -ge 10 || reportFailure "not enough measurements of at least 4000 (found: ${numFound})"
+# There should be at least 2 measurements showing a rate of at least 1000
+# bytes per second but less than 4000.
+numFound="$(awk 'BEGIN {t=0} $1>=1000 && $1<4000 {t++} END {print t}' < "${workDir}/testOutput")"
+test "${numFound}" -ge 2 || reportFailure "not enough measurements of 1000-3999 (found: ${numFound})"
+# The last measurement should be between 1000 and 2000 bytes per second.
+finalValue="$(sed -n '$p' < "${workDir}/testOutput" | awk '{print $1}')"
+test "${finalValue}" -ge 1000 || reportFailure "final measurement was under 1000"
+test "${finalValue}" -le 2000 || reportFailure "final measurement was over 2000"
+
+# Repeat the above test, but with an average rate window of 2 seconds, so
+# the input data rate will be more closely aligned with the calculated
+# average.
+startSubTest
+{
+"${testSubject}" -qSs 10000 -L 5000 /dev/zero
+"${testSubject}" -qSs 200 -L 50 /dev/zero
+} | runTestSubject -Xfa -m 2 -i 0.2 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+# Convert the rates to integer bytes per second.
+tr '\r' '\n' < "${workDir}/stderr" \
+| awk '/[0-9]/ { s=$0; sub(/\(/,"",s); r=0+s; if (match($0,/KiB/)) r=r*1024; printf "%.0f\t%s\n", r, $0 }' \
+> "${workDir}/testOutput"
+# There should be at least 3 measurements showing a rate of at least 4000
+# bytes per second.
+numFound="$(awk 'BEGIN {t=0} $1>=4000 {t++} END {print t}' < "${workDir}/testOutput")"
+test "${numFound}" -ge 3 || reportFailure "not enough measurements of at least 4000 (found: ${numFound})"
+# There should be at least 3 measurements showing a rate of 1000-4000 bytes
+# per second.
+numFound="$(awk 'BEGIN {t=0} $1>=1000 && $1<4000 {t++} END {print t}' < "${workDir}/testOutput")"
+test "${numFound}" -ge 3 || reportFailure "not enough measurements of 1000-3999 (found: ${numFound})"
+# There should be at least 3 measurements showing a rate of at least 35
+# bytes per second but less than 100.
+numFound="$(awk 'BEGIN {t=0} $1>=35 && $1<100 {t++} END {print t}' < "${workDir}/testOutput")"
+test "${numFound}" -ge 3 || reportFailure "not enough measurements of 35-99 (found: ${numFound})"
+# The last measurement should be between 1000 and 2000 bytes per second.
+finalValue="$(sed -n '$p' < "${workDir}/testOutput" | awk '{print $1}')"
+test "${finalValue}" -ge 1000 || reportFailure "final measurement was under 1000"
+test "${finalValue}" -le 2000 || reportFailure "final measurement was over 2000"
+
+exit ${exitStatus}
