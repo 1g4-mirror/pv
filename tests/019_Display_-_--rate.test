@@ -10,9 +10,6 @@ true "${sourcePath:?$error}"
 true "${workDir:?$error}"
 test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
 
-# Write 90 null bytes to a file, to use as input.
-"${testSubject}" -qSs 90 /dev/zero > "${workDir}/zeroes"
-
 exitStatus=0
 
 # Check that a transfer rate of 50 bytes per second is reported as roughly
