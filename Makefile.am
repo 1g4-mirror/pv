@@ -87,11 +87,11 @@ tests/020_Display_-_--average-rate.test \
 tests/021_Display_-_--bytes.test \
 tests/022_Display_-_--buffer-percent.test \
 tests/023_Display_-_--last-written.test \
-tests/500a_Detect_memory_leak.test \
-tests/500b_Detect_file_descriptor_leak.test \
-tests/500c_Detect_buffer_overflow.test \
-tests/500d_Detect_leak_inside_tmux.test \
-tests/500e_Confirm_checkvalgrind_runs.test \
+tests/495_Detect_memory_leak.test \
+tests/496_Detect_file_descriptor_leak.test \
+tests/497_Detect_buffer_overflow.test \
+tests/498_Detect_leak_inside_tmux.test \
+tests/499_Confirm_checkvalgrind_runs.test \
 tests/502_Memory_safety_-_Help_and_version.test \
 tests/503_Memory_safety_-_Help_word_wrapping.test \
 tests/505_Memory_safety_-_Detect_terminal_width.test \
@@ -146,10 +146,10 @@ tests/Watchfd_-_Multiple_descriptors.test \
 tests/Watchfd_-_Single_descriptor.test
 
 XFAIL_TESTS = \
-tests/500a_Detect_memory_leak.test \
-tests/500b_Detect_file_descriptor_leak.test \
-tests/500c_Detect_buffer_overflow.test \
-tests/500d_Detect_leak_inside_tmux.test
+tests/495_Detect_memory_leak.test \
+tests/496_Detect_file_descriptor_leak.test \
+tests/497_Detect_buffer_overflow.test \
+tests/498_Detect_leak_inside_tmux.test
 
 EXTRA_DIST += $(TESTS) tests/run-valgrind.sh tests/test-env.sh tests/test-functions.sh tests/test-template.sh
 
