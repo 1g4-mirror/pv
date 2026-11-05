@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# Check that --buffer-percent behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# The output should show 100% and 0% as the buffer initially fills up due to
+# there being nowhere to write to, and then empties.
+{
+dd if=/dev/zero bs=1024 count=1024
+sleep 2
+} 2>/dev/null \
+| { runTestSubject -f -T -i 0.2 -B 1024 2>"${workDir}/stderr" || true > "${workDir}/failed"; } \
+| {
+sleep 1
+dd bs=1024 count=512
+sleep 1
+cat
+} >/dev/null 2>&1
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+test -e "${workDir}/failed" && reportFailure 'unexpected non-zero exit status'
+differentLines="$(sort < "${workDir}/testOutput" | uniq | grep -c .)"
+test "${differentLines}" -gt 1 || reportFailure 'display did not change as expected'
+
+grep -Fqx '{100%}' "${workDir}/testOutput" || reportFailure 'did not detect any 100% fill'
+grep -Fqx '{  0%}' "${workDir}/testOutput" || reportFailure 'did not detect any 0% fill'
+
+exit ${exitStatus}
