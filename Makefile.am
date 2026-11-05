@@ -84,6 +84,7 @@ tests/017_Display_-_--eta.test \
 tests/018_Display_-_--fineta.test \
 tests/019_Display_-_--rate.test \
 tests/020_Display_-_--average-rate.test \
+tests/021_Display_-_--bytes.test \
 tests/500a_Detect_memory_leak.test \
 tests/500b_Detect_file_descriptor_leak.test \
 tests/500c_Detect_buffer_overflow.test \
@@ -107,11 +108,11 @@ tests/517_Memory_safety_-_Display_-_--eta.test \
 tests/518_Memory_safety_-_Display_-_--fineta.test \
 tests/519_Memory_safety_-_Display_-_--rate.test \
 tests/520_Memory_safety_-_Display_-_--average-rate.test \
+tests/521_Memory_safety_-_Display_-_--bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--bits.test \
 tests/Display_-_--buffer-percent.test \
-tests/Display_-_--bytes.test \
 tests/Display_-_--last-written.test \
 tests/Display_-_--numeric_--bytes_--line-mode.test \
 tests/Display_-_--numeric_--bytes.test \

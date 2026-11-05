@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# Check that --bytes behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# Write 100 null bytes to a file, to use as input.
+"${testSubject}" -qSs 100 /dev/zero > "${workDir}/zeroes"
+
+# Check the counter goes up to 100 when reading from a file on stdin and
+# redirecting output.
+startSubTest
+runTestSubject -fb < "${workDir}/zeroes" >/dev/null 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+counterValue="$(sed -n '$p' < "${workDir}/testOutput" | tr -d ' ')"
+test "${counterValue}" = '100B' \
+|| reportFailure "final byte count (${counterValue}) was not as expected"
+
+# Check the counter goes up to 100 when reading from a file on stdin and
+# writing to a named output file.
+startSubTest
+runTestSubject -fb -o /dev/null < "${workDir}/zeroes" 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+counterValue="$(sed -n '$p' < "${workDir}/testOutput" | tr -d ' ')"
+test "${counterValue}" = '100B' \
+|| reportFailure "final byte count (${counterValue}) was not as expected"
+
+# Check that the behaviour is the same when reading from a file on stdin and
+# discarding the output.
+startSubTest
+runTestSubject -Xfb < "${workDir}/zeroes" 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+counterValue="$(sed -n '$p' < "${workDir}/testOutput" | tr -d ' ')"
+test "${counterValue}" = '100B' \
+|| reportFailure "final byte count (${counterValue}) was not as expected"
+
+# Check that the behaviour is the same when reading from a named file and
+# discarding the output.
+startSubTest
+runTestSubject -Xfb "${workDir}/zeroes" 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+counterValue="$(sed -n '$p' < "${workDir}/testOutput" | tr -d ' ')"
+test "${counterValue}" = '100B' \
+|| reportFailure "final byte count (${counterValue}) was not as expected"
+
+# Check that the behaviour is the same when reading from a pipe and
+# discarding the output.
+startSubTest
+cat "${workDir}/zeroes" | runTestSubject -Xfb 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+counterValue="$(sed -n '$p' < "${workDir}/testOutput" | tr -d ' ')"
+test "${counterValue}" = '100B' \
+|| reportFailure "final byte count (${counterValue}) was not as expected"
+
+exit ${exitStatus}
