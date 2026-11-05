@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Check that --last-written behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# Write a sequence of numbers, rate-limited to run slowly, and display the
+# bytes passing through.
+seq -w 3 1 100 \
+| "${testSubject}" -qL 200 \
+| runTestSubject -XfC -A 16 -i 0.2 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+differentLines="$(sort < "${workDir}/testOutput" | uniq | grep -c .)"
+lastLine="$(sed -n '$p' < "${workDir}/testOutput")"
+
+# Even on very slow hosts, there should be at least 3 different output
+# lines: nothing at the start, something in the middle, and the last few
+# numbers at the end.
+test "${differentLines}" -gt 2 || reportFailure 'fewer than 3 different outputs seen'
+
+expectedLastLine="097.098.099.100."
+test "${lastLine}" = "${expectedLastLine}" \
+|| reportFailure 'final output did not contain the last bytes sent'
+
+exit ${exitStatus}
