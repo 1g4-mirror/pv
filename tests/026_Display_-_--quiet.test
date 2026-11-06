@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# Check that --quiet behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+dd if=/dev/zero bs=1000 count=5 2>/dev/null \
+| runTestSubject -f -q -i 0.1 -L 5000 >/dev/null 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+test -s "${workDir}/stderr" && reportFailure 'output detected when there should be none'
+
+exit ${exitStatus}
