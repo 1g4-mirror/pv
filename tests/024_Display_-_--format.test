@@ -1,0 +1,137 @@
+#!/bin/sh
+#
+# Check that --format behaves as described in the manual, in terms of the
+# general structure of the output rather than specific values (accuracy of
+# specific values are covered by individual display tests such as
+# --average-rate).
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# Define the test cases - the input type to use (| for pipe, F for file, B
+# for both); a colon; the format to use; another colon; some whitespace (for
+# readability) and another colon; and a regex to match the expected result,
+# when the display width is explicitly set to 50 columns.
+#
+# Formats which would result in an empty line are prefixed with a character
+# such as "x" so that the line is never completely empty, otherwise the
+# screening out of the final \r (which leaves no blank lines) would cause
+# the test case to fail.
+cat > "${workDir}/testCases" <<'EOF'
+|:%p:               :^\[<=>                                             \]$
+F:%p:               :^\[==========================================>\] 100%$
+|:%10p:             :^\[<=>     \]$
+F:%10p:             :^\[==>\] 100%$
+|:%{progress}:      :^\[<=>                                             \]$
+F:%{progress}:      :^\[==========================================>\] 100%$
+F:xxx%{progress}:   :^xxx\[=======================================>\] 100%$
+|:%10{progress}: :^\[<=>     \]$
+F:%10{progress}: :^\[==>\] 100%$
+|:%{progress-bar-only}:     :^<=>                                               $
+F:%{progress-bar-only}:     :^=================================================>$
+|:%10{progress-bar-only}:   :^<=>       $
+F:%10{progress-bar-only}:   :^=========>$
+|:%{bar-plain}:             :^<=>                                               $
+F:%{bar-plain}:             :^=================================================>$
+|:%10{bar-plain}:           :^<=>       $
+F:%10{bar-plain}:           :^=========>$
+F:x%10000{bar-plain}:       :^x$
+|:x%{progress-amount-only}: :^x$
+F:%{progress-amount-only}:  :^100%$
+B:%t:                :^ *[0-9]+:[0-9][0-9]:[0-9][0-9]$
+B:%{timer}:          :^ *[0-9]+:[0-9][0-9]:[0-9][0-9]$
+|:a%eb:              :^ab$
+|:a%{eta}b:          :^ab$
+F:a%eb:              :^a           b$
+F:a%{eta}b:          :^a           b$
+|:a%Ib:              :^ab$
+|:a%{fineta}b:       :^ab$
+F:%I:                :^FIN +[0-9]+:[0-9][0-9]:[0-9][0-9]$
+F:%{fineta}:         :^FIN +[0-9]+:[0-9][0-9]:[0-9][0-9]$
+B:%r:                :^\[ *[0-9.]+..B/s\]$
+B:%{rate}:           :^\[ *[0-9.]+..B/s\]$
+B:%a:                :^\( *[0-9.]+..B/s\)$
+B:%{average-rate}:   :^\( *[0-9.]+..B/s\)$
+B:%b:                :^ *[0-9.]+..B$
+B:%{bytes}:          :^ *[0-9.]+..B$
+B:%{transferred}:    :^ *[0-9.]+..B$
+B:%{ratio}:          :^-:-$
+B:%T:                :^\{....\}$
+B:%{buffer-percent}: :^\{....\}$
+B:a%16Ab:                  :^a.{16}b$
+B:a%16{last-written}b:     :^a.{16}b$
+B:a%10000{last-written}b:  :^a.{256}b$
+B:a%16Lb:                  :^a.{16}b$
+B:a%16{previous-line}b:    :^a.{16}b$
+B:a%48{previous-line}b:    :^a.{48}b$
+B:a%500{previous-line}b:   :^ab$
+B:a%10000{previous-line}b: :^ab$
+B:a%Nb:                    :^ab$
+B:a%{name}b:               :^ab$
+B:a%15{name}b:             :^ab$
+F:%%:^%$
+|:%b %t %r %p %e: :^ *[0-9.]+..B 0:[0-9][0-9]:[0-9][0-9] \[ *[0-9.]+..B/s\] \[<=>                \] $
+F:%b %t %r %p %e: :^ *[0-9.]+..B 0:[0-9][0-9]:[0-9][0-9] \[ *[0-9.]+..B/s\] \[==>\] 100%            $
+|:a%pbc%pd: :^a\[<=>                  \]bc\[<=>                  \]d$
+F:a%pbc%pd: :^a\[===============>\] 100%bc\[===============>\] 100%d$
+EOF
+
+# Deliberate omissions from the above list:
+#  - Unicode progress bar types: these depend on UTF-8 output capability,
+#    which needs to be checked for separately first.
+#  - SGR (colour): these require terminal support, which needs a more
+#    complicated testing structure.
+
+# Write 100 lines of 3-digit numbers to a file to use as input.
+seq -w 3 1 100 > "${workDir}/input"
+
+# Set the number of sub-tests instead of relying on auto calculation.
+subTestCount="$(grep -Ec '^(\||F):[^:]+:[^:]+:.+$' < "${workDir}/testCases")"
+doubleTests="$(grep -Ec '^B:[^:]+:[^:]+:.+$' < "${workDir}/testCases")"
+subTestCount=$((subTestCount+2*doubleTests))
+
+# Try each test case.
+{
+while read -r testCase; do
+	# First field - strip everything from the first :.
+	inputType="${testCase%%:*}"
+	# Second field - strip up to first :, and from the next : on.
+	testFormat="${testCase#*:}"
+	testFormat="${testFormat%%:*}"
+	# Fourth field (the third is empty); strip each preceding field in
+	# turn, and since this is the final field because the regex can
+	# contain :, don't do anything else.
+	matchRegex="${testCase#*:}"
+	matchRegex="${matchRegex#*:}"
+	matchRegex="${matchRegex#*:}"
+
+	for runWithInputType in '|' 'F'; do
+		matchType="${inputType}"
+		test "${inputType}" = 'B' && matchType="${runWithInputType}"
+		test "${matchType}" = "${runWithInputType}" || continue
+
+		rm -f "${workDir}/stderr" "${workDir}/testOutput"
+
+		startSubTest
+		if test "${runWithInputType}" = '|'; then
+			cat "${workDir}/input" | runTestSubject -w 50 -XfF "${testFormat}" 2>"${workDir}/stderr" \
+			|| reportFailure 'unexpected non-zero exit status'
+		elif test "${runWithInputType}" = 'F'; then
+			runTestSubject -w 50 -XfF "${testFormat}" "${workDir}/input" 2>"${workDir}/stderr" \
+			|| reportFailure 'unexpected non-zero exit status'
+		fi
+		tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+		grep -qE "${matchRegex}" "${workDir}/testOutput" \
+		|| reportFailure "output for format \"${testFormat}\" with input type ${runWithInputType} did not match the expected value: ${matchRegex}"
+	done
+done
+} < "${workDir}/testCases"
+
+exit ${exitStatus}

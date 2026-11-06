@@ -87,6 +87,7 @@ tests/020_Display_-_--average-rate.test \
 tests/021_Display_-_--bytes.test \
 tests/022_Display_-_--buffer-percent.test \
 tests/023_Display_-_--last-written.test \
+tests/024_Display_-_--format.test \
 tests/495_Detect_memory_leak.test \
 tests/496_Detect_file_descriptor_leak.test \
 tests/497_Detect_buffer_overflow.test \
@@ -113,6 +114,7 @@ tests/520_Memory_safety_-_Display_-_--average-rate.test \
 tests/521_Memory_safety_-_Display_-_--bytes.test \
 tests/522_Memory_safety_-_Display_-_--buffer-percent.test \
 tests/523_Memory_safety_-_Display_-_--last-written.test \
+tests/524_Memory_safety_-_Display_-_--format.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--bits.test \
