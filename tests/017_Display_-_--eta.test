@@ -23,7 +23,7 @@ ETA 0:00:02
 ETA 0:00:01
 ETA 0:00:00
 EOF
-runTestSubject -Xfe -i 0.2 -L 30 "${workDir}/zeroes" 2>"${workDir}/stderr" \
+runTestSubject -Xfe -i 0.1 -L 30 "${workDir}/zeroes" 2>"${workDir}/stderr" \
 || reportFailure 'unexpected non-zero exit status'
 tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
 cmp -s "${workDir}/testOutput" "${workDir}/expectedOutput" \
@@ -32,7 +32,7 @@ cmp -s "${workDir}/testOutput" "${workDir}/expectedOutput" \
 # Check that no ETA countdown is displayed when the input size is not known.
 startSubTest
 true > "${workDir}/expectedOutput"
-cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -L 30 2>"${workDir}/stderr" \
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.1 -L 30 2>"${workDir}/stderr" \
 || reportFailure 'unexpected non-zero exit status'
 tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
 cmp -s "${workDir}/testOutput" "${workDir}/expectedOutput" \
@@ -47,7 +47,7 @@ ETA 0:00:02
 ETA 0:00:01
 ETA 0:00:00
 EOF
-cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -s 90 -L 30 2>"${workDir}/stderr" \
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.1 -s 90 -L 30 2>"${workDir}/stderr" \
 || reportFailure 'unexpected non-zero exit status'
 tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
 cmp -s "${workDir}/testOutput" "${workDir}/expectedOutput" \
@@ -56,7 +56,7 @@ cmp -s "${workDir}/testOutput" "${workDir}/expectedOutput" \
 # Check that ETAs of over 10 hours are displayed as HH:MM:SS.
 rm -f "${workDir}/expectedOutput"
 startSubTest
-cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -L 45 -s $((45*10*3600)) 2>"${workDir}/stderr" \
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.1 -L 45 -s $((45*10*3600)) 2>"${workDir}/stderr" \
 || reportFailure 'unexpected non-zero exit status'
 tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
 grep -qE '^ETA 1[0-9]:[0-9][0-9]:[0-9][0-9]$' "${workDir}/testOutput" \
@@ -65,7 +65,7 @@ grep -qE '^ETA 1[0-9]:[0-9][0-9]:[0-9][0-9]$' "${workDir}/testOutput" \
 # Check that ETAs of over 25 hours are displayed as D:HH:MM:SS.
 rm -f "${workDir}/expectedOutput"
 startSubTest
-cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -L 45 -s $((45*25*3600)) 2>"${workDir}/stderr" \
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.1 -L 45 -s $((45*25*3600)) 2>"${workDir}/stderr" \
 || reportFailure 'unexpected non-zero exit status'
 tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
 grep -qE '^ETA 1:[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$' "${workDir}/testOutput" \
@@ -74,7 +74,7 @@ grep -qE '^ETA 1:[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$' "${workDir}/testOutput" \
 # Check that very large ETAs are displayed as DDD:HH:MM:SS.
 rm -f "${workDir}/expectedOutput"
 startSubTest
-cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -L 45 -s 10G 2>"${workDir}/stderr" \
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.1 -L 45 -s 10G 2>"${workDir}/stderr" \
 || reportFailure 'unexpected non-zero exit status'
 tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
 grep -qE '^ETA [0-9]+:[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$' "${workDir}/testOutput" \
@@ -83,7 +83,7 @@ grep -qE '^ETA [0-9]+:[0-9][0-9]:[0-9][0-9]:[0-9][0-9]$' "${workDir}/testOutput"
 # Check that extremely large (overflow) ETAs are displayed sensibly.
 rm -f "${workDir}/expectedOutput"
 startSubTest
-cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.2 -L 45 -s 10T 2>"${workDir}/stderr" \
+cat "${workDir}/zeroes" | runTestSubject -Xfe -i 0.1 -L 45 -s 10T 2>"${workDir}/stderr" \
 || reportFailure 'unexpected non-zero exit status'
 tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
 grep -qxF 'ETA 999999:23:59:59' "${workDir}/testOutput" \
