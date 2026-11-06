@@ -1,0 +1,168 @@
+#!/bin/sh
+#
+# Check that --numeric and its associated modifiers behave as described in
+# the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# Check that --numeric on its own produces some percentages.
+startSubTest
+# Process 100 bytes at 100 bytes per second, updating every 0.1 seconds for
+# around 10 output lines.
+dd if=/dev/zero bs=100 count=1 2>/dev/null \
+| runTestSubject -s 100 -n -i 0.1 -L 100 -X 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+grep . < "${workDir}/stderr" > "${workDir}/testOutput"
+lineCount="$(wc -l < "${workDir}/testOutput" | tr -dc '0-9')"
+finalLine="$(sed -n '$p' < "${workDir}/testOutput")"
+# The number of output lines should be >8 and <13, and the final percentage
+# should be 100.
+if ! test "${lineCount}" -gt 8; then
+	reportFailure "fewer than 9 output lines (${lineCount})"
+elif ! test "${lineCount}" -lt 13; then
+	reportFailure "more than 12 output lines (${lineCount})"
+elif ! test "${finalLine}" = "100"; then
+	reportFailure "final percentage was not 100 (${finalLine})"
+fi
+
+# Check that --numeric with --bytes produces a byte count instead of a
+# percentage.
+startSubTest
+rm -f "${workDir}/testOutput"
+# Process 500 bytes at 500 bytes per second, updating every 0.1 seconds for
+# around 10 output lines.
+dd if=/dev/zero bs=500 count=1 2>/dev/null \
+| runTestSubject -s 500 -n -b -i 0.1 -L 500 -X 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+grep . < "${workDir}/stderr" > "${workDir}/testOutput"
+lineCount="$(wc -l < "${workDir}/testOutput" | tr -dc '0-9')"
+finalLine="$(sed -n '$p' < "${workDir}/testOutput")"
+# The number of output lines should be >6 and <13, and the final byte count
+# should be 500.
+if ! test "${lineCount}" -gt 6; then
+	reportFailure "fewer than 7 output lines (${lineCount})"
+elif ! test "${lineCount}" -lt 13; then
+	reportFailure "more than 12 output lines (${lineCount})"
+elif ! test "${finalLine}" = "500"; then
+	reportFailure "final byte count was not 500 (${finalLine})"
+fi
+
+# Check that --numeric shows line counts instead of percentages, when used
+# with --line-mode and --bytes.
+startSubTest
+rm -f "${workDir}/testOutput"
+# Pass through 100 lines.
+seq -w 3 1 100 \
+| runTestSubject -bnl -i 0.2 -f -L 100 >"${workDir}/stdout" 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+grep . < "${workDir}/stderr" > "${workDir}/testOutput"
+lineCount="$(wc -l < "${workDir}/testOutput" | tr -dc '0-9')"
+finalStdoutLine="$(sed -n '$p' < "${workDir}/stdout")"
+# The number of output lines should be >3 and <10.
+if ! test "${lineCount}" -gt 3; then
+	reportFailure "fewer than 4 output lines (${lineCount})"
+elif ! test "${lineCount}" -lt 10; then
+	reportFailure "more than 9 output lines (${lineCount})"
+fi
+if ! test "${finalStdoutLine}" = "100"; then
+	reportFailure "final transferred line was not 100 (${finalStdoutLine})"
+fi
+
+# Check that --numeric --rate shows the transfer rate in bytes per second.
+startSubTest
+rm -f "${workDir}/testOutput"
+# Process 100 bytes at 100 bytes per second, updating every 0.1 seconds for
+# around 10 output lines.
+dd if=/dev/zero bs=100 count=1 2>/dev/null \
+| runTestSubject -s 100 -n -r -i 0.1 -L 100 >"${workDir}/stdout" 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+grep . < "${workDir}/stderr" > "${workDir}/testOutput"
+lineCount="$(wc -l < "${workDir}/testOutput" | tr -dc '0-9')"
+rateMin="$(awk '{printf "%.0f\n", $1}' < "${workDir}/testOutput" | sort -n | sed -n 1p)"
+rateMax="$(awk '{printf "%.0f\n", $1}' < "${workDir}/testOutput" | sort -rn | sed -n 1p)"
+# The number of output lines should be >7 and <13, and the rates should be
+# between 70 and 130.
+if ! test "${lineCount}" -gt 7; then
+	reportFailure "fewer than 8 output lines (${lineCount})"
+elif ! test "${lineCount}" -lt 13; then
+	reportFailure "more than 12 output lines (${lineCount})"
+fi
+if ! test "${rateMin}" -ge 70; then
+	reportFailure "minimum transfer rate was too low (${rateMin})"
+fi
+if ! test "${rateMax}" -le 130; then
+	reportFailure "maximum transfer rate was too high (${rateMax})"
+fi
+
+# Check that --numeric --timer shows the elapsed time as well as the
+# progress percentage.
+startSubTest
+rm -f "${workDir}/testOutput"
+# Process 100 bytes at 100 bytes per second, updating every 0.1 seconds for
+# around 10 output lines.
+dd if=/dev/zero bs=100 count=1 2>/dev/null \
+| runTestSubject -s 100 -n -t -i 0.1 -L 100 >"${workDir}/stdout" 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+grep . < "${workDir}/stderr" > "${workDir}/testOutput"
+lineCount=$(wc -l < "${workDir}/testOutput" | tr -dc '0-9')
+timesCount=$(tr ',' '.' < "${workDir}/testOutput" | awk '{print int(10*$1)}' | sort -n | uniq | wc -l | tr -dc '0-9')
+finalPercentage=$(sed -n '$p' < "${workDir}/testOutput" | awk '{print $2}')
+# The number of output lines should be >7 and <13, and the number of
+# different elapsed times should be at least 6. The last percentage should
+# be 100.
+if ! test "${lineCount}" -gt 7; then
+	reportFailure "fewer than 8 output lines (${lineCount})"
+elif ! test "${lineCount}" -lt 13; then
+	reportFailure "more than 12 output lines (${lineCount})"
+fi
+if ! test "${timesCount}" -gt 5; then
+	reportFailure "fewer than 6 different elapsed times (${timesCount})"
+fi
+if ! test "${finalPercentage}" = "100"; then
+	reportFailure "final percentage was not 100 (${finalPercentage})"
+fi
+
+# Check that --numeric --format produces output of the right format.
+startSubTest
+rm -f "${workDir}/testOutput"
+# Process 100 bytes at 100 bytes per second, updating every 0.1 seconds for
+# around 10 output lines.
+dd if=/dev/zero bs=100 count=1 2>/dev/null \
+| runTestSubject -s 100 -n -F '%t %b %r %{progress-amount-only}' -i 0.1 -L 100 >"${workDir}/stdout" 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+grep . < "${workDir}/stderr" > "${workDir}/testOutput"
+lineCount=$(wc -l < "${workDir}/testOutput" | tr -dc '0-9')
+timesCount=$(tr ',' '.' < "${workDir}/testOutput" | awk '{print int(10*$1)}' | sort -n | uniq | wc -l | tr -dc '0-9')
+rateMin="$(awk '{printf "%.0f\n", $3}' < "${workDir}/testOutput" | sort -n | sed -n 1p)"
+rateMax="$(awk '{printf "%.0f\n", $3}' < "${workDir}/testOutput" | sort -rn | sed -n 1p)"
+finalPercentage=$(sed -n '$p' < "${workDir}/testOutput" | awk '{print $4}')
+# The number of output lines should be >7 and <13, and the number of
+# different elapsed times should be at least 6. The last percentage should
+# be 100.
+if ! test "${lineCount}" -gt 7; then
+	reportFailure "fewer than 8 output lines (${lineCount})"
+elif ! test "${lineCount}" -lt 13; then
+	reportFailure "more than 12 output lines (${lineCount})"
+fi
+if ! test "${timesCount}" -gt 5; then
+	reportFailure "fewer than 6 different elapsed times (${timesCount})"
+fi
+if ! test "${finalPercentage}" = "100"; then
+	reportFailure "final percentage was not 100 (${finalPercentage})"
+fi
+if ! test "${rateMin}" -ge 70; then
+	reportFailure "minimum transfer rate was too low (${rateMin})"
+fi
+if ! test "${rateMax}" -le 130; then
+	reportFailure "maximum transfer rate was too high (${rateMax})"
+fi
+
+exit ${exitStatus}
