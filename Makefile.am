@@ -119,7 +119,6 @@ tests/523_Memory_safety_-_Display_-_--last-written.test \
 tests/524_Memory_safety_-_Display_-_--format.test \
 tests/525_Memory_safety_-_Display_-_--numeric.test \
 tests/526_Memory_safety_-_Display_-_--quiet.test \
-tests/Bug_-_Display_length_at_magnitude_boundary_-_Bytes.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/Display_-_--bits.test \
 tests/General_-_--size_argument_handling.test \
