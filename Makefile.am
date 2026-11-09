@@ -121,7 +121,6 @@ tests/524_Memory_safety_-_Display_-_--format.test \
 tests/525_Memory_safety_-_Display_-_--numeric.test \
 tests/526_Memory_safety_-_Display_-_--quiet.test \
 tests/527_Memory_safety_-_Output_-_--bits.test \
-tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
 tests/General_-_--size_argument_handling.test \
 tests/Memory_safety_-_Basic.test \
 tests/Memory_safety_-_Process_title.test \

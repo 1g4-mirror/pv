@@ -58,4 +58,26 @@ rateCount="$(sort < "${workDir}/testOutput" | uniq -u | wc -l | tr -dc '0-9')"
 test "${rateCount}" -gt 2 \
 || reportFailure "fewer than 3 different rates detected (${rateCount})"
 
+# Check that the rate doesn't increase the line length as it passes 1MiB/s,
+# described here:
+# http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=586763
+# Transfer 1500kB of data in a bursty fashion.
+{
+dd if=/dev/zero bs=1k count=999;
+sleep 1;
+dd if=/dev/zero bs=1k count=1;
+sleep 1;
+dd if=/dev/zero bs=1k count=1;
+sleep 1;
+dd if=/dev/zero bs=1k count=500;
+sleep 1;
+} 2>/dev/null \
+| runTestSubject -rtIf -s 1500k >/dev/null 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+# Count how many different line lengths there are.
+lineLengthCount=$(sed 's/ *$//' < "${workDir}/testOutput" | awk '{x=length($0);if(x>0)print length($0)}' | sort | uniq | wc -l | tr -dc '0-9')
+# There should only be one length (not counting 0).
+test "${lineLengthCount}" -eq 1 || reportFailure "variable line lengths detected"
+
 exit ${exitStatus}
