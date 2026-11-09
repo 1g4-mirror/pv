@@ -90,6 +90,7 @@ tests/023_Display_-_--last-written.test \
 tests/024_Display_-_--format.test \
 tests/025_Display_-_--numeric.test \
 tests/026_Display_-_--quiet.test \
+tests/027_Output_-_--bits.test \
 tests/495_Detect_memory_leak.test \
 tests/496_Detect_file_descriptor_leak.test \
 tests/497_Detect_buffer_overflow.test \
@@ -119,8 +120,8 @@ tests/523_Memory_safety_-_Display_-_--last-written.test \
 tests/524_Memory_safety_-_Display_-_--format.test \
 tests/525_Memory_safety_-_Display_-_--numeric.test \
 tests/526_Memory_safety_-_Display_-_--quiet.test \
+tests/527_Memory_safety_-_Output_-_--bits.test \
 tests/Bug_-_Display_length_at_magnitude_boundary_-_Rate.test \
-tests/Display_-_--bits.test \
 tests/General_-_--size_argument_handling.test \
 tests/Memory_safety_-_Basic.test \
 tests/Memory_safety_-_Process_title.test \

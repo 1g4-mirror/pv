@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+# Check that --bits behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# Write 100 null bytes to a file, to use as input.
+"${testSubject}" -qSs 100 /dev/zero > "${workDir}/zeroes"
+
+# Check the counter goes up to 800 bits when reading from the file.
+startSubTest
+runTestSubject -Xfb8 < "${workDir}/zeroes" >/dev/null 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+counterValue="$(sed -n '$p' < "${workDir}/testOutput" | tr -d ' ')"
+test "${counterValue}" = '800b' \
+|| reportFailure "final bit count (${counterValue}) was not as expected"
+
+# Check that a transfer rate of 50 bytes per second is reported as roughly
+# that.
+startSubTest
+runTestSubject -Xfr8 -i 0.2 -Ss 100 -L 50 /dev/zero 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" > "${workDir}/testOutput"
+averageRate="$(sed 's,^.*\[,[,' < "${workDir}/testOutput" | grep -F ' b/s' | tr -dc '0-9.\n' | awk '/^[0-9.]+/{n++;t+=$1} END{printf "%.0f\n",t/(n==0?1:n)}')"
+test -n "${averageRate}" || { averageRate=0; reportFailure 'failed to calculate average reported rate'; }
+if ! test "${averageRate}" -gt 240; then
+	reportFailure "average rate of ${averageRate} is too far below 400 b/s"
+elif ! test "${averageRate}" -lt 560; then
+	reportFailure "average rate of ${averageRate} is too far above 400 b/s"
+fi
+
+exit ${exitStatus}
