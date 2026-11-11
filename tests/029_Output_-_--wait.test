@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+# Check that --wait behaves as described in the manual.
+#
+# Copyright 2026 Andrew Wood
+# License GPLv3+: GNU GPL version 3 or later; see `docs/COPYING'.
+
+error="not set - call this from 'make check'"
+true "${sourcePath:?$error}"
+true "${workDir:?$error}"
+test -n "${sourcePath}" && . "${sourcePath}/tests/test-functions.sh"
+
+exitStatus=0
+
+# If there is no input data, then no progress should be shown at all.
+startSubTest
+sleep 1 | runTestSubject -WXtbf -i 0.1 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+test -s "${workDir}/stderr" && reportFailure 'unexpected progress output'
+
+# If there is input data after a pause, then the timer should count from
+# when the first byte appears.
+startSubTest
+{ sleep 2; printf '%s\n' 'abcd'; } | runTestSubject -WXtbf -i 0.1 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . > "${workDir}/testOutput"
+lastLine="$(sed -n '$p' < "${workDir}/testOutput")"
+test "${lastLine}" = '5.00  B 0:00:00' || reportFailure 'progress output is not as expected'
+
+# The timer should operate normally if input appears straight away.
+rm -f "${workDir}/testOutput"
+startSubTest
+{ printf '%s\n' 'abcd'; sleep 3; } | runTestSubject -WXft -i 0.2 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep . | sort -u > "${workDir}/testOutput"
+test "$(grep -Ec '^0:00:0[0123]$' < "${workDir}/testOutput")" -gt 1 \
+|| reportFailure 'the timer value did not change'
+
+# ETA calculations should start from when the first byte arrives.
+# Note that this test fails if run under valgrind - the ETA appears as 4
+# seconds rather than 2 - and this may be related to how slowly the test
+# subject runs under valgrind; so valgrind is not used for this test case.
+rm -f "${workDir}/testOutput"
+startSubTest
+{
+# Wait for the test subject to start before doing a 2-second sleep.
+while ! test -e "${workDir}/pidFile"; do sleep 0.1; done
+sleep 2
+"${testSubject}" -q -Ss 30 -L 30 /dev/zero
+} \
+| "${testSubject}" -P "${workDir}/pidFile" -WXfe -i 0.1 -s 150 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" | grep : | uniq > "${workDir}/testOutput"
+firstLine="$(sed -n '1p' < "${workDir}/testOutput")"
+test "${firstLine}" = 'ETA 0:00:02' \
+|| reportFailure 'ETA was not calculated as expected'
+
+# Average rate calculation should start at the first byte.
+rm -f "${workDir}/testOutput" "${workDir}/pidFile"
+startSubTest
+{
+# Wait for the test subject to start before doing a 2-second sleep.
+while ! test -e "${workDir}/pidFile"; do sleep 0.1; done
+sleep 2
+"${testSubject}" -q -Ss 100 -L 50 /dev/zero
+} \
+| runTestSubject -P "${workDir}/pidFile" -WXfr -i 0.2 -s 100 2>"${workDir}/stderr" \
+|| reportFailure 'unexpected non-zero exit status'
+tr '\r' '\n' < "${workDir}/stderr" > "${workDir}/testOutput"
+averageRate="$(grep -F ' B/s' < "${workDir}/testOutput" | tr -dc '0-9.\n' | awk '/^[0-9.]+/{n++;t+=$1} END{printf "%.0f\n",t/(n==0?1:n)}')"
+test -n "${averageRate}" || { averageRate=0; reportFailure 'failed to calculate average reported rate'; }
+if ! test "${averageRate}" -gt 30; then
+	reportFailure "average rate of ${averageRate} is too far below 50 B/s"
+elif ! test "${averageRate}" -lt 70; then
+	reportFailure "average rate of ${averageRate} is too far above 50 B/s"
+fi
+
+exit ${exitStatus}
